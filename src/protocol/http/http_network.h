@@ -27,7 +27,10 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
+
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Connector.h"
+#endif // SSL_SUPPORT
 
 #include "common_timer_manager_common.h"
 
@@ -169,6 +172,7 @@ struct HTTP_SocketHandlerConfiguration
 //                               struct Net_TCPSocketConfiguration,
 //                               struct HTTP_SocketHandlerConfiguration,
 //                               struct HTTP_Stream_UserData> HTTP_Connector_t;
+#if defined (SSL_SUPPORT)
 //typedef Net_Client_SSL_Connector_T<HTTP_TCPConnection_t,
 //                                   ACE_SSL_SOCK_Connector,
 //                                   ACE_INET_Addr,
@@ -178,6 +182,7 @@ struct HTTP_SocketHandlerConfiguration
 //                                   HTTP_Stream_t,
 //                                   struct HTTP_SocketHandlerConfiguration,
 //                                   struct HTTP_Stream_UserData> HTTP_SSL_Connector_t;
+#endif // SSL_SUPPORT
 //typedef Net_Client_AsynchConnector_T<HTTP_AsynchTCPConnection_t,
 //                                     ACE_INET_Addr,
 //                                     struct Net_ConnectionConfiguration,

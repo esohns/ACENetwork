@@ -52,7 +52,7 @@ IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
        iterator != connections_in.end ();
        ++iterator)
   {
-    const struct IRC_Client_GTK_ConnectionCBData& connection_data_r =
+    const struct IRC_Client_UI_ConnectionCBData& connection_data_r =
       (*iterator).second->getR ();
     if (connection_data_r.timeStamp == timeStamp_in)
     {
@@ -78,7 +78,7 @@ IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
 }
 
 IRC_Client_GUI_Connection*
-IRC_Client_UI_Tools::current (const Common_UI_GTK_State& GTKState_in,
+IRC_Client_UI_Tools::current (Common_UI_GTK_State_t& GTKState_in,
                               const IRC_Client_GUI_Connections_t& connections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
@@ -110,7 +110,7 @@ IRC_Client_UI_Tools::current (const Common_UI_GTK_State& GTKState_in,
        iterator_2 != connections_in.end ();
        ++iterator_2)
   {
-    const struct IRC_Client_GTK_ConnectionCBData& connection_data_r =
+    const struct IRC_Client_UI_ConnectionCBData& connection_data_r =
       (*iterator_2).second->getR ();
     Common_UI_GTK_BuildersConstIterator_t iterator_3 =
       GTKState_in.builders.find (connection_data_r.timeStamp);

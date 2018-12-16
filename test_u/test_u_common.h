@@ -88,18 +88,20 @@ struct Test_U_UI_ProgressData
 };
 
 struct Test_U_UI_CBData
+ : Common_UI_CBData
 {
   Test_U_UI_CBData ()
-   : allowUserRuntimeStatistic (true)
+   : Common_UI_CBData ()
+   , allowUserRuntimeStatistic (true)
    , progressData ()
-   , UIState ()
+   , UIState (NULL)
   {
-    progressData.state = &UIState;
+    progressData.state = UIState;
   }
 
   bool                          allowUserRuntimeStatistic;
   struct Test_U_UI_ProgressData progressData;
-  struct Common_UI_State        UIState;
+  struct Common_UI_State*       UIState;
 };
 
 struct Test_U_UI_ThreadData

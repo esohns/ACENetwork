@@ -130,7 +130,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
-set (file_server_SRCS
+set (EXECUTABLE file_server)
+set (${EXECUTABLE}_SRCS
      file_server.cpp
      file_server_common.h
      file_server_connection_common.h
@@ -163,13 +164,13 @@ set (file_server_SRCS
      stdafx.h)
 if (GUI_SUPPORT)
  if (GTK_USE)
-  set (${file_server_SRCS}
-       ${file_server_SRCS}
+  set (${EXECUTABLE}_SRCS
+       ${${EXECUTABLE}_SRCS}
        test_u_callbacks.cpp
        test_u_callbacks.h)
 # elseif (WXWIDGETS_USE)
-#  set (${EXECUTABLE_TARGET}_EXE_SRCS
-#       ${${EXECUTABLE_TARGET}_EXE_SRCS})
+#  set (${EXECUTABLE}_SRCS
+#       ${${EXECUTABLE}_SRCS})
  endif (GTK_USE)
 endif (GUI_SUPPORT)
 
@@ -186,7 +187,6 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
-set (EXECUTABLE file_server)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${file_server_SRCS}

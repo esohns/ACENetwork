@@ -30,7 +30,7 @@
 
 #include "IRC_client_common.h"
 #include "IRC_client_configuration.h"
-#include "IRC_client_curses.h" // *TODO*: remove this ASAP
+//#include "IRC_client_curses.h" // *TODO*: remove this ASAP
 #include "IRC_client_inputhandler.h"
 #include "IRC_client_network.h"
 //#include "IRC_client_stream.h"

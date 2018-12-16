@@ -1596,8 +1596,7 @@ associate:
           SSIDCache_.find (configuration_->SSID);
         ACE_ASSERT (iterator != SSIDCache_.end ());
       } // end lock scope
-      std::string SSID_string = this->SSID ();
-      ACE_ASSERT (!SSID_string.empty ());
+      ACE_ASSERT (!this->SSID ().empty ());
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       // *NOTE*: the Win32 API does not let developers interfere with the DHCP
       //         handshake/addressing process programmatically at this time
@@ -1772,7 +1771,10 @@ associate:
           if (unlikely (!configuration_->SSID.empty () &&
                         ACE_OS::strcmp (configuration_->SSID.c_str (),
                                         SSID_string.c_str ()))) // configured, associated to different SSID
+          { ACE_ASSERT (isConnectionNotified_);
+            isConnectionNotified_ = false;
             done = false;
+          } // end IF
           else
             inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
           break;

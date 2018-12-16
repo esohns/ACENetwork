@@ -447,11 +447,10 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
                   reason_i,
                   ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("\"%s\": received notification %s%s%s\n"),
+                ACE_TEXT ("\"%s\": received notification %s: %s\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (data_in->InterfaceGuid).c_str ()),
                 ACE_TEXT (notification_string.c_str ()),
-                ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT (": ") : ACE_TEXT ("")),
-                ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT_WCHAR_TO_TCHAR (buffer_a) : ACE_TEXT (""))));
+                ACE_TEXT_WCHAR_TO_TCHAR (buffer_a)));
   } // end IF
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
@@ -2107,8 +2106,10 @@ Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
   } // end IF
   ACE_ASSERT (client_handle != ACE_INVALID_HANDLE);
 
-  DWORD data_size = 0;
+  DWORD data_size = sizeof (struct _WLAN_CONNECTION_ATTRIBUTES);
   PVOID data_p = NULL;
+  enum _WLAN_OPCODE_VALUE_TYPE op_code_value_type_e =
+    wlan_opcode_value_type_invalid;
   struct _WLAN_CONNECTION_ATTRIBUTES* wlan_connection_attributes_p = NULL;
   DWORD result_2 =
     WlanQueryInterface (client_handle,
@@ -2117,9 +2118,10 @@ Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
                         NULL,
                         &data_size,
                         &data_p,
-                        NULL);
-  if (unlikely ((result_2 != ERROR_SUCCESS) &&
-                (result_2 != ERROR_INVALID_STATE)))
+                        &op_code_value_type_e);
+  if (unlikely ((result_2 != ERROR_SUCCESS)          && // 0
+                (result_2 != ERROR_CAN_NOT_COMPLETE) && // 1003
+                (result_2 != ERROR_INVALID_STATE)))     // 5023
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanQueryInterface(\"%s\",%d): \"%s\", aborting\n"),
@@ -2128,7 +2130,8 @@ Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
                 ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto clean;
   } // end IF
-  if (result_2 == ERROR_INVALID_STATE) // <-- not connected
+  if ((result_2 == ERROR_CAN_NOT_COMPLETE) ||
+      (result_2 == ERROR_INVALID_STATE))      // <-- not connected
     return result;
   ACE_ASSERT (data_p && (data_size == sizeof (struct _WLAN_CONNECTION_ATTRIBUTES)));
   wlan_connection_attributes_p =
@@ -2138,9 +2141,13 @@ Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
 
 clean:
   if (data_p)
-    WlanFreeMemory (data_p);
+  {
+    WlanFreeMemory (data_p); data_p = NULL;
+  } // end IF
   if (release_handle)
-    Net_WLAN_Tools::finalize (client_handle);
+  {
+    Net_WLAN_Tools::finalize (client_handle); client_handle = NULL;
+  } // end IF
 
   return result;
 }
@@ -2180,7 +2187,7 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
 
   DWORD result_2 = 0;
   struct _GUID interface_identifier_s = GUID_NULL;
-  DWORD flags =
+  DWORD flags_i =
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
     0;
 #else
@@ -2206,7 +2213,7 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
     result_2 =
       WlanGetAvailableNetworkList (client_handle,
                                    &interface_identifier_s,
-                                   flags,
+                                   flags_i,
                                    NULL,
                                    &wlan_network_list_p);
     if (unlikely (result_2 != ERROR_SUCCESS)) // ERROR_CAN_NOT_COMPLETE: 1003

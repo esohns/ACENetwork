@@ -32,9 +32,10 @@
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
+#include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
 #elif defined (WXWIDGETS_USE)
-//#include "common_ui_wxwidgets_common.h"
+#include "common_ui_wxwidgets_common.h"
 #endif
 #endif // GUI_SUPPORT
 
@@ -139,14 +140,14 @@ struct Client_UI_CBData
 #if defined (GTK_USE)
  : Test_U_GTK_CBData
 #elif defined (WXWIDGETS_USE)
- : Test_U_WxWidgets_CBData
+ : Test_U_wxWidgets_CBData
 #endif
 {
   Client_UI_CBData ()
 #if defined (GTK_USE)
    : Test_U_GTK_CBData ()
 #elif defined (WXWIDGETS_USE)
-   : Test_U_WxWidgets_CBData ()
+   : Test_U_wxWidgets_CBData ()
 #endif
    , configuration (NULL)
    , subscribers ()

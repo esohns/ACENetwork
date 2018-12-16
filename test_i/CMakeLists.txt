@@ -8,7 +8,7 @@ if (GUI_SUPPORT)
  include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/PreUIFramework.cmake)
  include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetUIFramework.cmake)
 
- if (CUSES_USE)
+ if (CURSES_USE)
  elseif (GTK_USE)
   include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetGTKVersion.cmake)
  elseif (WXWIDGETS_USE)
@@ -42,7 +42,7 @@ if (UNIX)
   if (CURSES_USE)
 # *WORKAROUND*
    add_definitions (-DNCURSES_INTERNALS)
-  endif ()
+  endif (CURSES_USE)
  endif (GUI_SUPPORT)
 elseif (WIN32)
 endif ()
@@ -312,24 +312,22 @@ set (source_files
      test_i_defines.h
      test_i_stream_common.h)
 if (GUI_SUPPORT)
- if (CURSES_SUPPORT)
-   set (source_files
-        ${source_files}
-        test_i_curses_defines.h)
- endif (CURSES_SUPPORT)
- if (GTK_SUPPORT)
+ if (CURSES_USE)
+  set (source_files
+       ${source_files}
+       test_i_curses_defines.h)
+ elseif (GTK_USE)
   set (source_files
        ${source_files}
        test_i_gtk_common.h
        test_i_gtk_eventhandler.cpp
        test_i_gtk_eventhandler.h
        test_i_gtk_eventhandler.inl)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
+ elseif (WXWIDGETS_USE)
   set (source_files
        ${source_files}
        test_i_wxwidgets_common.h)
- endif (WXWIDGETS_SUPPORT)
+ endif ()
 endif (GUI_SUPPORT)
 #install (FILES
 #         ${PROJECT_NAME}_Test_I_GTK_SRCS

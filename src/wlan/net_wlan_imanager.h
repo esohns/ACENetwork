@@ -27,7 +27,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
 #else
-#include <net/ethernet.h>
+#include "net/ethernet.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 class Net_WLAN_IManager

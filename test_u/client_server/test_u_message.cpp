@@ -188,10 +188,7 @@ allocate:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Test_U_Message::duplicate(): \"%m\", aborting\n")));
-
-      // clean up
-      message_p->release ();
-
+      message_p->release (); message_p = NULL;
       return NULL;
     } // end IF
   } // end IF

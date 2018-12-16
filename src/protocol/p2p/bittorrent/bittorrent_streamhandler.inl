@@ -30,10 +30,10 @@
 
 #if defined (GUI_SUPPORT)
 #include "common_ui_common.h"
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_SUPPORT
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #include "net_macros.h"
@@ -118,7 +118,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   {
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
@@ -138,7 +138,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 //    } // end IF
 //    CBData_->eventSourceIds.insert (event_source_id);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }
@@ -210,7 +210,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   {
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
@@ -229,7 +229,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 //    } // end IF
 //    CBData_->eventSourceIds.insert (event_source_id);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }
@@ -278,19 +278,19 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   { 
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
       const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_SUPPORT
+#endif // GTK_USE
       CBData_->progressData.transferred += message_in.total_length ();
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
       state_r.eventStack.push (COMMON_UI_EVENT_DATA);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }
@@ -329,14 +329,14 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   {
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
       const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_SUPPORT
+#endif // GTK_USE
       enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
       switch (sessionMessage_in.type ())
       {
@@ -371,10 +371,10 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
           return;
         }
       } // end SWITCH
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
       state_r.eventStack.push (event_e);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }
@@ -452,7 +452,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   {
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
@@ -472,7 +472,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 //    } // end IF
 //    CBData_->eventSourceIds.insert (event_source_id);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }
@@ -545,7 +545,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   {
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
@@ -564,7 +564,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 //    } // end IF
 //    CBData_->eventSourceIds.insert (event_source_id);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }
@@ -642,7 +642,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   {
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
@@ -652,7 +652,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
       CBData_->progressData.transferred += message_in.total_length ();
       state_r.eventStack.push (COMMON_UI_EVENT_DATA);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }
@@ -687,14 +687,14 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   if (CBData_)
   {
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
     Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
       const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_SUPPORT
+#endif // GTK_USE
       enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
       switch (sessionMessage_in.type ())
       {
@@ -729,10 +729,10 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
           return;
         }
       } // end SWITCH
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
       state_r.eventStack.push (event_e);
     } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
   } // end IF
 #endif // GUI_SUPPORT
 }

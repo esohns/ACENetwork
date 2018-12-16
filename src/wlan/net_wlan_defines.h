@@ -26,6 +26,7 @@
 // protocol
 // (see also: http://standards.ieee.org/findstds/standard/802.11-2016.html)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#define NET_WLAN_ESSID_MAX_SIZE                                           32
 #else
 #if defined (WEXT_SUPPORT)
 #define NET_WLAN_ESSID_MAX_SIZE                                           IW_ESSID_MAX_SIZE

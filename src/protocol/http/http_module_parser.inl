@@ -20,7 +20,7 @@
 
 #include "ace/Log_Msg.h"
 
-#include "common_timer_manager_common.h"
+//#include "common_timer_manager_common.h"
 
 #include "stream_dec_tools.h"
 
@@ -113,8 +113,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
     if (headFragment_)
     {
-      headFragment_->release ();
-      headFragment_ = NULL;
+      headFragment_->release (); headFragment_ = NULL;
     } // end IF
   } // end IF
 
@@ -232,10 +231,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
                   inherited::mod_->name ()));
-
-      // clean up
       headFragment_->release ();
-
       goto error;
     } // end IF
     headFragment_ = NULL;
@@ -502,8 +498,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
     if (headFragment_)
     {
-      headFragment_->release ();
-      headFragment_ = NULL;
+      headFragment_->release (); headFragment_ = NULL;
     } // end IF
   } // end IF
 
@@ -869,10 +864,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-
-    delete record_inout;
-    record_inout = NULL;
-
+    delete record_inout; record_inout = NULL;
     goto error;
   } // end IF
   data_container_p->setPR (record_inout);

@@ -227,8 +227,8 @@ set (${EXECUTABLE}_EXE_SRCS
 #  test_i_template_instantiations.cpp
 if (GUI_SUPPORT)
  if (GTK_USE)
-  set (${EXECUTABLE_GUI}_EXE_SRCS
-       ${${EXECUTABLE_GUI}_EXE_SRCS}
+  set (${EXECUTABLE}_EXE_SRCS
+       ${${EXECUTABLE}_EXE_SRCS}
        test_i_callbacks.cpp
        test_i_callbacks.h)
  endif (GTK_USE)
@@ -286,9 +286,10 @@ endif (SSL_SUPPORT)
 if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_LIBXML2_LIBRARIES})
-# target_link_libraries (${EXECUTABLE} X11)
 
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
+
+ target_link_libraries (${EXECUTABLE} X11)
 elseif (WIN32)
  set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
 

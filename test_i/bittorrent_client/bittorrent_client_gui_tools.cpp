@@ -83,7 +83,7 @@
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 BitTorrent_Client_GUI_Session_t*
-BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State_t& GTKState_in,
+BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State_t& UIState_in,
                                      const BitTorrent_Client_GUI_Sessions_t& sessions_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_UI_Tools::current"));
@@ -93,9 +93,9 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State_t& GTKState_in,
 
   // sanity check(s)
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    GTKState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    UIState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != GTKState_in.builders.end ());
+  ACE_ASSERT (iterator != UIState_in.builders.end ());
 
   // step1: retrieve connections notebook
   GtkNotebook* notebook_p =
@@ -115,11 +115,11 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State_t& GTKState_in,
        iterator_2 != sessions_in.end ();
        ++iterator_2)
   {
-    const struct BitTorrent_Client_GTK_SessionCBData& data_r =
+    const struct BitTorrent_Client_UI_SessionCBData& data_r =
       (*iterator_2).second->getR ();
     Common_UI_GTK_BuildersConstIterator_t iterator_3 =
-      GTKState_in.builders.find (data_r.label);
-    if (iterator_3 == GTKState_in.builders.end ())
+      UIState_in.builders.find (data_r.label);
+    if (iterator_3 == UIState_in.builders.end ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("could not find builder (connection was: \"%s\"), aborting\n"),

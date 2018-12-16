@@ -266,8 +266,8 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_client_UI_cb"));
 
-  struct Client_GTK_CBData* data_p =
-    static_cast<struct Client_GTK_CBData*> (userData_in);
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -736,8 +736,8 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_server_UI_cb"));
 
-  struct Server_GTK_CBData* data_p =
-    static_cast<struct Server_GTK_CBData*> (userData_in);
+  struct Server_UI_CBData* data_p =
+    static_cast<struct Server_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1251,8 +1251,8 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   int result = -1;
 
   ACE_UNUSED_ARG (widget_in);
-  struct Client_GTK_CBData* data_p =
-    static_cast<struct Client_GTK_CBData*> (userData_in);
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1341,8 +1341,8 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
 
   int result = -1;
 
-  struct Client_GTK_CBData* data_p =
-    static_cast<struct Client_GTK_CBData*> (userData_in);
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -1407,8 +1407,8 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct Server_GTK_CBData* data_p =
-    static_cast<struct Server_GTK_CBData*> (userData_in);
+  struct Server_UI_CBData* data_p =
+    static_cast<struct Server_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1470,8 +1470,8 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_client_cb"));
 
-  struct Client_GTK_CBData* data_p =
-    static_cast<struct Client_GTK_CBData*> (userData_in);
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1561,8 +1561,8 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_server_cb"));
 
-  struct Server_GTK_CBData* data_p =
-    static_cast<struct Server_GTK_CBData*> (userData_in);
+  struct Server_UI_CBData* data_p =
+    static_cast<struct Server_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1640,8 +1640,8 @@ spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_client_cb"));
 
-  struct Client_GTK_CBData* data_p =
-    static_cast<struct Client_GTK_CBData*> (userData_in);
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1657,8 +1657,8 @@ spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_server_cb"));
 
-  struct Server_GTK_CBData* data_p =
-    static_cast<struct Server_GTK_CBData*> (userData_in);
+  struct Server_UI_CBData* data_p =
+    static_cast<struct Server_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);

@@ -117,8 +117,12 @@ endif ()
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
  # *WORKAROUND*
- add_definitions (-DNCURSES_INTERNALS)
- include_directories (${PKG_CURSES_INCLUDE_DIRS})
+ if (GUI_SUPPORT)
+  if (CURSES_USE)
+   add_definitions (-DNCURSES_INTERNALS)
+   include_directories (${PKG_CURSES_INCLUDE_DIRS})
+  endif (CURSES_USE)
+ endif (GUI_SUPPORT)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
@@ -136,7 +140,11 @@ if (UNIX)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
+ if (GUI_SUPPORT)
+  if (CURSES_USE)
+   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
+  endif (CURSES_USE)
+ endif (GUI_SUPPORT)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
@@ -176,8 +184,6 @@ set (${EXECUTABLE}_EXE_SRCS
      IRC_client_common.h
      IRC_client_common_modules.h
      IRC_client_configuration.h
-     IRC_client_curses.cpp
-     IRC_client_curses.h
      IRC_client_defines.h
      IRC_client_inputhandler.cpp
      IRC_client_inputhandler.h
@@ -200,6 +206,14 @@ set (${EXECUTABLE}_EXE_SRCS
      Streambuf_alt.cpp
      Streambuf_alt.h
      Streambuf_alt.inl)
+if (GUI_SUPPORT)
+ if (CURSES_USE)
+  set (${EXECUTABLE}_EXE_SRCS
+       ${${EXECUTABLE}_EXE_SRCS}
+       IRC_client_curses.cpp
+       IRC_client_curses.h)
+ endif (CURSES_USE)
+endif (GUI_SUPPORT)
 set (${EXECUTABLE}_INI
      etc/IRC_client.ini
      etc/IRC_client_phonebook.ini)
@@ -241,6 +255,9 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
+if (UNIX)
+ target_link_libraries (${EXECUTABLE} X11)
+endif (UNIX)
 
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 
@@ -351,6 +368,10 @@ add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
 
+if (UNIX)
+ target_link_libraries (${EXECUTABLE_GUI} X11)
+endif (UNIX)
+
 target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 
 target_link_libraries (${EXECUTABLE_GUI} Common)
@@ -364,7 +385,6 @@ target_link_libraries (${EXECUTABLE_GUI} ACEStream_Network)
 target_link_libraries (${EXECUTABLE_GUI} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)

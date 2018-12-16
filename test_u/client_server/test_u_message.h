@@ -45,6 +45,11 @@ class Test_U_Message
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t>
 {
+  typedef Stream_MessageBase_2<struct Net_AllocatorConfiguration,
+                               enum Stream_MessageType,
+                               Net_Remote_Comm::MessageHeader,
+                               Net_MessageType_t> inherited;
+
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                                  struct Net_AllocatorConfiguration,
@@ -73,11 +78,6 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-  typedef Stream_MessageBase_2<struct Net_AllocatorConfiguration,
-                               enum Stream_MessageType,
-                               Net_Remote_Comm::MessageHeader,
-                               Net_MessageType_t> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by allocators
   Test_U_Message (Stream_SessionId_t,

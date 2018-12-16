@@ -67,8 +67,8 @@ idle_end_session_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_end_session_cb"));
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -131,8 +131,8 @@ idle_finalize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-    static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -155,8 +155,8 @@ idle_initialize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
@@ -502,8 +502,8 @@ idle_reset_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_reset_UI_cb"));
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-    static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -557,8 +557,8 @@ idle_start_session_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_start_session_cb"));
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-    static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -580,8 +580,8 @@ idle_update_progress_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_ProgressData* data_p =
-    static_cast<struct Test_I_URLStreamLoad_GTK_ProgressData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_ProgressData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_ProgressData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -641,8 +641,8 @@ idle_update_info_display_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   GtkSpinButton* spin_button_p = NULL;
@@ -784,8 +784,8 @@ idle_update_info_display_cb (gpointer userData_in)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 //
-//  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-//      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+//  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+//      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
 //
 //  // sanity check(s)
 //  ACE_ASSERT (data_p);
@@ -885,8 +885,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
   } // end IF
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
@@ -1345,8 +1345,8 @@ entry_url_activate_cb (GtkEntry* entry_in,
   ACE_UNUSED_ARG (entry_in);
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -1375,8 +1375,8 @@ button_about_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
 
   // sanity check(s)
-  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -1423,8 +1423,8 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
-  //struct Test_I_URLStreamLoad_GTK_CBData* data_p =
-  //  static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+  //struct Test_I_URLStreamLoad_UI_CBData* data_p =
+  //  static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   //// sanity check(s)
   //ACE_ASSERT (data_p);
 

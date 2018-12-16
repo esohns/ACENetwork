@@ -74,7 +74,6 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
   // sanity check(s)
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
-  ACE_ASSERT (CBData_->UIState);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
@@ -87,7 +86,9 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
                                           &const_cast<struct DHCPClient_SessionData&> (sessionData_in)));
 
 #if defined (GUI_SUPPORT)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GTK_USE
 
 //  CBData_->progressData.transferred = 0;
 #if defined (GTK_USE)
@@ -129,7 +130,6 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
   // sanity check(s)
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
-  ACE_ASSERT (CBData_->UIState);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
@@ -139,7 +139,9 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
   ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GUI_SUPPORT)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GTK_USE
 
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STOPPED);
@@ -170,7 +172,6 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   // sanity check(s)
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
-  ACE_ASSERT (CBData_->UIState);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
@@ -178,10 +179,14 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GTK_USE
 
   CBData_->progressData.transferred += message_in.total_length ();
+#if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 }
 void
@@ -195,7 +200,6 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   // sanity check(s)
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
-  ACE_ASSERT (CBData_->UIState);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
@@ -205,9 +209,13 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GUI_SUPPORT)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GTK_USE
 
+#if defined (GTK_USE)
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
+#endif // GTK_USE
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_STATISTIC:
@@ -230,7 +238,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
       } // end IF
 
+#if defined (GTK_USE)
       event_e = COMMON_UI_EVENT_STATISTIC;
+#endif // GTK_USE
       break;
     }
     default:

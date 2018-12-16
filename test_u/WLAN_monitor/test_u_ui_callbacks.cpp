@@ -59,6 +59,7 @@ load_wlan_interfaces (GtkListStore* listStore_in
 #elif defined (DBUS_USE)
                       struct DBusConnection* connection_in)
 #endif
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("::load_wlan_interfaces"));
 
@@ -292,14 +293,14 @@ idle_update_info_display_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->UIState);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   GtkSpinButton* spin_button_p = NULL;
   GtkScale* scale_p =
@@ -313,8 +314,8 @@ idle_update_info_display_cb (gpointer userData_in)
   enum WLANMMMonitor_EventType* event_p = NULL;
   enum WLANMMMonitor_EventType event_e =
     static_cast<enum WLANMMMonitor_EventType> (COMMON_UI_EVENT_INVALID);
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-    for (WLANMMMonitor_EventsIterator_t iterator_2 (data_p->UIState->eventStack);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock, G_SOURCE_REMOVE);
+    for (WLANMMMonitor_EventsIterator_t iterator_2 (ui_cb_data_p->UIState->eventStack);
          iterator_2.next (event_p);
          iterator_2.advance ())
     { ACE_ASSERT (event_p);
@@ -407,9 +408,9 @@ idle_update_info_display_cb (gpointer userData_in)
 
     // clean up
     int result = -1;
-    while (!data_p->UIState->eventStack.is_empty ())
+    while (!ui_cb_data_p->UIState->eventStack.is_empty ())
     {
-      result = data_p->UIState->eventStack.pop (event_e);
+      result = ui_cb_data_p->UIState->eventStack.pop (event_e);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Unbounded_Stack::pop(): \"%m\", continuing\n")));
@@ -426,17 +427,17 @@ idle_update_ssids_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->monitor);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
-  Net_WLAN_SSIDs_t ssids = data_p->monitor->SSIDs ();
+  Net_WLAN_SSIDs_t ssids = ui_cb_data_p->monitor->SSIDs ();
   GtkTreeIter tree_iterator;
   gchar* string_p = NULL;
   guint num_signal_handlers = 0;
@@ -455,7 +456,7 @@ idle_update_ssids_cb (gpointer userData_in)
                                        (gpointer)combobox_ssid_changed_cb,
                                        userData_in);
   ACE_ASSERT (num_signal_handlers == 1);
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock, G_SOURCE_REMOVE);
     gtk_list_store_clear (list_store_p);
     for (Net_WLAN_SSIDsIterator_t iterator_3 = ssids.begin ();
          iterator_3 != ssids.end ();
@@ -492,23 +493,26 @@ idle_update_signal_quality_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->monitor);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   GtkScale* scale_p =
     GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
   ACE_ASSERT (scale_p);
   gtk_range_set_value (GTK_RANGE (scale_p),
-                       static_cast<gdouble> (data_p->monitor->get_3 ()));
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                       static_cast<gdouble> (ui_cb_data_p->monitor->get_4 ()));
+#else
+                       static_cast<gdouble> (ui_cb_data_p->monitor->get_3 ()));
+#endif // ACE_WIN32 || ACE_WIN64
   return G_SOURCE_REMOVE;
 }
 
@@ -519,17 +523,17 @@ idle_update_status_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->monitor);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
-  bool is_connected_b = !(data_p->monitor->SSID ().empty ());
+  bool is_connected_b = !(ui_cb_data_p->monitor->SSID ().empty ());
 
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -556,15 +560,15 @@ idle_initialize_ui_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
@@ -614,7 +618,20 @@ idle_initialize_ui_cb (gpointer userData_in)
   ACE_ASSERT (list_store_p);
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
                                         0, GTK_SORT_ASCENDING);
-  load_wlan_interfaces (list_store_p);
+  load_wlan_interfaces (list_store_p
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                        );
+#elif defined (ACE_LINUX)
+#if defined (WEXT_USE)
+                        );
+#elif defined (NL80211_USE)
+                        ,const_cast<struct nl_sock*> (ui_cb_data_p->monitor->getP ()),
+                        ui_cb_data_p->monitor->get_3 ());
+#elif defined (DBUS_USE)
+                        ui_cb_data_p->monitor->getP ());
+#endif
+#endif
+
   GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_COMBOBOX_INTERFACE_NAME)));
@@ -758,7 +775,7 @@ idle_initialize_ui_cb (gpointer userData_in)
                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_BUTTON_REPORT_NAME)));
   ACE_ASSERT (button_p);
   gtk_widget_set_sensitive (GTK_WIDGET (button_p),
-                            data_p->allowUserRuntimeStatistic);
+                            ui_cb_data_p->allowUserRuntimeStatistic);
 
   // step6: (auto-)connect signals/slots
   gtk_builder_connect_signals ((*iterator).second.second,
@@ -782,13 +799,13 @@ idle_initialize_ui_cb (gpointer userData_in)
 
   // step9: initialize updates
   guint event_source_id = 0;
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the log view
     event_source_id = g_timeout_add_seconds (1,
                                              idle_update_log_display_cb,
-                                             data_p);
+                                             ui_cb_data_p);
     if (event_source_id > 0)
-      data_p->UIState->eventSourceIds.insert (event_source_id);
+      ui_cb_data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -799,9 +816,9 @@ idle_initialize_ui_cb (gpointer userData_in)
     event_source_id =
         g_timeout_add (COMMON_UI_REFRESH_DEFAULT_WIDGET,
                        idle_update_info_display_cb,
-                       data_p);
+                       ui_cb_data_p);
     if (event_source_id > 0)
-      data_p->UIState->eventSourceIds.insert (event_source_id);
+      ui_cb_data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -816,7 +833,7 @@ idle_initialize_ui_cb (gpointer userData_in)
                                                 ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_CHECKBUTTON_AUTOASSOCIATE_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                data_p->configuration->WLANMonitorConfiguration.autoAssociate);
+                                ui_cb_data_p->configuration->WLANMonitorConfiguration.autoAssociate);
 
   combo_box_p =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -843,15 +860,15 @@ idle_update_progress_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->configuration);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -876,16 +893,16 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->monitor);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   bool is_active = gtk_toggle_button_get_active (toggleButton_in);
 //  GtkFrame* frame_p =
@@ -942,12 +959,12 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                                 1, &value_s);
       ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
-      data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
+      ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
         Common_Tools::StringToGUID (g_value_get_string (&value_s));
 #else
                                 0, &value_s);
       ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
-      data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
+      ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
           ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value_s));
 #endif
       g_value_unset (&value_s);
@@ -969,7 +986,7 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                                 &iterator_2,
                                 0, &value_s);
       ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
-      data_p->configuration->WLANMonitorConfiguration.SSID =
+      ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID =
           ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value_s));
       g_value_unset (&value_s);
     } // end IF
@@ -978,10 +995,10 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
         GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                   ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_CHECKBUTTON_AUTOASSOCIATE_NAME)));
     ACE_ASSERT (check_button_p);
-    data_p->configuration->WLANMonitorConfiguration.autoAssociate =
+    ui_cb_data_p->configuration->WLANMonitorConfiguration.autoAssociate =
         gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p));
 
-    if (!data_p->monitor->initialize (data_p->configuration->WLANMonitorConfiguration))
+    if (!ui_cb_data_p->monitor->initialize (ui_cb_data_p->configuration->WLANMonitorConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_IInitialize_T::initialize(), aborting\n")));
@@ -989,7 +1006,7 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
     } // end IF
 
     try {
-      data_p->monitor->start ();
+      ui_cb_data_p->monitor->start ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask_T::start(): \"%m\", aborting\n")));
@@ -997,9 +1014,9 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
     } // end catch
 
     // start progress reporting
-    ACE_ASSERT (!data_p->progressData.eventSourceId);
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
-      data_p->progressData.eventSourceId =
+    ACE_ASSERT (!ui_cb_data_p->progressData.eventSourceId);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock);
+      ui_cb_data_p->progressData.eventSourceId =
           //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
           //                 idle_update_progress_cb,
           //                 &data_p->progressData,
@@ -1009,8 +1026,8 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                               idle_update_progress_cb,
                               userData_in,
                               NULL);
-      if (data_p->progressData.eventSourceId > 0)
-        data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
+      if (ui_cb_data_p->progressData.eventSourceId > 0)
+        ui_cb_data_p->UIState->eventSourceIds.insert (ui_cb_data_p->progressData.eventSourceId);
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", continuing\n")));
@@ -1022,8 +1039,8 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                           GTK_STOCK_MEDIA_PLAY);
 
     try {
-      data_p->monitor->stop (true,
-                             true);
+      ui_cb_data_p->monitor->stop (true,
+                                   true);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask_T::stop(): \"%m\", aborting\n")));
@@ -1031,14 +1048,14 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
     } // end catch
 
     // stop progress reporting
-    ACE_ASSERT (data_p->progressData.eventSourceId);
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
-      if (!g_source_remove (data_p->progressData.eventSourceId))
+    ACE_ASSERT (ui_cb_data_p->progressData.eventSourceId);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock);
+      if (!g_source_remove (ui_cb_data_p->progressData.eventSourceId))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                    data_p->progressData.eventSourceId));
-      data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
-      data_p->progressData.eventSourceId = 0;
+                    ui_cb_data_p->progressData.eventSourceId));
+      ui_cb_data_p->UIState->eventSourceIds.erase (ui_cb_data_p->progressData.eventSourceId);
+      ui_cb_data_p->progressData.eventSourceId = 0;
     } // end lock scope
   } // end ELSE
   //  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
@@ -1063,16 +1080,16 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->monitor);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   bool is_active = gtk_toggle_button_get_active (toggleButton_in);
 //  GtkFrame* frame_p =
@@ -1103,7 +1120,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // *NOTE*: when monitoring, the signal quality display is handled in the
     //         callbacks
-    if (!data_p->monitor->isRunning ())
+    if (!ui_cb_data_p->monitor->isRunning ())
     {
       gtk_widget_set_visible (GTK_WIDGET (scale_p),
                               TRUE);
@@ -1121,24 +1138,24 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     struct ether_addr ap_mac_address;
     ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
 #endif
-    if (!data_p->monitor->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+    if (!ui_cb_data_p->monitor->associate (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
                                      ap_mac_address,
 #endif
-                                     data_p->configuration->WLANMonitorConfiguration.SSID))
+                                     ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier).c_str ()),
-                  ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier).c_str ()),
+                  ACE_TEXT (ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s,%s), returning\n"),
-                  ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier.c_str ()),
+                  ACE_TEXT (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier.c_str ()),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
-                  ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
+                  ACE_TEXT (ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
 #endif
       goto error;
     } // end IF
@@ -1162,22 +1179,22 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (!data_p->monitor->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+    if (!ui_cb_data_p->monitor->associate (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #else
-    if (!data_p->monitor->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
-                                     ap_mac_address,
+    if (!ui_cb_data_p->monitor->associate (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+                                           ap_mac_address,
 #endif // ACE_WIN32 || ACE_WIN64
-                                     ACE_TEXT_ALWAYS_CHAR ("")))
+                                           ACE_TEXT_ALWAYS_CHAR ("")))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier).c_str ()),
                   ACE_TEXT ("")));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s,%s), returning\n"),
-                  ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier.c_str ()),
+                  ACE_TEXT (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier.c_str ()),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
                   ACE_TEXT ("")));
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1186,7 +1203,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // *NOTE*: when monitoring, the signal quality display is handled in the
     //         callbacks
-    if (!data_p->monitor->isRunning ())
+    if (!ui_cb_data_p->monitor->isRunning ())
     {
       gtk_widget_set_visible (GTK_WIDGET (scale_p),
                               FALSE);
@@ -1250,16 +1267,16 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->monitor);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   GtkTreeIter iterator_2;
   if (!gtk_combo_box_get_active_iter (comboBox_in,
@@ -1288,10 +1305,10 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
+  ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
     Common_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value)));
 #else
-  data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
+  ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
     ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value));
 #endif // ACE_WIN32 || ACE_WIN64
   g_value_reset (&value);
@@ -1311,21 +1328,21 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
       g_signal_handlers_block_by_func (G_OBJECT (combo_box_p),
                                        (gpointer)combobox_ssid_changed_cb,
                                        userData_in);
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-    load_ssids (data_p->monitor->get_2 (),
-                data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+    load_ssids (ui_cb_data_p->monitor->get_2 (),
+                ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #endif // WLANAPI_USE
 #else
-    load_ssids (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+    load_ssids (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #if defined (WEXT_USE)
-                data_p->monitor->get (),
+                ui_cb_data_p->monitor->get (),
 #elif defined (NL80211_USE)
-                const_cast<struct nl_sock*> (data_p->monitor->getP ()),
-                data_p->monitor->get_3 (),
+                const_cast<struct nl_sock*> (ui_cb_data_p->monitor->getP ()),
+                ui_cb_data_p->monitor->get_3 (),
 #elif defined (DBUS_USE)
-                data_p->monitor->getP (),
+                ui_cb_data_p->monitor->getP (),
 #endif
 #endif // ACE_WIN32 || ACE_WIN64
                 ssids,
@@ -1343,8 +1360,8 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-      Net_WLAN_Tools::associatedSSID (data_p->monitor->get_2 (),
-                                      data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
+      Net_WLAN_Tools::associatedSSID (ui_cb_data_p->monitor->get_2 (),
+                                      ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
       ACE_TEXT_ALWAYS_CHAR ("");
   ACE_ASSERT (false);
@@ -1352,14 +1369,14 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   ACE_NOTREACHED (return;)
 #endif // WLANAPI_USE
 #else
-      Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+      Net_WLAN_Tools::associatedSSID (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #if defined (WEXT_USE)
-                                      data_p->monitor->get ());
+                                      ui_cb_data_p->monitor->get ());
 #elif defined (NL80211_USE)
-                                      const_cast<struct nl_sock*> (data_p->monitor->getP ()),
-                                      data_p->monitor->get_3 ());
+                                      const_cast<struct nl_sock*> (ui_cb_data_p->monitor->getP ()),
+                                      ui_cb_data_p->monitor->get_3 ());
 #elif defined (DBUS_USE)
-                                      data_p->monitor->getP ());
+                                      ui_cb_data_p->monitor->getP ());
 #else
                                       NULL);
   ACE_ASSERT (false);
@@ -1368,17 +1385,17 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 #endif
 #endif // ACE_WIN32 || ACE_WIN64
   bool select_ssid = false;
-  if (!data_p->configuration->WLANMonitorConfiguration.SSID.empty () || // configured
-      (data_p->configuration->WLANMonitorConfiguration.SSID.empty () &&
+  if (!ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.empty () || // configured
+      (ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.empty () &&
        !current_essid_string.empty ()))                                 // not configured and associated
   {
     string_p =
-        Common_UI_GTK_Tools::localeToUTF8 ((!data_p->configuration->WLANMonitorConfiguration.SSID.empty () ? data_p->configuration->WLANMonitorConfiguration.SSID
-                                                                                                           : current_essid_string.c_str ()));
+        Common_UI_GTK_Tools::localeToUTF8 ((!ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.empty () ? ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID
+                                                                                                                 : current_essid_string.c_str ()));
     ACE_ASSERT (string_p);
     g_value_set_string (&value,
                         string_p);
-    g_free (string_p);
+    g_free (string_p); string_p = NULL;
     index_i = Common_UI_GTK_Tools::valueToIndex (GTK_TREE_MODEL (list_store_p),
                                                  value,
                                                  0);
@@ -1417,16 +1434,16 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct WLANMonitor_UI_CBData* data_p =
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->monitor);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  ACE_ASSERT (ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   GtkListStore* list_store_p =
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
@@ -1438,15 +1455,15 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   GValue value = G_VALUE_INIT;
 #else
   GValue value;
-  g_value_init (&value, G_TYPE_STRING);
 #endif // GTK_CHECK_VERSION (2,30,0)
+  g_value_init (&value, G_TYPE_STRING);
 
   GtkTreeIter iterator_2;
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-    Net_WLAN_Tools::associatedSSID (data_p->monitor->get_2 (),
-                                    data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
+    Net_WLAN_Tools::associatedSSID (ui_cb_data_p->monitor->get_2 (),
+                                    ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
   ACE_TEXT_ALWAYS_CHAR ("");
   ACE_ASSERT (false);
@@ -1454,14 +1471,14 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   ACE_NOTREACHED (return;)
 #endif // WLANAPI_USE
 #else
-  Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+  Net_WLAN_Tools::associatedSSID (ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #if defined (WEXT_USE)
-                                  data_p->monitor->get ());
+                                  ui_cb_data_p->monitor->get ());
 #elif defined (NL80211_USE)
-                                  const_cast<struct nl_sock*> (data_p->monitor->getP ()),
-                                  data_p->monitor->get_3 ());
+                                  const_cast<struct nl_sock*> (ui_cb_data_p->monitor->getP ()),
+                                  ui_cb_data_p->monitor->get_3 ());
 #elif defined (DBUS_USE)
-                                  data_p->monitor->getP ());
+                                  ui_cb_data_p->monitor->getP ());
 #else
                                   NULL);
   ACE_ASSERT (false);
@@ -1479,14 +1496,14 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
                                                   ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_TOGGLEBUTTON_CONNECT_NAME)));
   ACE_ASSERT (toggle_button_p);
   // retrieve the active entry
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock);
     if (!gtk_combo_box_get_active_iter (comboBox_in,
                                         &iterator_2))
     { // most probable reason: nothing selected
       can_connect = false;
 
       // --> select configured entry (if any) and available
-      if (data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
+      if (ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
       { // not configured
         // --> select current entry (if any) and available
         if (current_essid_string.empty ())
@@ -1496,16 +1513,16 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
         ACE_ASSERT (string_p);
         g_value_set_string (&value,
                             string_p);
-        g_free (string_p);
+        g_free (string_p); string_p = NULL;
       } // end IF
       else
       { // configured
         string_p =
-            Common_UI_GTK_Tools::localeToUTF8 (data_p->configuration->WLANMonitorConfiguration.SSID);
+            Common_UI_GTK_Tools::localeToUTF8 (ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID);
         ACE_ASSERT (string_p);
         g_value_set_string (&value,
                             string_p);
-        g_free (string_p);
+        g_free (string_p); string_p = NULL;
       } // end ELSE
       index_i =
           Common_UI_GTK_Tools::valueToIndex (GTK_TREE_MODEL (list_store_p),
@@ -1527,18 +1544,18 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
                                          -1);
   g_value_reset (&value);
   if (!ACE_OS::strcmp (selected_essid_string.c_str (),
-                       data_p->configuration->WLANMonitorConfiguration.SSID.c_str ()))
+                       ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.c_str ()))
   {
     // the selected SSID is the configured SSID
 
-    if (data_p->configuration->WLANMonitorConfiguration.SSID.empty () ||                 // not configured
+    if (ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.empty () ||                 // not configured
         !ACE_OS::strcmp (current_essid_string.c_str (),
-                         data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())) // already associated
+                         ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())) // already associated
       goto continue_;
 
     // the current SSID is not the configured SSID
     // --> auto-associate ?
-    if (data_p->configuration->WLANMonitorConfiguration.autoAssociate)
+    if (ui_cb_data_p->configuration->WLANMonitorConfiguration.autoAssociate)
     {
       GtkCheckButton* check_button_p =
           GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -1553,17 +1570,17 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   {
     // the selected SSID is not the configured SSID
 
-    if (!data_p->monitor->isRunning () ||
-        data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
+    if (!ui_cb_data_p->monitor->isRunning () ||
+        ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
     { // not active or configured
       // --> update configuration
-      data_p->configuration->WLANMonitorConfiguration.SSID =
+      ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID =
           selected_essid_string;
 
       // already associated with selected SSID ?
       // --> activate disconnect function
       if (!ACE_OS::strcmp (current_essid_string.c_str (),
-                           data_p->configuration->WLANMonitorConfiguration.SSID.c_str ()))
+                           ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.c_str ()))
       { // associated with selected SSID
         if (!gtk_toggle_button_get_active (toggle_button_p))
         {
@@ -1588,7 +1605,7 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
 
       // not associated with selected SSID
       // --> auto-associate ?
-      if (data_p->configuration->WLANMonitorConfiguration.autoAssociate)
+      if (ui_cb_data_p->configuration->WLANMonitorConfiguration.autoAssociate)
       {
         // already associated ? --> disconnect first
         if (!current_essid_string.empty ())
@@ -1611,12 +1628,12 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
     // active and configured
     // --> re-select configured SSID, if available
     string_p =
-        Common_UI_GTK_Tools::localeToUTF8 (data_p->configuration->WLANMonitorConfiguration.SSID);
+        Common_UI_GTK_Tools::localeToUTF8 (ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID);
     ACE_ASSERT (string_p);
     g_value_set_string (&value,
                         string_p);
     g_free (string_p);
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock);
       index_i =
           Common_UI_GTK_Tools::valueToIndex (GTK_TREE_MODEL (list_store_p),
                                               value,

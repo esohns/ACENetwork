@@ -202,8 +202,8 @@ idle_add_session_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_add_session_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_SessionCBData*> (userData_in);
+  struct BitTorrent_Client_UI_SessionCBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->eventSourceId);
 
@@ -317,8 +317,8 @@ idle_finalize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_CBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_CBData*> (userData_in);
+  struct BitTorrent_Client_UI_CBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -354,8 +354,8 @@ idle_initialize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_CBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_CBData*> (userData_in);
+  struct BitTorrent_Client_UI_CBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -492,8 +492,8 @@ idle_remove_session_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_remove_session_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_SessionCBData*> (userData_in);
+  struct BitTorrent_Client_UI_SessionCBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
 //  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
   ACE_ASSERT (data_p->session);
@@ -559,8 +559,8 @@ idle_update_display_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_update_display_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_CBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_CBData*> (userData_in);
+  struct BitTorrent_Client_UI_CBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -598,8 +598,8 @@ idle_update_progress_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_ProgressData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_ProgressData*> (userData_in);
+  struct BitTorrent_Client_UI_ProgressData* data_p =
+    static_cast<struct BitTorrent_Client_UI_ProgressData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -698,8 +698,8 @@ button_about_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_CBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_CBData*> (userData_in);
+  struct BitTorrent_Client_UI_CBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
@@ -735,8 +735,8 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_CBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_CBData*> (userData_in);
+  struct BitTorrent_Client_UI_CBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
@@ -957,8 +957,8 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_CBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_CBData*> (userData_in);
+  struct BitTorrent_Client_UI_CBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
@@ -1030,8 +1030,8 @@ switch_session_cb (GtkNotebook* notebook_in,
   ACE_UNUSED_ARG (page_in);
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_SessionCBData*> (userData_in);
+  struct BitTorrent_Client_UI_SessionCBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -1057,8 +1057,8 @@ button_session_close_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_SessionCBData*> (userData_in);
+  struct BitTorrent_Client_UI_SessionCBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->session);
 
@@ -1072,8 +1072,8 @@ button_connection_close_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_connection_close_clicked_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_GTK_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_SessionCBData*> (userData_in);
+  struct BitTorrent_Client_UI_SessionCBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->session);
 
@@ -1141,8 +1141,8 @@ combobox_connections_changed_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
-  struct BitTorrent_Client_GTK_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_GTK_SessionCBData*> (userData_in);
+  struct BitTorrent_Client_UI_SessionCBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =

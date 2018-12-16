@@ -498,7 +498,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       ACE_Time_Value deadline = ACE_Time_Value::zero;
       ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT, 0);
       enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-      bool use_reactor = false;
+//      bool use_reactor = false;
       ConnectionConfigurationIteratorType iterator;
       bool write_only = false;
       struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;

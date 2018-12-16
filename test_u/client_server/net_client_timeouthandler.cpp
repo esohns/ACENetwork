@@ -60,13 +60,13 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  ACE_OS::memset (randomStateInitializationBuffer,
+  ACE_OS::memset (randomStateInitializationBuffer_,
                   0,
                   sizeof (char[BUFSIZ]));
   int result =
     ::initstate_r (Common_Tools::randomSeed,
-                   randomStateInitializationBuffer, sizeof (char[BUFSIZ]),
-                   &randomState);
+                   randomStateInitializationBuffer_, sizeof (char[BUFSIZ]),
+                   &randomState_);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::initstate_r(): \"%m\", continuing\n")));
@@ -316,18 +316,13 @@ continue_:
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnection_T::close(), returning\n")));
-
-      // clean up
       connection_p->decrease ();
       if (connection_2)
         connection_2->decrease ();
-
       return;
     }
 
-    // clean up
-    connection_p->decrease ();
-    connection_p = NULL;
+    connection_p->decrease (); connection_p = NULL;
   } // end IF
 
   if (do_abort_oldest)
@@ -354,11 +349,8 @@ continue_:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
                     connector_->transportLayer ()));
-
-        // clean up
         if (connection_2)
           connection_2->decrease ();
-
         return;
       }
     } // end SWITCH
@@ -371,11 +363,8 @@ continue_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-
-      // clean up
       if (connection_2)
         connection_2->decrease ();
-
       return;
     }
     if (handle_h == ACE_INVALID_HANDLE)
@@ -383,11 +372,8 @@ continue_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IConnector::connect(%s), returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-
-      // clean up
       if (connection_2)
         connection_2->decrease ();
-
       return;
     } // end IF
     ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
@@ -424,15 +410,11 @@ continue_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-
-      // clean up
       if (connection_2)
         connection_2->decrease ();
-
       return;
     } // end IF
-    iconnection_p->decrease ();
-    iconnection_p = NULL;
+    iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
 
   if (do_ping)
@@ -443,10 +425,7 @@ continue_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dynamic_cast<Net_IPing>(0x%@), returning\n"),
                   connection_2));
-
-      // clean up
       connection_2->decrease ();
-
       return;
     } // end IF
 
@@ -455,15 +434,11 @@ continue_:
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IPing::ping(), returning\n")));
-
-      // clean up
       connection_2->decrease ();
-
       return;
     }
 
     // clean up
-    connection_2->decrease ();
-    connection_2 = NULL;
+    connection_2->decrease (); connection_2 = NULL;
   } // end IF
 }

@@ -79,186 +79,6 @@ structuredErrorCallback (void* userData_in,
               ACE_TEXT (error_in->message)));
 }
 
-Test_I_Module_HTMLParser::Test_I_Module_HTMLParser (ISTREAM_T* stream_in)
- : inherited (stream_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::Test_I_Module_HTMLParser"));
-
-}
-
-Test_I_Module_HTMLParser::~Test_I_Module_HTMLParser ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::~Test_I_Module_HTMLParser"));
-
-}
-
-void
-Test_I_Module_HTMLParser::handleDataMessage (Test_I_Message*& message_inout,
-                                             bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::handleDataMessage"));
-
-  // sanity check(s)
-  //ACE_ASSERT (inherited::configuration_);
-  //ACE_ASSERT (inherited::sessionData_);
-
-  //// insert target record
-  //struct Test_I_URLStreamLoad_SessionData& session_data_r =
-  //  const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->get ());
-
-  //// sanity check(s)
-  //const typename Test_I_Message::DATA_T& message_data_container_r =
-  //  message_inout->get ();
-  //typename Test_I_Message::DATA_T::DATA_T& message_data_r =
-  //  const_cast<typename Test_I_Message::DATA_T::DATA_T&> (message_data_container_r.get ());
-  //Test_I_StockItemsIterator_t iterator =
-  //  inherited::configuration_->stockItems.find (message_data_r.stockItem);
-  //ACE_ASSERT (iterator != inherited::configuration_->stockItems.end ());
-  //ACE_ASSERT (!inherited::parserContext_.record);
-
-  //Test_I_StockRecord stock_record;
-  //stock_record.item = &const_cast<Test_I_StockItem&> (*iterator);
-  //session_data_r.data.push_back (stock_record);
-
-  //Test_I_StockRecordsIterator_t iterator_2 = session_data_r.data.begin ();
-  //for (;
-  //     iterator_2 != session_data_r.data.end ();
-  //     ++iterator_2)
-  //  if ((*iterator_2).item->ISIN == message_data_r.stockItem.ISIN)
-  //    break;
-  //ACE_ASSERT (iterator_2 != session_data_r.data.end ());
-  //inherited::parserContext_.record =
-  //  &const_cast<Test_I_StockRecord&> (*iterator_2);
-
-  inherited::handleDataMessage (message_inout,
-                                passMessageDownstream_out);
-
-  if (inherited::complete_)
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s: parsed HTML document (stream URL: \"%s\")\n"),
-                inherited::mod_->name (),
-                ACE_TEXT (inherited::parserContext_.URL.c_str ())));
-
-    inherited::complete_ = false;
-    inherited::parserContext_.URL.clear ();
-  } // end IF
-}
-
-//void
-//Test_I_Module_HTMLParser::handleSessionMessage (Test_I_Stream_SessionMessage*& message_inout,
-//                                                bool& passMessageDownstream_out)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::handleSessionMessage"));
-//
-//  // don't care (implies yes per default, if part of a stream)
-//  ACE_UNUSED_ARG (passMessageDownstream_out);
-//
-//  switch (message_inout->type ())
-//  {
-//    case STREAM_SESSION_MESSAGE_BEGIN:
-//    {
-//      // sanity check(s)
-//      ACE_ASSERT (inherited::sessionData_);
-//      ACE_ASSERT (!inherited::parserContext_.sessionData);
-//
-////      if (parserContext_)
-////        htmlCtxtReset (parserContext_);
-//
-//      // *TODO*: remove type inference
-//      inherited::parserContext_.sessionData =
-//        &const_cast<Test_I_HTTPGet_SessionData&> (inherited::sessionData_->get ());
-//
-//      break;
-//    }
-//    case STREAM_SESSION_MESSAGE_LINK:
-//    {
-//      // sanity check(s)
-//      ACE_ASSERT (inherited::parserContext_.sessionData);
-//
-//      // *TODO*: remove type inference
-//      inherited::parserContext_.sessionData =
-//        &const_cast<Test_I_HTTPGet_SessionData&> (inherited::sessionData_->get ());
-//
-//      break;
-//    }
-//    case STREAM_SESSION_MESSAGE_STEP:
-//    {
-//      if (inherited::parserContext_.parserContext)
-//        htmlCtxtReset (inherited::parserContext_.parserContext);
-//
-//      //++iterator_;
-//      //ACE_ASSERT (iterator_ != session_data_r.data.end ());
-//      //inherited::parserContext_.data =
-//      //  &const_cast<Test_I_StockRecord&> (*iterator_);
-//
-//      break;
-//    }
-//    case STREAM_SESSION_MESSAGE_END:
-//    {
-//      inherited::parserContext_.sessionData = NULL;
-//
-//      break;
-//    }
-//    default:
-//      break;
-//  } // end SWITCH
-//}
-
-bool
-Test_I_Module_HTMLParser::initialize (const struct Test_I_URLStreamLoad_ModuleHandlerConfiguration& configuration_in,
-                                      Stream_IAllocator* allocator_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::initialize"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.mode == STREAM_MODULE_HTMLPARSER_MODE_SAX);
-
-//  initGenericErrorDefaultFunc ((xmlGenericErrorFunc*)&::errorCallback);
-//  xmlSetGenericErrorFunc (inherited::parserContext_, &::errorCallback);
-//  xmlSetStructuredErrorFunc (inherited::parserContext_, &::structuredErrorCallback);
-
-  return inherited::initialize (configuration_in,
-                                allocator_in);
-}
-
-bool
-Test_I_Module_HTMLParser::initializeSAXParser ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::initializeSAXParser"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::SAXHandler_.initialized);
-
-  // set necessary SAX parser callbacks
-  // *IMPORTANT NOTE*: the default SAX callbacks expect xmlParserCtxtPtr as user
-  //                   data; this implementation uses Test_I_URLStreamLoad_SAXParserContext*
-  //                   --> all default callbacks will crash on invocation, so
-  //                       disable them here
-  inherited::SAXHandler_.cdataBlock = NULL;
-  inherited::SAXHandler_.comment = NULL;
-  inherited::SAXHandler_.getEntity = NULL;
-  inherited::SAXHandler_.ignorableWhitespace = NULL;
-  inherited::SAXHandler_.internalSubset = NULL;
-  inherited::SAXHandler_.processingInstruction = NULL;
-  inherited::SAXHandler_.setDocumentLocator = NULL;
-  inherited::SAXHandler_.startDocument = NULL;
-  inherited::SAXHandler_.endDocument = NULL;
-
-//  inherited::SAXHandler_.getEntity = getEntity;
-//  inherited::SAXHandler_.startDocument = startDocument;
-//  inherited::SAXHandler_.endDocument = endDocument;
-  inherited::SAXHandler_.startElement = startElement;
-  inherited::SAXHandler_.endElement = endElement;
-  inherited::SAXHandler_.characters = characters;
-  ////////////////////////////////////////
-  inherited::SAXHandler_.warning = errorCallback;
-  inherited::SAXHandler_.error = errorCallback;
-  inherited::SAXHandler_.fatalError = errorCallback;
-
-  return true;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 //void
@@ -805,4 +625,186 @@ endElement (void* userData_in,
     data_p->state = TEST_I_SAXPARSER_STATE_IN_HTML;
     return;
   } // end IF
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+Test_I_Module_HTMLParser::Test_I_Module_HTMLParser (ISTREAM_T* stream_in)
+ : inherited (stream_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::Test_I_Module_HTMLParser"));
+
+}
+
+Test_I_Module_HTMLParser::~Test_I_Module_HTMLParser ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::~Test_I_Module_HTMLParser"));
+
+}
+
+void
+Test_I_Module_HTMLParser::handleDataMessage (Test_I_Message*& message_inout,
+                                             bool& passMessageDownstream_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::handleDataMessage"));
+
+  // sanity check(s)
+  //ACE_ASSERT (inherited::configuration_);
+  //ACE_ASSERT (inherited::sessionData_);
+
+  //// insert target record
+  //struct Test_I_URLStreamLoad_SessionData& session_data_r =
+  //  const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->get ());
+
+  //// sanity check(s)
+  //const typename Test_I_Message::DATA_T& message_data_container_r =
+  //  message_inout->get ();
+  //typename Test_I_Message::DATA_T::DATA_T& message_data_r =
+  //  const_cast<typename Test_I_Message::DATA_T::DATA_T&> (message_data_container_r.get ());
+  //Test_I_StockItemsIterator_t iterator =
+  //  inherited::configuration_->stockItems.find (message_data_r.stockItem);
+  //ACE_ASSERT (iterator != inherited::configuration_->stockItems.end ());
+  //ACE_ASSERT (!inherited::parserContext_.record);
+
+  //Test_I_StockRecord stock_record;
+  //stock_record.item = &const_cast<Test_I_StockItem&> (*iterator);
+  //session_data_r.data.push_back (stock_record);
+
+  //Test_I_StockRecordsIterator_t iterator_2 = session_data_r.data.begin ();
+  //for (;
+  //     iterator_2 != session_data_r.data.end ();
+  //     ++iterator_2)
+  //  if ((*iterator_2).item->ISIN == message_data_r.stockItem.ISIN)
+  //    break;
+  //ACE_ASSERT (iterator_2 != session_data_r.data.end ());
+  //inherited::parserContext_.record =
+  //  &const_cast<Test_I_StockRecord&> (*iterator_2);
+
+  inherited::handleDataMessage (message_inout,
+                                passMessageDownstream_out);
+
+  if (inherited::complete_)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: parsed HTML document (stream URL: \"%s\")\n"),
+                inherited::mod_->name (),
+                ACE_TEXT (inherited::parserContext_.URL.c_str ())));
+
+    inherited::complete_ = false;
+    inherited::parserContext_.URL.clear ();
+  } // end IF
+}
+
+//void
+//Test_I_Module_HTMLParser::handleSessionMessage (Test_I_Stream_SessionMessage*& message_inout,
+//                                                bool& passMessageDownstream_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::handleSessionMessage"));
+//
+//  // don't care (implies yes per default, if part of a stream)
+//  ACE_UNUSED_ARG (passMessageDownstream_out);
+//
+//  switch (message_inout->type ())
+//  {
+//    case STREAM_SESSION_MESSAGE_BEGIN:
+//    {
+//      // sanity check(s)
+//      ACE_ASSERT (inherited::sessionData_);
+//      ACE_ASSERT (!inherited::parserContext_.sessionData);
+//
+////      if (parserContext_)
+////        htmlCtxtReset (parserContext_);
+//
+//      // *TODO*: remove type inference
+//      inherited::parserContext_.sessionData =
+//        &const_cast<Test_I_HTTPGet_SessionData&> (inherited::sessionData_->get ());
+//
+//      break;
+//    }
+//    case STREAM_SESSION_MESSAGE_LINK:
+//    {
+//      // sanity check(s)
+//      ACE_ASSERT (inherited::parserContext_.sessionData);
+//
+//      // *TODO*: remove type inference
+//      inherited::parserContext_.sessionData =
+//        &const_cast<Test_I_HTTPGet_SessionData&> (inherited::sessionData_->get ());
+//
+//      break;
+//    }
+//    case STREAM_SESSION_MESSAGE_STEP:
+//    {
+//      if (inherited::parserContext_.parserContext)
+//        htmlCtxtReset (inherited::parserContext_.parserContext);
+//
+//      //++iterator_;
+//      //ACE_ASSERT (iterator_ != session_data_r.data.end ());
+//      //inherited::parserContext_.data =
+//      //  &const_cast<Test_I_StockRecord&> (*iterator_);
+//
+//      break;
+//    }
+//    case STREAM_SESSION_MESSAGE_END:
+//    {
+//      inherited::parserContext_.sessionData = NULL;
+//
+//      break;
+//    }
+//    default:
+//      break;
+//  } // end SWITCH
+//}
+
+bool
+Test_I_Module_HTMLParser::initialize (const struct Test_I_URLStreamLoad_ModuleHandlerConfiguration& configuration_in,
+                                      Stream_IAllocator* allocator_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::initialize"));
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.mode == STREAM_MODULE_HTMLPARSER_MODE_SAX);
+
+//  initGenericErrorDefaultFunc ((xmlGenericErrorFunc*)&::errorCallback);
+//  xmlSetGenericErrorFunc (inherited::parserContext_, &::errorCallback);
+//  xmlSetStructuredErrorFunc (inherited::parserContext_, &::structuredErrorCallback);
+
+  return inherited::initialize (configuration_in,
+                                allocator_in);
+}
+
+bool
+Test_I_Module_HTMLParser::initializeSAXParser ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_HTMLParser::initializeSAXParser"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::SAXHandler_.initialized);
+
+  // set necessary SAX parser callbacks
+  // *IMPORTANT NOTE*: the default SAX callbacks expect xmlParserCtxtPtr as user
+  //                   data; this implementation uses Test_I_URLStreamLoad_SAXParserContext*
+  //                   --> all default callbacks will crash on invocation, so
+  //                       disable them here
+  inherited::SAXHandler_.cdataBlock = NULL;
+  inherited::SAXHandler_.comment = NULL;
+  inherited::SAXHandler_.getEntity = NULL;
+  inherited::SAXHandler_.ignorableWhitespace = NULL;
+  inherited::SAXHandler_.internalSubset = NULL;
+  inherited::SAXHandler_.processingInstruction = NULL;
+  inherited::SAXHandler_.setDocumentLocator = NULL;
+  inherited::SAXHandler_.startDocument = NULL;
+  inherited::SAXHandler_.endDocument = NULL;
+
+//  inherited::SAXHandler_.getEntity = getEntity;
+//  inherited::SAXHandler_.startDocument = startDocument;
+//  inherited::SAXHandler_.endDocument = endDocument;
+  inherited::SAXHandler_.startElement = startElement;
+  inherited::SAXHandler_.endElement = endElement;
+  inherited::SAXHandler_.characters = characters;
+  ////////////////////////////////////////
+  inherited::SAXHandler_.warning = errorCallback;
+  inherited::SAXHandler_.error = errorCallback;
+  inherited::SAXHandler_.fatalError = errorCallback;
+
+  return true;
 }

@@ -9,7 +9,8 @@ if (GUI_SUPPORT)
  include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/PreUIFramework.cmake)
  include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetUIFramework.cmake)
 
- if (GTK_USE)
+ if (CURSES_USE)
+ elseif (GTK_USE)
   include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetGTKVersion.cmake)
   CMAKE_DEPENDENT_OPTION (GTKGL_SUPPORT "enable GTK OpenGL support" ON
                           "GUI_SUPPORT" OFF)
@@ -42,6 +43,16 @@ if (GUI_SUPPORT)
 endif (GUI_SUPPORT)
 
 add_library (${PROJECT_NAME}_Test_U STATIC "")
+
+if (UNIX)
+ if (GUI_SUPPORT)
+  if (CURSES_USE)
+# *WORKAROUND*
+   add_definitions (-DNCURSES_INTERNALS)
+  endif (CURSES_USE)
+ endif (GUI_SUPPORT)
+elseif (WIN32)
+endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -201,7 +212,8 @@ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
 if (UNIX)
  if (GUI_SUPPORT)
   target_link_libraries (${PROJECT_NAME}_Test_U CommonUI)
-  if (GTK_USE)
+  if (CURSES_USE)
+  elseif (GTK_USE)
    target_link_libraries (${PROJECT_NAME}_Test_U ${PKG_GTK_LIBRARIES})
    target_link_libraries (${PROJECT_NAME}_Test_U CommonUI_GTK)
   elseif (WXWIDGETS_USE)
@@ -276,19 +288,19 @@ set (source_files
      test_u_socket_common.h
      test_u_stream_common.h)
 if (GUI_SUPPORT)
- if (GTK_SUPPORT)
+ if (CURSES_USE)
+ elseif (GTK_USE)
   set (source_files
        ${source_files}
        test_u_gtk_common.h
        test_u_gtk_eventhandler.cpp
        test_u_gtk_eventhandler.h
        test_u_gtk_eventhandler.inl)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
+ elseif (WXWIDGETS_USE)
   set (source_files
        ${source_files}
        test_u_wxwidgets_common.h)
- endif (WXWIDGETS_SUPPORT)
+ endif ()
 endif (GUI_SUPPORT)
 #install (FILES
 #         ${PROJECT_NAME}_Test_U_GTK_SRCS

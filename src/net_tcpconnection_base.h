@@ -30,7 +30,10 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Time_Value.h"
+
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Connector.h"
+#endif // SSL_SUPPORT
 
 #include "stream_statemachine_control.h"
 
@@ -130,6 +133,7 @@ class Net_TCPConnectionBase_T
                                                      TimerManagerType,
                                                      UserDataType>,
                              Net_SOCK_Connector>;
+#if defined (SSL_SUPPORT)
   friend class ACE_Connector<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                                                      HandlerType,
                                                      ConfigurationType,
@@ -141,6 +145,7 @@ class Net_TCPConnectionBase_T
                                                      TimerManagerType,
                                                      UserDataType>,
                              ACE_SSL_SOCK_Connector>;
+#endif // SSL_SUPPORT
 
  public:
   // convenient types

@@ -97,19 +97,20 @@ using namespace std;
 #include "test_i_defines.h"
 
 #include "bittorrent_client_configuration.h"
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
-#include "bittorrent_client_curses.h"
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
 #include "bittorrent_client_defines.h"
 // *TODO*: to be removed ASAP
-#include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_session_common.h"
 #include "bittorrent_client_signalhandler.h"
 #include "bittorrent_client_stream_common.h"
 #include "bittorrent_client_tools.h"
+
+#if defined (GUI_SUPPORT)
+#include "bittorrent_client_gui_common.h"
+#if defined (CURSES_USE)
+#include "bittorrent_client_curses.h"
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("BitTorrentStream");
 
@@ -153,14 +154,6 @@ do_printUsage (const std::string& programName_in)
             << TEST_I_DEFAULT_SESSION_LOG
             << ACE_TEXT ("]")
             << std::endl;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  std::cout << ACE_TEXT ("-n        : use (PD|n)curses library [")
-            << BITTORRENT_CLIENT_DEFAULT_USE_CURSES
-            << ACE_TEXT ("]")
-            << std::endl;
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   std::cout << ACE_TEXT ("-r        : use reactor [")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT ("]")
@@ -192,11 +185,6 @@ do_processArguments (int argc_in,
                      bool& debugParser_out,
                      std::string& metaInfoFileName_out,
                      bool& logToFile_out,
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-                     bool& useCursesLibrary_out,
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -222,11 +210,6 @@ do_processArguments (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   logToFile_out                  = TEST_I_DEFAULT_SESSION_LOG;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  useCursesLibrary_out           = BITTORRENT_CLIENT_DEFAULT_USE_CURSES;
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   useReactor_out                 =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
@@ -238,11 +221,7 @@ do_processArguments (int argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-                              ACE_TEXT ("df:lnrs:tvx:"),
-#else
                               ACE_TEXT ("df:lrs:tvx:"),
-#endif // CURSES_SUPPORT
 #else
                               ACE_TEXT ("df:lrs:tvx:"),
 #endif // GUI_SUPPORT
@@ -271,15 +250,6 @@ do_processArguments (int argc_in,
         logToFile_out = true;
         break;
       }
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-      case 'n':
-      {
-        useCursesLibrary_out = true;
-        break;
-      }
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
       case 'r':
       {
         useReactor_out = true;
@@ -347,11 +317,6 @@ do_processArguments (int argc_in,
 
 void
 do_initializeSignals (bool useReactor_in,
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-                      bool useCursesLibrary_in,
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                       bool allowUserRuntimeStats_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
@@ -436,18 +401,15 @@ do_initializeSignals (bool useReactor_in,
 #endif
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
   // *NOTE*: let (n)curses install it's own signal handler and process events in
   //         (w)getch()
-  if (useCursesLibrary_in)
-  {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 //    signals_out.sig_del (SIGINT);
-    signals_out.sig_del (SIGWINCH);
+  signals_out.sig_del (SIGWINCH);
 #endif
-  } // end IF
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
 #endif // GUI_SUPPORT
 
 // *NOTE*: gdb sends some signals (when running in an IDE ?)
@@ -460,7 +422,7 @@ do_initializeSignals (bool useReactor_in,
 }
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
 ACE_THR_FUNC_RETURN
 session_setup_curses_function (void* arg_in)
 {
@@ -473,7 +435,7 @@ session_setup_curses_function (void* arg_in)
   return_value = -1;
 #else
   return_value = arg_in;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   struct BitTorrent_Client_ThreadData* data_p =
     static_cast<struct BitTorrent_Client_ThreadData*> (arg_in);
@@ -528,7 +490,7 @@ session_setup_curses_function (void* arg_in)
   return_value = 0;
 #else
   return_value = NULL;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return return_value;
 
@@ -540,17 +502,12 @@ error:
 
   return return_value;
 }
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
 #endif // GUI_SUPPORT
 
 void
 do_work (struct BitTorrent_Client_Configuration& configuration_in,
          bool debugParser_in,
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-         bool useCursesLibrary_in,
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
          const std::string& metaInfoFileName_in,
          bool useReactor_in,
          const ACE_Time_Value& statisticReportingInterval_in,
@@ -564,11 +521,11 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   int result = -1;
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
   // *TODO*: clean this up
   struct BitTorrent_Client_CursesState curses_state;
   struct BitTorrent_Client_ThreadData curses_thread_data;
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
 #endif // GUI_SUPPORT
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
@@ -601,10 +558,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   // step1: initialize configuration
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  if (useCursesLibrary_in)
-    configuration_in.cursesState = &curses_state;
-#endif // CURSES_SUPPORT
+#if defined (CURSES_USE)
+  configuration_in.cursesState = &curses_state;
+#endif // CURSES_USE
 #endif // GUI_SUPPORT
 
   configuration_in.parserConfiguration.debugParser = debugParser_in;
@@ -724,10 +680,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                                                                            : COMMON_EVENT_DISPATCH_PROACTOR);
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  if (useCursesLibrary_in)
-    configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
-#endif // CURSES_SUPPORT
+#if defined (CURSES_USE)
+  configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
+#endif // CURSES_USE
 #endif // GUI_SUPPORT
 
   // step4: initialize signal handling
@@ -775,11 +730,10 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step6b: (try to) connect to the torrent tracker
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
   curses_thread_data.configuration = &configuration_in;
   curses_thread_data.controller = &bittorrent_control;
-  if (useCursesLibrary_in)
-    curses_thread_data.cursesState = &curses_state;
+  curses_thread_data.cursesState = &curses_state;
   curses_thread_data.dispatchState = &event_dispatch_state_s;
   curses_thread_data.filename = metaInfoFileName_in;
 //  curses_thread_data.groupId = group_id_2;
@@ -829,7 +783,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
     goto clean;
   } // end IF
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
 #endif // GUI_SUPPORT
 
   // step6c: dispatch connection attempt, wait for the session to finish
@@ -893,12 +847,12 @@ do_printVersion (const std::string& programName_in)
 
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
             << ACE_TEXT (ACENetwork_PACKAGE_NAME)
             << ACE_TEXT (": ")
             << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
             << std::endl;
-#endif
+#endif // HAVE_CONFIG_H
 
   converter.str ("");
   // ACE version string...
@@ -917,11 +871,11 @@ do_printVersion (const std::string& programName_in)
             << std::endl;
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
   std::cout << ACE_TEXT ("curses: ")
             << curses_version ()
             << std::endl;
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
 #endif // GUI_SUPPORT
 }
 
@@ -969,12 +923,6 @@ ACE_TMAIN (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   bool log_to_file                           = TEST_I_DEFAULT_SESSION_LOG;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  bool use_curses_library                    =
-      BITTORRENT_CLIENT_DEFAULT_USE_CURSES;
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   bool use_reactor                           =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
@@ -988,11 +936,6 @@ ACE_TMAIN (int argc_in,
                             debug_parser,
                             meta_info_file_name,
                             log_to_file,
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-                            use_curses_library,
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
@@ -1056,11 +999,6 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (use_reactor,
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-                        use_curses_library,
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                         true,
                         signal_set,
                         ignored_signal_set);
@@ -1105,14 +1043,7 @@ ACE_TMAIN (int argc_in,
   ACE_SYNCH_RECURSIVE_MUTEX signal_lock;
   BitTorrent_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                                  &signal_lock
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-                                                  ,use_curses_library);
-#else
-                                                 );
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
+                                                  &signal_lock);
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1147,11 +1078,6 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   do_work (configuration,
            debug_parser,
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-           use_curses_library,
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
            meta_info_file_name,
            use_reactor,
            ACE_Time_Value (statistic_reporting_interval, 0),

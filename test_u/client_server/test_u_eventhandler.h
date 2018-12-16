@@ -32,9 +32,7 @@
 
 // forward declarations
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-struct Test_U_GTK_CBData;
-#endif // GTK_USE
+struct Test_U_UI_CBData;
 #endif // GUI_SUPPORT
 
 class ClientServer_EventHandler
@@ -43,9 +41,7 @@ class ClientServer_EventHandler
  public:
   ClientServer_EventHandler (
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-                             struct Test_U_GTK_CBData* // UI callback data
-#endif // GTK_USE
+                             struct Test_U_UI_CBData* // UI callback data
 #endif // GUI_SUPPORT
                             );
   inline virtual ~ClientServer_EventHandler () {}
@@ -62,12 +58,14 @@ class ClientServer_EventHandler
                        const Test_U_SessionMessage&);
 
  private:
+#if defined (GUI_SUPPORT)
   ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler ())
+#endif // GUI_SUPPORT
   ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler (const ClientServer_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler& operator=(const ClientServer_EventHandler&))
 
 #if defined (GUI_SUPPORT)
-  struct Test_U_GTK_CBData* CBData_;
+  struct Test_U_UI_CBData* CBData_;
 #endif // GUI_SUPPORT
 };
 

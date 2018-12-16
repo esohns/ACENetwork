@@ -139,9 +139,9 @@ struct Test_I_UI_CBData
    , mediaFramework (STREAM_LIB_DEFAULT_MEDIAFRAMEWORK)
 #endif // ACE_WIN32 || ACE_WIN64
    , progressData ()
-   , UIState ()
+   , UIState (NULL)
   {
-    progressData.state = &UIState;
+    progressData.state = UIState;
   }
 
   bool                            allowUserRuntimeStatistic;
@@ -150,7 +150,7 @@ struct Test_I_UI_CBData
   enum Stream_MediaFramework_Type mediaFramework;
 #endif // ACE_WIN32 || ACE_WIN64
   struct Test_I_UI_ProgressData   progressData;
-  struct Common_UI_State          UIState;
+  struct Common_UI_State*         UIState;
 };
 
 struct Test_I_UI_ThreadData

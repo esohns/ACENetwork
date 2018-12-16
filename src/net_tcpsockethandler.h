@@ -27,7 +27,10 @@
 #include "ace/Reactor_Notification_Strategy.h"
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
+
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Stream.h"
+#endif // SSL_SUPPORT
 
 #include "net_sockethandler_base.h"
 
@@ -64,6 +67,7 @@ class Net_TCPSocketHandler_T
 
 //////////////////////////////////////////
 
+#if defined (SSL_SUPPORT)
 // partial specialization (for SSL)
 template <ACE_SYNCH_DECL,
           typename ConfigurationType>
@@ -96,6 +100,7 @@ class Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))
 };
+#endif // SSL_SUPPORT
 
 // include template definition
 #include "net_tcpsockethandler.inl"

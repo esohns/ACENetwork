@@ -179,7 +179,9 @@ struct WLANMonitor_UI_CBData
 #elif defined (WXWIDGETS_USE)
    , UIState (NULL)
 #endif // GTK_USE
-  {}
+  {
+    progressData.state = UIState;
+  }
 
   struct WLANMonitor_Configuration*      configuration;
   Net_WLAN_IInetMonitor_t*               monitor;

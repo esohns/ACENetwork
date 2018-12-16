@@ -47,6 +47,8 @@
 #include "irc_icontrol.h"
 #include "irc_tools.h"
 
+
+
 template <typename ConnectionType,
           typename SessionDataType,
 //          typename ControllerType,
@@ -788,12 +790,17 @@ IRC_Session_T<ConnectionType,
             std::string channel = record_r.parameters_.front ();
             if ((inherited::state_.channel.empty ()) &&
                 UIState_)
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
               if (!curses_join (channel,
                                 *UIState_))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_join(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
-
+#else
+              ;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
             inherited::state_.channel = channel;
 
             break;
@@ -816,12 +823,17 @@ IRC_Session_T<ConnectionType,
             std::string channel = record_r.parameters_.front ();
             if ((!inherited::state_.channel.empty ()) &&
                 UIState_)
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
               if (!curses_part (channel,
                                 *UIState_))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_part(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
-
+#else
+              ;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
             inherited::state_.channel.clear ();
             break;
           } // end IF
@@ -1272,13 +1284,16 @@ IRC_Session_T<ConnectionType,
 
   if (UIState_)
   {
+    if (logToFile_)
+      output_ << messageText_in;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
     curses_log (channel_in,     // channel
                 messageText_in, // text
                 *UIState_,      // state
                 true);          // locked access
-
-    if (logToFile_)
-      output_ << messageText_in;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   } // end IF
   else
     output_ << messageText_in;

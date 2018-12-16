@@ -110,7 +110,9 @@ struct IRC_Client_UI_CBData
    , phoneBook ()
    , progressData ()
    , UIFileDirectory ()
-  {}
+  {
+    progressData.state = UIState;
+  }
 
   struct IRC_Client_Configuration*  configuration;
   IRC_Client_GUI_Connections_t      connections;
@@ -137,10 +139,12 @@ struct IRC_Client_ConnectionThreadData
   struct IRC_Client_ConnectionEntry phonebookEntry;
 };
 
+struct IRC_Client_UI_HandlerCBData;
 struct IRC_Client_UI_ConnectionCBData
 {
   IRC_Client_UI_ConnectionCBData ()
    : acknowledgements (0)
+   , CBData (NULL)
    , connections (NULL)
    , controller (NULL)
 #if defined (GTK_USE)
@@ -148,25 +152,20 @@ struct IRC_Client_UI_ConnectionCBData
 #endif // GTK_USE
    , label ()
    , pending (false)
-#if defined (GTK_USE)
-   , UIState (NULL)
-#endif // GTK_USE
    , timeStamp ()
   {}
 
-  unsigned int                  acknowledgements;
-  IRC_Client_GUI_Connections_t* connections;
-  IRC_IControl*                 controller;
+  unsigned int                         acknowledgements;
+  struct IRC_Client_UI_HandlerCBData*  CBData;
+  IRC_Client_GUI_Connections_t*        connections;
+  IRC_IControl*                        controller;
 #if defined (GTK_USE)
-  guint                         eventSourceId;
+  guint                                eventSourceId;
 #endif // GTK_USE
   // *TODO*: remove this
-  std::string                   label;
-  bool                          pending;
-#if defined (GTK_USE)
-  Common_UI_GTK_State_t*        UIState;
-#endif // GTK_USE
-  std::string                   timeStamp;
+  std::string                          label;
+  bool                                 pending;
+  std::string                          timeStamp;
 };
 
 struct IRC_Client_UI_HandlerCBData
@@ -179,7 +178,6 @@ struct IRC_Client_UI_HandlerCBData
    , controller (NULL)
 #if defined (GTK_USE)
    , eventSourceId (0)
-   , UIState (NULL)
 #endif // GTK_USE
    , handler (NULL)
    , id ()
@@ -195,7 +193,6 @@ struct IRC_Client_UI_HandlerCBData
   IRC_IControl*                  controller;
 #if defined (GTK_USE)
   guint                          eventSourceId;
-  Common_UI_GTK_State_t*         UIState;
 #endif // GTK_USE
   IRC_Client_GUI_MessageHandler* handler;
   // *TODO*: remove this

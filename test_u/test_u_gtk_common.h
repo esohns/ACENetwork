@@ -53,7 +53,9 @@ struct Test_U_GTK_CBData
    , allowUserRuntimeStatistic (true)
    , progressData ()
    , UIState (NULL)
-  {}
+  {
+    progressData.state = UIState;
+  }
 
   bool                           allowUserRuntimeStatistic;
   struct Test_U_GTK_ProgressData progressData;

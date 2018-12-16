@@ -176,7 +176,7 @@ endif ()
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
-                ${ACENetwork_DHCPClient_EXE_SRCS}
+                ${${EXECUTABLE}_EXE_SRCS}
                 etc/test_u.glade)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
@@ -204,6 +204,11 @@ elseif (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
+
+if (UNIX)
+ target_link_libraries (${EXECUTABLE} X11)
+endif (UNIX)
+
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 
 target_link_libraries (${EXECUTABLE} Common)

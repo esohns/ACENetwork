@@ -179,13 +179,13 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_udpconnection.h)
 if (GUI_SUPPORT)
  if (GTK_USE)
-  set (${EXECUTABLE_SOURCE_SRCS}
-       ${EXECUTABLE_SOURCE_SRCS}
+  set (${EXECUTABLE_SOURCE}_SRCS
+       ${${EXECUTABLE_SOURCE}_SRCS}
        test_u_callbacks.cpp
        test_u_callbacks.h)
  elseif (WXWIDGETS_USE)
-   #  set (${EXECUTABLE}_EXE_SRCS
-   #       ${${EXECUTABLE}_EXE_SRCS}
+   #  set (${EXECUTABLE_SOURCE}_SRCS
+   #       ${${EXECUTABLE_SOURCE}_SRCS}
    #       test_u_wxwidgets_ui.cpp
    #       test_u_wxwidgets_ui.h
    #       test_u_wxwidgets_ui.inl
@@ -204,7 +204,7 @@ endif ()
 
 add_executable (${EXECUTABLE_SOURCE}
                 EXCLUDE_FROM_ALL
-                ${EXECUTABLE_SOURCE_SRCS}
+                ${${EXECUTABLE_SOURCE}_SRCS}
                 etc/net_client.glade)
 set_property (TARGET ${EXECUTABLE_SOURCE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
@@ -222,7 +222,7 @@ add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Client)
 target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
 if (UNIX)
-# target_link_libraries (${EXECUTABLE_SOURCE} X11)
+ target_link_libraries (${EXECUTABLE_SOURCE} X11)
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_SOURCE} ntdll.lib)
 
@@ -302,13 +302,13 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_udpconnection.h)
 if (GUI_SUPPORT)
  if (GTK_USE)
-  set (${EXECUTABLE_TARGET_SRCS}
-       ${EXECUTABLE_TARGET_SRCS}
+  set (${EXECUTABLE_TARGET}_SRCS
+       ${${EXECUTABLE_TARGET}_SRCS}
        test_u_callbacks.cpp
        test_u_callbacks.h)
  elseif (WXWIDGETS_USE)
-      #  set (${EXECUTABLE}_EXE_SRCS
-      #       ${${EXECUTABLE}_EXE_SRCS}
+      #  set (${EXECUTABLE_TARGET}_SRCS
+      #       ${${EXECUTABLE_TARGET}_SRCS}
       #       test_u_wxwidgets_ui.cpp
       #       test_u_wxwidgets_ui.h
       #       test_u_wxwidgets_ui.inl
@@ -319,7 +319,7 @@ endif (GUI_SUPPORT)
 
 add_executable (${EXECUTABLE_TARGET}
                 EXCLUDE_FROM_ALL
-                ${EXECUTABLE_TARGET_SRCS}
+                ${${EXECUTABLE_TARGET}_SRCS}
                 etc/net_server.glade)
 set_property (TARGET ${EXECUTABLE_TARGET} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
@@ -340,7 +340,7 @@ add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
 if (UNIX)
-# target_link_libraries (${EXECUTABLE_TARGET} X11)
+ target_link_libraries (${EXECUTABLE_TARGET} X11)
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_TARGET} ntdll.lib)
 

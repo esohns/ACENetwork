@@ -61,8 +61,8 @@ idle_update_log_display_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct FileServer_GTK_CBData* data_p =
-    static_cast<struct FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_UI_CBData* data_p =
+    static_cast<struct FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
 
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -148,8 +148,8 @@ idle_session_start_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct FileServer_GTK_CBData* data_p =
-    static_cast<struct FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_UI_CBData* data_p =
+    static_cast<struct FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
 
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -187,8 +187,8 @@ idle_update_info_display_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct FileServer_GTK_CBData* data_p =
-    static_cast<struct FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_UI_CBData* data_p =
+    static_cast<struct FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
 
   GtkSpinButton* spin_button_p = NULL;
@@ -311,8 +311,8 @@ idle_initialize_ui_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct FileServer_GTK_CBData* data_p =
-    static_cast<struct FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_UI_CBData* data_p =
+    static_cast<struct FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
   ACE_ASSERT (data_p->configuration);
 
@@ -791,8 +791,8 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  struct FileServer_GTK_CBData* data_p =
-    static_cast<struct FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_UI_CBData* data_p =
+    static_cast<struct FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->listener);
@@ -928,8 +928,8 @@ button_clear_clicked_cb (GtkButton* button_in,
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  FileServer_GTK_CBData* data_p =
-    static_cast<FileServer_GTK_CBData*> (userData_in);
+  FileServer_UI_CBData* data_p =
+    static_cast<FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
 
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -959,8 +959,8 @@ button_about_clicked_cb (GtkButton* button_in,
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
-  FileServer_GTK_CBData* data_p =
-    static_cast<FileServer_GTK_CBData*> (userData_in);
+  FileServer_UI_CBData* data_p =
+    static_cast<FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
 
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -1003,7 +1003,7 @@ button_quit_clicked_cb (GtkButton* button_in,
 
   int result = -1;
 
-  //FileServer_GTK_CBData* data_p = static_cast<FileServer_GTK_CBData*> (userData_in);
+  //FileServer_UI_CBData* data_p = static_cast<FileServer_UI_CBData*> (userData_in);
   //// sanity check(s)
   //ACE_ASSERT (data_p);
 

@@ -48,7 +48,7 @@
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "common_file_tools.h"
+#include "common_file_tools.h"
 #include "common_tools.h"
 
 #include "common_logger.h"
@@ -82,7 +82,11 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
@@ -131,6 +135,7 @@ do_printUsage (const std::string& programName_in)
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+#if defined (GUI_SUPPORT)
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -138,6 +143,7 @@ do_printUsage (const std::string& programName_in)
             << UI_file_path
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
+#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [")
             << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -200,7 +206,9 @@ bool
 do_processArguments (const int& argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      unsigned int& maximumNumberOfConnections_out,
+#if defined (GUI_SUPPORT)
                      std::string& UIFile_out,
+#endif // GUI_SUPPORT
                      bool& useThreadPool_out,
                      ACE_Time_Value& pingInterval_out,
                      //unsigned int& keepAliveTimeout_out,
@@ -226,9 +234,11 @@ do_processArguments (const int& argc_in,
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+#if defined (GUI_SUPPORT)
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+#endif // GUI_SUPPORT
   useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
                         (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
@@ -251,7 +261,11 @@ do_processArguments (const int& argc_in,
 
   ACE_Get_Opt argument_parser (argc_in,                                // argc
                                argv_in,                                // argv
+#if defined (GUI_SUPPORT)
                                ACE_TEXT ("c:g::hi:k:lmn:op:rs:tuvx:"), // optstring
+#else
+                               ACE_TEXT ("c:hi:k:lmn:op:rs:tuvx:"), // optstring
+#endif // GUI_SUPPORT
                                1,                                      // skip_args
                                1,                                      // report_errors
                                ACE_Get_Opt::PERMUTE_ARGS,              // ordering
@@ -270,6 +284,7 @@ do_processArguments (const int& argc_in,
         converter >> maximumNumberOfConnections_out;
         break;
       }
+#if defined (GUI_SUPPORT)
       case 'g':
       {
         ACE_TCHAR* opt_arg = argument_parser.opt_arg ();
@@ -279,6 +294,7 @@ do_processArguments (const int& argc_in,
           UIFile_out.clear ();
         break;
       }
+#endif // GUI_SUPPORT
       case 'h':
       {
         useThreadPool_out = true;
@@ -477,7 +493,9 @@ do_initializeSignals (bool useReactor_in,
 
 void
 do_work (unsigned int maximumNumberOfConnections_in,
+#if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFile_in,
+#endif // GUI_SUPPORT
          bool useThreadPool_in,
          const ACE_Time_Value& pingInterval_in,
          //unsigned int keepAliveTimeout_in,
@@ -488,7 +506,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
-         struct Server_GTK_CBData& CBData_in,
+#if defined (GUI_SUPPORT)
+         struct Server_UI_CBData& CBData_in,
+#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -503,9 +523,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step0a: initialize configuration
   struct Server_Configuration configuration;
+#if defined (GUI_SUPPORT)
   CBData_in.configuration = &configuration;
+#endif // GUI_SUPPORT
 
-  ClientServer_EventHandler ui_event_handler (&CBData_in);
+  ClientServer_EventHandler ui_event_handler (
+#if defined (GUI_SUPPORT)
+                                              &CBData_in
+#endif // GUI_SUPPORT
+                                             );
   ClientServer_Module_EventHandler_Module event_handler (NULL,
                                                          ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   ClientServer_Module_EventHandler* event_handler_p =
@@ -539,9 +565,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration.streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
   configuration.streamConfiguration.configuration_.module =
-    (!UIDefinitionFile_in.empty () ? &event_handler
-                                   : NULL);
-
+#if defined (GUI_SUPPORT)
+      (!UIDefinitionFile_in.empty () ? &event_handler
+                                     : NULL);
+#else
+      NULL;
+#endif // GUI_SUPPORT
   struct Stream_ModuleConfiguration module_configuration;
   struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.printFinalReport = true;
@@ -551,10 +580,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     statisticReportingInterval_in;
   modulehandler_configuration.streamConfiguration =
     &configuration.streamConfiguration;
+#if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
   modulehandler_configuration.subscribersLock =
     &CBData_in.UIState->subscribersLock;
+#endif // GUI_SUPPORT
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
                                                 configuration.streamConfiguration.allocatorConfiguration_,
@@ -637,7 +668,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
-
       timer_manager_p->stop ();
       return;
     } // end IF
@@ -648,13 +678,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   if (!useUDP_in)
   {
     if (useReactor_in)
-      CBData_in.configuration->listener =
-        SERVER_LISTENER_SINGLETON::instance ();
+      configuration.listener = SERVER_LISTENER_SINGLETON::instance ();
     else
-      CBData_in.configuration->listener =
-        SERVER_ASYNCHLISTENER_SINGLETON::instance ();
-    signal_handler_configuration.listener =
-      CBData_in.configuration->listener;
+      configuration.listener = SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+    signal_handler_configuration.listener = configuration.listener;
   } // end IF
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
@@ -665,7 +692,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
-
     timer_manager_p->stop ();
     return;
   } // end IF
@@ -678,7 +704,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
-
     timer_manager_p->stop ();
     return;
   } // end IF
@@ -744,7 +769,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-
       timer_manager_p->stop ();
       return;
     } // end IF
@@ -770,7 +794,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
     //		} // end lock scope
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
       gtk_manager_p->stop ();
+#else
+      ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
     timer_manager_p->stop ();
     return;
@@ -817,7 +845,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
         gtk_manager_p->stop ();
+#else
+        ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
       timer_manager_p->stop ();
       return;
@@ -842,9 +874,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Server_UDP_AsynchConnector_t udp_asynch_connector;
   Server_UDP_Connector_t udp_connector;
   if (!useUDP_in)
-  {
-    ACE_ASSERT (CBData_in.configuration->listener);
-    if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
+  { ACE_ASSERT (configuration.listener);
+    if (!configuration.listener->initialize (configuration.listenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, returning\n")));
@@ -863,13 +894,17 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
         gtk_manager_p->stop ();
+#else
+        ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
       timer_manager_p->stop ();
       return;
     } // end IF
-    CBData_in.configuration->listener->start ();
-    if (!CBData_in.configuration->listener->isRunning ())
+    configuration.listener->start ();
+    if (!configuration.listener->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start listener (port: %u), returning\n"),
@@ -889,7 +924,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
         gtk_manager_p->stop ();
+#else
+        ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
       timer_manager_p->stop ();
       return;
@@ -898,10 +937,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   else
   {
     if (useReactor_in)
-      CBData_in.configuration->connector = &udp_connector;
+      configuration.connector = &udp_connector;
     else
-      CBData_in.configuration->connector = &udp_asynch_connector;
-    if (!CBData_in.configuration->connector->initialize ((*iterator).second))
+      configuration.connector = &udp_asynch_connector;
+    if (!configuration.connector->initialize ((*iterator).second))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector, returning\n")));
@@ -920,17 +959,20 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
         gtk_manager_p->stop ();
+#else
+        ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
       timer_manager_p->stop ();
       return;
     } // end IF
 
     ACE_HANDLE handle_h =
-      CBData_in.configuration->connector->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress);
-    ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
-      NULL;
-    if (CBData_in.configuration->connector->useReactor ())
+      configuration.connector->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress);
+    ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+    if (configuration.connector->useReactor ())
     {
       if (handle_h != ACE_INVALID_HANDLE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -978,7 +1020,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
         gtk_manager_p->stop ();
+#else
+        ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
       timer_manager_p->stop ();
       return;
@@ -1004,7 +1050,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //		} // end lock scope
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
     gtk_manager_p->stop ();
+#else
+        ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
   timer_manager_p->stop ();
 
@@ -1136,9 +1186,11 @@ ACE_TMAIN (int argc_in,
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+#if defined (GUI_SUPPORT)
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+#endif // GUI_SUPPORT
   bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
                                 (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
@@ -1162,7 +1214,9 @@ ACE_TMAIN (int argc_in,
   if (!do_processArguments (argc_in,
                             argv_in,
                             maximum_number_of_connections,
+#if defined (GUI_SUPPORT)
                             UI_file_path,
+#endif // GUI_SUPPORT
                             use_thread_pool,
                             ping_interval,
                             //keep_alive_timeout,
@@ -1205,8 +1259,8 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path))      ||
-      (use_thread_pool && !use_reactor)                                    ||
+  if ((!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
+      (use_thread_pool && !use_reactor)                                         ||
       (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1226,10 +1280,10 @@ ACE_TMAIN (int argc_in,
     number_of_dispatch_threads = 1;
 
   // step1d: initialize logging and/or tracing
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -1298,20 +1352,20 @@ ACE_TMAIN (int argc_in,
 
   // step1h: initialize UI framework
 #if defined (GUI_SUPPORT)
+  struct Server_UI_CBData ui_cb_data;
 #if defined (GTK_USE)
-    struct Server_GTK_CBData gtk_cb_data;
-  gtk_cb_data.allowUserRuntimeStatistic =
+  ui_cb_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
-  //gtk_cb_data.progressData.state = &gtk_cb_data;
+  //ui_cb_data.progressData.state = &ui_cb_data;
 
     // step1h: init GLIB / G(D|T)K[+] / GNOME ?
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   Server_GtkBuilderDefinition_t ui_definition (argc_in,
                                                argv_in,
-                                               &gtk_cb_data);
+                                               &ui_cb_data);
   if (!UI_file_path.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                               argv_in,
@@ -1411,7 +1465,9 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   // step2: do actual work
   do_work (maximum_number_of_connections,
+#if defined (GUI_SUPPORT)
            UI_file_path,
+#endif // GUI_SUPPORT
            use_thread_pool,
            ping_interval,
            //keep_alive_timeout,
@@ -1422,7 +1478,9 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            number_of_dispatch_threads,
            use_UDP,
-           gtk_cb_data,
+#if defined (GUI_SUPPORT)
+           ui_cb_data,
+#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,

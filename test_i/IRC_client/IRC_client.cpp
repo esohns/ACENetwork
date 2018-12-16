@@ -47,6 +47,8 @@ using namespace std;
 #include "ace/Signal.h"
 #include "ace/Version.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
 #else
@@ -56,6 +58,8 @@ using namespace std;
 //         to undefine...
 #undef timeout
 #endif // ACE_WIN32 || ACE_WIN32
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
@@ -89,7 +93,6 @@ using namespace std;
 
 #include "IRC_client_common_modules.h"
 #include "IRC_client_configuration.h"
-#include "IRC_client_curses.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_messageallocator.h"
 #include "IRC_client_sessionmessage.h"
@@ -97,6 +100,12 @@ using namespace std;
 #include "IRC_client_session_common.h"
 #include "IRC_client_signalhandler.h"
 #include "IRC_client_tools.h"
+
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
+#include "IRC_client_curses.h"
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IRCClientStream");
 
@@ -609,6 +618,8 @@ connection_setup_curses_function (void* arg_in)
     goto clean_up;
   }
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   // step5: run curses event dispatch ?
   if (thread_data_p->cursesState)
   {
@@ -654,6 +665,8 @@ connection_setup_curses_function (void* arg_in)
                   ACE_TEXT ("running curses dispatch loop...DONE\n")));
   } // end IF
   else
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   {
     // step6: clean up
     connection_p->decrease ();
@@ -681,7 +694,6 @@ done:
 
 void
 do_work (struct IRC_Client_Configuration& configuration_in,
-         bool useCursesLibrary_in,
          const ACE_INET_Addr& serverAddress_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
@@ -693,10 +705,12 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
-  // *TODO*: clean this up
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   struct IRC_Client_CursesState curses_state;
-  if (useCursesLibrary_in)
-    configuration_in.cursesState = &curses_state;
+  configuration_in.cursesState = &curses_state;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 
   // step1: initialize IRC handler module
   struct Stream_ModuleConfiguration module_configuration;
@@ -806,7 +820,11 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // step3: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.connector = connector_p;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   signal_handler_configuration.cursesState = &curses_state;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   signal_handler_configuration.peerAddress = serverAddress_in;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
@@ -867,8 +885,11 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   struct IRC_Client_InputThreadData input_thread_data_s;
   input_thread_data_s.configuration = &configuration_in;
   input_thread_data_s.dispatchState = &event_dispatch_state_s;
-  if (useCursesLibrary_in)
-    input_thread_data_s.cursesState = &curses_state;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
+  input_thread_data_s.cursesState = &curses_state;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   input_thread_data_s.moduleHandlerConfiguration =
     const_cast<struct IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second.second));
   ACE_thread_t thread_id = -1;
@@ -1029,9 +1050,13 @@ do_printVersion (const std::string& programName_in)
             << converter.str ()
             << std::endl;
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   std::cout << ACE_TEXT ("curses: ")
             << curses_version ()
             << std::endl;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 }
 
 int
@@ -1382,7 +1407,6 @@ ACE_TMAIN (int argc_in,
   ACE_High_Res_Timer timer;
   timer.start ();
   do_work (configuration,
-           use_curses_library,
            server_address,
            ACE_Time_Value (statistic_reporting_interval, 0),
            signal_set,

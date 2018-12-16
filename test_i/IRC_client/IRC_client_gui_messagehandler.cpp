@@ -27,6 +27,7 @@
 #include "common_file_tools.h"
 
 #if defined (GTK_USE)
+#include "common_ui_gtk_manager_common.h"
 #include "common_ui_gtk_tools.h"
 #endif // GTK_USE
 
@@ -44,12 +45,9 @@
 #include "IRC_client_gui_defines.h"
 
 IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Connection* connection_in,
-                                                              const std::string& timeStamp_in
-#if defined (GTK_USE)
-                                                              ,Common_UI_GTK_State_t* GTKState_in
-#endif // GTK_USE
-                                                             )
- : CBData_ ()
+                                                              const std::string& timeStamp_in,
+                                                              struct IRC_Client_UI_HandlerCBData* CBData_in)
+ : CBData_ (CBData_in)
  , isFirstMemberListMsg_ (true)
  , isPrivateDialog_ (false)
  , messageQueue_ ()
@@ -62,37 +60,37 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
 
   // sanity check(s)
   ACE_ASSERT (connection_in);
-#if defined (GTK_USE)
-  ACE_ASSERT (GTKState_in);
-#endif // GTK_USE
+  ACE_ASSERT (CBData_in);
 
   // initialize cb data
-  //CBData_.acknowledgements = 0;
-  //CBData_.builderLabel ();
-  //CBData_.channelModes = 0;
-  CBData_.connection = connection_in;
-  CBData_.controller = NULL;
-  //CBData_.eventSourceId = 0;
-#if defined (GTK_USE)
-  CBData_.UIState = GTKState_in;
-#endif // GTK_USE
-  CBData_.handler = this;
-  CBData_.id.clear ();
-  //  CBData_.parameters ();
-  CBData_.timeStamp = timeStamp_in;
+  //CBData_->acknowledgements = 0;
+  //CBData_->builderLabel ();
+  //CBData_->channelModes = 0;
+  CBData_->connection = connection_in;
+  CBData_->controller = NULL;
+  //CBData_->eventSourceId = 0;
+  CBData_->handler = this;
+  CBData_->id.clear ();
+  //  CBData_->parameters ();
+  CBData_->timeStamp = timeStamp_in;
 
   // step1: retrieve server log view
 #if defined (GTK_USE)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.UIState->lock);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.UIState->builders.find (CBData_.timeStamp);
+    state_r.builders.find (CBData_->timeStamp);
   // sanity check(s)
-  if (iterator == CBData_.UIState->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, returning\n"),
-                ACE_TEXT (CBData_.timeStamp.c_str ())));
+                ACE_TEXT (CBData_->timeStamp.c_str ())));
     return;
   } // end IF
 
@@ -120,13 +118,13 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
                                                               IRC_IControl* controller_in,
                                                               const std::string& id_in,
                                                               const std::string& UIFileDirectory_in,
-                                                              const std::string& timestamp_in
+                                                              const std::string& timestamp_in,
+                                                              struct IRC_Client_UI_HandlerCBData* CBData_in
 #if defined (GTK_USE)
-                                                              ,Common_UI_GTK_State_t* GTKState_in,
-                                                              bool gdkLockedAccess_in
+                                                              ,bool gdkLockedAccess_in
 #endif // GTK_USE
                                                              )
- : CBData_ ()
+ : CBData_ (CBData_in)
  , isFirstMemberListMsg_ (true)
  , isPrivateDialog_ (false)
  , messageQueue_ ()
@@ -138,9 +136,6 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler"));
 
   // sanity check(s)
-#if defined (GTK_USE)
-  ACE_ASSERT (GTKState_in);
-#endif // GTK_USE
   ACE_ASSERT (connection_in);
   ACE_ASSERT (controller_in);
   ACE_ASSERT (!id_in.empty ());
@@ -151,33 +146,36 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
                 ACE_TEXT (UIFileDirectory_in.c_str ())));
     return;
   } // end IF
+  ACE_ASSERT (CBData_);
 
   // initialize cb data
-  //CBData_.acknowledgements = 0;
-  //CBData_.builderLabel ();
-  //CBData_.channelModes = 0;
-  CBData_.connection = connection_in;
-  CBData_.controller = controller_in;
-  //CBData_.eventSourceId = 0;
-#if defined (GTK_USE)
-  CBData_.UIState = GTKState_in;
-#endif // GTK_USE
-  CBData_.handler = this;
-  CBData_.id = id_in;
-//  CBData_.parameters ();
-  CBData_.timeStamp = timestamp_in;
+  //CBData_->acknowledgements = 0;
+  //CBData_->builderLabel ();
+  //CBData_->channelModes = 0;
+  CBData_->connection = connection_in;
+  CBData_->controller = controller_in;
+  //CBData_->eventSourceId = 0;
+  CBData_->handler = this;
+  CBData_->id = id_in;
+//  CBData_->parameters ();
+  CBData_->timeStamp = timestamp_in;
 
-//  { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.UIState->lock);
+//  { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->UIState->lock);
 #if defined (GTK_USE)
-    // step1: retrieve server log view
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  // step1: retrieve server log view
     Common_UI_GTK_BuildersIterator_t iterator =
-      CBData_.UIState->builders.find (CBData_.timeStamp);
+      state_r.builders.find (CBData_->timeStamp);
     // sanity check(s)
-    if (iterator == CBData_.UIState->builders.end ())
+    if (iterator == state_r.builders.end ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, returning\n"),
-                  ACE_TEXT (CBData_.timeStamp.c_str ())));
+                  ACE_TEXT (CBData_->timeStamp.c_str ())));
       return;
     } // end IF
     if (gdkLockedAccess_in)
@@ -479,37 +477,37 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   // *TODO*: there must be a better way to do this
   //         (see: IRC_client_gui_callbacks.cpp:2236, 2347, ...)
   std::string page_tab_label_string;
-  if (!IRC_Tools::isValidChannelName (CBData_.id))
+  if (!IRC_Tools::isValidChannelName (CBData_->id))
   {
     // --> private conversation window, modify label accordingly
     isPrivateDialog_ = true;
     page_tab_label_string = ACE_TEXT_ALWAYS_CHAR ("<b>");
-    page_tab_label_string += CBData_.id;
+    page_tab_label_string += CBData_->id;
     page_tab_label_string += ACE_TEXT_ALWAYS_CHAR ("</b>");
   } // end IF
   else
-    page_tab_label_string = CBData_.id;
-  CBData_.builderLabel = CBData_.timeStamp;
-  CBData_.builderLabel += ACE_TEXT_ALWAYS_CHAR ("::");
-  CBData_.builderLabel += page_tab_label_string;
+    page_tab_label_string = CBData_->id;
+  CBData_->builderLabel = CBData_->timeStamp;
+  CBData_->builderLabel += ACE_TEXT_ALWAYS_CHAR ("::");
+  CBData_->builderLabel += page_tab_label_string;
 
-  { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.UIState->lock);
-    CBData_.UIState->builders[CBData_.builderLabel] =
+  { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_r.lock);
+    state_r.builders[CBData_->builderLabel] =
         std::make_pair (ui_definition_filename, builder_p);
 
-    CBData_.eventSourceId =
+    CBData_->eventSourceId =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_add_channel_cb,
                        &CBData_,
                        NULL);
-    if (!CBData_.eventSourceId)
+    if (!CBData_->eventSourceId)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_idle_add_full(idle_add_channel_cb): \"%m\", returning\n")));
       return;
     } // end IF
     // *TODO*: this id is never removed from the list again...
-    CBData_.UIState->eventSourceIds.insert (CBData_.eventSourceId);
+    state_r.eventSourceIds.insert (CBData_->eventSourceId);
   } // end lock scope
 #endif // GTK_USE
 }
@@ -520,26 +518,31 @@ IRC_Client_GUI_MessageHandler::~IRC_Client_GUI_MessageHandler ()
 
   // sanity check(s)
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  ACE_ASSERT (CBData_);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-//  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.UIState->lock);
+//  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->UIState->lock);
 
   // remove builder ?
   if (!isServerLog ())
   {
 #if defined (GTK_USE)
     Common_UI_GTK_BuildersIterator_t iterator =
-        CBData_.UIState->builders.find (CBData_.builderLabel);
-    if (iterator != CBData_.UIState->builders.end ())
+        state_r.builders.find (CBData_->builderLabel);
+    if (iterator != state_r.builders.end ())
     {
       g_object_unref (G_OBJECT ((*iterator).second.second));
-      CBData_.UIState->builders.erase (iterator);
+      state_r.builders.erase (iterator);
     } // end IF
     else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("handler (was: \"%s\") builder not found, continuing\n"),
-                  ACE_TEXT (CBData_.id.c_str ())));
+                  ACE_TEXT (CBData_->id.c_str ())));
 #endif // GTK_USE
   } // end IF
 
@@ -552,10 +555,10 @@ IRC_Client_GUI_MessageHandler::~IRC_Client_GUI_MessageHandler ()
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s: removed %u queued event(s)\n"),
                 (isServerLog () ? ACE_TEXT (IRC_CLIENT_GUI_GTK_LABEL_DEF_LOG_TEXT)
-                                : ACE_TEXT (CBData_.id.c_str ())),
+                                : ACE_TEXT (CBData_->id.c_str ())),
                 removed_events));
-//  if (CBData_.eventSourceId)
-//    CBData_.UIState->eventSourceIds.erase (CBData_.eventSourceId);
+//  if (CBData_->eventSourceId)
+//    CBData_->UIState->eventSourceIds.erase (CBData_->eventSourceId);
 #endif // GTK_USE
 }
 
@@ -574,7 +577,15 @@ IRC_Client_GUI_MessageHandler::update ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::update"));
 
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
 #if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   // always insert new text at the END of the buffer
   GtkTextView* text_view_p = NULL;
 
@@ -584,9 +595,9 @@ IRC_Client_GUI_MessageHandler::update ()
   else
   {
     Common_UI_GTK_BuildersIterator_t iterator =
-        CBData_.UIState->builders.find (CBData_.builderLabel);
+        state_r.builders.find (CBData_->builderLabel);
     // sanity check(s)
-    ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+    ACE_ASSERT (iterator != state_r.builders.end ());
 
     text_view_p =
         GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
@@ -684,19 +695,27 @@ IRC_Client_GUI_MessageHandler::getTopLevelPageChild (bool lockedAccess_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::getTopLevelPageChild"));
 
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
   int result = -1;
   GtkWidget* widget_p = NULL;
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   if (lockedAccess_in)
   {
-    result = CBData_.UIState->lock.acquire ();
+    result = state_r.lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
 
   // *NOTE*: the server log handler doesn't have a builder
-  if (CBData_.id.empty ())
+  if (CBData_->id.empty ())
   {
     // sanity check(s)
     ACE_ASSERT (view_);
@@ -706,13 +725,10 @@ IRC_Client_GUI_MessageHandler::getTopLevelPageChild (bool lockedAccess_in) const
   } // end IF
   else
   {
-    // sanity check(s)
-    ACE_ASSERT (CBData_.UIState);
-
     Common_UI_GTK_BuildersIterator_t iterator =
-      CBData_.UIState->builders.find (CBData_.builderLabel);
+      state_r.builders.find (CBData_->builderLabel);
     // sanity check(s)
-    ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+    ACE_ASSERT (iterator != state_r.builders.end ());
 
     widget_p =
         GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
@@ -722,7 +738,7 @@ IRC_Client_GUI_MessageHandler::getTopLevelPageChild (bool lockedAccess_in) const
 
   if (lockedAccess_in)
   {
-    result = CBData_.UIState->lock.release ();
+    result = state_r.lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -738,9 +754,9 @@ IRC_Client_GUI_MessageHandler::getTopLevelPageChild (bool lockedAccess_in) const
 //   NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_MessageHandler::getChannel"));
 //
 //   // sanity check: 'this' might be a private message handler !...
-//   ACE_ASSERT(RPG_Net_Protocol_Tools::isValidIRCChannelName(CBData_.id));
+//   ACE_ASSERT(RPG_Net_Protocol_Tools::isValidIRCChannelName(CBData_->id));
 //
-//   return CBData_.id;
+//   return CBData_->id;
 // }
 
 void
@@ -749,17 +765,21 @@ IRC_Client_GUI_MessageHandler::setTopic (const std::string& topic_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::setTopic"));
 
   // sanity check(s)
+  ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.UIState->lock);
+  //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->UIState->lock);
 
 #if defined (GTK_USE)
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.UIState->builders.find (CBData_.builderLabel);
+    state_r.builders.find (CBData_->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   gdk_threads_enter ();
 
@@ -786,31 +806,36 @@ IRC_Client_GUI_MessageHandler::setModes (const std::string& modes_in,
 
   // sanity check(s)
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  ACE_ASSERT (CBData_);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.UIState->lock);
+  //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->UIState->lock);
   int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.acquire ();
+    result = state_r.lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
 #endif // GTK_USE
   } // end IF
 
-  CBData_.acknowledgements += IRC_Tools::merge (modes_in,
-                                                CBData_.channelModes);
+  CBData_->acknowledgements += IRC_Tools::merge (modes_in,
+                                                 CBData_->channelModes);
 #if defined (GTK_USE)
-  CBData_.eventSourceId =
+  CBData_->eventSourceId =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_update_channel_modes_cb,
                        &CBData_,
                        NULL);
-  if (CBData_.eventSourceId)
-    CBData_.UIState->eventSourceIds.insert (CBData_.eventSourceId);
+  if (CBData_->eventSourceId)
+    state_r.eventSourceIds.insert (CBData_->eventSourceId);
   else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to g_idle_add_full(idle_update_channel_modes_cb): \"%m\", continuing\n")));
@@ -819,7 +844,7 @@ IRC_Client_GUI_MessageHandler::setModes (const std::string& modes_in,
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.release ();
+    result = state_r.lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -833,16 +858,20 @@ IRC_Client_GUI_MessageHandler::clearMembers (bool lockedAccess_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::clearMembers"));
 
   // sanity check(s)
+  ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-//  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.UIState->lock);
+//  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->UIState->lock);
   int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.acquire ();
+    result = state_r.lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -851,9 +880,9 @@ IRC_Client_GUI_MessageHandler::clearMembers (bool lockedAccess_in)
 
 #if defined (GTK_USE)
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.UIState->builders.find (CBData_.builderLabel);
+    state_r.builders.find (CBData_->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   gdk_threads_enter ();
 
@@ -872,7 +901,7 @@ IRC_Client_GUI_MessageHandler::clearMembers (bool lockedAccess_in)
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.release ();
+    result = state_r.lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -886,15 +915,16 @@ IRC_Client_GUI_MessageHandler::update (const std::string& currentNickName_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::update"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.connection);
+  ACE_ASSERT (CBData_);
+  ACE_ASSERT (CBData_->connection);
 
   std::string new_nick_name;//, channel;
-  //CBData_.connection->current (new_nick_name,
+  //CBData_->connection->current (new_nick_name,
   //                             channel);
   const struct IRC_Client_SessionState& connection_state_r =
-    CBData_.connection->state ();
+    CBData_->connection->state ();
   new_nick_name = connection_state_r.nickName;
-  if (CBData_.channelModes.test (CHANNELMODE_OPERATOR))
+  if (CBData_->channelModes.test (CHANNELMODE_OPERATOR))
     new_nick_name.insert (new_nick_name.begin (), '@');
 
   remove (currentNickName_in, true);
@@ -908,15 +938,19 @@ IRC_Client_GUI_MessageHandler::add (const std::string& nickname_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::add"));
 
   // sanity check(s)
+  ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
   int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.acquire ();
+    result = state_r.lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -925,9 +959,9 @@ IRC_Client_GUI_MessageHandler::add (const std::string& nickname_in,
 
 #if defined (GTK_USE)
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.UIState->builders.find (CBData_.builderLabel);
+    state_r.builders.find (CBData_->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   gdk_threads_enter ();
 
@@ -964,7 +998,7 @@ IRC_Client_GUI_MessageHandler::add (const std::string& nickname_in,
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.release ();
+    result = state_r.lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -979,30 +1013,36 @@ IRC_Client_GUI_MessageHandler::remove (const std::string& nick_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::remove"));
 
   // sanity check(s)
+  ACE_ASSERT (CBData_);
+
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  int result = -1;
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.acquire ();
+    result = state_r.lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
 #endif // GTK_USE
   } // end IF
 
-  int result = -1;
   bool found_row = false;
 #if defined (GTK_USE)
   GtkTreeIter tree_iter;
   gchar* string_2 = NULL;
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.UIState->builders.find (CBData_.builderLabel);
+    state_r.builders.find (CBData_->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   gdk_threads_enter ();
 
@@ -1075,7 +1115,7 @@ clean_up:
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.release ();
+    result = state_r.lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -1090,15 +1130,19 @@ IRC_Client_GUI_MessageHandler::members (const string_list_t& list_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::members"));
 
   // sanity check(s)
+  ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
   int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.acquire ();
+    result = state_r.lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -1107,9 +1151,9 @@ IRC_Client_GUI_MessageHandler::members (const string_list_t& list_in,
 
 #if defined (GTK_USE)
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.UIState->builders.find (CBData_.builderLabel);
+    state_r.builders.find (CBData_->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   if (isFirstMemberListMsg_)
   {
@@ -1156,7 +1200,7 @@ IRC_Client_GUI_MessageHandler::members (const string_list_t& list_in,
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.release ();
+    result = state_r.lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -1170,15 +1214,19 @@ IRC_Client_GUI_MessageHandler::endMembers (bool lockedAccess_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::endMembers"));
 
   // sanity check(s)
+  ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
-  ACE_ASSERT (CBData_.UIState);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
   int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.acquire ();
+    result = state_r.lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -1187,9 +1235,9 @@ IRC_Client_GUI_MessageHandler::endMembers (bool lockedAccess_in)
 
 #if defined (GTK_USE)
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.UIState->builders.find (CBData_.builderLabel);
+    state_r.builders.find (CBData_->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_.UIState->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   isFirstMemberListMsg_ = true;
 
@@ -1208,7 +1256,7 @@ IRC_Client_GUI_MessageHandler::endMembers (bool lockedAccess_in)
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
-    result = CBData_.UIState->lock.release ();
+    result = state_r.lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));

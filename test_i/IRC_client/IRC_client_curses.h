@@ -26,16 +26,16 @@
 
 #include "ace/Synch_Traits.h"
 
-#if defined (_MSC_VER)
-#include <curses.h>
+#if defined (ACE_WIN32) || defined (ACE_WIN32)
+#include "curses.h"
 #else
-#include <ncurses.h>
+#include "ncurses.h"
 // *NOTE*: the ncurses "timeout" macros conflicts with
 //         ACE_Synch_Options::timeout. Since not currently used, it's safe to
 //         undefine
 #undef timeout
-#endif
-#include <panel.h>
+#endif // ACE_WIN32 || ACE_WIN32
+#include "panel.h"
 
 #include "IRC_client_common.h"
 

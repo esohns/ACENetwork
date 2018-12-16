@@ -18,7 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#if defined (SSL_SUPPORT)
 #include "openssl/ssl.h"
+#endif // SSL_SUPPORT
 
 #include "ace/Event_Handler.h"
 #include "ace/Log_Msg.h"
@@ -322,6 +324,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 
 //////////////////////////////////////////
 
+#if defined (SSL_SUPPORT)
 template <ACE_SYNCH_DECL,
           typename ConfigurationType>
 Net_TCPSocketHandler_T<ACE_SYNCH_USE,
@@ -605,7 +608,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %d) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
       break;
     }
@@ -618,3 +621,4 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 
   return result;
 }
+#endif // SSL_SUPPORT

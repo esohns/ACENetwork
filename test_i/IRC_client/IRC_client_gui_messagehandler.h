@@ -32,9 +32,7 @@
 
 #include "common_iget.h"
 
-#if defined (GTK_USE)
 #include "common_ui_common.h"
-#endif // GTK_USE
 
 #include "IRC_client_common.h"
 #include "IRC_client_stream_common.h"
@@ -49,36 +47,33 @@ class IRC_Client_GUI_MessageHandler
 {
  public:
   // ctor for default handler (== server log)
-  IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Connection*,  // connection handle
-                                 const std::string&           // connection timestamp
-                                                              // *NOTE*: used to lookup the corresponding builder
-#if defined (GTK_USE)
-                                 ,Common_UI_GTK_State_t*      // GTK state handle
-#endif // GTK_USE
-                                );
+  IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Connection*,           // connection handle
+                                 const std::string&,                   // connection timestamp
+                                                                       // *NOTE*: used to lookup the corresponding builder
+                                 struct IRC_Client_UI_HandlerCBData*); // UI callback data handle
   // ctor for regular channel handler
   // *WARNING*: must be called with
-  //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
-  IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Connection*, // connection handle
-                                 IRC_IControl*,              // controller handle
-                                 const std::string&,         // identifier (channel/nick)
-                                 const std::string&,         // UI (glade) file directory
-                                 const std::string&          // connection timestamp
-                                                             // *NOTE*: used to lookup the corresponding builder
+  //            IRC_Client_UI_CBData::Common_UI_GTKState::lock held !
+  IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Connection*,         // connection handle
+                                 IRC_IControl*,                      // controller handle
+                                 const std::string&,                 // identifier (channel/nick)
+                                 const std::string&,                 // UI (glade) file directory
+                                 const std::string&,                 // connection timestamp
+                                                                     // *NOTE*: used to lookup the corresponding builder
+                                 struct IRC_Client_UI_HandlerCBData* // UI callback data handle
 #if defined (GTK_USE)
-                                 ,Common_UI_GTK_State_t*,    // GTK state handle
-                                 bool = true                 // locked access (GDK) ?
+                                 ,bool = true                        // locked access (GDK) ?
 #endif // GTK_USE
                                 );
   // *WARNING*: must be called with
-  //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
+  //            IRC_Client_UI_CBData::Common_UI_GTKState::lock held !
   virtual ~IRC_Client_GUI_MessageHandler ();
 
   // implement Common_IGet_T
-  inline virtual const IRC_Client_UI_HandlerCBData& getR () const { return CBData_; }
+  inline virtual const IRC_Client_UI_HandlerCBData& getR () const { ACE_ASSERT (CBData_); return *CBData_; }
 
   inline bool isPrivateDialog () const { return isPrivateDialog_; }
-  inline bool isServerLog () const { return CBData_.id.empty (); }
+  inline bool isServerLog () const { ACE_ASSERT (CBData_); return CBData_->id.empty (); }
 
   // *WARNING*: to be called from gtk_main context ONLY (trigger with
   //            g_idle_add())
@@ -137,13 +132,13 @@ class IRC_Client_GUI_MessageHandler
   // helper methods
   void clearMembers (bool = true); // locked access ?
 
-  struct IRC_Client_UI_HandlerCBData CBData_;
-  bool                               isFirstMemberListMsg_;
-  bool                               isPrivateDialog_;
-  IRC_Client_MessageQueue_t          messageQueue_;
-  ACE_SYNCH_MUTEX                    messageQueueLock_;
+  struct IRC_Client_UI_HandlerCBData* CBData_;
+  bool                                isFirstMemberListMsg_;
+  bool                                isPrivateDialog_;
+  IRC_Client_MessageQueue_t           messageQueue_;
+  ACE_SYNCH_MUTEX                     messageQueueLock_;
 #if defined (GTK_USE)
-  GtkTextView*                       view_; // --> server log
+  GtkTextView*                        view_; // --> server log
 #endif // GTK_USE
 };
 

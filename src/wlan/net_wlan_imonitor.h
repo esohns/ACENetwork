@@ -28,7 +28,7 @@
 #include <guiddef.h>
 #include <wlanapi.h>
 #else
-#include <net/ethernet.h>
+#include "net/ethernet.h"
 
 #if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"

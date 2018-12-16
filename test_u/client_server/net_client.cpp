@@ -47,7 +47,7 @@
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "common_file_tools.h"
+#include "common_file_tools.h"
 #include "common_tools.h"
 
 #include "common_logger.h"
@@ -82,7 +82,11 @@
 #include "net_iconnector.h"
 #include "net_macros.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
@@ -138,6 +142,7 @@ do_printUsage (const std::string& programName_in)
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+#if defined (GUI_SUPPORT)
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -145,6 +150,7 @@ do_printUsage (const std::string& programName_in)
             << UI_file_path
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\" --> no GUI}")
             << std::endl;
+#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [\"")
             << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -200,7 +206,9 @@ do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      bool& alternatingMode_out,
                      unsigned int& maximumNumberOfConnections_out,
+#if defined (GUI_SUPPORT)
                      std::string& UIFile_out,
+#endif // GUI_SUPPORT
                      bool& useThreadPool_out,
                      unsigned int& connectionInterval_out,
                      bool& logToFile_out,
@@ -225,9 +233,11 @@ do_processArguments (int argc_in,
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+#if defined (GUI_SUPPORT)
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+#endif // GUI_SUPPORT
   useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   connectionInterval_out = NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   logToFile_out = false;
@@ -245,7 +255,11 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
+#if defined (GUI_SUPPORT)
                               ACE_TEXT ("ac:g::hi:ln:p:rs:tuvx:y"),
+#else
+                              ACE_TEXT ("ac:hi:ln:p:rs:tuvx:y"),
+#endif // GUI_SUPPORT
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -270,6 +284,7 @@ do_processArguments (int argc_in,
         converter >> maximumNumberOfConnections_out;
         break;
       }
+#if defined (GUI_SUPPORT)
       case 'g':
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
@@ -279,6 +294,7 @@ do_processArguments (int argc_in,
           UIFile_out.clear ();
         break;
       }
+#endif // GUI_SUPPORT
       case 'h':
       {
         useThreadPool_out = true;
@@ -463,7 +479,9 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 void
 do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
          unsigned int maxNumConnections_in,
+#if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFile_in,
+#endif // GUI_SUPPORT
          bool useThreadPool_in,
          unsigned int connectionInterval_in,
          const std::string& serverHostname_in,
@@ -473,7 +491,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
-         struct Client_GTK_CBData& CBData_in,
+#if defined (GUI_SUPPORT)
+         struct Client_UI_CBData& CBData_in,
+#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -488,9 +508,15 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // step0a: initialize configuration
   struct Client_Configuration configuration;
+#if defined (GUI_SUPPORT)
   CBData_in.configuration = &configuration;
+#endif // GUI_SUPPORT
 
-  ClientServer_EventHandler ui_event_handler (&CBData_in);
+  ClientServer_EventHandler ui_event_handler (
+#if defined (GUI_SUPPORT)
+                                              &CBData_in
+#endif // GUI_SUPPORT
+                                             );
   ClientServer_Module_EventHandler_Module event_handler (NULL,
                                                          ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   ClientServer_Module_EventHandler* event_handler_p =
@@ -527,18 +553,24 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   modulehandler_configuration.streamConfiguration =
     &configuration.streamConfiguration;
   modulehandler_configuration.printFinalReport = true;
+#if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
   modulehandler_configuration.subscribersLock =
     &CBData_in.UIState->subscribersLock;
+#endif // GUI_SUPPORT
 
   configuration.streamConfiguration.configuration_.cloneModule =
     !(UIDefinitionFile_in.empty ());
   configuration.streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
   configuration.streamConfiguration.configuration_.module =
-    (!UIDefinitionFile_in.empty () ? &event_handler
-                                   : NULL);
+#if defined (GUI_SUPPORT)
+      (!UIDefinitionFile_in.empty () ? &event_handler
+                                     : NULL);
+#else
+      NULL;
+#endif // GUI_SUPPORT
   configuration.streamConfiguration.configuration_.printFinalReport = true;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.configuration_.serializeOutput =
@@ -674,7 +706,10 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                 ACE_TEXT ("failed to Common_Tools::initializeTimers(), returning\n")));
     return;
   } // end IF
-  if (UIDefinitionFile_in.empty () &&
+  if (
+#if defined (GUI_SUPPORT)
+      UIDefinitionFile_in.empty () &&
+#endif // GUI_SUPPORT
       (connectionInterval_in > 0))
   {
     // schedule action interval timer
@@ -691,10 +726,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", returning\n")));
-
-      // clean up
       Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
-
       return;
     } // end IF
   } // end IF
@@ -710,10 +742,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
-
-    // clean up
     Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
-
     return;
   } // end IF
   if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -725,10 +754,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
-
-    // clean up
     Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
-
     return;
   } // end IF
 
@@ -736,10 +762,14 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
   // [- signal timer expiration to perform server queries] (see above)
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   // step1a: start GTK event loop ?
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
+#endif // GTK_USE
   if (!UIDefinitionFile_in.empty ())
   {
+#if defined (GTK_USE)
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
@@ -765,6 +795,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
       return;
     } // end IF
+#endif // GTK_USE
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     HWND window_p = GetConsoleWindow ();
@@ -772,17 +803,17 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-
-      // clean up
       Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+#if defined (GTK_USE)
       gtk_manager_p->stop (true,
                            true);
-
+#endif // GTK_USE
       return;
     } // end IF
     BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
+#endif // GUI_SUPPORT
 
   // step1b: initialize worker(s)
   if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
@@ -800,15 +831,24 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //				g_source_remove(*iterator);
 //		} // end lock scope
     Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+#if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
       gtk_manager_p->stop (true,
                            true);
-
+#else
+      ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
     return;
   } // end IF
 
   // step1c: connect immediately ?
-  if (UIDefinitionFile_in.empty () && !connectionInterval_in)
+  if (
+#if defined (GUI_SUPPORT)
+      UIDefinitionFile_in.empty () &&
+#endif // GUI_SUPPORT
+      !connectionInterval_in)
   {
     ACE_HANDLE handle_h = connector_p->connect (peer_address);
     if (handle_h == ACE_INVALID_HANDLE)
@@ -831,22 +871,26 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       //				g_source_remove(*iterator);
       //		} // end lock scope
       Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+#if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
         gtk_manager_p->stop (true,
                              true);
-
+#else
+        ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
       return;
     } // end IF
     ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
       NULL;
     if (useReactor_in)
     {
+      iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_p =
-        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+          connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
 #else
-      iconnection_p =
-        iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+          iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
 #endif
     } // end IF
     else
@@ -885,10 +929,15 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       //				g_source_remove(*iterator);
       //		} // end lock scope
       Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+#if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
         gtk_manager_p->stop (true,
                              true);
-
+#else
+        ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
       return;
     } // end IF
     iconnection_p->decrease ();
@@ -902,8 +951,14 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                                : event_dispatch_state_s.proactorGroupId));
 
   // step3: clean up
+#if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
     gtk_manager_p->wait ();
+#else
+    ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   //		{ // synch access
   //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1063,9 +1118,11 @@ ACE_TMAIN (int argc_in,
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+#if defined (GUI_SUPPORT)
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+#endif // GUI_SUPPORT
   bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   unsigned int connection_interval =
    NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
@@ -1092,7 +1149,9 @@ ACE_TMAIN (int argc_in,
                             argv_in,
                             alternating_mode,
                             maximum_number_of_connections,
+#if defined (GUI_SUPPORT)
                             UI_file_path,
+#endif // GUI_SUPPORT
                             use_thread_pool,
                             connection_interval,
                             log_to_file,
@@ -1127,10 +1186,13 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path))       ||
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool) ||
-      (run_stress_test && ((ping_interval != ACE_Time_Value::zero) ||
-                           (connection_interval != 0)))                     ||
+  if (
+#if defined (GUI_SUPPORT)
+      (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
+#endif // GUI_SUPPORT
+      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)     ||
+      (run_stress_test && ((ping_interval != ACE_Time_Value::zero)              ||
+                           (connection_interval != 0)))                         ||
       (alternating_mode && run_stress_test))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1146,8 +1208,8 @@ ACE_TMAIN (int argc_in,
 #endif
     return EXIT_FAILURE;
   } // end IF
-  if (!UI_file_path.empty () &&
-      !Common_File_Tools::isReadable (UI_file_path))
+#if defined (GUI_SUPPORT)
+  if (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid UI definition file (was: %s), aborting\n"),
@@ -1162,6 +1224,7 @@ ACE_TMAIN (int argc_in,
 #endif
     return EXIT_FAILURE;
   } // end IF
+#endif // GUI_SUPPORT
   if (number_of_dispatch_threads == 0)
     number_of_dispatch_threads = 1;
   if (alternating_mode)
@@ -1170,17 +1233,14 @@ ACE_TMAIN (int argc_in,
     action_mode = Client_TimeoutHandler::ACTION_STRESS;
 
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-  struct Client_GTK_CBData ui_cb_data;
-  //ui_cb_data.progressData.state = &ui_cb_data;
-#endif // GTK_USE
+  struct Client_UI_CBData ui_cb_data;
 #endif // GUI_SUPPORT
 
   // step1d: initialize logging and/or tracing
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -1356,7 +1416,9 @@ ACE_TMAIN (int argc_in,
   // step2: do actual work
   do_work (action_mode,
            maximum_number_of_connections,
+#if defined (GUI_SUPPORT)
            UI_file_path,
+#endif // GUI_SUPPORT
            use_thread_pool,
            connection_interval,
            server_hostname,
@@ -1366,7 +1428,9 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            number_of_dispatch_threads,
            use_UDP,
+#if defined (GUI_SUPPORT)
            ui_cb_data,
+#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,

@@ -50,13 +50,13 @@ class IRC_Client_GUI_Connection
   friend class IRC_Client_GUI_MessageHandler;
 
  public:
-  IRC_Client_GUI_Connection (IRC_Client_GUI_Connections_t*, // connections handle
+  IRC_Client_GUI_Connection (IRC_Client_GUI_Connections_t*,       // connections handle
+                             struct IRC_Client_UI_HandlerCBData*, // UI callback data handle
 #if defined (GTK_USE)
-                             Common_UI_GTK_State_t&,        // GTK state handle
-                             guint,                         // (statusbar) context id
+                             guint,                               // (statusbar) context id
 #endif // GTK_USE
-                             const std::string&,            // (server tab) label
-                             const std::string&);           // UI (glade) file directory
+                             const std::string&,                  // (server tab) label
+                             const std::string&);                 // UI (glade) file directory
   // *WARNING*: must be called with
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   virtual ~IRC_Client_GUI_Connection ();

@@ -140,7 +140,7 @@ struct Server_UI_CBData
  : Test_U_wxWidgets_CBData
 #endif
 {
-  Server_GTK_CBData ()
+  Server_UI_CBData ()
 #if defined (GTK_USE)
    : Test_U_GTK_CBData ()
 #elif defined (WXWIDGETS_USE)

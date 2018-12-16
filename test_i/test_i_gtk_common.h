@@ -61,16 +61,16 @@ struct Test_I_GTK_CBData
 //   , cursorType (GDK_LAST_CURSOR)
    , progressData ()
    , progressEventSourceId (0)
-   , UIState ()
+   , UIState (NULL)
   {
-    progressData.state = &UIState;
+    progressData.state = UIState;
   }
 
   struct Test_I_Configuration*   configuration;
 //  GdkCursorType                      cursorType;
   struct Test_I_GTK_ProgressData progressData;
   guint                          progressEventSourceId;
-  Common_UI_GTK_State_t          UIState;
+  Common_UI_GTK_State_t*         UIState;
 };
 
 struct Test_I_ThreadData

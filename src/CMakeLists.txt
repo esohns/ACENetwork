@@ -7,6 +7,7 @@
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
  find_package (Threads)
 endif (UNIX)
+# *TODO*: automatize support option support
 option (SSL_SUPPORT "enable SSL support" OFF)
 
 set (ACE_LIB_FILE libACE.so)

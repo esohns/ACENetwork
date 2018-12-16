@@ -38,24 +38,19 @@
 
 #include "net_macros.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-#include "test_u_gtk_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-
+#include "test_u_common.h"
 #include "test_u_stream.h"
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+#include "test_u_gtk_common.h"
+
 #include "test_u_callbacks.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
 ClientServer_EventHandler::ClientServer_EventHandler (
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-                                                      struct Test_U_GTK_CBData* CBData_in
-#endif // GTK_USE
+                                                      struct Test_U_UI_CBData* CBData_in
 #endif // GUI_SUPPORT
                                                      )
 #if defined (GUI_SUPPORT)
@@ -77,15 +72,19 @@ ClientServer_EventHandler::start (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
 #if defined (GUI_SUPPORT)
-  if (!CBData_)
-    return;
-  ACE_ASSERT (CBData_->UIState);
+  ACE_ASSERT (CBData_);
+#if defined (GTK_USE)
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
-    CBData_->UIState->eventStack.push (COMMON_UI_EVENT_CONNECT);
+#if defined (GTK_USE)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_CONNECT);
   } // end lock scope
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 }
 
@@ -113,9 +112,11 @@ ClientServer_EventHandler::end (Stream_SessionId_t sessionId_in)
 
   // sanity check(s)
 #if defined (GUI_SUPPORT)
-  if (!CBData_)
-    return;
-  ACE_ASSERT (CBData_->UIState);
+  ACE_ASSERT (CBData_);
+#if defined (GTK_USE)
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -130,9 +131,11 @@ ClientServer_EventHandler::end (Stream_SessionId_t sessionId_in)
   } // end IF
 #endif // GTK_USE
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
-    CBData_->UIState->eventSourceIds.insert (event_source_id);
+#if defined (GTK_USE)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 }
 
@@ -147,15 +150,19 @@ ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
 #if defined (GUI_SUPPORT)
-  if (!CBData_)
-    return;
-  ACE_ASSERT (CBData_->UIState);
+  ACE_ASSERT (CBData_);
+#if defined (GTK_USE)
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
-    CBData_->UIState->eventStack.push (COMMON_UI_EVENT_DATA);
+#if defined (GTK_USE)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 }
 
@@ -169,21 +176,29 @@ ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
 #if defined (GUI_SUPPORT)
-  if (!CBData_)
-    return;
-  ACE_ASSERT (CBData_->UIState);
+  ACE_ASSERT (CBData_);
+#if defined (GTK_USE)
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
+#endif // GUI_SUPPORT
   switch (sessionMessage_in.type ())
   {
     //case STREAM_SESSION_MESSAGE_CONNECT:
     //  return;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
+#if defined (GUI_SUPPORT)
       event_e = COMMON_UI_EVENT_DISCONNECT;
+#endif // GUI_SUPPORT
       break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
+#if defined (GUI_SUPPORT)
       event_e = COMMON_UI_EVENT_STATISTIC;
+#endif // GUI_SUPPORT
       break;
     default:
     {
@@ -195,8 +210,10 @@ ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
   } // end SWITCH
 
 #if defined (GUI_SUPPORT)
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
-    CBData_->UIState->eventStack.push (event_e);
+#if defined (GTK_USE)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (event_e);
   } // end lock scope
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 }

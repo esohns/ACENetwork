@@ -26,8 +26,8 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
-#include <sys/capability.h>
-#include <linux/capability.h>
+#include "sys/capability.h"
+#include "linux/capability.h"
 #endif // ACE_WIN32 || ACE_WIN32
 
 #include "ace/Get_Opt.h"
@@ -87,7 +87,11 @@
 
 #include "dhcp_defines.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
@@ -1271,13 +1275,15 @@ allocate:
   {
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
-
-    CBData_in.UIState->eventHooks.finiHook = idle_finalize_UI_cb;
-    CBData_in.UIState->eventHooks.initHook = idle_initialize_UI_cb;
+    Common_UI_GTK_State_t& state_r =
+        const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    state_r.eventHooks.finiHook = idle_finalize_UI_cb;
+    state_r.eventHooks.initHook = idle_initialize_UI_cb;
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
-    CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
+    state_r.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
         std::make_pair (UIDefinitionFileName_in, static_cast<GtkBuilder*> (NULL));
+    CBData_in.UIState = &state_r;
     //CBData_in.userData = &CBData_in;
 
     //CBData_in.stream = stream_p;
