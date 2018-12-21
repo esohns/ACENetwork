@@ -1075,7 +1075,7 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_ASSERT (inherited::socketHandle_);
   ACE_ASSERT (handle_in == nl_socket_get_fd (inherited::socketHandle_));
 
-  int result = -1;
+//  int result = -1;
   ssize_t bytes_received = -1;
   ACE_Message_Block* message_block_p =
       allocateMessage (inherited::configuration_->defaultBufferSize);

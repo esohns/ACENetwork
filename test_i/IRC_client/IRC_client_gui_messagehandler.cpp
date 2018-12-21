@@ -764,6 +764,8 @@ IRC_Client_GUI_MessageHandler::setTopic (const std::string& topic_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::setTopic"));
 
+  ACE_UNUSED_ARG (topic_in);
+
   // sanity check(s)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
@@ -815,7 +817,7 @@ IRC_Client_GUI_MessageHandler::setModes (const std::string& modes_in,
 #endif // GTK_USE
 
   //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->UIState->lock);
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -867,7 +869,7 @@ IRC_Client_GUI_MessageHandler::clearMembers (bool lockedAccess_in)
 #endif // GTK_USE
 
 //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->UIState->lock);
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -937,6 +939,8 @@ IRC_Client_GUI_MessageHandler::add (const std::string& nickname_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::add"));
 
+  ACE_UNUSED_ARG (nickname_in);
+
   // sanity check(s)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
@@ -946,7 +950,7 @@ IRC_Client_GUI_MessageHandler::add (const std::string& nickname_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -1012,6 +1016,8 @@ IRC_Client_GUI_MessageHandler::remove (const std::string& nick_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::remove"));
 
+  ACE_UNUSED_ARG (nick_in);
+
   // sanity check(s)
   ACE_ASSERT (CBData_);
 
@@ -1034,7 +1040,7 @@ IRC_Client_GUI_MessageHandler::remove (const std::string& nick_in,
 #endif // GTK_USE
   } // end IF
 
-  bool found_row = false;
+//  bool found_row = false;
 #if defined (GTK_USE)
   GtkTreeIter tree_iter;
   gchar* string_2 = NULL;
@@ -1111,7 +1117,9 @@ IRC_Client_GUI_MessageHandler::remove (const std::string& nick_in,
   gdk_threads_leave ();
 #endif // GTK_USE
 
+#if defined (GTK_USE)
 clean_up:
+#endif // GTK_USE
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -1129,6 +1137,8 @@ IRC_Client_GUI_MessageHandler::members (const string_list_t& list_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::members"));
 
+  ACE_UNUSED_ARG (list_in);
+
   // sanity check(s)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
@@ -1138,7 +1148,7 @@ IRC_Client_GUI_MessageHandler::members (const string_list_t& list_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -1222,7 +1232,7 @@ IRC_Client_GUI_MessageHandler::endMembers (bool lockedAccess_in)
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)

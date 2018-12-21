@@ -1598,10 +1598,10 @@ ACE_TMAIN (int argc_in,
     number_of_dispatch_threads = 1;
 
   // step1d: initialize logging and/or tracing
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);

@@ -572,7 +572,7 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -584,7 +584,7 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
   } // end IF
 
   // clean up message handlers
-  const IRC_Client_UI_HandlerCBData* cb_data_p = NULL;
+//  const IRC_Client_UI_HandlerCBData* cb_data_p = NULL;
 #if defined (GTK_USE)
   Common_UI_GTK_BuildersIterator_t iterator;
   GtkButton* button_p = NULL;
@@ -1091,12 +1091,16 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionId_in,
           std::string nickname = *iterator_2;
           iterator_2++;
           bool away = ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("G"), 0) == 0);
+          ACE_UNUSED_ARG (away);
           bool is_IRCoperator =
             ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("*"), 1) == 1);
+          ACE_UNUSED_ARG (is_IRCoperator);
           bool is_operator =
             ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("@"), 2) != std::string::npos);
+          ACE_UNUSED_ARG (is_operator);
           bool is_voiced =
             ((*iterator_2).find (ACE_TEXT_ALWAYS_CHAR ("+"), 2) != std::string::npos);
+          ACE_UNUSED_ARG (is_voiced);
           unsigned int hop_count = 0;
           std::string real_name;
           std::stringstream converter;
@@ -1711,6 +1715,8 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::getActiveHandler"));
 
+  ACE_UNUSED_ARG (gdkLockedAccess_in);
+
   IRC_Client_GUI_MessageHandler* return_value = NULL;
 
 #if defined (GTK_USE)
@@ -1720,7 +1726,7 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -1802,7 +1808,9 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
     gdk_threads_leave ();
 #endif // GTK_USE
 
+#if defined (GTK_USE)
 clean_up:
+#endif // GTK_USE
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -1928,6 +1936,8 @@ IRC_Client_GUI_Connection::error (const IRC_Record& message_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::error"));
 
+  ACE_UNUSED_ARG (message_in);
+
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -1935,7 +1945,7 @@ IRC_Client_GUI_Connection::error (const IRC_Record& message_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -2077,6 +2087,8 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::createMessageHandler"));
 
+  ACE_UNUSED_ARG (gdkLockedAccess_in);
+
   // sanity check(s)
   ACE_ASSERT (CBData_.connections);
 
@@ -2188,7 +2200,7 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-  int result = -1;
+//  int result = -1;
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)

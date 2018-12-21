@@ -126,7 +126,7 @@
 #define NET_WLAN_DBUS_WPASUPPLICANT_INTERFACE                     "fi.w1.wpa_supplicant1"
 #define NET_WLAN_DBUS_WPASUPPLICANT_INTERFACE_INTERFACE           "fi.w1.wpa_supplicant1.Interface"
 
-#define NET_WLAN_DBUS_WPASUPPLICANT_OBJECT_PATH                  "/fi/w1/wpa_supplicant1"
+#define NET_WLAN_DBUS_WPASUPPLICANT_OBJECT_PATH                   "/fi/w1/wpa_supplicant1"
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 

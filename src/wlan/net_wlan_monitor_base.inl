@@ -23,11 +23,11 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#include <net/ethernet.h>
+#include "net/ethernet.h"
 
 #if defined (NL80211_SUPPORT)
-#include <linux/netlink.h>
-#include <linux/nl80211.h>
+#include "linux/netlink.h"
+#include "linux/nl80211.h"
 
 #include "netlink/handlers.h"
 #include "netlink/netlink.h"
@@ -2457,7 +2457,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-continue_:
+//continue_:
   ;
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG
