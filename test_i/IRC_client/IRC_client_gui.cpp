@@ -1496,7 +1496,7 @@ ACE_TMAIN (int argc_in,
 
 #if defined (GTK_USE)
   ui_cb_data.progressData.state =
-    &const_cast<struct Common_UI_GTK_State&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+    &const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
 #endif // GTK_USE
 
   // step8: initialize GTK UI

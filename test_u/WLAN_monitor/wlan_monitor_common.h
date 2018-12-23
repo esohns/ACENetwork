@@ -137,14 +137,25 @@ typedef ACE_Unbounded_Stack<enum WLANMMMonitor_EventType>::ITERATOR WLANMMMonito
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 struct WLANMonitor_UI_GTK_State
- : Common_UI_GTK_State
+ : Common_UI_GTK_State_t
 {
   WLANMonitor_UI_GTK_State ()
-   : Common_UI_GTK_State ()
+   : Common_UI_GTK_State_t ()
    , eventStack ()
   {}
 
   WLANMMMonitor_Events_t eventStack;
+};
+
+struct WLANMonitor_GTK_ProgressData
+ : Test_U_GTK_ProgressData
+{
+  WLANMonitor_GTK_ProgressData ()
+   : Test_U_GTK_ProgressData ()
+   , state (NULL)
+  {}
+
+  struct WLANMonitor_UI_GTK_State* state;
 };
 #elif defined (WXWIDGETS_USE)
 struct WLANMonitor_UI_WxWidgets_State
@@ -175,6 +186,7 @@ struct WLANMonitor_UI_CBData
    , configuration (NULL)
    , monitor (NULL)
 #if defined (GTK_USE)
+   , progressData ()
    , UIState (NULL)
 #elif defined (WXWIDGETS_USE)
    , UIState (NULL)
@@ -186,6 +198,7 @@ struct WLANMonitor_UI_CBData
   struct WLANMonitor_Configuration*      configuration;
   Net_WLAN_IInetMonitor_t*               monitor;
 #if defined (GTK_USE)
+  struct WLANMonitor_GTK_ProgressData    progressData;
   struct WLANMonitor_UI_GTK_State*       UIState;
 #elif defined (WXWIDGETS_USE)
   struct WLANMonitor_UI_WxWidgets_State* UIState;

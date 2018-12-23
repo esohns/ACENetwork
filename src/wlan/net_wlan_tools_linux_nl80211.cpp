@@ -921,7 +921,9 @@ Net_WLAN_Tools::isInterface (const std::string& interfaceIdentifier_in,
 
 clean:
   if (message_p)
-    nlmsg_free (message_p);
+  {
+    nlmsg_free (message_p); message_p = NULL;
+  } // end IF
 
   return ((cb_data_s.type == NL80211_IFTYPE_ADHOC)   ||
           (cb_data_s.type == NL80211_IFTYPE_STATION) ||

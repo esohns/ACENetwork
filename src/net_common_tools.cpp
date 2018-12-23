@@ -76,6 +76,7 @@
 #include "net_packet_headers.h"
 
 #if defined (ACE_LINUX)
+#include "net_wlan_configuration.h"
 #if defined (DBUS_SUPPORT)
 #include "net_wlan_defines.h"
 #endif // DBUS_SUPPORT
@@ -3398,6 +3399,12 @@ error_2:
       ACE_NOTREACHED (return false;)
 #endif // WLANAPI_SUPPORT
 #else
+#if defined (NL80211_SUPPORT)
+      Net_WLAN_IInetMonitor_t* wlan_inet_monitor_p =
+          NET_WLAN_INETNL80211MONITOR_SINGLETON::instance ();
+      ACE_ASSERT (wlan_inet_monitor_p);
+#endif // NL80211_SUPPORT
+
 #if defined (ACE_HAS_GETIFADDRS)
       struct ifaddrs* ifaddrs_p = NULL;
       int result_2 = ::getifaddrs (&ifaddrs_p);
@@ -3417,23 +3424,24 @@ error_2:
         if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name))
 #elif defined (NL80211_SUPPORT)
         if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name,
-                                         NULL,
-                                         -1))
+                                         const_cast<nl_sock*> (wlan_inet_monitor_p->getP ()),
+                                         wlan_inet_monitor_p->get_3 ()))
 #elif defined (DBUS_SUPPORT)
         if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name,
                                          NULL))
 #else
     ACE_ASSERT (false);
     ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-
     ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
-#endif // WEXT_SUPPORT
+#endif
           interface_identifiers_a.push_back (ifaddrs_2->ifa_name);
       } // end FOR
 
 clean:
       if (likely (ifaddrs_p))
-        ::freeifaddrs (ifaddrs_p);
+      {
+        ::freeifaddrs (ifaddrs_p); ifaddrs_p = NULL;
+      } // end IF
 #else
     ACE_ASSERT (false);
     ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));

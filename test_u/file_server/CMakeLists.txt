@@ -215,7 +215,7 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Server)
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
-# target_link_libraries (${EXECUTABLE} X11)
+ target_link_libraries (${EXECUTABLE} X11)
 
 # target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
 elseif (WIN32)

@@ -572,7 +572,9 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-//  int result = -1;
+#if defined (GTK_USE)
+  int result = -1;
+#endif // GTK_USE
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -584,7 +586,7 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
   } // end IF
 
   // clean up message handlers
-//  const IRC_Client_UI_HandlerCBData* cb_data_p = NULL;
+  const IRC_Client_UI_HandlerCBData* ui_cb_data_p = NULL;
 #if defined (GTK_USE)
   Common_UI_GTK_BuildersIterator_t iterator;
   GtkButton* button_p = NULL;
@@ -598,16 +600,16 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
       if ((*iterator_2).second->isServerLog ())
         continue;
 
-      cb_data_p = &(*iterator_2).second->getR ();
-      ACE_ASSERT (cb_data_p);
+      ui_cb_data_p = &(*iterator_2).second->getR ();
+      ACE_ASSERT (ui_cb_data_p);
 
-      iterator = state_r.builders.find (cb_data_p->builderLabel);
+      iterator = state_r.builders.find (ui_cb_data_p->builderLabel);
       // sanity check(s)
       if (iterator == state_r.builders.end ())
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("handler (was: \"%s\") builder not found, continuing\n"),
-                    ACE_TEXT (CBData_.label.c_str ())));
+                    ACE_TEXT (ui_cb_data_p->builderLabel.c_str ())));
         continue;
       } // end IF
       button_p =
@@ -1726,7 +1728,9 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-//  int result = -1;
+#if defined (GTK_USE)
+  int result = -1;
+#endif // GTK_USE
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -1945,7 +1949,9 @@ IRC_Client_GUI_Connection::error (const IRC_Record& message_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-//  int result = -1;
+#if defined (GTK_USE)
+  int result = -1;
+#endif // GTK_USE
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
@@ -2099,7 +2105,9 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-//  int result = -1;
+#if defined (GTK_USE)
+  int result = -1;
+#endif // GTK_USE
   IRC_Client_GUI_MessageHandler* message_handler_p = NULL;
 
   if (lockedAccess_in)
@@ -2200,7 +2208,9 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 #endif // GTK_USE
 
-//  int result = -1;
+#if defined (GTK_USE)
+  int result = -1;
+#endif // GTK_USE
   if (lockedAccess_in)
   {
 #if defined (GTK_USE)
