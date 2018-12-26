@@ -86,7 +86,4 @@ struct Test_I_ThreadData
   guint                     eventSourceId;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct Test_I_GTK_CBData> Test_I_GtkBuilderDefinition_t;
-
 #endif
