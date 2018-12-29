@@ -539,7 +539,7 @@ template <typename HandlerType,
           typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
-void
+ACE_thread_t
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
@@ -556,11 +556,11 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return 0;
   } // end IF
   if (unlikely (isListening_))
-    return; // nothing to do
+    return 0; // nothing to do
 
   // not running --> start listening
 
@@ -576,11 +576,11 @@ Net_Server_AsynchListener_T<HandlerType,
                                                                                                              INADDR_LOOPBACK,                                                                                                      // address
                                                                                                              1,                                                                                                                    // encode ?
                                                                                                              0);                                                                                                                   // map ?
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-      return;
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+      return 0;
     } // end IF
   } // end IF
   result =
@@ -596,10 +596,11 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", returning\n"),
+                ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
-    return;
+    return 0;
   } // end IF
+#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
@@ -611,8 +612,11 @@ Net_Server_AsynchListener_T<HandlerType,
               inherited::get_handle (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
+#endif // _DEBUG
 
   isListening_ = true;
+
+  return 0;
 }
 
 template <typename HandlerType,
@@ -678,9 +682,11 @@ Net_Server_AsynchListener_T<HandlerType,
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT ("failed to ACE_POSIX_Asynch_Accept::close(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (_DEBUG)
   else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("stopped listening\n")));
+#endif // _DEBUG
 
   isListening_ = false;
 }

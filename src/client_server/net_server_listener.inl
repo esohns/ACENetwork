@@ -118,10 +118,9 @@ Net_Server_Listener_T<HandlerType,
 
   ACE_DEBUG ((LM_WARNING,
               ACE_TEXT ("failed to accept connection, continuing\n")));
-
 #if defined (_DEBUG)
   inherited::dump ();
-#endif
+#endif // _DEBUG
 
   // *NOTE*: remain registered with the reactor
   return 0;
@@ -135,7 +134,7 @@ template <typename HandlerType,
           typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
-void
+ACE_thread_t
 Net_Server_Listener_T<HandlerType,
                       AcceptorType,
                       AddressType,
@@ -153,11 +152,11 @@ Net_Server_Listener_T<HandlerType,
   if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return 0;
   } // end IF
   if (unlikely (isListening_))
-    return; // nothing to do
+    return 0; // nothing to do
 
   if (unlikely (hasChanged_))
   {
@@ -171,15 +170,13 @@ Net_Server_Listener_T<HandlerType,
     if (isOpen_)
     {
       result = inherited::close ();
-      if (result == -1)
+      if (unlikely (result == -1))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
-
+                    ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", aborting\n")));
         isOpen_ = false;
         isListening_ = false;
-
-        return;
+        return 0;
       } // end IF
       isOpen_ = false;
     } // end IF
@@ -193,19 +190,21 @@ Net_Server_Listener_T<HandlerType,
     ACE_ASSERT (isSuspended_);
 
     result = inherited::resume ();
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
-      return;
+                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", aborting\n")));
+      return 0;
     } // end IF
+#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("resumed listening...\n")));
+#endif // _DEBUG
 
     isSuspended_ = false;
     isListening_ = true;
 
-    return;
+    return 0;
   } // end IF
 
   // not running --> start listening
@@ -221,11 +220,11 @@ Net_Server_Listener_T<HandlerType,
                                                                                                              INADDR_LOOPBACK,                                                                                                      // IP address
                                                                                                              1,                                                                                                                    // encode ?
                                                                                                              0);                                                                                                                   // map ?
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-      return;
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+      return 0;
     } // end IF
   } // end IF
   result =
@@ -238,10 +237,11 @@ Net_Server_Listener_T<HandlerType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
-    return;
+                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", aborting\n")));
+    return 0;
   } // end IF
   isOpen_ = true;
+#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
@@ -252,9 +252,12 @@ Net_Server_Listener_T<HandlerType,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
+#endif // _DEBUG
 
   isListening_ = true;
+
+  return 0;
 }
 
 template <typename HandlerType,
@@ -295,8 +298,10 @@ Net_Server_Listener_T<HandlerType,
   } // end IF
   isSuspended_ = true;
 
+#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("suspended listening\n")));
+#endif // _DEBUG
 
   isListening_ = false;
 }
@@ -359,13 +364,12 @@ Net_Server_Listener_T<HandlerType,
     return;
   } // end IF
   ACE_ASSERT (buffer_p);
-
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s\n"),
               buffer_p));
 
   // clean up
-  delete [] buffer_p;
+  delete [] buffer_p; buffer_p = NULL;
 }
 
 template <typename HandlerType,

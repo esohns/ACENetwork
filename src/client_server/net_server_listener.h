@@ -81,7 +81,7 @@ class Net_Server_Listener_T
 
   // implement (part of) Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
-  virtual void start ();
+  virtual ACE_thread_t start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; }

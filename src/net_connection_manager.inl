@@ -526,27 +526,6 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::start ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
-
-  ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
-  isActive_ = true;
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-void
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
                          UserDataType>::stop (bool waitForCompletion_in,
                                               bool lockedAccess_in)
 {
@@ -564,9 +543,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                   ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
 
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-    isActive_ = false;
-  } // end lock scope
+  isActive_ = false;
 
   if (lockedAccess_in)
   {
@@ -591,15 +568,11 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          StatisticContainerType,
                          UserDataType>::isRunning () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
-
-  bool result = false;
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::isRunning"));
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
-    result = isActive_;
+    return isActive_;
   } // end lock scope
-
-  return result;
 }
 
 template <ACE_SYNCH_DECL,
