@@ -97,7 +97,7 @@ set (source_files
      irc_common_modules.h
      irc_configuration.h
      irc_defines.h
-     irc_exports.h
+#     irc_exports.h
      irc_icontrol.h
      irc_message.cpp
      irc_message.h
@@ -174,7 +174,7 @@ if (WIN32)
  set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_IRC_SCRIPTS)
  source_group (exports FILES etc/exports.def)
-endif ()
+endif (WIN32)
 
 set_property (TARGET ${PROJECT_NAME}_Protocol_IRC PROPERTY FOLDER "protocols")
 
@@ -188,9 +188,9 @@ set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES VERSION ${VERSION
 #target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${ACE_LIBRARY})
- target_link_libraries (${PROJECT_NAME}_Protocol_IRC Common)
- target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
 endif (WIN32)
+target_link_libraries (${PROJECT_NAME}_Protocol_IRC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -209,7 +209,7 @@ install (FILES
          irc_common_modules.h
          irc_configuration.h
          irc_defines.h
-         irc_exports.h
+#         irc_exports.h
          irc_icontrol.h
          irc_message.h
          irc_module_parser.h

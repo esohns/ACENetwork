@@ -63,7 +63,7 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   DHCPClient_Module_Dump_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_DUMP_DEFAULT_NAME_STRING)),
+                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DUMP_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
@@ -80,7 +80,7 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
   modules_out.push_back (module_p);
 //  module_p = NULL;
 //  ACE_NEW_RETURN (module_p,
-//                  DHCPClient_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_PARSER_DEFAULT_NAME_STRING)),
+//                  DHCPClient_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
 //                  false);
 //  modules_out.push_back (module_p);
   module_p = NULL;

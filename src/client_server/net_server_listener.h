@@ -81,7 +81,7 @@ class Net_Server_Listener_T
 
   // implement (part of) Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
-  virtual ACE_thread_t start ();
+  virtual void start (ACE_thread_t&); // return value: thread handle (if any)
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; }
@@ -98,7 +98,7 @@ class Net_Server_Listener_T
   // override default instantiation strategy
   virtual int make_svc_handler (HandlerType*&);
   // override default accept strategy
-  virtual int accept_svc_handler (HandlerType*);
+  inline virtual int accept_svc_handler (HandlerType* handler_in) { ACE_ASSERT (handler_in); handler_in->set (NET_ROLE_SERVER); return inherited::accept_svc_handler (handler_in); }
   // override default activation strategy
   virtual int activate_svc_handler (HandlerType*);
 

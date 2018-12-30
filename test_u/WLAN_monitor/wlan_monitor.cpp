@@ -587,7 +587,9 @@ do_work (bool autoAssociate_in,
 
   // step1: initialize regular (global) statistic reporting ?
   timer_manager_p->initialize (configuration.timerConfiguration);
-  timer_manager_p->start ();
+  ACE_thread_t thread_id = 0;
+  timer_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
   ACE_ASSERT (timer_manager_p->isRunning ());
 
   if (statisticReportingInterval_in)
@@ -645,8 +647,6 @@ do_work (bool autoAssociate_in,
 
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-    CBData_in.UIState->eventHooks.finiHook = idle_finalize_ui_cb;
-    CBData_in.UIState->eventHooks.initHook = idle_initialize_ui_cb;
 #endif // GTK_USE
     CBData_in.monitor = iwlanmonitor_p;
     //CBData_in.userData = &CBData_in;
@@ -665,7 +665,9 @@ do_work (bool autoAssociate_in,
 
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
-    gtk_manager_p->start ();
+    ACE_thread_t thread_id = 0;
+    gtk_manager_p->start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
     result = ACE_OS::sleep (timeout);
@@ -692,7 +694,9 @@ do_work (bool autoAssociate_in,
       goto error;
     } // end IF
 
-    iwlanmonitor_p->start ();
+    ACE_thread_t thread_id = 0;
+    iwlanmonitor_p->start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
     if (!iwlanmonitor_p->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -989,13 +993,17 @@ ACE_TMAIN (int argc_in,
 
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  WLANMonitor_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                    argv_in,
-                                                    &ui_cb_data);
+  WLANMonitor_GtkBuilderDefinition_t gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
+  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
+  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+      idle_finalize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+      idle_initialize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
   if (!UI_definition_file_path.empty ())
-    WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                   argv_in,
-                                                                   &ui_definition);
+    WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

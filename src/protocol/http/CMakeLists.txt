@@ -113,7 +113,7 @@ set (source_files
      http_codes.h
      http_common.h
      http_defines.h
-     http_exports.h
+#     http_exports.h
      http_iparser.h
      http_message.cpp
      http_message.h
@@ -213,9 +213,9 @@ endif (WIN32 AND MSVC)
 #target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ${ACE_LIBRARY})
- target_link_libraries (${PROJECT_NAME}_Protocol_HTTP Common)
- target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACEStream)
 endif (WIN32)
+target_link_libraries (${PROJECT_NAME}_Protocol_HTTP Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACEStream)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -231,7 +231,7 @@ install (FILES
          http_codes.h
          http_common.h
          http_defines.h
-         http_exports.h
+#         http_exports.h
          http_iparser.h
          http_message.h
          http_parser.h

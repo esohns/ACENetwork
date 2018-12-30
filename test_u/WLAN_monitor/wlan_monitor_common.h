@@ -63,40 +63,6 @@ class Net_WLAN_IMonitorCB;
 
 //////////////////////////////////////////
 
-struct WLANMonitor_SignalHandlerConfiguration
- : Common_SignalHandlerConfiguration
-{
-  WLANMonitor_SignalHandlerConfiguration ()
-   : Common_SignalHandlerConfiguration ()
-   , monitor (NULL)
-   , statisticReportingHandler (NULL)
-   , statisticReportingTimerId (-1)
-  {}
-
-  Net_WLAN_IInetMonitor_t* monitor;
-  Net_IStatisticHandler_t* statisticReportingHandler;
-  long                     statisticReportingTimerId;
-};
-
-struct WLANMonitor_Configuration
- : Test_U_Configuration
-{
-  WLANMonitor_Configuration ()
-   : Test_U_Configuration ()
-   , handle (ACE_INVALID_HANDLE)
-   , signalHandlerConfiguration ()
-   , timerConfiguration ()
-   , WLANMonitorConfiguration ()
-  {}
-
-  ACE_HANDLE                                    handle;
-  struct WLANMonitor_SignalHandlerConfiguration signalHandlerConfiguration;
-  struct Common_TimerConfiguration              timerConfiguration;
-  struct Net_WLAN_MonitorConfiguration          WLANMonitorConfiguration;
-};
-
-//////////////////////////////////////////
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
 typedef NET_WLAN_INETWLANAPIMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
@@ -133,6 +99,8 @@ enum WLANMMMonitor_EventType
 };
 typedef ACE_Unbounded_Stack<enum WLANMMMonitor_EventType> WLANMMMonitor_Events_t;
 typedef ACE_Unbounded_Stack<enum WLANMMMonitor_EventType>::ITERATOR WLANMMMonitor_EventsIterator_t;
+
+//////////////////////////////////////////
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -206,13 +174,14 @@ struct WLANMonitor_UI_CBData
 };
 
 #if defined (GTK_USE)
-typedef Common_UI_GtkBuilderDefinition_T<struct WLANMonitor_UI_GTK_State,
-                                         struct WLANMonitor_UI_CBData> WLANMonitor_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct WLANMonitor_UI_GTK_State> WLANMonitor_GtkBuilderDefinition_t;
 
 //////////////////////////////////////////
 
 typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct WLANMonitor_UI_GTK_State> WLANMonitor_UI_GTK_Manager_t;
+                                Common_UI_GTK_Configuration_t,
+                                struct WLANMonitor_UI_GTK_State,
+                                gpointer> WLANMonitor_UI_GTK_Manager_t;
 typedef ACE_Singleton<WLANMonitor_UI_GTK_Manager_t,
                       ACE_MT_SYNCH::MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
 #endif // GTK_USE

@@ -26,10 +26,10 @@
 //#include "common_inotify.h"
 //#include "common_time_common.h"
 
-//#include "stream_common.h"
+#include "stream_configuration.h"
 //#include "stream_imodule.h"
-#include "stream_inotify.h"
-#include "stream_session_data.h"
+//#include "stream_inotify.h"
+//#include "stream_session_data.h"
 
 //#include "dhcp_common.h"
 
@@ -63,11 +63,11 @@ struct DHCP_StreamConfiguration;
 struct DHCP_Stream_SessionData
  : Stream_SessionData
 {
-  inline DHCP_Stream_SessionData ()
+  DHCP_Stream_SessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
    //, currentStatistic ()
-  {};
+  {}
 
   struct DHCP_ConnectionState* connectionState;
 
@@ -77,46 +77,28 @@ struct DHCP_Stream_SessionData
 struct DHCP_Stream_UserData
  : Stream_UserData
 {
-  inline DHCP_Stream_UserData ()
+  DHCP_Stream_UserData ()
    : Stream_UserData ()
    , moduleConfiguration (NULL)
    , moduleHandlerConfiguration (NULL)
-  {};
+  {}
 
   // *TODO*: remove these ASAP
-  struct Stream_ModuleConfiguration*     moduleConfiguration;
+  struct Stream_ModuleConfiguration*      moduleConfiguration;
   struct DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
 struct DHCP_StreamState
  : Stream_State
 {
-  inline DHCP_StreamState ()
+  DHCP_StreamState ()
    : Stream_State ()
    , currentSessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct DHCP_Stream_SessionData* currentSessionData;
   struct DHCP_Stream_UserData*    userData;
 };
-
-//typedef Stream_SessionData_T<DHCP_Stream_SessionData> DHCP_Stream_SessionData_t;
-
-//typedef Common_INotify_T<unsigned int,
-//                         struct DHCP_Stream_SessionData,
-//                         DHCP_Record,
-//                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
-typedef Stream_INotify_T<enum Stream_SessionMessageType> DHCP_Stream_INotify_t;
-
-//typedef DHCP_Stream_T<struct DHCP_StreamState,
-//                      struct DHCP_StreamConfiguration,
-//                      DHCP_RuntimeStatistic_t,
-//                      struct DHCP_ModuleHandlerConfiguration,
-//                      struct DHCP_Stream_SessionData,
-//                      DHCP_Stream_SessionData_t,
-//                      ACE_Message_Block,
-//                      DHCP_Message_t,
-//                      DHCP_SessionMessage> DHCP_Stream_t;
 
 #endif

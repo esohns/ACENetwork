@@ -722,7 +722,11 @@ continue_:
   } // end IF
 
   if (likely (restart_b))
-    start ();
+  {
+    ACE_thread_t thread_id = 0;
+    start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
+  } // end IF
 
   return true;
 }
@@ -845,7 +849,11 @@ Net_WLAN_Monitor_Base_T<AddressType,
   } // end IF
 
   if (restart_b)
-    start ();
+  {
+    ACE_thread_t thread_id = 0;
+    start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
+  } // end IF
 }
 
 template <typename AddressType,

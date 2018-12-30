@@ -175,7 +175,7 @@ class DHCP_Stream_T
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 libacenetwork_default_dhcp_marshal_module_name_string,
-                                DHCP_Stream_INotify_t,             // stream notification interface type
+                                Stream_INotify_t,                  // stream notification interface type
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
 
@@ -209,7 +209,7 @@ class DHCP_Stream_T
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 libacestream_default_stat_report_module_name_string,
-                                DHCP_Stream_INotify_t,             // stream notification interface type
+                                Stream_INotify_t,                  // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 

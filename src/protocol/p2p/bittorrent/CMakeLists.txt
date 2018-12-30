@@ -150,7 +150,7 @@ set (source_files
      bittorrent_control.h
      bittorrent_control.inl
      bittorrent_defines.h
-     bittorrent_exports.h
+#     bittorrent_exports.h
      bittorrent_iparser.h
      bittorrent_message.cpp
      bittorrent_message.h
@@ -256,13 +256,10 @@ elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${OPENSSL_LIBRARY})
 
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
-
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
-
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
-
-# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PROJECT_NAME}_Protocol_HTTP)
 endif ()
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
+# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PROJECT_NAME}_Protocol_HTTP)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -282,7 +279,7 @@ install (FILES
          bittorrent_control.h
          bittorrent_control.inl
          bittorrent_defines.h
-         bittorrent_exports.h
+#         bittorrent_exports.h
          bittorrent_iparser.h
          bittorrent_message.h
          bittorrent_message.inl

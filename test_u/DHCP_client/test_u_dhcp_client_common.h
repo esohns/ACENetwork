@@ -358,13 +358,4 @@ struct DHCPClient_ThreadData
 };
 #endif // GUI_SUPPORT
 
-//////////////////////////////////////////
-
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct DHCPClient_UI_CBData> DHCPClient_GtkBuilderDefinition_t;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-
 #endif

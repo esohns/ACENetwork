@@ -82,7 +82,7 @@ Net_Server_SSL_Listener_T<HandlerType,
   if (isSuspended_)
   {
     result = inherited::resume ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", continuing\n")));
   } // end IF
@@ -90,7 +90,7 @@ Net_Server_SSL_Listener_T<HandlerType,
   if (isOpen_)
   {
     result = inherited::close ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", continuing\n")));
   } // end IF
@@ -117,11 +117,10 @@ Net_Server_SSL_Listener_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::handle_accept_error"));
 
   ACE_DEBUG ((LM_WARNING,
-              ACE_TEXT ("failed to accept connection...\n")));
-
+              ACE_TEXT ("failed to accept connection, continuing\n")));
 #if defined (_DEBUG)
   inherited::dump ();
-#endif
+#endif // _DEBUG
 
   // *NOTE*: remain registered with the reactor
   return 0;
@@ -143,20 +142,23 @@ Net_Server_SSL_Listener_T<HandlerType,
                           StateType,
                           ConnectionConfigurationType,
                           StreamType,
-                          UserDataType>::start ()
+                          UserDataType>::start (ACE_thread_t& threadId_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::start"));
+
+  // initialize return value(s)
+  threadId_out = 0;
 
   int result = -1;
 
   // sanity check(s)
-  if (!isInitialized_)
+  if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("not initialized, returning\n")));
     return;
   } // end IF
-  if (isListening_)
+  if (unlikely (isListening_))
     return; // nothing to do
 
   if (hasChanged_)
@@ -165,19 +167,18 @@ Net_Server_SSL_Listener_T<HandlerType,
     //            ACE_TEXT ("configuration has changed, stopping...\n")));
     hasChanged_ = false;
 
-    if (isSuspended_) stop ();
+    if (isSuspended_)
+      stop ();
 
     if (isOpen_)
     {
       result = inherited::close ();
-      if (result == -1)
+      if (unlikely (result == -1))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
-
         isOpen_ = false;
         isListening_ = false;
-
         return;
       } // end IF
       isOpen_ = false;
@@ -192,14 +193,16 @@ Net_Server_SSL_Listener_T<HandlerType,
     ACE_ASSERT (isSuspended_);
 
     result = inherited::resume ();
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
       return;
     } // end IF
+#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("resumed listening...\n")));
+#endif // _DEBUG
 
     isSuspended_ = false;
     isListening_ = true;
@@ -211,7 +214,7 @@ Net_Server_SSL_Listener_T<HandlerType,
   // *TODO*: remove type inferences
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  if (configuration_->socketHandlerConfiguration.socketConfiguration.useLoopBackDevice)
+  if (unlikely (configuration_->socketHandlerConfiguration.socketConfiguration.useLoopBackDevice))
   {
     result =
       configuration_->address.set (configuration_->socketHandlerConfiguration.socketConfiguration.address.get_port_number (), // port
@@ -220,7 +223,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                                    ACE_LOCALHOST,                                                                             // hostname
                                    1,                                                                                         // encode ?
                                    AF_INET);                                                                                  // address family
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
@@ -234,24 +237,26 @@ Net_Server_SSL_Listener_T<HandlerType,
                        //0,                                                                    // flags (*NOTE*: default is blocking sockets)
                        1,                                                                      // accept all pending connections
                        1);                                                                     // try to re-use address
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
     return;
   } // end IF
   isOpen_ = true;
+#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: started listening: %s...\n"),
+              ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: started listening: %s...\n"),
+              ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
+#endif // _DEBUG
 
   isListening_ = true;
 }
@@ -285,16 +290,17 @@ Net_Server_SSL_Listener_T<HandlerType,
   ACE_ASSERT (isOpen_);
 
   int result = inherited::suspend ();
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
     return;
   } // end IF
   isSuspended_ = true;
-
+#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("suspended listening...\n")));
+#endif // _DEBUG
 
   isListening_ = false;
 }
@@ -350,18 +356,18 @@ Net_Server_SSL_Listener_T<HandlerType,
 
   ACE_TCHAR* buffer_p = NULL;
   result = inherited::info (&buffer_p, BUFSIZ);
-  if ((result == -1) || !buffer_p)
+  if (unlikely ((result == -1) || !buffer_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Acceptor::info(): \"%m\", returning\n")));
     return;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
+  ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s\n"),
               buffer_p));
 
   // clean up
-  delete [] buffer_p;
+  delete [] buffer_p; buffer_p = NULL;
 }
 
 template <typename HandlerType,
@@ -395,38 +401,11 @@ Net_Server_SSL_Listener_T<HandlerType,
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (configuration_->connectionManager,
                                  configuration_->socketHandlerConfiguration.statisticReportingInterval));
-  if (!handler_out)
+  if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
   return (handler_out ? 0 : -1);
-}
-
-template <typename HandlerType,
-          typename AcceptorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename ConnectionConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-int
-Net_Server_SSL_Listener_T<HandlerType,
-                          AcceptorType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          ConnectionConfigurationType,
-                          StreamType,
-                          UserDataType>::accept_svc_handler (HandlerType* handler_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::accept_svc_handler"));
-
-  // pre-initialize the connection handler
-  // *TODO*: remove type inference
-  handler_in->set (NET_ROLE_SERVER);
-
-  return inherited::accept_svc_handler (handler_in);
 }
 
 template <typename HandlerType,

@@ -134,7 +134,7 @@ template <typename HandlerType,
           typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
-ACE_thread_t
+void
 Net_Server_Listener_T<HandlerType,
                       AcceptorType,
                       AddressType,
@@ -142,9 +142,12 @@ Net_Server_Listener_T<HandlerType,
                       StateType,
                       ConnectionConfigurationType,
                       StreamType,
-                      UserDataType>::start ()
+                      UserDataType>::start (ACE_thread_t& threadId_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::start"));
+
+  // initialize return value(s)
+  threadId_out = 0;
 
   int result = -1;
 
@@ -152,11 +155,11 @@ Net_Server_Listener_T<HandlerType,
   if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, aborting\n")));
-    return 0;
+                ACE_TEXT ("not initialized, returning\n")));
+    return;
   } // end IF
   if (unlikely (isListening_))
-    return 0; // nothing to do
+    return; // nothing to do
 
   if (unlikely (hasChanged_))
   {
@@ -173,10 +176,10 @@ Net_Server_Listener_T<HandlerType,
       if (unlikely (result == -1))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", aborting\n")));
+                    ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
         isOpen_ = false;
         isListening_ = false;
-        return 0;
+        return;
       } // end IF
       isOpen_ = false;
     } // end IF
@@ -193,8 +196,8 @@ Net_Server_Listener_T<HandlerType,
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", aborting\n")));
-      return 0;
+                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
+      return;
     } // end IF
 #if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
@@ -204,7 +207,7 @@ Net_Server_Listener_T<HandlerType,
     isSuspended_ = false;
     isListening_ = true;
 
-    return 0;
+    return;
   } // end IF
 
   // not running --> start listening
@@ -223,8 +226,8 @@ Net_Server_Listener_T<HandlerType,
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      return 0;
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+      return;
     } // end IF
   } // end IF
   result =
@@ -237,8 +240,8 @@ Net_Server_Listener_T<HandlerType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", aborting\n")));
-    return 0;
+                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
+    return;
   } // end IF
   isOpen_ = true;
 #if defined (_DEBUG)
@@ -256,8 +259,6 @@ Net_Server_Listener_T<HandlerType,
 #endif // _DEBUG
 
   isListening_ = true;
-
-  return 0;
 }
 
 template <typename HandlerType,
@@ -297,7 +298,6 @@ Net_Server_Listener_T<HandlerType,
     return;
   } // end IF
   isSuspended_ = true;
-
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("suspended listening\n")));
@@ -357,7 +357,7 @@ Net_Server_Listener_T<HandlerType,
 
   ACE_TCHAR* buffer_p = NULL;
   result = inherited::info (&buffer_p, BUFSIZ);
-  if (unlikely (result == -1))
+  if (unlikely ((result == -1) || !buffer_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Acceptor::info(): \"%m\", returning\n")));
@@ -409,33 +409,6 @@ Net_Server_Listener_T<HandlerType,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
   return (handler_out ? 0 : -1);
-}
-
-template <typename HandlerType,
-          typename AcceptorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename ConnectionConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-int
-Net_Server_Listener_T<HandlerType,
-                      AcceptorType,
-                      AddressType,
-                      ConfigurationType,
-                      StateType,
-                      ConnectionConfigurationType,
-                      StreamType,
-                      UserDataType>::accept_svc_handler (HandlerType* handler_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::accept_svc_handler"));
-
-  // pre-initialize the connection handler
-  // *TODO*: remove type inference
-  handler_in->set (NET_ROLE_SERVER);
-
-  return inherited::accept_svc_handler (handler_in);
 }
 
 template <typename HandlerType,

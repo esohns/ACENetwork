@@ -105,7 +105,7 @@ set (source_files
      dhcp_configuration.h
      dhcp_codes.h
      dhcp_defines.h
-     dhcp_exports.h
+#     dhcp_exports.h
      dhcp_message.cpp
      dhcp_message.h
      dhcp_parser.cpp
@@ -188,6 +188,7 @@ set_property (TARGET ${PROJECT_NAME}_Protocol_DHCP PROPERTY FOLDER "protocols")
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_DHCP Common)
 add_dependencies (${PROJECT_NAME}_Protocol_DHCP ACEStream)
+#add_dependencies (${PROJECT_NAME}_Protocol_DHCP ${PROJECT_NAME})
 
 set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES DEFINE_SYMBOL NET_PROTOCOL_DHCP_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
@@ -196,14 +197,10 @@ set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES VERSION ${VERSIO
 if (WIN32)
 # target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ntdll.lib)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
-
- target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
-
- target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
-
- target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork)
-# target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork_WLAN)
-endif ()
+endif (WIN32)
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PROJECT_NAME})
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -221,7 +218,7 @@ install (FILES
          dhcp_common_modules.h
          dhcp_configuration.h
          dhcp_defines.h
-         dhcp_exports.h
+#         dhcp_exports.h
          dhcp_message.h
          dhcp_parser.h
          dhcp_parser_driver.h

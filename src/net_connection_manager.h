@@ -86,7 +86,7 @@ class Net_Connection_Manager_T
   virtual bool lock (bool = true); // block ?
   virtual int unlock (bool = false); // unblock ?
   inline virtual const typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ();) }
-  inline virtual ACE_thread_t start () { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, 0); isActive_ = true; return 0; }
+  inline virtual void start (ACE_thread_t& threadId_out) { threadId_out = 0; ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_); isActive_ = true; }
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   virtual bool isRunning () const;

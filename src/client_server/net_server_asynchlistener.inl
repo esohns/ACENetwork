@@ -539,16 +539,19 @@ template <typename HandlerType,
           typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
-ACE_thread_t
+void
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
                             ConnectionConfigurationType,
                             StreamType,
-                            UserDataType>::start ()
+                            UserDataType>::start (ACE_thread_t& threadId_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::start"));
+
+  // initialize return value(s)
+  threadId_out = 0;
 
   int result = -1;
 
@@ -556,11 +559,11 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, aborting\n")));
-    return 0;
+                ACE_TEXT ("not initialized, returning\n")));
+    return;
   } // end IF
   if (unlikely (isListening_))
-    return 0; // nothing to do
+    return; // nothing to do
 
   // not running --> start listening
 
@@ -579,8 +582,8 @@ Net_Server_AsynchListener_T<HandlerType,
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      return 0;
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+      return;
     } // end IF
   } // end IF
   result =
@@ -596,9 +599,9 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
-    return 0;
+    return;
   } // end IF
 #if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -615,8 +618,6 @@ Net_Server_AsynchListener_T<HandlerType,
 #endif // _DEBUG
 
   isListening_ = true;
-
-  return 0;
 }
 
 template <typename HandlerType,

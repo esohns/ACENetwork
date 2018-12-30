@@ -1005,13 +1005,15 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
       goto error;
     } // end IF
 
+    ACE_thread_t thread_id = 0;
     try {
-      ui_cb_data_p->monitor->start ();
+      ui_cb_data_p->monitor->start (thread_id);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask_T::start(): \"%m\", aborting\n")));
       goto error;
     } // end catch
+    ACE_UNUSED_ARG (thread_id);
 
     // start progress reporting
     ACE_ASSERT (!ui_cb_data_p->progressData.eventSourceId);

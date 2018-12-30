@@ -170,11 +170,6 @@ struct FileServer_UI_CBData
   struct FileServer_Configuration* configuration;
   FileServer_Subscribers_t         subscribers;
 };
-
-#if defined (GTK_USE)
-typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct FileServer_UI_CBData> FileServer_GtkBuilderDefinition_t;
-#endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #endif

@@ -23,12 +23,27 @@
 
 #include "gtk/gtk.h"
 
+#include "ace/OS.h"
+
 #include "common_ui_gtk_common.h"
-//#if defined (GTKGL_SUPPORT)
-//#include "common_ui_gtk_gl_common.h"
-//#endif // GTKGL_SUPPORT
+#if defined (GTKGL_SUPPORT)
+#include "common_ui_gtk_gl_common.h"
+#endif // GTKGL_SUPPORT
 
 #include "test_u_common.h"
+
+struct Test_U_GTK_Configuration
+ : Test_U_Configuration
+{
+  Test_U_GTK_Configuration ()
+   : Test_U_Configuration ()
+   , GTKConfiguration ()
+  {}
+
+  Common_UI_GTK_Configuration_t GTKConfiguration;
+};
+
+//////////////////////////////////////////
 
 struct Test_U_GTK_ProgressData
  : Common_UI_GTK_ProgressData
@@ -38,7 +53,9 @@ struct Test_U_GTK_ProgressData
    , size (0)
    , transferred (0)
    , statistic ()
-  {}
+  {
+    ACE_OS::memset (&statistic, 0, sizeof (Test_U_Statistic_t));
+  }
 
   size_t             size; // bytes
   size_t             transferred; // bytes

@@ -643,7 +643,7 @@ do_work (bool requestBroadcastReplies_in,
                                         NULL);
 #endif // GUI_SUPPORT
   Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   DHCPClient_ConnectionManager_t* connection_manager_p =
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -896,7 +896,9 @@ do_work (bool requestBroadcastReplies_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start ();
+  ACE_thread_t thread_id = 0;
+  timer_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
   DHCP_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                              connection_manager_p,
                                              false);
@@ -1275,20 +1277,18 @@ allocate:
   {
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-        const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
-    state_r.eventHooks.finiHook = idle_finalize_UI_cb;
-    state_r.eventHooks.initHook = idle_initialize_UI_cb;
+
+    ACE_ASSERT (CBData_in.UIState);
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
-    state_r.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
         std::make_pair (UIDefinitionFileName_in, static_cast<GtkBuilder*> (NULL));
-    CBData_in.UIState = &state_r;
-    //CBData_in.userData = &CBData_in;
 
     //CBData_in.stream = stream_p;
 
-    gtk_manager_p->start ();
+    ACE_thread_t thread_id = 0;
+    gtk_manager_p->start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
     ACE_Time_Value one_second (1, 0);
     result = ACE_OS::sleep (one_second);
     if (result == -1)
@@ -1769,17 +1769,21 @@ ACE_TMAIN (int argc_in,
   struct DHCPClient_UI_CBData ui_cb_data;
   ui_cb_data.configuration = &configuration_s;
 #if defined (GTK_USE)
-  if (!gtk_rc_file.empty ())
-    state_r.RCFiles.push_back (gtk_rc_file);
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  DHCPClient_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                   argv_in,
-                                                   &ui_cb_data);
+  Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
+  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
+  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+      idle_finalize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+      idle_initialize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  if (!gtk_rc_file.empty ())
+    ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
   if (!ui_definition_file.empty ())
-    if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                   argv_in,
-                                                                   &ui_definition))
+    if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_UI_GTK_Manager::initialize(), aborting\n")));
