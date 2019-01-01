@@ -998,9 +998,9 @@ ACE_TMAIN (int argc_in,
   ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
   ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
-      idle_finalize_UI_cb;
+      idle_finalize_ui_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
-      idle_initialize_UI_cb;
+      idle_initialize_ui_cb;
   ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
   if (!UI_definition_file_path.empty ())
     WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);

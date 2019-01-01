@@ -45,6 +45,22 @@ struct WLANMonitor_SignalHandlerConfiguration
   long                     statisticReportingTimerId;
 };
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+typedef Common_UI_IDefinition_T<struct WLANMonitor_UI_GTK_State> WLANMonitor_UI_GTK_IDefinition_t;
+struct WLANMonitor_UI_GTK_Configuration
+ : Common_UI_GTK_Configuration_t
+{
+  WLANMonitor_UI_GTK_Configuration ()
+   : Common_UI_GTK_Configuration_t ()
+   , interface (NULL)
+  {}
+
+  WLANMonitor_UI_GTK_IDefinition_t* interface;
+};
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
 struct WLANMonitor_Configuration
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -66,12 +82,22 @@ struct WLANMonitor_Configuration
 #else
    : Test_U_Configuration ()
 #endif // GUI_SUPPORT
+ #if defined (GUI_SUPPORT)
+ #if defined (GTK_USE)
+   , GTKConfiguration ()
+ #endif // GTK_USE
+ #endif // GUI_SUPPORT
    , handle (ACE_INVALID_HANDLE)
    , signalHandlerConfiguration ()
    , timerConfiguration ()
    , WLANMonitorConfiguration ()
   {}
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  struct WLANMonitor_UI_GTK_Configuration       GTKConfiguration;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   ACE_HANDLE                                    handle;
   struct WLANMonitor_SignalHandlerConfiguration signalHandlerConfiguration;
   struct Common_TimerConfiguration              timerConfiguration;

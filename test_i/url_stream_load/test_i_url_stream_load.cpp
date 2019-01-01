@@ -552,7 +552,7 @@ do_work (bool debugParser_in,
   Test_I_EventHandler message_handler;
 #endif // GUI_SUPPORT
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
-                                                          ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_FlexParserAllocatorConfiguration> heap_allocator;
@@ -645,6 +645,7 @@ do_work (bool debugParser_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   int group_id = -1;
+  ACE_thread_t thread_id = 0;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
@@ -724,7 +725,8 @@ do_work (bool debugParser_in,
 
   // intialize timers
   timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start ();
+  timer_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
 
   // step1a: start GTK event loop ?
 #if defined (GUI_SUPPORT)
@@ -733,7 +735,9 @@ do_work (bool debugParser_in,
 #if defined (GTK_USE)
     gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
-    gtk_manager_p->start ();
+    thread_id = 0;
+    gtk_manager_p->start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
     int result = ACE_OS::sleep (timeout);
@@ -963,9 +967,15 @@ ACE_TMAIN (int argc_in,
                                        lock_2);
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Test_I_URLStreamLoad_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                             argv_in,
-                                                             &ui_cb_data);
+  Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
+  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
+  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+      idle_finalize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+      idle_initialize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   ACE_High_Res_Timer timer;
@@ -1175,11 +1185,11 @@ ACE_TMAIN (int argc_in,
     goto error;
   } // end IF
 
-  // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+  // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
   if (!gtk_rc_file.empty ())
-    state_r.RCFiles.push_back (gtk_rc_file);
+    ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   //Common_UI_GladeDefinition ui_definition (argc_in,
@@ -1189,17 +1199,12 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
     ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
-    state_r.argc = argc_in;
-    state_r.argv = argv_in;
+//    ACE_ASSERT (CBData_in.UIState);
     state_r.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (ui_definition_file, static_cast<GtkBuilder*> (NULL));
-    state_r.eventHooks.finiHook = idle_finalize_UI_cb;
-    state_r.eventHooks.initHook = idle_initialize_UI_cb;
     ui_cb_data.progressData.state = &state_r;
     //ui_cb_data.userData = &configuration.userData;
-    if (!gtk_manager_p->initialize (argc_in,
-                                    argv_in,
-                                    &ui_definition))
+    if (!gtk_manager_p->initialize (configuration.GTKConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_UI_GTK_Manager::initialize(), aborting\n")));

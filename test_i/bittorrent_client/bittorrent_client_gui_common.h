@@ -168,9 +168,4 @@ struct BitTorrent_Client_UI_SessionCBData
   BitTorrent_Client_ISession_t*           session;
 };
 
-#if defined (GTK_USE)
-typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct BitTorrent_Client_UI_CBData> BitTorrent_Client_GtkBuilderDefinition_t;
-#endif // GTK_USE
-
 #endif

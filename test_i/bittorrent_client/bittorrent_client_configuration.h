@@ -31,6 +31,14 @@
 #include "test_i_common.h"
 #include "test_i_defines.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "test_i_gtk_common.h"
+#elif defined (WXWIDGETS_USE)
+#include "test_i_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT
+
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_stream_common.h"
 
@@ -47,10 +55,26 @@ struct BitTorrent_Client_TrackerUserData
 
 struct BitTorrent_Client_CursesState;
 struct BitTorrent_Client_Configuration
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+ : Test_I_GTK_Configuration
+#else
  : Test_I_Configuration
+#endif // GTK_USE
+#else
+ : Test_I_Configuration
+#endif // GUI_SUPPORT
 {
   BitTorrent_Client_Configuration ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+   : Test_I_GTK_Configuration ()
+#else
    : Test_I_Configuration ()
+#endif // GTK_USE
+#else
+   : Test_I_Configuration ()
+#endif // GUI_SUPPORT
    , signalHandlerConfiguration ()
    ///////////////////////////////////////
    , peerConnectionConfigurations ()

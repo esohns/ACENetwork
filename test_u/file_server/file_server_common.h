@@ -101,10 +101,26 @@ struct FileServer_SignalHandlerConfiguration
 };
 
 struct FileServer_Configuration
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+ : Test_U_GTK_Configuration
+#else
  : Test_U_Configuration
+#endif // GTK_USE
+#else
+ : Test_U_Configuration
+#endif // GUI_SUPPORT
 {
   FileServer_Configuration ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+   : Test_U_GTK_Configuration ()
+#else
    : Test_U_Configuration ()
+#endif // GTK_USE
+#else
+   : Test_U_Configuration ()
+#endif // GUI_SUPPORT
    , allocatorConfiguration ()
    , connectionConfigurations ()
    , handle (ACE_INVALID_HANDLE)

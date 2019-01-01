@@ -24,9 +24,10 @@
 #include <list>
 
 #include "ace/INET_Addr.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "ace/Netlink_Addr.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #include "ace/Time_Value.h"
 
 #include "stream_common.h"
@@ -43,6 +44,12 @@
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
 #include "test_u_stream_common.h"
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "test_u_gtk_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 // forward declarations
 struct ClientServer_ConnectionConfiguration;
@@ -117,10 +124,26 @@ struct ClientServer_StreamConfiguration
 };
 
 struct ClientServer_Configuration
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+ : Test_U_GTK_Configuration
+#else
  : Test_U_Configuration
+#endif // GTK_USE
+#else
+ : Test_U_Configuration
+#endif // GUI_SUPPORT
 {
   ClientServer_Configuration ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+   : Test_U_GTK_Configuration ()
+#else
    : Test_U_Configuration ()
+#endif // GTK_USE
+#else
+   : Test_U_Configuration ()
+#endif // GUI_SUPPORT
    , allocatorConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()

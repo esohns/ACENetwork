@@ -21,23 +21,28 @@
 #ifndef TEST_I_GTK_COMMON_H
 #define TEST_I_GTK_COMMON_H
 
-#include "ace/OS.h"
-#include "ace/Synch_Traits.h"
-
 #include "gtk/gtk.h"
 
-#include "common_ui_common.h"
-
-#include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
-#include "common_ui_gtk_manager.h"
+#if defined (GTKGL_SUPPORT)
+#include "common_ui_gtk_gl_common.h"
+#endif // GTKGL_SUPPORT
 
-#include "stream_common.h"
-
+//#include "test_i_configuration.h"
 #include "test_i_common.h"
 
-// forward declarations
-struct Test_I_Configuration;
+struct Test_I_GTK_Configuration
+ : Test_I_Configuration
+{
+  Test_I_GTK_Configuration ()
+   : Test_I_Configuration ()
+   , GTKConfiguration ()
+  {}
+
+  Common_UI_GTK_Configuration_t GTKConfiguration;
+};
+
+//////////////////////////////////////////
 
 struct Test_I_GTK_ProgressData
  : Common_UI_GTK_ProgressData

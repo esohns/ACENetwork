@@ -1409,7 +1409,7 @@ ACE_TMAIN (int argc_in,
   ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
       idle_finalize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
-      idle_initialize_UI_cb;
+      idle_initialize_client_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
   if (!UI_file_path.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);

@@ -536,7 +536,9 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start ();
+  ACE_thread_t thread_id = 0;
+  timer_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
 
   // step4: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
@@ -546,10 +548,7 @@ do_work (bool useThreadPool_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_SignalHandler::initialize(): \"%m\", returning\n")));
-
-    // clean up
     timer_manager_p->stop ();
-
     return;
   } // end IF
   if (!Common_Signal_Tools::initialize (((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -561,10 +560,7 @@ do_work (bool useThreadPool_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
-
-    // clean up
     timer_manager_p->stop ();
-
     return;
   } // end IF
 
@@ -572,21 +568,19 @@ do_work (bool useThreadPool_in,
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
   // [- signal timer expiration to perform server queries] (see above)
 
-  // step5: start GTK event loop
+  // step5: start UI event loop
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
-  state_r.eventHooks.finiHook = idle_finalize_UI_cb;
-  state_r.eventHooks.initHook = idle_initialize_UI_cb;
-  state_r.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
+  ACE_ASSERT (CBData_in.UIState);
+  CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-  state_r.userData = &CBData_in;
 
-  gtk_manager_p->start ();
+  thread_id = 0;
+  gtk_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
   if (result == -1)
@@ -596,10 +590,7 @@ do_work (bool useThreadPool_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-
-    // clean up
     timer_manager_p->stop ();
-
     return;
   } // end IF
 #endif // GTK_USE
@@ -1467,10 +1458,6 @@ ACE_TMAIN (int argc_in,
                              configuration.protocolConfiguration.loginOptions.user.realName);
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (GTK_USE)
-  state_r.RCFiles.push_back (UIRC_file_name);
-#endif // GTK_USE
-
   // step7: parse configuration file(s) (if any)
   if (Common_File_Tools::isReadable (phonebook_file_name))
     do_parsePhonebookFile (phonebook_file_name,
@@ -1501,12 +1488,17 @@ ACE_TMAIN (int argc_in,
 
   // step8: initialize GTK UI
 #if defined (GTK_USE)
-  IRC_Client_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                   argv_in,
-                                                   &ui_cb_data);
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                            argv_in,
-                                                            &ui_definition);
+  Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
+  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
+  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+      idle_finalize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+      idle_initialize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (UIRC_file_name);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE
 
   // step9: do work

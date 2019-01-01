@@ -179,7 +179,7 @@ typedef Common_UI_GtkBuilderDefinition_T<struct WLANMonitor_UI_GTK_State> WLANMo
 //////////////////////////////////////////
 
 typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                Common_UI_GTK_Configuration_t,
+                                struct WLANMonitor_UI_GTK_Configuration,
                                 struct WLANMonitor_UI_GTK_State,
                                 gpointer> WLANMonitor_UI_GTK_Manager_t;
 typedef ACE_Singleton<WLANMonitor_UI_GTK_Manager_t,

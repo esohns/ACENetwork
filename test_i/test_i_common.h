@@ -21,8 +21,9 @@
 #ifndef TEST_I_COMMON_H
 #define TEST_I_COMMON_H
 
+#include "ace/OS.h"
+
 #include "common.h"
-//#include "common_configuration.h"
 #include "common_statistic_handler.h"
 #include "common_time_common.h"
 

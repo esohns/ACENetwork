@@ -533,7 +533,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GUI_SUPPORT
                                              );
   ClientServer_Module_EventHandler_Module event_handler (NULL,
-                                                         ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   ClientServer_Module_EventHandler* event_handler_p =
     dynamic_cast<ClientServer_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -650,7 +650,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start ();
+  ACE_thread_t thread_id = 0;
+  timer_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
   Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                             connection_manager_p,
                                             false);
@@ -731,8 +733,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   if (!UIDefinitionFile_in.empty ())
   {
 #if defined (GTK_USE)
-    CBData_in.UIState->eventHooks.finiHook = idle_finalize_UI_cb;
-    CBData_in.UIState->eventHooks.initHook = idle_initialize_server_UI_cb;
+    ACE_ASSERT (CBData_in.UIState);
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
@@ -757,7 +758,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (GTK_USE)
     gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
-    gtk_manager_p->start ();
+    ACE_thread_t thread_id = 0;
+    gtk_manager_p->start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
     result = ACE_OS::sleep (timeout);
@@ -903,7 +906,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
       timer_manager_p->stop ();
       return;
     } // end IF
-    configuration.listener->start ();
+    ACE_thread_t thread_id = 0;
+    configuration.listener->start (thread_id);
+    ACE_UNUSED_ARG (thread_id);
     if (!configuration.listener->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1363,13 +1368,19 @@ ACE_TMAIN (int argc_in,
     // step1h: init GLIB / G(D|T)K[+] / GNOME ?
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  Server_GtkBuilderDefinition_t ui_definition (argc_in,
-                                               argv_in,
-                                               &ui_cb_data);
+  Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
+  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
+  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+      idle_finalize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+      idle_initialize_server_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+//  if (!gtk_rc_file.empty ())
+//    ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
   if (!UI_file_path.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                              argv_in,
-                                                              &ui_definition);
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

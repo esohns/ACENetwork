@@ -154,13 +154,6 @@ struct Server_UI_CBData
 
   ClientServer_Subscribers_t   subscribers;
 };
-
-//////////////////////////////////////////
-
-#if defined (GTK_USE)
-typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct Server_UI_CBData> Server_GtkBuilderDefinition_t;
-#endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #endif

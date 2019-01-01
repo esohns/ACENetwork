@@ -527,7 +527,9 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (timer_manager_p);
   Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start ();
+  ACE_thread_t thread_id = 0;
+  timer_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
 
   // step4: initialize signal handling
   BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
@@ -535,10 +537,7 @@ do_work (bool useThreadPool_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to BITTORRENT_CLIENT_SignalHandler::initialize(): \"%m\", returning\n")));
-
-    // clean up
     timer_manager_p->stop ();
-
     return;
   } // end IF
   if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -550,10 +549,7 @@ do_work (bool useThreadPool_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
-
-    // clean up
     timer_manager_p->stop ();
-
     return;
   } // end IF
 
@@ -566,17 +562,16 @@ do_work (bool useThreadPool_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
-  state_r.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
+  ACE_ASSERT (CBData_in.UIState);
+//  Common_UI_GTK_State_t& state_r =
+//    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-  state_r.eventHooks.initHook = idle_initialize_UI_cb;
-  state_r.eventHooks.finiHook = idle_finalize_UI_cb;
 #endif // GTK_USE
-  //CBData_in.userData = &CBData_in;
-
 #if defined (GTK_USE)
-  gtk_manager_p->start ();
+  thread_id = 0;
+  gtk_manager_p->start (thread_id);
+  ACE_UNUSED_ARG (thread_id);
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
   if (result == -1)
@@ -1437,16 +1432,20 @@ ACE_TMAIN (int argc_in,
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  state_r.RCFiles.push_back (rc_file_name);
   ui_cb_data.progressData.state = &state_r;
 
   // step8: initialize GTK UI
-  BitTorrent_Client_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                          argv_in,
-                                                          &ui_cb_data);
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                            argv_in,
-                                                            &ui_definition);
+  Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
+  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
+  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+      idle_finalize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+      idle_initialize_UI_cb;
+  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (rc_file_name);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

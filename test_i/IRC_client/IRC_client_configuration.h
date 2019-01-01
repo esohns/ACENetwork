@@ -38,11 +38,17 @@
 #include "irc_defines.h"
 
 #include "test_i_common.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "test_i_gtk_common.h"
+#else
+//#include "test_u_wxwidgets_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_network.h"
-//#include "IRC_client_stream_common.h"
 
 // forward declarations
 //struct IRC_Client_ConnectionConfiguration;
@@ -94,10 +100,26 @@ struct IRC_Client_InputHandlerConfiguration
 };
 
 struct IRC_Client_Configuration
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+ : Test_I_GTK_Configuration
+#else
  : Test_I_Configuration
+#endif // GTK_USE
+#else
+ : Test_I_Configuration
+#endif // GUI_SUPPORT
 {
   IRC_Client_Configuration ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+   : Test_I_GTK_Configuration ()
+#else
    : Test_I_Configuration ()
+#endif // GTK_USE
+#else
+   : Test_I_Configuration ()
+#endif // GUI_SUPPORT
    , parserConfiguration ()
    ///////////////////////////////////////
    , connectionConfigurations ()
@@ -106,7 +128,11 @@ struct IRC_Client_Configuration
    ///////////////////////////////////////
    , protocolConfiguration ()
    ///////////////////////////////////////
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
    , cursesState (NULL)
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , encoding (IRC_PRT_DEFAULT_ENCODING)
    , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
@@ -124,8 +150,12 @@ struct IRC_Client_Configuration
   // ***************************** protocol ************************************
   struct IRC_ProtocolConfiguration      protocolConfiguration;
   // ***************************************************************************
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   // *TODO*: move this somewhere else
   struct IRC_Client_CursesState*        cursesState;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   enum Common_EventDispatchType         dispatch;
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible

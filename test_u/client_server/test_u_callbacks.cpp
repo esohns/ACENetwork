@@ -1417,12 +1417,14 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
 
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in)))
   {
+    ACE_thread_t thread_id = 0;
     try {
-      data_p->configuration->listener->start ();
+      data_p->configuration->listener->start (thread_id);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Test_U_Server_IListener::start(): \"%m\", continuing\n")));
     } // end catch
+    ACE_UNUSED_ARG (thread_id);
   } // end IF
   else
   {

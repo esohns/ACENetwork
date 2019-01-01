@@ -202,9 +202,4 @@ struct IRC_Client_UI_HandlerCBData
   std::string                    timeStamp;
 };
 
-#if defined (GTK_USE)
-typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct IRC_Client_UI_CBData> IRC_Client_GtkBuilderDefinition_t;
-#endif // GTK_USE
-
 #endif

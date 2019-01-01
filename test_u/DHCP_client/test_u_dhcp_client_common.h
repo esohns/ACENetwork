@@ -261,10 +261,26 @@ struct DHCPClient_SignalHandlerConfiguration
 //////////////////////////////////////////
 
 struct DHCPClient_Configuration
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+ : Test_U_GTK_Configuration
+#else
  : Test_U_Configuration
+#endif // GTK_USE
+#else
+ : Test_U_Configuration
+#endif // GUI_SUPPORT
 {
   DHCPClient_Configuration ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+   : Test_U_GTK_Configuration ()
+#else
    : Test_U_Configuration ()
+#endif // GTK_USE
+#else
+   : Test_U_Configuration ()
+#endif // GUI_SUPPORT
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , parserConfiguration ()
@@ -294,8 +310,6 @@ struct DHCPClient_Configuration
   enum Common_EventDispatchType                dispatch;
   ACE_HANDLE                                   handle;          // listen handle (unicast)
 };
-
-//typedef Common_ISubscribe_T<DHCPClient_ISessionNotify_t> DHCPClient_ISubscribe_t;
 
 //////////////////////////////////////////
 
