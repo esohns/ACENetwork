@@ -22,10 +22,11 @@
 #define DHCP_MODULE_STREAMER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_ilock.h"
 
 #include "stream_task_base_synch.h"
-
-//#include "dhcp_exports.h"
 
 //extern NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_streamer_module_name_string[];
 extern const char libacenetwork_protocol_default_dhcp_streamer_module_name_string[];
@@ -41,6 +42,7 @@ template <typename SynchStrategyType,
 class DHCP_Module_Streamer_T
  : public Stream_TaskBaseSynch_T<SynchStrategyType,
                                  TimePolicyType,
+                                 Common_ILock_T<SynchStrategyType>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -52,6 +54,7 @@ class DHCP_Module_Streamer_T
 {
   typedef Stream_TaskBaseSynch_T<SynchStrategyType,
                                  TimePolicyType,
+                                 Common_ILock_T<SynchStrategyType>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -67,9 +70,8 @@ class DHCP_Module_Streamer_T
   DHCP_Module_Streamer_T (ISTREAM_T*);                     // stream handle
 #else
   DHCP_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
-
-  virtual ~DHCP_Module_Streamer_T ();
+#endif // ACE_WIN32 || ACE_WIN64
+  inline virtual ~DHCP_Module_Streamer_T () {}
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

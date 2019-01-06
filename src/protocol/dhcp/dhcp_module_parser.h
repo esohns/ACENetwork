@@ -22,13 +22,14 @@
 #define DHCP_MODULE_PARSER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_ilock.h"
 
 #include "stream_headmoduletask_base.h"
-//#include "stream_statistichandler.h"
 #include "stream_task_base_synch.h"
 
 #include "dhcp_defines.h"
-//#include "dhcp_exports.h"
 #include "dhcp_parser_driver.h"
 
 //extern NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_parser_module_name_string[];
@@ -48,6 +49,7 @@ template <ACE_SYNCH_DECL,
 class DHCP_Module_Parser_T
  : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -59,6 +61,7 @@ class DHCP_Module_Parser_T
 {
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -75,7 +78,7 @@ class DHCP_Module_Parser_T
 #else
   DHCP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
 #endif
-  virtual ~DHCP_Module_Parser_T ();
+  inline virtual ~DHCP_Module_Parser_T () {}
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,

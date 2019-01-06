@@ -22,6 +22,9 @@
 #define IRC_MODULE_STREAMER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_ilock.h"
 
 #include "stream_common.h"
 #include "stream_task_base_synch.h"
@@ -39,6 +42,7 @@ template <ACE_SYNCH_DECL,
 class IRC_Module_Streamer_T
  : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -50,6 +54,7 @@ class IRC_Module_Streamer_T
 {
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -65,8 +70,8 @@ class IRC_Module_Streamer_T
   IRC_Module_Streamer_T (ISTREAM_T*);                     // stream handle
 #else
   IRC_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
-  virtual ~IRC_Module_Streamer_T ();
+#endif // ACE_WIN32 || ACE_WIN64
+  inline virtual ~IRC_Module_Streamer_T () {}
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

@@ -169,6 +169,5 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
 
 error:
   passMessageDownstream_out = false;
-  message_inout->release ();
-  message_inout = NULL;
+  message_inout->release (); message_inout = NULL;
 }

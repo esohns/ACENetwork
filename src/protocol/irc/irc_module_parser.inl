@@ -61,23 +61,6 @@ template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
-IRC_Module_Parser_T<ACE_SYNCH_USE,
-                    TimePolicyType,
-                    ConfigurationType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::~IRC_Module_Parser_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::~IRC_Module_Parser_T"));
-
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
 bool
 IRC_Module_Parser_T<ACE_SYNCH_USE,
                     TimePolicyType,

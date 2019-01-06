@@ -59,23 +59,6 @@ template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
-HTTP_Module_Streamer_T<ACE_SYNCH_USE,
-                       TimePolicyType,
-                       ConfigurationType,
-                       ControlMessageType,
-                       DataMessageType,
-                       SessionMessageType>::~HTTP_Module_Streamer_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Streamer_T::~HTTP_Module_Streamer_T"));
-
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
 void
 HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                        TimePolicyType,

@@ -181,7 +181,7 @@ class BitTorrent_Session_T
                                          struct Stream_ModuleConfiguration,
                                          PeerModuleHandlerConfigurationType,
                                          libacenetwork_default_bittorrent_handler_module_name_string,
-                                         BitTorrent_INotify_t,
+                                         Stream_INotify_t,
                                          PEER_MESSAGEHANDLER_T> PEER_MESSAGEHANDLER_MODULE_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
@@ -191,7 +191,7 @@ class BitTorrent_Session_T
                                          struct Stream_ModuleConfiguration,
                                          TrackerModuleHandlerConfigurationType,
                                          libacenetwork_default_bittorrent_handler_module_name_string,
-                                         BitTorrent_INotify_t,
+                                         Stream_INotify_t,
                                          TRACKER_MESSAGEHANDLER_T> TRACKER_MESSAGEHANDLER_MODULE_T;
 
   typedef BitTorrent_PeerStreamHandler_T<typename PeerStreamType::SESSION_DATA_T,

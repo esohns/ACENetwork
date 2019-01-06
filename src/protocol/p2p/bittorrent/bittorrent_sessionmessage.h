@@ -59,6 +59,11 @@ class BitTorrent_SessionMessage_T
                                       Stream_SessionData_T<SessionDataType>,
                                       UserDataType>
 {
+  typedef Stream_SessionMessageBase_T<struct BitTorrent_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      Stream_SessionData_T<SessionDataType>,
+                                      UserDataType> inherited;
+
   // enable access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
   //                                               struct BitTorrent_AllocatorConfiguration,
@@ -97,18 +102,13 @@ class BitTorrent_SessionMessage_T
   BitTorrent_SessionMessage_T (Stream_SessionId_t,
                                ACE_Data_Block*, // data block to use
                                ACE_Allocator*); // message allocator
-  inline virtual ~BitTorrent_SessionMessage_T () {};
+  inline virtual ~BitTorrent_SessionMessage_T () {}
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<struct BitTorrent_AllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
-                                      Stream_SessionData_T<SessionDataType>,
-                                      UserDataType> inherited;
-
   // convenient types
   typedef BitTorrent_SessionMessage_T<SessionDataType,
                                       UserDataType> OWN_TYPE_T;

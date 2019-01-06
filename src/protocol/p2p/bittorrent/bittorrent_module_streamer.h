@@ -22,6 +22,9 @@
 #define BITTORRENT_MODULE_STREAMER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_ilock.h"
 
 #include "stream_common.h"
 #include "stream_task_base_synch.h"
@@ -37,6 +40,7 @@ template <ACE_SYNCH_DECL,
 class BitTorrent_Module_Streamer_T
  : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -48,6 +52,7 @@ class BitTorrent_Module_Streamer_T
 {
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -64,7 +69,7 @@ class BitTorrent_Module_Streamer_T
 #else
   BitTorrent_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
 #endif
-  inline virtual ~BitTorrent_Module_Streamer_T () {};
+  inline virtual ~BitTorrent_Module_Streamer_T () {}
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

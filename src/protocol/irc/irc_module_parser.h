@@ -22,13 +22,14 @@
 #define IRC_MODULE_PARSER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
+#include "common_ilock.h"
 #include "common_time_common.h"
 
 #include "stream_task_base_synch.h"
 
 #include "irc_defines.h"
-//#include "irc_exports.h"
 #include "irc_parser_driver.h"
 
 //extern IRC_Export const char libacenetwork_protocol_default_irc_parser_module_name_string[];
@@ -68,6 +69,7 @@ template <ACE_SYNCH_DECL,
 class IRC_Module_Parser_T
  : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -79,6 +81,7 @@ class IRC_Module_Parser_T
 {
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
+                                 Common_ILock_T<ACE_SYNCH_USE>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
@@ -95,7 +98,7 @@ class IRC_Module_Parser_T
 #else
   IRC_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
 #endif // ACE_WIN32 || ACE_WIN64
-  virtual ~IRC_Module_Parser_T ();
+  inline virtual ~IRC_Module_Parser_T () {}
 
   // configuration / initialization
   virtual bool initialize (const ConfigurationType&,   // configuration handle

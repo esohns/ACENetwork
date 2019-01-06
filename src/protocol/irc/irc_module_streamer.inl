@@ -46,29 +46,10 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
                       UserDataType>::IRC_Module_Streamer_T (ISTREAM_T* stream_in)
 #else
                       UserDataType>::IRC_Module_Streamer_T (typename inherited::ISTREAM_T* stream_in)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::IRC_Module_Streamer_T"));
-
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-IRC_Module_Streamer_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ConfigurationType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      UserDataType>::~IRC_Module_Streamer_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::~IRC_Module_Streamer_T"));
 
 }
 

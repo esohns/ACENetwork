@@ -37,6 +37,8 @@
 
 #include "stream_dec_common.h"
 
+#include "stream_misc_messagehandler.h"
+
 #include "net_common.h"
 #include "net_defines.h"
 
@@ -329,8 +331,6 @@ struct BitTorrent_TrackerStreamState
   struct BitTorrent_UserData*           userData;
 };
 
-typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
-
 //////////////////////////////////////////
 
 struct BitTorrent_ProtocolConfiguration
@@ -404,16 +404,16 @@ struct BitTorrent_ProtocolConfiguration
 //                                          BitTorrent_ISession_t,
 //                                          struct Common_UI_State> BitTorrent_TrackerStreamHandler_t;
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename SessionIdType,
-          typename SessionDataType,
-          typename UserDataType>
-class Stream_Module_MessageHandler_T;
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename SessionIdType,
+//          typename SessionDataType,
+//          typename UserDataType>
+//class Stream_Module_MessageHandler_T;
 typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
                                        struct BitTorrent_PeerModuleHandlerConfiguration,
@@ -428,7 +428,7 @@ DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_PeerSessionData,              
                                 enum Stream_SessionMessageType,                   // session event type
                                 struct BitTorrent_PeerModuleHandlerConfiguration, // module handler configuration type
                                 libacenetwork_default_bittorrent_handler_module_name_string, // module name
-                                BitTorrent_INotify_t,                             // stream notification interface type
+                                Stream_INotify_t,                             // stream notification interface type
                                 BitTorrent_PeerHandler_t,                         // writer type
                                 BitTorrent_PeerHandler);                          // class name
 
@@ -448,7 +448,7 @@ DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_TrackerSessionData,           
                                 enum Stream_SessionMessageType,                      // session event type
                                 struct BitTorrent_TrackerModuleHandlerConfiguration, // module handler configuration type
                                 libacenetwork_default_bittorrent_handler_module_name_string, // module name
-                                BitTorrent_INotify_t,                                // stream notification interface type
+                                Stream_INotify_t,                                // stream notification interface type
                                 BitTorrent_TrackerHandler_t,                         // writer type
                                 BitTorrent_TrackerHandler);                          // class name
 
