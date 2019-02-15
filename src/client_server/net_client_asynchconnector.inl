@@ -858,7 +858,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
 /////////////////////////////////////////
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
@@ -1033,4 +1033,4 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   return handler_p;
 }
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT

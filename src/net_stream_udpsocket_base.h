@@ -30,9 +30,9 @@
 #include "net_common.h"
 #include "net_configuration.h"
 #include "net_iconnection.h"
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 #include "net_netlinksockethandler.h"
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 #include "net_udpsockethandler.h"
 
 // forward declarations
@@ -89,11 +89,11 @@ class Net_StreamUDPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #else
-  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
@@ -189,11 +189,11 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #else
-  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
@@ -223,7 +223,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 
 //////////////////////////////////////////
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 // partial specialization (for Netlink)
 template <typename ConfigurationType,
           typename StateType,
@@ -281,11 +281,11 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                      Net_Netlink_Addr&,        // return value: local SAP
                      Net_Netlink_Addr&) const; // return value: remote SAP
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #else
-  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
@@ -312,7 +312,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
 };
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 // include template definition
 #include "net_stream_udpsocket_base.inl"

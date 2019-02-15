@@ -30,7 +30,7 @@
 #include "net_configuration.h"
 #include "net_sockethandler_base.h"
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 // *NOTE*: this should be added to ACE so Svc_Handler can be parametrized with
 //         ACE_SOCK_Netlink
 class Net_SOCK_Netlink
@@ -46,6 +46,9 @@ class Net_NetlinkSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<Net_SOCK_Netlink, ACE_MT_SYNCH>
 {
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<Net_SOCK_Netlink, ACE_MT_SYNCH> inherited2;
+
  public:
   //// override some event handler methods
   //virtual ACE_Event_Handler::Reference_Count add_reference (void);
@@ -70,15 +73,12 @@ class Net_NetlinkSocketHandler_T
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<Net_SOCK_Netlink, ACE_MT_SYNCH> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T (const Net_NetlinkSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T& operator= (const Net_NetlinkSocketHandler_T&))
 };
 
 // include template definition
 #include "net_netlinksockethandler.inl"
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 #endif

@@ -47,8 +47,8 @@ extern "C"
 #endif // ACE_WIN32 || ACE_WIN64
 
 // forward declarations
-#if defined (NETLINK_SUPPORT)
-struct nl_msg;
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+//struct nl_msg;
 #endif // NETLINK_SUPPORT
 
 //////////////////////////////////////////
@@ -209,11 +209,11 @@ class Net_Common_Tools
   static std::string IPAddressToInterface (const ACE_INET_Addr&); // IP address
 
   inline static std::string IPAddressToString (const ACE_INET_Addr& address_in, bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); }
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
   static std::string NetlinkAddressToString (const Net_Netlink_Addr&);
 
 //  static std::string dump (struct nl_msg*);
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
   // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
   //         from the return value
   static std::string IPAddressToString (unsigned short, // port (network byte order !)

@@ -24,18 +24,15 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_time_common.h"
-
+#include "common_ilock.h"
 #include "common_itimerhandler.h"
+#include "common_time_common.h"
 #include "common_timer_handler.h"
 
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
-#include "net_exports.h"
-
-//#include "test_u_sessionmessage.h"
 #include "test_u_stream_common.h"
 
 // forward declaration(s)
@@ -43,12 +40,12 @@ class Stream_IAllocator;
 class Test_U_Message;
 class Test_U_SessionMessage;
 
-//extern Net_Export const char libacenetwork_default_test_u_protocolhandler_module_name_string[];
 extern const char libacenetwork_default_test_u_protocolhandler_module_name_string[];
 
 class ClientServer_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct ClientServer_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
@@ -59,6 +56,18 @@ class ClientServer_Module_ProtocolHandler
                                  struct Test_U_UserData>
  , public Common_ITimerHandler
 {
+  typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
+                                 struct ClientServer_ModuleHandlerConfiguration,
+                                 Test_U_ControlMessage_t,
+                                 Test_U_Message,
+                                 Test_U_SessionMessage,
+                                 Stream_SessionId_t,
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Test_U_UserData> inherited;
+
  public:
   ClientServer_Module_ProtocolHandler (ISTREAM_T*); // stream handle
   virtual ~ClientServer_Module_ProtocolHandler ();
@@ -77,17 +86,6 @@ class ClientServer_Module_ProtocolHandler
   virtual void dump_state () const;
 
  private:
-  typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
-                                 Common_TimePolicy_t,
-                                 struct ClientServer_ModuleHandlerConfiguration,
-                                 Test_U_ControlMessage_t,
-                                 Test_U_Message,
-                                 Test_U_SessionMessage,
-                                 Stream_SessionId_t,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 struct Test_U_UserData> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_ProtocolHandler ())
   ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_ProtocolHandler (const ClientServer_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_ProtocolHandler& operator= (const ClientServer_Module_ProtocolHandler&))

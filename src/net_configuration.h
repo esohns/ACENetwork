@@ -99,7 +99,7 @@ struct Net_SocketConfigurationBase
   bool         useLoopBackDevice;   // (if any)
 };
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 struct Net_NetlinkSocketConfiguration
  : Net_SocketConfigurationBase
 {
@@ -112,7 +112,7 @@ struct Net_NetlinkSocketConfiguration
   Net_Netlink_Addr address;
   int              protocol;
 };
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 struct Net_TCPSocketConfiguration
  : Net_SocketConfigurationBase

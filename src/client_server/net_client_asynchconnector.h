@@ -276,7 +276,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
 //////////////////////////////////////////
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 // partial specialization (for Netlink)
 template <typename HandlerType,
           ////////////////////////////////
@@ -345,14 +345,14 @@ class Net_Client_AsynchConnector_T<HandlerType,
   // implement Net_IAsynchConnector_T
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
-  inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; };
-  inline virtual bool useReactor () const { return false; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; }
+  inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; }
+  inline virtual bool useReactor () const { return false; }
   virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
-  inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  inline virtual int wait (ACE_HANDLE, const ACE_Time_Value& = ACE_Time_Value::zero) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }; // block : (relative-) timeout
-  inline virtual void onConnect (ACE_HANDLE, int) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual int wait (ACE_HANDLE, const ACE_Time_Value& = ACE_Time_Value::zero) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) } // block : (relative-) timeout
+  inline virtual void onConnect (ACE_HANDLE, int) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  protected:
   // override default creation strategy
@@ -379,7 +379,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   ACE_SYNCH_CONDITION    condition_;
   ACE_SYNCH_MUTEX        lock_;
 };
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 // include template definition
 #include "net_client_asynchconnector.inl"

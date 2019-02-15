@@ -221,9 +221,9 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
 
  protected:
   // override default activation strategy
-  virtual int activate_svc_handler (CONNECTION_T*);
+  virtual int activate_svc_handler (HandlerType*);
   // override default instantiation strategy
-  virtual int make_svc_handler (CONNECTION_T*&);
+  virtual int make_svc_handler (HandlerType*&);
   //virtual int connect_svc_handler (CONNECTION_T*&,
   //                                 const ACE_SOCK_Connector::PEER_ADDR&,
   //                                 ACE_Time_Value*,
@@ -271,7 +271,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
 
 //////////////////////////////////////////
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 // specialization (for Netlink)
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T
@@ -364,7 +364,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   ICONNECTION_MANAGER_T* connectionManager_;
   ACE_Time_Value         statisticCollectionInterval_;
 };
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 // include template definition
 #include "net_client_connector.inl"

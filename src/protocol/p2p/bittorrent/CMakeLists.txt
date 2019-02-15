@@ -14,9 +14,10 @@ add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
 if (UNIX)
 elseif (WIN32)
- set (OPENSSL_LIB_FILE libeay32.lib)
+# set (OPENSSL_LIB_FILE libeay32.lib)
+ set (OPENSSL_LIB_FILE libcrypto.lib)
  find_library (OPENSSL_LIBRARY ${OPENSSL_LIB_FILE}
-               PATHS ${PROJECTS_DIRECTORY}/openssl_win32_bin
+               PATHS ${PROJECTS_DIRECTORY}/openssl
                PATH_SUFFIXES lib
                DOC "searching for ${OPENSSL_LIB_FILE}")
 #if (NOT EXISTS OPENSSL_LIBRARY)

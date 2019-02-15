@@ -556,8 +556,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
-  modulehandler_configuration.subscribersLock =
-    &CBData_in.UIState->subscribersLock;
+  modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
 #endif // GUI_SUPPORT
 
   configuration.streamConfiguration.configuration_.cloneModule =
@@ -1410,7 +1409,7 @@ ACE_TMAIN (int argc_in,
       idle_finalize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_client_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
   if (!UI_file_path.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE

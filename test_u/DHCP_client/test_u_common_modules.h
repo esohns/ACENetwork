@@ -158,7 +158,6 @@ typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              DHCPClient_ControlMessage_t,
                              Test_U_Message,
                              Test_U_SessionMessage,
-                             DHCPClient_SessionData_t,
                              struct Test_U_UserData> DHCPClient_Module_Dump;
 
 // declare module(s)

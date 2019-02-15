@@ -24,17 +24,15 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_ilock.h"
 #include "common_time_common.h"
 
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
-#include "net_exports.h"
-
 #include "test_u_stream_common.h"
 
-//extern Net_Export const char libacenetwork_default_test_u_headerparser_module_name_string[];
 extern const char libacenetwork_default_test_u_headerparser_module_name_string[];
 
 // forward declaration(s)
@@ -44,6 +42,7 @@ class Test_U_SessionMessage;
 class ClientServer_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct ClientServer_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
@@ -53,6 +52,18 @@ class ClientServer_Module_HeaderParser
                                  enum Stream_SessionMessageType,
                                  struct Test_U_UserData>
 {
+  typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
+                                 struct ClientServer_ModuleHandlerConfiguration,
+                                 Test_U_ControlMessage_t,
+                                 Test_U_Message,
+                                 Test_U_SessionMessage,
+                                 Stream_SessionId_t,
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Test_U_UserData> inherited;
+
  public:
   ClientServer_Module_HeaderParser (ISTREAM_T*); // stream handle
   inline virtual ~ClientServer_Module_HeaderParser () {}
@@ -69,20 +80,9 @@ class ClientServer_Module_HeaderParser
   virtual void dump_state () const;
 
  private:
-  typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
-                                 Common_TimePolicy_t,
-                                 struct ClientServer_ModuleHandlerConfiguration,
-                                 Test_U_ControlMessage_t,
-                                 Test_U_Message,
-                                 Test_U_SessionMessage,
-                                 Stream_SessionId_t,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 struct Test_U_UserData> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser ());
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser (const ClientServer_Module_HeaderParser&));
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser& operator= (const ClientServer_Module_HeaderParser&));
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser ())
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser (const ClientServer_Module_HeaderParser&))
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser& operator= (const ClientServer_Module_HeaderParser&))
 };
 
 // declare module

@@ -401,7 +401,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        struct Net_UDPSocketConfiguration,
                        HandlerConfigurationType,
                        StreamType,
-                       UserDataType>::activate_svc_handler (CONNECTION_T* handler_in)
+                       UserDataType>::activate_svc_handler (HandlerType* handler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::activate_svc_handler"));
 
@@ -455,7 +455,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        struct Net_UDPSocketConfiguration,
                        HandlerConfigurationType,
                        StreamType,
-                       UserDataType>::make_svc_handler (CONNECTION_T*& handler_out)
+                       UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::make_svc_handler"));
 
@@ -561,7 +561,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
 /////////////////////////////////////////
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 template <ACE_SYNCH_DECL,
           typename HandlerType,
           typename ConnectorType,
@@ -680,4 +680,4 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   return (handler_out ? 0 : -1);
 }
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT

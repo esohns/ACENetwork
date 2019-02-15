@@ -583,8 +583,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
-  modulehandler_configuration.subscribersLock =
-    &CBData_in.UIState->subscribersLock;
+  modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
 #endif // GUI_SUPPORT
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
@@ -1376,7 +1375,7 @@ ACE_TMAIN (int argc_in,
       idle_finalize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_server_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
 //  if (!gtk_rc_file.empty ())
 //    ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
   if (!UI_file_path.empty ())

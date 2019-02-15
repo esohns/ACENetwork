@@ -174,7 +174,7 @@ enum Net_Connection_Status
   NET_CONNECTION_STATUS_MAX
 };
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 class Net_Netlink_Addr
  : public ACE_Netlink_Addr
 {
@@ -201,7 +201,7 @@ class Net_Netlink_Addr
 
   inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 typedef Stream_Statistic Net_Statistic_t;
 typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;
