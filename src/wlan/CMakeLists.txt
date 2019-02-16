@@ -154,7 +154,7 @@ if (UNIX)
 elseif (WIN32)
  if (LIBXML2_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libiconv-1.9.2-1/include>)
+                              $<BUILD_INTERFACE:$ENV{LIB_ROOT}/libiconv-1.9.2-1/include>)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               $<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIR}>)
  endif (LIBXML2_SUPPORT)

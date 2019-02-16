@@ -910,7 +910,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
 //////////////////////////////////////////
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1559,4 +1559,4 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                 result_in.handle (),
                 ACE_Event_Handler::ALL_EVENTS_MASK));
 }
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT

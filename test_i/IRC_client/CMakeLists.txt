@@ -44,33 +44,8 @@ if (UNIX)
 # *NOTE*: Common requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
 # pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
- pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
- if (GTK3_SUPPORT)
-  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
- else ()
-# pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
-  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
- endif ()
- if ((!PKG_CURSES) OR (!PKG_GTK))
-  message (FATAL_ERROR "required packages not found, aborting")
- endif ()
 # *TODO*: repair WIN32 pkgconfig support
 elseif (WIN32)
- find_library (CURSES_LIBRARY pdcurses.lib
-               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-               PATH_SUFFIXES win32
-               DOC "searching for pdcurses.lib")
- find_library (PANEL_LIBRARY panel.lib
-               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-               PATH_SUFFIXES win32
-               DOC "searching for panel.lib")
-
- if (NOT CURSES_LIBRARY)
-  message (FATAL_ERROR "could not find pdcurses.lib, aborting")
- endif ()
- if (NOT PANEL_LIBRARY)
-  message (FATAL_ERROR "could not find panel.lib, aborting")
- endif ()
 endif ()
 #if (NOT EXISTS PDCURSES_LIBRARY)
 

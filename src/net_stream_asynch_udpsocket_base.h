@@ -31,10 +31,10 @@
 #include "net_common.h"
 #include "net_configuration.h"
 #include "net_iconnection.h"
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 #include "net_asynch_netlinksockethandler.h"
 #include "net_netlinksockethandler.h"
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 // forward declarations
 class ACE_Notification_Strategy;
@@ -116,7 +116,7 @@ class Net_StreamAsynchUDPSocketBase_T
 
 //////////////////////////////////////////
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 // partial specialization (for Netlink)
 template <typename ConfigurationType,
           typename StateType,
@@ -197,7 +197,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 };
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 // include template definition
 #include "net_stream_asynch_udpsocket_base.inl"

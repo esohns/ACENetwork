@@ -22,13 +22,13 @@
 #include "ace/Synch.h"
 #include "net_configuration.h"
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 #include "netlink/addr.h"
 
 #include "ace/OS.h"
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 int
 Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
                                   size_t size_in,
@@ -80,4 +80,4 @@ Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
 
   return 0;
 }
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
