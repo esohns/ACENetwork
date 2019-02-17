@@ -56,9 +56,6 @@
 // statistic
 #define TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL  0 // seconds: 0 --> OFF
 
-// file system
-#define TEST_I_DEFAULT_CONFIGURATION_DIRECTORY       "etc"
-
 //////////////////////////////////////////
 
 // UI
