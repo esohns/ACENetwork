@@ -44,36 +44,40 @@ template <typename AllocatorConfigurationType,
           typename DataMessageType,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType,
+template <typename DataType,
+          typename AllocatorConfigurationType,
           typename ControlMessageType,
-          typename SessionMessageType,
-          typename DataType>
-class HTTP_Message_T
- : public Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
-                                   DataType,
+          typename SessionMessageType>
+class PPSPP_Message_T
+ : public Stream_DataMessageBase_T<DataType,
+                                   AllocatorConfigurationType,
+                                   enum Stream_MessageType,
                                    HTTP_Method_t>
 {
+  typedef Stream_DataMessageBase_T<DataType,
+                                   AllocatorConfigurationType,
+                                   enum Stream_MessageType,
+                                   HTTP_Method_t> inherited;
+
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<AllocatorConfigurationType,
                                                  ControlMessageType,
-                                                 HTTP_Message_T<AllocatorConfigurationType,
-                                                                ControlMessageType,
-                                                                SessionMessageType,
-                                                                DataType>,
+                                                 PPSPP_Message_T<DataType,
+                                                                 AllocatorConfigurationType,
+                                                                 ControlMessageType,
+                                                                 SessionMessageType>,
                                                  SessionMessageType>;
   friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
                                                ControlMessageType,
-                                               HTTP_Message_T<AllocatorConfigurationType,
-                                                              ControlMessageType,
-                                                              SessionMessageType,
-                                                              DataType>,
+                                               PPSPP_Message_T<DataType,
+                                                               AllocatorConfigurationType,
+                                                               ControlMessageType,
+                                                               SessionMessageType>,
                                                SessionMessageType>;
 
  public:
-  HTTP_Message_T (unsigned int); // size
-  virtual ~HTTP_Message_T ();
+  PPSPP_Message_T (unsigned int); // size
+  virtual ~PPSPP_Message_T ();
 
   virtual HTTP_Method_t command () const; // return value: message type
   static std::string Command2String (HTTP_Method_t);
@@ -105,24 +109,18 @@ class HTTP_Message_T
 
  protected:
   // *NOTE*: to be used by allocators
-  HTTP_Message_T (ACE_Data_Block*, // data block to use
+  PPSPP_Message_T (ACE_Data_Block*, // data block to use
                   ACE_Allocator*,  // message allocator
                   bool = true);    // increment running message counter ?
-  //   HTTP_Message_T (ACE_Allocator*); // message allocator
+  //   PPSPP_Message_T (ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
-  HTTP_Message_T (const HTTP_Message_T&);
+  PPSPP_Message_T (const PPSPP_Message_T&);
 
  private:
-  typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
-                                   DataType,
-                                   HTTP_Method_t> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T ())
-  ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T& operator= (const HTTP_Message_T&))
+  ACE_UNIMPLEMENTED_FUNC (PPSPP_Message_T ())
+  ACE_UNIMPLEMENTED_FUNC (PPSPP_Message_T& operator= (const PPSPP_Message_T&))
 };
 
 // include template definition

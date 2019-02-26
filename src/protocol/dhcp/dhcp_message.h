@@ -50,25 +50,28 @@ class Stream_CachedMessageAllocator_T;
 template <typename AllocatorConfigurationType,
           typename MessageType>
 class DHCP_Message_T
- : public Stream_DataMessageBase_T<AllocatorConfigurationType,
+ : public Stream_DataMessageBase_T<struct DHCP_Record,
+                                   AllocatorConfigurationType,
                                    MessageType,
-                                   struct DHCP_Record,
                                    DHCP_MessageType_t>
 {
-  // enable access to specific private ctors
+  typedef Stream_DataMessageBase_T<struct DHCP_Record,
+                                   AllocatorConfigurationType,
+                                   MessageType,
+                                   DHCP_MessageType_t> inherited;
+
+    // enable access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
   //                                               AllocatorConfigurationType,
   //                                               ControlMessageType,
   //                                               DHCP_Message_T<AllocatorConfigurationType,
-  //                                                              ControlMessageType,
-  //                                                              SessionMessageType>,
+  //                                                              MessageType>,
   //                                               SessionMessageType>;
   //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
   //                                             AllocatorConfigurationType,
   //                                             ControlMessageType,
   //                                             DHCP_Message_T<AllocatorConfigurationType,
-  //                                                            ControlMessageType,
-  //                                                            SessionMessageType>,
+  //                                                            MessageType>,
   //                                             SessionMessageType>;
 
  public:
@@ -103,11 +106,6 @@ class DHCP_Message_T
   DHCP_Message_T (const OWN_TYPE_T&);
 
  private:
-  typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   MessageType,
-                                   struct DHCP_Record,
-                                   DHCP_MessageType_t> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (DHCP_Message_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Message_T& operator= (const DHCP_Message_T&))
 };

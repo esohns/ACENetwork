@@ -64,11 +64,16 @@ class Test_I_MessageDataContainer
 //////////////////////////////////////////
 
 class Test_I_Message
- : public Stream_DataMessageBase_2<struct Common_FlexParserAllocatorConfiguration,
+ : public Stream_DataMessageBase_2<Test_I_MessageDataContainer,
+                                   struct Common_FlexParserAllocatorConfiguration,
                                    enum Stream_MessageType,
-                                   Test_I_MessageDataContainer,
                                    HTTP_Method_t>
 {
+  typedef Stream_DataMessageBase_2<Test_I_MessageDataContainer,
+                                   struct Common_FlexParserAllocatorConfiguration,
+                                   enum Stream_MessageType,
+                                   HTTP_Method_t> inherited;
+
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                                  struct Common_FlexParserAllocatorConfiguration,
@@ -91,11 +96,6 @@ class Test_I_Message
   Test_I_Message (const Test_I_Message&);
 
  private:
-  typedef Stream_DataMessageBase_2<struct Common_FlexParserAllocatorConfiguration,
-                                   enum Stream_MessageType,
-                                   Test_I_MessageDataContainer,
-                                   HTTP_Method_t> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_I_Message ())
   // *NOTE*: to be used by message allocators
   Test_I_Message (Stream_SessionId_t,

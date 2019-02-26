@@ -46,11 +46,16 @@ class ACE_Message_Block;
 //class Stream_CachedMessageAllocator_T;
 
 class IRC_Message
- : public Stream_DataMessageBase_T<struct IRC_AllocatorConfiguration,
+ : public Stream_DataMessageBase_T<IRC_Record,
+                                   struct IRC_AllocatorConfiguration,
                                    enum Stream_MessageType,
-                                   IRC_Record,
                                    IRC_CommandType_t>
 {
+  typedef Stream_DataMessageBase_T<IRC_Record,
+                                   struct IRC_AllocatorConfiguration,
+                                   enum Stream_MessageType,
+                                   IRC_CommandType_t> inherited;
+
   // enable access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
   //                                               struct Stream_AllocatorConfiguration,
@@ -71,7 +76,7 @@ class IRC_Message
                ACE_Allocator*,     // message allocator
                bool = true);       // increment running message counter ?
   //IRC_Message(ACE_Allocator*); // message allocator
-  inline virtual ~IRC_Message() {};
+  inline virtual ~IRC_Message() {}
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -90,11 +95,6 @@ class IRC_Message
   IRC_Message (const IRC_Message&);
 
  private:
-  typedef Stream_DataMessageBase_T<struct IRC_AllocatorConfiguration,
-                                   enum Stream_MessageType,
-                                   IRC_Record,
-                                   IRC_CommandType_t> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (IRC_Message ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Message& operator= (const IRC_Message&))
 };

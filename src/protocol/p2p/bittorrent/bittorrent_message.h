@@ -74,12 +74,17 @@ struct BitTorrent_PeerMessageData
 template <typename SessionDataType, // *NOTE*: this implements Common_IReferenceCount !
           typename UserDataType>
 class BitTorrent_Message_T
- : public Stream_DataMessageBase_2<struct BitTorrent_AllocatorConfiguration,
+ : public Stream_DataMessageBase_2<Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
+                                   struct BitTorrent_AllocatorConfiguration,
                                    enum Stream_MessageType,
-                                   Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
                                    enum BitTorrent_MessageType>
 {
-  // enable access to specific private ctors
+  typedef Stream_DataMessageBase_2<Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
+                                   struct BitTorrent_AllocatorConfiguration,
+                                   enum Stream_MessageType,
+                                   enum BitTorrent_MessageType> inherited;
+
+    // enable access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
   //                                               struct BitTorrent_AllocatorConfiguration,
   //                                               Stream_ControlMessage_T<enum Stream_ControlMessageType,
@@ -133,11 +138,6 @@ class BitTorrent_Message_T
                                                    UserDataType>&);
 
  private:
-  typedef Stream_DataMessageBase_2<struct BitTorrent_AllocatorConfiguration,
-                                   enum Stream_MessageType,
-                                   Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
-                                   enum BitTorrent_MessageType> inherited;
-
   // convenient types
   typedef BitTorrent_Message_T<SessionDataType,
                                UserDataType> OWN_TYPE_T;

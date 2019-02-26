@@ -50,11 +50,16 @@ class ACE_Message_Block;
 template <typename AllocatorConfigurationType,
           typename MessageType>
 class HTTP_Message_T
- : public Stream_DataMessageBase_2<AllocatorConfigurationType,
+ : public Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
+                                   AllocatorConfigurationType,
                                    MessageType,
-                                   Stream_DataBase_T<struct HTTP_Record>,
                                    HTTP_Method_t>
 {
+  typedef Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
+                                   AllocatorConfigurationType,
+                                   MessageType,
+                                   HTTP_Method_t> inherited;
+
   // enable access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
   //                                               AllocatorConfigurationType,
@@ -118,11 +123,6 @@ class HTTP_Message_T
   HTTP_Message_T (const HTTP_Message_T&);
 
  private:
-  typedef Stream_DataMessageBase_2<AllocatorConfigurationType,
-                                   MessageType,
-                                   Stream_DataBase_T<struct HTTP_Record>,
-                                   HTTP_Method_t> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T& operator= (const HTTP_Message_T&))
 
