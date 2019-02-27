@@ -22,7 +22,7 @@
 #define NET_CLIENT_DEFINES_H
 
 // (asynchronous) connections
-#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT          NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT // seconds
+#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT          10 // second(s)
 // *IMPORTANT NOTE*: unfortunately, this means that asynchronous connections
 //                   take at least this amount of time to establish
 // *TODO*: remove ASAP
