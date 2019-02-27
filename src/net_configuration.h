@@ -77,6 +77,7 @@ struct Net_SocketConfigurationBase
 #else
    , interfaceIdentifier (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
 #endif // ACE_WIN32 || ACE_WIN64
+   , linger (NET_SOCKET_DEFAULT_LINGER)
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -96,6 +97,8 @@ struct Net_SocketConfigurationBase
 #else
   std::string  interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64
+  // *NOTE*: win32 udp sockets do not linger
+  bool         linger;
   bool         useLoopBackDevice;   // (if any)
 };
 
@@ -121,7 +124,6 @@ struct Net_TCPSocketConfiguration
    : Net_SocketConfigurationBase ()
    , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
               static_cast<ACE_UINT32> (INADDR_ANY))
-   , linger (NET_SOCKET_DEFAULT_LINGER)
   {
     int result = -1;
 
@@ -137,8 +139,7 @@ struct Net_TCPSocketConfiguration
     } // end IF
   }
 
-  ACE_INET_Addr address;
-  bool          linger;
+  ACE_INET_Addr address; // listening/peer-
 };
 
 struct Net_UDPSocketConfiguration
@@ -149,10 +150,6 @@ struct Net_UDPSocketConfiguration
    , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
    // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
    //                SO_LINGER
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-   , linger (NET_SOCKET_DEFAULT_LINGER)
-#endif // ACE_WIN32 || ACE_WIN64
    , listenAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
                     static_cast<ACE_UINT32> (INADDR_ANY))
    , peerAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
@@ -190,10 +187,6 @@ struct Net_UDPSocketConfiguration
   //                   needs to be associated with the peer address, as the data
   //                   dispatch happens out of context
   bool          connect;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  bool          linger;
-#endif // ACE_WIN32 || ACE_WIN64
   ACE_INET_Addr listenAddress;
   ACE_INET_Addr peerAddress;
   ACE_UINT16    sourcePort; // specify a specific source port (outbound)

@@ -28,14 +28,14 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <ifdef.h>
 #else
-#include <net/ethernet.h>
+#include "net/ethernet.h"
 
-#if defined (DHCLIENT_SUPPORT)
-extern "C"
-{
-#include "dhcpctl/dhcpctl.h"
-}
-#endif // DHCLIENT_SUPPORT
+//#if defined (DHCLIENT_SUPPORT)
+//extern "C"
+//{
+//#include "dhcpctl/dhcpctl.h"
+//}
+//#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"

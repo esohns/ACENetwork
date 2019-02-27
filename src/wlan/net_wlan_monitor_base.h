@@ -55,6 +55,10 @@ extern "C"
 #include "net_common.h"
 
 #include "net_wlan_common.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include "net_wlan_dhcp_common.h"
+#endif // ACE_WIN32 || ACE_WIN64
 #include "net_wlan_imanager.h"
 #include "net_wlan_imonitor.h"
 #include "net_wlan_monitor_statemachine.h"

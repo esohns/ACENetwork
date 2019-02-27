@@ -2,6 +2,8 @@ include (CMakeDependentOption)
 include (FeatureSummary)
 
 if (UNIX)
+ option (NETLINK_SUPPORT "enable netlink support" ON)
+
 # check_library_exists (iw iw_sockets_open /usr/lib/x86_64-linux-gnu HAVE_LIBIW)
  set (IW_LIB_FILE libiw.so)
  find_library (IW_LIBRARY ${IW_LIB_FILE}

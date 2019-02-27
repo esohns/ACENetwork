@@ -41,13 +41,6 @@
 #else
 #include "net/ethernet.h"
 
-#if defined (DHCLIENT_SUPPORT)
-extern "C"
-{
-#include "dhcpctl/dhcpctl.h"
-}
-#endif // DHCLIENT_SUPPORT
-
 #if defined (NL80211_SUPPORT)
 #include "linux/nl80211.h"
 #endif // NL80211_SUPPORT
@@ -324,19 +317,6 @@ int
 network_wlan_nl80211_default_handler_cb (struct nl_msg*,
                                          void*);
 #endif // NL80211_SUPPORT
-
-#if defined (DHCLIENT_SUPPORT)
-struct Net_WLAN_dhclient_CBData
-{
-  Net_WLAN_dhclient_CBData ()
-   : connection (NULL)
-   , monitor (NULL)
-  {}
-
-  dhcpctl_handle         connection;
-  Net_WLAN_IMonitorBase* monitor;
-};
-#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 struct Net_WLAN_AssociationConfiguration

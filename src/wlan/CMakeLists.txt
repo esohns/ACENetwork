@@ -201,7 +201,7 @@ set (source_files
      net_wlan_common.h
      net_wlan_configuration.h
      net_wlan_defines.h
-     net_wlan_exports.h
+ #    net_wlan_exports.h
      net_wlan_imanager.h
      net_wlan_imonitor.h
      net_wlan_inetmonitor.cpp
@@ -218,6 +218,9 @@ set (source_files
      net_wlan_tools.cpp
      net_wlan_tools.h)
 if (UNIX)
+ set (source_files
+      ${source_files}
+      net_wlan_dhcp_common.h)
  if (WEXT_SUPPORT)
   set (source_files
        ${source_files}
