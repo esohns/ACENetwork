@@ -12,20 +12,6 @@ endif ()
 add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
 
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
-if (UNIX)
-elseif (WIN32)
-# set (OPENSSL_LIB_FILE libeay32.lib)
- set (OPENSSL_LIB_FILE libcrypto.lib)
- find_library (OPENSSL_LIBRARY ${OPENSSL_LIB_FILE}
-               PATHS ${PROJECTS_DIRECTORY}/openssl
-               PATH_SUFFIXES lib
-               DOC "searching for ${OPENSSL_LIB_FILE}")
-#if (NOT EXISTS OPENSSL_LIBRARY)
- if (NOT OPENSSL_LIBRARY)
-  message (FATAL_ERROR "could not find ${OPENSSL_LIB_FILE} (was: \"${OPENSSL_LIBRARY}\"), aborting")
- endif (NOT OPENSSL_LIBRARY)
-endif ()
-add_definitions (-DACE_HAS_DLL)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -254,7 +240,7 @@ endif (WIN32 AND MSVC)
 if (UNIX)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${OPENSSL_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${OPENSSL_LIBRARY})
 
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
 endif ()

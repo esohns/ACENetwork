@@ -77,8 +77,9 @@ elseif (WIN32)
  unset (LIBXML2_LIB_FILE)
  set (LIBXML2_LIB_FILE libxml2.lib)
  find_library (LIBXML2_LIBRARY ${LIBXML2_LIB_FILE}
-               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.4
-               PATH_SUFFIXES win32/bin.msvc
+               PATHS $ENV{LIB_ROOT}/libxml2
+#               PATH_SUFFIXES win32/bin.msvc
+               PATH_SUFFIXES lib
                DOC "searching for \"${LIBXML2_LIB_FILE}\""
                NO_DEFAULT_PATH)
  if (NOT LIBXML2_LIBRARY)

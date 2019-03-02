@@ -341,7 +341,7 @@ elseif (WIN32)
 # if (MSXML_USE)
   target_link_libraries (${EXECUTABLE} msxml2.lib)
 # elseif (LIBXML2_USE)
-  target_link_libraries (${EXECUTABLE} ${LIBXML2_LIBRARY})
+#  target_link_libraries (${EXECUTABLE} ${LIBXML2_LIBRARY})
 # endif ()
 
  target_link_libraries (${EXECUTABLE} ${ACE_XML_LIBRARY})
