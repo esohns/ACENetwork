@@ -26,18 +26,19 @@
 #include <Ks.h>
 #include <l2cmn.h>
 #include <mstcpip.h>
-#if defined (MSXML_SUPPORT)
-#include <msxml2.h>
-#endif // MSXML_SUPPORT
 #include <OleAuto.h>
 #include <shlwapi.h>
 #include <wlanapi.h>
 #include <WinInet.h>
 
-#if defined (LIBXML2_SUPPORT)
+#if defined (MSXML_SUPPORT)
+#include <msxml2.h>
+#elif defined (LIBXML2_SUPPORT)
 #include "libxml/xpath.h"
 #include "libxml/xpathInternals.h"
-#endif // LIBXML2_SUPPORT
+#else
+#error "no supported XML parser, aborting"
+#endif
 
 #include "ace/Handle_Set.h"
 #include "ace/INET_Addr.h"
@@ -1445,146 +1446,147 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   LPCWSTR strProfileXml = NULL;
   DWORD   dwReasonCode = 0;
 
-  //// load/populate profile template
-  //HRESULT result = CoInitializeEx (NULL,
-  //                                 (COINIT_MULTITHREADED    |
-  //                                  COINIT_DISABLE_OLE1DDE  |
-  //                                  COINIT_SPEED_OVER_MEMORY));
-  //if (unlikely (FAILED (result))) // 0x80010106: RPC_E_CHANGED_MODE
-  //{
-  //  if (result != RPC_E_CHANGED_MODE) // already initialized
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to CoInitializeEx(): \"%s\", aborting\n"),
-  //                ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
-  //    return false;
-  //  } // end IF
-  //  ACE_DEBUG ((LM_WARNING,
-  //              ACE_TEXT ("failed to CoInitializeEx(): \"%s\", continuing\n"),
-  //              ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
-  //} // end IF
-  //IXMLDOMDocument* document_p = NULL;
-  //IXMLDOMNode* node_p = NULL;
-  std::string profile_template_path;
-  // *TODO*: use MSXML
-  //struct tagVARIANT variant_s;
-  //VariantInit (&variant_s);
-  //VARIANT_BOOL result_2 = VARIANT_TRUE;
-  //BSTR string_p = NULL;
-  DWORD result_3 = ERROR_INVALID_DATA;
-  //BSTR xpath_query_p = SysAllocString (NET_WLAN_PROFILE_SSIDCONFIG_SSID_XPATH);
-  //ACE_ASSERT (xpath_query_p);
-  //result = CoCreateInstance (CLSID_DOMDocument30, NULL,
-  //                           CLSCTX_INPROC_SERVER,
-  //                           IID_PPV_ARGS (&document_p));
-  //if (unlikely (FAILED (result)))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to CoCreateInstance(CLSID_DOMDocument30): \"%s\", aborting\n"),
-  //              ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
-  //  goto clean;
-  //} // end IF
-  //ACE_ASSERT (document_p);
-  //result = document_p->put_async (VARIANT_FALSE);
-  //ACE_ASSERT (SUCCEEDED (result));
-  //result = document_p->put_validateOnParse (VARIANT_FALSE);
-  //ACE_ASSERT (SUCCEEDED (result));
-  //result = document_p->put_resolveExternals (VARIANT_FALSE);
-  //ACE_ASSERT (SUCCEEDED (result));
-  //result = document_p->put_preserveWhiteSpace (VARIANT_FALSE);
-  //ACE_ASSERT (SUCCEEDED (result));
-  profile_template_path =
+  std::string profile_template_path =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
                                                       ACE_TEXT_ALWAYS_CHAR (NET_MODULE_WLAN_DIRECTORY_STRING),
                                                       true);
   profile_template_path += ACE_DIRECTORY_SEPARATOR_STR;
   profile_template_path +=
     ACE_TEXT_ALWAYS_CHAR (NET_WLAN_PROFILE_TEMPLATE_FILENAME);
+  DWORD result_3 = ERROR_INVALID_DATA;
+#if defined (MSXML_SUPPORT)
+  // load/populate profile template
+  HRESULT result = CoInitializeEx (NULL,
+                                   (COINIT_MULTITHREADED    |
+                                    COINIT_DISABLE_OLE1DDE  |
+                                    COINIT_SPEED_OVER_MEMORY));
+  if (unlikely (FAILED (result))) // 0x80010106: RPC_E_CHANGED_MODE
+  {
+    if (result != RPC_E_CHANGED_MODE) // already initialized
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to CoInitializeEx(): \"%s\", aborting\n"),
+                  ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
+      return false;
+    } // end IF
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("failed to CoInitializeEx(): \"%s\", continuing\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
+  } // end IF
+  IXMLDOMDocument* document_p = NULL;
+  IXMLDOMNode* node_p = NULL;
+  struct tagVARIANT variant_s;
+  VariantInit (&variant_s);
+  VARIANT_BOOL result_2 = VARIANT_TRUE;
+  BSTR string_p = NULL;
+  BSTR xpath_query_p =
+    SysAllocString (ACE_TEXT_ALWAYS_WCHAR (NET_WLAN_PROFILE_WLANCONFIG_SSIDCONFIG_SSID_XPATH_STRING));
+  ACE_ASSERT (xpath_query_p);
+  result = CoCreateInstance (CLSID_DOMDocument30, NULL,
+                             CLSCTX_INPROC_SERVER,
+                             IID_PPV_ARGS (&document_p));
+  if (unlikely (FAILED (result)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to CoCreateInstance(CLSID_DOMDocument30): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
+    goto clean;
+  } // end IF
+  ACE_ASSERT (document_p);
+  result = document_p->put_async (VARIANT_FALSE);
+  ACE_ASSERT (SUCCEEDED (result));
+  result = document_p->put_validateOnParse (VARIANT_FALSE);
+  ACE_ASSERT (SUCCEEDED (result));
+  result = document_p->put_resolveExternals (VARIANT_FALSE);
+  ACE_ASSERT (SUCCEEDED (result));
+  result = document_p->put_preserveWhiteSpace (VARIANT_FALSE);
+  ACE_ASSERT (SUCCEEDED (result));
   // *TODO*: find a way to pass a valid path URL to IXMLDOMDocument::load()
   //         (already tried UrlCreateFromPath() and Common_File_Tools::escape()
   //         to no avail)
-  //V_VT (&variant_s) = VT_BSTR;
+  V_VT (&variant_s) = VT_BSTR;
   
-  //uint8_t* data_p = NULL;
-  //unsigned int file_size_i = 0;
-  //if (unlikely (!Common_File_Tools::load (profile_template_path,
-  //                                        data_p,
-  //                                        file_size_i)))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
-  //              ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
-  //  goto clean;
-  //} // end IF
-  //ACE_ASSERT (data_p);
-  //V_BSTR (&variant_s) =
-  //  Common_String_Tools::to (reinterpret_cast<char*> (data_p));
-  //ACE_ASSERT (V_BSTR (&variant_s));
-  //delete [] data_p; data_p = NULL;
-  //result =
-    //document_p->load (variant_s,
-    //                  &result_2);
-  //  document_p->loadXML (V_BSTR (&variant_s),
-  //                       &result_2);
-  //if (unlikely ((result == S_FALSE) || (result_2 == VARIANT_FALSE)))
-  //{
-  //  IXMLDOMParseError* error_p = NULL;
-  //  BSTR error_2 = NULL, line_p = NULL;
-  //  long error_i = 0, line_i = 0, column_i = 0;
-  //  HRESULT result_4 = document_p->get_parseError (&error_p);
-  //  ACE_ASSERT (SUCCEEDED (result_4) && error_p);
-  //  result_4 = error_p->get_errorCode (&error_i);
-  //  ACE_ASSERT (SUCCEEDED (result_4));
-  //  result_4 = error_p->get_reason (&error_2);
-  //  ACE_ASSERT (SUCCEEDED (result_4) && error_2);
-  //  result_4 = error_p->get_srcText (&line_p);
-  //  ACE_ASSERT (SUCCEEDED (result_4));// && line_p);
-  //  result_4 = error_p->get_line (&line_i);
-  //  ACE_ASSERT (SUCCEEDED (result_3));
-  //  result_4 = error_p->get_linepos (&column_i);
-  //  ACE_ASSERT (SUCCEEDED (result_4));
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to IXMLDOMDocument::load(\"%s\"): \"%s\" (\"%s\"), aborting\n"),
-  //              ACE_TEXT (profile_template_path.c_str ()),
-  //              ACE_TEXT (Common_Error_Tools::errorToString (HRESULT_CODE (error_i), false, true).c_str ()),
-  //              ACE_TEXT_WCHAR_TO_TCHAR (error_2)));
-  //  SysFreeString (error_2); error_2 = NULL;
-  //  SysFreeString (line_p); line_p = NULL;
-  //  error_p->Release (); error_p = NULL;
-  //  goto clean;
-  //} // end IF
-  //result = VariantClear (&variant_s);
-  //ACE_ASSERT (SUCCEEDED (result));
-  //result = document_p->selectSingleNode (xpath_query_p,
-  //                                       &node_p);
-  //if (unlikely (FAILED (result) || !node_p))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to IXMLDOMDocument::selectSingleNode(\"%s\"): \"%s\", aborting\n"),
-  //              ACE_TEXT_WCHAR_TO_TCHAR (NET_WLAN_PROFILE_SSIDCONFIG_SSID_XPATH),
-  //              ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError (), false).c_str ())));
-  //  goto clean;
-  //} // end IF
-  //V_BSTR (&variant_s) = SysAllocStringByteLen (SSID_in.c_str (),
-  //                                             SSID_in.size ());
-  //ACE_ASSERT (V_BSTR (&variant_s));
-  //result = node_p->put_nodeValue (variant_s);
-  //if (unlikely (FAILED (result)))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to IXMLDOMNode::put_nodeValue(\"%s\"): \"%s\", aborting\n"),
-  //              ACE_TEXT (SSID_in.c_str ()),
-  //              ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError (), false).c_str ())));
-  //  goto clean;
-  //} // end IF
-  //result = document_p->get_xml (&string_p);
-  //if (unlikely (FAILED (result) || !string_p))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to IXMLDOMDocument::get_xml(): \"%s\", aborting\n"),
-  //              ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
-  //  goto clean;
-  //} // end IF
+  uint8_t* data_p = NULL;
+  unsigned int file_size_i = 0;
+  if (unlikely (!Common_File_Tools::load (profile_template_path,
+                                          data_p,
+                                          file_size_i)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
+    goto clean;
+  } // end IF
+  ACE_ASSERT (data_p);
+  V_BSTR (&variant_s) =
+    Common_String_Tools::to (reinterpret_cast<char*> (data_p));
+  ACE_ASSERT (V_BSTR (&variant_s));
+  delete [] data_p; data_p = NULL;
+  result =
+    document_p->load (variant_s,
+                      &result_2);
+    document_p->loadXML (V_BSTR (&variant_s),
+                         &result_2);
+  if (unlikely ((result == S_FALSE) || (result_2 == VARIANT_FALSE)))
+  {
+    IXMLDOMParseError* error_p = NULL;
+    BSTR error_2 = NULL, line_p = NULL;
+    long error_i = 0, line_i = 0, column_i = 0;
+    HRESULT result_4 = document_p->get_parseError (&error_p);
+    ACE_ASSERT (SUCCEEDED (result_4) && error_p);
+    result_4 = error_p->get_errorCode (&error_i);
+    ACE_ASSERT (SUCCEEDED (result_4));
+    result_4 = error_p->get_reason (&error_2);
+    ACE_ASSERT (SUCCEEDED (result_4) && error_2);
+    result_4 = error_p->get_srcText (&line_p);
+    ACE_ASSERT (SUCCEEDED (result_4));// && line_p);
+    result_4 = error_p->get_line (&line_i);
+    ACE_ASSERT (SUCCEEDED (result_3));
+    result_4 = error_p->get_linepos (&column_i);
+    ACE_ASSERT (SUCCEEDED (result_4));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IXMLDOMDocument::load(\"%s\"): \"%s\" (\"%s\"), aborting\n"),
+                ACE_TEXT (profile_template_path.c_str ()),
+                ACE_TEXT (Common_Error_Tools::errorToString (HRESULT_CODE (error_i), false, true).c_str ()),
+                ACE_TEXT_WCHAR_TO_TCHAR (error_2)));
+    SysFreeString (error_2); error_2 = NULL;
+    SysFreeString (line_p); line_p = NULL;
+    error_p->Release (); error_p = NULL;
+    goto clean;
+  } // end IF
+  result = VariantClear (&variant_s);
+  ACE_ASSERT (SUCCEEDED (result));
+  result = document_p->selectSingleNode (xpath_query_p,
+                                         &node_p);
+  if (unlikely (FAILED (result) || !node_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IXMLDOMDocument::selectSingleNode(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (NET_WLAN_PROFILE_WLANCONFIG_SSIDCONFIG_SSID_XPATH_STRING),
+                ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError (), false).c_str ())));
+    goto clean;
+  } // end IF
+  V_BSTR (&variant_s) = SysAllocStringByteLen (SSID_in.c_str (),
+                                               SSID_in.size ());
+  ACE_ASSERT (V_BSTR (&variant_s));
+  result = node_p->put_nodeValue (variant_s);
+  if (unlikely (FAILED (result)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IXMLDOMNode::put_nodeValue(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (SSID_in.c_str ()),
+                ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError (), false).c_str ())));
+    goto clean;
+  } // end IF
+  result = document_p->get_xml (&string_p);
+  if (unlikely (FAILED (result) || !string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IXMLDOMDocument::get_xml(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
+    goto clean;
+  } // end IF
+#elif defined (LIBXML2_SUPPORT)
   xmlChar* data_p = NULL;
   int size_i = 0;
   xmlXPathContextPtr xpath_context_p = NULL;
@@ -1683,6 +1685,9 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   strProfileXml =
     Common_String_Tools::to (reinterpret_cast<char*> (data_p));
   ACE_ASSERT (strProfileXml);
+#else
+  ACE_ASSERT (false); // *TODO* (see above)
+#endif // LIBXML2_SUPPORT
   result_3 = WlanSetProfile (clientHandle_in,
                              &interfaceIdentifier_in,
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
@@ -1718,21 +1723,24 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
 #endif // _DEBUG
 
 clean:
-  //if (xpath_query_p)
-  //  SysFreeString (xpath_query_p);
-  //if (string_p)
-  //  SysFreeString (string_p);
-  //result = VariantClear (&variant_s);
-  //ACE_ASSERT (SUCCEEDED (result));
-  //if (node_p)
-  //  node_p->Release ();
-  //if (document_p)
-  //  document_p->Release ();
-  //CoUninitialize ();
+#if defined (MSXML_SUPPORT)
+  if (xpath_query_p)
+    SysFreeString (xpath_query_p);
+  if (string_p)
+    SysFreeString (string_p);
+  result = VariantClear (&variant_s);
+  ACE_ASSERT (SUCCEEDED (result));
+  if (node_p)
+    node_p->Release ();
+  if (document_p)
+    document_p->Release ();
+  CoUninitialize ();
+#elif defined (LIBXML2_SUPPORT)
   if (xpath_context_p)
     xmlXPathFreeContext (xpath_context_p);
   if (document_p)
     xmlFreeDoc (document_p);
+#endif
 
   return (result_3 == ERROR_SUCCESS);
 }
