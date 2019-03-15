@@ -220,7 +220,8 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // pre-initialize the connection handler
   // *TODO*: remove type inference
-  handler_in->set (NET_ROLE_CLIENT);
+  Net_ILinkLayer_T<SocketConfigurationType>* ilinklayer_p = handler_in;
+  ilinklayer_p->set (NET_ROLE_CLIENT);
 
   // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Connector.cpp:251
 
@@ -309,7 +310,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       struct Net_UDPSocketConfiguration,
+                       Net_UDPSocketConfiguration_t,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (bool managed_in)
@@ -337,7 +338,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       struct Net_UDPSocketConfiguration,
+                       Net_UDPSocketConfiguration_t,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::connect (const ACE_INET_Addr& address_in)
@@ -357,8 +358,9 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   ACE_ASSERT (handler_p);
 
   // pre-initialize the connection handler
-  handler_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
-                                                         : NET_ROLE_SERVER);
+  Net_ILinkLayer_T<Net_UDPSocketConfiguration_t>* ilinklayer_p = handler_p;
+  ilinklayer_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
+                                                            : NET_ROLE_SERVER);
 
   result = activate_svc_handler (handler_p);
   if (unlikely (result == -1))
@@ -389,7 +391,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       struct Net_UDPSocketConfiguration,
+                       Net_UDPSocketConfiguration_t,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::activate_svc_handler (HandlerType* handler_in)
@@ -443,7 +445,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       struct Net_UDPSocketConfiguration,
+                       Net_UDPSocketConfiguration_t,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)
@@ -568,7 +570,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       struct Net_NetlinkSocketConfiguration,
+                       Net_NetlinkSocketConfiguration_t,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (bool managed_in)
@@ -596,7 +598,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       struct Net_NetlinkSocketConfiguration,
+                       Net_NetlinkSocketConfiguration_t,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::connect (const Net_Netlink_Addr& address_in)
@@ -646,7 +648,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       struct Net_NetlinkSocketConfiguration,
+                       Net_NetlinkSocketConfiguration_t,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)

@@ -154,7 +154,9 @@ class Net_StreamConnectionBase_T
   typedef Net_IListener_T<ListenerConfigurationType,
                           ConfigurationType> ILISTENER_T;
 
-  Net_StreamConnectionBase_T (bool = true); // managed ?
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_StreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  Net_StreamConnectionBase_T (bool); // managed ?
 
   // override (part of) Net_ISocketHandler
   virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -169,7 +171,6 @@ class Net_StreamConnectionBase_T
   ACE_Message_Block* writeBuffer_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T (const Net_StreamConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T& operator= (const Net_StreamConnectionBase_T&))
 
@@ -291,7 +292,9 @@ class Net_AsynchStreamConnectionBase_T
   typedef Net_IListener_T<ListenerConfigurationType,
                           ConfigurationType> ILISTENER_T;
 
-  Net_AsynchStreamConnectionBase_T (bool = true); // managed ?
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_AsynchStreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  Net_AsynchStreamConnectionBase_T (bool); // managed ?
 
   // override (part of) Net_ISocketHandler
   virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -303,7 +306,6 @@ class Net_AsynchStreamConnectionBase_T
   Stream_IAllocator* allocator_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T (const Net_AsynchStreamConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T& operator= (const Net_AsynchStreamConnectionBase_T&))
 

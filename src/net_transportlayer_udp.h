@@ -33,7 +33,7 @@ class Net_TransportLayer_UDP
 
  public:
   Net_TransportLayer_UDP ();
-  inline virtual ~Net_TransportLayer_UDP () {};
+  inline virtual ~Net_TransportLayer_UDP () {}
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP (const Net_TransportLayer_UDP&))

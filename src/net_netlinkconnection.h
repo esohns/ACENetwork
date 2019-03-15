@@ -37,7 +37,7 @@
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_netlink.h"
 
-#if defined (ACE_HAS_NETLINK)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 template <typename HandlerType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -91,18 +91,10 @@ class Net_NetlinkConnection_T
                              ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   Net_Netlink_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
+  Net_NetlinkConnection_T (bool); // managed ?
+  inline virtual ~Net_NetlinkConnection_T () {}
 
-   Net_NetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                            unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
-   virtual ~Net_NetlinkConnection_T ();
-
-   // override some task-based members
+  // override some task-based members
 //   virtual int open (void* = NULL); // args
    //  // *NOTE*: enqueue any received data onto our stream for further processing
    //   virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -110,24 +102,25 @@ class Net_NetlinkConnection_T
    //  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
    // *NOTE*: this is called when:
    // - handle_xxx() returns -1
-   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
    // override / implement (part of) Net_INetlinkTransportLayer
 //   virtual bool initialize (Common_DispatchType,             // dispatch
 //                            Net_ClientServerRole,            // role
 //                            const Net_SocketConfiguration&); // socket configuration
 //   virtual void finalize ();
-   virtual void info (ACE_HANDLE&,              // return value: handle
-                      Net_Netlink_Addr&,        // return value: local SAP
-                      Net_Netlink_Addr&) const; // return value: remote SAP
-   virtual Net_ConnectionId_t id () const;
-   virtual void dump_state () const;
+  virtual void info (ACE_HANDLE&,              // return value: handle
+                     Net_Netlink_Addr&,        // return value: local SAP
+                     Net_Netlink_Addr&) const; // return value: remote SAP
+  virtual Net_ConnectionId_t id () const;
+  virtual void dump_state () const;
+
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_NetlinkConnection_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
-  // *TODO*: remove this ASAP
-  Net_NetlinkConnection_T ();
-//  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T (const Net_NetlinkConnection_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T& operator= (const Net_NetlinkConnection_T&))
 };
@@ -184,17 +177,8 @@ class Net_AsynchNetlinkConnection_T
                                                                   UserDataType> >;
 
  public:
-  // convenient types
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   Net_Netlink_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-
-  Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T*, // connection manager handle
-                                 unsigned int = 0);      // statistic collecting interval (second(s)) [0: off]
-  virtual ~Net_AsynchNetlinkConnection_T ();
+  Net_AsynchNetlinkConnection_T (bool); // managed ?
+  inline virtual ~Net_AsynchNetlinkConnection_T () {}
 
   // implement (part of) Net_INetlinkTransportLayer
 //  virtual bool initialize (Common_DispatchType,             // dispatch
@@ -216,19 +200,20 @@ class Net_AsynchNetlinkConnection_T
   //  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
     // *NOTE*: this is called when:
     // - handle_xxx() returns -1
-    virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
-                              ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
+
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_AsynchNetlinkConnection_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
-  // *TODO*: remove this ASAP
-  Net_AsynchNetlinkConnection_T ();
-  //  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T (const Net_AsynchNetlinkConnection_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T& operator= (const Net_AsynchNetlinkConnection_T&))
 };
 
 // include template definition
 #include "net_netlinkconnection.inl"
-#endif
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 #endif

@@ -148,7 +148,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_UDPSocketConfiguration,
+                             Net_UDPSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>
@@ -168,7 +168,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  struct Net_UDPSocketConfiguration,
+                                  Net_UDPSocketConfiguration_t,
                                   HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -222,7 +222,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                  ConfigurationType,
                                  StateType,
                                  StatisticContainerType,
-                                 struct Net_UDPSocketConfiguration,
+                                 Net_UDPSocketConfiguration_t,
                                  HandlerConfigurationType,
                                  StreamType,
                                  UserDataType> OWN_TYPE_T;
@@ -232,7 +232,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
   // convenient types
-  typedef Net_ITransportLayer_T<struct Net_UDPSocketConfiguration> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<Net_UDPSocketConfiguration_t> ITRANSPORTLAYER_T;
 
   ConfigurationType*     configuration_; // connection-
   bool                   managed_;
@@ -262,7 +262,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_NetlinkSocketConfiguration,
+                             Net_NetlinkSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>
@@ -281,7 +281,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                   ConfigurationType,
   StateType,
                                   StatisticContainerType,
-                                  struct Net_NetlinkSocketConfiguration,
+                                  Net_NetlinkSocketConfiguration_t,
                                   HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -312,7 +312,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
   // convenient types
-  typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t> ITRANSPORTLAYER_T;
 
   ConfigurationType*     configuration_; // connection-
   bool                   managed_;

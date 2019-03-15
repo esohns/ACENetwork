@@ -55,33 +55,33 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
 }
 
-template <ACE_SYNCH_DECL,
-          typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename TimerManagerType,
-          typename UserDataType>
-Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
-                        ConfigurationType,
-                        StateType,
-                        StatisticContainerType,
-                        HandlerConfigurationType,
-                        StreamType,
-                        TimerManagerType,
-                        UserDataType>::Net_UDPConnectionBase_T ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
+//template <ACE_SYNCH_DECL,
+//          typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename StreamType,
+//          typename TimerManagerType,
+//          typename UserDataType>
+//Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+//                        HandlerType,
+//                        ConfigurationType,
+//                        StateType,
+//                        StatisticContainerType,
+//                        HandlerConfigurationType,
+//                        StreamType,
+//                        TimerManagerType,
+//                        UserDataType>::Net_UDPConnectionBase_T ()
+// : inherited (true)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
 
-  ACE_NOTREACHED (return;)
-}
+//  ACE_NOTREACHED (return;)
+//}
 
 template <ACE_SYNCH_DECL,
           typename HandlerType,
@@ -681,31 +681,31 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename TimerManagerType,
-          typename UserDataType>
-Net_AsynchUDPConnectionBase_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              HandlerConfigurationType,
-                              StreamType,
-                              TimerManagerType,
-                              UserDataType>::Net_AsynchUDPConnectionBase_T ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::Net_AsynchUDPConnectionBase_T"));
+//template <typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename StreamType,
+//          typename TimerManagerType,
+//          typename UserDataType>
+//Net_AsynchUDPConnectionBase_T<HandlerType,
+//                              ConfigurationType,
+//                              StateType,
+//                              StatisticContainerType,
+//                              HandlerConfigurationType,
+//                              StreamType,
+//                              TimerManagerType,
+//                              UserDataType>::Net_AsynchUDPConnectionBase_T ()
+// : inherited (true)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::Net_AsynchUDPConnectionBase_T"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
 
-  ACE_NOTREACHED (return;)
-}
+//  ACE_NOTREACHED (return;)
+//}
 
 template <typename HandlerType,
           typename ConfigurationType,

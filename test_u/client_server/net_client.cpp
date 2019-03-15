@@ -582,25 +582,29 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                                 configuration.streamConfiguration.configuration_);
 
   // ********************** connection configuration data **********************
-  Test_U_ConnectionConfiguration_t connection_configuration;
-  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
+  Test_U_TCPConnectionConfiguration connection_configuration;
+  Test_U_UDPConnectionConfiguration connection_configuration_2;
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.userData =
-    &configuration.userData;
+  connection_configuration.statisticReportingInterval =
+    statisticReportingInterval_in;
   connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
                                        configuration.streamConfiguration);
+  connection_configuration_2.messageAllocator = &message_allocator;
+  connection_configuration_2.statisticReportingInterval =
+    statisticReportingInterval_in;
+  connection_configuration_2.initialize (configuration.streamConfiguration.allocatorConfiguration_,
+                                         configuration.streamConfiguration);
 
-  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+  configuration.TCPConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  connection_configuration));
-  Test_U_ConnectionConfigurationIterator_t iterator =
-    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
-  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
-  if (useUDP_in)
-    (*iterator).second.socketHandlerConfiguration.socketConfiguration =
-      &((*iterator).second.socketHandlerConfiguration.socketConfiguration_3);
+  Test_U_TCPConnectionConfigurationIterator_t iterator =
+    configuration.TCPConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration.TCPConnectionConfigurations.end ());
+  configuration.UDPConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                    connection_configuration_2));
+  Test_U_UDPConnectionConfigurationIterator_t iterator_2 =
+    configuration.UDPConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != configuration.UDPConnectionConfigurations.end ());
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -644,22 +648,24 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Test_U_IUDPConnectionManager_t* iconnection_manager_2 =
     connection_manager_2;
 
-  Client_TCP_AsynchConnector_t asynch_connector (iconnection_manager_p,
-                                                 statisticReportingInterval_in);
-  Client_TCP_Connector_t connector (iconnection_manager_p,
-                                    statisticReportingInterval_in);
-  Client_UDP_AsynchConnector_t udp_asynch_connector (iconnection_manager_p,
-                                                     statisticReportingInterval_in);
-  Client_UDP_Connector_t udp_connector (iconnection_manager_p,
-                                        statisticReportingInterval_in);
+  Client_TCP_AsynchConnector_t asynch_connector (true);
+  Client_TCP_Connector_t connector (true);
+  Client_UDP_AsynchConnector_t udp_asynch_connector (true);
+  Client_UDP_Connector_t udp_connector (true);
   Test_U_ITCPConnector_t* connector_p = NULL;
   Test_U_IUDPConnector_t* connector_2 = NULL;
   if (useUDP_in)
   {
     if (useReactor_in)
-      connector_p = &udp_connector;
+      connector_2 = &udp_connector;
     else
-      connector_p = &udp_asynch_connector;
+      connector_2 = &udp_asynch_connector;
+    if (!connector_2->initialize ((*iterator_2).second))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+      return;
+    } // end IF
   } // end IF
   else
   {
@@ -667,13 +673,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       connector_p = &connector;
     else
       connector_p = &asynch_connector;
+    if (!connector_p->initialize ((*iterator).second))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+      return;
+    } // end IF
   } // end ELSE
-  if (!connector_p->initialize ((*iterator).second))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-    return;
-  } // end IF
 
   // step0d: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
@@ -692,15 +698,14 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     !UIDefinitionFile_in.empty ();
 
   if (useUDP_in)
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.peerAddress =
-        peer_address;
+      (*iterator_2).second.peerAddress = peer_address;
   else
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address =
-        peer_address;
+      (*iterator).second.address = peer_address;
 
   Client_TimeoutHandler timeout_handler (actionMode_in,
                                          maxNumConnections_in,
-                                         connector_p);
+                                         connector_p,
+                                         connector_2);
   configuration.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();

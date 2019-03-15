@@ -107,8 +107,17 @@ class Net_UDPConnectionBase_T
                                      TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_UDPConnectionBase_T (bool = true); // managed ?
+  Net_UDPConnectionBase_T (bool); // managed ?
   inline virtual ~Net_UDPConnectionBase_T () {}
+
+  // implement (part of) Net_ITransportLayer_T
+  // *TODO*: these shouldn't be necessary, remove ASAP
+  inline virtual enum Common_EventDispatchType dispatch () { return inherited2::dispatch_; }
+  inline virtual enum Net_ClientServerRole role () { return inherited2::role_; }
+  inline virtual void set (enum Net_ClientServerRole role_in) { inherited2::role_ = role_in; }
+  inline virtual bool initialize (enum Common_EventDispatchType dispatch_in, enum Net_ClientServerRole role_in, const Net_UDPSocketConfiguration_t&) { inherited2::dispatch_ = dispatch_in; inherited2::role_ = role_in; return true; }
+  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual enum Net_TransportLayerType transportLayer () { return inherited2::transportLayer_; }
 
   // override some ACE_Event_Handler methods
   // *NOTE*: stream any received data for further processing
@@ -126,11 +135,11 @@ class Net_UDPConnectionBase_T
   // implement Common_IReset
   virtual void reset ();
 
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_UDPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
  private:
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Net_UDPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnectionBase_T (const Net_UDPConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnectionBase_T& operator= (const Net_UDPConnectionBase_T&))
 
@@ -208,8 +217,17 @@ class Net_AsynchUDPConnectionBase_T
                                            TimerManagerType,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_AsynchUDPConnectionBase_T (bool = true); // managed ?
-  inline virtual ~Net_AsynchUDPConnectionBase_T () {};
+  Net_AsynchUDPConnectionBase_T (bool); // managed ?
+  inline virtual ~Net_AsynchUDPConnectionBase_T () {}
+
+  // implement (part of) Net_ITransportLayer_T
+  // *TODO*: these shouldn't be necessary, remove ASAP
+  inline virtual enum Common_EventDispatchType dispatch () { return inherited2::dispatch_; }
+  inline virtual enum Net_ClientServerRole role () { return inherited2::role_; }
+  inline virtual void set (enum Net_ClientServerRole role_in) { inherited2::role_ = role_in; }
+  inline virtual bool initialize (enum Common_EventDispatchType dispatch_in, enum Net_ClientServerRole role_in, const Net_UDPSocketConfiguration_t&) { inherited2::dispatch_ = dispatch_in; inherited2::role_ = role_in; return true; }
+  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual enum Net_TransportLayerType transportLayer () { return inherited2::transportLayer_; }
 
   // override (part of) ACE_Service_Handler
   virtual void open (ACE_HANDLE,          // handle
@@ -229,11 +247,11 @@ class Net_AsynchUDPConnectionBase_T
   // implement Common_IReset
   virtual void reset ();
 
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_AsynchUDPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
  private:
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Asynch_Connector/ACE_Asynch_Acceptor
-  Net_AsynchUDPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T (const Net_AsynchUDPConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T& operator= (const Net_AsynchUDPConnectionBase_T&))
 

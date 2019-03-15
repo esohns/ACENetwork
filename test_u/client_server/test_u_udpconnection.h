@@ -60,7 +60,7 @@ class Test_U_UDPConnection
                                   Test_U_UDPConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
+                                  Net_UDPSocketConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
@@ -68,17 +68,15 @@ class Test_U_UDPConnection
   friend class ACE_Connector<Test_U_UDPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  Test_U_UDPConnection (bool = true); // managed ?
+  Test_U_UDPConnection (bool); // managed ?
   inline virtual ~Test_U_UDPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { stream_.ping (); }
 
  private:
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Test_U_UDPConnection ();
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Test_U_UDPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   ACE_UNIMPLEMENTED_FUNC (Test_U_UDPConnection (const Test_U_UDPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_UDPConnection& operator= (const Test_U_UDPConnection&))
 };
@@ -90,7 +88,7 @@ class Test_U_AsynchUDPConnection
                                         Test_U_UDPConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
+                                        Net_UDPSocketConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData>
@@ -100,7 +98,7 @@ class Test_U_AsynchUDPConnection
                                         Test_U_UDPConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
+                                        Net_UDPSocketConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData> inherited;
@@ -108,17 +106,15 @@ class Test_U_AsynchUDPConnection
  friend class ACE_Asynch_Connector<Test_U_AsynchUDPConnection>;
 
  public:
-  Test_U_AsynchUDPConnection (bool = true); // managed ?
+  Test_U_AsynchUDPConnection (bool); // managed ?
   inline virtual ~Test_U_AsynchUDPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { stream_.ping (); }
 
  private:
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
-  Test_U_AsynchUDPConnection ();
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Test_U_AsynchUDPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchUDPConnection (const Test_U_AsynchUDPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchUDPConnection& operator= (const Test_U_AsynchUDPConnection&))
 };

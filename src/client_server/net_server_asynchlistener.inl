@@ -37,6 +37,8 @@
 
 #include "net_common.h"
 #include "net_common_tools.h"
+#include "net_connection_configuration.h"
+#include "net_itransportlayer.h"
 #include "net_macros.h"
 
 #include "net_server_defines.h"
@@ -56,7 +58,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             StreamType,
                             UserDataType>::Net_Server_AsynchListener_T ()
  : inherited ()
- //, addressFamily_ (ACE_ADDRESS_FAMILY_INET)
  , configuration_ (NULL)
  , isInitialized_ (false)
  , isListening_ (false)
@@ -570,7 +571,6 @@ Net_Server_AsynchListener_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->connectionConfiguration);
 
   // *TODO*: remove type inferences
   if (unlikely (configuration_->useLoopBackDevice))
@@ -784,7 +784,8 @@ Net_Server_AsynchListener_T<HandlerType,
                               local_address);
 
     // *EDIT*: set role
-    new_handler->set (NET_ROLE_SERVER);
+    Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = new_handler;
+    ilinklayer_p->set (NET_ROLE_SERVER);
 
     // Pass the ACT
     if (unlikely (result.act () != 0))
@@ -842,14 +843,9 @@ Net_Server_AsynchListener_T<HandlerType,
   // initialize return value(s)
   HandlerType* connection_p = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->connectionConfiguration);
-
-  // *TODO*: remove type inferences
+  // *TODO*: remove type inference
   ACE_NEW_NORETURN (connection_p,
-                    HandlerType (configuration_->connectionManager,
-                                 configuration_->connectionConfiguration->statisticReportingInterval));
+                    HandlerType (true)); // managed ?
   if (unlikely (!connection_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

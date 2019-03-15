@@ -32,7 +32,7 @@
 #include "stream_statemachine_common.h"
 
 #include "net_common.h"
-#include "net_configuration.h"
+#include "net_connection_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -163,7 +163,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   struct Net_UDPSocketConfiguration,
+                                   Net_UDPSocketConfiguration_t,
                                    HandlerConfigurationType,
                                    StreamType,
                                    UserDataType>
@@ -186,7 +186,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  struct Net_UDPSocketConfiguration,
+                                  Net_UDPSocketConfiguration_t,
                                   HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -231,7 +231,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
  private:
   // convenient types
-  typedef Net_ITransportLayer_T<struct Net_UDPSocketConfiguration> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<Net_UDPSocketConfiguration_t> ITRANSPORTLAYER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
@@ -266,7 +266,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   struct Net_NetlinkSocketConfiguration,
+                                   Net_NetlinkSocketConfiguration_t,
                                    HandlerConfigurationType,
                                    StreamType,
                                    UserDataType>
@@ -288,7 +288,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  struct Net_NetlinkSocketConfiguration,
+                                  Net_NetlinkSocketConfiguration_t,
                                   HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -322,7 +322,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
  private:
   // convenient types
-  typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t> ITRANSPORTLAYER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))

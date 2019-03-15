@@ -38,17 +38,6 @@ Test_U_TCPConnection::Test_U_TCPConnection (bool managed_in)
 
 }
 
-Test_U_TCPConnection::Test_U_TCPConnection ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
 //////////////////////////////////////////
 
 Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (bool managed_in)
@@ -56,15 +45,4 @@ Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (bool managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
 
-}
-
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
 }

@@ -66,7 +66,7 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 struct Server_ListenerConfiguration;
 
-typedef Net_IListener_T<struct Server_ListenerConfiguration,
+typedef Net_IListener_T<Net_TCPListenerConfiguration_t,
                         Test_U_TCPConnectionConfiguration> Server_IListener_t;
 struct Server_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration

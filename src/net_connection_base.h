@@ -91,7 +91,9 @@ class Net_ConnectionBase_T
   // missing: waitForCompletion
 
  protected:
-  Net_ConnectionBase_T (bool = true); // managed ?
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_ConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  Net_ConnectionBase_T (bool); // managed ?
   virtual ~Net_ConnectionBase_T ();
 
   // implement Common_IRegister
@@ -114,7 +116,6 @@ class Net_ConnectionBase_T
                                TimerManagerType,
                                UserDataType> OWN_TYPE_T;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&))
 

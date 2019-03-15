@@ -50,35 +50,35 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
 
 }
 
-template <ACE_SYNCH_DECL,
-          typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename ListenerConfigurationType,
-          typename StreamType,
-          typename TimerManagerType,
-          typename UserDataType>
-Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
-                        ConfigurationType,
-                        StateType,
-                        StatisticContainerType,
-                        HandlerConfigurationType,
-                        ListenerConfigurationType,
-                        StreamType,
-                        TimerManagerType,
-                        UserDataType>::Net_TCPConnectionBase_T ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::Net_TCPConnectionBase_T"));
+//template <ACE_SYNCH_DECL,
+//          typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename ListenerConfigurationType,
+//          typename StreamType,
+//          typename TimerManagerType,
+//          typename UserDataType>
+//Net_TCPConnectionBase_T<ACE_SYNCH_USE,
+//                        HandlerType,
+//                        ConfigurationType,
+//                        StateType,
+//                        StatisticContainerType,
+//                        HandlerConfigurationType,
+//                        ListenerConfigurationType,
+//                        StreamType,
+//                        TimerManagerType,
+//                        UserDataType>::Net_TCPConnectionBase_T ()
+// : inherited (true)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::Net_TCPConnectionBase_T"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
 
-  ACE_NOTREACHED (return;)
-}
+//  ACE_NOTREACHED (return;)
+//}
 
 template <ACE_SYNCH_DECL,
           typename HandlerType,
@@ -463,33 +463,33 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename ListenerConfigurationType,
-          typename StreamType,
-          typename TimerManagerType,
-          typename UserDataType>
-Net_AsynchTCPConnectionBase_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              HandlerConfigurationType,
-                              ListenerConfigurationType,
-                              StreamType,
-                              TimerManagerType,
-                              UserDataType>::Net_AsynchTCPConnectionBase_T ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::Net_AsynchTCPConnectionBase_T"));
+//template <typename HandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename ListenerConfigurationType,
+//          typename StreamType,
+//          typename TimerManagerType,
+//          typename UserDataType>
+//Net_AsynchTCPConnectionBase_T<HandlerType,
+//                              ConfigurationType,
+//                              StateType,
+//                              StatisticContainerType,
+//                              HandlerConfigurationType,
+//                              ListenerConfigurationType,
+//                              StreamType,
+//                              TimerManagerType,
+//                              UserDataType>::Net_AsynchTCPConnectionBase_T ()
+// : inherited (true)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::Net_AsynchTCPConnectionBase_T"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
 
-  ACE_NOTREACHED (return;)
-}
+//  ACE_NOTREACHED (return;)
+//}
 
 template <typename HandlerType,
           typename ConfigurationType,

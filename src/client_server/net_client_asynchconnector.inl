@@ -23,6 +23,8 @@
 #include "common_defines.h"
 
 #include "net_common_tools.h"
+#include "net_connection_configuration.h"
+#include "net_itransportlayer.h"
 #include "net_macros.h"
 
 template <typename HandlerType,
@@ -606,7 +608,8 @@ Net_Client_AsynchConnector_T<HandlerType,
                               local_address);
 
     // *EDIT*: set role
-    new_handler->set (NET_ROLE_CLIENT);
+    Net_ILinkLayer_T<SocketConfigurationType>* ilinklayer_p = new_handler;
+    ilinklayer_p->set (NET_ROLE_CLIENT);
 
     // Pass the ACT
     if (likely (result_in.act () != 0))
@@ -677,7 +680,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_UDPSocketConfiguration,
+                             Net_UDPSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
@@ -714,7 +717,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_UDPSocketConfiguration,
+                             Net_UDPSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
@@ -772,7 +775,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_UDPSocketConfiguration,
+                             Net_UDPSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::connect (const ACE_INET_Addr& address_in)
@@ -794,8 +797,9 @@ Net_Client_AsynchConnector_T<HandlerType,
   ACE_ASSERT (handler_p);
 
   // pre-initialize the connection handler
-  handler_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
-                                                         : NET_ROLE_SERVER);
+  Net_ILinkLayer_T<Net_UDPSocketConfiguration_t>* ilinklayer_p = handler_p;
+  ilinklayer_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
+                                                            : NET_ROLE_SERVER);
 
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
@@ -823,7 +827,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_UDPSocketConfiguration,
+                             Net_UDPSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::make_handler (void)
@@ -859,7 +863,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_NetlinkSocketConfiguration,
+                             Net_NetlinkSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
@@ -896,7 +900,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_NetlinkSocketConfiguration,
+                             Net_NetlinkSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::validate_connection (const ACE_Asynch_Connect::Result& result_in,
@@ -946,7 +950,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_NetlinkSocketConfiguration,
+                             Net_NetlinkSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::connect (const Net_Netlink_Addr& address_in)
@@ -996,7 +1000,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              ConfigurationType,
                              StateType,
                              StatisticContainerType,
-                             struct Net_NetlinkSocketConfiguration,
+                             Net_NetlinkSocketConfiguration_t,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::make_handler (void)

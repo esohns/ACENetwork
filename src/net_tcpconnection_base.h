@@ -163,8 +163,17 @@ class Net_TCPConnectionBase_T
                                      TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_TCPConnectionBase_T (bool = true); // managed ?
-  inline virtual ~Net_TCPConnectionBase_T () {};
+  Net_TCPConnectionBase_T (bool); // managed ?
+  inline virtual ~Net_TCPConnectionBase_T () {}
+
+  // implement (part of) Net_ITransportLayer_T
+  // *TODO*: these shouldn't be necessary, remove ASAP
+  inline virtual enum Common_EventDispatchType dispatch () { return inherited2::dispatch_; }
+  inline virtual enum Net_ClientServerRole role () { return inherited2::role_; }
+  inline virtual void set (enum Net_ClientServerRole role_in) { inherited2::role_ = role_in; }
+  inline virtual bool initialize (enum Common_EventDispatchType dispatch_in, enum Net_ClientServerRole role_in, const Net_TCPSocketConfiguration_t&) { inherited2::dispatch_ = dispatch_in; inherited2::role_ = role_in; return true; }
+  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual enum Net_TransportLayerType transportLayer () { return inherited2::transportLayer_; }
 
   // override some ACE_Event_Handler methods
   // *NOTE*: stream any received data for further processing
@@ -172,11 +181,11 @@ class Net_TCPConnectionBase_T
   // *NOTE*: send stream data to the peer
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
 
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_TCPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
  private:
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Net_TCPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T (const Net_TCPConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T& operator= (const Net_TCPConnectionBase_T&))
 };
@@ -260,8 +269,17 @@ class Net_AsynchTCPConnectionBase_T
                                            TimerManagerType,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_AsynchTCPConnectionBase_T (bool = true); // managed ?
-  inline virtual ~Net_AsynchTCPConnectionBase_T () {};
+  Net_AsynchTCPConnectionBase_T (bool); // managed ?
+  inline virtual ~Net_AsynchTCPConnectionBase_T () {}
+
+  // implement (part of) Net_ITransportLayer_T
+  // *TODO*: these shouldn't be necessary, remove ASAP
+  inline virtual enum Common_EventDispatchType dispatch () { return inherited2::dispatch_; }
+  inline virtual enum Net_ClientServerRole role () { return inherited2::role_; }
+  inline virtual void set (enum Net_ClientServerRole role_in) { inherited2::role_ = role_in; }
+  inline virtual bool initialize (enum Common_EventDispatchType dispatch_in, enum Net_ClientServerRole role_in, const Net_TCPSocketConfiguration_t&) { inherited2::dispatch_ = dispatch_in; inherited2::role_ = role_in; return true; }
+  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual enum Net_TransportLayerType transportLayer () { return inherited2::transportLayer_; }
 
   // override (part of) ACE_Service_Handler
   virtual void open (ACE_HANDLE,          // handle
@@ -275,14 +293,13 @@ class Net_AsynchTCPConnectionBase_T
   inline virtual void info (ACE_HANDLE& handle_out, ACE_INET_Addr& localSAP_out, ACE_INET_Addr& peerSAP_out) const { handle_out = inherited::handle (); localSAP_out = inherited::localSAP_; peerSAP_out = inherited::peerSAP_; };
 
  protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_AsynchTCPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
   // *IMPORTANT NOTE*: supports synchronicity-agnostic connections
   inline virtual int open (void* = NULL) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
  private:
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
-  Net_AsynchTCPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnectionBase_T (const Net_AsynchTCPConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPConnectionBase_T& operator= (const Net_AsynchTCPConnectionBase_T&))
 };

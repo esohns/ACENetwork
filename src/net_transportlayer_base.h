@@ -26,9 +26,9 @@
 #include "common.h"
 
 #include "net_common.h"
-#if defined (ACE_HAS_NETLINK)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 #include "net_configuration.h"
-#endif
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 #include "net_itransportlayer.h"
 
 template <typename ConfigurationType> // socket-
@@ -64,9 +64,9 @@ class Net_InetTransportLayerBase_T
 
 //////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 class Net_NetlinkTransportLayer_Base
- : virtual public Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration>
+ : virtual public Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t>
 {
  public:
   inline virtual ~Net_NetlinkTransportLayer_Base () {}
@@ -76,7 +76,7 @@ class Net_NetlinkTransportLayer_Base
   inline virtual enum Net_ClientServerRole role () { return role_; }
   virtual bool initialize (enum Common_EventDispatchType,
                            enum Net_ClientServerRole,
-                           const struct Net_NetlinkSocketConfiguration&);
+                           const Net_NetlinkSocketConfiguration_t&);
   inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; }
 
  protected:
@@ -93,7 +93,7 @@ class Net_NetlinkTransportLayer_Base
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base (const Net_NetlinkTransportLayer_Base&))
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base& operator= (const Net_NetlinkTransportLayer_Base&))
 };
-#endif
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 // include template definition
 #include "net_transportlayer_base.inl"

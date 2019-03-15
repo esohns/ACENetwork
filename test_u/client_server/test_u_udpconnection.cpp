@@ -38,16 +38,16 @@ Test_U_UDPConnection::Test_U_UDPConnection (bool managed_in)
 
 }
 
-Test_U_UDPConnection::Test_U_UDPConnection ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_UDPConnection::Test_U_UDPConnection"));
+//Test_U_UDPConnection::Test_U_UDPConnection ()
+// : inherited (true)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_U_UDPConnection::Test_U_UDPConnection"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
 
-  ACE_NOTREACHED (return;)
-}
+//  ACE_NOTREACHED (return;)
+//}
 
 //////////////////////////////////////////
 
@@ -58,13 +58,13 @@ Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection (bool managed_in)
 
 }
 
-Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection"));
+//Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection ()
+// : inherited (true)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
 
-  ACE_NOTREACHED (return;)
-}
+//  ACE_NOTREACHED (return;)
+//}

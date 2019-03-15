@@ -101,8 +101,8 @@ class Test_U_Stream
   virtual ~Test_U_Stream ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete ?
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete modules ?
 
   // *TODO*: re-consider this API
   void ping ();

@@ -36,52 +36,10 @@ Net_NetlinkConnection_T<HandlerType,
                         StatisticContainerType,
                         HandlerConfigurationType,
                         StreamType,
-                        UserDataType>::Net_NetlinkConnection_T ()
- : inherited (NULL,
-              0)
+                        UserDataType>::Net_NetlinkConnection_T (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::Net_NetlinkConnection_T"));
-
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_NetlinkConnection_T<HandlerType,
-                        ConfigurationType,
-                        StateType,
-                        StatisticContainerType,
-                        HandlerConfigurationType,
-                        StreamType,
-                        UserDataType>::Net_NetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                unsigned int statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::Net_NetlinkConnection_T"));
-
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_NetlinkConnection_T<HandlerType,
-                        ConfigurationType,
-                        StateType,
-                        StatisticContainerType,
-                        HandlerConfigurationType,
-                        StreamType,
-                        UserDataType>::~Net_NetlinkConnection_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::~Net_NetlinkConnection_T"));
 
 }
 
@@ -703,58 +661,11 @@ Net_AsynchNetlinkConnection_T<HandlerType,
                               StatisticContainerType,
                               HandlerConfigurationType,
                               StreamType,
-                              UserDataType>::Net_AsynchNetlinkConnection_T ()
- : inherited (NULL,
-              0)
+                              UserDataType>::Net_AsynchNetlinkConnection_T (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::Net_AsynchNetlinkConnection_T"));
 
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_AsynchNetlinkConnection_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              HandlerConfigurationType,
-                              StreamType,
-                              UserDataType>::Net_AsynchNetlinkConnection_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            unsigned int statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::Net_AsynchNetlinkConnection_T"));
-
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_AsynchNetlinkConnection_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              HandlerConfigurationType,
-                              StreamType,
-                              UserDataType>::~Net_AsynchNetlinkConnection_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::~Net_AsynchNetlinkConnection_T"));
-
-  //// wait for our worker (if any)
-  //if (inherited::userData_.useThreadPerConnection)
-  //  if (inherited::wait () == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_Task_Base::wait(): \"%m\", continuing\n")));
 }
 
 ////int

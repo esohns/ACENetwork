@@ -1170,7 +1170,7 @@ button_close_all_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
 
-  CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+  TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->abort ();
 
   return FALSE;
 } // button_close_all_clicked_cb
@@ -1186,7 +1186,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
 
   // sanity check
   unsigned int number_of_connections =
-    CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->count ();
+    TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
   if (number_of_connections == 0)
     return FALSE;
 
@@ -1202,8 +1202,8 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   index = ((ACE_OS::rand_r (&usecs) % number_of_connections) + 1);
 #endif
 
-  ClientServer_InetConnectionManager_t::CONNECTION_T* connection_base_p =
-      CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
+  Test_U_TCPConnectionManager_t::CONNECTION_T* connection_base_p =
+      TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
   if (!connection_base_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1212,24 +1212,14 @@ button_ping_clicked_cb (GtkWidget* widget_in,
     return FALSE;
   } // end IF
   Net_IPing* iping_p = dynamic_cast<Net_IPing*> (connection_base_p);
-  if (!iping_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Net_IPing>(%@), aborting\n"),
-                connection_base_p));
-    return FALSE;
-  } // end IF
-
+  ACE_ASSERT (iping_p);
   try {
     iping_p->ping ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
-
-    // clean up
     connection_base_p->decrease ();
     connection_base_p->close ();
-
     return FALSE;
   }
   //ACE_DEBUG ((LM_DEBUG,

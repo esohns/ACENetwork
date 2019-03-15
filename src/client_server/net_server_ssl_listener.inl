@@ -393,14 +393,10 @@ Net_Server_SSL_Listener_T<HandlerType,
   // initialize return value(s)
   handler_out = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
   // default behavior
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (configuration_->connectionManager,
-                                 configuration_->socketHandlerConfiguration.statisticReportingInterval));
+                    HandlerType (true)); // managed ?
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

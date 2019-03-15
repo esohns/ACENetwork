@@ -66,53 +66,28 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
 //                         DHCP_Record,
 //                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
 
-struct DHCP_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
-{
-  DHCP_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
-   ///////////////////////////////////////
-   , socketConfiguration_2 ()
-   , userData (NULL)
-  {
-    socketConfiguration = &socketConfiguration_2;
-  }
-  DHCP_SocketHandlerConfiguration (const DHCP_SocketHandlerConfiguration& rhs_in)
-   : Net_SocketHandlerConfiguration (rhs_in)
-   ///////////////////////////////////////
-   , socketConfiguration_2 (rhs_in.socketConfiguration_2)
-   , userData (rhs_in.userData)
-  {
-    socketConfiguration = &socketConfiguration_2;
-  }
-
-  struct Net_UDPSocketConfiguration socketConfiguration_2;
-
-  struct DHCP_Stream_UserData*      userData;
-};
-
 struct DHCP_StreamConfiguration;
-struct DHCP_ConnectionConfiguration
- : Net_ConnectionConfiguration
-{
-  DHCP_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration ()
-   ///////////////////////////////////////
-   , socketHandlerConfiguration ()
-   , streamConfiguration (NULL)
-   , userData (NULL)
-  {
-    PDUSize = DHCP_MESSAGE_SIZE;
-    //PDUSize = DHCP_BUFFER_SIZE;
-  }
+//struct DHCP_ConnectionConfiguration
+// : Net_ConnectionConfiguration
+//{
+//  DHCP_ConnectionConfiguration ()
+//   : Net_ConnectionConfiguration ()
+//   ///////////////////////////////////////
+//   , socketHandlerConfiguration ()
+//   , streamConfiguration (NULL)
+//   , userData (NULL)
+//  {
+//    PDUSize = DHCP_MESSAGE_SIZE;
+//    //PDUSize = DHCP_BUFFER_SIZE;
+//  }
 
-  struct DHCP_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct DHCP_StreamConfiguration*       streamConfiguration;
+//  struct DHCP_SocketHandlerConfiguration socketHandlerConfiguration;
+//  struct DHCP_StreamConfiguration*       streamConfiguration;
 
-  struct DHCP_Stream_UserData*           userData;
-};
-typedef std::deque<struct DHCP_ConnectionConfiguration> DHCP_ConnectionConfigurations_t;
-typedef DHCP_ConnectionConfigurations_t::iterator DHCP_ConnectionConfigurationIterator_t;
+//  struct DHCP_Stream_UserData*           userData;
+//};
+//typedef std::deque<struct DHCP_ConnectionConfiguration> DHCP_ConnectionConfigurations_t;
+//typedef DHCP_ConnectionConfigurations_t::iterator DHCP_ConnectionConfigurationIterator_t;
 
 //struct DHCP_ConnectorConfiguration
 //{
@@ -148,7 +123,7 @@ struct DHCP_ModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
 //   , connection (NULL)
-   , connectionConfigurations (NULL)
+//   , connectionConfigurations (NULL)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
    , protocolConfiguration (NULL)
   {
@@ -157,7 +132,7 @@ struct DHCP_ModuleHandlerConfiguration
   }
 
 //  Test_U_IConnection_t*       connection; // UDP target/net IO module
-  DHCP_ConnectionConfigurations_t*   connectionConfigurations;
+//  DHCP_ConnectionConfigurations_t*   connectionConfigurations;
   bool                               printProgressDot; // file writer module
   struct DHCP_ProtocolConfiguration* protocolConfiguration;
 };

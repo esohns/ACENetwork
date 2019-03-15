@@ -50,8 +50,8 @@ class Test_U_TCPConnection
                                   Test_U_TCPConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
-                                  struct Server_ListenerConfiguration,
+                                  Net_TCPSocketConfiguration_t,
+                                  Net_TCPListenerConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData>
@@ -62,8 +62,8 @@ class Test_U_TCPConnection
                                   Test_U_TCPConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
-                                  struct Server_ListenerConfiguration,
+                                  Net_TCPSocketConfiguration_t,
+                                  Net_TCPListenerConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
@@ -72,17 +72,17 @@ class Test_U_TCPConnection
   friend class ACE_Connector<Test_U_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  Test_U_TCPConnection (bool = true); // managed ?
+  Test_U_TCPConnection (bool); // managed ?
   inline virtual ~Test_U_TCPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { stream_.ping (); }
 
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Test_U_TCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
  private:
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Test_U_TCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Test_U_TCPConnection (const Test_U_TCPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_TCPConnection& operator= (const Test_U_TCPConnection&))
 };
@@ -94,8 +94,8 @@ class Test_U_AsynchTCPConnection
                                         Test_U_TCPConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
-                                        struct Server_ListenerConfiguration,
+                                        Net_TCPSocketConfiguration_t,
+                                        Net_TCPListenerConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData>
@@ -105,27 +105,27 @@ class Test_U_AsynchTCPConnection
  friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
 
  public:
-  Test_U_AsynchTCPConnection (bool = true); // managed ?
+  Test_U_AsynchTCPConnection (bool); // managed ?
   inline virtual ~Test_U_AsynchTCPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { stream_.ping (); }
+
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Test_U_AsynchTCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
                                         Test_U_TCPConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
-                                        struct Server_ListenerConfiguration,
+                                        Net_TCPSocketConfiguration_t,
+                                        Net_TCPListenerConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData> inherited;
 
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
-  Test_U_AsynchTCPConnection ();
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection (const Test_U_AsynchTCPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection& operator= (const Test_U_AsynchTCPConnection&))
 };

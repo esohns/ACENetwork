@@ -24,7 +24,7 @@
 
 /////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
  : dispatch_(COMMON_EVENT_DISPATCH_INVALID)
  , role_(NET_ROLE_INVALID)
@@ -37,7 +37,7 @@ Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
 bool
 Net_NetlinkTransportLayer_Base::initialize (enum Common_EventDispatchType dispatch_in,
                                             enum Net_ClientServerRole role_in,
-                                            const struct Net_NetlinkSocketConfiguration& configuration_in)
+                                            const Net_NetlinkSocketConfiguration_t& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
 
@@ -48,4 +48,4 @@ Net_NetlinkTransportLayer_Base::initialize (enum Common_EventDispatchType dispat
 
   return true;
 }
-#endif
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT

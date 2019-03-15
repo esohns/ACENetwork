@@ -25,6 +25,8 @@
 
 #include "net_common.h"
 #include "net_common_tools.h"
+#include "net_connection_configuration.h"
+#include "net_itransportlayer.h"
 #include "net_macros.h"
 
 #include "net_server_defines.h"
@@ -394,20 +396,43 @@ Net_Server_Listener_T<HandlerType,
   // initialize return value(s)
   handler_out = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->connectionConfiguration);
-
   // default behavior
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (configuration_->connectionManager,
-                                 configuration_->statisticReportingInterval));
+                    HandlerType (true)); // managed ?
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
   return (handler_out ? 0 : -1);
+}
+
+template <typename HandlerType,
+          typename AcceptorType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename ConnectionConfigurationType,
+          typename StreamType,
+          typename UserDataType>
+int
+Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
+                      AddressType,
+                      ConfigurationType,
+                      StateType,
+                      ConnectionConfigurationType,
+                      StreamType,
+                      UserDataType>::accept_svc_handler (HandlerType* handler_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::accept_svc_handler"));
+
+  ACE_ASSERT (handler_in);
+
+  Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = handler_in;
+  ilinklayer_p->set (NET_ROLE_SERVER);
+
+  return inherited::accept_svc_handler (handler_in);
 }
 
 template <typename HandlerType,

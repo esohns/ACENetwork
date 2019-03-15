@@ -86,7 +86,7 @@ class Net_Server_Listener_T
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; }
 
-  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); ACE_ASSERT (configuration_->connectionConfiguration); return *(configuration_->connectionConfiguration); }
+  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ConnectionConfigurationType ()); ACE_NOTREACHED (return ConnectionConfigurationType ();) }
   //virtual bool initialize (const ConnectionConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
   inline virtual bool useReactor () const { return true; }
@@ -98,7 +98,7 @@ class Net_Server_Listener_T
   // override default instantiation strategy
   virtual int make_svc_handler (HandlerType*&);
   // override default accept strategy
-  inline virtual int accept_svc_handler (HandlerType* handler_in) { ACE_ASSERT (handler_in); handler_in->set (NET_ROLE_SERVER); return inherited::accept_svc_handler (handler_in); }
+  virtual int accept_svc_handler (HandlerType*);
   // override default activation strategy
   virtual int activate_svc_handler (HandlerType*);
 
