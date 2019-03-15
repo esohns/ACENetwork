@@ -46,8 +46,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        SocketConfigurationType,
                        HandlerConfigurationType,
                        StreamType,
-                       UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                              const ACE_Time_Value& statisticCollectionInterval_in)
+                       UserDataType>::Net_Client_Connector_T (bool managed_in)
  : inherited (ACE_Reactor::instance (), // default reactor
               // *IMPORTANT NOTE*: ACE_NONBLOCK is only set if timeout != NULL
               //                   (see: SOCK_Connector.cpp:94), set via the
@@ -55,13 +54,10 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
  , configuration_ (NULL)
- , connectionManager_ (connectionManager_in)
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
-  if (!connectionManager_)
-    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <ACE_SYNCH_DECL,
@@ -287,8 +283,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (connectionManager_,
-                                 statisticCollectionInterval_));
+                    HandlerType (managed_));
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -317,16 +312,12 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        struct Net_UDPSocketConfiguration,
                        HandlerConfigurationType,
                        StreamType,
-                       UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                              const ACE_Time_Value& statisticCollectionInterval_in)
+                       UserDataType>::Net_Client_Connector_T (bool managed_in)
  : configuration_ (NULL)
- , connectionManager_ (connectionManager_in)
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
-  if (!connectionManager_)
-    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <ACE_SYNCH_DECL,
@@ -464,8 +455,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    CONNECTION_T (connectionManager_,
-                                  statisticCollectionInterval_));
+                    CONNECTION_T (managed_));
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -581,16 +571,12 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        struct Net_NetlinkSocketConfiguration,
                        HandlerConfigurationType,
                        StreamType,
-                       UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                              const ACE_Time_Value& statisticCollectionInterval_in)
+                       UserDataType>::Net_Client_Connector_T (bool managed_in)
  : configuration_ (NULL)
- , connectionManager_ (connectionManager_in)
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
-  if (!connectionManager_)
-    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <ACE_SYNCH_DECL,
@@ -672,8 +658,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (connectionManager_,
-                                 statisticCollectionInterval_));
+                    HandlerType (managed_));
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

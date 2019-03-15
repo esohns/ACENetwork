@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef ClientServer_Module_HeaderParser_H
-#define ClientServer_Module_HeaderParser_H
+#ifndef Test_U_Module_HeaderParser_H
+#define Test_U_Module_HeaderParser_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -39,37 +39,37 @@ extern const char libacenetwork_default_test_u_headerparser_module_name_string[]
 class Test_U_Message;
 class Test_U_SessionMessage;
 
-class ClientServer_Module_HeaderParser
+class Test_U_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Common_ILock_T<ACE_MT_SYNCH>,
-                                 struct ClientServer_ModuleHandlerConfiguration,
+                                 struct Test_U_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Test_U_UserData>
+                                 struct Net_UserData>
 {
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Common_ILock_T<ACE_MT_SYNCH>,
-                                 struct ClientServer_ModuleHandlerConfiguration,
+                                 struct Test_U_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Test_U_UserData> inherited;
+                                 struct Net_UserData> inherited;
 
  public:
-  ClientServer_Module_HeaderParser (ISTREAM_T*); // stream handle
-  inline virtual ~ClientServer_Module_HeaderParser () {}
+  Test_U_Module_HeaderParser (ISTREAM_T*); // stream handle
+  inline virtual ~Test_U_Module_HeaderParser () {}
 
   // initialization
-  virtual bool initialize (const struct ClientServer_ModuleHandlerConfiguration&,
+  virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&,
                            Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
@@ -80,17 +80,17 @@ class ClientServer_Module_HeaderParser
   virtual void dump_state () const;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser ())
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser (const ClientServer_Module_HeaderParser&))
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser& operator= (const ClientServer_Module_HeaderParser&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser (const Test_U_Module_HeaderParser&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser& operator= (const Test_U_Module_HeaderParser&))
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct ClientServer_StreamSessionData,          // session data type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,                 // session event type
-                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
+                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_default_test_u_headerparser_module_name_string,
                               Stream_INotify_t,                               // stream notification interface type
-                              ClientServer_Module_HeaderParser);              // writer type
+                              Test_U_Module_HeaderParser);              // writer type
 
 #endif

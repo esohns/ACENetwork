@@ -39,11 +39,13 @@
 
 Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
                                               unsigned int maximumNumberOfConnections_in,
-                                              Client_IConnector_t* connector_in)
+                                              Test_U_ITCPConnector_t* connector_in,
+                                              Test_U_IUDPConnector_t* connector2_in)
  : inherited (this,  // dispatch interface
               false) // invoke only once ?
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
- , connector_ (connector_in)
+ , TCPConnector_ (connector_in)
+ , UDPConnector_ (connector2_in)
  , lock_ ()
  , maximumNumberOfConnections_ (maximumNumberOfConnections_in)
  , mode_ (mode_in)
@@ -114,22 +116,29 @@ Client_TimeoutHandler::handle (const void* arg_in)
 
   int result = -1;
   int index_i = 0;
-  ClientServer_InetConnectionManager_t::CONNECTION_T* connection_p = NULL;
-  ClientServer_InetConnectionManager_t::CONNECTION_T* connection_2 = NULL;
+  Test_U_ITCPConnectionManager_t::CONNECTION_T* connection_p = NULL;
+  Test_U_ITCPConnectionManager_t::CONNECTION_T* connection_2 = NULL;
+  Test_U_IUDPConnectionManager_t::CONNECTION_T* connection_2_p = NULL;
+  Test_U_IUDPConnectionManager_t::CONNECTION_T* connection_2_2 = NULL;
   bool do_abort = false;
   bool do_abort_oldest = false;
   bool do_abort_youngest = false;
   bool do_connect = false;
   bool do_ping = false;
-  ClientServer_IInetConnectionManager_t* connection_manager_p =
-    CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_ITCPConnectionManager_t* connection_manager_p =
+    TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_IUDPConnectionManager_t* connection_manager_2 =
+    TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
 
   // sanity check(s)
-  ACE_ASSERT (connector_);
+  ACE_ASSERT (TCPConnector_);
+  ACE_ASSERT (UDPConnector_);
   ACE_ASSERT (connection_manager_p);
 
-  const Client_IConnector_t::CONFIGURATION_T& configuration_r =
-    connector_->getR ();
+  const Test_U_ITCPConnector_t::CONFIGURATION_T& configuration_r =
+    TCPConnector_->getR ();
+  const Test_U_IUDPConnector_t::CONFIGURATION_T& configuration_2 =
+    UDPConnector_->getR ();
   unsigned int number_of_connections_i = 0;
 
   connection_manager_p->lock ();
@@ -318,7 +327,9 @@ continue_:
                   ACE_TEXT ("caught exception in Net_IConnection_T::close(), returning\n")));
       connection_p->decrease ();
       if (connection_2)
-        connection_2->decrease ();
+      {
+        connection_2->decrease (); connection_2 = NULL;
+      } // end IF
       return;
     }
 
@@ -334,37 +345,39 @@ continue_:
   if (do_connect)
   {
     ACE_INET_Addr peer_address;
-    switch (connector_->transportLayer ())
+    switch (TCPConnector_->transportLayer ())
     {
       case NET_TRANSPORTLAYER_TCP:
-        peer_address =
-          configuration_r.socketHandlerConfiguration.socketConfiguration_2.address;
+        peer_address = configuration_r.address;
         break;
       case NET_TRANSPORTLAYER_UDP:
-        peer_address =
-          configuration_r.socketHandlerConfiguration.socketConfiguration_3.peerAddress;
+        peer_address = configuration_2.peerAddress;
         break;
       default:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                    connector_->transportLayer ()));
+                    TCPConnector_->transportLayer ()));
         if (connection_2)
-          connection_2->decrease ();
+        {
+          connection_2->decrease (); connection_2 = NULL;
+        } // end IF
         return;
       }
     } // end SWITCH
 
     ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-    ACE_ASSERT (connector_);
+    ACE_ASSERT (TCPConnector_);
     try {
-      handle_h = connector_->connect (peer_address);
+      handle_h = TCPConnector_->connect (peer_address);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
       if (connection_2)
-        connection_2->decrease ();
+      {
+        connection_2->decrease (); connection_2 = NULL;
+      } // end IF
       return;
     }
     if (handle_h == ACE_INVALID_HANDLE)
@@ -373,12 +386,14 @@ continue_:
                   ACE_TEXT ("failed to Net_IConnector::connect(%s), returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
       if (connection_2)
-        connection_2->decrease ();
+      {
+        connection_2->decrease (); connection_2 = NULL;
+      } // end IF
       return;
     } // end IF
-    ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p =
       NULL;
-    if (connector_->useReactor ())
+    if (TCPConnector_->useReactor ())
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_p =
@@ -425,7 +440,7 @@ continue_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dynamic_cast<Net_IPing>(0x%@), returning\n"),
                   connection_2));
-      connection_2->decrease ();
+      connection_2->decrease (); connection_2 = NULL;
       return;
     } // end IF
 
@@ -434,7 +449,7 @@ continue_:
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IPing::ping(), returning\n")));
-      connection_2->decrease ();
+      connection_2->decrease (); connection_2 = NULL;
       return;
     }
 

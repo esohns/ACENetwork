@@ -101,8 +101,7 @@ typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
                                    struct Test_U_ModuleHandlerConfiguration,
                                    Test_U_HTTPDecoder_ControlMessage_t,
                                    Test_U_Message,
-                                   Test_U_SessionMessage,
-                                   struct Test_U_HTTPDecoder_SessionData> Test_U_Module_FileWriter;
+                                   Test_U_SessionMessage> Test_U_Module_FileWriter;
 
 // declare module(s)
 DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,    // session data type

@@ -213,16 +213,15 @@ Net_Server_Listener_T<HandlerType,
   // not running --> start listening
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->connectionConfiguration);
 
   // *TODO*: remove type inferences
-  if (unlikely (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice))
+  if (unlikely (configuration_->useLoopBackDevice))
   {
     result =
-      configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number (), // port
-                                                                                                             INADDR_LOOPBACK,                                                                                                      // IP address
-                                                                                                             1,                                                                                                                    // encode ?
-                                                                                                             0);                                                                                                                   // map ?
+      configuration_->address.set (configuration_->address.get_port_number (), // port
+                                   INADDR_LOOPBACK,                            // IP address
+                                   1,                                          // encode ?
+                                   0);                                         // map ?
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -231,12 +230,12 @@ Net_Server_Listener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-    inherited::open (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address, // local address
-                     ACE_Reactor::instance (),                                                                          // reactor handle
-                     ACE_NONBLOCK,                                                                                      // flags (use non-blocking sockets)
-                     //0,                                                                                               // flags (default is blocking sockets)
-                     1,                                                                                                 // always accept all pending connections
-                     1);                                                                                                // (try to) re-use address
+    inherited::open (configuration_->address,  // local address
+                     ACE_Reactor::instance (), // reactor handle
+                     ACE_NONBLOCK,             // flags (use non-blocking sockets)
+                     //0,                      // flags (default is blocking sockets)
+                     1,                        // always accept all pending connections
+                     1);                       // (try to) re-use address
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -249,12 +248,12 @@ Net_Server_Listener_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG
 
@@ -403,7 +402,7 @@ Net_Server_Listener_T<HandlerType,
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (configuration_->connectionManager,
-                                 configuration_->connectionConfiguration->socketHandlerConfiguration.statisticReportingInterval));
+                                 configuration_->statisticReportingInterval));
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

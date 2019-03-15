@@ -96,12 +96,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   // sanity checks
   ACE_ASSERT (inherited::configuration_);
   // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
-  ACE_ASSERT (inherited::configuration_->socketConfiguration);
   ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
-  struct Net_TCPSocketConfiguration* socket_configuration_p =
-    static_cast<struct Net_TCPSocketConfiguration*> (inherited::configuration_->socketConfiguration);
-  ACE_ASSERT (socket_configuration_p);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -117,41 +112,41 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 
-  PDUSize_ = inherited::configuration_->connectionConfiguration->PDUSize;
+  PDUSize_ = inherited::configuration_->PDUSize;
 
   // step1: tweak socket
-  if (likely (socket_configuration_p->bufferSize))
+  if (likely (inherited::configuration_->bufferSize))
   {
     if (unlikely (!Net_Common_Tools::setSocketBuffer (handle_in,
                                                       SO_RCVBUF,
-                                                      socket_configuration_p->bufferSize)))
+                                                      inherited::configuration_->bufferSize)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle_in,
-                  socket_configuration_p->bufferSize));
+                  inherited::configuration_->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle_in,
-                  socket_configuration_p->bufferSize));
+                  inherited::configuration_->bufferSize));
 #endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     if (unlikely (!Net_Common_Tools::setSocketBuffer (handle_in,
                                                       SO_SNDBUF,
-                                                      socket_configuration_p->bufferSize)))
+                                                      inherited::configuration_->bufferSize)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_SNDBUF,%u), continuing\n"),
                   handle_in,
-                  socket_configuration_p->bufferSize));
+                  inherited::configuration_->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle_in,
-                  socket_configuration_p->bufferSize));
+                  inherited::configuration_->bufferSize));
 #endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
@@ -198,7 +193,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     goto error;
   } // end IF
   if (unlikely (!Net_Common_Tools::setLinger (handle_in,
-                                              socket_configuration_p->linger,
+                                              inherited::configuration_->linger,
                                               std::numeric_limits<unsigned short>::max ())))
   {
     error = ACE_OS::last_error ();
@@ -208,13 +203,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(0x%@,%s,-1), aborting\n"),
                   handle_in,
-                  (socket_configuration_p->linger ? ACE_TEXT ("true")
+                  (inherited::configuration_->linger ? ACE_TEXT ("true")
                                                   : ACE_TEXT ("false"))));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
                   handle_in,
-                  (socket_configuration_p->linger ? ACE_TEXT ("true")
+                  (inherited::configuration_->linger ? ACE_TEXT ("true")
                                                   : ACE_TEXT ("false"))));
 #endif // ACE_WIN32 || ACE_WIN64
     } // end IF

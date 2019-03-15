@@ -44,6 +44,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "net_common_tools.h"
 #endif // ACE_WIN32 || ACE_WIN64
+#include "net_connection_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
@@ -64,227 +65,8 @@ struct Net_AllocatorConfiguration
   }
 };
 
-struct Net_SocketConfigurationBase
-{
-  Net_SocketConfigurationBase ()
-   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-   , interfaceIdentifier (GUID_NULL)
-#else
-   , interfaceIdentifier ()
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-   , interfaceIdentifier (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
-#endif // ACE_WIN32 || ACE_WIN64
-   , linger (NET_SOCKET_DEFAULT_LINGER)
-   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //interfaceIdentifier =
-    //  Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
-#endif // ACE_WIN32 || ACE_WIN64
-  }
-  inline virtual ~Net_SocketConfigurationBase () {}
-
-  int          bufferSize; // socket buffer size (I/O)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID interfaceIdentifier; // NIC-
-#else
-  std::string  interfaceIdentifier; // NIC-
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  std::string  interfaceIdentifier; // NIC-
-#endif // ACE_WIN32 || ACE_WIN64
-  // *NOTE*: win32 udp sockets do not linger
-  bool         linger;
-  bool         useLoopBackDevice;   // (if any)
-};
-
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-struct Net_NetlinkSocketConfiguration
- : Net_SocketConfigurationBase
-{
-  Net_NetlinkSocketConfiguration ()
-   : Net_SocketConfigurationBase ()
-   , address ()
-   , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
-  {}
-
-  Net_Netlink_Addr address;
-  int              protocol;
-};
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-
-struct Net_TCPSocketConfiguration
- : Net_SocketConfigurationBase
-{
-  Net_TCPSocketConfiguration ()
-   : Net_SocketConfigurationBase ()
-   , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-              static_cast<ACE_UINT32> (INADDR_ANY))
-  {
-    int result = -1;
-
-    if (unlikely (useLoopBackDevice))
-    {
-      result = address.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-                            static_cast<ACE_UINT32> (INADDR_LOOPBACK),
-                            1,
-                            0);
-      if (unlikely (result == -1))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-    } // end IF
-  }
-
-  ACE_INET_Addr address; // listening/peer-
-};
-
-struct Net_UDPSocketConfiguration
- : Net_SocketConfigurationBase
-{
-  Net_UDPSocketConfiguration ()
-   : Net_SocketConfigurationBase ()
-   , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
-   // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
-   //                SO_LINGER
-   , listenAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-                    static_cast<ACE_UINT32> (INADDR_ANY))
-   , peerAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-                  static_cast<ACE_UINT32> (INADDR_ANY))
-   , sourcePort (0)
-   , writeOnly (false) // *TODO*: remove ASAP
-  {
-    int result = -1;
-
-    if (unlikely (useLoopBackDevice))
-    {
-      result =
-        listenAddress.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-                           static_cast<ACE_UINT32> (INADDR_LOOPBACK),
-                           1,
-                           0);
-      if (unlikely (result == -1))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-      result =
-        peerAddress.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-                         static_cast<ACE_UINT32> (INADDR_LOOPBACK),
-                         1,
-                         0);
-      if (unlikely (result == -1))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-    } // end IF
-
-    if (unlikely (writeOnly))
-      listenAddress.reset ();
-  }
-
-  // *IMPORTANT NOTE*: set this for asynchronous event dispatch; the socket
-  //                   needs to be associated with the peer address, as the data
-  //                   dispatch happens out of context
-  bool          connect;
-  ACE_INET_Addr listenAddress;
-  ACE_INET_Addr peerAddress;
-  ACE_UINT16    sourcePort; // specify a specific source port (outbound)
-  bool          writeOnly; // *TODO*: remove ASAP
-};
-
 //typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
 //typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
-
-struct Net_ConnectionConfiguration;
-struct Net_SocketHandlerConfiguration
-{
-  Net_SocketHandlerConfiguration ()
-   : connectionConfiguration (NULL)
-   , socketConfiguration (NULL)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
-                                 0)
-   , useThreadPerConnection (false)
-   ///////////////////////////////////////
-   , userData (NULL)
-  {}
-
-  struct Net_ConnectionConfiguration* connectionConfiguration;
-  struct Net_SocketConfigurationBase* socketConfiguration;
-  ACE_Time_Value                      statisticReportingInterval; // [ACE_Time_Value::zero: off]
-  bool                                useThreadPerConnection;
-
-  struct Net_UserData*                userData;
-};
-
-struct Stream_Configuration;
-class Common_ITimer;
-template <typename ConnectionConfigurationType, // derives from Net_ConnectionConfiguration
-          typename AllocatorConfigurationType,
-          typename StreamConfigurationType>
-class Net_ConnectionConfiguration_T;
-struct Net_ConnectionConfiguration;
-typedef Net_ConnectionConfiguration_T<struct Net_ConnectionConfiguration,
-                                      struct Net_AllocatorConfiguration,
-                                      struct Stream_Configuration> Net_ConnectionConfiguration_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 Net_ConnectionConfiguration_t,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
-                                 struct Net_UserData> Net_IInetConnectionManager_t;
-struct Net_ConnectionConfiguration
-{
-  Net_ConnectionConfiguration ()
-   : connectionManager (NULL)
-   , dispatch (NET_EVENT_DEFAULT_DISPATCH)
-   , generateUniqueIOModuleNames (false)
-   , messageAllocator (NULL)
-   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , socketHandlerConfiguration ()
-   , timerManager (NULL)
-   , userData (NULL)
-  {}
-
-  Net_IInetConnectionManager_t*         connectionManager;
-  enum Common_EventDispatchType         dispatch;
-  bool                                  generateUniqueIOModuleNames; // stream
-  Stream_IAllocator*                    messageAllocator;
-  // *NOTE*: applies to the corresponding protocol, if it has fixed size
-  //         datagrams; otherwise, this is the size of the individual (opaque)
-  //         stream buffers
-  unsigned int                          PDUSize; // package data unit size
-  struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
-  Common_ITimer_t*                      timerManager;
-
-  struct Net_UserData*                  userData;
-};
-typedef std::map<std::string,
-                 Net_ConnectionConfiguration_t> Net_ConnectionConfigurations_t;
-typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationIterator_t;
-
-template <typename ConnectionConfigurationType, // derives from Net_ConnectionConfiguration
-          typename AllocatorConfigurationType,
-          typename StreamConfigurationType>
-class Net_ConnectionConfiguration_T
- : public ConnectionConfigurationType
-{
-  typedef ConnectionConfigurationType inherited;
-
- public:
-  Net_ConnectionConfiguration_T ();
-  inline virtual ~Net_ConnectionConfiguration_T () {}
-
-  bool initialize (const AllocatorConfigurationType&,
-                   const StreamConfigurationType&);
-
-  AllocatorConfigurationType allocatorConfiguration_;
-  StreamConfigurationType*   streamConfiguration_;
-  bool                       isInitialized_;
-};
-
-// include template definition
-#include "net_configuration.inl"
 
 struct Net_SessionConfiguration
 {
@@ -297,15 +79,23 @@ struct Net_SessionConfiguration
   struct Common_ParserConfiguration* parserConfiguration;
 };
 
-struct Net_ListenerConfiguration
+template <enum Net_TransportLayerType TransportLayerType_e>
+class Net_ListenerConfiguration_T
+ : public Net_ConnectionConfigurationBase_T<TransportLayerType_e>
 {
-  Net_ListenerConfiguration ()
+ public:
+  Net_ListenerConfiguration_T ()
+//   : Net_ConnectionConfigurationBase_T ()
    : addressFamily (ACE_ADDRESS_FAMILY_INET)
-   , connectionConfiguration (NULL)
   {}
 
-  int                                 addressFamily;
-  struct Net_ConnectionConfiguration* connectionConfiguration;
+  int addressFamily;
 };
+
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+typedef Net_ListenerConfiguration_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkListenerConfiguration_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+typedef Net_ListenerConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPListenerConfiguration_t;
+typedef Net_ListenerConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPListenerConfiguration_t;
 
 #endif

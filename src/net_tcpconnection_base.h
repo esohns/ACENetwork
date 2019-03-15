@@ -65,7 +65,7 @@ class Net_TCPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_TCPSocketConfiguration,
+                                     Net_TCPSocketConfiguration_t,
                                      HandlerConfigurationType,
                                      ListenerConfigurationType,
                                      StreamType,
@@ -80,7 +80,7 @@ class Net_TCPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_TCPSocketConfiguration,
+                                     Net_TCPSocketConfiguration_t,
                                      HandlerConfigurationType,
                                      ListenerConfigurationType,
                                      StreamType,
@@ -155,22 +155,15 @@ class Net_TCPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_TCPSocketConfiguration,
+                                     Net_TCPSocketConfiguration_t,
                                      HandlerConfigurationType,
                                      ListenerConfigurationType,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_TCPConnectionBase_T (bool = true); // managed ?
   inline virtual ~Net_TCPConnectionBase_T () {};
 
   // override some ACE_Event_Handler methods
@@ -210,7 +203,7 @@ class Net_AsynchTCPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_TCPSocketConfiguration,
+                                           Net_TCPSocketConfiguration_t,
                                            HandlerConfigurationType,
                                            ListenerConfigurationType,
                                            StreamType,
@@ -224,7 +217,7 @@ class Net_AsynchTCPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_TCPSocketConfiguration,
+                                           Net_TCPSocketConfiguration_t,
                                            HandlerConfigurationType,
                                            ListenerConfigurationType,
                                            StreamType,
@@ -259,22 +252,15 @@ class Net_AsynchTCPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_TCPSocketConfiguration,
+                                           Net_TCPSocketConfiguration_t,
                                            HandlerConfigurationType,
                                            ListenerConfigurationType,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            TimerManagerType,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_AsynchTCPConnectionBase_T (bool = true); // managed ?
   inline virtual ~Net_AsynchTCPConnectionBase_T () {};
 
   // override (part of) ACE_Service_Handler

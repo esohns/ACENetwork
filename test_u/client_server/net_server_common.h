@@ -67,7 +67,7 @@ class Test_U_Message;
 struct Server_ListenerConfiguration;
 
 typedef Net_IListener_T<struct Server_ListenerConfiguration,
-                        ClientServer_ConnectionConfiguration_t> Server_IListener_t;
+                        Test_U_TCPConnectionConfiguration> Server_IListener_t;
 struct Server_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
@@ -83,27 +83,8 @@ struct Server_SignalHandlerConfiguration
   long                     statisticReportingTimerId;
 };
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 ClientServer_ConnectionConfiguration_t,
-                                 struct ClientServer_ConnectionState,
-                                 Net_Statistic_t,
-                                 struct Test_U_UserData> ClientServer_IInetConnectionManager_t;
-struct Server_ListenerConfiguration
- : Net_ListenerConfiguration
-{
-  Server_ListenerConfiguration ()
-   : Net_ListenerConfiguration ()
-   , connectionConfiguration (NULL)
-   , connectionManager (NULL)
-  {}
-
-  ClientServer_ConnectionConfiguration_t* connectionConfiguration;
-  ClientServer_IInetConnectionManager_t*  connectionManager;
-};
-
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         ClientServer_ConnectionConfiguration_t> Client_IConnector_t;
+                         Test_U_UDPConnectionConfiguration> Test_U_IUDPConnector_t;
 struct Server_Configuration
  : ClientServer_Configuration
 {
@@ -115,9 +96,9 @@ struct Server_Configuration
    , signalHandlerConfiguration ()
   {}
 
-  Client_IConnector_t*                     connector;
+  Test_U_IUDPConnector_t*                  connector;
   Server_IListener_t*                      listener;
-  struct Server_ListenerConfiguration      listenerConfiguration;
+  Net_TCPListenerConfiguration_t           listenerConfiguration;
 
   struct Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };
@@ -125,12 +106,12 @@ struct Server_Configuration
 //////////////////////////////////////////
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct ClientServer_StreamSessionData,
+                                    struct Test_U_StreamSessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
-                                    Test_U_SessionMessage> ClientServer_ISessionNotify_t;
-typedef std::list<ClientServer_ISessionNotify_t*> ClientServer_Subscribers_t;
-typedef ClientServer_Subscribers_t::const_iterator ClientServer_SubscribersIterator_t;
+                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
+typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
+typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
 #if defined (GUI_SUPPORT)
 struct Server_UI_CBData
@@ -152,7 +133,7 @@ struct Server_UI_CBData
 
   struct Server_Configuration* configuration;
 
-  ClientServer_Subscribers_t   subscribers;
+  Test_U_Subscribers_t         subscribers;
 };
 #endif // GUI_SUPPORT
 

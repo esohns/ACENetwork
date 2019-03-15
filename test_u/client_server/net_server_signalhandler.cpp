@@ -60,8 +60,8 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
   NETWORK_TRACE (ACE_TEXT ("Server_SignalHandler::handle"));
 
   int result = -1;
-  ClientServer_IInetConnectionManager_t* iconnection_manager_p =
-      CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_ITCPConnectionManager_t* iconnection_manager_p =
+      TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   bool shutdown = false;

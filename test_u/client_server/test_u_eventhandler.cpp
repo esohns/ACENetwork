@@ -51,7 +51,7 @@
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-ClientServer_EventHandler::ClientServer_EventHandler (
+Test_U_EventHandler::Test_U_EventHandler (
 #if defined (GUI_SUPPORT)
                                                       struct Test_U_UI_CBData* CBData_in
 #endif // GUI_SUPPORT
@@ -60,15 +60,15 @@ ClientServer_EventHandler::ClientServer_EventHandler (
  : CBData_ (CBData_in)
 #endif // GUI_SUPPORT
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::ClientServer_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::Test_U_EventHandler"));
 
 }
 
 void
-ClientServer_EventHandler::start (Stream_SessionId_t sessionId_in,
-                                  const struct ClientServer_StreamSessionData& sessionData_in)
+Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
+                                  const struct Test_U_StreamSessionData& sessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::start"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionData_in);
@@ -92,10 +92,10 @@ ClientServer_EventHandler::start (Stream_SessionId_t sessionId_in,
 }
 
 void
-ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                                    const enum Stream_SessionMessageType& sessionEvent_in)
 {
-  STREAM_TRACE (ACE_TEXT ("ClientServer_EventHandler::notify"));
+  STREAM_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -107,9 +107,9 @@ ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
 }
 
 void
-ClientServer_EventHandler::end (Stream_SessionId_t sessionId_in)
+Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::end"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
 
   ACE_UNUSED_ARG (sessionId_in);
 
@@ -143,10 +143,10 @@ ClientServer_EventHandler::end (Stream_SessionId_t sessionId_in)
 }
 
 void
-ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                                    const Test_U_Message& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (message_in);
@@ -170,10 +170,10 @@ ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
 }
 
 void
-ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                                    const Test_U_SessionMessage& sessionMessage_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
 

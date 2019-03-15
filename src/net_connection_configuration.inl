@@ -22,12 +22,12 @@
 
 #include "net_macros.h"
 
-template <typename ConnectionConfigurationType,
-          typename AllocatorConfigurationType,
-          typename StreamConfigurationType>
-Net_ConnectionConfiguration_T<ConnectionConfigurationType,
-                              AllocatorConfigurationType,
-                              StreamConfigurationType>::Net_ConnectionConfiguration_T ()
+template <typename AllocatorConfigurationType,
+          typename StreamConfigurationType,
+          enum Net_TransportLayerType TransportLayerType>
+Net_ConnectionConfiguration_T<AllocatorConfigurationType,
+                              StreamConfigurationType,
+                              TransportLayerType>::Net_ConnectionConfiguration_T ()
  : inherited ()
  , allocatorConfiguration_ ()
  , streamConfiguration_ (NULL)
@@ -37,14 +37,14 @@ Net_ConnectionConfiguration_T<ConnectionConfigurationType,
 
 }
 
-template <typename ConnectionConfigurationType,
-          typename AllocatorConfigurationType,
-          typename StreamConfigurationType>
+template <typename AllocatorConfigurationType,
+          typename StreamConfigurationType,
+          enum Net_TransportLayerType TransportLayerType>
 bool
-Net_ConnectionConfiguration_T<ConnectionConfigurationType,
-                              AllocatorConfigurationType,
-                              StreamConfigurationType>::initialize (const AllocatorConfigurationType& allocatorConfiguration_in,
-                                                                    const StreamConfigurationType& streamConfiguration_in)
+Net_ConnectionConfiguration_T<AllocatorConfigurationType,
+                              StreamConfigurationType,
+                              TransportLayerType>::initialize (const AllocatorConfigurationType& allocatorConfiguration_in,
+                                                               const StreamConfigurationType& streamConfiguration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionConfiguration_T::initialize"));
 

@@ -39,36 +39,38 @@ typedef Net_Statistic_t Test_U_Statistic_t;
 typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_IStatistic_t;
 typedef Common_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
 
-struct Test_U_SignalHandlerConfiguration
- : Common_SignalHandlerConfiguration
-{
-  Test_U_SignalHandlerConfiguration ()
-   : Common_SignalHandlerConfiguration ()
-  {}
-};
+//struct Test_U_SignalHandlerConfiguration
+// : Common_SignalHandlerConfiguration
+//{
+//  Test_U_SignalHandlerConfiguration ()
+//   : Common_SignalHandlerConfiguration ()
+//  {}
+//};
 
 //////////////////////////////////////////
 
-struct Test_U_UserData
- : Net_UserData
-{
-  Test_U_UserData ()
-   : Net_UserData ()
-  {}
-};
+//struct Test_U_UserData
+// : Net_UserData
+//{
+//  Test_U_UserData ()
+//   : Net_UserData ()
+//  {}
+//};
 
 struct Test_U_Configuration
 {
   Test_U_Configuration ()
-   : dispatchConfiguration ()
+   : allocatorConfiguration ()
+   , dispatchConfiguration ()
    , signalHandlerConfiguration ()
    , userData ()
   {}
 
+  struct Common_AllocatorConfiguration     allocatorConfiguration;
   struct Common_EventDispatchConfiguration dispatchConfiguration;
-  struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct Common_SignalHandlerConfiguration signalHandlerConfiguration;
 
-  struct Test_U_UserData                   userData;
+  struct Net_UserData                      userData;
 };
 
 //////////////////////////////////////////

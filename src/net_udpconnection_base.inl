@@ -48,10 +48,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
-                        UserDataType>::Net_UDPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+                        UserDataType>::Net_UDPConnectionBase_T (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
 
@@ -75,8 +73,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::Net_UDPConnectionBase_T ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+ : inherited (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
 
@@ -259,8 +256,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
   //                   been notified to the reactor
   result =
-    (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection) ? inherited::getq (message_block_p, NULL)
-                                                                                                                : inherited::stream_.get (message_block_p, NULL));
+    (unlikely (inherited::CONNECTION_BASE_T::configuration_->useThreadPerConnection) ? inherited::getq (message_block_p, NULL)
+                                                                                     : inherited::stream_.get (message_block_p, NULL));
   if (unlikely (result == -1))
   {
     // *NOTE*: a number of issues can occur here:
@@ -270,8 +267,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
     if ((error != EAGAIN)   && // 11   : connection has been closed
         (error != ESHUTDOWN))  // 10058: queue has been deactivated
       ACE_DEBUG ((LM_ERROR,
-                  (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection ? ACE_TEXT ("%u: failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                                                   : ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n")),
+                  (inherited::CONNECTION_BASE_T::configuration_->useThreadPerConnection ? ACE_TEXT ("%u: failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                        : ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n")),
                   this->id ()));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
@@ -437,26 +434,17 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
   int result = -1;
   int error = 0;
-  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
-
-  socket_configuration_p =
-    dynamic_cast<struct Net_UDPSocketConfiguration*> (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
-
-  // sanity check(s)
-  ACE_ASSERT (socket_configuration_p);
 
   handle_out =
-    (socket_configuration_p->writeOnly ? inherited::writeHandle_ 
-                                       : inherited::peer_.get_handle ());
+    (inherited::CONNECTION_BASE_T::configuration_->writeOnly ? inherited::writeHandle_
+                                                             : inherited::peer_.get_handle ());
   localSAP_out.reset ();
   peerSAP_out.reset ();
 
-  if (likely (!socket_configuration_p->writeOnly))
+  if (likely (!inherited::CONNECTION_BASE_T::configuration_->writeOnly))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (unlikely (result == -1))
@@ -471,7 +459,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  if (unlikely (socket_configuration_p->writeOnly))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
     peerSAP_out = inherited::address_;
   else
   {
@@ -686,10 +674,8 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
                               HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
-                              UserDataType>::Net_AsynchUDPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+                              UserDataType>::Net_AsynchUDPConnectionBase_T (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::Net_AsynchUDPConnectionBase_T"));
 
@@ -711,8 +697,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::Net_AsynchUDPConnectionBase_T ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+ : inherited (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::Net_AsynchUDPConnectionBase_T"));
 
@@ -744,18 +729,9 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::open"));
 
   int result = -1;
-  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
-
-  socket_configuration_p =
-    dynamic_cast<struct Net_UDPSocketConfiguration*> (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
-
-  // sanity check(s)
-  ACE_ASSERT (socket_configuration_p);
 
   // step1: initialize asynchronous I/O
   inherited::open (handle_in,
@@ -764,7 +740,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
     goto error;
 
   // step2: start reading ? (need to pass any data ?)
-  if (unlikely (socket_configuration_p->writeOnly))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
   { ACE_ASSERT (!messageBlock_in.length ());
     goto continue_;
   } // end IF
@@ -909,23 +885,20 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   do
   {
     length = message_block_2->length ();
-    if (length > inherited::PDUSize_)
+    if (length > inherited::CONNECTION_BASE_T::configuration_->PDUSize)
     {
       message_block_3 = message_block_2->duplicate ();
       if (unlikely (!message_block_3))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
-
-        // clean up
-        message_block_p->release ();
-
+        message_block_p->release (); message_block_p = NULL;
         return -1;
       } // end IF
       message_block_2->cont (message_block_3);
 
-      message_block_2->length (inherited::PDUSize_);
-      message_block_3->rd_ptr (inherited::PDUSize_);
+      message_block_2->length (inherited::CONNECTION_BASE_T::configuration_->PDUSize);
+      message_block_3->rd_ptr (inherited::CONNECTION_BASE_T::configuration_->PDUSize);
 
       message_block_2 = message_block_3;
       continue;
@@ -939,7 +912,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   {
     length = 0;
     message_block_2 = message_block_p;
-    while (length < inherited::PDUSize_)
+    while (length < inherited::CONNECTION_BASE_T::configuration_->PDUSize)
     {
       length += message_block_2->length ();
       message_block_2 = message_block_2->cont ();
@@ -1019,26 +992,17 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 
   int result = -1;
   int error = 0;
-  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
-
-  socket_configuration_p =
-    dynamic_cast<struct Net_UDPSocketConfiguration*> (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
-
-  // sanity check(s)
-  ACE_ASSERT (socket_configuration_p);
 
   handle_out =
-    (socket_configuration_p->writeOnly ? inherited::writeHandle_ 
-                                       : inherited::HANDLER_T::SOCKET_T::get_handle ());
+    (inherited::CONNECTION_BASE_T::configuration_->writeOnly ? inherited::writeHandle_
+                                                             : inherited::HANDLER_T::SOCKET_T::get_handle ());
   localSAP_out.reset ();
   peerSAP_out.reset ();
 
-  if (likely (!socket_configuration_p->writeOnly))
+  if (likely (!inherited::CONNECTION_BASE_T::configuration_->writeOnly))
   {
     result = inherited::HANDLER_T::SOCKET_T::get_local_addr (localSAP_out);
     if (unlikely (result == -1))
@@ -1053,7 +1017,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  if (unlikely (socket_configuration_p->writeOnly))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
     peerSAP_out = inherited::address_;
   else
   {

@@ -54,7 +54,7 @@ class Net_IConnectionManagerBase_T
 
 template <ACE_SYNCH_DECL,
           typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
@@ -69,6 +69,7 @@ class Net_IConnectionManager_T
  public:
   // convenience types
   typedef Net_IConnectionManagerBase_T<ACE_SYNCH_USE> BASE_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,

@@ -1,5 +1,5 @@
-/***************************************************************************
- *   Copyright (C) 2010 by Erik Sohns   *
+﻿/***************************************************************************
+ *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,51 +20,4 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
-#include "test_u_message.h"
-#include "test_u_stream.h"
-#include "test_u_tcpconnection.h"
-
-#include "ace/Log_Msg.h"
-
-#include "test_u_sessionmessage.h"
-
-#include "net_defines.h"
-#include "net_macros.h"
-
-Test_U_TCPConnection::Test_U_TCPConnection (bool managed_in)
- : inherited (managed_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
-
-}
-
-Test_U_TCPConnection::Test_U_TCPConnection ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
-//////////////////////////////////////////
-
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (bool managed_in)
- : inherited (managed_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
-
-}
-
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection ()
- : inherited (true)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
+#include "net_connection_configuration.h"

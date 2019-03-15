@@ -56,19 +56,19 @@
 #endif // GUI_SUPPORT
 #include "test_u_stream_common.h"
 
+#include "test_u_common.h"
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
 
 // forward declaration(s)
 class Stream_IAllocator;
-struct ClientServer_SocketHandlerConfiguration;
 class Test_U_SessionMessage;
 class Test_U_Message;
 class Client_TimeoutHandler;
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         ClientServer_ConnectionConfiguration_t> Client_IConnector_t;
+                         Test_U_TCPConnectionConfiguration> Test_U_ITCPConnector_t;
 typedef Net_IAsynchConnector_T<ACE_INET_Addr,
-                               ClientServer_ConnectionConfiguration_t> Client_IAsynchConnector_t;
+                               Test_U_TCPConnectionConfiguration> Test_U_ITCPAsynchConnector_t;
 
 class Net_IPing
 {
@@ -78,16 +78,16 @@ class Net_IPing
   virtual void ping () = 0;
 };
 
-struct Client_ConnectorConfiguration
-{
-  Client_ConnectorConfiguration ()
-   : connectionManager (NULL)
-   , socketHandlerConfiguration (NULL)
-  {}
+//struct Test_U_ConnectorConfiguration
+//{
+//  Test_U_ConnectorConfiguration ()
+//   : connectionManager (NULL)
+//   , socketHandlerConfiguration (NULL)
+//  {}
 
-  ClientServer_IInetConnectionManager_t*          connectionManager;
-  struct ClientServer_SocketHandlerConfiguration* socketHandlerConfiguration;
-};
+//  Test_U_ITCPConnectionManager_t*     connectionManager;
+//  struct Net_SocketConfigurationBase* socketHandlerConfiguration;
+//};
 
 struct Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
@@ -102,12 +102,12 @@ struct Client_SignalHandlerConfiguration
    , statisticReportingInterval (0)
   {}
 
-  ACE_INET_Addr                           address;
-  long                                    actionTimerId;
-  ClientServer_ConnectionConfiguration_t* connectionConfiguration;
-  Client_IConnector_t*                    connector;
-  Stream_IAllocator*                      messageAllocator;
-  unsigned int                            statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
+  ACE_INET_Addr                      address;
+  long                               actionTimerId;
+  Test_U_TCPConnectionConfiguration* connectionConfiguration;
+  Test_U_ITCPConnector_t*            connector;
+  Stream_IAllocator*                 messageAllocator;
+  unsigned int                       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Client_Configuration
@@ -130,11 +130,11 @@ struct Client_Configuration
 //                                    struct Test_U_StreamSessionData,
 //                                    enum Stream_SessionMessageType,
 //                                    Test_U_Message,
-//                                    Test_U_SessionMessage> ClientServer_ISessionNotify_t;
-//typedef std::list<ClientServer_ISessionNotify_t*> ClientServer_Subscribers_t;
-//typedef ClientServer_Subscribers_t::const_iterator ClientServer_SubscribersIterator_t;
+//                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
+//typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
+//typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
-//typedef Common_ISubscribe_T<ClientServer_ISessionNotify_t> ClientServer_ISubscribe_t;
+//typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
 
 struct Client_UI_CBData
 #if defined (GTK_USE)
@@ -155,7 +155,7 @@ struct Client_UI_CBData
 
   struct Client_Configuration* configuration;
 
-  ClientServer_Subscribers_t   subscribers;
+  Test_U_Subscribers_t         subscribers;
 };
 #endif // GUI_SUPPORT
 

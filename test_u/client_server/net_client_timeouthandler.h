@@ -64,9 +64,10 @@ class Client_TimeoutHandler
     ALTERNATING_STATE_INVALID = -1
   };
 
-  Client_TimeoutHandler (enum ActionModeType,   // mode
-                         unsigned int,          // max #connections
-                         Client_IConnector_t*); // connector
+  Client_TimeoutHandler (enum ActionModeType,      // mode
+                         unsigned int,             // max #connections
+                         Test_U_ITCPConnector_t*,  // connector
+                         Test_U_IUDPConnector_t*); // connector
   inline virtual ~Client_TimeoutHandler () {}
 
   void mode (enum ActionModeType);
@@ -81,7 +82,8 @@ class Client_TimeoutHandler
   ACE_UNIMPLEMENTED_FUNC (Client_TimeoutHandler& operator= (const Client_TimeoutHandler&))
 
   enum AlternatingModeStateType      alternatingModeState_;
-  Client_IConnector_t*               connector_;
+  Test_U_ITCPConnector_t*            TCPConnector_;
+  Test_U_IUDPConnector_t*            UDPConnector_;
   mutable ACE_SYNCH_MUTEX            lock_;
   unsigned int                       maximumNumberOfConnections_;
   enum ActionModeType                mode_;

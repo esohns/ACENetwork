@@ -99,7 +99,7 @@ class Net_Connection_Manager_T
                                        // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
                                        //                   invoked, i.e. when new connections will be rejected;
                                        //                   otherwise this may block indefinetly
-  virtual bool registerc (ICONNECTION_T*); // connection handle
+  virtual bool register_ (ICONNECTION_T*); // connection handle
   virtual void deregister (ICONNECTION_T*); // connection handle
 
   // *WARNING*: these two methods are NOT (!) re-entrant. If you want to set a

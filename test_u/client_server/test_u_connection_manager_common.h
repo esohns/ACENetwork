@@ -32,44 +32,55 @@
 
 #include "test_u_connection_common.h"
 
-// forward declarations
-struct Test_U_UserData;
-
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  Net_Netlink_Addr,
-                                 ClientServer_ConnectionConfiguration_t,
-                                 struct ClientServer_ConnectionState,
+                                 Test_U_NetlinkConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> ClientServer_INetlinkConnectionManager_t;
-#endif // NETLINK_SUPPORT
+                                 struct Net_UserData> Test_U_INetlinkConnectionManager_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 ClientServer_ConnectionConfiguration_t,
-                                 struct ClientServer_ConnectionState,
+                                 Test_U_TCPConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> ClientServer_IInetConnectionManager_t;
+                                 struct Net_UserData> Test_U_ITCPConnectionManager_t;
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 Test_U_UDPConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
+                                 Net_Statistic_t,
+                                 struct Net_UserData> Test_U_IUDPConnectionManager_t;
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  Net_Netlink_Addr,
-                                 ClientServer_ConnectionConfiguration_t,
-                                 struct ClientServer_ConnectionState,
+                                 Test_U_NetlinkConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> ClientServer_NetlinkConnectionManager_t;
-#endif // NETLINK_SUPPORT
+                                 struct Net_UserData> Test_U_NetlinkConnectionManager_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 ClientServer_ConnectionConfiguration_t,
-                                 struct ClientServer_ConnectionState,
+                                 Test_U_TCPConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> ClientServer_InetConnectionManager_t;
+                                 struct Net_UserData> Test_U_TCPConnectionManager_t;
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 Test_U_UDPConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
+                                 Net_Statistic_t,
+                                 struct Net_UserData> Test_U_UDPConnectionManager_t;
 
-#if defined (NETLINK_SUPPORT)
-typedef ACE_Singleton<ClientServer_NetlinkConnectionManager_t,
-                      ACE_SYNCH_MUTEX> CLIENTSERVER_NETLINKCONNECTIONMANAGER_SINGLETON;
-#endif // NETLINK_SUPPORT
-typedef ACE_Singleton<ClientServer_InetConnectionManager_t,
-                      ACE_SYNCH_MUTEX> CLIENTSERVER_CONNECTIONMANAGER_SINGLETON;
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+typedef ACE_Singleton<Test_U_NetlinkConnectionManager_t,
+                      ACE_SYNCH_MUTEX> TEST_U_NETLINKCONNECTIONMANAGER_SINGLETON;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+typedef ACE_Singleton<Test_U_TCPConnectionManager_t,
+                      ACE_SYNCH_MUTEX> TEST_U_TCPCONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<Test_U_UDPConnectionManager_t,
+                      ACE_SYNCH_MUTEX> TEST_U_UDPCONNECTIONMANAGER_SINGLETON;
 
 #endif

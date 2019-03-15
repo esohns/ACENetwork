@@ -46,7 +46,7 @@ template <typename HandlerType,
           typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
+          typename SocketConfigurationType, // *NOTE*: ATM these two are the same type
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
@@ -76,32 +76,18 @@ class Net_Client_AsynchConnector_T
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                   AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-
   typedef Net_IAsynchConnector_T<AddressType,
                                  ConfigurationType> ICONNECTOR_T;
   typedef ICONNECTOR_T IASYNCH_CONNECTOR_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
-                                const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_Client_AsynchConnector_T (bool = true); // managed ?
   virtual ~Net_Client_AsynchConnector_T ();
 
   // implement Net_IAsynchConnector_T
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return false; }
   virtual ACE_HANDLE connect (const AddressType&);
@@ -122,12 +108,12 @@ class Net_Client_AsynchConnector_T
   typedef std::map<ACE_HANDLE, int> HANDLE_TO_ERROR_MAP_T;
   typedef HANDLE_TO_ERROR_MAP_T::iterator HANDLE_TO_ERROR_MAP_ITERATOR_T;
 
-  ICONNECTION_MANAGER_T* connectionManager_;
   HANDLE_TO_ERROR_MAP_T  handles_;
-  ACE_Time_Value         statisticCollectionInterval_;
+  bool                   managed_;
   AddressType            SAP_;
 
  private:
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
@@ -205,32 +191,18 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-
   typedef Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType> ICONNECTOR_T;
   typedef ICONNECTOR_T IASYNCH_CONNECTOR_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
-                                const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_Client_AsynchConnector_T (bool = true); // managed ?
   inline virtual ~Net_Client_AsynchConnector_T () {}
 
   // implement Net_IAsynchConnector_T
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; }
   inline virtual bool useReactor () const { return false; }
   // *NOTE*: UDP is a datagram-based protocol. The Berkeley (datagram) socket
@@ -254,14 +226,14 @@ class Net_Client_AsynchConnector_T<HandlerType,
   virtual HandlerType* make_handler (void);
 
   ConfigurationType*     configuration_; // connection-
-  ICONNECTION_MANAGER_T* connectionManager_;
-  ACE_Time_Value         statisticCollectionInterval_;
+  bool                   managed_;
   ACE_INET_Addr          SAP_;
 
  private:
   // convenient types
   typedef Net_ITransportLayer_T<struct Net_UDPSocketConfiguration> ITRANSPORTLAYER_T;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
@@ -321,32 +293,18 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                   Net_Netlink_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   Net_Netlink_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-
   typedef Net_IAsynchConnector_T<Net_Netlink_Addr,
                                  ConfigurationType> ICONNECTOR_T;
   typedef ICONNECTOR_T IASYNCH_CONNECTOR_T;
 
-  Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
-                                const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  inline virtual ~Net_Client_AsynchConnector_T () {};
+  Net_Client_AsynchConnector_T (bool = true); // managed ?
+  inline virtual ~Net_Client_AsynchConnector_T () {}
 
   // implement Net_IAsynchConnector_T
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; }
   inline virtual bool useReactor () const { return false; }
   virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
@@ -359,8 +317,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   virtual HandlerType* make_handler (void);
 
   ConfigurationType*     configuration_; // connection-
-  ICONNECTION_MANAGER_T* connectionManager_;
-  ACE_Time_Value         statisticCollectionInterval_;
+  bool                   managed_;
   Net_Netlink_Addr       SAP_;
 
  private:

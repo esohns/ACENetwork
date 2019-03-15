@@ -52,14 +52,14 @@
 #endif // GUI_SUPPORT
 
 // forward declarations
-struct ClientServer_ConnectionConfiguration;
-struct ClientServer_ConnectionState;
+struct Test_U_ConnectionConfiguration;
+struct Test_U_ConnectionState;
 class Test_U_Message;
 class Test_U_SessionMessage;
 
-struct ClientServer_ProtocolConfiguration
+struct Test_U_ProtocolConfiguration
 {
-  ClientServer_ProtocolConfiguration ()
+  Test_U_ProtocolConfiguration ()
    : PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , pingInterval (ACE_Time_Value::zero)
    , pingAutoAnswer (true)
@@ -73,25 +73,25 @@ struct ClientServer_ProtocolConfiguration
 };
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct ClientServer_StreamSessionData,
+                                    struct Test_U_StreamSessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
-                                    Test_U_SessionMessage> ClientServer_ISessionNotify_t;
-typedef std::list<ClientServer_ISessionNotify_t*> ClientServer_Subscribers_t;
-typedef ClientServer_Subscribers_t::const_iterator ClientServer_SubscribersIterator_t;
+                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
+typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
+typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
 //extern const char stream_name_string_[];
-struct ClientServer_StreamConfiguration;
-struct ClientServer_ModuleHandlerConfiguration;
+struct Test_U_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
                                struct Net_AllocatorConfiguration,
-                               struct ClientServer_StreamConfiguration,
+                               struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
-                               struct ClientServer_ModuleHandlerConfiguration> ClientServer_StreamConfiguration_t;
-struct ClientServer_ModuleHandlerConfiguration
+                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+struct Test_U_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
-  ClientServer_ModuleHandlerConfiguration ()
+  Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //, printProgressDot (false)
    , protocolConfiguration (NULL)
@@ -104,23 +104,23 @@ struct ClientServer_ModuleHandlerConfiguration
   }
 
   //bool                             printProgressDot; // file writer module
-  struct ClientServer_ProtocolConfiguration* protocolConfiguration; // protocol handler
-  ClientServer_StreamConfiguration_t*        streamConfiguration;
+  struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
+  Test_U_StreamConfiguration_t*        streamConfiguration;
   //// *TODO*: remove this (--> session message data)
-  //struct ClientServer_StreamSessionData*     sessionData;
-  ClientServer_ISessionNotify_t*             subscriber;
-  ClientServer_Subscribers_t*                subscribers;
+  //struct Test_U_StreamSessionData*     sessionData;
+  Test_U_ISessionNotify_t*             subscriber;
+  Test_U_Subscribers_t*                subscribers;
 };
 
-struct ClientServer_StreamConfiguration
+struct Test_U_StreamConfiguration
  : Stream_Configuration
 {
-  ClientServer_StreamConfiguration ()
+  Test_U_StreamConfiguration ()
    : Stream_Configuration ()
    , userData (NULL)
   {}
 
-  struct Test_U_UserData* userData; // user data
+  struct Net_UserData* userData; // user data
 };
 
 struct ClientServer_Configuration
@@ -145,18 +145,20 @@ struct ClientServer_Configuration
    : Test_U_Configuration ()
 #endif // GUI_SUPPORT
    , allocatorConfiguration ()
-   , connectionConfigurations ()
+   , TCPConnectionConfigurations ()
+   , UDPConnectionConfigurations ()
    , streamConfiguration ()
    , protocolConfiguration ()
   {}
 
-  struct Net_AllocatorConfiguration         allocatorConfiguration;
+  struct Net_AllocatorConfiguration    allocatorConfiguration;
   // **************************** socket data **********************************
-  ClientServer_ConnectionConfigurations_t   connectionConfigurations;
+  Test_U_TCPConnectionConfigurations_t TCPConnectionConfigurations;
+  Test_U_UDPConnectionConfigurations_t UDPConnectionConfigurations;
   // **************************** stream data **********************************
-  ClientServer_StreamConfiguration_t        streamConfiguration;
+  Test_U_StreamConfiguration_t         streamConfiguration;
   // *************************** protocol data *********************************
-  struct ClientServer_ProtocolConfiguration protocolConfiguration;
+  struct Test_U_ProtocolConfiguration  protocolConfiguration;
 };
 
 #endif

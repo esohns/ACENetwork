@@ -56,9 +56,9 @@ class Net_UDPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_UDPSocketConfiguration,
+                                     Net_UDPSocketConfiguration_t,
                                      HandlerConfigurationType,
-                                     struct Net_ListenerConfiguration,
+                                     Net_UDPListenerConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      TimerManagerType,
@@ -71,9 +71,9 @@ class Net_UDPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_UDPSocketConfiguration,
+                                     Net_UDPSocketConfiguration_t,
                                      HandlerConfigurationType,
-                                     struct Net_ListenerConfiguration,
+                                     Net_UDPListenerConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      TimerManagerType,
@@ -99,23 +99,16 @@ class Net_UDPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_UDPSocketConfiguration,
+                                     Net_UDPSocketConfiguration_t,
                                      HandlerConfigurationType,
-                                     struct Net_ListenerConfiguration,
+                                     Net_UDPListenerConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_UDPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  inline virtual ~Net_UDPConnectionBase_T () {};
+  Net_UDPConnectionBase_T (bool = true); // managed ?
+  inline virtual ~Net_UDPConnectionBase_T () {}
 
   // override some ACE_Event_Handler methods
   // *NOTE*: stream any received data for further processing
@@ -168,9 +161,9 @@ class Net_AsynchUDPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_UDPSocketConfiguration,
+                                           Net_UDPSocketConfiguration_t,
                                            HandlerConfigurationType,
-                                           struct Net_ListenerConfiguration,
+                                           Net_UDPListenerConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            TimerManagerType,
@@ -182,9 +175,9 @@ class Net_AsynchUDPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_UDPSocketConfiguration,
+                                           Net_UDPSocketConfiguration_t,
                                            HandlerConfigurationType,
-                                           struct Net_ListenerConfiguration,
+                                           Net_UDPListenerConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            TimerManagerType,
@@ -207,22 +200,15 @@ class Net_AsynchUDPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_UDPSocketConfiguration,
+                                           Net_UDPSocketConfiguration_t,
                                            HandlerConfigurationType,
-                                           struct Net_ListenerConfiguration,
+                                           Net_UDPListenerConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            TimerManagerType,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_AsynchUDPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_AsynchUDPConnectionBase_T (bool = true); // managed ?
   inline virtual ~Net_AsynchUDPConnectionBase_T () {};
 
   // override (part of) ACE_Service_Handler

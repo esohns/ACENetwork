@@ -58,21 +58,21 @@ class Test_U_Stream
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
-                                        struct ClientServer_StreamState,
-                                        struct ClientServer_StreamConfiguration,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
                                         Test_U_Statistic_t,
                                         Common_Timer_Manager_t,
                                         struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
-                                        struct ClientServer_ModuleHandlerConfiguration,
-                                        struct ClientServer_StreamSessionData, // session data
-                                        ClientServer_StreamSessionData_t,      // session data container (reference counted)
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_StreamSessionData, // session data
+                                        Test_U_StreamSessionData_t,      // session data container (reference counted)
                                         Test_U_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        ClientServer_InetConnectionManager_t,
-                                        struct Test_U_UserData>
+                                        Test_U_TCPConnectionManager_t,
+                                        struct Net_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -80,21 +80,21 @@ class Test_U_Stream
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
-                                        struct ClientServer_StreamState,
-                                        struct ClientServer_StreamConfiguration,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
                                         Test_U_Statistic_t,
                                         Common_Timer_Manager_t,
                                         struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
-                                        struct ClientServer_ModuleHandlerConfiguration,
-                                        struct ClientServer_StreamSessionData,
-                                        ClientServer_StreamSessionData_t,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_StreamSessionData,
+                                        Test_U_StreamSessionData_t,
                                         Test_U_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        ClientServer_InetConnectionManager_t,
-                                        struct Test_U_UserData> inherited;
+                                        Test_U_TCPConnectionManager_t,
+                                        struct Net_UserData> inherited;
 
  public:
   Test_U_Stream ();

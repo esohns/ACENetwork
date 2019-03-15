@@ -145,21 +145,16 @@ class Net_StreamConnectionBase_T
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
 
+  StreamType         stream_;
+
  protected:
   // convenient types
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ListenerConfigurationType,
                           ConfigurationType> ILISTENER_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_StreamConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                              const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_StreamConnectionBase_T (bool = true); // managed ?
 
   // override (part of) Net_ISocketHandler
   virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -168,7 +163,6 @@ class Net_StreamConnectionBase_T
   virtual void open (ACE_HANDLE, ACE_Message_Block&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return); }
 
   Stream_IAllocator* allocator_;
-  StreamType         stream_;
 
   ACE_SYNCH_MUTEX_T  sendLock_;
   // *NOTE*: support partial writes
@@ -287,6 +281,8 @@ class Net_AsynchStreamConnectionBase_T
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
 
+  StreamType         stream_;
+
  protected:
   typedef HandlerType HANDLER_T;
   typedef StreamType STREAM_T;
@@ -294,15 +290,8 @@ class Net_AsynchStreamConnectionBase_T
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ListenerConfigurationType,
                           ConfigurationType> ILISTENER_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
 
-  Net_AsynchStreamConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                                    const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_AsynchStreamConnectionBase_T (bool = true); // managed ?
 
   // override (part of) Net_ISocketHandler
   virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
@@ -312,7 +301,6 @@ class Net_AsynchStreamConnectionBase_T
   inline virtual int close (u_long = 0) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
   Stream_IAllocator* allocator_;
-  StreamType         stream_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T ())

@@ -31,38 +31,40 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-ClientServer_UDPConnection::ClientServer_UDPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                        const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+Test_U_UDPConnection::Test_U_UDPConnection (bool managed_in)
+ : inherited (managed_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_UDPConnection::ClientServer_UDPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_UDPConnection::Test_U_UDPConnection"));
 
 }
 
-ClientServer_UDPConnection::ClientServer_UDPConnection ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+Test_U_UDPConnection::Test_U_UDPConnection ()
+ : inherited (true)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_UDPConnection::ClientServer_UDPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_UDPConnection::Test_U_UDPConnection"));
 
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
 }
 
 //////////////////////////////////////////
 
-ClientServer_AsynchUDPConnection::ClientServer_AsynchUDPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                    const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection (bool managed_in)
+ : inherited (managed_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_AsynchUDPConnection::ClientServer_AsynchUDPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection"));
 
 }
 
-ClientServer_AsynchUDPConnection::ClientServer_AsynchUDPConnection ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection ()
+ : inherited (true)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_AsynchUDPConnection::ClientServer_AsynchUDPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection"));
 
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
 }

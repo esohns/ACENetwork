@@ -37,7 +37,7 @@
 #include "test_u_defines.h"
 #include "test_u_message.h"
 
-ClientServer_Module_ProtocolHandler::ClientServer_Module_ProtocolHandler (ISTREAM_T* stream_in)
+Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_in)
  : inherited (stream_in)
  , pingHandler_ (this,  // dispatch ourselves
                  false) // ping peer at regular intervals...
@@ -48,13 +48,13 @@ ClientServer_Module_ProtocolHandler::ClientServer_Module_ProtocolHandler (ISTREA
  , printPongDot_ (false)
  , sessionId_ (0)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_ProtocolHandler::ClientServer_Module_ProtocolHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler"));
 
 }
 
-ClientServer_Module_ProtocolHandler::~ClientServer_Module_ProtocolHandler ()
+Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_ProtocolHandler::~ClientServer_Module_ProtocolHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler"));
 
   int result = -1;
 
@@ -81,10 +81,10 @@ ClientServer_Module_ProtocolHandler::~ClientServer_Module_ProtocolHandler ()
 }
 
 bool
-ClientServer_Module_ProtocolHandler::initialize (const struct ClientServer_ModuleHandlerConfiguration& configuration_in,
+Test_U_Module_ProtocolHandler::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
                                                  Stream_IAllocator* allocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_ProtocolHandler::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::initialize"));
 
   int result = -1;
 
@@ -136,10 +136,10 @@ ClientServer_Module_ProtocolHandler::initialize (const struct ClientServer_Modul
 }
 
 void
-ClientServer_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout,
+Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout,
                                                         bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_ProtocolHandler::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handleDataMessage"));
 
   int result = -1;
 
@@ -224,10 +224,10 @@ ClientServer_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message
 }
 
 void
-ClientServer_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& message_inout,
+Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& message_inout,
                                                            bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_ProtocolHandler::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handleSessionMessage"));
 
   // don't care (implies yes per default, when part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -242,9 +242,9 @@ ClientServer_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session id for reporting
-      const ClientServer_StreamSessionData_t& session_data_container_r =
+      const Test_U_StreamSessionData_t& session_data_container_r =
           message_inout->getR ();
-      const struct ClientServer_StreamSessionData& session_data_r =
+      const struct Test_U_StreamSessionData& session_data_r =
           session_data_container_r.getR ();
       sessionId_ = session_data_r.sessionId;
 
@@ -306,9 +306,9 @@ ClientServer_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage
 }
 
 void
-ClientServer_Module_ProtocolHandler::handle (const void* arg_in)
+Test_U_Module_ProtocolHandler::handle (const void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_ProtocolHandler::handle"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handle"));
 
   ACE_UNUSED_ARG (arg_in);
 
@@ -355,9 +355,9 @@ ClientServer_Module_ProtocolHandler::handle (const void* arg_in)
 }
 
 void
-ClientServer_Module_ProtocolHandler::dump_state () const
+Test_U_Module_ProtocolHandler::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_ProtocolHandler::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::dump_state"));
 
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\n"),

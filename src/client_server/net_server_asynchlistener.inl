@@ -163,15 +163,15 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_Message_Block* message_block_p = NULL;
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->connectionConfiguration);
   // *TODO*: remove type inference
-  if (likely (configuration_->connectionConfiguration->messageAllocator))
+  if (likely (configuration_->messageAllocator))
   {
     typename StreamType::MESSAGE_T* message_p =
-      static_cast<typename StreamType::MESSAGE_T*> (configuration_->connectionConfiguration->messageAllocator->malloc (space_needed));
+      static_cast<typename StreamType::MESSAGE_T*> (configuration_->messageAllocator->malloc (space_needed));
     message_block_p = message_p;
   } // end IF
   else
+  { ACE_ASSERT (false); // this needs to be typed
     ACE_NEW_NORETURN (message_block_p,
                       ACE_Message_Block (space_needed,
                                          ACE_Message_Block::MB_DATA,
@@ -184,6 +184,7 @@ Net_Server_AsynchListener_T<HandlerType,
                                          ACE_Time_Value::max_time,
                                          NULL,
                                          NULL));
+  } // end IF
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -572,13 +573,13 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_ASSERT (configuration_->connectionConfiguration);
 
   // *TODO*: remove type inferences
-  if (unlikely (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice))
+  if (unlikely (configuration_->useLoopBackDevice))
   {
     result =
-      configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number (), // port
-                                                                                                             INADDR_LOOPBACK,                                                                                                      // address
-                                                                                                             1,                                                                                                                    // encode ?
-                                                                                                             0);                                                                                                                   // map ?
+      configuration_->address.set (configuration_->address.get_port_number (), // port
+                                   INADDR_LOOPBACK,                            // address
+                                   1,                                          // encode ?
+                                   0);                                         // map ?
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -587,20 +588,20 @@ Net_Server_AsynchListener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-    open (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address, // local SAP
-          0,                                                                        // bytes to read
-          1,                                                                        // pass_addresses ?
-          ACE_DEFAULT_ASYNCH_BACKLOG,                                               // backlog
-          1,                                                                        // SO_REUSEADDR ?
-          NULL,                                                                     // proactor (use default)
-          true,                                                                     // validate new connections ?
-          1,                                                                        // reissue_accept ?
-          -1);                                                                      // number of initial accepts
+    open (configuration_->address,    // local SAP
+          0,                          // bytes to read
+          1,                          // pass_addresses ?
+          ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
+          1,                          // SO_REUSEADDR ?
+          NULL,                       // proactor (use default)
+          true,                       // validate new connections ?
+          1,                          // reissue_accept ?
+          -1);                        // number of initial accepts
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
     return;
   } // end IF
 #if defined (_DEBUG)
@@ -608,12 +609,12 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG
 
@@ -848,7 +849,7 @@ Net_Server_AsynchListener_T<HandlerType,
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (connection_p,
                     HandlerType (configuration_->connectionManager,
-                                 configuration_->connectionConfiguration->socketHandlerConfiguration.statisticReportingInterval));
+                                 configuration_->connectionConfiguration->statisticReportingInterval));
   if (unlikely (!connection_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

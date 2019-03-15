@@ -22,7 +22,7 @@
 #define NET_CONNECTION_BASE_H
 
 #include "ace/Global_Macros.h"
-#include "ace/Singleton.h"
+//#include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
@@ -64,10 +64,8 @@ class Net_ConnectionBase_T
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> CONNECTION_MANAGER_T;
-  //typedef Net_IConnection_T<AddressType,
-  //                          ConfigurationType,
-  //                          StateType,
-  //                          StatisticContainerType> ICONNECTION_T;
+//  typedef ACE_Singleton<CONNECTION_MANAGER_T,
+//                        ACE_SYNCH_MUTEX> CONNECTION_MANAGER_SINGLETON_T;
   typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                    AddressType,
                                    ConfigurationType,
@@ -81,31 +79,30 @@ class Net_ConnectionBase_T
   // missing: Common_IStatistic_T
   // *NOTE*: when using a connection manager, the (default) configuration is
   //         retrieved in the ctor
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; };
-  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (!configuration_); configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   // missing: Common_IDumpState
   // missing: info
   // missing: id
   // missing: notification
-  inline virtual const StateType& state () const { return state_; };
-  inline virtual enum Net_Connection_Status status () const { return state_.status; };
+  inline virtual const StateType& state () const { return state_; }
+  inline virtual enum Net_Connection_Status status () const { return state_.status; }
   // missing: close
   // missing: waitForCompletion
 
  protected:
-  Net_ConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                        const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_ConnectionBase_T (bool = true); // managed ?
   virtual ~Net_ConnectionBase_T ();
 
   // implement Common_IRegister
-  virtual bool registerc ();
+  virtual bool register_ ();
   virtual void deregister ();
 
   ConfigurationType*     configuration_;
   StateType              state_;
 
+  bool                   isManaged_;
   bool                   isRegistered_;
-  ICONNECTION_MANAGER_T* manager_;
 
  private:
   // convenient types

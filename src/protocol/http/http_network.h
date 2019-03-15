@@ -37,7 +37,7 @@
 #include "stream_common.h"
 
 #include "net_asynch_tcpsockethandler.h"
-#include "net_configuration.h"
+#include "net_connection_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
@@ -46,156 +46,28 @@
 #include "net_tcpsockethandler.h"
 #include "net_tcpconnection_base.h"
 
-//#include "net_client_asynchconnector.h"
-//#include "net_client_connector.h"
-//#include "net_client_ssl_connector.h"
-
 #include "http_common.h"
-//#include "http_stream.h"
-//#include "http_stream_common.h"
 
-struct HTTP_Stream_UserData;
+class HTTP_ConnectionConfiguration
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
+                                        struct HTTP_StreamConfiguration,
+                                        NET_TRANSPORTLAYER_TCP>
+{
+ public:
+  HTTP_ConnectionConfiguration ()
+   : Net_ConnectionConfiguration_T ()
+  {}
+};
+
 struct HTTP_ConnectionState
  : Net_ConnectionState
 {
   HTTP_ConnectionState ()
    : Net_ConnectionState ()
    , configuration (NULL)
-   , userData (NULL)
-  {};
+  {}
 
-  struct Net_ConnectionConfiguration* configuration;
-
-  struct HTTP_Stream_UserData*        userData;
+  HTTP_ConnectionConfiguration* configuration;
 };
-
-struct HTTP_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
-{
-  HTTP_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
-   //////////////////////////////////////
-   , socketConfiguration_2 ()
-   , userData (NULL)
-  {
-    socketConfiguration = &socketConfiguration_2;
-  };
-
-  struct Net_TCPSocketConfiguration socketConfiguration_2;
-
-  struct HTTP_Stream_UserData*      userData;
-};
-
-/////////////////////////////////////////
-
-//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-//                                 ACE_INET_Addr,
-//                                 struct Net_ConnectionConfiguration,
-//                                 struct HTTP_ConnectionState,
-//                                 HTTP_Statistic_t,
-//                                 struct HTTP_Stream_UserData> HTTP_IConnection_Manager_t;
-//typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-//                                 ACE_INET_Addr,
-//                                 struct Net_ConnectionConfiguration,
-//                                 struct HTTP_ConnectionState,
-//                                 HTTP_Statistic_t,
-//                                 struct HTTP_Stream_UserData> HTTP_Connection_Manager_t;
-//
-//struct HTTP_StreamState;
-//typedef HTTP_Stream_T<struct HTTP_StreamState,
-//                      struct HTTP_StreamConfiguration,
-//                      HTTP_Statistic_t,
-//                      Common_Timer_Manager_t,
-//                      struct Common_FlexParserAllocatorConfiguration,
-//                      struct HTTP_ModuleHandlerConfiguration,
-//                      struct HTTP_Stream_SessionData,
-//                      HTTP_Stream_SessionData_t,
-//                      ACE_Message_Block,
-//                      HTTP_Message_t,
-//                      HTTP_SessionMessage,
-//                      HTTP_Connection_Manager_t,
-//                      struct HTTP_Stream_UserData> HTTP_Stream_t;
-//
-//typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
-//                               ACE_SOCK_STREAM,
-//                               struct HTTP_SocketHandlerConfiguration> HTTP_TCPSocketHandler_t;
-//typedef Net_AsynchTCPSocketHandler_T<struct HTTP_SocketHandlerConfiguration> HTTP_AsynchTCPSocketHandler_t;
-//
-//typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
-//                                HTTP_TCPSocketHandler_t,
-//                                struct Net_ConnectionConfiguration,
-//                                struct HTTP_ConnectionState,
-//                                HTTP_Statistic_t,
-//                                struct HTTP_SocketHandlerConfiguration,
-//                                struct Net_ListenerConfiguration,
-//                                HTTP_Stream_t,
-//                                Common_Timer_Manager_t,
-//                                struct HTTP_Stream_UserData> HTTP_TCPConnection_t;
-//typedef Net_AsynchTCPConnectionBase_T<HTTP_AsynchTCPSocketHandler_t,
-//                                      struct Net_ConnectionConfiguration,
-//                                      struct HTTP_ConnectionState,
-//                                      HTTP_Statistic_t,
-//                                      struct HTTP_SocketHandlerConfiguration,
-//                                      struct Net_ListenerConfiguration,
-//                                      HTTP_Stream_t,
-//                                      Common_Timer_Manager_t,
-//                                      struct HTTP_Stream_UserData> HTTP_AsynchTCPConnection_t;
-//
-///////////////////////////////////////////
-//
-//typedef Net_IConnection_T<ACE_INET_Addr,
-//                          struct Net_ConnectionConfiguration,
-//                          struct HTTP_ConnectionState,
-//                          HTTP_Statistic_t> HTTP_IConnection_t;
-//typedef Net_IStreamConnection_T<ACE_INET_Addr,
-//                                struct Net_ConnectionConfiguration,
-//                                struct HTTP_ConnectionState,
-//                                HTTP_Statistic_t,
-//                                struct Net_SocketConfiguration,
-//                                struct HTTP_SocketHandlerConfiguration,
-//                                HTTP_Stream_t,
-//                                enum Stream_StateMachine_ControlState> HTTP_IStreamConnection_t;
-//
-///////////////////////////////////////////
-//
-//typedef Net_IConnector_T<ACE_INET_Addr,
-//                         struct HTTP_ConnectionConfiguration> HTTP_IConnector_t;
-//
-//typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-//                               HTTP_TCPConnection_t,
-//                               Net_SOCK_Connector,
-//                               ACE_INET_Addr,
-//                               struct Net_ConnectionConfiguration,
-//                               struct HTTP_ConnectionState,
-//                               HTTP_Statistic_t,
-//                               HTTP_Stream_t,
-//                               struct Net_TCPSocketConfiguration,
-//                               struct HTTP_SocketHandlerConfiguration,
-//                               struct HTTP_Stream_UserData> HTTP_Connector_t;
-#if defined (SSL_SUPPORT)
-//typedef Net_Client_SSL_Connector_T<HTTP_TCPConnection_t,
-//                                   ACE_SSL_SOCK_Connector,
-//                                   ACE_INET_Addr,
-//                                   struct Net_ConnectionConfiguration,
-//                                   struct HTTP_ConnectionState,
-//                                   HTTP_Statistic_t,
-//                                   HTTP_Stream_t,
-//                                   struct HTTP_SocketHandlerConfiguration,
-//                                   struct HTTP_Stream_UserData> HTTP_SSL_Connector_t;
-#endif // SSL_SUPPORT
-//typedef Net_Client_AsynchConnector_T<HTTP_AsynchTCPConnection_t,
-//                                     ACE_INET_Addr,
-//                                     struct Net_ConnectionConfiguration,
-//                                     struct HTTP_ConnectionState,
-//                                     HTTP_Statistic_t,
-//                                     HTTP_Stream_t,
-//                                     struct Net_TCPSocketConfiguration,
-//                                     struct HTTP_SocketHandlerConfiguration,
-//                                     struct HTTP_Stream_UserData> HTTP_AsynchConnector_t;
-//
-///////////////////////////////////////////
-//
-//typedef ACE_Singleton<HTTP_Connection_Manager_t,
-//                      ACE_SYNCH_MUTEX> HTTP_CONNECTIONMANAGER_SINGLETON;
 
 #endif

@@ -398,9 +398,9 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::registerc (ICONNECTION_T* connection_in)
+                         UserDataType>::register_ (ICONNECTION_T* connection_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerc"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::register_"));
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
     if (unlikely (!isActive_ || // --> currently rejecting new connections

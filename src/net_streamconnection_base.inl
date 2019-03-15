@@ -56,11 +56,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            StreamType,
                            StreamStatusType,
                            TimerManagerType,
-                           UserDataType>::Net_StreamConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                      const ACE_Time_Value& statisticCollectionInterval_in)
+                           UserDataType>::Net_StreamConnectionBase_T (bool managed_in)
  : inherited ()
- , inherited2 (interfaceHandle_in,
-               statisticCollectionInterval_in)
+ , inherited2 (managed_in)
  , stream_ ()
  , sendLock_ ()
  , writeBuffer_ (NULL)
@@ -106,7 +104,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // wait for any worker(s)
   // *TODO*: remove type inference
-  if (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
+  if (unlikely (inherited2::configuration_->useThreadPerConnection))
   {
     result = ACE_Task_Base::wait ();
     if (result == -1)
@@ -228,7 +226,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // step1: initialize/tweak socket, register reading data with reactor, ...
   // *TODO*: remove type inference
-  result = inherited::open (&configuration_p->socketHandlerConfiguration);
+  result = inherited::open (configuration_p);
   if (unlikely (result == -1))
   {
     // *NOTE*: this can happen when the connection handle is still registered
@@ -248,15 +246,18 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   info (inherited2::state_.handle,
         local_SAP, peer_SAP);
 
-  // step2: register with the connection manager (if any)
-  if (unlikely (!inherited2::registerc ()))
+  // step2: register with the connection manager ?
+  if (likely (inherited2::isManaged_))
   {
-    // *NOTE*: (most probably) maximum number of connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    goto error;
+    if (unlikely (!inherited2::register_ ()))
+    {
+      // *NOTE*: (most probably) maximum number of connections has been reached
+      //ACE_DEBUG ((LM_ERROR,
+      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+      goto error;
+    } // end IF
+    handle_manager = true;
   } // end IF
-  handle_manager = true;
 
   // step2: initialize/start stream
   // step2a: connect the stream head message queue with the reactor notification
@@ -917,7 +918,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (likely (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
+      if (likely (!inherited2::configuration_->useThreadPerConnection))
       { // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
         //                   in-flight notifications being dispatched at this
@@ -1527,12 +1528,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StreamType,
                                  StreamStatusType,
                                  TimerManagerType,
-                                 UserDataType>::Net_AsynchStreamConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                                  const ACE_Time_Value& statisticCollectionInterval_in)
+                                 UserDataType>::Net_AsynchStreamConnectionBase_T (bool managed_in)
  : inherited ()
- , inherited2 (interfaceHandle_in,
-               statisticCollectionInterval_in)
- //, configuration_ ()
+ , inherited2 (managed_in)
  , stream_ ()
  , notify_ (true)
 {
@@ -1628,7 +1626,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end SWITCH
   ACE_ASSERT (configuration_p);
 
-  if (unlikely (!inherited::initialize (configuration_p->socketHandlerConfiguration)))
+  if (unlikely (!inherited::initialize (*configuration_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_SocketHandlerBase_T::initialize(): \"%m\", returning\n"),
@@ -1703,15 +1701,18 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   this->info (inherited2::state_.handle,
               local_SAP, peer_SAP);
 
-  // step2: register with the connection manager (if any)
-  if (unlikely (!inherited2::registerc ()))
+  // step2: register with the connection manager ?
+  if (likely (inherited2::isManaged_))
   {
-    // *NOTE*: (most probably) maximum number of connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    goto error;
+    if (unlikely (!inherited2::register_ ()))
+    {
+      // *NOTE*: (most probably) maximum number of connections has been reached
+      //ACE_DEBUG ((LM_ERROR,
+      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+      goto error;
+    } // end IF
+    handle_manager = true;
   } // end IF
-  handle_manager = true;
 
   // step2: initialize/start stream
   ACE_ASSERT (inherited2::configuration_);
@@ -2170,10 +2171,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   //  socket_configuration = *configuration_.socketConfiguration;
 
   try {
-    result =
-      initialize (this->dispatch (),
-                  role_in,
-                  socket_configuration);
+    result = initialize (this->dispatch (),
+                         role_in,
+                         socket_configuration);
                          //*configuration_.socketConfiguration);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,

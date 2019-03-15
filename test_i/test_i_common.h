@@ -95,7 +95,7 @@ struct Test_I_Configuration
 {
   Test_I_Configuration ()
    : dispatchConfiguration ()
-   , connectionConfigurations ()
+//   , connectionConfigurations ()
    , parserConfiguration ()
    //, streamConfiguration ()
    , signalHandlerConfiguration ()
@@ -104,7 +104,7 @@ struct Test_I_Configuration
 
   struct Common_EventDispatchConfiguration dispatchConfiguration;
   // **************************** socket data **********************************
-  Net_ConnectionConfigurations_t           connectionConfigurations;
+//  Net_ConnectionConfigurations_t           connectionConfigurations;
   // **************************** parser data **********************************
   struct Common_ParserConfiguration        parserConfiguration;
   //// **************************** stream data **********************************

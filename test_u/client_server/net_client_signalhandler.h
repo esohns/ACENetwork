@@ -50,11 +50,10 @@ class Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (Client_SignalHandler (const Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Client_SignalHandler& operator= (const Client_SignalHandler&))
 
-  ACE_INET_Addr        address_;
-  Client_IConnector_t* connector_;
-  bool                 hasUI_;
-  long                 timerId_;
-  bool                 useReactor_;
+  ACE_INET_Addr           address_;
+  Test_U_ITCPConnector_t* connector_;
+  long                    timerId_;
+  bool                    useReactor_;
 };
 
 #endif

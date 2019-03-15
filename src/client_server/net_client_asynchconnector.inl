@@ -42,12 +42,10 @@ Net_Client_AsynchConnector_T<HandlerType,
                              SocketConfigurationType,
                              HandlerConfigurationType,
                              StreamType,
-                             UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                                          const ACE_Time_Value& statisticCollectionInterval_in)
+                             UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
  : configuration_ (NULL)
- , connectionManager_ (connectionManager_in)
  , handles_ ()
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , managed_ (managed_in)
  , SAP_ ()
  , condition_ (lock_)
  , lock_ ()
@@ -55,9 +53,6 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
-
-  if (unlikely (!connectionManager_))
-    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result =
@@ -660,8 +655,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_p,
-                    HandlerType (connectionManager_,
-                                 statisticCollectionInterval_));
+                    HandlerType (managed_));
   if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -686,11 +680,9 @@ Net_Client_AsynchConnector_T<HandlerType,
                              struct Net_UDPSocketConfiguration,
                              HandlerConfigurationType,
                              StreamType,
-                             UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                                          const ACE_Time_Value& statisticCollectionInterval_in)
+                             UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
  : configuration_ (NULL)
- , connectionManager_ (connectionManager_in)
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , managed_ (managed_in)
  , SAP_ ()
  , condition_ (lock_)
  , lock_ ()
@@ -698,9 +690,6 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
-
-  if (unlikely (!connectionManager_))
-    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result =
@@ -847,8 +836,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   // default behavior
   // *TODO*: remove type inference
   ACE_NEW_NORETURN (handler_p,
-                    CONNECTION_T (connectionManager_,
-                                  statisticCollectionInterval_));
+                    CONNECTION_T (managed_));
   if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -874,11 +862,9 @@ Net_Client_AsynchConnector_T<HandlerType,
                              struct Net_NetlinkSocketConfiguration,
                              HandlerConfigurationType,
                              StreamType,
-                             UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                                          const ACE_Time_Value& statisticCollectionInterval_in)
+                             UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
  : configuration_ (NULL)
- , connectionManager_ (connectionManager_in)
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , managed_ (managed_in)
  , SAP_ ()
  , condition_ (lock_)
  , lock_ ()
@@ -886,9 +872,6 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
-
-  if (unlikely (!connectionManager_))
-    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
   result =
@@ -1025,8 +1008,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_p,
-                    HandlerType (connectionManager_,
-                                 statisticCollectionInterval_));
+                    HandlerType (managed_));
   if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

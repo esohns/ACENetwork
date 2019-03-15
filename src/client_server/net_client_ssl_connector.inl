@@ -42,17 +42,13 @@ Net_Client_SSL_Connector_T<HandlerType,
                            StatisticContainerType,
                            HandlerConfigurationType,
                            StreamType,
-                           UserDataType>::Net_Client_SSL_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
-                                                                      const ACE_Time_Value& statisticCollectionInterval_in)
+                           UserDataType>::Net_Client_SSL_Connector_T (bool managed_in)
  : inherited ()
  , configuration_ ()
- , connectionManager_ (connectionManager_in)
- , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::Net_Client_SSL_Connector_T"));
 
-  if (!connectionManager_)
-    connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
 template <typename HandlerType,
@@ -122,6 +118,7 @@ Net_Client_SSL_Connector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::abort"));
 
   ACE_ASSERT (false);
+
   ACE_NOTSUP;
   ACE_NOTREACHED (return;)
 }
@@ -286,8 +283,7 @@ Net_Client_SSL_Connector_T<HandlerType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (connectionManager_,
-                                 statisticCollectionInterval_));
+                    HandlerType (managed_));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

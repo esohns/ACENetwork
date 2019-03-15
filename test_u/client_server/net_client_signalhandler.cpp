@@ -50,7 +50,6 @@ Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispa
               this) // event handler handle
  , address_ ()
  , connector_ (NULL)
- , hasUI_ (false)
  , timerId_ (-1)
  , useReactor_ (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
 {
@@ -70,7 +69,6 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   // *TODO*: remove type inference
   address_ = configuration_in.address;
   connector_ = configuration_in.connector;
-  hasUI_ = configuration_in.hasUI;
   timerId_ = configuration_in.actionTimerId;
   useReactor_ =
     (configuration_in.dispatchState->configuration->numberOfReactorThreads > 0);
@@ -87,9 +85,12 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  ClientServer_IInetConnectionManager_t* iconnection_manager_p =
-      CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_ITCPConnectionManager_t* iconnection_manager_p =
+      TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_IUDPConnectionManager_t* iconnection_manager_2 =
+      TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
+  ACE_ASSERT (iconnection_manager_2);
 
   bool abort = false;
   bool connect = false;
@@ -209,8 +210,8 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     if (connector_ &&
         !useReactor_)
     {
-      Client_IAsynchConnector_t* iasynch_connector_p =
-          dynamic_cast<Client_IAsynchConnector_t*> (connector_);
+      Test_U_ITCPAsynchConnector_t* iasynch_connector_p =
+          dynamic_cast<Test_U_ITCPAsynchConnector_t*> (connector_);
       ACE_ASSERT (iasynch_connector_p);
       try {
         iasynch_connector_p->abort ();
@@ -233,15 +234,10 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
                                          false);                                                    // don't block
 
     // step6: stop UI ?
-    if (hasUI_)
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-#else
-      ;
 #endif // GTK_USE
-#else
-      ;
 #endif // GUI_SUPPORT
   } // end IF
 }

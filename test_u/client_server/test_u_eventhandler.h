@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef ClientServer_EventHandler_H
-#define ClientServer_EventHandler_H
+#ifndef Test_U_EventHandler_H
+#define Test_U_EventHandler_H
 
 #include "ace/Global_Macros.h"
 
@@ -35,20 +35,20 @@
 struct Test_U_UI_CBData;
 #endif // GUI_SUPPORT
 
-class ClientServer_EventHandler
- : public ClientServer_ISessionNotify_t
+class Test_U_EventHandler
+ : public Test_U_ISessionNotify_t
 {
  public:
-  ClientServer_EventHandler (
+  Test_U_EventHandler (
 #if defined (GUI_SUPPORT)
                              struct Test_U_UI_CBData* // UI callback data
 #endif // GUI_SUPPORT
                             );
-  inline virtual ~ClientServer_EventHandler () {}
+  inline virtual ~Test_U_EventHandler () {}
 
   // implement Common_INotify_T
   virtual void start (Stream_SessionId_t,
-                      const struct ClientServer_StreamSessionData&);
+                      const struct Test_U_StreamSessionData&);
   virtual void notify (Stream_SessionId_t,
                        const enum Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);
@@ -59,10 +59,10 @@ class ClientServer_EventHandler
 
  private:
 #if defined (GUI_SUPPORT)
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler ())
 #endif // GUI_SUPPORT
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler (const ClientServer_EventHandler&))
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler& operator=(const ClientServer_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
 
 #if defined (GUI_SUPPORT)
   struct Test_U_UI_CBData* CBData_;

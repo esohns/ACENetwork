@@ -512,19 +512,19 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   CBData_in.configuration = &configuration;
 #endif // GUI_SUPPORT
 
-  ClientServer_EventHandler ui_event_handler (
+  Test_U_EventHandler ui_event_handler (
 #if defined (GUI_SUPPORT)
                                               &CBData_in
 #endif // GUI_SUPPORT
                                              );
-  ClientServer_Module_EventHandler_Module event_handler (NULL,
+  Test_U_Module_EventHandler_Module event_handler (NULL,
                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
-  ClientServer_Module_EventHandler* event_handler_p =
-    dynamic_cast<ClientServer_Module_EventHandler*> (event_handler.writer ());
+  Test_U_Module_EventHandler* event_handler_p =
+    dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<ClientServer_Module_EventHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
 
@@ -547,7 +547,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
-  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.protocolConfiguration =
     &configuration.protocolConfiguration;
   modulehandler_configuration.streamConfiguration =
@@ -582,7 +582,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                                 configuration.streamConfiguration.configuration_);
 
   // ********************** connection configuration data **********************
-  ClientServer_ConnectionConfiguration_t connection_configuration;
+  Test_U_ConnectionConfiguration_t connection_configuration;
   connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
@@ -593,7 +593,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  connection_configuration));
-  ClientServer_ConnectionConfigurationIterator_t iterator =
+  Test_U_ConnectionConfigurationIterator_t iterator =
     configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
   (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
@@ -633,11 +633,17 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step0c: initialize connector
-  ClientServer_InetConnectionManager_t* connection_manager_p =
-    CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_TCPConnectionManager_t* connection_manager_p =
+    TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  ClientServer_IInetConnectionManager_t* iconnection_manager_p =
+  Test_U_ITCPConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
+  Test_U_UDPConnectionManager_t* connection_manager_2 =
+    TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_2);
+  Test_U_IUDPConnectionManager_t* iconnection_manager_2 =
+    connection_manager_2;
+
   Client_TCP_AsynchConnector_t asynch_connector (iconnection_manager_p,
                                                  statisticReportingInterval_in);
   Client_TCP_Connector_t connector (iconnection_manager_p,
@@ -646,7 +652,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                                      statisticReportingInterval_in);
   Client_UDP_Connector_t udp_connector (iconnection_manager_p,
                                         statisticReportingInterval_in);
-  Client_IConnector_t* connector_p = NULL;
+  Test_U_ITCPConnector_t* connector_p = NULL;
+  Test_U_IUDPConnector_t* connector_2 = NULL;
   if (useUDP_in)
   {
     if (useReactor_in)
@@ -882,8 +889,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #endif // GUI_SUPPORT
       return;
     } // end IF
-    ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
-      NULL;
+    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_2 = NULL;
     if (useReactor_in)
     {
       iconnection_p =
@@ -974,7 +981,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // *IMPORTANT NOTE*: as long as connections are inactive (i.e. events are
   // dispatched by reactor thread(s), there is no real reason to wait here)
 //  connection_manager_p->wait ();
-  CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
 
 //  { // synch access
 //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef ClientServer_UDPConnection_H
-#define ClientServer_UDPConnection_H
+#ifndef Test_U_UDPConnection_H
+#define Test_U_UDPConnection_H
 
 #include "ace/Acceptor.h"
 #include "ace/Asynch_Acceptor.h"
@@ -43,100 +43,84 @@
 // forward declarations
 class Test_U_Stream;
 
-class ClientServer_UDPConnection
+class Test_U_UDPConnection
  : public Net_UDPConnectionBase_T<ACE_NULL_SYNCH,
-                                  ClientServer_UDPSocketHandler_t,
-                                  ClientServer_ConnectionConfiguration_t,
-                                  struct ClientServer_ConnectionState,
+                                  Test_U_UDPSocketHandler_t,
+                                  Test_U_UDPConnectionConfiguration,
+                                  struct Test_U_ConnectionState,
                                   Net_Statistic_t,
-                                  struct ClientServer_SocketHandlerConfiguration,
+                                  Net_UDPSocketConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
-                                  struct Test_U_UserData>
+                                  struct Net_UserData>
  , public Net_IPing
 {
   typedef Net_UDPConnectionBase_T<ACE_NULL_SYNCH,
-                                  ClientServer_UDPSocketHandler_t,
-                                  ClientServer_ConnectionConfiguration_t,
-                                  struct ClientServer_ConnectionState,
+                                  Test_U_UDPSocketHandler_t,
+                                  Test_U_UDPConnectionConfiguration,
+                                  struct Test_U_ConnectionState,
                                   Net_Statistic_t,
-                                  struct ClientServer_SocketHandlerConfiguration,
+                                  struct Test_U_SocketHandlerConfiguration,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
-                                  struct Test_U_UserData> inherited;
+                                  struct Net_UserData> inherited;
 
-  friend class ACE_Connector<ClientServer_UDPConnection, ACE_SOCK_CONNECTOR>;
+  friend class ACE_Connector<Test_U_UDPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ClientServer_ConnectionConfiguration_t,
-                                   struct ClientServer_ConnectionState,
-                                   Net_Statistic_t,
-                                   struct Test_U_UserData> ICONNECTION_MANAGER_T;
-
-  ClientServer_UDPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                              const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  inline virtual ~ClientServer_UDPConnection () {}
+  Test_U_UDPConnection (bool = true); // managed ?
+  inline virtual ~Test_U_UDPConnection () {}
 
   // implement Net_IPing
-  inline virtual void ping () { inherited::stream_.ping (); }
+  inline virtual void ping () { stream_.ping (); }
 
  private:
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  ClientServer_UDPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_UDPConnection (const ClientServer_UDPConnection&))
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_UDPConnection& operator= (const ClientServer_UDPConnection&))
+  Test_U_UDPConnection ();
+  ACE_UNIMPLEMENTED_FUNC (Test_U_UDPConnection (const Test_U_UDPConnection&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_UDPConnection& operator= (const Test_U_UDPConnection&))
 };
 
 //////////////////////////////////////////
 
-class ClientServer_AsynchUDPConnection
- : public Net_AsynchUDPConnectionBase_T<ClientServer_AsynchUDPSocketHandler_t,
-                                        ClientServer_ConnectionConfiguration_t,
-                                        struct ClientServer_ConnectionState,
+class Test_U_AsynchUDPConnection
+ : public Net_AsynchUDPConnectionBase_T<Test_U_AsynchUDPSocketHandler_t,
+                                        Test_U_UDPConnectionConfiguration,
+                                        struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        struct ClientServer_SocketHandlerConfiguration,
+                                        struct Test_U_SocketHandlerConfiguration,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
-                                        struct Test_U_UserData>
+                                        struct Net_UserData>
  , public Net_IPing
 {
-  typedef Net_AsynchUDPConnectionBase_T<ClientServer_AsynchUDPSocketHandler_t,
-                                        ClientServer_ConnectionConfiguration_t,
-                                        struct ClientServer_ConnectionState,
+  typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchUDPSocketHandler_t,
+                                        Test_U_UDPConnectionConfiguration,
+                                        struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        struct ClientServer_SocketHandlerConfiguration,
+                                        struct Test_U_SocketHandlerConfiguration,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
-                                        struct Test_U_UserData> inherited;
+                                        struct Net_UserData> inherited;
 
- friend class ACE_Asynch_Connector<ClientServer_AsynchUDPConnection>;
+ friend class ACE_Asynch_Connector<Test_U_AsynchUDPConnection>;
 
  public:
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   ACE_INET_Addr,
-                                   ClientServer_ConnectionConfiguration_t,
-                                   struct ClientServer_ConnectionState,
-                                   Net_Statistic_t,
-                                   struct Test_U_UserData> ICONNECTION_MANAGER_T;
-
-  ClientServer_AsynchUDPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                                    const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  inline virtual ~ClientServer_AsynchUDPConnection () {}
+  Test_U_AsynchUDPConnection (bool = true); // managed ?
+  inline virtual ~Test_U_AsynchUDPConnection () {}
 
   // implement Net_IPing
-  inline virtual void ping () { inherited::stream_.ping (); }
+  inline virtual void ping () { stream_.ping (); }
 
  private:
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
-  ClientServer_AsynchUDPConnection ();
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_AsynchUDPConnection (const ClientServer_AsynchUDPConnection&))
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_AsynchUDPConnection& operator= (const ClientServer_AsynchUDPConnection&))
+  Test_U_AsynchUDPConnection ();
+  ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchUDPConnection (const Test_U_AsynchUDPConnection&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchUDPConnection& operator= (const Test_U_AsynchUDPConnection&))
 };
 
 #endif

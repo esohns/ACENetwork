@@ -43,10 +43,8 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                         ListenerConfigurationType,
                         StreamType,
                         TimerManagerType,
-                        UserDataType>::Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+                        UserDataType>::Net_TCPConnectionBase_T (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::Net_TCPConnectionBase_T"));
 
@@ -72,8 +70,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::Net_TCPConnectionBase_T ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+ : inherited (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::Net_TCPConnectionBase_T"));
 
@@ -285,8 +282,8 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
   // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
   //                   been notified to the reactor
   result =
-    (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection) ? inherited::getq (inherited::writeBuffer_, NULL)
-                                                                                                                : inherited::stream_.get (inherited::writeBuffer_, NULL));
+    (unlikely (inherited::CONNECTION_BASE_T::configuration_->useThreadPerConnection) ? inherited::getq (inherited::writeBuffer_, NULL)
+                                                                                     : inherited::stream_.get (inherited::writeBuffer_, NULL));
   if (unlikely (result == -1))
   {
     // *NOTE*: a number of issues can occur here:
@@ -296,8 +293,8 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
     if ((error != EAGAIN)   && // 11   : connection has been closed
         (error != ESHUTDOWN))  // 10058: queue has been deactivated
       ACE_DEBUG ((LM_ERROR,
-                  (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection ? ACE_TEXT ("%u: failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                                                   : ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n")),
+                  (inherited::CONNECTION_BASE_T::configuration_->useThreadPerConnection ? ACE_TEXT ("%u: failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                        : ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n")),
                   this->id ()));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
@@ -459,10 +456,8 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
                               ListenerConfigurationType,
                               StreamType,
                               TimerManagerType,
-                              UserDataType>::Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                                            const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+                              UserDataType>::Net_AsynchTCPConnectionBase_T (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::Net_AsynchTCPConnectionBase_T"));
 
@@ -486,8 +481,7 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::Net_AsynchTCPConnectionBase_T ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+ : inherited (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::Net_AsynchTCPConnectionBase_T"));
 

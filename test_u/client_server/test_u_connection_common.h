@@ -24,81 +24,98 @@
 #include <map>
 #include <string>
 
+#include "ace/Synch_Traits.h"
+#include "ace/INET_Addr.h"
+
 #include "stream_common.h"
 #include "stream_configuration.h"
 
 #include "net_common.h"
-#include "net_configuration.h"
+#include "net_connection_configuration.h"
+#include "net_iconnectionmanager.h"
 
 #include "test_u_common.h"
 
-struct ClientServer_ConnectionConfiguration;
-struct ClientServer_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
-{
-  ClientServer_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
-   , socketConfiguration_2 ()
-   , socketConfiguration_3 ()
-   , connectionConfiguration (NULL)
-   , userData (NULL)
-  {
-    socketConfiguration = &socketConfiguration_2; // default: TCP socket
-  };
-
-  struct Net_TCPSocketConfiguration            socketConfiguration_2;
-  struct Net_UDPSocketConfiguration            socketConfiguration_3;
-  struct ClientServer_ConnectionConfiguration* connectionConfiguration;
-
-  struct Test_U_UserData*                      userData;
-};
-
 //extern const char stream_name_string_[];
-struct ClientServer_StreamConfiguration;
-struct ClientServer_ModuleHandlerConfiguration;
+struct Test_U_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
                                struct Net_AllocatorConfiguration,
-                               struct ClientServer_StreamConfiguration,
+                               struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
-                               struct ClientServer_ModuleHandlerConfiguration> ClientServer_StreamConfiguration_t;
-struct ClientServer_ConnectionConfiguration;
-typedef Net_ConnectionConfiguration_T<struct ClientServer_ConnectionConfiguration,
-                                      struct Net_AllocatorConfiguration,
-                                      ClientServer_StreamConfiguration_t> ClientServer_ConnectionConfiguration_t;
-struct ClientServer_ConnectionState
+                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+
+struct Test_U_ConnectionState
  : Net_ConnectionState
 {
-  ClientServer_ConnectionState ()
+  Test_U_ConnectionState ()
    : Net_ConnectionState ()
-   , userData (NULL)
-  {};
-
-  struct Test_U_UserData* userData;
+  {}
 };
+
+class Test_U_TCPConnectionConfiguration
+ : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+                                        Test_U_StreamConfiguration_t,
+                                        NET_TRANSPORTLAYER_TCP>
+{
+ public:
+  Test_U_TCPConnectionConfiguration ()
+   : Net_ConnectionConfiguration_T ()
+   ///////////////////////////////////////
+//   , connectionManager (NULL)
+  {}
+
+//  Test_U_IInetConnectionManager_t*         connectionManager;
+};
+class Test_U_UDPConnectionConfiguration
+ : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+                                        Test_U_StreamConfiguration_t,
+                                        NET_TRANSPORTLAYER_UDP>
+{
+ public:
+  Test_U_UDPConnectionConfiguration ()
+   : Net_ConnectionConfiguration_T ()
+   ///////////////////////////////////////
+//   , connectionManager (NULL)
+  {}
+
+//  Test_U_IInetConnectionManager_t*         connectionManager;
+};
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+class Test_U_NetlinkConnectionConfiguration
+ : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+                                        Test_U_StreamConfiguration_t,
+                                        NET_TRANSPORTLAYER_NETLINK>
+{
+ public:
+  Test_U_NetlinkConnectionConfiguration ()
+   : Net_ConnectionConfiguration_T ()
+   ///////////////////////////////////////
+//   , connectionManager (NULL)
+  {}
+
+//  Test_U_IInetConnectionManager_t*         connectionManager;
+};
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+
+typedef std::map<std::string,
+                 Test_U_TCPConnectionConfiguration> Test_U_TCPConnectionConfigurations_t;
+typedef Test_U_TCPConnectionConfigurations_t::iterator Test_U_TCPConnectionConfigurationIterator_t;
+typedef std::map<std::string,
+                 Test_U_UDPConnectionConfiguration> Test_U_UDPConnectionConfigurations_t;
+typedef Test_U_UDPConnectionConfigurations_t::iterator Test_U_UDPConnectionConfigurationIterator_t;
+
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 ClientServer_ConnectionConfiguration_t,
-                                 struct ClientServer_ConnectionState,
+                                 Test_U_TCPConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> ClientServer_IInetConnectionManager_t;
-struct ClientServer_ConnectionConfiguration
- : Net_ConnectionConfiguration
-{
-  ClientServer_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration ()
-   ///////////////////////////////////////
-   , connectionManager (NULL)
-   , socketHandlerConfiguration ()
-   , userData (NULL)
-  {};
-
-  ClientServer_IInetConnectionManager_t*         connectionManager;
-  struct ClientServer_SocketHandlerConfiguration socketHandlerConfiguration;
-
-  struct Test_U_UserData*                        userData;
-};
-typedef std::map<std::string,
-                 ClientServer_ConnectionConfiguration_t> ClientServer_ConnectionConfigurations_t;
-typedef ClientServer_ConnectionConfigurations_t::iterator ClientServer_ConnectionConfigurationIterator_t;
+                                 struct Net_UserData> Test_U_ITCPConnectionManager_t;
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 Test_U_UDPConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
+                                 Net_Statistic_t,
+                                 struct Net_UserData> Test_U_IUDPConnectionManager_t;
 
 #endif

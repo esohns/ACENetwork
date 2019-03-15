@@ -67,24 +67,10 @@ class Net_Client_SSL_Connector_T
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                   AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
 
-  Net_Client_SSL_Connector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
-                              const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  Net_Client_SSL_Connector_T (bool = true); // managed ?
   inline virtual ~Net_Client_SSL_Connector_T () {};
 
   // implement Net_Client_IConnector_T
@@ -124,9 +110,7 @@ class Net_Client_SSL_Connector_T
   typedef Net_ITransportLayer_T<struct Net_TCPSocketConfiguration> ITRANSPORTLAYER_T;
 
   ConfigurationType      configuration_; // connection-
-
-  ICONNECTION_MANAGER_T* connectionManager_;
-  ACE_Time_Value         statisticCollectionInterval_;
+  bool                   managed_;
 };
 
 // include template definition

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef ClientServer_Module_EventHandler_H
-#define ClientServer_Module_EventHandler_H
+#ifndef Test_U_Module_EventHandler_H
+#define Test_U_Module_EventHandler_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -35,47 +35,47 @@
 #include "test_u_sessionmessage.h"
 #include "test_u_stream_common.h"
 
-class ClientServer_Module_EventHandler
+class Test_U_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         struct ClientServer_ModuleHandlerConfiguration,
+                                         struct Test_U_ModuleHandlerConfiguration,
                                          Test_U_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct ClientServer_StreamSessionData,
-                                         struct Test_U_UserData>
+                                         struct Test_U_StreamSessionData,
+                                         struct Net_UserData>
 {
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         struct ClientServer_ModuleHandlerConfiguration,
+                                         struct Test_U_ModuleHandlerConfiguration,
                                          Test_U_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct ClientServer_StreamSessionData,
-                                         struct Test_U_UserData> inherited;
+                                         struct Test_U_StreamSessionData,
+                                         struct Net_UserData> inherited;
 
  public:
-  ClientServer_Module_EventHandler (ISTREAM_T*); // stream handle
-  inline virtual ~ClientServer_Module_EventHandler () {}
+  Test_U_Module_EventHandler (ISTREAM_T*); // stream handle
+  inline virtual ~Test_U_Module_EventHandler () {}
 
   // implement Common_IClone_T
   virtual ACE_Task<ACE_MT_SYNCH,
                    Common_TimePolicy_t>* clone ();
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_EventHandler ())
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_EventHandler (const ClientServer_Module_EventHandler&))
-  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_EventHandler& operator= (const ClientServer_Module_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct ClientServer_StreamSessionData,          // session data type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,                 // session event type
-                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
+                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
                               Stream_INotify_t,                               // stream notification interface type
-                              ClientServer_Module_EventHandler);              // writer type
+                              Test_U_Module_EventHandler);              // writer type
 
 #endif

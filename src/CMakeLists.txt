@@ -237,17 +237,19 @@ set (source_files
      net_common.h
      net_configuration.cpp
      net_configuration.h
-     net_configuration.inl
      net_connection_base.cpp
      net_connection_base.h
      net_connection_base.inl
+     net_connection_configuration.cpp
+     net_connection_configuration.h
+     net_connection_configuration.inl
      net_connection_manager.cpp
      net_connection_manager.h
      net_connection_manager.inl
      net_controller_base.cpp
      net_controller_base.h
      net_defines.h
-     net_exports.h
+#     net_exports.h
      net_iconnection.h
      net_iconnectionmanager.h
      net_iconnector.h
@@ -424,13 +426,14 @@ install (FILES
          net_common_tools.h
          net_common.h
          net_configuration.h
-         net_configuration.inl
          net_connection_base.h
+         net_connection_configuration.h
+         net_connection_configuration.inl
          net_connection_manager.h
          net_connection_manager.inl
          net_controller_base.h
          net_defines.h
-         net_exports.h
+#         net_exports.h
          net_iconnection.h
          net_iconnectionmanager.h
          net_iconnector.h

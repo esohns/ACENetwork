@@ -52,9 +52,6 @@ template <ACE_SYNCH_DECL>
 class Net_IConnectionManagerBase_T;
 template <typename ConfigurationType>
 class Net_ITransportLayer_T;
-struct Net_NetlinkSocketConfiguration;
-struct Net_TCPSocketConfiguration;
-struct Net_UDPSocketConfiguration;
 class Net_Common_Tools;
 
 enum Net_LinkLayerType
@@ -206,10 +203,6 @@ class Net_Netlink_Addr
 typedef Stream_Statistic Net_Statistic_t;
 typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;
 typedef Common_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
-
-typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> Net_INetlinkTransportLayer_t;
-typedef Net_ITransportLayer_T<struct Net_TCPSocketConfiguration> Net_ITCPTransportLayer_t;
-typedef Net_ITransportLayer_T<struct Net_UDPSocketConfiguration> Net_IUDPTransportLayer_t;
 
 struct Net_UserData
 {

@@ -46,38 +46,17 @@ struct IRC_ModuleHandlerConfiguration;
 //class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
 
-//typedef Common_INotify_T<unsigned int,
-//                         struct IRC_Stream_SessionData,
-//                         IRC_Record,
-//                         IRC_SessionMessage> IRC_IStreamNotify_t;
-//typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
-
-struct IRC_AllocatorConfiguration
- : Stream_AllocatorConfiguration
-{
-  IRC_AllocatorConfiguration ()
-   : Stream_AllocatorConfiguration ()
-  {
-    defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
-    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-    //         'flex's yy_scan_buffer() method
-    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  }
-};
-
-//struct IRC_ConnectorConfiguration
+//struct IRC_AllocatorConfiguration
+// : Stream_AllocatorConfiguration
 //{
-//  IRC_ConnectorConfiguration ()
-//   : /*configuration (NULL)
-//   ,*/ connectionManager (NULL)
-//   , socketHandlerConfiguration (NULL)
-//   //, statisticCollectionInterval (0)
-//  {};
-//
-//  //struct IRC_Configuration*              configuration;
-//  IRC_IConnection_Manager_t*             connectionManager;
-//  struct IRC_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  unsigned int                           statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
+//  IRC_AllocatorConfiguration ()
+//   : Stream_AllocatorConfiguration ()
+//  {
+//    defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
+//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+//    //         'flex's yy_scan_buffer() method
+//    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+//  }
 //};
 
 struct IRC_ProtocolConfiguration

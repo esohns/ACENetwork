@@ -32,14 +32,15 @@
 
 #include "stream_common.h"
 
-#if defined (NETLINK_SUPPORT)
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 #include "net_asynch_netlinksockethandler.h"
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 #include "net_asynch_tcpsockethandler.h"
 #include "net_asynch_udpsockethandler.h"
-#if defined (NETLINK_SUPPORT)
+#include "net_connection_configuration.h"
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 #include "net_netlinksockethandler.h"
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 #include "net_tcpconnection_base.h"
 #include "net_tcpsockethandler.h"
 #include "net_udpconnection_base.h"
@@ -52,32 +53,37 @@
 // forward declarations
 class Test_U_Stream;
 
-typedef Net_AsynchTCPSocketHandler_T<struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchTCPSocketHandler_t;
-#if defined (NETLINK_SUPPORT)
-typedef Net_AsynchNetlinkSocketHandler_T<struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchNetlinkSocketHandler_t;
-#endif // NETLINK_SUPPORT
+typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Test_U_AsynchTCPSocketHandler_t;
+
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+typedef Net_AsynchNetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Test_U_AsynchNetlinkSocketHandler_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
-                                     struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchUDPSocketHandler_t;
+                                     Net_UDPSocketConfiguration_t> Test_U_AsynchUDPSocketHandler_t;
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
-                                     struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchIPMulticastSocketHandler_t;
+                                     Net_UDPSocketConfiguration_t> Test_U_AsynchIPMulticastSocketHandler_t;
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-                                     struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchIPBroadcastSocketHandler_t;
+                                     Net_UDPSocketConfiguration_t> Test_U_AsynchIPBroadcastSocketHandler_t;
+
+//////////////////////////////////////////
 
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SOCK_STREAM,
-                               struct ClientServer_SocketHandlerConfiguration> ClientServer_TCPSocketHandler_t;
-#if defined (NETLINK_SUPPORT)
-typedef Net_NetlinkSocketHandler_T<struct ClientServer_SocketHandlerConfiguration> ClientServer_NetlinkSocketHandler_t;
-#endif // NETLINK_SUPPORT
+                               Net_TCPSocketConfiguration_t> Test_U_TCPSocketHandler_t;
+
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+typedef Net_NetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Test_U_NetlinkSocketHandler_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram,
-                               struct ClientServer_SocketHandlerConfiguration> ClientServer_UDPSocketHandler_t;
+                               Net_UDPSocketConfiguration_t> Test_U_UDPSocketHandler_t;
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram_Mcast,
-                               struct ClientServer_SocketHandlerConfiguration> ClientServer_IPMulticastSocketHandler_t;
+                               Net_UDPSocketConfiguration_t> Test_U_IPMulticastSocketHandler_t;
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram_Bcast,
-                               struct ClientServer_SocketHandlerConfiguration> ClientServer_IPBroadcastSocketHandler_t;
+                               Net_UDPSocketConfiguration_t> Test_U_IPBroadcastSocketHandler_t;
 
 #endif
