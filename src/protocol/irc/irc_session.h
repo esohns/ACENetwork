@@ -97,8 +97,9 @@ class IRC_Session_T
                                                  LogOutputType> >;
 
  public:
-  IRC_Session_T (ConnectionManagerType* = NULL,                 // connection manager handle
-                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+ // *NOTE*: if there is no default ctor, this will not compile
+ inline IRC_Session_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+ IRC_Session_T (bool); // managed ?
   virtual ~IRC_Session_T ();
 
   // implement Net_ISession_T

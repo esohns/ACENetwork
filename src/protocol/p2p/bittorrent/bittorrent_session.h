@@ -29,6 +29,7 @@
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
+#include "net_connection_configuration.h"
 #include "net_session_base.h"
 
 #include "bittorrent_common.h"
@@ -80,7 +81,7 @@ class BitTorrent_Session_T
                             PeerConnectionConfigurationType,
                             PeerConnectionStateType,
                             BitTorrent_Statistic_t,
-                            struct Net_SocketConfiguration,
+                            Net_TCPSocketConfiguration_t,
                             PeerHandlerConfigurationType,
                             typename PeerConnectionType::ICONNECTION_T,
                             PeerConnectionManagerType,
@@ -92,7 +93,7 @@ class BitTorrent_Session_T
                                                   TrackerConnectionConfigurationType,
                                                   PeerConnectionStateType,
                                                   BitTorrent_Statistic_t,
-                                                  struct Net_SocketConfiguration,
+                                                  Net_TCPSocketConfiguration_t,
                                                   PeerHandlerConfigurationType,
                                                   TrackerHandlerConfigurationType,
                                                   PeerStreamType,
@@ -126,7 +127,7 @@ class BitTorrent_Session_T
                             PeerConnectionConfigurationType,
                             PeerConnectionStateType,
                             BitTorrent_Statistic_t,
-                            struct Net_SocketConfiguration,
+                            Net_TCPSocketConfiguration_t,
                             PeerHandlerConfigurationType,
                             typename PeerConnectionType::ICONNECTION_T,
                             PeerConnectionManagerType,
@@ -138,7 +139,7 @@ class BitTorrent_Session_T
                                                   TrackerConnectionConfigurationType,
                                                   PeerConnectionStateType,
                                                   BitTorrent_Statistic_t,
-                                                  struct Net_SocketConfiguration,
+                                                  Net_TCPSocketConfiguration_t,
                                                   PeerHandlerConfigurationType,
                                                   TrackerHandlerConfigurationType,
                                                   PeerStreamType,

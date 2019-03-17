@@ -52,7 +52,7 @@ typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                               IRC_Client_ControlMessage_t,
                               IRC_Message,
                               IRC_Client_SessionMessage,
-                              struct IRC_Client_UserData> IRC_Client_Module_Streamer_t;
+                              struct Net_UserData> IRC_Client_Module_Streamer_t;
 typedef IRC_Module_Bisector_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,
                               IRC_Client_ControlMessage_t,
@@ -66,7 +66,7 @@ typedef IRC_Module_Bisector_T<ACE_MT_SYNCH,
                               IRC_Client_SessionData_t,
                               IRC_Statistic_t,
                               Common_Timer_Manager_t,
-                              struct IRC_Client_UserData> IRC_Client_Module_Bisector_t;
+                              struct Net_UserData> IRC_Client_Module_Bisector_t;
 
 typedef IRC_Module_Parser_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,

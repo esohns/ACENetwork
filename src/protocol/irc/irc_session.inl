@@ -76,10 +76,8 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::IRC_Session_T (ConnectionManagerType* interfaceHandle_in,
-                                             const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
+              LogOutputType>::IRC_Session_T (bool managed_in)
+ : inherited (managed_in)
  , close_ (false)
  , inputHandler_ (NULL)
  , logToFile_ (IRC_SESSION_DEF_LOG)
@@ -1081,29 +1079,25 @@ IRC_Session_T<ConnectionType,
   ACE_ASSERT (connection_configuration_p);
 
   ModuleHandlerConfigurationIteratorType iterator;
-  if (!inherited::manager_)
-  {
-    // *TODO*: remove type inference
+  if (!inherited::isManaged_)
+  { // *TODO*: remove type inference
     ACE_ASSERT (connection_configuration_p->streamConfiguration_);
-
     iterator =
       connection_configuration_p->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration_->end ());
   } // end IF
   else
-  {
-    // *TODO*: remove type inference
+  { // *TODO*: remove type inference
     ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
     ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_);
-
     iterator =
       inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->end ());
   } // end ELSE
   (*iterator).second.second.subscriber = this;
-  (*iterator).second.second.userData =
-    connection_configuration_p->socketHandlerConfiguration.userData;
-  ACE_ASSERT ((*iterator).second.second.userData);
+//  (*iterator).second.second.userData =
+//    connection_configuration_p->socketHandlerConfiguration.userData;
+//  ACE_ASSERT ((*iterator).second.second.userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();
 //  module_handler_configuration_p->userData->connectionState =
 //      &const_cast<IRC_ConnectionState&> (connection_state_r);

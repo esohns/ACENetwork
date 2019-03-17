@@ -149,7 +149,6 @@ struct Common_UI_State;
 //          typename ConfigurationType,
 //          typename StateType>
 //class BitTorrent_ISession_T;
-struct Net_SocketConfiguration;
 enum Stream_StateMachine_ControlState;
 //typedef BitTorrent_ISession_T<ACE_INET_Addr,
 //                              struct BitTorrent_PeerConnectionConfiguration,

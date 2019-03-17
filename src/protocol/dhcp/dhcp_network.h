@@ -88,14 +88,14 @@ typedef Net_AsynchTCPConnectionBase_T<DHCP_AsynchTCPHandler_t,
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct DHCP_ConnectionConfiguration,
                           struct DHCP_ConnectionState,
-                          DHCP_RuntimeStatistic_t> DHCP_IConnection_t;
+                          Net_Statistic_t> DHCP_IConnection_t;
 typedef Net_ISocketConnection_T<ACE_INET_Addr,
                                 struct DHCP_ConnectionConfiguration,
                                 struct DHCP_ConnectionState,
-                                DHCP_RuntimeStatistic_t,
+                                Net_Statistic_t,
                                 DHCP_Stream_t,
                                 enum Stream_StateMachine_ControlState,
-                                struct Net_SocketConfiguration,
+                                Net_UDPSocketConfiguration_t,
                                 struct DHCP_SocketHandlerConfiguration> DHCP_ISocketConnection_t;
 //typedef Net_ISession_T<ACE_INET_Addr,
 //                       struct Net_SocketConfiguration,

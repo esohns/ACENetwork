@@ -31,7 +31,7 @@
 IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionId_t sessionId_in,
                                                       enum Stream_SessionMessageType messageType_in,
                                                       IRC_Client_SessionData_t*& sessionData_inout,
-                                                      struct IRC_Client_UserData* userData_in)
+                                                      struct Net_UserData* userData_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_inout,
