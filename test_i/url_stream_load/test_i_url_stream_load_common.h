@@ -83,19 +83,19 @@ struct Test_I_URLStreamLoad_Configuration
    , connectionConfigurations ()
    , streamConfiguration ()
    //, protocolConfiguration ()
-   , userData ()
+//   , userData ()
   {}
 
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  Test_I_URLStreamLoad_ConnectionConfigurations_t        connectionConfigurations;
+  Net_ConnectionConfigurations_t                         connectionConfigurations;
   // **************************** stream data **********************************
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
   //struct HTTP_ProtocolConfiguration                      protocolConfiguration;
 
-  struct HTTP_Stream_UserData                            userData;
+//  struct HTTP_Stream_UserData                            userData;
 };
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,

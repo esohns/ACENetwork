@@ -133,7 +133,7 @@ do_printUsage (const std::string& programName_in)
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILE] : configuration file {\"")
@@ -213,7 +213,7 @@ do_processArguments (int argc_in,
   configurationFile_out          = configuration_path;
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
@@ -482,7 +482,7 @@ connection_setup_curses_function (void* arg_in)
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   std::string channel_string;
   string_list_t channels, keys;
-  IRC_Client_IConnection_Manager_t* connection_manager_p =
+  IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
@@ -763,33 +763,26 @@ do_work (struct IRC_Client_Configuration& configuration_in,
       &event_dispatch_configuration_s;
 
   // step3: initialize client connector
-  IRC_Client_ConnectionConfiguration_t connection_configuration;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address =
-    serverAddress_in;
+  IRC_Client_ConnectionConfiguration connection_configuration;
+  connection_configuration.address = serverAddress_in;
 
   //connection_configuration.socketHandlerConfiguration.bufferSize =
   //  IRC_CLIENT_BUFFER_SIZE;
-  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+  connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration.socketHandlerConfiguration.userData =
-    &configuration_in.userData;
 
   connection_configuration.messageAllocator =
     configuration_in.streamConfiguration.configuration_.messageAllocator;
   connection_configuration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
-  connection_configuration.userData =
-    &configuration_in.userData;
   connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
                                        configuration_in.streamConfiguration);
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                    connection_configuration));
-  IRC_Client_ConnectionConfigurationIterator_t iterator_2 =
+                                                                    &connection_configuration));
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
-  (*iterator_2).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator_2).second);
 
   //IRC_Client_SessionState session_state;
   //session_state.configuration = configuration_in;
@@ -800,17 +793,15 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   //connector_configuration.userData = &configuration_in.streamUserData;
   //connector_configuration.socketHandlerConfiguration =
   //  &configuration_in.socketHandlerConfiguration;
-  IRC_Client_SessionConnector_t connector (connection_manager_p,
-                                           statisticReportingInterval_in);
-  IRC_Client_AsynchSessionConnector_t asynch_connector (connection_manager_p,
-                                                        statisticReportingInterval_in);
+  IRC_Client_SessionConnector_t connector (true);
+  IRC_Client_AsynchSessionConnector_t asynch_connector (true);
   IRC_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
   //if (!connector_p->initialize (connector_configuration))
-  if (!connector_p->initialize ((*iterator_2).second))
+  if (!connector_p->initialize (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -846,8 +837,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step4: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set ((*iterator_2).second,
-                             //configuration_in.streamUserData);
+  connection_manager_p->set (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
                              NULL);
 
   // event loop(s):
@@ -1119,7 +1109,7 @@ ACE_TMAIN (int argc_in,
   std::string configuration_file_name        = configuration_path;
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);

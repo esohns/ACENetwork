@@ -103,8 +103,8 @@ struct BitTorrent_Client_Configuration
   // ****************************** socket *************************************
   // *TODO*: workaround to accomodate different message allocators for each connection type.
   //         --> there must be a better way to implement this
-  BitTorrent_Client_PeerConnectionConfigurations_t    peerConnectionConfigurations;
-  BitTorrent_Client_TrackerConnectionConfigurations_t trackerConnectionConfigurations;
+  Net_ConnectionConfigurations_t                      peerConnectionConfigurations;
+  Net_ConnectionConfigurations_t                      trackerConnectionConfigurations;
   // ****************************** stream *************************************
   struct Common_ParserConfiguration                   parserConfiguration;
   BitTorrent_Client_PeerStreamConfiguration_t         peerStreamConfiguration;

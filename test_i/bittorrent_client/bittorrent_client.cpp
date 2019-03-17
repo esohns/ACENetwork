@@ -128,7 +128,7 @@ do_printUsage (const std::string& programName_in)
   configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT ("usage: ")
@@ -199,7 +199,7 @@ do_processArguments (int argc_in,
   configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   debugParser_out                = false;
@@ -596,10 +596,10 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                                                                       std::make_pair (module_configuration,
                                                                                       tracker_modulehandler_configuration)));
 
-  BitTorrent_Client_PeerConnectionConfiguration_t peer_connection_configuration;
-  BitTorrent_Client_TrackerConnectionConfiguration_t tracker_connection_configuration;
-  BitTorrent_Client_PeerConnectionConfigurationIterator_t iterator;
-  BitTorrent_Client_TrackerConnectionConfigurationIterator_t iterator_2;
+  BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
+  BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
+  Net_ConnectionConfigurationsIterator_t iterator;
+  Net_ConnectionConfigurationsIterator_t iterator_2;
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -621,45 +621,33 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step3: initialize configuration (part 2)
   //peer_connection_configuration.socketHandlerConfiguration.bufferSize =
   //  BITTORRENT_CLIENT_BUFFER_SIZE;
-  peer_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+  peer_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  peer_connection_configuration.socketHandlerConfiguration.userData =
-    &configuration_in.peerUserData;
 
   peer_connection_configuration.messageAllocator =
     &peer_message_allocator;
-  peer_connection_configuration.userData =
-    &configuration_in.peerUserData;
   peer_connection_configuration.initialize (configuration_in.peerStreamConfiguration.allocatorConfiguration_,
                                             configuration_in.peerStreamConfiguration);
 
   configuration_in.peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                        peer_connection_configuration));
+                                                                        &peer_connection_configuration));
   iterator =
     configuration_in.peerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.peerConnectionConfigurations.end ());
-  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
 
-  tracker_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+  tracker_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  tracker_connection_configuration.socketHandlerConfiguration.userData =
-    &configuration_in.trackerUserData;
 
   tracker_connection_configuration.messageAllocator =
     &tracker_message_allocator;
-  tracker_connection_configuration.userData =
-    &configuration_in.trackerUserData;
   tracker_connection_configuration.initialize (configuration_in.trackerStreamConfiguration.allocatorConfiguration_,
                                                configuration_in.trackerStreamConfiguration);
 
   configuration_in.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                           tracker_connection_configuration));
+                                                                           &tracker_connection_configuration));
   iterator_2 =
     configuration_in.trackerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != configuration_in.trackerConnectionConfigurations.end ());
-  (*iterator_2).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator_2).second);
 
   configuration_in.sessionConfiguration.controller =
       &bittorrent_control;
@@ -670,9 +658,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.sessionConfiguration.metaInfoFileName =
       metaInfoFileName_in;
   configuration_in.sessionConfiguration.connectionConfiguration =
-    &((*iterator).second);
+    dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second);
   configuration_in.sessionConfiguration.trackerConnectionConfiguration =
-    &((*iterator_2).second);
+    dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second);
   configuration_in.sessionConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
   configuration_in.sessionConfiguration.dispatch =
@@ -706,12 +694,10 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   // step5: initialize connection manager
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  peer_connection_manager_p->set ((*iterator).second,
-                                  //configuration_in.streamUserData);
+  peer_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
                                   NULL);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  tracker_connection_manager_p->set ((*iterator_2).second,
-                                     //configuration_in.streamUserData);
+  tracker_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
                                      NULL);
 
   // event loop(s):
@@ -912,7 +898,7 @@ ACE_TMAIN (int argc_in,
   configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   bool debug_parser                          = false;

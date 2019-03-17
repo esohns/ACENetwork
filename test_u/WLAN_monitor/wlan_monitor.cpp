@@ -565,8 +565,6 @@ do_work (bool autoAssociate_in,
 #endif // GUI_SUPPORT
 
   // ********************** monitor configuration data *************************
-  configuration.signalHandlerConfiguration.hasUI =
-      !UIDefinitionFile_in.empty ();
   configuration.signalHandlerConfiguration.monitor = iwlanmonitor_p;
   configuration.signalHandlerConfiguration.statisticReportingHandler =
       istatistic_handler_p;

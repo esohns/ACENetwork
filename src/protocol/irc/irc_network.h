@@ -46,22 +46,22 @@ struct IRC_AllocatorConfiguration
   }
 };
 
-struct IRC_StreamConfiguration;
-class IRC_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
-                                        struct IRC_StreamConfiguration,
-                                        NET_TRANSPORTLAYER_TCP>
-{
-  IRC_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
-   ///////////////////////////////////////
-   , protocolConfiguration (NULL)
-  {
-    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
-  }
+//struct IRC_StreamConfiguration;
+//class IRC_ConnectionConfiguration
+// : public Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
+//                                        struct IRC_StreamConfiguration,
+//                                        NET_TRANSPORTLAYER_TCP>
+//{
+//  IRC_ConnectionConfiguration ()
+//   : Net_ConnectionConfiguration_T ()
+//   ///////////////////////////////////////
+//   , protocolConfiguration (NULL)
+//  {
+//    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
+//  }
 
-  struct IRC_ProtocolConfiguration* protocolConfiguration;
-};
+//  struct IRC_ProtocolConfiguration* protocolConfiguration;
+//};
 //typedef std::map<std::string,
 //                 struct IRC_ConnectionConfiguration> IRC_ConnectionConfigurations_t;
 //typedef IRC_ConnectionConfigurations_t::iterator IRC_ConnectionConfigurationIterator_t;

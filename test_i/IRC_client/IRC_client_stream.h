@@ -53,7 +53,7 @@ typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
                                 struct IRC_AllocatorConfiguration> IRC_Client_ControlMessage_t;
 //class IRC_Client_SessionMessage;
-struct IRC_Client_UserData;
+struct Net_UserData;
 
 //extern const char stream_name_string_[];
 struct IRC_Client_StreamConfiguration;
@@ -63,16 +63,35 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct IRC_Client_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
-struct IRC_Client_ConnectionConfiguration;
-typedef Net_ConnectionConfiguration_T<struct IRC_Client_ConnectionConfiguration,
-                                      struct IRC_AllocatorConfiguration,
-                                      IRC_Client_StreamConfiguration_t> IRC_Client_ConnectionConfiguration_t;
+class IRC_Client_ConnectionConfiguration
+ : public Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
+                                        IRC_Client_StreamConfiguration_t,
+                                        NET_TRANSPORTLAYER_TCP>
+{
+ public:
+  IRC_Client_ConnectionConfiguration ()
+   : Net_ConnectionConfiguration_T ()
+   ///////////////////////////////////////
+   , cursesState (NULL)
+   , protocolConfiguration (NULL)
+   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
+   //   , userData (NULL)
+  {
+    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
+  }
+
+  struct IRC_Client_CursesState*    cursesState;
+  struct IRC_ProtocolConfiguration* protocolConfiguration;
+  bool                              logToFile;
+
+  //  struct Net_UserData*                  userData;
+};
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 IRC_Client_ConnectionConfiguration_t,
+                                 IRC_Client_ConnectionConfiguration,
                                  struct IRC_Client_SessionState,
                                  IRC_Statistic_t,
-                                 struct IRC_Client_UserData> IRC_Client_Connection_Manager_t;
+                                 struct Net_UserData> IRC_Client_Connection_Manager_t;
 
 template <typename TimerManagerType> // implements Common_ITimer
 class IRC_Client_Stream_T
@@ -87,7 +106,7 @@ class IRC_Client_Stream_T
                        IRC_Message,
                        IRC_Client_SessionMessage,
                        IRC_Client_Connection_Manager_t,
-                       struct IRC_Client_UserData>
+                       struct Net_UserData>
 {
   typedef IRC_Stream_T<struct IRC_Client_StreamState,
                        struct IRC_Client_StreamConfiguration,
@@ -100,7 +119,7 @@ class IRC_Client_Stream_T
                        IRC_Message,
                        IRC_Client_SessionMessage,
                        IRC_Client_Connection_Manager_t,
-                       struct IRC_Client_UserData> inherited;
+                       struct Net_UserData> inherited;
 
  public:
   IRC_Client_Stream_T (); // name

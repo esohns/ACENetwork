@@ -48,12 +48,12 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
 //  int result = -1;
-  BitTorrent_Client_PeerConnectionConfiguration_t* peer_configuration_p =
+  BitTorrent_Client_PeerConnectionConfiguration* peer_configuration_p =
       NULL;
-  struct BitTorrent_Client_PeerUserData* peer_user_data_p = NULL;
-  BitTorrent_Client_TrackerConnectionConfiguration_t* tracker_configuration_p =
+  struct Net_UserData* peer_user_data_p = NULL;
+  BitTorrent_Client_TrackerConnectionConfiguration* tracker_configuration_p =
       NULL;
-  struct BitTorrent_Client_TrackerUserData* tracker_user_data_p = NULL;
+  struct Net_UserData* tracker_user_data_p = NULL;
 
   // step0: retrive default configuration
   BitTorrent_Client_IPeerConnection_Manager_t* peer_connection_manager_p =
@@ -76,11 +76,9 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
 
   // step1: set up configuration
   if (isPeer_in)
-    peer_configuration_p->socketHandlerConfiguration.socketConfiguration_2.address =
-        address_in;
+    peer_configuration_p->address = address_in;
   else
-    tracker_configuration_p->socketHandlerConfiguration.socketConfiguration_2.address =
-        address_in;
+    tracker_configuration_p->address = address_in;
   if (finalModule_inout)
   {
     if (isPeer_in)

@@ -58,7 +58,7 @@ struct IRC_Client_CursesState;
 //struct IRC_ModuleHandlerConfiguration;
 //class IRC_Client_Stream;
 //struct IRC_Stream_SessionData;
-struct IRC_Client_UserData;
+struct Net_UserData;
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          IRC_Client_ConnectionConfiguration_t,
 //                          struct IRC_Client_ConnectionState,
@@ -69,7 +69,7 @@ struct IRC_Client_UserData;
 //                                 IRC_Client_ConnectionConfiguration_t,
 //                                 struct IRC_Client_SessionState,
 //                                 IRC_Statistic_t,
-//                                 struct IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
+//                                 struct Net_UserData> IRC_Client_IConnection_Manager_t;
 
 //struct IRC_Client_ConnectorConfiguration
 //{
@@ -142,29 +142,29 @@ struct IRC_Client_Configuration
   {}
 
   // ****************************** parser *************************************
-  struct Common_ParserConfiguration     parserConfiguration;
+  struct Common_ParserConfiguration parserConfiguration;
   // ****************************** socket *************************************
-  IRC_Client_ConnectionConfigurations_t connectionConfigurations;
+  Net_ConnectionConfigurations_t    connectionConfigurations;
   // ****************************** stream *************************************
-  IRC_Client_StreamConfiguration_t      streamConfiguration;
+  IRC_Client_StreamConfiguration_t  streamConfiguration;
   // ***************************** protocol ************************************
-  struct IRC_ProtocolConfiguration      protocolConfiguration;
+  struct IRC_ProtocolConfiguration  protocolConfiguration;
   // ***************************************************************************
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   // *TODO*: move this somewhere else
-  struct IRC_Client_CursesState*        cursesState;
+  struct IRC_Client_CursesState*    cursesState;
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
-  enum Common_EventDispatchType         dispatch;
+  enum Common_EventDispatchType      dispatch;
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
-  enum IRC_CharacterEncoding            encoding;
-  int                                   groupId;
-  bool                                  logToFile;
+  enum IRC_CharacterEncoding         encoding;
+  int                                groupId;
+  bool                               logToFile;
 
-  struct IRC_Client_UserData            userData;
+  struct Net_UserData                userData;
 };
 
 #endif

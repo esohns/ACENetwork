@@ -188,8 +188,7 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::connect"));
 
-  ConnectorType connector (connectionManager_,
-                           ACE_Time_Value::zero);
+  ConnectorType connector (true);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
   // step1: initialize connector

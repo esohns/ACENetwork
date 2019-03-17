@@ -344,8 +344,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT (configuration_p->streamConfiguration_);
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration.socketConfiguration_2.address =
-        address_in;
+    configuration_p->address = address_in;
 
     iterator =
         configuration_p->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -925,8 +924,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
-  TrackerConnectorType connector (trackerConnectionManager_,
-                                  ACE_Time_Value::zero);
+  TrackerConnectorType connector (true);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
   // step0: subscribe to notifications
@@ -946,8 +944,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT (configuration_p->streamConfiguration_);
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration.socketConfiguration_2.address =
-        address_in;
+    configuration_p->address = address_in;
 
     iterator =
         configuration_p->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));

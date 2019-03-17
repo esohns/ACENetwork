@@ -68,12 +68,12 @@ struct IRC_Client_SessionData
   IRC_Client_SessionData ()
    : IRC_Stream_SessionData ()
    , connectionState (NULL)
-   , userData (NULL)
-  {};
+//   , userData (NULL)
+  {}
 
   struct IRC_Client_SessionState* connectionState;
 
-  struct IRC_Client_UserData*     userData;
+//  struct IRC_Client_UserData*     userData;
 };
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
 
@@ -83,12 +83,12 @@ struct IRC_Client_StreamState
   IRC_Client_StreamState ()
    : IRC_StreamState ()
    , sessionData (NULL)
-   , userData (NULL)
-  {};
+//   , userData (NULL)
+  {}
 
   struct IRC_Client_SessionData* sessionData;
 
-  struct IRC_Client_UserData*    userData;
+//  struct IRC_Client_UserData*    userData;
 };
 
 //struct IRC_Client_ConnectionConfiguration;
@@ -111,12 +111,11 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct IRC_Client_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
-struct IRC_Client_ConnectionConfiguration;
-typedef Net_ConnectionConfiguration_T<struct IRC_Client_ConnectionConfiguration,
-                                      struct IRC_AllocatorConfiguration,
-                                      IRC_Client_StreamConfiguration_t> IRC_Client_ConnectionConfiguration_t;
-typedef std::map<std::string,
-                 IRC_Client_ConnectionConfiguration_t> IRC_Client_ConnectionConfigurations_t;
+//typedef Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
+//                                      IRC_Client_StreamConfiguration_t,
+//                                      NET_TRANSPORTLAYER_TCP> IRC_Client_ConnectionConfiguration_t;
+//typedef std::map<std::string,
+//                 IRC_Client_ConnectionConfiguration_t> IRC_Client_ConnectionConfigurations_t;
 struct IRC_Client_ModuleHandlerConfiguration
  : IRC_ModuleHandlerConfiguration
 {
@@ -127,15 +126,15 @@ struct IRC_Client_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-   , userData (NULL)
-  {};
+//   , userData (NULL)
+  {}
 
-  IRC_Client_ConnectionConfigurations_t* connectionConfigurations;
-  IRC_Client_StreamConfiguration_t*      streamConfiguration;
-  IRC_Client_ISessionNotify_t*           subscriber; // (initial) subscriber
-  IRC_Client_ISubscribers_t*             subscribers;
+  Net_ConnectionConfigurations_t*   connectionConfigurations;
+  IRC_Client_StreamConfiguration_t* streamConfiguration;
+  IRC_Client_ISessionNotify_t*      subscriber; // (initial) subscriber
+  IRC_Client_ISubscribers_t*        subscribers;
 
-  struct IRC_Client_UserData*            userData;
+//  struct IRC_Client_UserData*       userData;
 };
 
 struct IRC_Client_StreamConfiguration
@@ -143,10 +142,10 @@ struct IRC_Client_StreamConfiguration
 {
   IRC_Client_StreamConfiguration ()
    : IRC_StreamConfiguration ()
-   , userData (NULL)
-  {};
+//   , userData (NULL)
+  {}
 
-  struct IRC_Client_UserData* userData;
+//  struct IRC_Client_UserData* userData;
 };
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,

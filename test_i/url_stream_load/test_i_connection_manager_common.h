@@ -44,13 +44,13 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
-                                 struct HTTP_Stream_UserData> Test_I_IConnectionManager_t;
+                                 struct Net_UserData> Test_I_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
-                                 struct HTTP_Stream_UserData> Test_I_ConnectionManager_t;
+                                 struct Net_UserData> Test_I_ConnectionManager_t;
 
 typedef ACE_Singleton<Test_I_ConnectionManager_t,
                       ACE_SYNCH_MUTEX> TEST_I_CONNECTIONMANAGER_SINGLETON;

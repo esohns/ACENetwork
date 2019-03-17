@@ -119,7 +119,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILENAME]   : configuration file [\"")
@@ -133,7 +133,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g [FILENAME]   : GTK rc file [\"")
@@ -162,7 +162,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [DIRECTORY]  : UI file directory [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -209,7 +209,7 @@ do_processArguments (int argc_in,
   configurationFile_out          = configuration_path;
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
@@ -221,7 +221,7 @@ do_processArguments (int argc_in,
   UIRCFile_out                   = configuration_path;
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
@@ -241,7 +241,7 @@ do_processArguments (int argc_in,
   UIDefinitionFileDirectory_out  = configuration_path;
   UIDefinitionFileDirectory_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitionFileDirectory_out +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
@@ -458,17 +458,17 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (CBData_in.configuration);
 
   // step1: initialize configuration
-  BitTorrent_Client_PeerConnectionConfigurationIterator_t iterator =
+  Net_ConnectionConfigurationsIterator_t iterator =
     CBData_in.configuration->peerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != CBData_in.configuration->peerConnectionConfigurations.end ());
-  BitTorrent_Client_TrackerConnectionConfigurationIterator_t iterator_2 =
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
     CBData_in.configuration->trackerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != CBData_in.configuration->trackerConnectionConfigurations.end ());
 
   struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
   peer_modulehandler_configuration.statisticReportingInterval =
-    (*iterator).second.socketHandlerConfiguration.statisticReportingInterval;
+    (*iterator).second->statisticReportingInterval;
   peer_modulehandler_configuration.streamConfiguration =
       &CBData_in.configuration->peerStreamConfiguration;
   peer_modulehandler_configuration.parserConfiguration =
@@ -481,7 +481,7 @@ do_work (bool useThreadPool_in,
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
   tracker_modulehandler_configuration.statisticReportingInterval =
-    (*iterator_2).second.socketHandlerConfiguration.statisticReportingInterval;
+    (*iterator_2).second->statisticReportingInterval;
   tracker_modulehandler_configuration.streamConfiguration =
       &CBData_in.configuration->trackerStreamConfiguration;
   tracker_modulehandler_configuration.parserConfiguration =
@@ -512,14 +512,14 @@ do_work (bool useThreadPool_in,
       BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  peer_connection_manager_p->set ((*iterator).second,
-                                  &CBData_in.configuration->peerUserData);
+  peer_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
+                                  NULL);
   BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =
       BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (tracker_connection_manager_p);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  tracker_connection_manager_p->set ((*iterator_2).second,
-                                     &CBData_in.configuration->trackerUserData);
+  tracker_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
+                                     NULL);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -1133,7 +1133,7 @@ ACE_TMAIN (int argc_in,
   std::string configuration_file_name        = configuration_path;
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
@@ -1145,7 +1145,7 @@ ACE_TMAIN (int argc_in,
   std::string rc_file_name                 = configuration_path;
   rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   rc_file_name                            +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   rc_file_name                            +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
@@ -1165,7 +1165,7 @@ ACE_TMAIN (int argc_in,
   std::string UIDefinitionFile_directory     = configuration_path;
   UIDefinitionFile_directory                += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitionFile_directory                +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
@@ -1389,35 +1389,28 @@ ACE_TMAIN (int argc_in,
       &configuration.parserConfiguration;
 
   ////////////////////// socket handler configuration //////////////////////////
-  BitTorrent_Client_PeerConnectionConfiguration_t peer_connection_configuration;
-  peer_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+  BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
+  peer_connection_configuration.statisticReportingInterval =
     ACE_Time_Value (reporting_interval, 0);
-  peer_connection_configuration.socketHandlerConfiguration.userData =
-    &configuration.peerUserData;
   peer_connection_configuration.messageAllocator = &peer_message_allocator;
-  peer_connection_configuration.userData = &configuration.peerUserData;
 
   peer_connection_configuration.initialize (configuration.peerStreamConfiguration.allocatorConfiguration_,
                                             configuration.peerStreamConfiguration);
 
   configuration.peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                     peer_connection_configuration));
+                                                                     &peer_connection_configuration));
 
-  BitTorrent_Client_TrackerConnectionConfiguration_t tracker_connection_configuration;
-  tracker_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+  BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
+  tracker_connection_configuration.statisticReportingInterval =
     ACE_Time_Value (reporting_interval, 0);
-  tracker_connection_configuration.socketHandlerConfiguration.userData =
-    &configuration.trackerUserData;
   tracker_connection_configuration.messageAllocator =
     &tracker_message_allocator;
-  tracker_connection_configuration.userData =
-    &configuration.trackerUserData;
 
   tracker_connection_configuration.initialize (configuration.trackerStreamConfiguration.allocatorConfiguration_,
                                                configuration.trackerStreamConfiguration);
 
   configuration.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                        tracker_connection_configuration));
+                                                                        &tracker_connection_configuration));
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -1443,7 +1436,7 @@ ACE_TMAIN (int argc_in,
       idle_finalize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
   ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (rc_file_name);
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE

@@ -62,8 +62,7 @@ IRC_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
 
-//  int result = -1;
-  IRC_Client_IConnection_Manager_t* connection_manager_p =
+  IRC_Client_Connection_Manager_t* connection_manager_p =
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
 
   bool abort = false;
@@ -172,23 +171,16 @@ done_connect:
     if (inherited::configuration_)
     {
 #if defined (GUI_SUPPORT)
-      // step1: stop GTK event dispatch ?
-      if (inherited::configuration_->hasUI)
 #if defined (GTK_USE)
-        COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
-                                                            false); // N/A
-#else
-        ;
-#endif // GTK_USE
-      else
-      {
-#if defined (CURSES_USE)
+      // step1: stop GTK event dispatch ?
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
+                                                          false); // N/A
+#elif defined (CURSES_USE)
         if (inherited::configuration_->cursesState)
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
           inherited::configuration_->cursesState->finished = true;
         } // end IF
 #endif // CURSES_USE
-      } // end IF
 #endif // GUI_SUPPORT
     } // end IF
 

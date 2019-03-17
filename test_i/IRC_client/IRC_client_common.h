@@ -132,7 +132,7 @@ struct IRC_Client_UserData
 };
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         IRC_Client_ConnectionConfiguration_t> IRC_Client_IConnector_t;
+                         IRC_Client_ConnectionConfiguration> IRC_Client_IConnector_t;
 struct IRC_Client_CursesState;
 struct IRC_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration

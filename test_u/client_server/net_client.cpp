@@ -694,8 +694,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   configuration.signalHandlerConfiguration.connectionConfiguration =
     &((*iterator).second);
   configuration.signalHandlerConfiguration.connector = connector_p;
-  configuration.signalHandlerConfiguration.hasUI =
-    !UIDefinitionFile_in.empty ();
 
   if (useUDP_in)
       (*iterator_2).second.peerAddress = peer_address;

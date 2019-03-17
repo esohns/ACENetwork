@@ -464,7 +464,7 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (CBData_in.configuration);
 
   // step1: initialize configuration
-  IRC_Client_ConnectionConfigurationIterator_t iterator =
+  Net_ConnectionConfigurationsIterator_t iterator =
     CBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != CBData_in.configuration->connectionConfigurations.end ());
 
@@ -527,8 +527,8 @@ do_work (bool useThreadPool_in,
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set ((*iterator).second,
-                             &CBData_in.configuration->userData);
+  connection_manager_p->set (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator).second),
+                             NULL);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -543,7 +543,6 @@ do_work (bool useThreadPool_in,
   // step4: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.dispatchState = &event_dispatch_state_s;
-  signal_handler_configuration.hasUI = !UIDefinitionFile_in.empty ();
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1379,23 +1378,19 @@ ACE_TMAIN (int argc_in,
   if (debug)
     configuration.parserConfiguration.debugScanner = debug;
   ////////////////////// socket handler configuration //////////////////////////
-  IRC_Client_ConnectionConfiguration_t connection_configuration;
-  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+  IRC_Client_ConnectionConfiguration connection_configuration;
+  connection_configuration.statisticReportingInterval =
     ACE_Time_Value (reporting_interval, 0);
-  connection_configuration.socketHandlerConfiguration.userData =
-    &configuration.userData;
   connection_configuration.messageAllocator = &message_allocator;
 
   connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
                                        configuration.streamConfiguration);
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 connection_configuration));
-  IRC_Client_ConnectionConfigurationIterator_t iterator =
+                                                                 &connection_configuration));
+  Net_ConnectionConfigurationsIterator_t iterator =
     configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
-  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
 
   ////////////////////////// stream configuration //////////////////////////////
   configuration.streamConfiguration.configuration_.messageAllocator =
@@ -1496,7 +1491,7 @@ ACE_TMAIN (int argc_in,
       idle_finalize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
   ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (UIRC_file_name);
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE

@@ -189,12 +189,12 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
     inbound = true;
   }
 
-  Test_I_URLStreamLoad_ConnectionConfigurations_t* connectionConfigurations;
+  Net_ConnectionConfigurations_t*    connectionConfigurations;
   //guint                                   contextId;
-  enum Stream_Module_HTMLParser_Mode               mode; // HTML parser module
-  Test_I_ISessionNotify_t*                         subscriber;
-  Test_I_Subscribers_t*                            subscribers;
-  std::string                                      targetFileName; // dump module
+  enum Stream_Module_HTMLParser_Mode mode; // HTML parser module
+  Test_I_ISessionNotify_t*           subscriber;
+  Test_I_Subscribers_t*              subscribers;
+  std::string                        targetFileName; // dump module
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration
