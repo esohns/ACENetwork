@@ -45,6 +45,7 @@ class Test_U_SessionMessage;
 class Test_U_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct Stream_ModuleHandlerConfiguration,
                                  ACE_Message_Block,
                                  Test_U_Message,
@@ -52,7 +53,7 @@ class Test_U_Module_ProtocolHandler
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Stream_UserData>
+                                 struct Net_UserData>
 {
  public:
   Test_U_Module_ProtocolHandler (ISTREAM_T*); // stream handle
@@ -74,6 +75,7 @@ class Test_U_Module_ProtocolHandler
  private:
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct Stream_ModuleHandlerConfiguration,
                                  ACE_Message_Block,
                                  Test_U_Message,
@@ -81,7 +83,7 @@ class Test_U_Module_ProtocolHandler
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Stream_UserData> inherited;
+                                 struct Net_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))

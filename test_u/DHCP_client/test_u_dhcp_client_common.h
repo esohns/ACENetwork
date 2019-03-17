@@ -195,7 +195,7 @@ struct DHCPClient_StreamConfiguration
    , userData (NULL)
   {}
 
-  struct Test_U_UserData* userData;
+  struct Net_UserData* userData;
 };
 
 struct DHCPClient_StreamState

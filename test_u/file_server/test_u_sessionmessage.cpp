@@ -32,7 +32,7 @@
 Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
                                               enum Stream_SessionMessageType messageType_in,
                                               FileServer_SessionData_t*& sessionData_inout,
-                                              struct FileServer_UserData* userData_in)
+                                              struct Net_UserData* userData_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_inout,

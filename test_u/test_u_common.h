@@ -39,13 +39,13 @@ typedef Net_Statistic_t Test_U_Statistic_t;
 typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_IStatistic_t;
 typedef Common_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
 
-//struct Test_U_SignalHandlerConfiguration
-// : Common_SignalHandlerConfiguration
-//{
-//  Test_U_SignalHandlerConfiguration ()
-//   : Common_SignalHandlerConfiguration ()
-//  {}
-//};
+struct Test_U_SignalHandlerConfiguration
+ : Common_SignalHandlerConfiguration
+{
+  Test_U_SignalHandlerConfiguration ()
+   : Common_SignalHandlerConfiguration ()
+  {}
+};
 
 //////////////////////////////////////////
 

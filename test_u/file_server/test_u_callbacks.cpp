@@ -378,7 +378,7 @@ idle_initialize_ui_cb (gpointer userData_in)
                              0.0,
                              std::numeric_limits<double>::max ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<gdouble> (data_p->configuration->listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number ()));
+                             static_cast<gdouble> (data_p->configuration->TCPListenerConfiguration.address.get_port_number ()));
 
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -390,7 +390,7 @@ idle_initialize_ui_cb (gpointer userData_in)
   FileServer_StreamConfiguration_t::ITERATOR_T iterator_2 =
     data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
-  if (!(*iterator_2).second.second.fileName.empty ())
+  if (!(*iterator_2).second.second.fileIdentifier.identifier.empty ())
   {
     // *NOTE*: gtk does not complain if the file doesn't exist, but the button
     //         will display "(None)"
@@ -405,11 +405,11 @@ idle_initialize_ui_cb (gpointer userData_in)
     //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
     //                                              file_uri.c_str ()))
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                        (*iterator_2).second.second.fileName.c_str ()))
+                                        (*iterator_2).second.second.fileIdentifier.identifier.c_str ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT ((*iterator_2).second.second.fileName.c_str ())));
+                  ACE_TEXT ((*iterator_2).second.second.fileIdentifier.identifier.c_str ())));
       return G_SOURCE_REMOVE;
     } // end IF
 
@@ -448,7 +448,7 @@ idle_initialize_ui_cb (gpointer userData_in)
   } // end ELSE
 
   std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
-  default_folder_uri += (*iterator_2).second.second.fileName;
+  default_folder_uri += (*iterator_2).second.second.fileIdentifier.identifier;
   filename_p = Common_UI_GTK_Tools::localeToUTF8 (default_folder_uri);
   ACE_ASSERT (filename_p);
   gboolean result_2 =
@@ -780,7 +780,7 @@ button_close_all_clicked_cb (GtkButton* button_in,
   ACE_UNUSED_ARG (button_in);
   ACE_UNUSED_ARG (userData_in);
 
-  FILESERVER_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+  FILESERVER_TCPCONNECTIONMANAGER_SINGLETON::instance ()->abort ();
 } // button_close_all_clicked_cb
 
 G_MODULE_EXPORT void
@@ -811,8 +811,8 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_PORT_NAME)));
     ACE_ASSERT (spin_button_p);
-    data_p->configuration->listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
-                                                                                                                                                    1);
+    data_p->configuration->TCPListenerConfiguration.address.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
+                                                                             1);
 
     GtkFileChooserButton* file_chooser_button_p =
       GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -842,11 +842,11 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
     FileServer_StreamConfiguration_t::ITERATOR_T iterator_2 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
-    (*iterator_2).second.second.fileName =
+    (*iterator_2).second.second.fileIdentifier.identifier =
         Common_UI_GTK_Tools::UTF8ToLocale (filename_p, -1);
     g_free (filename_p);
 
-    if (!data_p->configuration->listener->initialize (data_p->configuration->listenerConfiguration))
+    if (!data_p->configuration->listener->initialize (data_p->configuration->TCPListenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Test_U_Server_IListener::initialize(): \"%m\", returning\n")));

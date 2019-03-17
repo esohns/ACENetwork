@@ -44,6 +44,7 @@ class Test_U_SessionMessage;
 class Test_U_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct Stream_ModuleHandlerConfiguration,
                                  ACE_Message_Block,
                                  Test_U_Message,
@@ -51,7 +52,7 @@ class Test_U_Module_HeaderParser
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Test_U_UserData>
+                                 struct Net_UserData>
 {
  public:
   Test_U_Module_HeaderParser (ISTREAM_T*); // stream handle
@@ -67,6 +68,7 @@ class Test_U_Module_HeaderParser
  private:
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct Stream_ModuleHandlerConfiguration,
                                  ACE_Message_Block,
                                  Test_U_Message,
@@ -74,7 +76,7 @@ class Test_U_Module_HeaderParser
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Test_U_UserData> inherited;
+                                 struct Net_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser ());
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser (const Test_U_Module_HeaderParser&));

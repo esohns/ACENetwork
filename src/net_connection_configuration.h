@@ -239,11 +239,6 @@ class Net_ConnectionConfigurationBase_T
   Stream_IAllocator*            messageAllocator;
   Common_ITimer_t*              timerManager;
 };
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkConnectionConfigurationBase_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_TCP> Net_TCPConnectionConfigurationBase_t;
-typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_UDP> Net_UDPConnectionConfigurationBase_t;
 
 template <typename AllocatorConfigurationType,
           typename StreamConfigurationType, // *NOTE*: connection-
@@ -272,6 +267,16 @@ typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkSocketC
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPSocketConfiguration_t;
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPSocketConfiguration_t;
+
+typedef std::map<std::string,
+                 Net_SocketConfigurationBase*> Net_ConnectionConfigurations_t;
+typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationsIterator_t;
+
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkConnectionConfigurationBase_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_TCP> Net_TCPConnectionConfigurationBase_t;
+typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_UDP> Net_UDPConnectionConfigurationBase_t;
 
 //#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 //typedef Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t> Net_INetlinkTransportLayer_t;

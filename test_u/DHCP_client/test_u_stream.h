@@ -33,10 +33,11 @@
 
 #include "stream_module_target.h"
 
-#include "test_u_common.h"
 #include "test_u_common_modules.h"
 //#include "test_u_message.h"
 //#include "test_u_session_message.h"
+
+#include "test_u_dhcp_client_common.h"
 
 // forward declarations
 class Stream_IAllocator;
@@ -58,7 +59,7 @@ class Test_U_Stream_T
                         Test_U_StreamModuleHandlerConfiguration,
                         Test_U_StreamSessionData,   // session data
                         Test_U_StreamSessionData_t, // session data container (reference counted)
-                        ACE_Message_Block,
+                        DHCPClient_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage>
 {

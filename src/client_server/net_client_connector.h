@@ -63,6 +63,7 @@ class Net_Client_Connector_T
  public:
   // convenient types
   typedef AddressType ADDRESS_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
   typedef ACE_Connector<HandlerType,
                         ConnectorType> CONNECTOR_T;
@@ -157,6 +158,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
 {
  public:
   typedef ACE_INET_Addr ADDRESS_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
@@ -271,6 +273,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
 {
  public:
   typedef Net_Netlink_Addr ADDRESS_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<Net_Netlink_Addr,
@@ -279,7 +282,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<Net_Netlink_Addr,
                                   ConfigurationType,
-  StateType,
+                                  StateType,
                                   StatisticContainerType,
                                   Net_NetlinkSocketConfiguration_t,
                                   HandlerConfigurationType,

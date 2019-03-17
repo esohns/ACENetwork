@@ -218,7 +218,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   DHCP_OptionsIterator_t iterator;
   int result = -1;
   ConnectionConfigurationIteratorType iterator_2;
-  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
   iterator_2 =
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
@@ -267,14 +266,10 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (!session_data_r.connection);
 
-  ACE_ASSERT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration);
-  socket_configuration_p =
-    dynamic_cast<struct Net_UDPSocketConfiguration*> ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration);
-  ACE_ASSERT (socket_configuration_p);
-  address = socket_configuration_p->peerAddress;
-  write_only = socket_configuration_p->writeOnly;
-  socket_configuration_p->peerAddress = session_data_r.serverAddress;
-  socket_configuration_p->writeOnly = true;
+  address = (*iterator_2).second.peerAddress;
+  write_only = (*iterator_2).second.writeOnly;
+  (*iterator_2).second.peerAddress = session_data_r.serverAddress;
+  (*iterator_2).second.writeOnly = true;
 
   // step2ab: set up the connection manager
   // *NOTE*: the stream configuration may contain a module handle that is
@@ -339,8 +334,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   } // end IF
 
   // step2e: reset the connection configuration
-  socket_configuration_p->peerAddress = address;
-  socket_configuration_p->writeOnly = write_only;
+  (*iterator_2).second.peerAddress = address;
+  (*iterator_2).second.writeOnly = write_only;
   inherited::configuration_->streamConfiguration->configuration_.cloneModule =
     clone_module;
   inherited::configuration_->streamConfiguration->configuration_.deleteModule =
@@ -353,8 +348,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 error:
   if (reset_configuration)
   {
-    socket_configuration_p->peerAddress = address;
-    socket_configuration_p->writeOnly = write_only;
+    (*iterator_2).second.peerAddress = address;
+    (*iterator_2).second.writeOnly = write_only;
     inherited::configuration_->streamConfiguration->configuration_.cloneModule =
       clone_module;
     inherited::configuration_->streamConfiguration->configuration_.deleteModule =
@@ -395,7 +390,7 @@ continue_:
   if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   struct ether_addr ether_addrs_s =
-    Net_Common_Tools::interfaceToLinkLayerAddress (socket_configuration_p->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.interfaceIdentifier);
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -501,7 +496,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 //      bool use_reactor = false;
       ConnectionConfigurationIteratorType iterator;
       bool write_only = false;
-      struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
+//      struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
       // sanity check(s)
       ACE_ASSERT (inherited::configuration_);
@@ -673,7 +668,7 @@ continue_:
 error:
       if (reset_configuration)
       {
-        socket_configuration_p->writeOnly = write_only;
+//        (*iterator_2).second->writeOnly = write_only;
         inherited::configuration_->streamConfiguration->configuration_.cloneModule =
           clone_module;
         inherited::configuration_->streamConfiguration->configuration_.deleteModule =
@@ -822,10 +817,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                 inherited::mod_->name ()));
   ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
 
-  ConnectorTypeBcast broadcast_connector (connection_manager_p,
-                                          (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
-  ConnectorType connector (connection_manager_p,
-                           (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+  ConnectorTypeBcast broadcast_connector (true);
+  ConnectorType connector (true);
   if (is_broadcast)
     iconnector_p = &broadcast_connector;
   else

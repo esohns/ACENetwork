@@ -61,6 +61,7 @@ class Net_Client_AsynchConnector_T
 
  public:
   typedef AddressType ADDRESS_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<AddressType,
@@ -175,6 +176,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
  public:
   typedef ACE_INET_Addr ADDRESS_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
@@ -278,6 +280,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
  public:
   typedef Net_Netlink_Addr ADDRESS_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<Net_Netlink_Addr,

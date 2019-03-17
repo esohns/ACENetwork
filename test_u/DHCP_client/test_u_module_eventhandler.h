@@ -43,7 +43,7 @@ class Test_U_Module_EventHandler
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
                                          struct DHCPClient_SessionData,
-                                         struct Test_U_UserData>
+                                         struct Net_UserData>
 {
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
@@ -53,7 +53,7 @@ class Test_U_Module_EventHandler
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
                                          struct DHCPClient_SessionData,
-                                         struct Test_U_UserData> inherited;
+                                         struct Net_UserData> inherited;
 
  public:
   Test_U_Module_EventHandler (ISTREAM_T*); // stream handle

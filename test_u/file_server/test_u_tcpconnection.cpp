@@ -31,18 +31,8 @@
 
 #include "test_u_sessionmessage.h"
 
-Test_U_TCPConnection::Test_U_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                            const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
-
-}
-
-Test_U_TCPConnection::Test_U_TCPConnection ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+Test_U_TCPConnection::Test_U_TCPConnection (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
 
@@ -50,18 +40,8 @@ Test_U_TCPConnection::Test_U_TCPConnection ()
 
 //////////////////////////////////////////
 
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                                        const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited (interfaceHandle_in,
-              statisticCollectionInterval_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
-
-}
-
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection ()
- : inherited (NULL,
-              ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
+Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (bool managed_in)
+ : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
 

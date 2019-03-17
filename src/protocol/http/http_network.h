@@ -48,26 +48,26 @@
 
 #include "http_common.h"
 
-class HTTP_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
-                                        struct HTTP_StreamConfiguration,
-                                        NET_TRANSPORTLAYER_TCP>
-{
- public:
-  HTTP_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
-  {}
-};
+//class HTTP_ConnectionConfiguration
+// : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
+//                                        struct HTTP_StreamConfiguration,
+//                                        NET_TRANSPORTLAYER_TCP>
+//{
+// public:
+//  HTTP_ConnectionConfiguration ()
+//   : Net_ConnectionConfiguration_T ()
+//  {}
+//};
 
-struct HTTP_ConnectionState
- : Net_ConnectionState
-{
-  HTTP_ConnectionState ()
-   : Net_ConnectionState ()
-   , configuration (NULL)
-  {}
+//struct HTTP_ConnectionState
+// : Net_ConnectionState
+//{
+//  HTTP_ConnectionState ()
+//   : Net_ConnectionState ()
+//   , configuration (NULL)
+//  {}
 
-  HTTP_ConnectionConfiguration* configuration;
-};
+//  HTTP_ConnectionConfiguration* configuration;
+//};
 
 #endif

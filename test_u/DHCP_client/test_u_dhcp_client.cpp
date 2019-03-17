@@ -672,12 +672,12 @@ do_work (bool requestBroadcastReplies_in,
   //               server) is the lowest (run 'route print' and inspect the
   //               (global) broadcast route entries) to ensure that broadcast
   //               packets are (at least) sent out on the correct subnet
-  DHCPClient_ConnectionConfiguration_t connection_configuration;
+  DHCPClient_ConnectionConfiguration connection_configuration;
   result =
-    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
-                                                                                               static_cast<ACE_UINT32> (INADDR_BROADCAST),
-                                                                                               1,
-                                                                                               0);
+    connection_configuration.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
+                                              static_cast<ACE_UINT32> (INADDR_BROADCAST),
+                                              1,
+                                              0);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -685,33 +685,24 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
 
-  if (useReactor_in);
+  if (useReactor_in)
+    ;
   else
-    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.connect =
-      true;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier =
-    interfaceIdentifier_in;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
-    useLoopback_in;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
-    true;
-  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+    connection_configuration.connect = true;
+  connection_configuration.interfaceIdentifier = interfaceIdentifier_in;
+  connection_configuration.useLoopBackDevice = useLoopback_in;
+  connection_configuration.writeOnly = true;
+  connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration.socketHandlerConfiguration.userData =
-    &configuration_in.userData;
-
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.userData = &configuration_in.userData;
   connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
                                        configuration_in.streamConfiguration);
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Out"),
-                                                                 connection_configuration));
+                                                                    connection_configuration));
   DHCPClient_ConnectionConfigurationIterator_t iterator =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
 
   // ********************** stream configuration data **************************
   configuration_in.streamConfiguration.configuration_.cloneModule = true;
@@ -762,16 +753,14 @@ do_work (bool requestBroadcastReplies_in,
       sendRequestOnOffer_in;
 
   // ********************* listener configuration data *************************
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.connect =
-    false;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
-    false;
+  connection_configuration.connect = false;
+  connection_configuration.writeOnly = false;
   if (useLoopback_in)
     result =
-      connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (DHCP_DEFAULT_CLIENT_PORT,
-                                                                                                   ACE_LOCALHOST,
-                                                                                                   1,
-                                                                                                   ACE_ADDRESS_FAMILY_INET);
+      connection_configuration.listenAddress.set (DHCP_DEFAULT_CLIENT_PORT,
+                                                  ACE_LOCALHOST,
+                                                  1,
+                                                  ACE_ADDRESS_FAMILY_INET);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   else if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
@@ -784,7 +773,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_INET_Addr gateway_address;
     if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-                                                 connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress,
+                                                 connection_configuration.listenAddress,
                                                  gateway_address))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -805,16 +794,16 @@ do_work (bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
       result = -1;
     } // end IF
-    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
-                                                                                                             1);
+    connection_configuration.listenAddress.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
+                                                            1);
     result = 0;
   } // end ELSE IF
   else
     result =
-      connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                                                   static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                                                   1,
-                                                                                                   0);
+      connection_configuration.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                  static_cast<ACE_UINT32> (INADDR_ANY),
+                                                  1,
+                                                  0);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -827,10 +816,10 @@ do_work (bool requestBroadcastReplies_in,
   if (requestBroadcastReplies_in)
   {
     result =
-      connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                                                   static_cast<ACE_UINT32> (INADDR_NONE),
-                                                                                                   1,
-                                                                                                   0);
+      connection_configuration.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                  static_cast<ACE_UINT32> (INADDR_NONE),
+                                                  1,
+                                                  0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -978,10 +967,8 @@ do_work (bool requestBroadcastReplies_in,
   //                                      configuration_in.socketHandlerConfiguration.statisticReportingInterval);
   //Test_U_OutboundAsynchConnector_t asynch_connector (connection_manager_p,
   //                                                   configuration_in.socketHandlerConfiguration.statisticReportingInterval);
-  DHCPClient_OutboundConnectorBcast_t connector (connection_manager_p,
-                                                 (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
-  DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector (connection_manager_p,
-                                                              (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+  DHCPClient_OutboundConnectorBcast_t connector (true);
+  DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector (true);
   if (useReactor_in)
     iconnector_p = &connector;
   else
@@ -993,12 +980,12 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
   handle =
-    iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
+    iconnector_p->connect ((*iterator).second.peerAddress);
   if (unlikely (handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ())));
     return;
   } // end IF
   if (unlikely (iconnector_p->useReactor ()))
@@ -1023,7 +1010,7 @@ do_work (bool requestBroadcastReplies_in,
     do
     {
       (*iterator_2).second.second.connection =
-          connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
+          connection_manager_p->get ((*iterator).second.peerAddress);
       if ((*iterator_2).second.second.connection)
         break;
     } while (COMMON_TIME_NOW < deadline);
@@ -1032,7 +1019,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ())));
     return;
   } // end IF
   // step1b: wait for the connection to finish initializing
@@ -1049,7 +1036,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ()),
                 status));
     return;
   } // end IF
@@ -1069,16 +1056,15 @@ do_work (bool requestBroadcastReplies_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
               (*iterator_2).second.second.connection->id (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ())));
 #endif // _DEBUG
 
   // step1ca: reinitialize connection manager
-  if (useReactor_in);
+  if (useReactor_in)
+    ;
   else
-    (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.connect =
-      false;
-  (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
-    false;
+    (*iterator).second.connect = false;
+  (*iterator).second.writeOnly = false;
   configuration_in.streamConfiguration.configuration_.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
@@ -1088,10 +1074,8 @@ do_work (bool requestBroadcastReplies_in,
   // step1cb: start listening ?
   if (UIDefinitionFileName_in.empty ())
   {
-    DHCPClient_InboundConnector_t connector_2 (iconnection_manager_p,
-                                               (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
-    DHCPClient_InboundAsynchConnector_t asynch_connector_2 (iconnection_manager_p,
-                                                            (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+    DHCPClient_InboundConnector_t connector_2 (true);
+    DHCPClient_InboundAsynchConnector_t asynch_connector_2 (true);
     if (useReactor_in)
       iconnector_p = &connector_2;
     else
@@ -1109,12 +1093,12 @@ do_work (bool requestBroadcastReplies_in,
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     configuration_in.handle =
-        iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress);
+        iconnector_p->connect ((*iterator).second.listenAddress);
     if (configuration_in.handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.listenAddress).c_str ())));
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1141,7 +1125,7 @@ do_work (bool requestBroadcastReplies_in,
       do
       {
         iconnection_p =
-          connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress);
+          connection_manager_p->get ((*iterator).second.listenAddress);
         if (iconnection_p)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1160,7 +1144,7 @@ do_work (bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.listenAddress).c_str ())));
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1168,7 +1152,7 @@ do_work (bool requestBroadcastReplies_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: listening to (UDP) %s\n"),
                 iconnection_p->id (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.listenAddress).c_str ())));
 #endif // _DEBUG
 
     // step2: send DHCP request
@@ -1222,7 +1206,7 @@ allocate:
     if (configuration_in.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
     struct ether_addr ether_addrs_s =
-      Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+      Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second.interfaceIdentifier);
     ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
     ACE_OS::memcpy (&(DHCP_record.chaddr),
                     &(ether_addrs_s.ether_addr_octet),

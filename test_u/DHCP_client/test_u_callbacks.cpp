@@ -237,7 +237,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress.get_port_number ()));
+                             static_cast<double> ((*iterator_2).second.peerAddress.get_port_number ()));
 
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
@@ -298,7 +298,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice);
+                                (*iterator_2).second.useLoopBackDevice);
 
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -595,12 +595,12 @@ idle_initialize_UI_cb (gpointer userData_in)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    if (InlineIsEqualGUID ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier, GUID_NULL))
+    if (InlineIsEqualGUID ((*iterator_2).second.interfaceIdentifier, GUID_NULL))
 #else
-    if ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.empty ())
+    if ((*iterator_2).second.interfaceIdentifier.empty ())
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-    if ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.empty ())
+    if ((*iterator_2).second.interfaceIdentifier.empty ())
 #endif // ACE_WIN32 || ACE_WIN64
       gtk_combo_box_set_active (combo_box_p, 0);
     else
@@ -641,7 +641,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         if (ACE_OS::strcmp (interface_identifier.c_str (),
 #else
-        if (ACE_OS::strcmp ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str (),
+        if (ACE_OS::strcmp ((*iterator_2).second.interfaceIdentifier.c_str (),
 #endif // ACE_WIN32 || ACE_WIN64
                             g_value_get_string (&value)) == 0)
         {
@@ -1089,8 +1089,8 @@ action_discover_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (data_p->configuration->protocolConfiguration.requestBroadcastReplies ? ACE_TEXT_ALWAYS_CHAR ("In_2")
                                                                                                                                : ACE_TEXT_ALWAYS_CHAR ("In"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set_port_number (port_number,
-                                                                                                     1);
+  (*iterator_2).second.peerAddress.set_port_number (port_number,
+                                                    1);
 
   // retrieve buffer
   spin_button_p =
@@ -1121,7 +1121,7 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   struct ether_addr ether_addrs_s =
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.interfaceIdentifier);
   ACE_ASSERT (DHCP_CHADDR_SIZE >= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -1147,7 +1147,7 @@ allocate:
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-    iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress,
+    iconnection_manager_p->get ((*iterator_2).second.listenAddress,
                                 false);
   if (!iconnection_p)
   {
@@ -1155,7 +1155,7 @@ allocate:
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.listenAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1183,7 +1183,7 @@ allocate:
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
+      iconnection_manager_p->get ((*iterator_2).second.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1191,7 +1191,7 @@ allocate:
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1228,7 +1228,7 @@ action_inform_activate_cb (GtkAction* action_in,
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-    iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress,
+    iconnection_manager_p->get ((*iterator_2).second.listenAddress,
                                 false);
   ACE_ASSERT (iconnection_p);
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1252,7 +1252,7 @@ action_inform_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
+      iconnection_manager_p->get ((*iterator_2).second.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1260,7 +1260,7 @@ action_inform_activate_cb (GtkAction* action_in,
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1293,7 +1293,7 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   ACE_INET_Addr IP_address, gateway_address;
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.interfaceIdentifier,
                                                IP_address,
                                                gateway_address))
   {
@@ -1311,14 +1311,14 @@ allocate:
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                ACE_TEXT ((*iterator_2).second.interfaceIdentifier.c_str ()),
                 NULL));
 #endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
   struct ether_addr ether_addrs_s =
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.interfaceIdentifier);
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -1367,7 +1367,7 @@ action_request_activate_cb (GtkAction* action_in,
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-    iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress,
+    iconnection_manager_p->get ((*iterator_2).second.listenAddress,
                                 false);
   ACE_ASSERT (iconnection_p);
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1391,7 +1391,7 @@ action_request_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
+      iconnection_manager_p->get ((*iterator_2).second.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1399,7 +1399,7 @@ action_request_activate_cb (GtkAction* action_in,
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1432,7 +1432,7 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   struct ether_addr ether_addrs_s =
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.interfaceIdentifier);
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -1483,7 +1483,7 @@ action_release_activate_cb (GtkAction* action_in,
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-      iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress,
+      iconnection_manager_p->get ((*iterator_2).second.listenAddress,
                                   false);
   ACE_ASSERT (iconnection_p);
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1507,7 +1507,7 @@ action_release_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
+      iconnection_manager_p->get ((*iterator_2).second.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1515,7 +1515,7 @@ action_release_activate_cb (GtkAction* action_in,
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1546,7 +1546,7 @@ allocate:
     session_data_r.xid = DHCP_record.xid;
   } // end IF
   ACE_INET_Addr IP_address, gateway_address;
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.interfaceIdentifier,
                                                IP_address,
                                                gateway_address))
   {
@@ -1554,24 +1554,24 @@ allocate:
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier))));
+                ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.interfaceIdentifier))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                ACE_TEXT ((*iterator_2).second.interfaceIdentifier.c_str ()),
                 NULL));
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                ACE_TEXT ((*iterator_2).second.interfaceIdentifier.c_str ()),
                 NULL));
 #endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
   struct ether_addr ether_addrs_s =
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.interfaceIdentifier);
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -1665,7 +1665,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 //#else
 //      g_value_get_string (&value);
 //#endif
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier =
+  (*iterator_2).second.interfaceIdentifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     Common_Tools::StringToGUID (g_value_get_string (&value));
@@ -1794,10 +1794,8 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     DHCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
-    DHCPClient_InboundConnectorBcast_t connector_bcast (iconnection_manager_p,
-                                                        (*iterator_2).second.second.statisticReportingInterval);
-    DHCPClient_InboundAsynchConnectorBcast_t asynch_connector_bcast (iconnection_manager_p,
-                                                                     (*iterator_2).second.second.statisticReportingInterval);
+    DHCPClient_InboundConnectorBcast_t connector_bcast (true);
+    DHCPClient_InboundAsynchConnectorBcast_t asynch_connector_bcast (true);
     DHCPClient_IConnector_t* iconnector_p = NULL;
     DHCPClient_ConnectionConfigurationIterator_t iterator_3 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
@@ -1856,7 +1854,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //    (*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2 =
 //      data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2;
     data_p->configuration->handle =
-        iconnector_p->connect ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress);
+        iconnector_p->connect ((*iterator_3).second.listenAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
@@ -1875,7 +1873,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       do
       {
         iconnection_p =
-          connection_manager_p->get ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress,
+          connection_manager_p->get ((*iterator_3).second.listenAddress,
                                      false);
         if (iconnection_p)
         {
@@ -1894,26 +1892,26 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ()),
                     &timeout));
     } // end IF
     if (data_p->configuration->handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ())));
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
                 data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened UDP socket: %s\n"),
                 data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ())));
 #endif
 
     // connect (broadcast) ?
@@ -1980,7 +1978,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     // step2: connect
     data_p->configuration->broadcastHandle =
-        iconnector_p->connect ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress);
+        iconnector_p->connect ((*iterator_3).second.listenAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
@@ -1999,7 +1997,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       do
       {
         iconnection_p =
-            connection_manager_p->get ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress,
+            connection_manager_p->get ((*iterator_3).second.listenAddress,
                                        false);
         if (iconnection_p)
         {
@@ -2018,26 +2016,26 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to \"%s\" (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ()),
                     &timeout));
     } // end IF
     if (data_p->configuration->broadcastHandle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ())));
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
                 data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened UDP socket: %s\n"),
                 data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_3).second.listenAddress).c_str ())));
 #endif
 
     failed = false;

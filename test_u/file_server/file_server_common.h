@@ -62,28 +62,20 @@
 // forward declarations
 struct FileServer_ConnectionConfiguration;
 struct FileServer_ConnectionState;
-struct FileServer_UserData;
+struct Net_UserData;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 FileServer_ConnectionConfiguration_t,
+                                 FileServer_TCPConnectionConfiguration,
                                  struct FileServer_ConnectionState,
                                  Net_Statistic_t,
-                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
+                                 struct Net_UserData> FileServer_ITCPConnectionManager_t;
 class Test_U_SessionMessage;
 class Test_U_Message;
 struct FileServer_ListenerConfiguration;
-typedef Net_IListener_T<struct FileServer_ListenerConfiguration,
-                        FileServer_ConnectionConfiguration_t> Test_U_IListener_t;
+typedef Net_IListener_T<Net_TCPListenerConfiguration_t,
+                        FileServer_TCPConnectionConfiguration> Test_U_IListener_t;
 
 //////////////////////////////////////////
-
-struct FileServer_UserData
- : Net_UserData
-{
-  FileServer_UserData ()
-   : Net_UserData ()
-  {}
-};
 
 struct FileServer_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
@@ -125,21 +117,23 @@ struct FileServer_Configuration
    , connectionConfigurations ()
    , handle (ACE_INVALID_HANDLE)
    , listener (NULL)
-   , listenerConfiguration ()
+   , TCPListenerConfiguration ()
+   , UDPListenerConfiguration ()
    , signalHandlerConfiguration ()
    , streamConfiguration ()
    , userData ()
   {}
 
   struct Net_AllocatorConfiguration            allocatorConfiguration;
-  FileServer_ConnectionConfigurations_t        connectionConfigurations;
+  Net_ConnectionConfigurations_t               connectionConfigurations;
   ACE_HANDLE                                   handle;
   Test_U_IListener_t*                          listener;
-  struct FileServer_ListenerConfiguration      listenerConfiguration;
+  Net_TCPListenerConfiguration_t               TCPListenerConfiguration;
+  Net_UDPListenerConfiguration_t               UDPListenerConfiguration;
   struct FileServer_SignalHandlerConfiguration signalHandlerConfiguration;
   FileServer_StreamConfiguration_t             streamConfiguration;
 
-  struct FileServer_UserData                   userData;
+  struct Net_UserData                          userData;
 };
 
 //typedef Stream_ControlMessage_T<enum Stream_ControlType,

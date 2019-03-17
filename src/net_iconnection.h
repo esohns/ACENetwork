@@ -154,7 +154,7 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,  // inherits Net_SocketConfiguration
+          typename SocketConfigurationType,  // *NOTE*: ATM these two are the same type
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,

@@ -55,9 +55,9 @@ struct FileServer_SessionData
    , userData (NULL)
   {}
 
-  FileServer_IConnection_t*   connection;
+  FileServer_TCPIConnection_t* connection;
 
-  struct FileServer_UserData* userData;
+  struct Net_UserData*         userData;
 };
 typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 
@@ -72,7 +72,7 @@ struct FileServer_StreamState
 
   struct FileServer_SessionData* sessionData;
 
-  struct FileServer_UserData*    userData;
+  struct Net_UserData*           userData;
 };
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
@@ -100,7 +100,7 @@ typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_
 //                                 FileServer_ConnectionConfiguration_t,
 //                                 struct FileServer_ConnectionState,
 //                                 Net_Statistic_t,
-//                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
+//                                 struct Net_UserData> FileServer_IInetConnectionManager_t;
 //extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
@@ -117,8 +117,7 @@ struct Test_U_ModuleHandlerConfiguration
    , allocatorConfiguration (NULL)
    , connection (NULL)
    , connectionConfigurations (NULL)
-   , connectionManager (NULL)
-   , fileName ()
+   , fileIdentifier ()
    , outboundQueue (NULL)
    , program (FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER)
    , streamConfiguration (NULL)
@@ -129,17 +128,16 @@ struct Test_U_ModuleHandlerConfiguration
     inbound = true;
   }
 
-  struct Net_AllocatorConfiguration*     allocatorConfiguration;
-  FileServer_UDPIStreamConnection_t*     connection;               // net target module
-  FileServer_ConnectionConfigurations_t* connectionConfigurations; // net target module
-  FileServer_IInetConnectionManager_t*   connectionManager;        // net target module
-  std::string                            fileName;                 // file reader module
-  Stream_IMessageQueue*                  outboundQueue;            // event handler module
-  unsigned int                           program;                  // MPEG TS decoder module
-  FileServer_StreamConfiguration_t*      streamConfiguration;      // net target module
-  unsigned int                           streamType;               // MPEG TS decoder module
-  FileServer_ISessionNotify_t*           subscriber;               // event handler module
-  FileServer_Subscribers_t*              subscribers;              // event handler module
+  struct Net_AllocatorConfiguration* allocatorConfiguration;
+  FileServer_UDPIStreamConnection_t* connection;               // net target module
+  Net_ConnectionConfigurations_t*    connectionConfigurations; // net target module
+  Common_File_Identifier             fileIdentifier;           // file reader module
+  Stream_IMessageQueue*              outboundQueue;            // event handler module
+  unsigned int                       program;                  // MPEG TS decoder module
+  FileServer_StreamConfiguration_t*  streamConfiguration;      // net target module
+  unsigned int                       streamType;               // MPEG TS decoder module
+  FileServer_ISessionNotify_t*       subscriber;               // event handler module
+  FileServer_Subscribers_t*          subscribers;              // event handler module
 };
 
 struct FileServer_StreamConfiguration
@@ -153,7 +151,7 @@ struct FileServer_StreamConfiguration
 
   enum Common_EventDispatchType dispatch;
 
-  struct FileServer_UserData*   userData;   // user data
+  struct Net_UserData*   userData;   // user data
 };
 
 #endif

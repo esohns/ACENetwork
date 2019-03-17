@@ -41,19 +41,19 @@ class Test_U_Stream;
 
 typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
-                                    struct FileServer_ListenerConfiguration,
-                                    struct FileServer_ConnectionState,
-                                    FileServer_ConnectionConfiguration_t,
+                                    Net_TCPListenerConfiguration_t,
+                                    struct Net_ConnectionState,
+                                    FileServer_TCPConnectionConfiguration,
                                     Test_U_Stream,
-                                    struct FileServer_UserData> FileServer_AsynchListener_t;
+                                    struct Net_UserData> FileServer_AsynchListener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
-                              struct FileServer_ListenerConfiguration,
-                              struct FileServer_ConnectionState,
-                              FileServer_ConnectionConfiguration_t,
+                              Net_TCPListenerConfiguration_t,
+                              struct Net_ConnectionState,
+                              FileServer_TCPConnectionConfiguration,
                               Test_U_Stream,
-                              struct FileServer_UserData> FileServer_Listener_t;
+                              struct Net_UserData> FileServer_Listener_t;
 
 typedef ACE_Singleton<FileServer_AsynchListener_t,
                       ACE_SYNCH_RECURSIVE_MUTEX> FILESERVER_ASYNCHLISTENER_SINGLETON;

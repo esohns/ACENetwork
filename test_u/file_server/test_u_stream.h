@@ -52,7 +52,7 @@ struct Test_U_ModuleHandlerConfiguration;
 struct FileServer_SessionData;
 typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 class Test_U_SessionMessage;
-struct FileServer_UserData;
+struct Net_UserData;
 
 extern const char stream_name_string_[];
 
@@ -76,8 +76,8 @@ class Test_U_Stream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        FileServer_InetConnectionManager_t,
-                                        struct FileServer_UserData>
+                                        FileServer_TCPConnectionManager_t,
+                                        struct Net_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -98,16 +98,16 @@ class Test_U_Stream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        FileServer_InetConnectionManager_t,
-                                        struct FileServer_UserData> inherited;
+                                        FileServer_TCPConnectionManager_t,
+                                        struct Net_UserData> inherited;
 
  public:
   Test_U_Stream ();
   virtual ~Test_U_Stream ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete ?
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete ?
 
   // implement Common_IInitialize_T
   virtual bool initialize (const inherited::CONFIGURATION_T&,
@@ -143,8 +143,8 @@ class Test_U_UDPStream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        FileServer_InetConnectionManager_t,
-                                        struct FileServer_UserData>
+                                        FileServer_UDPConnectionManager_t,
+                                        struct Net_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -165,16 +165,16 @@ class Test_U_UDPStream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        FileServer_InetConnectionManager_t,
-                                        struct FileServer_UserData> inherited;
+                                        FileServer_UDPConnectionManager_t,
+                                        struct Net_UserData> inherited;
 
  public:
   Test_U_UDPStream ();
   virtual ~Test_U_UDPStream ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete ?
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete ?
 
   // implement Common_IInitialize_T
   virtual bool initialize (const inherited::CONFIGURATION_T&,

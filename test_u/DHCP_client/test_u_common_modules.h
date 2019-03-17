@@ -54,10 +54,10 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 DHCPClient_ConnectionConfiguration_t,
+                                 DHCPClient_ConnectionConfiguration,
                                  struct DHCPClient_ConnectionState,
                                  DHCP_Statistic_t,
-                                 struct Test_U_UserData> DHCPClient_ConnectionManager_t;
+                                 struct Net_UserData> DHCPClient_ConnectionManager_t;
 
 // declare module(s)
 typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
@@ -74,7 +74,7 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      DHCPClient_ConnectionManager_t,
-                                     struct Test_U_UserData> DHCPClient_Module_Net_Writer_t;
+                                     struct Net_UserData> DHCPClient_Module_Net_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      DHCPClient_ControlMessage_t,
                                      Test_U_Message,
@@ -89,7 +89,7 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      DHCPClient_ConnectionManager_t,
-                                     struct Test_U_UserData> DHCPClient_Module_Net_Reader_t;
+                                     struct Net_UserData> DHCPClient_Module_Net_Reader_t;
 
 typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -158,7 +158,7 @@ typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              DHCPClient_ControlMessage_t,
                              Test_U_Message,
                              Test_U_SessionMessage,
-                             struct Test_U_UserData> DHCPClient_Module_Dump;
+                             struct Net_UserData> DHCPClient_Module_Dump;
 
 // declare module(s)
 DATASTREAM_MODULE_DUPLEX (struct DHCPClient_SessionData,                  // session data type

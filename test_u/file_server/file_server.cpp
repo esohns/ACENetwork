@@ -125,7 +125,7 @@ do_printUsage (const std::string& programName_in)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
@@ -236,7 +236,7 @@ do_processArguments (const int& argc_in,
   configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
@@ -525,7 +525,6 @@ do_work (
   struct Common_EventDispatchState event_dispatch_state_s;
   struct Common_TimerConfiguration timer_configuration;
   struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
-  struct FileServer_UserData user_data;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
@@ -549,9 +548,9 @@ do_work (
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
 
-  FileServer_InetConnectionManager_t* connection_manager_p =
-    FILESERVER_CONNECTIONMANAGER_SINGLETON::instance ();
-  FileServer_IInetConnectionManager_t* iconnection_manager_p =
+  FileServer_TCPConnectionManager_t* connection_manager_p =
+    FILESERVER_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+  FileServer_TCPIConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
 
@@ -596,8 +595,7 @@ do_work (
     &configuration.allocatorConfiguration;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
-  modulehandler_configuration.connectionManager = connection_manager_p;
-  modulehandler_configuration.fileName = fileName_in;
+  modulehandler_configuration.fileIdentifier.identifier = fileName_in;
   if (useUDP_in)
     modulehandler_configuration.inbound = false;
   modulehandler_configuration.printFinalReport = true;
@@ -614,7 +612,7 @@ do_work (
     modulehandler_configuration.subscriber = &ui_event_handler;
 #if defined (GUI_SUPPORT)
     modulehandler_configuration.subscribers = &CBData_in.subscribers;
-    modulehandler_configuration.subscribersLock =
+    modulehandler_configuration.lock =
       &CBData_in.UIState->subscribersLock;
 #endif // GUI_SUPPORT
   } // end IF
@@ -642,40 +640,36 @@ do_work (
   //    &configuration.connectionConfiguration;
 
   // ********************** socket configuration data **************************
-  FileServer_ConnectionConfiguration_t connection_configuration;
-  FileServer_ConnectionConfigurationIterator_t iterator;
+  FileServer_TCPConnectionConfiguration tcp_connection_configuration;
+  FileServer_UDPConnectionConfiguration udp_connection_configuration;
+  Net_ConnectionConfigurationsIterator_t iterator;
+  Net_ConnectionConfigurationsIterator_t iterator_2;
   if (useUDP_in)
   {
     result =
-      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set (listeningPortNumber_in,
-                                                                                                                                       static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                                                                                       1,
-                                                                                                                                       0);
+      configuration.UDPListenerConfiguration.listenAddress.set (listeningPortNumber_in,
+                                                                static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                1,
+                                                                0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.writeOnly =
-      true;
+    configuration.UDPListenerConfiguration.writeOnly = true;
   } // end IF
   // ****************** connection configuration data **************************
-  connection_configuration.socketHandlerConfiguration.userData =
-    &configuration.userData;
-  connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.userData = &configuration.userData;
+  tcp_connection_configuration.messageAllocator = &message_allocator;
 
-  connection_configuration.initialize (configuration.allocatorConfiguration,
-                                       configuration.streamConfiguration);
+  tcp_connection_configuration.initialize (configuration.allocatorConfiguration,
+                                           configuration.streamConfiguration);
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 connection_configuration));
+                                                                 &tcp_connection_configuration));
   iterator =
     configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
-  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -757,18 +751,18 @@ do_work (
 
   // step3: initialize connection manager
   connection_manager_p->initialize (maximumNumberOfConnections_in);
-  iconnection_manager_p->set ((*iterator).second,
-                              &user_data);
+  iconnection_manager_p->set (*dynamic_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second),
+                              NULL);
 
   // step4: initialize listener
   //if (networkInterface_in.empty ()); // *TODO*
   if (useLoopBack_in)
   {
     result =
-      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
-                                                                                                                                 INADDR_LOOPBACK,
-                                                                                                                                 1,
-                                                                                                                                 0);
+      configuration.TCPListenerConfiguration.address.set (listeningPortNumber_in,
+                                                          INADDR_LOOPBACK,
+                                                          1,
+                                                          0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -776,10 +770,10 @@ do_work (
       goto error;
     } // end IF
     result =
-      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set (listeningPortNumber_in,
-                                                                                                                                       INADDR_LOOPBACK,
-                                                                                                                                       1,
-                                                                                                                                       0);
+      configuration.UDPListenerConfiguration.listenAddress.set (listeningPortNumber_in,
+                                                                INADDR_LOOPBACK,
+                                                                1,
+                                                                0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -789,12 +783,11 @@ do_work (
   } // end IF
   else
   {
-    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (listeningPortNumber_in,
-                                                                                                                                           1);
-    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set_port_number (listeningPortNumber_in,
-                                                                                                                                                 1);
+    configuration.TCPListenerConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                    1);
+    configuration.UDPListenerConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
+                                                                          1);
   } // end ELSE
-  configuration.listenerConfiguration.connectionManager = connection_manager_p;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
   // step5: handle events (signals, incoming connections/data, timers, ...)
@@ -867,7 +860,7 @@ do_work (
   if (UIDefinitionFile_in.empty ())
   {
 #endif // GUI_SUPPORT
-    if (!configuration.listener->initialize (configuration.listenerConfiguration))
+    if (!configuration.listener->initialize (configuration.TCPListenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, aborting\n")));
@@ -1152,7 +1145,7 @@ ACE_TMAIN (int argc_in,
   configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
@@ -1341,11 +1334,11 @@ ACE_TMAIN (int argc_in,
   ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
   ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
   ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
+  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
       idle_finalize_ui_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_ui_cb;
-  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
   if (!UI_file_path.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE

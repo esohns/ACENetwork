@@ -33,20 +33,20 @@
 #include "test_u_connection_common.h"
 
 // forward declarations
-struct Test_U_UserData;
+struct Net_UserData;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 Test_U_ConnectionConfiguration_t,
+                                 Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  HTTP_Statistic_t,
-                                 struct Test_U_UserData> Test_U_IConnectionManager_t;
+                                 struct Net_UserData> Test_U_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 Test_U_ConnectionConfiguration_t,
+                                 Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  HTTP_Statistic_t,
-                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
+                                 struct Net_UserData> Test_U_ConnectionManager_t;
 
 typedef ACE_Singleton<Test_U_ConnectionManager_t,
                       ACE_SYNCH_MUTEX> TEST_U_CONNECTIONMANAGER_SINGLETON;

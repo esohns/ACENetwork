@@ -52,7 +52,7 @@ Test_U_Stream::~Test_U_Stream ()
 }
 
 bool
-Test_U_Stream::load (Stream_ModuleList_t& modules_out,
+Test_U_Stream::load (Stream_ILayout* layout_inout,
                      bool& delete_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
@@ -62,25 +62,25 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
                   Test_U_FileReader_Module (this,
                                             ACE_TEXT_ALWAYS_CHAR ("FileSource")),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_MPEG_TS_Decoder_Module (this,
                                                  ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_StatisticReport_Module (this,
                                                  ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Net_IO_Module (this,
                                         ACE_TEXT_ALWAYS_CHAR ("NetworkIO")),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
 
   delete_out = true;
 
@@ -210,12 +210,30 @@ Test_U_UDPStream::~Test_U_UDPStream ()
 }
 
 bool
-Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
+Test_U_UDPStream::load (Stream_ILayout* layout_inout,
                         bool& delete_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::load"));
 
   Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_FileReaderH_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SOURCE_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_StatisticReport_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_MPEG_TS_Decoder_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
   if (inherited::configuration_->configuration_.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     ACE_NEW_RETURN (module_p,
                     Test_U_Module_Net_UDPTarget_Module (this,
@@ -226,25 +244,7 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
                   Test_U_Module_Net_AsynchUDPTarget_Module (this,
                                                             ACE_TEXT_ALWAYS_CHAR (MODULE_NET_TARGET_DEFAULT_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_U_MPEG_TS_Decoder_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_U_StatisticReport_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_U_FileReaderH_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (MODULE_FILE_SOURCE_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
 
   delete_out = true;
 
@@ -300,13 +300,13 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
 
   // ******************* File Reader ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_FILE_SOURCE_DEFAULT_NAME_STRING)));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SOURCE_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT (MODULE_FILE_SOURCE_DEFAULT_NAME_STRING)));
+                ACE_TEXT (STREAM_FILE_SOURCE_DEFAULT_NAME_STRING)));
     goto error;
   } // end IF
   file_source_impl_p =

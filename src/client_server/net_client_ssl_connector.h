@@ -52,6 +52,7 @@ class Net_Client_SSL_Connector_T
 {
  public:
   typedef AddressType ADDRESS_T;
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<AddressType,

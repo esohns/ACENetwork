@@ -1571,6 +1571,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
   ConfigurationType* configuration_p = NULL;
+  SocketConfigurationType* socket_configuration_p = NULL;
   const ICONNECTOR_T* iconnector_p = NULL;
   const ILISTENER_T* ilistener_p = NULL;
   switch (this->transportLayer ())
@@ -1625,8 +1626,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
   } // end SWITCH
   ACE_ASSERT (configuration_p);
+  socket_configuration_p = configuration_p;
 
-  if (unlikely (!inherited::initialize (*configuration_p)))
+  if (unlikely (!inherited::initialize (*socket_configuration_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_SocketHandlerBase_T::initialize(): \"%m\", returning\n"),

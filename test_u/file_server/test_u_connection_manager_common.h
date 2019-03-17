@@ -28,31 +28,39 @@
 #include "net_common.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "net_netlinksockethandler.h"
-#endif
 
 #include "test_u_connection_common.h"
 #include "file_server_connection_common.h"
 
-// forward declarations
-struct FileServer_UserData;
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 FileServer_TCPConnectionConfiguration,
+                                 struct Net_ConnectionState,
+                                 Net_Statistic_t,
+                                 struct Net_UserData> FileServer_TCPIConnectionManager_t;
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 FileServer_TCPConnectionConfiguration,
+                                 struct Net_ConnectionState,
+                                 Net_Statistic_t,
+                                 struct Net_UserData> FileServer_TCPConnectionManager_t;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 FileServer_ConnectionConfiguration_t,
-                                 struct FileServer_ConnectionState,
+                                 FileServer_UDPConnectionConfiguration,
+                                 struct Net_ConnectionState,
                                  Net_Statistic_t,
-                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
+                                 struct Net_UserData> FileServer_UDPIConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 FileServer_ConnectionConfiguration_t,
-                                 struct FileServer_ConnectionState,
+                                 FileServer_UDPConnectionConfiguration,
+                                 struct Net_ConnectionState,
                                  Net_Statistic_t,
-                                 struct FileServer_UserData> FileServer_InetConnectionManager_t;
+                                 struct Net_UserData> FileServer_UDPConnectionManager_t;
 
-typedef ACE_Singleton<FileServer_InetConnectionManager_t,
-                      ACE_SYNCH_MUTEX> FILESERVER_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<FileServer_TCPConnectionManager_t,
+                      ACE_SYNCH_MUTEX> FILESERVER_TCPCONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<FileServer_UDPConnectionManager_t,
+                      ACE_SYNCH_MUTEX> FILESERVER_UDPCONNECTIONMANAGER_SINGLETON;
 
 #endif

@@ -691,16 +691,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #endif // ACE_LINUX
   bool handle_sockets = false;
 
-  configuration_p =
-    reinterpret_cast<ConfigurationType*> (arg_in);
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_p);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (configuration_p->socketConfiguration);
-
-  configuration_p =
-    dynamic_cast<struct Net_UDPSocketConfiguration*> (configuration_p->socketConfiguration);
+  configuration_p = reinterpret_cast<ConfigurationType*> (arg_in);
 
   // sanity check(s)
   ACE_ASSERT (configuration_p);

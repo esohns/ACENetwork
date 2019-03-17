@@ -65,8 +65,8 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Net_Statistic_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
-                                     FileServer_InetConnectionManager_t,
-                                     struct FileServer_UserData> Test_U_Module_Net_Writer_t;
+                                     FileServer_TCPConnectionManager_t,
+                                     struct Net_UserData> Test_U_Module_Net_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Test_U_ControlMessage_t,
                                      Test_U_Message,
@@ -80,8 +80,8 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Net_Statistic_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
-                                     FileServer_InetConnectionManager_t,
-                                     struct FileServer_UserData> Test_U_Module_Net_Reader_t;
+                                     FileServer_TCPConnectionManager_t,
+                                     struct Net_UserData> Test_U_Module_Net_Reader_t;
 DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,            // session data type
                           enum Stream_SessionMessageType,           // session event type
                           struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
@@ -98,8 +98,7 @@ typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    FileServer_SessionData_t,
-                                   FileServer_ConnectionConfigurationIterator_t,
-                                   FileServer_InetConnectionManager_t,
+                                   FileServer_UDPConnectionManager_t,
                                    Test_U_UDPConnector_t> Test_U_Module_Net_UDPTarget;
 typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
@@ -108,8 +107,7 @@ typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    FileServer_SessionData_t,
-                                   FileServer_ConnectionConfigurationIterator_t,
-                                   FileServer_InetConnectionManager_t,
+                                   FileServer_UDPConnectionManager_t,
                                    Test_U_UDPAsynchConnector_t> Test_U_Module_Net_AsynchUDPTarget;
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
                               enum Stream_SessionMessageType,           // session event type
@@ -176,7 +174,7 @@ typedef Stream_Module_FileReader_Writer_T<ACE_MT_SYNCH,
                                           Test_U_Message,
                                           Test_U_SessionMessage,
                                           struct FileServer_SessionData,
-                                          struct FileServer_UserData> Test_U_FileReader;
+                                          struct Net_UserData> Test_U_FileReader;
 typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
                                     Test_U_ControlMessage_t,
                                     Test_U_Message,
@@ -189,7 +187,7 @@ typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
                                     FileServer_SessionData_t,
                                     Net_Statistic_t,
                                     Common_Timer_Manager_t,
-                                    struct FileServer_UserData> Test_U_FileReaderH;
+                                    struct Net_UserData> Test_U_FileReaderH;
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type

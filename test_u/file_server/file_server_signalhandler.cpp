@@ -60,8 +60,8 @@ FileServer_SignalHandler::handle (const struct Common_Signal& signal_in)
   NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::handle"));
 
   int result = -1;
-  FileServer_IInetConnectionManager_t* iconnection_manager_p =
-      FILESERVER_CONNECTIONMANAGER_SINGLETON::instance ();
+  FileServer_TCPIConnectionManager_t* iconnection_manager_p =
+      FILESERVER_TCPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   bool shutdown = false;

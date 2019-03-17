@@ -34,16 +34,16 @@
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 DHCPClient_ConnectionConfiguration_t,
+                                 DHCPClient_ConnectionConfiguration,
                                  struct DHCPClient_ConnectionState,
                                  DHCP_Statistic_t,
-                                 struct Test_U_UserData> DHCPClient_IConnectionManager_t;
+                                 struct Net_UserData> DHCPClient_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 DHCPClient_ConnectionConfiguration_t,
+                                 DHCPClient_ConnectionConfiguration,
                                  struct DHCPClient_ConnectionState,
                                  DHCP_Statistic_t,
-                                 struct Test_U_UserData> DHCPClient_ConnectionManager_t;
+                                 struct Net_UserData> DHCPClient_ConnectionManager_t;
 
 typedef ACE_Singleton<DHCPClient_ConnectionManager_t,
                       ACE_SYNCH_MUTEX> DHCPCLIENT_CONNECTIONMANAGER_SINGLETON;

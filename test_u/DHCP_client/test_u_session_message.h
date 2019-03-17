@@ -42,7 +42,7 @@ class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       DHCPClient_SessionData_t,
-                                      struct Test_U_UserData>
+                                      struct Net_UserData>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -54,7 +54,7 @@ class Test_U_SessionMessage
   typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       DHCPClient_SessionData_t,
-                                      struct Test_U_UserData> inherited;
+                                      struct Net_UserData> inherited;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
@@ -62,7 +62,7 @@ class Test_U_SessionMessage
   Test_U_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
                          DHCPClient_SessionData_t*&, // session data container handle
-                         struct Test_U_UserData*);
+                         struct Net_UserData*);
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);
   inline virtual ~Test_U_SessionMessage () {};
