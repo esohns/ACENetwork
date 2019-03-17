@@ -176,13 +176,11 @@ connection_setup_function (void* arg_in)
   IRC_Client_IStreamConnection_t* istream_connection_p = NULL;
 
   // step2a: set up connector
-  IRC_Client_IConnection_Manager_t* connection_manager_p =
+  IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  IRC_Client_Connector_t connector (connection_manager_p,
-                                    (*iterator_2).second.second.statisticReportingInterval);
-  IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
-                                                 (*iterator_2).second.second.statisticReportingInterval);
+  IRC_Client_Connector_t connector (true);
+  IRC_Client_AsynchConnector_t asynch_connector (true);
   IRC_Client_IConnector_t* connector_p = &connector;
   if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
     connector_p = &asynch_connector;
@@ -190,8 +188,8 @@ connection_setup_function (void* arg_in)
   //IRC_Client_ConnectorConfiguration connector_configuration;
 
   // step2b: set up configuration passed to processing stream
-  IRC_Client_ConnectionConfiguration_t* configuration_p = NULL;
-  struct IRC_Client_UserData* user_data_p = NULL;
+  IRC_Client_ConnectionConfiguration* configuration_p = NULL;
+  struct Net_UserData* user_data_p = NULL;
   // load defaults
   connection_manager_p->get (configuration_p,
                              user_data_p);
@@ -245,10 +243,10 @@ connection_setup_function (void* arg_in)
       g_free (string_p); string_p = NULL;
 
       result_3 =
-        configuration_p->socketHandlerConfiguration.socketConfiguration_2.address.set (current_port,
-                                                                                       data_p->phonebookEntry.hostName.c_str (),
-                                                                                       1,
-                                                                                       ACE_ADDRESS_FAMILY_INET);
+        configuration_p->address.set (current_port,
+                                      data_p->phonebookEntry.hostName.c_str (),
+                                      1,
+                                      ACE_ADDRESS_FAMILY_INET);
       if (result_3 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -258,11 +256,11 @@ connection_setup_function (void* arg_in)
 
       // step3: (try to) connect to the server
       handle =
-        connector_p->connect (configuration_p->socketHandlerConfiguration.socketConfiguration_2.address);
+        connector_p->connect (configuration_p->address);
       if (handle == ACE_INVALID_HANDLE)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to connect(%s): \"%m\", continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->address).c_str ())));
       else
       {
         done = true;
@@ -312,8 +310,7 @@ connection_failed:
                     &delay));
 
       // *TODO*: this does not work
-      connection_2 =
-        connection_manager_p->get (configuration_p->socketHandlerConfiguration.socketConfiguration_2.address);
+      connection_2 = connection_manager_p->get (configuration_p->address);
       if (connection_2)
         break; // done
     } while (COMMON_TIME_NOW < deadline);

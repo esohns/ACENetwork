@@ -233,11 +233,11 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              std::numeric_limits<double>::max ());
-  Test_I_URLStreamLoad_ConnectionConfigurationIterator_t iterator_2 =
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> ((*iterator_2).second.PDUSize));
+                             static_cast<double> ((*iterator_2).second->PDUSize));
 
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
@@ -395,7 +395,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.is_loopback ());
+                                dynamic_cast<Net_TCPSocketConfiguration_t*> ((*iterator_2).second)->address.is_loopback ());
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -934,20 +934,18 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     GtkFileChooserButton* file_chooser_button_p = NULL;
     gchar* URI_p, *directory_p, *hostname_p = NULL;
     GError* error_p = NULL;
-    Test_I_URLStreamLoad_ConnectionConfigurationIterator_t iterator_2 =
+    Net_ConnectionConfigurationsIterator_t iterator_2 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
     Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
-    Test_I_TCPConnector_t connector (iconnection_manager_p,
-                                     (*iterator_3).second.second.statisticReportingInterval);
+    Test_I_TCPConnector_t connector (true);
 #if defined (SSL_SUPPORT)
     Test_I_SSLTCPConnector_t ssl_connector (iconnection_manager_p,
                                             (*iterator_3).second.second.statisticReportingInterval);
 #endif
-    Test_I_AsynchTCPConnector_t asynch_connector (iconnection_manager_p,
-                                                  (*iterator_3).second.second.statisticReportingInterval);
+    Test_I_AsynchTCPConnector_t asynch_connector (true);
     Test_I_IConnector_t* iconnector_p = NULL;
     Test_I_IStreamConnection_t* istream_connection_p = NULL;
     HTTP_Form_t HTTP_form;
@@ -964,7 +962,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
     ACE_ASSERT (spin_button_p);
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.bufferSize =
+    (*iterator_2).second->bufferSize =
       static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
     //data_p->configuration->connectionConfiguration.PDUSize =
     //  static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
@@ -998,8 +996,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       hostname_string_2 += converter.str ();
     } // end IF
     result =
-      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.set (hostname_string_2.c_str (),
-                                                                                         AF_INET);
+      dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address.set (hostname_string_2.c_str (),
+                                                                                                         AF_INET);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1007,8 +1005,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (hostname_string_2.c_str ())));
       goto error;
     } // end IF
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
-      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.is_loopback ();
+    (*iterator_2).second->useLoopBackDevice =
+      dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address.is_loopback ();
 
     // save to file ?
     check_button_p =
@@ -1078,7 +1076,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 #endif // SSL_SUPPORT
       iconnector_p = &asynch_connector;
     } // end ELSE
-    if (!iconnector_p->initialize ((*iterator_2).second))
+    if (!iconnector_p->initialize (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
@@ -1096,7 +1094,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // step3b: connect
     data_p->handle =
-        iconnector_p->connect ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address);
+        iconnector_p->connect (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0)
@@ -1114,7 +1112,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       do
       {
         iconnection_p =
-            iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address,
+            iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address,
                                         true);
         if (iconnection_p)
         {
@@ -1131,19 +1129,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       if (!iconnection_p)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s (timed out after: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ()),
                     &timeout));
     } // end IF
     else
       iconnection_p =
-        iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address,
+        iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address,
                                     true);
     if ((data_p->handle == ACE_INVALID_HANDLE) ||
         !iconnection_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
       goto error;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1155,7 +1153,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened TCP socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
 #endif
 
     // step4: send HTTP request
@@ -1197,13 +1195,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
     message_data_p->setPR (HTTP_record_p);
 
-    ACE_ASSERT ((*iterator_2).second.messageAllocator);
+    ACE_ASSERT (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator);
 allocate:
     message_p =
-      static_cast<Test_I_Message*> ((*iterator_2).second.messageAllocator->malloc ((*iterator_2).second.PDUSize));
+      static_cast<Test_I_Message*> (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->PDUSize));
     // keep retrying ?
     if (!message_p &&
-        !(*iterator_2).second.messageAllocator->block ())
+        !dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->block ())
       goto allocate;
     if (!message_p)
     {

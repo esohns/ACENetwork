@@ -573,11 +573,10 @@ do_work (bool debugParser_in,
 
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address =
-    remoteHost_in;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
-    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address.is_loopback ();
-  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+  connection_configuration.address = remoteHost_in;
+  connection_configuration.useLoopBackDevice =
+    connection_configuration.address.is_loopback ();
+  connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   //connection_configuration.socketHandlerConfiguration.userData =
   //  &CBData_in.configuration->userData;
@@ -588,12 +587,10 @@ do_work (bool debugParser_in,
                                        configuration_in.streamConfiguration);
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                    connection_configuration));
-  Test_I_URLStreamLoad_ConnectionConfigurationIterator_t iterator =
+                                                                    &connection_configuration));
+  Net_ConnectionConfigurationsIterator_t iterator =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
@@ -637,8 +634,8 @@ do_work (bool debugParser_in,
 
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set ((*iterator).second,
-                             &configuration_in.userData);
+  connection_manager_p->set (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator).second),
+                             NULL);
 
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
@@ -975,7 +972,7 @@ ACE_TMAIN (int argc_in,
       idle_finalize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   ACE_High_Res_Timer timer;

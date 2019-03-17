@@ -51,17 +51,17 @@ struct Test_I_UserData
   struct Net_Configuration* configuration;
 };
 
-struct Test_I_ConnectionState
- : Net_ConnectionState
-{
-  Test_I_ConnectionState ()
-   : Net_ConnectionState ()
-   //, configuration (NULL)
-  {}
+//struct Test_I_ConnectionState
+// : Net_ConnectionState
+//{
+//  Test_I_ConnectionState ()
+//   : Net_ConnectionState ()
+//   //, configuration (NULL)
+//  {}
 
-  // *TODO*: remove ASAP
-  //struct Net_Configuration* configuration;
-};
+//  // *TODO*: remove ASAP
+//  //struct Net_Configuration* configuration;
+//};
 
 //struct Test_I_AllocatorConfiguration
 // : Stream_AllocatorConfiguration

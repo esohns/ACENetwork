@@ -89,25 +89,36 @@ typedef Stream_Configuration_T<//stream_name_string_,
 typedef Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                       Test_I_URLStreamLoad_StreamConfiguration_t,
                                       NET_TRANSPORTLAYER_TCP> Test_I_URLStreamLoad_ConnectionConfiguration_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                 struct HTTP_ConnectionState,
-                                 HTTP_Statistic_t,
-                                 struct Net_UserData> Test_I_IConnectionManager_t;
+//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+//                                 ACE_INET_Addr,
+//                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                 struct Test_I_ConnectionState,
+//                                 HTTP_Statistic_t,
+//                                 struct Net_UserData> Test_I_IConnectionManager_t;
 //typedef std::map<std::string,
 //                 Test_I_URLStreamLoad_ConnectionConfiguration_t> Test_I_URLStreamLoad_ConnectionConfigurations_t;
 //typedef Test_I_URLStreamLoad_ConnectionConfigurations_t::iterator Test_I_URLStreamLoad_ConnectionConfigurationIterator_t;
+
+struct Test_I_ConnectionState
+ : Net_ConnectionState
+{
+  Test_I_ConnectionState ()
+   : Net_ConnectionState ()
+   , configuration (NULL)
+  {}
+
+  Test_I_URLStreamLoad_ConnectionConfiguration_t* configuration;
+};
 
 //////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
                           Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                          struct HTTP_ConnectionState,
+                          struct Test_I_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                struct HTTP_ConnectionState,
+                                struct Test_I_ConnectionState,
                                 HTTP_Statistic_t,
                                 Net_TCPSocketConfiguration_t,
                                 Net_TCPSocketConfiguration_t,
@@ -129,7 +140,7 @@ typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Test_I_Asynch
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_I_TCPSocketHandler_t,
                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                struct HTTP_ConnectionState,
+                                struct Test_I_ConnectionState,
                                 HTTP_Statistic_t,
                                 Net_TCPSocketConfiguration_t,
                                 Net_TCPListenerConfiguration_t,
@@ -140,7 +151,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_I_SSLTCPSocketHandler_t,
                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                struct HTTP_ConnectionState,
+                                struct Test_I_ConnectionState,
                                 HTTP_Statistic_t,
                                 Net_TCPSocketConfiguration_t,
                                 Net_TCPListenerConfiguration_t,
@@ -150,7 +161,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
 #endif
 typedef Net_AsynchTCPConnectionBase_T<Test_I_AsynchTCPSocketHandler_t,
                                       Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                      struct HTTP_ConnectionState,
+                                      struct Test_I_ConnectionState,
                                       HTTP_Statistic_t,
                                       Net_TCPSocketConfiguration_t,
                                       Net_TCPListenerConfiguration_t,
@@ -168,7 +179,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                               struct HTTP_ConnectionState,
+                               struct Test_I_ConnectionState,
                                HTTP_Statistic_t,
                                Net_TCPSocketConfiguration_t,
                                Net_TCPSocketConfiguration_t,
@@ -179,7 +190,7 @@ typedef Net_Client_SSL_Connector_T<Test_I_SSLTCPConnection_t,
                                    ACE_SSL_SOCK_Connector,
                                    ACE_INET_Addr,
                                    Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                   struct HTTP_ConnectionState,
+                                   struct Test_I_ConnectionState,
                                    HTTP_Statistic_t,
                                    Net_TCPSocketConfiguration_t,
                                    Net_TCPSocketConfiguration_t,
@@ -189,7 +200,7 @@ typedef Net_Client_SSL_Connector_T<Test_I_SSLTCPConnection_t,
 typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                     struct HTTP_ConnectionState,
+                                     struct Test_I_ConnectionState,
                                      HTTP_Statistic_t,
                                      Net_TCPSocketConfiguration_t,
                                      Net_TCPSocketConfiguration_t,

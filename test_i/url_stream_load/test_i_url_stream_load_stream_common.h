@@ -81,7 +81,7 @@ class Test_I_SessionMessage;
 //struct Test_I_URLStreamLoad_ConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                          struct HTTP_ConnectionState,
+                          struct Test_I_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 
 struct HTTP_Record;
