@@ -96,14 +96,15 @@ set (source_files_client
      net_client_asynchconnector.cpp
      net_client_asynchconnector.h
      net_client_asynchconnector.inl
+     net_client_common.h
      net_client_connector.cpp
      net_client_connector.h
      net_client_connector.inl
+     net_client_defines.h
+#     net_client_exports.h
      net_client_ssl_connector.cpp
      net_client_ssl_connector.h
-     net_client_ssl_connector.inl
-     net_client_defines.h)
-#     net_client_exports.h)
+     net_client_ssl_connector.inl)
 
 #set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -178,6 +179,7 @@ export (TARGETS ${PROJECT_NAME}_Client ${PROJECT_NAME}_Server
 ############### install files ################
 install (FILES
          net_client_asynchconnector.h
+         net_client_common.h
          net_client_connector.h
          net_client_defines.h
 #         net_client_exports.h
