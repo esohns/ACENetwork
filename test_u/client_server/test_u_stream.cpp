@@ -81,6 +81,8 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
   layout_inout->append (module_p, NULL, 0);
 
   delete_out = true;
+
+  return true;
 }
 
 bool
