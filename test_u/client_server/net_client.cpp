@@ -491,6 +491,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
+         struct Client_Configuration& configuration_in,
 #if defined (GUI_SUPPORT)
          struct Client_UI_CBData& CBData_in,
 #endif // GUI_SUPPORT
@@ -507,11 +508,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Common_Tools::initialize ();
 
   // step0a: initialize configuration
-  struct Client_Configuration configuration;
-#if defined (GUI_SUPPORT)
-  CBData_in.configuration = &configuration;
-#endif // GUI_SUPPORT
-
   Test_U_EventHandler ui_event_handler (
 #if defined (GUI_SUPPORT)
                                               &CBData_in
@@ -530,7 +526,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Net_AllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
+  if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -540,18 +536,18 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                                &heap_allocator,         // heap allocator handle
                                                true);                   // block ?
   // ********************* protocol configuration data *************************
-  configuration.protocolConfiguration.pingInterval =
+  configuration_in.protocolConfiguration.pingInterval =
     ((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? ACE_Time_Value::zero
                                                              : pingInterval_in);
-  configuration.protocolConfiguration.printPongMessages =
+  configuration_in.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.protocolConfiguration =
-    &configuration.protocolConfiguration;
+    &configuration_in.protocolConfiguration;
   modulehandler_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
+    &configuration_in.streamConfiguration;
   modulehandler_configuration.printFinalReport = true;
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
@@ -559,27 +555,27 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
 #endif // GUI_SUPPORT
 
-  configuration.streamConfiguration.configuration_.cloneModule =
+  configuration_in.streamConfiguration.configuration_.cloneModule =
     !(UIDefinitionFile_in.empty ());
-  configuration.streamConfiguration.configuration_.messageAllocator =
+  configuration_in.streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
-  configuration.streamConfiguration.configuration_.module =
+  configuration_in.streamConfiguration.configuration_.module =
 #if defined (GUI_SUPPORT)
       (!UIDefinitionFile_in.empty () ? &event_handler
                                      : NULL);
 #else
       NULL;
 #endif // GUI_SUPPORT
-  configuration.streamConfiguration.configuration_.printFinalReport = true;
+  configuration_in.streamConfiguration.configuration_.printFinalReport = true;
   // *TODO*: is this correct ?
-  configuration.streamConfiguration.configuration_.serializeOutput =
+  configuration_in.streamConfiguration.configuration_.serializeOutput =
     useThreadPool_in;
-  configuration.streamConfiguration.configuration_.userData =
-    &configuration.userData;
-  configuration.streamConfiguration.initialize (module_configuration,
+  configuration_in.streamConfiguration.configuration_.userData =
+    &configuration_in.userData;
+  configuration_in.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
-                                                configuration.streamConfiguration.allocatorConfiguration_,
-                                                configuration.streamConfiguration.configuration_);
+                                                configuration_in.streamConfiguration.allocatorConfiguration_,
+                                                configuration_in.streamConfiguration.configuration_);
 
   // ********************** connection configuration data **********************
   Test_U_TCPConnectionConfiguration connection_configuration;
@@ -587,24 +583,31 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
-                                       configuration.streamConfiguration);
+  connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
+                                       configuration_in.streamConfiguration);
   connection_configuration_2.messageAllocator = &message_allocator;
   connection_configuration_2.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration_2.initialize (configuration.streamConfiguration.allocatorConfiguration_,
-                                         configuration.streamConfiguration);
+  connection_configuration_2.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
+                                         configuration_in.streamConfiguration);
+  Net_ConnectionConfigurationsIterator_t iterator, iterator_2;
 
-  configuration.TCPConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 connection_configuration));
-  Test_U_TCPConnectionConfigurationIterator_t iterator =
-    configuration.TCPConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration.TCPConnectionConfigurations.end ());
-  configuration.UDPConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                    connection_configuration_2));
-  Test_U_UDPConnectionConfigurationIterator_t iterator_2 =
-    configuration.UDPConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != configuration.UDPConnectionConfigurations.end ());
+  if (useUDP_in)
+  {
+    configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                   &connection_configuration_2));
+    iterator_2 =
+        configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
+  } // end IF
+  else
+  {
+    configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                   &connection_configuration));
+    iterator =
+        configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
+  } // end ELSE
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -622,14 +625,14 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // step0b: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
-    &configuration.dispatchConfiguration;
+    &configuration_in.dispatchConfiguration;
   if (useReactor_in)
-    configuration.dispatchConfiguration.numberOfReactorThreads =
+    configuration_in.dispatchConfiguration.numberOfReactorThreads =
       numberOfDispatchThreads_in;
   else
-    configuration.dispatchConfiguration.numberOfProactorThreads =
+    configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
-  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
+  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returing\n")));
@@ -660,7 +663,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       connector_2 = &udp_connector;
     else
       connector_2 = &udp_asynch_connector;
-    if (!connector_2->initialize ((*iterator_2).second))
+    if (!connector_2->initialize (connection_configuration_2))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -673,7 +676,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       connector_p = &connector;
     else
       connector_p = &asynch_connector;
-    if (!connector_p->initialize ((*iterator).second))
+    if (!connector_p->initialize (connection_configuration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -683,28 +686,31 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // step0d: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set ((*iterator).second,
-                             &configuration.userData);
+  connection_manager_p->set (connection_configuration,
+                             NULL);
+  connection_manager_2->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_2->set (connection_configuration_2,
+                             NULL);
 
   // step0e: initialize action timer
   ACE_INET_Addr peer_address (serverPortNumber_in,
                               serverHostname_in.c_str (),
                               ACE_ADDRESS_FAMILY_INET);
-  configuration.signalHandlerConfiguration.address = peer_address;
-  configuration.signalHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
-  configuration.signalHandlerConfiguration.connector = connector_p;
+  configuration_in.signalHandlerConfiguration.address = peer_address;
+  configuration_in.signalHandlerConfiguration.connectionConfiguration =
+    &connection_configuration;
+  configuration_in.signalHandlerConfiguration.connector = connector_p;
 
   if (useUDP_in)
-      (*iterator_2).second.peerAddress = peer_address;
+    connection_configuration_2.peerAddress = peer_address;
   else
-      (*iterator).second.address = peer_address;
+    connection_configuration.address = peer_address;
 
   Client_TimeoutHandler timeout_handler (actionMode_in,
                                          maxNumConnections_in,
                                          connector_p,
                                          connector_2);
-  configuration.timeoutHandler = &timeout_handler;
+  configuration_in.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
@@ -726,12 +732,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                                                                       : connectionInterval_in),
                              ((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
                                                                                       : 0));
-    configuration.signalHandlerConfiguration.actionTimerId =
+    configuration_in.signalHandlerConfiguration.actionTimerId =
         timer_manager_p->schedule_timer (&timeout_handler,           // event handler handle
                                          NULL,                       // asynchronous completion token
                                          COMMON_TIME_NOW + interval, // first wakeup time
                                          interval);                  // interval
-    if (configuration.signalHandlerConfiguration.actionTimerId == -1)
+    if (configuration_in.signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", returning\n")));
@@ -741,13 +747,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step0e: initialize signal handling
-  configuration.signalHandlerConfiguration.dispatchState =
+  configuration_in.signalHandlerConfiguration.dispatchState =
     &event_dispatch_state_s;
-  configuration.signalHandlerConfiguration.messageAllocator =
+  configuration_in.signalHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.signalHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
-  if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
+  configuration_in.signalHandlerConfiguration.connectionConfiguration =
+    &connection_configuration;
+  if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
@@ -1259,6 +1265,7 @@ ACE_TMAIN (int argc_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
   logstack_p = &state_r.logStack;
   lock_p = &state_r.logStackLock;
+  ui_cb_data.UIState = &state_r;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -1349,7 +1356,7 @@ ACE_TMAIN (int argc_in,
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                       &ui_cb_data.UIState->subscribersLock);
+                                       &state_r.subscribersLock);
 #else
                                        NULL);
 #endif // GTK_USE
@@ -1409,8 +1416,10 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-#if defined (GUI_SUPPORT)
   // step1h: initialize UI framework
+  struct Client_Configuration configuration;
+#if defined (GUI_SUPPORT)
+  ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
   ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
@@ -1443,6 +1452,7 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            number_of_dispatch_threads,
            use_UDP,
+           configuration,
 #if defined (GUI_SUPPORT)
            ui_cb_data,
 #endif // GUI_SUPPORT

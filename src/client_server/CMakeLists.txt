@@ -134,6 +134,7 @@ set (source_files_server
      net_server_asynchlistener.cpp
      net_server_asynchlistener.h
      net_server_asynchlistener.inl
+     net_server_common.h
      net_server_common_tools.cpp
      net_server_common_tools.h
      net_server_defines.h
@@ -185,6 +186,7 @@ install (FILES
 #         net_client_exports.h
          net_server_asynchlistener.h
          net_server_asynchlistener.inl
+         net_server_common.h
          net_server_common_tools.h
          net_server_defines.h
 #         net_server_exports.h

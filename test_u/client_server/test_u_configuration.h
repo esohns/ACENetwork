@@ -145,20 +145,18 @@ struct ClientServer_Configuration
    : Test_U_Configuration ()
 #endif // GUI_SUPPORT
    , allocatorConfiguration ()
-   , TCPConnectionConfigurations ()
-   , UDPConnectionConfigurations ()
+   , connectionConfigurations ()
    , streamConfiguration ()
    , protocolConfiguration ()
   {}
 
-  struct Net_AllocatorConfiguration    allocatorConfiguration;
+  struct Net_AllocatorConfiguration   allocatorConfiguration;
   // **************************** socket data **********************************
-  Test_U_TCPConnectionConfigurations_t TCPConnectionConfigurations;
-  Test_U_UDPConnectionConfigurations_t UDPConnectionConfigurations;
+  Net_ConnectionConfigurations_t      connectionConfigurations;
   // **************************** stream data **********************************
-  Test_U_StreamConfiguration_t         streamConfiguration;
+  Test_U_StreamConfiguration_t        streamConfiguration;
   // *************************** protocol data *********************************
-  struct Test_U_ProtocolConfiguration  protocolConfiguration;
+  struct Test_U_ProtocolConfiguration protocolConfiguration;
 };
 
 #endif

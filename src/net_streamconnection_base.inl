@@ -1635,13 +1635,14 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                 id ()));
     return;
   } // end IF
-  if (unlikely (!inherited2::initialize (*configuration_p)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n"),
-                id ()));
-    return;
-  } // end IF
+  if (!inherited2::isManaged_)
+    if (unlikely (!inherited2::initialize (*configuration_p)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n"),
+                  id ()));
+      return;
+    } // end IF
 }
 
 template <typename HandlerType,

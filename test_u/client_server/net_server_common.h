@@ -66,7 +66,10 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 struct Server_ListenerConfiguration;
 
-typedef Net_IListener_T<Net_TCPListenerConfiguration_t,
+typedef Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
+                                    NET_TRANSPORTLAYER_TCP> Server_ListenerConfiguration_t;
+
+typedef Net_IListener_T<Server_ListenerConfiguration_t,
                         Test_U_TCPConnectionConfiguration> Server_IListener_t;
 struct Server_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
@@ -98,7 +101,7 @@ struct Server_Configuration
 
   Test_U_IUDPConnector_t*                  connector;
   Server_IListener_t*                      listener;
-  Net_TCPListenerConfiguration_t           listenerConfiguration;
+  Server_ListenerConfiguration_t           listenerConfiguration;
 
   struct Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };

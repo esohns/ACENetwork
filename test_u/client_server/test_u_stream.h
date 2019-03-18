@@ -118,7 +118,7 @@ class Test_U_Stream
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (Test_U_Statistic_t&); // return value: statistic data
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  virtual void report () const;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))

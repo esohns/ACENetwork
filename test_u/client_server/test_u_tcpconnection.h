@@ -51,7 +51,6 @@ class Test_U_TCPConnection
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
                                   Net_TCPSocketConfiguration_t,
-                                  Net_TCPListenerConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData>
@@ -63,7 +62,6 @@ class Test_U_TCPConnection
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
                                   Net_TCPSocketConfiguration_t,
-                                  Net_TCPListenerConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
@@ -95,7 +93,6 @@ class Test_U_AsynchTCPConnection
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
                                         Net_TCPSocketConfiguration_t,
-                                        Net_TCPListenerConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData>
@@ -121,7 +118,6 @@ class Test_U_AsynchTCPConnection
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
                                         Net_TCPSocketConfiguration_t,
-                                        Net_TCPListenerConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData> inherited;

@@ -57,10 +57,14 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
 
+  if (!inherited::load (layout_inout,
+                        delete_out))
+    return false;
+
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_ProtocolHandler_Module (this,
-                                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME)),
+                  Test_U_Module_HeaderParser_Module (this,
+                                                           ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME)),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
@@ -71,21 +75,12 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_HeaderParser_Module (this,
-                                                           ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME)),
+                  Test_U_Module_ProtocolHandler_Module (this,
+                                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME)),
                   false);
   layout_inout->append (module_p, NULL, 0);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_U_Module_TCPSocketHandler_Module (this,
-  //                                                             ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)),
-  //                false);
-  //modules_out.push_back (module_p);
 
   delete_out = true;
-
-  return inherited::load (layout_inout,
-                          delete_out);
 }
 
 bool
@@ -221,7 +216,8 @@ Test_U_Stream::collect (Test_U_Statistic_t& data_out)
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::collect"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
+  if (!inherited::sessionData_)
+    return true; // nothing to do (yet)
 
   int result = -1;
 
@@ -282,4 +278,35 @@ Test_U_Stream::collect (Test_U_Statistic_t& data_out)
   } // end IF
 
   return result_2;
+}
+
+void
+Test_U_Stream::report () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::report"));
+
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve \"%s\" module handle, returning\n"),
+                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
+    return;
+  } // end IF
+  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
+    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
+  if (!statistic_report_impl_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, returning\n")));
+    return;
+  } // end IF
+
+  try {
+    statistic_report_impl_p->report ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IStatistic_T::report(), continuing\n")));
+  }
 }

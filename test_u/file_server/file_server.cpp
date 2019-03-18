@@ -634,10 +634,6 @@ do_work (
                    : COMMON_EVENT_DISPATCH_PROACTOR);
   configuration.streamConfiguration.configuration_.serializeOutput =
     useThreadPool_in;
-  configuration.streamConfiguration.configuration_.userData =
-    &configuration.userData;
-  //configuration.userData.connectionConfiguration =
-  //    &configuration.connectionConfiguration;
 
   // ********************** socket configuration data **************************
   FileServer_TCPConnectionConfiguration tcp_connection_configuration;
@@ -647,26 +643,43 @@ do_work (
   if (useUDP_in)
   {
     result =
-      configuration.UDPListenerConfiguration.listenAddress.set (listeningPortNumber_in,
-                                                                static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                1,
-                                                                0);
+      udp_connection_configuration.listenAddress.set (listeningPortNumber_in,
+                                                      static_cast<ACE_UINT32> (INADDR_ANY),
+                                                      1,
+                                                      0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    configuration.UDPListenerConfiguration.writeOnly = true;
+    udp_connection_configuration.writeOnly = true;
   } // end IF
   // ****************** connection configuration data **************************
-  tcp_connection_configuration.messageAllocator = &message_allocator;
+  //configuration.userData.connectionConfiguration =
+  //    &configuration.connectionConfiguration;
 
-  tcp_connection_configuration.initialize (configuration.allocatorConfiguration,
-                                           configuration.streamConfiguration);
+  if (useUDP_in)
+  {
+    udp_connection_configuration.messageAllocator = &message_allocator;
+    udp_connection_configuration.initialize (configuration.allocatorConfiguration,
+                                             configuration.streamConfiguration);
+    configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                   &udp_connection_configuration));
+  } // end IF
+  else
+  {
+    configuration.listenerConfiguration.messageAllocator =
+        &message_allocator;
+    configuration.listenerConfiguration.connectionConfiguration =
+        &tcp_connection_configuration;
 
-  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 &tcp_connection_configuration));
+    tcp_connection_configuration.messageAllocator = &message_allocator;
+    tcp_connection_configuration.initialize (configuration.allocatorConfiguration,
+                                             configuration.streamConfiguration);
+    configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                   &tcp_connection_configuration));
+  } // end ELSE
   iterator =
     configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
@@ -759,34 +772,34 @@ do_work (
   if (useLoopBack_in)
   {
     result =
-      configuration.TCPListenerConfiguration.address.set (listeningPortNumber_in,
-                                                          INADDR_LOOPBACK,
-                                                          1,
-                                                          0);
+      configuration.listenerConfiguration.address.set (listeningPortNumber_in,
+                                                       INADDR_LOOPBACK,
+                                                       1,
+                                                       0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    result =
-      configuration.UDPListenerConfiguration.listenAddress.set (listeningPortNumber_in,
-                                                                INADDR_LOOPBACK,
-                                                                1,
-                                                                0);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      goto error;
-    } // end IF
+//    result =
+//      configuration.UDPListenerConfiguration.listenAddress.set (listeningPortNumber_in,
+//                                                                INADDR_LOOPBACK,
+//                                                                1,
+//                                                                0);
+//    if (result == -1)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+//      goto error;
+//    } // end IF
   } // end IF
   else
   {
-    configuration.TCPListenerConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                    1);
-    configuration.UDPListenerConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
-                                                                          1);
+    configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                 1);
+//    configuration.UDPListenerConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
+//                                                                          1);
   } // end ELSE
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
@@ -860,7 +873,7 @@ do_work (
   if (UIDefinitionFile_in.empty ())
   {
 #endif // GUI_SUPPORT
-    if (!configuration.listener->initialize (configuration.TCPListenerConfiguration))
+    if (!configuration.listener->initialize (configuration.listenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, aborting\n")));

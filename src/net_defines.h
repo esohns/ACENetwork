@@ -121,7 +121,7 @@
 #define NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING  "SocketHandler"
 
 // statistic
-#define NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL            500 // ms [0: off]
+#define NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL            0 // ms [0: off]
 #define NET_STATISTIC_DEFAULT_REPORTING_INTERVAL             0 // second(s) [0: off]
 
 // platform

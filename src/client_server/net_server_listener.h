@@ -86,7 +86,7 @@ class Net_Server_Listener_T
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; }
 
-  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ConnectionConfigurationType ()); ACE_NOTREACHED (return ConnectionConfigurationType ();) }
+  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); ACE_ASSERT (configuration_->connectionConfiguration); return *(configuration_->connectionConfiguration); }
   //virtual bool initialize (const ConnectionConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
   inline virtual bool useReactor () const { return true; }
