@@ -278,6 +278,7 @@ set (source_files
      net_sock_connector.h
      net_sock_dgram.cpp
      net_sock_dgram.h
+     net_socket_common.h
      net_sockethandler_base.cpp
      net_sockethandler_base.h
      net_sockethandler_base.inl
@@ -458,6 +459,7 @@ install (FILES
          net_sock_acceptor.h
          net_sock_connector.h
          net_sock_dgram.h
+         net_socket_common.h
          net_sockethandler_base.h
          net_sockethandler_base.inl
          net_streamconnection_base.h

@@ -199,7 +199,10 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
 endif (WIN32)
 target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP CommonTimer)
+
 target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
+
 target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PROJECT_NAME})
 
 # add PCH

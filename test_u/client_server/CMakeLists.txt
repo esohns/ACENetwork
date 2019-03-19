@@ -184,13 +184,10 @@ if (GUI_SUPPORT)
        test_u_callbacks.cpp
        test_u_callbacks.h)
  elseif (WXWIDGETS_USE)
-   #  set (${EXECUTABLE_SOURCE}_SRCS
-   #       ${${EXECUTABLE_SOURCE}_SRCS}
-   #       test_u_wxwidgets_ui.cpp
-   #       test_u_wxwidgets_ui.h
-   #       test_u_wxwidgets_ui.inl
-   #       test_u_wxwidgets_ui_base.cpp
-   #       test_u_wxwidgets_ui_base.h)
+  set (${EXECUTABLE_SOURCE}_SRCS
+       ${${EXECUTABLE_SOURCE}_SRCS}
+       net_server_wxui_base.cpp
+       net_server_wxui_base.h)
  endif ()
 endif (GUI_SUPPORT)
 
@@ -307,13 +304,14 @@ if (GUI_SUPPORT)
        test_u_callbacks.cpp
        test_u_callbacks.h)
  elseif (WXWIDGETS_USE)
-      #  set (${EXECUTABLE_TARGET}_SRCS
-      #       ${${EXECUTABLE_TARGET}_SRCS}
-      #       test_u_wxwidgets_ui.cpp
-      #       test_u_wxwidgets_ui.h
-      #       test_u_wxwidgets_ui.inl
-      #       test_u_wxwidgets_ui_base.cpp
-      #       test_u_wxwidgets_ui_base.h)
+  set (${EXECUTABLE_TARGET}_SRCS
+       ${${EXECUTABLE_TARGET}_SRCS}
+       net_server_wxui.cpp
+       net_server_wxui.h
+#       test_u_wxwidgets_ui.inl
+       net_server_wxui_base.cpp
+       net_server_wxui_base.h)
+  list (REMOVE_ITEM ${EXECUTABLE_TARGET}_SRCS net_server.cpp)
  endif ()
 endif (GUI_SUPPORT)
 
