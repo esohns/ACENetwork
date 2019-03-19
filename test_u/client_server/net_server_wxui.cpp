@@ -5,13 +5,10 @@
 
 #include "ace/config-lite.h"
 #include "ace/Log_Msg.h"
-#include "ace/Synch_Traits.h"
 
 #include "common_tools.h"
 
 #include "common_log_tools.h"
-
-#include "stream_allocatorheap.h"
 
 #include "stream_misc_defines.h"
 
@@ -20,11 +17,9 @@
 #endif // HAVE_CONFIG_H
 
 #include "net_common_tools.h"
-#include "net_configuration.h"
 
 #include "net_client_defines.h"
 
-#include "net_server_common.h"
 #include "net_server_common_tools.h"
 #include "net_server_listener_common.h"
 
@@ -61,21 +56,6 @@ BEGIN_EVENT_TABLE(dialog_main, dialog_main_base)
 END_EVENT_TABLE();
 
 //////////////////////////////////////////
-
-class server
- : public wxApp
-{
- public:
-  bool OnInit ();
-  bool OnInit_2 ();
-
- private:
-  struct Server_Configuration configuration_;
-  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Net_AllocatorConfiguration> heap_allocator_;
-  struct Server_UI_CBData CBData_;
-  struct Common_EventDispatchState event_dispatch_state_;
-};
 
 IMPLEMENT_APP(server)
 
@@ -248,16 +228,16 @@ server::OnInit_2 ()
                   ACE_TEXT ("failed to initialize listener, aborting\n")));
       return false;
     } // end IF
-    ACE_thread_t thread_id = 0;
-    configuration_.listener->start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
-    if (!configuration_.listener->isRunning ())
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
-                  NET_SERVER_DEFAULT_LISTENING_PORT));
-      return false;
-    } // end IF
+//    ACE_thread_t thread_id = 0;
+//    configuration_.listener->start (thread_id);
+//    ACE_UNUSED_ARG (thread_id);
+//    if (!configuration_.listener->isRunning ())
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
+//                  NET_SERVER_DEFAULT_LISTENING_PORT));
+//      return false;
+//    } // end IF
   } // end IF
   else
   {

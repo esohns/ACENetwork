@@ -37,7 +37,21 @@ dialog_main::togglebutton_listen_cb(wxCommandEvent &event)  // wxGlade: dialog_m
 {
   event.Skip();
 
-  ACE_ASSERT (this->configuration_.listener);
+  server* server_p =
+      dynamic_cast<server*> (static_cast<wxApp*> (wxApp::GetInstance ()));
+  ACE_ASSERT (server_p);
+  ACE_ASSERT (server_p->configuration_.listener);
+
+  if (event.IsChecked ())
+  {
+    ACE_thread_t thread_id;
+    server_p->configuration_.listener->start (thread_id);
+  } // end IF
+  else
+  {
+    server_p->configuration_.listener->stop (true,
+                                             true);
+  } // end ELSE
 }
 
 void
@@ -69,5 +83,5 @@ dialog_main::button_quit_cb(wxCommandEvent &event)  // wxGlade: dialog_main.<eve
 
   event.Skip();
 
-  this->Close (false);
+  this->Close (true);
 }
