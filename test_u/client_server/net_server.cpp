@@ -528,19 +528,19 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // step0a: initialize configuration
   Test_U_EventHandler ui_event_handler (
 #if defined (GUI_SUPPORT)
-                                              &CBData_in
+                                        &CBData_in
 #endif // GUI_SUPPORT
-                                             );
+                                        );
   Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
-  Test_U_Module_EventHandler* event_handler_p =
-    dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
-  if (!event_handler_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
-    return;
-  } // end IF
+                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+//  Test_U_Module_EventHandler* event_handler_p =
+//    dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
+//  if (!event_handler_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
+//    return;
+//  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Net_AllocatorConfiguration> heap_allocator;
@@ -1171,36 +1171,7 @@ ACE_TMAIN (int argc_in,
   process_profile.start ();
 
   // initialize randomness
-  // *TODO*: use STL functionality here
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed (RAND_MAX = %d)...\n"),
-              RAND_MAX));
-  ACE_Time_Value now = COMMON_TIME_NOW;
-  random_seed = static_cast<unsigned int> (now.sec ());
-  // *PORTABILITY*: outside glibc, this is not very portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_OS::srand (static_cast<u_int> (random_seed));
-#else
-  ACE_OS::memset (random_state_buffer, 0, sizeof (random_state_buffer));
-  result = ::initstate_r (random_seed,
-                          random_state_buffer, sizeof (random_state_buffer),
-                          &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initstate_r(): \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-  result = ::srandom_r (random_seed, &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize random seed: \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-#endif // ACE_WIN32 || ACE_WIN64
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed...DONE\n")));
+  Common_Tools::initialize (true);
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();

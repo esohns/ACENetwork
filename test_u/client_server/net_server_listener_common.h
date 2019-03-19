@@ -34,12 +34,10 @@
 #include "net_server_listener.h"
 
 #include "test_u_connection_common.h"
+#include "test_u_stream.h"
 #include "test_u_stream_common.h"
 #include "test_u_tcpconnection.h"
 #include "test_u_udpconnection.h"
-
-// foward declarations
-class Test_U_Stream;
 
 typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,

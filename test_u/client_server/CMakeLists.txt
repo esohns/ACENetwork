@@ -308,7 +308,7 @@ if (GUI_SUPPORT)
        ${${EXECUTABLE_TARGET}_SRCS}
        net_server_wxui.cpp
        net_server_wxui.h
-#       test_u_wxwidgets_ui.inl
+       net_server_wxui_callbacks.cpp
        net_server_wxui_base.cpp
        net_server_wxui_base.h)
   list (REMOVE_ITEM ${EXECUTABLE_TARGET}_SRCS net_server.cpp)
