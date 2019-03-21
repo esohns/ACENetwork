@@ -145,8 +145,6 @@ class Net_WLAN_Tools
   // *NOTE*: this uses iwlib
   static bool hasSSID (const std::string&,  // interface identifier
                        const std::string&); // (E)SSID
-  // *NOTE*: the WEXT_SUPPORT implementation merely tests SIOCGIWNAME ioctl
-  static bool isInterface (const std::string&); // interface identifier
 
   static bool associate (const std::string&,       // interface identifier
                          const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
@@ -160,6 +158,9 @@ class Net_WLAN_Tools
                     ACE_HANDLE,         // (socket) handle to effectuate the ioctl (if any)
                     bool = false);      // wait for the (first bit of-) result data ? (times out after 250ms)
 #endif // WEXT_SUPPORT
+
+  // *NOTE*: this implementation merely tests SIOCGIWNAME ioctl
+  static bool isInterface (const std::string&); // interface identifier
 
 #if defined (NL80211_SUPPORT)
   // *IMPORTANT NOTE*: be aware of race conditions when passing a valid socket

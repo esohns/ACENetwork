@@ -3420,20 +3420,7 @@ error_2:
            ifaddrs_2;
            ifaddrs_2 = ifaddrs_2->ifa_next)
       {
-#if defined (WEXT_SUPPORT)
         if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name))
-#elif defined (NL80211_SUPPORT)
-        if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name,
-                                         const_cast<nl_sock*> (wlan_inet_monitor_p->getP ()),
-                                         wlan_inet_monitor_p->get_3 ()))
-#elif defined (DBUS_SUPPORT)
-        if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name,
-                                         NULL))
-#else
-    ACE_ASSERT (false);
-    ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
-#endif
           interface_identifiers_a.push_back (ifaddrs_2->ifa_name);
       } // end FOR
 

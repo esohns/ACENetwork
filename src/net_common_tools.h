@@ -167,6 +167,7 @@ class Net_Common_Tools
 #endif // ACE_WIN32 || ACE_WIN64
 
   // network layer
+//  static ACE_INET_Addr getLocalAddress (std::string&); // interface
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
 

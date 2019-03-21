@@ -21,6 +21,10 @@
 
 #include "net_wlan_tools.h"
 
+#if defined (ACE_LINUX)
+#include <linux/wireless.h>
+#endif // ACE_LINUX
+
 #include "ace/Log_Msg.h"
 
 #include "net_macros.h"
@@ -64,6 +68,49 @@ Net_WLAN_Tools::decodeSSID (void* data_in,
       result += buffer_a;
     } // end ELSE
   } // end FOR
+
+  return result;
+}
+
+bool
+Net_WLAN_Tools::isInterface (const std::string& interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::isInterface"));
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
+
+  bool result = false;
+  int socket_handle = -1;
+  struct iwreq iwreq_s;
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  int result_2 = -1;
+
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  socket_handle = ACE_OS::socket (AF_INET,
+                                  SOCK_STREAM,
+                                  0);
+  if (unlikely (socket_handle == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  // *TODO*: verify the presence of Wireless Extensions
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCGIWNAME,
+                            &iwreq_s);
+  if (!result_2)
+    result = true;
+
+  result_2 = ACE_OS::close (socket_handle);
+  if (unlikely (result_2 == -1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
 
   return result;
 }
