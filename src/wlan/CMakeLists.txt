@@ -213,6 +213,7 @@ set (source_files
      net_wlan_monitor_base.cpp
      net_wlan_monitor_base.h
      net_wlan_monitor_base.inl
+     net_wlan_monitor_common.h
      net_wlan_monitor_statemachine.cpp
      net_wlan_monitor_statemachine.h
      net_wlan_tools.cpp
@@ -351,6 +352,7 @@ set (include_files
      net_wlan_monitor.inl
      net_wlan_monitor_base.h
      net_wlan_monitor_base.inl
+     net_wlan_monitor_common.h
      net_wlan_monitor_statemachine.h
      net_wlan_tools.h)
 if (WIN32)

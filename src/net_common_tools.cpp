@@ -75,8 +75,9 @@
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
-#if defined (ACE_LINUX)
 #include "net_wlan_configuration.h"
+#include "net_wlan_monitor_common.h"
+#if defined (ACE_LINUX)
 #if defined (DBUS_SUPPORT)
 #include "net_wlan_defines.h"
 #endif // DBUS_SUPPORT
