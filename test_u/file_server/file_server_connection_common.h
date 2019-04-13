@@ -190,36 +190,18 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       FileServer_UDPConnectionManager_t,
                                       struct Net_UserData> Test_U_UDPNetStream_t;
 
-typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
-                               Net_SOCK_Dgram,
-                               Net_UDPSocketConfiguration_t> Test_U_UDPSocketHandler_t;
-typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
-                               Net_SOCK_Dgram_Mcast,
-                               Net_UDPSocketConfiguration_t> Test_U_UDPIPMulticastSocketHandler_t;
-typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
-                               Net_SOCK_Dgram_Bcast,
-                               Net_UDPSocketConfiguration_t> Test_U_UDPIPBroadcastSocketHandler_t;
-typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
-                                     Net_UDPSocketConfiguration_t> Test_U_UDPAsynchSocketHandler_t;
-typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
-                                     Net_UDPSocketConfiguration_t> Test_U_UDPAsynchIPMulticastSocketHandler_t;
-typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-                                     Net_UDPSocketConfiguration_t> Test_U_UDPAsynchIPBroadcastSocketHandler_t;
-
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
-                                Test_U_UDPSocketHandler_t,
+                                Net_UDPSocketHandler_t,
                                 FileServer_UDPConnectionConfiguration,
                                 struct Net_ConnectionState,
                                 Net_Statistic_t,
-                                Net_UDPSocketConfiguration_t,
                                 Test_U_UDPNetStream_t,
                                 Common_Timer_Manager_t,
                                 struct Net_UserData> Test_U_UDPConnection_t;
-typedef Net_AsynchUDPConnectionBase_T<Test_U_UDPAsynchSocketHandler_t,
+typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
                                       FileServer_UDPConnectionConfiguration,
                                       struct Net_ConnectionState,
                                       Net_Statistic_t,
-                                      Net_UDPSocketConfiguration_t,
                                       Test_U_UDPNetStream_t,
                                       Common_Timer_Manager_t,
                                       struct Net_UserData> Test_U_AsynchUDPConnection_t;

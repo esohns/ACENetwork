@@ -114,6 +114,8 @@ class Net_StreamConnectionBase_T
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
+  using inherited2::initialize;
+
   // implement (part of) Net_IStreamConnection_T
   //inline virtual unsigned int increase () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::increase (); }
   //inline virtual unsigned int decrease () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::decrease (); }
@@ -255,6 +257,8 @@ class Net_AsynchStreamConnectionBase_T
   // - handle_xxx() (see above) returns -1
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+
+  using inherited2::initialize;
 
   // implement (part of) Net_IStreamConnection_T
   inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }

@@ -37,16 +37,16 @@
 //////////////////////////////////////////
 
 typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
-                            struct Net_WLAN_MonitorConfiguration> Net_WLAN_IInetMonitor_t;
+                            struct Net_WLAN_MonitorConfiguration> Net_WLAN_IMonitor_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
 typedef Net_WLAN_Monitor_T<ACE_INET_Addr,
                            struct Net_WLAN_MonitorConfiguration,
                            NET_WLAN_MONITOR_API_WLANAPI,
-                           struct Net_UserData> Net_WLAN_InetWlanAPIMonitor_t;
-typedef ACE_Singleton<Net_WLAN_InetWlanAPIMonitor_t,
-                      ACE_SYNCH_MUTEX> NET_WLAN_INETWLANAPIMONITOR_SINGLETON;
+                           struct Net_UserData> Net_WLAN_WlanAPIMonitor_t;
+typedef ACE_Singleton<Net_WLAN_WlanAPIMonitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_WLANAPIMONITOR_SINGLETON;
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
@@ -54,27 +54,27 @@ typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                NET_WLAN_MONITOR_API_IOCTL,
-                               struct Net_UserData> Net_WLAN_InetIoctlMonitor_t;
-typedef ACE_Singleton<Net_WLAN_InetIoctlMonitor_t,
-                      ACE_SYNCH_MUTEX> NET_WLAN_INETIOCTLMONITOR_SINGLETON;
+                               struct Net_UserData> Net_WLAN_WExtMonitor_t;
+typedef ACE_Singleton<Net_WLAN_WExtMonitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_WEXTMONITOR_SINGLETON;
 #endif // WEXT_SUPPORT
 #if defined (NL80211_SUPPORT)
 typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                NET_WLAN_MONITOR_API_NL80211,
-                               struct Net_UserData> Net_WLAN_InetNl80211Monitor_t;
-typedef ACE_Singleton<Net_WLAN_InetNl80211Monitor_t,
-                      ACE_SYNCH_MUTEX> NET_WLAN_INETNL80211MONITOR_SINGLETON;
+                               struct Net_UserData> Net_WLAN_Nl80211Monitor_t;
+typedef ACE_Singleton<Net_WLAN_Nl80211Monitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_NL80211MONITOR_SINGLETON;
 #endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
 typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                NET_WLAN_MONITOR_API_DBUS,
-                               struct Net_UserData> Net_WLAN_InetDBusMonitor_t;
-typedef ACE_Singleton<Net_WLAN_InetDBusMonitor_t,
-                      ACE_SYNCH_MUTEX> NET_WLAN_INETDBUSMONITOR_SINGLETON;
+                               struct Net_UserData> Net_WLAN_DBusMonitor_t;
+typedef ACE_Singleton<Net_WLAN_DBusMonitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_DBUSMONITOR_SINGLETON;
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 

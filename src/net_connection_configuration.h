@@ -217,6 +217,9 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
   bool          writeOnly; // *TODO*: remove ASAP
 };
 
+#define NET_SOCKET_CONFIGURATION_TCP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>* > (X)
+#define NET_SOCKET_CONFIGURATION_UDP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>* > (X)
+
 //////////////////////////////////////////
 
 //struct Stream_Configuration;

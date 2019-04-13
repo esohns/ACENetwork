@@ -24,6 +24,8 @@
 #include "net_common.h"
 #include "net_configuration.h"
 
+#include "net_wlan_monitor_common.h"
+
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "test_u_gtk_common.h"
@@ -40,7 +42,7 @@ struct WLANMonitor_SignalHandlerConfiguration
    , statisticReportingTimerId (-1)
   {}
 
-  Net_WLAN_IInetMonitor_t* monitor;
+  Net_WLAN_IMonitor_t*     monitor;
   Net_IStatisticHandler_t* statisticReportingHandler;
   long                     statisticReportingTimerId;
 };

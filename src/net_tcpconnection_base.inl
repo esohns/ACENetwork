@@ -25,20 +25,16 @@
 #include "net_macros.h"
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::Net_TCPConnectionBase_T (bool managed_in)
@@ -49,21 +45,17 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
 }
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 int
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::handle_input (ACE_HANDLE handle_in)
@@ -199,21 +191,17 @@ retry:
 }
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 int
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::handle_output (ACE_HANDLE handle_in)
@@ -403,19 +391,15 @@ continue_:
 
 /////////////////////////////////////////
 
-template <typename HandlerType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
-Net_AsynchTCPConnectionBase_T<HandlerType,
-                              ConfigurationType,
+Net_AsynchTCPConnectionBase_T<ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::Net_AsynchTCPConnectionBase_T (bool managed_in)
@@ -425,20 +409,16 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
-Net_AsynchTCPConnectionBase_T<HandlerType,
-                              ConfigurationType,
+Net_AsynchTCPConnectionBase_T<ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::open (ACE_HANDLE handle_in,
@@ -536,20 +516,16 @@ error:
 #endif // ACE_WIN32 || ACE_WIN64
 }
 
-template <typename HandlerType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 int
-Net_AsynchTCPConnectionBase_T<HandlerType,
-                              ConfigurationType,
+Net_AsynchTCPConnectionBase_T<ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::handle_output (ACE_HANDLE handle_in)

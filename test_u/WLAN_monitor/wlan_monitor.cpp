@@ -476,7 +476,7 @@ do_work (bool autoAssociate_in,
 
   struct Test_U_SignalHandlerConfiguration signal_handler_configuration;
   Common_Timer_Manager_t* timer_manager_p = NULL;
-  Net_WLAN_IInetMonitor_t* iwlanmonitor_p = NULL;
+  Net_WLAN_IMonitor_t* iwlanmonitor_p = NULL;
   Net_IStatisticHandler_t* istatistic_handler_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
@@ -513,34 +513,20 @@ do_work (bool autoAssociate_in,
 #else
   switch (API_in)
   {
-    case NET_WLAN_MONITOR_API_IOCTL:
+    case NET_WLAN_MONITOR_API_WEXT:
 #if defined (WEXT_SUPPORT)
-      iwlanmonitor_p = NET_WLAN_INETIOCTLMONITOR_SINGLETON::instance ();
-      istatistic_handler_p = NET_WLAN_INETIOCTLMONITOR_SINGLETON::instance ();
-#else
-      ACE_ASSERT (false);
-      ACE_NOTSUP;
-      ACE_NOTREACHED (break;)
+      iwlanmonitor_p = NET_WLAN_WEXTMONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_WEXTMONITOR_SINGLETON::instance ();
 #endif // WEXT_SUPPORT
       break;
     case NET_WLAN_MONITOR_API_NL80211:
-#if defined (NL80211_SUPPORT)
-      iwlanmonitor_p = NET_WLAN_INETNL80211MONITOR_SINGLETON::instance ();
-      istatistic_handler_p = NET_WLAN_INETNL80211MONITOR_SINGLETON::instance ();
-#else
-      ACE_ASSERT (false);
-      ACE_NOTSUP;
-      ACE_NOTREACHED (break;)
-#endif // NL80211_SUPPORT
+      iwlanmonitor_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
       break;
     case NET_WLAN_MONITOR_API_DBUS:
 #if defined (DBUS_SUPPORT)
-      iwlanmonitor_p = NET_WLAN_INETDBUSMONITOR_SINGLETON::instance ();
-      istatistic_handler_p = NET_WLAN_INETDBUSMONITOR_SINGLETON::instance ();
-#else
-      ACE_ASSERT (false);
-      ACE_NOTSUP;
-      ACE_NOTREACHED (break;)
+      iwlanmonitor_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
 #endif // DBUS_SUPPORT
       break;
     default:
@@ -552,7 +538,7 @@ do_work (bool autoAssociate_in,
     }
   } // end SWITCH
 #endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iwlanmonitor_p);
+  ACE_ASSERT (iwlanmonitor_p && istatistic_handler_p);
 
   Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                dynamic_cast<Test_U_IStatistic_t*> (iwlanmonitor_p),

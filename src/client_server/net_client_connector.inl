@@ -130,8 +130,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   } // end IF
   ACE_ASSERT (handler_p);
 
-  ITRANSPORTLAYER_T* itransportlayer_p = handler_p;
-  result = itransportlayer_p->transportLayer ();
+  result = handler_p->transportLayer ();
 
   // clean up
   delete handler_p;
@@ -219,9 +218,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::activate_svc_handler"));
 
   // pre-initialize the connection handler
-  // *TODO*: remove type inference
-  Net_ILinkLayer_T<SocketConfigurationType>* ilinklayer_p = handler_in;
-  ilinklayer_p->set (NET_ROLE_CLIENT);
+  handler_in->set (NET_ROLE_CLIENT);
 
   // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Connector.cpp:251
 

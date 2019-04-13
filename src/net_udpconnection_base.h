@@ -32,17 +32,16 @@
 
 #include "net_configuration.h"
 #include "net_iconnectionmanager.h"
+#include "net_socket_common.h"
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_udp.h"
 
 template <ACE_SYNCH_DECL, // 'send' lock strategy
-          typename HandlerType, // implements Net_UDPSocketHandler_T
+          typename SocketHandlerType, // implements Net_UDPSocketHandler_T
           ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -51,13 +50,13 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename UserDataType>
 class Net_UDPConnectionBase_T
  : public Net_StreamConnectionBase_T<ACE_SYNCH_USE,
-                                     HandlerType,
+                                     SocketHandlerType,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
                                      Net_UDPSocketConfiguration_t,
-                                     HandlerConfigurationType,
+                                     Net_UDPSocketConfiguration_t,
                                      Net_ListenerConfiguration_T<ConfigurationType,
                                                                  NET_TRANSPORTLAYER_UDP>,
                                      StreamType,
@@ -67,13 +66,13 @@ class Net_UDPConnectionBase_T
  , public Net_TransportLayer_UDP
 {
   typedef Net_StreamConnectionBase_T<ACE_SYNCH_USE,
-                                     HandlerType,
+                                     SocketHandlerType,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
                                      Net_UDPSocketConfiguration_t,
-                                     HandlerConfigurationType,
+                                     Net_UDPSocketConfiguration_t,
                                      Net_ListenerConfiguration_T<ConfigurationType,
                                                                  NET_TRANSPORTLAYER_UDP>,
                                      StreamType,
@@ -83,11 +82,10 @@ class Net_UDPConnectionBase_T
   typedef Net_TransportLayer_UDP inherited2;
 
   friend class ACE_Connector<Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                                     HandlerType,
+                                                     SocketHandlerType,
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     HandlerConfigurationType,
                                                      StreamType,
                                                      TimerManagerType,
                                                      UserDataType>,
@@ -96,13 +94,13 @@ class Net_UDPConnectionBase_T
  public:
   // convenient types
   typedef Net_StreamConnectionBase_T<ACE_SYNCH_USE,
-                                     HandlerType,
+                                     SocketHandlerType,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
                                      Net_UDPSocketConfiguration_t,
-                                     HandlerConfigurationType,
+                                     Net_UDPSocketConfiguration_t,
                                      Net_ListenerConfiguration_T<ConfigurationType,
                                                                  NET_TRANSPORTLAYER_UDP>,
                                      StreamType,
@@ -154,13 +152,11 @@ class Net_UDPConnectionBase_T
 
 //////////////////////////////////////////
 
-template <typename HandlerType, // implements Net_AsynchUDPSocketHandler_T
+template <typename SocketHandlerType, // implements Net_AsynchUDPSocketHandler_T
           ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -168,13 +164,13 @@ template <typename HandlerType, // implements Net_AsynchUDPSocketHandler_T
           ////////////////////////////////
           typename UserDataType>
 class Net_AsynchUDPConnectionBase_T
- : public Net_AsynchStreamConnectionBase_T<HandlerType,
+ : public Net_AsynchStreamConnectionBase_T<SocketHandlerType,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
                                            Net_UDPSocketConfiguration_t,
-                                           HandlerConfigurationType,
+                                           Net_UDPSocketConfiguration_t,
                                            Net_ListenerConfiguration_T<ConfigurationType,
                                                                        NET_TRANSPORTLAYER_UDP>,
                                            StreamType,
@@ -183,13 +179,13 @@ class Net_AsynchUDPConnectionBase_T
                                            UserDataType>
  , public Net_TransportLayer_UDP
 {
-  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
+  typedef Net_AsynchStreamConnectionBase_T<SocketHandlerType,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
                                            Net_UDPSocketConfiguration_t,
-                                           HandlerConfigurationType,
+                                           Net_UDPSocketConfiguration_t,
                                            Net_ListenerConfiguration_T<ConfigurationType,
                                                                        NET_TRANSPORTLAYER_UDP>,
                                            StreamType,
@@ -198,24 +194,23 @@ class Net_AsynchUDPConnectionBase_T
                                            UserDataType> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
-  friend class ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
+  friend class ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                                                                   ConfigurationType,
                                                                   StateType,
                                                                   StatisticContainerType,
-                                                                  HandlerConfigurationType,
                                                                   StreamType,
                                                                   TimerManagerType,
                                                                   UserDataType> >;
 
  public:
   // convenient types
-  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
+  typedef Net_AsynchStreamConnectionBase_T<SocketHandlerType,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
                                            Net_UDPSocketConfiguration_t,
-                                           HandlerConfigurationType,
+                                           Net_UDPSocketConfiguration_t,
                                            Net_ListenerConfiguration_T<ConfigurationType,
                                                                        NET_TRANSPORTLAYER_UDP>,
                                            StreamType,

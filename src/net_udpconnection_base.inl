@@ -21,7 +21,7 @@
 #if defined (ACE_LINUX)
 #include "linux/errqueue.h"
 #include "netinet/ip_icmp.h"
-#endif
+#endif // ACE_LINUX
 
 #include "ace/Asynch_IO.h"
 #include "ace/Log_Msg.h"
@@ -32,20 +32,18 @@
 #include "net_macros.h"
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::Net_UDPConnectionBase_T (bool managed_in)
@@ -84,21 +82,19 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 //}
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 int
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::handle_input (ACE_HANDLE handle_in)
@@ -208,21 +204,19 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 }
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 int
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::handle_output (ACE_HANDLE handle_in)
@@ -409,21 +403,19 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 }
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::info (ACE_HANDLE& handle_out,
@@ -481,21 +473,19 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 }
 
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::reset ()
@@ -530,21 +520,19 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
 #if defined (ACE_LINUX)
 template <ACE_SYNCH_DECL,
-          typename HandlerType,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                        HandlerType,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
                         UserDataType>::processErrorQueue ()
@@ -659,19 +647,17 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
 /////////////////////////////////////////
 
-template <typename HandlerType,
+template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
-Net_AsynchUDPConnectionBase_T<HandlerType,
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::Net_AsynchUDPConnectionBase_T (bool managed_in)
@@ -707,20 +693,18 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 //  ACE_NOTREACHED (return;)
 //}
 
-template <typename HandlerType,
+template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
-Net_AsynchUDPConnectionBase_T<HandlerType,
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::open (ACE_HANDLE handle_in,
@@ -827,20 +811,18 @@ error:
 #endif
 }
 
-template <typename HandlerType,
+template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 int
-Net_AsynchUDPConnectionBase_T<HandlerType,
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::handle_output (ACE_HANDLE handle_in)
@@ -968,20 +950,18 @@ send:
   return 0;
 }
 
-template <typename HandlerType,
+template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
-Net_AsynchUDPConnectionBase_T<HandlerType,
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::info (ACE_HANDLE& handle_out,
@@ -1038,20 +1018,18 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   } // end ELSE
 }
 
-template <typename HandlerType,
+template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
-Net_AsynchUDPConnectionBase_T<HandlerType,
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::reset ()
@@ -1104,20 +1082,18 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
                    message_block);
 }
 
-template <typename HandlerType,
+template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 bool
-Net_AsynchUDPConnectionBase_T<HandlerType,
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::initiate_read ()
@@ -1147,20 +1123,18 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 }
 
 #if defined (ACE_LINUX)
-template <typename HandlerType,
+template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
-Net_AsynchUDPConnectionBase_T<HandlerType,
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              HandlerConfigurationType,
                               StreamType,
                               TimerManagerType,
                               UserDataType>::processErrorQueue ()

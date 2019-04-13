@@ -45,22 +45,20 @@ class Test_U_Stream;
 
 class Test_U_UDPConnection
  : public Net_UDPConnectionBase_T<ACE_NULL_SYNCH,
-                                  Test_U_UDPSocketHandler_t,
+                                  Net_UDPSocketHandler_t,
                                   Test_U_UDPConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
-                                  Net_UDPSocketConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData>
  , public Net_IPing
 {
   typedef Net_UDPConnectionBase_T<ACE_NULL_SYNCH,
-                                  Test_U_UDPSocketHandler_t,
+                                  Net_UDPSocketHandler_t,
                                   Test_U_UDPConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
-                                  Net_UDPSocketConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
@@ -72,7 +70,7 @@ class Test_U_UDPConnection
   inline virtual ~Test_U_UDPConnection () {}
 
   // implement Net_IPing
-  inline virtual void ping () { stream_.ping (); }
+  inline virtual void ping () { inherited::stream_.ping (); }
 
  private:
   // *NOTE*: if there is no default ctor, this will not compile
@@ -84,21 +82,19 @@ class Test_U_UDPConnection
 //////////////////////////////////////////
 
 class Test_U_AsynchUDPConnection
- : public Net_AsynchUDPConnectionBase_T<Test_U_AsynchUDPSocketHandler_t,
+ : public Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
                                         Test_U_UDPConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        Net_UDPSocketConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData>
  , public Net_IPing
 {
-  typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchUDPSocketHandler_t,
+  typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
                                         Test_U_UDPConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
-                                        Net_UDPSocketConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData> inherited;
@@ -110,7 +106,7 @@ class Test_U_AsynchUDPConnection
   inline virtual ~Test_U_AsynchUDPConnection () {}
 
   // implement Net_IPing
-  inline virtual void ping () { stream_.ping (); }
+  inline virtual void ping () { inherited::stream_.ping (); }
 
  private:
   // *NOTE*: if there is no default ctor, this will not compile

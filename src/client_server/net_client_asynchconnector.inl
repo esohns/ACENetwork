@@ -129,8 +129,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   } // end IF
   ACE_ASSERT (handler_p);
 
-  ITRANSPORTLAYER_T* itransportlayer_p = handler_p;
-  result = itransportlayer_p->transportLayer ();
+  result = handler_p->transportLayer ();
 
   // clean up
   delete handler_p;
@@ -608,8 +607,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                               local_address);
 
     // *EDIT*: set role
-    Net_ILinkLayer_T<SocketConfigurationType>* ilinklayer_p = new_handler;
-    ilinklayer_p->set (NET_ROLE_CLIENT);
+    new_handler->set (NET_ROLE_CLIENT);
 
     // Pass the ACT
     if (likely (result_in.act () != 0))

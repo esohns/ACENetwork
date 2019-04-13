@@ -75,8 +75,8 @@
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
-#include "net_wlan_configuration.h"
-#include "net_wlan_monitor_common.h"
+//#include "net_wlan_configuration.h"
+//#include "net_wlan_monitor_common.h"
 #if defined (ACE_LINUX)
 #if defined (DBUS_SUPPORT)
 #include "net_wlan_defines.h"
@@ -3400,12 +3400,6 @@ error_2:
       ACE_NOTREACHED (return false;)
 #endif // WLANAPI_SUPPORT
 #else
-#if defined (NL80211_SUPPORT)
-      Net_WLAN_IInetMonitor_t* wlan_inet_monitor_p =
-          NET_WLAN_INETNL80211MONITOR_SINGLETON::instance ();
-      ACE_ASSERT (wlan_inet_monitor_p);
-#endif // NL80211_SUPPORT
-
 #if defined (ACE_HAS_GETIFADDRS)
       struct ifaddrs* ifaddrs_p = NULL;
       int result_2 = ::getifaddrs (&ifaddrs_p);

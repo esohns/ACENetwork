@@ -63,19 +63,19 @@ class Net_WLAN_IMonitorCB;
 
 //////////////////////////////////////////
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (WLANAPI_USE)
-typedef NET_WLAN_INETWLANAPIMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
-#endif // WLANAPI_USE
-#elif defined (ACE_LINUX)
-#if defined (WEXT_USE)
-typedef NET_WLAN_INETIOCTLMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
-#elif defined (NL80211_USE)
-typedef NET_WLAN_INETNL80211MONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
-#elif defined (DBUS_USE)
-typedef NET_WLAN_INETDBUSMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
-#endif
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#if defined (WLANAPI_USE)
+//typedef NET_WLAN_WLANAPIMONITOR_SINGLETON NET_WLAN_MONITOR_SINGLETON;
+//#endif // WLANAPI_USE
+//#elif defined (ACE_LINUX)
+//#if defined (WEXT_USE)
+//typedef NET_WLAN_WEXTMONITOR_SINGLETON NET_WLAN_MONITOR_SINGLETON;
+//#elif defined (NL80211_USE)
+//typedef NET_WLAN_NL80211MONITOR_SINGLETON NET_WLAN_MONITOR_SINGLETON;
+//#elif defined (DBUS_USE)
+//typedef NET_WLAN_DBUSMONITOR_SINGLETON NET_WLAN_MONITOR_SINGLETON;
+//#endif
+//#endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
 
@@ -164,7 +164,7 @@ struct WLANMonitor_UI_CBData
   }
 
   struct WLANMonitor_Configuration*      configuration;
-  Net_WLAN_IInetMonitor_t*               monitor;
+  Net_WLAN_IMonitor_t*                   monitor;
 #if defined (GTK_USE)
   struct WLANMonitor_GTK_ProgressData    progressData;
   struct WLANMonitor_UI_GTK_State*       UIState;

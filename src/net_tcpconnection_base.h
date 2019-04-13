@@ -40,17 +40,15 @@
 #include "net_iconnectionmanager.h"
 #include "net_sock_acceptor.h"
 #include "net_sock_connector.h"
+#include "net_socket_common.h"
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_tcp.h"
 
 template <ACE_SYNCH_DECL, // 'send' lock strategy
-          typename HandlerType, // implements Net_TCPSocketHandler_T
           ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -59,13 +57,13 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename UserDataType>
 class Net_TCPConnectionBase_T
  : public Net_StreamConnectionBase_T<ACE_SYNCH_USE,
-                                     HandlerType,
+                                     Net_TCPSocketHandler_t,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
                                      Net_TCPSocketConfiguration_t,
-                                     HandlerConfigurationType,
+                                     Net_TCPSocketConfiguration_t,
                                      Net_ListenerConfiguration_T<ConfigurationType,
                                                                  NET_TRANSPORTLAYER_TCP>,
                                      StreamType,
@@ -75,13 +73,13 @@ class Net_TCPConnectionBase_T
  , public Net_TransportLayer_TCP
 {
   typedef Net_StreamConnectionBase_T<ACE_SYNCH_USE,
-                                     HandlerType,
+                                     Net_TCPSocketHandler_t,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
                                      Net_TCPSocketConfiguration_t,
-                                     HandlerConfigurationType,
+                                     Net_TCPSocketConfiguration_t,
                                      Net_ListenerConfiguration_T<ConfigurationType,
                                                                  NET_TRANSPORTLAYER_TCP>,
                                      StreamType,
@@ -91,52 +89,42 @@ class Net_TCPConnectionBase_T
   typedef Net_TransportLayer_TCP inherited2;
 
   friend class ACE_Acceptor<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                                                    HandlerType,
                                                     ConfigurationType,
                                                     StateType,
                                                     StatisticContainerType,
-                                                    HandlerConfigurationType,
                                                     StreamType,
                                                     TimerManagerType,
                                                     UserDataType>,
                             ACE_SOCK_ACCEPTOR>;
   friend class ACE_Acceptor<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                                                    HandlerType,
                                                     ConfigurationType,
                                                     StateType,
                                                     StatisticContainerType,
-                                                    HandlerConfigurationType,
                                                     StreamType,
                                                     TimerManagerType,
                                                     UserDataType>,
                             Net_SOCK_Acceptor>;
   friend class ACE_Connector<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                                                     HandlerType,
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     HandlerConfigurationType,
                                                      StreamType,
                                                      TimerManagerType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
   friend class ACE_Connector<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                                                     HandlerType,
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     HandlerConfigurationType,
                                                      StreamType,
                                                      TimerManagerType,
                                                      UserDataType>,
                              Net_SOCK_Connector>;
 #if defined (SSL_SUPPORT)
   friend class ACE_Connector<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
-                                                     HandlerType,
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     HandlerConfigurationType,
                                                      StreamType,
                                                      TimerManagerType,
                                                      UserDataType>,
@@ -146,13 +134,13 @@ class Net_TCPConnectionBase_T
  public:
   // convenient types
   typedef Net_StreamConnectionBase_T<ACE_SYNCH_USE,
-                                     HandlerType,
+                                     Net_TCPSocketHandler_t,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
                                      Net_TCPSocketConfiguration_t,
-                                     HandlerConfigurationType,
+                                     Net_TCPSocketConfiguration_t,
                                      Net_ListenerConfiguration_T<ConfigurationType,
                                                                  NET_TRANSPORTLAYER_TCP>,
                                      StreamType,
@@ -189,13 +177,9 @@ class Net_TCPConnectionBase_T
 
 //////////////////////////////////////////
 
-template <typename HandlerType,
-          ////////////////////////////////
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -203,13 +187,13 @@ template <typename HandlerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_AsynchTCPConnectionBase_T
- : public Net_AsynchStreamConnectionBase_T<HandlerType,
+ : public Net_AsynchStreamConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
                                            Net_TCPSocketConfiguration_t,
-                                           HandlerConfigurationType,
+                                           Net_TCPSocketConfiguration_t,
                                            Net_ListenerConfiguration_T<ConfigurationType,
                                                                        NET_TRANSPORTLAYER_TCP>,
                                            StreamType,
@@ -218,13 +202,13 @@ class Net_AsynchTCPConnectionBase_T
                                            UserDataType>
  , public Net_TransportLayer_TCP
 {
-  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
+  typedef Net_AsynchStreamConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
                                            Net_TCPSocketConfiguration_t,
-                                           HandlerConfigurationType,
+                                           Net_TCPSocketConfiguration_t,
                                            Net_ListenerConfiguration_T<ConfigurationType,
                                                                        NET_TRANSPORTLAYER_TCP>,
                                            StreamType,
@@ -233,32 +217,28 @@ class Net_AsynchTCPConnectionBase_T
                                            UserDataType> inherited;
   typedef Net_TransportLayer_TCP inherited2;
 
-  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnectionBase_T<HandlerType,
-                                                                 ConfigurationType,
+  friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnectionBase_T<ConfigurationType,
                                                                  StateType,
                                                                  StatisticContainerType,
-                                                                 HandlerConfigurationType,
                                                                  StreamType,
                                                                  TimerManagerType,
                                                                  UserDataType> >;
-  friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<HandlerType,
-                                                                  ConfigurationType,
+  friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<ConfigurationType,
                                                                   StateType,
                                                                   StatisticContainerType,
-                                                                  HandlerConfigurationType,
                                                                   StreamType,
                                                                   TimerManagerType,
                                                                   UserDataType> >;
 
  public:
   // convenient types
-  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
+  typedef Net_AsynchStreamConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                            ACE_INET_Addr,
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
                                            Net_TCPSocketConfiguration_t,
-                                           HandlerConfigurationType,
+                                           Net_TCPSocketConfiguration_t,
                                            Net_ListenerConfiguration_T<ConfigurationType,
                                                                        NET_TRANSPORTLAYER_TCP>,
                                            StreamType,

@@ -45,21 +45,17 @@ class Test_U_Stream;
 
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_MT_SYNCH,
-                                  Test_U_TCPSocketHandler_t,
                                   FileServer_TCPConnectionConfiguration,
                                   struct Net_ConnectionState,
                                   Net_Statistic_t,
-                                  Net_TCPSocketConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData>
 {
   typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
-                                  Test_U_TCPSocketHandler_t,
                                   FileServer_TCPConnectionConfiguration,
                                   struct Net_ConnectionState,
                                   Net_Statistic_t,
-                                  Net_TCPSocketConfiguration_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
@@ -84,20 +80,16 @@ class Test_U_TCPConnection
 //////////////////////////////////////////
 
 class Test_U_AsynchTCPConnection
- : public Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
-                                        FileServer_TCPConnectionConfiguration,
+ : public Net_AsynchTCPConnectionBase_T<FileServer_TCPConnectionConfiguration,
                                         struct Net_ConnectionState,
                                         Net_Statistic_t,
-                                        Net_TCPSocketConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData>
 {
-  typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
-                                        FileServer_TCPConnectionConfiguration,
+  typedef Net_AsynchTCPConnectionBase_T<FileServer_TCPConnectionConfiguration,
                                         struct Net_ConnectionState,
                                         Net_Statistic_t,
-                                        Net_TCPSocketConfiguration_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData> inherited;
@@ -106,13 +98,13 @@ class Test_U_AsynchTCPConnection
  friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
 
  public:
- // *NOTE*: if there is no default ctor, this will not compile
- inline Test_U_AsynchTCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Test_U_AsynchTCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   Test_U_AsynchTCPConnection (bool); // managed ?
   inline virtual ~Test_U_AsynchTCPConnection () {}
 
   // implement (part of) Net_ITransportLayer_T
-  inline virtual void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection (const Test_U_AsynchTCPConnection&))

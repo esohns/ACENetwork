@@ -150,11 +150,9 @@ typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
 typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Test_U_AsynchTCPSocketHandler_t;
 
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
-                                Test_U_TCPSocketHandler_t,
                                 Test_U_ConnectionConfiguration,
                                 struct Test_U_ConnectionState,
                                 HTTP_Statistic_t,
-                                Net_TCPSocketConfiguration_t,
                                 Test_U_Stream_t,
                                 Common_Timer_Manager_t,
                                 struct Net_UserData> Test_U_TCPConnection_t;
@@ -170,11 +168,9 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Common_Timer_Manager_t,
                                 struct Net_UserData> Test_U_SSLTCPConnection_t;
 #endif
-typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
-                                      Test_U_ConnectionConfiguration,
+typedef Net_AsynchTCPConnectionBase_T<Test_U_ConnectionConfiguration,
                                       struct Test_U_ConnectionState,
                                       HTTP_Statistic_t,
-                                      Net_TCPSocketConfiguration_t,
                                       Test_U_Stream_t,
                                       Common_Timer_Manager_t,
                                       struct Net_UserData> Test_U_AsynchTCPConnection_t;

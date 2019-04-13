@@ -104,11 +104,11 @@ enum Net_WLAN_MonitorAPIType
 {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // *TODO*: available since WinXP
-  NET_WLAN_MONITOR_API_WLANAPI = 0,
+  NET_WLAN_MONITOR_API_WLANAPI = 0, // --> default
 #else
-  NET_WLAN_MONITOR_API_IOCTL = 0, // aka 'wext' (mostly deprecated)
-  NET_WLAN_MONITOR_API_NL80211,
-  NET_WLAN_MONITOR_API_DBUS, // talk to the 'NetworkManager' service
+  NET_WLAN_MONITOR_API_WEXT = 0, // ioctl only (mostly deprecated)
+  NET_WLAN_MONITOR_API_NL80211,  // --> default
+  NET_WLAN_MONITOR_API_DBUS,     // listens/talks to the (systemd-) 'NetworkManager' service
 #endif // ACE_WIN32 || ACE_WIN64
   ////////////////////////////////////////
   NET_WLAN_MONITOR_API_MAX,

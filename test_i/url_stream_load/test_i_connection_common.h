@@ -127,22 +127,10 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
-typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
-                               ACE_SOCK_STREAM,
-                               Net_TCPSocketConfiguration_t> Test_I_TCPSocketHandler_t;
-#if defined (SSL_SUPPORT)
-typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
-                               ACE_SSL_SOCK_Stream,
-                               Net_TCPSocketConfiguration_t> Test_I_SSLTCPSocketHandler_t;
-#endif
-typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Test_I_AsynchTCPSocketHandler_t;
-
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
-                                Test_I_TCPSocketHandler_t,
                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                 struct Test_I_ConnectionState,
                                 HTTP_Statistic_t,
-                                Net_TCPSocketConfiguration_t,
                                 Test_I_ConnectionStream,
                                 Common_Timer_Manager_t,
                                 struct Net_UserData> Test_I_TCPConnection_t;
@@ -157,11 +145,9 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Common_Timer_Manager_t,
                                 struct Net_UserData> Test_I_SSLTCPConnection_t;
 #endif
-typedef Net_AsynchTCPConnectionBase_T<Test_I_AsynchTCPSocketHandler_t,
-                                      Test_I_URLStreamLoad_ConnectionConfiguration_t,
+typedef Net_AsynchTCPConnectionBase_T<Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                       struct Test_I_ConnectionState,
                                       HTTP_Statistic_t,
-                                      Net_TCPSocketConfiguration_t,
                                       Test_I_ConnectionStream,
                                       Common_Timer_Manager_t,
                                       struct Net_UserData> Test_I_AsynchTCPConnection_t;

@@ -35,12 +35,39 @@
 
 typedef Net_TCPSocketHandler_T<ACE_NULL_SYNCH,
                                ACE_SOCK_STREAM,
-                               Net_TCPSocketConfiguration_t> Test_U_TCPSocketHandler_t;
-typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Test_U_AsynchTCPSocketHandler_t;
+                               Net_TCPSocketConfiguration_t> Net_TCPSocketHandler_t;
+typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Net_AsynchTCPSocketHandler_t;
+
+#if defined (SSL_SUPPORT)
+typedef Net_TCPSocketHandler_T<ACE_NULL_SYNCH,
+                               ACE_SSL_SOCK_Stream,
+                               Net_TCPSocketConfiguration_t> Net_SSLSocketHandler_t;
+#endif // SSL_SUPPORT
+
+//////////////////////////////////////////
+
 typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
                                Net_SOCK_Dgram,
-                               Net_UDPSocketConfiguration_t> Test_U_UDPSocketHandler_t;
+                               Net_UDPSocketConfiguration_t> Net_UDPSocketHandler_t;
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
-                                     Net_UDPSocketConfiguration_t> Test_U_AsynchUDPSocketHandler_t;
+                                     Net_UDPSocketConfiguration_t> Net_AsynchUDPSocketHandler_t;
+
+typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                               Net_SOCK_CODgram,
+                               Net_UDPSocketConfiguration_t> Net_UDPSocketHandlerConnected_t;
+typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
+                                     Net_UDPSocketConfiguration_t> Net_AsynchUDPSocketHandlerConnected_t;
+
+typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                               Net_SOCK_Dgram_Mcast,
+                               Net_UDPSocketConfiguration_t> Net_UDPSocketHandlerMcast_t;
+typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
+                                     Net_UDPSocketConfiguration_t> Net_AsynchUDPSocketHandlerMcast_t;
+
+typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                               Net_SOCK_Dgram_Bcast,
+                               Net_UDPSocketConfiguration_t> Net_UDPSocketHandlerBcast_t;
+typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
+                                     Net_UDPSocketConfiguration_t> Net_AsynchUDPSocketHandlerBcast_t;
 
 #endif
