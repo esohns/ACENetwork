@@ -2463,216 +2463,280 @@ continue_:
   //                       the gateway address(es)
   // *TODO*: encapsulate the sockets/networking code with ACE
 
-  int socket_handle = ACE_OS::socket (PF_NETLINK,     // protocol family
-                                      SOCK_DGRAM,     // type
-                                      NETLINK_ROUTE); // protocol
-  if (unlikely (socket_handle < 0))
+//  int socket_handle = ACE_OS::socket (PF_NETLINK,     // protocol family
+//                                      SOCK_DGRAM,     // type
+//                                      NETLINK_ROUTE); // protocol
+//  if (unlikely (socket_handle < 0))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_OS::socket(PF_NETLINK,NETLINK_ROUTE): \"%m\", aborting\n")));
+//    return result;
+//  } // end IF
+
+//  char buffer_a[BUFSIZ];
+//  ACE_OS::memset (buffer_a, 0, sizeof (char [BUFSIZ]));
+//  struct nlmsghdr* nl_message_header_p =
+//      reinterpret_cast<struct nlmsghdr*> (buffer_a);
+//  struct rtmsg* rt_message_p =
+//      static_cast<struct rtmsg*> (NLMSG_DATA (nl_message_header_p));
+//  struct rtattr* rt_attribute_p = NULL;
+//  nl_message_header_p->nlmsg_len = NLMSG_LENGTH (sizeof (struct rtmsg));
+//  nl_message_header_p->nlmsg_type = RTM_GETROUTE;
+//  nl_message_header_p->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;
+//  int message_sequence_i = 0;
+//  pid_t pid_i = ACE_OS::getpid ();
+//  nl_message_header_p->nlmsg_seq = message_sequence_i++;
+//  nl_message_header_p->nlmsg_pid = pid_i;
+////  rt_message_p->rtm_table = RT_TABLE_DEFAULT;
+////  rt_message_p->rtm_protocol = 0;
+////  rt_message_p->rtm_scope = RT_SCOPE_UNIVERSE;
+////  rt_message_p->rtm_type = 0;
+
+//  unsigned int received_bytes = 0;
+//  char* buffer_p = buffer_a;
+//  int length_i = 0;
+//  bool done, skip = false;
+//  ACE_INET_Addr current_interface_address;
+//  std::string current_interface_string;
+
+//  int flags = 0;
+//  // send request
+//  int result_2 = ACE_OS::send (socket_handle,
+//                               reinterpret_cast<char*> (nl_message_header_p),
+//                               nl_message_header_p->nlmsg_len,
+//                               flags);
+//  if (unlikely ((result_2 < 0) ||
+//                (static_cast<__u32> (result_2) != nl_message_header_p->nlmsg_len)))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_OS::send(%d,%u): \"%m\", aborting\n"),
+//                socket_handle,
+//                nl_message_header_p->nlmsg_len));
+//    goto clean;
+//  } // end IF
+
+//  ACE_OS::memset (buffer_a, 0, sizeof (char [BUFSIZ]));
+//  // receive reply/ies
+//  do
+//  { ACE_ASSERT (received_bytes < BUFSIZ);
+//    result_2 = ACE_OS::recv (socket_handle,
+//                             buffer_p,
+//                             sizeof (char [BUFSIZ]) - received_bytes);
+//    if (unlikely (result_2 < 0))
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_OS::recv(%d): \"%m\", aborting\n"),
+//                  socket_handle));
+//      goto clean;
+//    } // end IF
+//    nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer_p);
+
+//    if (unlikely (!NLMSG_OK (nl_message_header_p, result_2) ||
+//                  (nl_message_header_p->nlmsg_type == NLMSG_ERROR)))
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("error in Netlink message, aborting\n")));
+//      goto clean;
+//    } // end IF
+//    if (nl_message_header_p->nlmsg_type == NLMSG_DONE)
+//      break;
+
+//    buffer_p += result_2;
+//    received_bytes += result_2;
+
+//    if ((nl_message_header_p->nlmsg_flags & NLM_F_MULTI) == 0)
+//      break;
+//  } while ((nl_message_header_p->nlmsg_seq != static_cast<__u32> (message_sequence_i)) ||
+//           (nl_message_header_p->nlmsg_pid != static_cast<__u32> (pid_i)));
+
+//  // parse routing tables entries
+//  done = false;
+//  for (nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer_p);
+//       (NLMSG_OK (nl_message_header_p, received_bytes) && !done);
+//       nl_message_header_p = NLMSG_NEXT (nl_message_header_p, received_bytes))
+//  {
+//    current_interface_address.reset ();
+//    current_interface_string.resize (0);
+
+//    rt_message_p =
+//        static_cast<struct rtmsg*> (NLMSG_DATA (nl_message_header_p));
+//    ACE_ASSERT (rt_message_p);
+
+//    // inspect only AF_INET-specific rules from the main table
+//    if ((rt_message_p->rtm_family != AF_INET) ||
+//        (rt_message_p->rtm_table != RT_TABLE_MAIN))
+//      continue;
+
+//    // *NOTE*: the attributes don't seem to appear in any specfic order; retain
+//    //         address information until the device has been identified, and
+//    //         vice versa
+//    rt_attribute_p = static_cast<struct rtattr*> (RTM_RTA (rt_message_p));
+//    ACE_ASSERT (rt_attribute_p);
+//    length_i = RTM_PAYLOAD (nl_message_header_p);
+//    skip = false;
+//    for (;
+//         RTA_OK (rt_attribute_p, length_i) && !skip;
+//         rt_attribute_p = RTA_NEXT (rt_attribute_p, length_i))
+//    {
+//      switch (rt_attribute_p->rta_type)
+//      {
+//        case RTA_IIF:
+//        case RTA_OIF:
+//        {
+//          char buffer_2[IF_NAMESIZE];
+//          ACE_OS::memset (buffer_2, 0, sizeof (char[IF_NAMESIZE]));
+//          if (unlikely (!::if_indextoname (*static_cast<int*> (RTA_DATA (rt_attribute_p)),
+//                                           buffer_2)))
+//          {
+//            ACE_DEBUG ((LM_ERROR,
+//                        ACE_TEXT ("failed to if_indextoname(): \"%m\", continuing\n")));
+//            break;
+//          } // end IF
+//          current_interface_string = buffer_2;
+//          if (!ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+//                               buffer_2))
+//          {
+//            if (!current_interface_address.is_any ())
+//            {
+//              result = current_interface_address;
+//              skip = true;
+//              done = true; // done
+//            } // end IF
+//          } // end IF
+//          else
+//            skip = true; // rule applies to a different interface --> skip ahead
+//          break;
+//        }
+//        case RTA_DST:
+//        {
+//          in_addr_t inet_address = 0;
+//          ACE_OS::memcpy (&inet_address,
+//                          RTA_DATA (rt_attribute_p),
+//                          sizeof (in_addr_t));
+//          ACE_INET_Addr inet_address_2;
+//          result_2 = inet_address_2.set (static_cast<u_short> (0),
+//                                         inet_address,
+//                                         0, // already in network byte order
+//                                         0);
+//          if (unlikely (result_2 == -1))
+//          {
+//            ACE_DEBUG ((LM_ERROR,
+//                        ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+//            break;
+//          } // end IF
+//          if (!inet_address_2.is_any ())
+//            skip = true; // apparently the gateway address is only set on rules
+//                         // with destination 0.0.0.0
+//          break;
+//        }
+//        case RTA_GATEWAY:
+//        {
+//          in_addr_t inet_address = 0;
+//          ACE_OS::memcpy (&inet_address,
+//                          RTA_DATA (rt_attribute_p),
+//                          sizeof (in_addr_t));
+//          result_2 =
+//              current_interface_address.set (static_cast<u_short> (0),
+//                                             inet_address,
+//                                             0, // already in network byte order
+//                                             0);
+//          if (unlikely (result_2 == -1))
+//          {
+//            ACE_DEBUG ((LM_ERROR,
+//                        ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+//            break;
+//          } // end IF
+
+//          if (!ACE_OS::strcmp (current_interface_string.c_str (),
+//                               interfaceIdentifier_in.c_str ()))
+//          {
+//            result = current_interface_address;
+//            skip = true; // skip
+//            done = true; // done
+//          } // end IF
+//          break;
+//        }
+//        default:
+//        {
+////          ACE_DEBUG ((LM_DEBUG,
+////                      ACE_TEXT ("found attribute (type was: %d)\n"),
+////                      rt_attribute_p->rta_type));
+//          break;
+//        }
+//      } // end SWITCH
+//    } // end FOR
+//  } // end FOR
+
+//clean:
+//  if (socket_handle != ACE_INVALID_HANDLE)
+//  {
+//    result_2 = ACE_OS::close (socket_handle);
+//    if (unlikely (result_2 == -1))
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+//                  socket_handle));
+//  } // end IF
+
+  // *TODO*: this should work on most Unixy systems, but is a really bad
+  //         idea:
+  //         - relies on local 'ip'
+  //         - temporary files
+  //         - system(3) call
+  //         --> extremely inefficient; remove ASAP
+  std::string command_line_string = ACE_TEXT_ALWAYS_CHAR ("ip route");
+  std::string ip_route_records_string;
+  int exit_status_i = 0;
+  if (unlikely (!Common_Tools::command (command_line_string,
+                                        exit_status_i,
+                                        ip_route_records_string)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(PF_NETLINK,NETLINK_ROUTE): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to Common_Tools::command(\"%s\"), aborting\n"),
+                ACE_TEXT (ip_route_records_string.c_str ())));
     return result;
   } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("ip data: \"%s\"\n"),
+//              ACE_TEXT (ip_route_records_string.c_str ())));
 
-  char buffer_a[BUFSIZ];
-  ACE_OS::memset (buffer_a, 0, sizeof (char [BUFSIZ]));
-  struct nlmsghdr* nl_message_header_p =
-      reinterpret_cast<struct nlmsghdr*> (buffer_a);
-  struct rtmsg* rt_message_p =
-      static_cast<struct rtmsg*> (NLMSG_DATA (nl_message_header_p));
-  struct rtattr* rt_attribute_p = NULL;
-  nl_message_header_p->nlmsg_len = NLMSG_LENGTH (sizeof (struct rtmsg));
-  nl_message_header_p->nlmsg_type = RTM_GETROUTE;
-  nl_message_header_p->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;
-  int message_sequence_i = 0;
-  pid_t pid_i = ACE_OS::getpid ();
-  nl_message_header_p->nlmsg_seq = message_sequence_i++;
-  nl_message_header_p->nlmsg_pid = pid_i;
-
-  unsigned int received_bytes = 0;
-  char* buffer_p = buffer_a;
-  int length_i = 0;
-  bool done, skip = false;
-  ACE_INET_Addr current_interface_address;
-  std::string current_interface_string;
-
-  int flags = 0;
-  // send request
-  int result_2 = ACE_OS::send (socket_handle,
-                               reinterpret_cast<char*> (nl_message_header_p),
-                               nl_message_header_p->nlmsg_len,
-                               flags);
-  if (unlikely ((result_2 < 0) ||
-                (static_cast<__u32> (result_2) != nl_message_header_p->nlmsg_len)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::send(%d,%u): \"%m\", aborting\n"),
-                socket_handle,
-                nl_message_header_p->nlmsg_len));
-    goto clean;
-  } // end IF
-
-  ACE_OS::memset (buffer_a, 0, sizeof (char [BUFSIZ]));
-  // receive reply/ies
+  std::istringstream converter;
+  char buffer_a [BUFSIZ];
+  std::string regex_string =
+      ACE_TEXT_ALWAYS_CHAR ("^default via ([[:digit:].]+) dev ([[:alnum:]]+)(?:.*)$");
+  std::regex regex (regex_string);
+  std::cmatch match_results;
+  converter.str (ip_route_records_string);
+  int result_2 = -1;
+  std::string ip_address_string;
   do
-  { ACE_ASSERT (received_bytes < BUFSIZ);
-    result_2 = ACE_OS::recv (socket_handle,
-                             buffer_p,
-                             sizeof (char [BUFSIZ]) - received_bytes);
-    if (unlikely (result_2 < 0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::recv(%d): \"%m\", aborting\n"),
-                  socket_handle));
-      goto clean;
-    } // end IF
-    nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer_p);
-
-    if (unlikely (!NLMSG_OK (nl_message_header_p, result_2) ||
-                  (nl_message_header_p->nlmsg_type == NLMSG_ERROR)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("error in Netlink message, aborting\n")));
-      goto clean;
-    } // end IF
-    if (nl_message_header_p->nlmsg_type == NLMSG_DONE)
-      break;
-
-    buffer_p += result_2;
-    received_bytes += result_2;
-
-    if ((nl_message_header_p->nlmsg_flags & NLM_F_MULTI) == 0)
-      break;
-  } while ((nl_message_header_p->nlmsg_seq != static_cast<__u32> (message_sequence_i)) ||
-           (nl_message_header_p->nlmsg_pid != static_cast<__u32> (pid_i)));
-
-  // parse routing tables entries
-  done = false;
-  for (nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer_p);
-       (NLMSG_OK (nl_message_header_p, received_bytes) && !done);
-       nl_message_header_p = NLMSG_NEXT (nl_message_header_p, received_bytes))
   {
-    current_interface_address.reset ();
-    current_interface_string.resize (0);
-
-    rt_message_p =
-        static_cast<struct rtmsg*> (NLMSG_DATA (nl_message_header_p));
-    ACE_ASSERT (rt_message_p);
-
-    // inspect only AF_INET-specific rules from the main table
-    if ((rt_message_p->rtm_family != AF_INET) ||
-        (rt_message_p->rtm_table != RT_TABLE_MAIN))
+    converter.getline (buffer_a, sizeof (char[BUFSIZ]));
+    if (unlikely (!std::regex_match (buffer_a,
+                                     match_results,
+                                     regex,
+                                     std::regex_constants::match_default)))
       continue;
-
-    // *NOTE*: the attributes don't seem to appear in any specfic order; retain
-    //         address information until the device has been identified, and
-    //         vice versa
-    rt_attribute_p = static_cast<struct rtattr*> (RTM_RTA (rt_message_p));
-    ACE_ASSERT (rt_attribute_p);
-    length_i = RTM_PAYLOAD (nl_message_header_p);
-    skip = false;
-    for (;
-         RTA_OK (rt_attribute_p, length_i) && !skip;
-         rt_attribute_p = RTA_NEXT (rt_attribute_p, length_i))
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+    ACE_ASSERT (match_results[1].matched);
+    ACE_ASSERT (match_results[2].matched);
+    if (!ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                         match_results[2].str ().c_str ()))
     {
-      switch (rt_attribute_p->rta_type)
-      {
-        case RTA_IIF:
-        case RTA_OIF:
-        {
-          char buffer_2[IF_NAMESIZE];
-          ACE_OS::memset (buffer_2, 0, sizeof (char[IF_NAMESIZE]));
-          if (unlikely (!::if_indextoname (*static_cast<int*> (RTA_DATA (rt_attribute_p)),
-                                           buffer_2)))
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to if_indextoname(): \"%m\", continuing\n")));
-            break;
-          } // end IF
-          current_interface_string = buffer_2;
-          if (!ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
-                               buffer_2))
-          {
-            if (!current_interface_address.is_any ())
-            {
-              result = current_interface_address;
-              skip = true;
-              done = true; // done
-            } // end IF
-          } // end IF
-          else
-            skip = true; // rule applies to a different interface --> skip ahead
-          break;
-        }
-        case RTA_DST:
-        {
-          in_addr_t inet_address = 0;
-          ACE_OS::memcpy (&inet_address,
-                          RTA_DATA (rt_attribute_p),
-                          sizeof (in_addr_t));
-          ACE_INET_Addr inet_address_2;
-          result_2 = inet_address_2.set (static_cast<u_short> (0),
-                                         inet_address,
-                                         0, // already in network byte order
-                                         0);
-          if (unlikely (result_2 == -1))
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-            break;
-          } // end IF
-          if (!inet_address_2.is_any ())
-            skip = true; // apparently the gateway address is only set on rules
-                         // with destination 0.0.0.0
-          break;
-        }
-        case RTA_GATEWAY:
-        {
-          in_addr_t inet_address = 0;
-          ACE_OS::memcpy (&inet_address,
-                          RTA_DATA (rt_attribute_p),
-                          sizeof (in_addr_t));
-          result_2 =
-              current_interface_address.set (static_cast<u_short> (0),
-                                             inet_address,
-                                             0, // already in network byte order
-                                             0);
-          if (unlikely (result_2 == -1))
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-            break;
-          } // end IF
-
-          if (!ACE_OS::strcmp (current_interface_string.c_str (),
-                               interfaceIdentifier_in.c_str ()))
-          {
-            result = current_interface_address;
-            skip = true; // skip
-            done = true; // done
-          } // end IF
-          break;
-        }
-        default:
-        {
-//          ACE_DEBUG ((LM_DEBUG,
-//                      ACE_TEXT ("found attribute (type was: %d)\n"),
-//                      rt_attribute_p->rta_type));
-          break;
-        }
-      } // end SWITCH
-    } // end FOR
-  } // end FOR
-
-clean:
-  if (socket_handle != ACE_INVALID_HANDLE)
-  {
-    result_2 = ACE_OS::close (socket_handle);
-    if (unlikely (result_2 == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
-                  socket_handle));
-  } // end IF
+      ip_address_string = match_results[1].str ();
+      ip_address_string += ACE_TEXT_ALWAYS_CHAR (":0");
+      result_2 = result.string_to_addr (ip_address_string.c_str (),
+                                        AF_INET);
+      ACE_ASSERT (result_2 != -1);
+      break;
+    } // end IF
+  } while (!converter.fail ());
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
+#endif // _DEBUG
 
   return result;
 }
@@ -3112,6 +3176,15 @@ continue_:
         reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_netmask);
     inet_address_network =
         sockaddr_in_2->sin_addr.s_addr & sockaddr_in_3->sin_addr.s_addr;
+#if defined (_DEBUG)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("verifying %s against \"%s\" [%s] (mask: %s --> network: %s)\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_in, true).c_str ()),
+                ACE_TEXT (ifaddrs_2->ifa_name),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (0, sockaddr_in_2->sin_addr.s_addr).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (0, sockaddr_in_3->sin_addr.s_addr).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (0, inet_address_network).c_str ())));
+#endif // _DEBUG
     if (inet_address_network !=
         (sockaddr_in_p->sin_addr.s_addr & sockaddr_in_3->sin_addr.s_addr))
       continue;
@@ -4314,8 +4387,8 @@ Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("dispatched %u byte(s): %s --> %s\n"),
               bytes_to_send,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in, false).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in, false).c_str ())));
 #endif // _DEBUG
   // *TODO*: shutdown() first ?
 

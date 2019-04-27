@@ -1105,17 +1105,14 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(0x%@): \"%m\", continuing\n"),
+                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(0x%@): \"%m\", aborting\n"),
                 id (), inherited::HANDLER_T::get_handle ()));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(%d): \"%m\", continuing\n"),
+                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(%d): \"%m\", aborting\n"),
                 this->id (), inherited::HANDLER_T::get_handle ()));
 #endif
-
-    // clean up
     inherited::decrease ();
-
     return false;
   } // end IF
 

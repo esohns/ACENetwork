@@ -79,7 +79,7 @@ class Net_ConnectionBase_T
   // missing: Common_IStatistic_T
   // *NOTE*: when using a connection manager, the (default) configuration is
   //         retrieved in the ctor
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (!configuration_); configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { /*ACE_ASSERT (!configuration_);*/ configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   // missing: Common_IDumpState
   // missing: info

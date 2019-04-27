@@ -1635,7 +1635,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                 id ()));
     return;
   } // end IF
-  if (!inherited2::isManaged_)
+//  if (!inherited2::isManaged_) // *TODO*: remove this 'feature' completely
     if (unlikely (!inherited2::initialize (*configuration_p)))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -2621,7 +2621,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_read_dgram"));
 
   int result = -1;
-  bool close = false;
+  bool close_connection_b = false;
+  bool release_block_b = false;
 
   // sanity check
   if (unlikely (!result_in.success ()))
@@ -2634,7 +2635,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
 #endif
-        (error != ECONNRESET))                // 10054: happens on Win32
+        (error != ECONNREFUSED))              // 111: happens on Linux
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to read from input stream (0x%@): \"%s\", aborting\n"),
@@ -2662,9 +2663,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     (error != ECONNRESET)              && // 10054
                     (error != EHOSTDOWN)))                // 10064
 #else
-      if (unlikely ((error != EBADF)                   && // 9    : local close (), happens on Linux
-                    (error != EPIPE)                   && // 32
-                    (error != ECONNRESET)))               // 10054: happens on Win32
+      if (unlikely ((error != EBADF)                   && // 9  : local close (), happens on Linux
+                    (error != EPIPE)                   && // 32 :
+                    (error != ECONNREFUSED)))             // 111:
 #endif
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_ERROR,
@@ -2679,12 +2680,16 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     result_in.handle (),
                     ACE::sock_error (static_cast<int> (error))));
 #endif
-      close = true;
-      break;
+      close_connection_b = true;
+      release_block_b = true;
+      goto error;
     }
     // *** GOOD CASES ***
     case 0:
+    {
+      release_block_b = true;
       break;
+    }
     default:
     {
 //       ACE_DEBUG ((LM_DEBUG,
@@ -2700,37 +2705,42 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     ACE_TEXT ("%u/%s: failed to ACE_Stream::put(): \"%m\", returning\n"),
                     id (),
                     ACE_TEXT (stream_.name ().c_str ())));
-        close = true;
-        break;
+        close_connection_b = true;
+        release_block_b = true;
       } // end IF
-
-      // start next read
-      if (unlikely (!inherited::initiate_read ()))
-      {
-        int error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        if ((error != ENXIO)               && // happens on Win32
-            (error != EFAULT)              && // *TODO*: happens on Win32
-            (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
-            (error != ERROR_NETNAME_DELETED)) // happens on Win32
-#else
-        if (error)
-#endif
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", returning\n"),
-                      id ()));
-        close = true;
-        break;
-      } // end IF
-
-      return;
+      break;
     }
   } // end SWITCH
 
-  // clean up
-  result_in.message_block ()->release ();
+  if (release_block_b)
+    result_in.message_block ()->release ();
 
-  if (unlikely (close))
+//start_next_read:
+  if (unlikely (!inherited::initiate_read ()))
+  {
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENXIO)               && // happens on Win32
+        (error != EFAULT)              && // *TODO*: happens on Win32
+        (error != ERROR_UNEXP_NET_ERR) && // *TODO*: happens on Win32
+        (error != ERROR_NETNAME_DELETED)) // happens on Win32
+#else
+    if (error)
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", returning\n"),
+                  id ()));
+    close_connection_b = true;
+    goto error;
+  } // end IF
+
+  return;
+
+error:
+  if (release_block_b)
+    result_in.message_block ()->release ();
+
+  if (unlikely (close_connection_b))
   {
     result = handle_close (result_in.handle (),
                            ACE_Event_Handler::ALL_EVENTS_MASK);

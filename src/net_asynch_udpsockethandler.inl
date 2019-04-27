@@ -113,7 +113,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   bool handle_sockets = false;
   // *IMPORTANT NOTE*: associate the outbound socket with the peer address as
   //                   the data dispatch happens in the proactor context
-  bool connect_socket = true;
   ACE_Proactor* proactor_p = ACE_Proactor::instance ();
 
   // sanity check(s)
@@ -121,11 +120,8 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
   // sanity check(s)
   ACE_ASSERT (proactor_p);
-
-  connect_socket = inherited::configuration_->connect;
   if (unlikely (inherited::configuration_->writeOnly))
   { ACE_ASSERT (inherited::configuration_->connect);
-    //connect_socket = true;
   } // end IF
 
   // step0: configure addresses
@@ -235,7 +231,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   result =
     inherited2::open ((inherited::configuration_->writeOnly ? (inherited::configuration_->sourcePort ? source_SAP
                                                                                                      : inet_addr_sap_any)
-                                                         : inherited::configuration_->listenAddress), // local SAP
+                                                            : inherited::configuration_->listenAddress), // local SAP
                       ACE_PROTOCOL_FAMILY_INET,                                                    // protocol family
                       0,                                                                           // protocol
                       1);                                                                          // reuse_addr
@@ -321,7 +317,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   inherited3::proactor (proactor_p);
 
   // step1: connect ?
-  if (likely (connect_socket &&
+  if (likely (inherited::configuration_->connect &&
               !inherited::configuration_->peerAddress.is_any ()))
   {
     result =
@@ -343,17 +339,19 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: connected datagram socket to %s\n"),
-//                writeHandle_,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
-//#else
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: connected datagram socket to %s\n"),
-//                writeHandle_,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
-//#endif
+#if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("0x%@: connected datagram socket to %s\n"),
+                writeHandle_,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: connected datagram socket to %s\n"),
+                writeHandle_,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
+#endif
+#endif // _DEBUG
   } // end IF
 
   if (likely (!inherited::configuration_->writeOnly))
@@ -744,10 +742,7 @@ receive:
                   ACE_TEXT ("%d: failed to ACE_Asynch_Read_Dgram::recv(): \"%m\", aborting\n"),
                   inherited2::get_handle ()));
 #endif // ACE_WIN32 || ACE_WIN64
-
-    // clean up
-    message_block_p->release ();
-
+    message_block_p->release (); message_block_p = NULL;
     return false;
   } // end IF
 

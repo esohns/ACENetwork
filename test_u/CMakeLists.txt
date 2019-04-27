@@ -82,11 +82,6 @@ if (UNIX)
 
  if (GUI_SUPPORT)
   if (GTK_USE)
-   if (GTK2_SUPPORT)
-    pkg_check_modules (PKG_GTK REQUIRED gmodule-2.0 gthread-2.0 gtk+-2.0)
-   elseif (GTK3_SUPPORT)
-    pkg_check_modules (PKG_GTK REQUIRED gtk+-3.0)
-   endif ()
    target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                                $<BUILD_INTERFACE:${PKG_GTK_INCLUDE_DIRS}>)
   elseif (WXWIDGETS_USE)
