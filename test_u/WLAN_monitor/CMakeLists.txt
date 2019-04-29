@@ -432,6 +432,7 @@ elseif (WIN32)
                              ${PROJECT_SOURCE_DIR}/../gtk2/bin)
   endif ()
   if (WXWIDGETS_SUPPORT)
+  string (REPLACE "\\" "\\\\" wxWidgets_LIB_DIR wxWidgets_LIB_DIR) 
   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                             ${wxWidgets_LIB_DIR})
   endif (WXWIDGETS_SUPPORT)

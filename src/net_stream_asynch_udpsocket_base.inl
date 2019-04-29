@@ -89,7 +89,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   bool handle_socket = false;
   bool decrease_reference_count = false;
   const ConfigurationType& configuration_r = this->getR ();
-  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
   // step0: initialize base-class
   if (unlikely (!inherited::initialize (configuration_r.socketHandlerConfiguration)))
@@ -99,85 +98,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     goto error;
   } // end IF
 
-  // sanity check(s)
-  // *TODO*: remove type inferences
-  ACE_ASSERT (configuration_r.socketHandlerConfiguration.socketConfiguration);
-
-  socket_configuration_p =
-    dynamic_cast<struct Net_UDPSocketConfiguration*> (configuration_r.socketHandlerConfiguration.socketConfiguration);
-
-  // sanity check(s)
-  ACE_ASSERT (socket_configuration_p);
-
-//  decrease_reference_count = socket_configuration_p->writeOnly;
-//
-//  // step1: open socket ?
-//  // *NOTE*: even when this is a write-only connection
-//  //         (inherited4::configuration_.socketConfiguration.writeOnly), the
-//  //         base class still requires a valid handle to open the output stream
-//  AddressType SAP_any (static_cast<u_short> (0),
-//                       static_cast<ACE_UINT32> (INADDR_ANY));
-//  AddressType local_SAP =
-//    (socket_configuration_p->writeOnly ? (socket_configuration_p->sourcePort ? ACE_INET_Addr (static_cast<u_short> (socket_configuration_p->sourcePort),
-//                                                                                              static_cast<ACE_UINT32> (INADDR_ANY))
-//                                                                             : ACE_sap_any_cast (const ACE_INET_Addr&))
-//                                       :  socket_configuration_p->address);
-//#if defined (ACE_LINUX)
-//  // (temporarily) elevate priviledges to open system sockets
-//  if (unlikely (!socket_configuration_p->writeOnly &&
-//                (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
-//  {
-//    if (!Common_Tools::setRootPrivileges ())
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to Common_Tools::setRootPrivileges(): \"%m\", aborting\n")));
-//      goto error;
-//    } // end IF
-//    handle_privileges = true;
-//  } // end IF
-//#endif
-//  result =
-//    inherited2::open (local_SAP,                // local SAP
-//                      ACE_PROTOCOL_FAMILY_INET, // protocol family
-//                      0,                        // protocol
-//                      1);                       // reuse_addr
-//  if (unlikely (result == -1))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
-//    goto error;
-//  } // end IF
-//#if defined (ACE_LINUX)
-//  if (handle_privileges)
-//    Common_Tools::dropRootPrivileges ();
-//#endif
-//  handle_socket = true;
-//  inherited::handle (inherited2::get_handle ());
-
   // step2b: tweak socket, initialize I/O
   inherited::open (ACE_INVALID_HANDLE,
                    messageBlock_in);
 
-//  // step5: register with the connection manager (if any) ?
-//  if (!inherited4::isRegistered_)
-//  {
-//#if defined (__GNUG__)
-//    if (!inherited4::registerc (this))
-//#else
-//    if (!inherited4::registerc ())
-//#endif
-//    {
-//      // *NOTE*: perhaps max# connections has been reached
-//      //ACE_DEBUG ((LM_ERROR,
-//      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-//      goto error;
-//    } // end IF
-//  } // end IF
-//  handle_manager = true;
-
   // step4: start reading ?
-  if (likely (!socket_configuration_p->writeOnly))
+  if (likely (!configuration_r.writeOnly))
   {
     if (likely (messageBlock_in.length () == 0))
       inherited::initiate_read_dgram ();
@@ -325,10 +251,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
-
-        // clean up
-        message_block_p->release ();
-
+        message_block_p->release (); message_block_p = NULL;
         return -1;
       } // end IF
       message_block_2->cont (message_block_3);
@@ -385,12 +308,9 @@ send:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
                   message_block_p->total_length ()));
-
-      // clean up
-      message_block_p->release ();
+      message_block_p->release (); message_block_p = NULL;
       this->decrease ();
       inherited::counter_.decrease ();
-
       return -1;
     } // end IF
     message_block_p = message_block_2;
