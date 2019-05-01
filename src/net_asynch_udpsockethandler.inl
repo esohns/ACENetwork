@@ -33,10 +33,6 @@
 #include "common_tools.h"
 #endif // ACE_LINUX
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "common_error_tools.h"
-#endif // ACE_WIN32 || ACE_WIN64
-
 #include "stream_iallocator.h"
 
 #include "net_common_tools.h"
@@ -139,9 +135,9 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     interface_identifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      Net_Common_Tools::IPAddressToInterface_2 (socket_configuration_p->peerAddress);
+      Net_Common_Tools::IPAddressToInterface_2 (inherited::configuration_->peerAddress);
 #else
-      Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress);
+      Net_Common_Tools::IPAddressToInterface (inherited::configuration_->peerAddress);
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
       Net_Common_Tools::IPAddressToInterface (inherited::configuration_->peerAddress);
@@ -330,7 +326,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(0x%@,%s): \"%m\", aborting\n"),
                   writeHandle_,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", aborting\n"),

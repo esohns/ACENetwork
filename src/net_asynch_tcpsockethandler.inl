@@ -286,11 +286,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::handle_close"));
 
-  ACE_UNUSED_ARG (handle_in);
+  //ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
   int result = -1;
-  ACE_HANDLE handle_h = inherited2::handle ();
+  //ACE_HANDLE handle_h = inherited2::handle ();
+  //ACE_ASSERT (handle_in == handle_h); // *TODO*
+  ACE_HANDLE handle_h = handle_in;
 
   if (handle_h != ACE_INVALID_HANDLE)
   {

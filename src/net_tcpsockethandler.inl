@@ -148,7 +148,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s,-1) (handle was: 0x%@), aborting\n"),
-                (socket_configuration_p->linger ? ACE_TEXT ("true") : ACE_TEXT ("false")),
+                (configuration_p->linger ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
 #else
     ACE_DEBUG ((LM_ERROR,

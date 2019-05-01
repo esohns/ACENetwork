@@ -517,6 +517,18 @@ do_work (unsigned int maximumNumberOfConnections_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  CBData_in.UIState =
+      &const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  ACE_ASSERT (CBData_in.UIState);
+  CBData_in.progressData.state = CBData_in.UIState;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
   int result = -1;
   Test_U_TCPConnectionManager_t* connection_manager_p =
     TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
@@ -582,7 +594,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
-  modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
+  ACE_ASSERT (CBData_in.UIState);
+  modulehandler_configuration.lock = &(CBData_in.UIState->subscribersLock);
 #endif // GUI_SUPPORT
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
@@ -745,23 +758,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step1a: start UI event loop ?
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-  Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
-#endif // GTK_USE
   if (!UIDefinitionFile_in.empty ())
   {
 #if defined (GTK_USE)
-    gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    CBData_in.UIState =
-        &const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
     ACE_ASSERT (CBData_in.UIState);
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
 #endif // GTK_USE
-    //CBData_in.userData = &CBData_in;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     HWND window_p = GetConsoleWindow ();
@@ -996,7 +1001,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     ACE_HANDLE handle_h =
       configuration_in.connector->connect (connection_configuration_p_2->listenAddress);
-    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
     if (configuration_in.connector->useReactor ())
     {
       if (handle_h != ACE_INVALID_HANDLE)
@@ -1019,7 +1024,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       {
         // *TODO*: avoid these tight loops
         iconnection_p =
-          connection_manager_2->get (connection_configuration_p_2->listenAddress,
+          connection_manager_p->get (connection_configuration_p_2->listenAddress,
                                      false);
         if (iconnection_p)
           break;

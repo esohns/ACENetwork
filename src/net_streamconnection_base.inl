@@ -1972,10 +1972,10 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     // step1: shut down the processing stream
     stream_.flush (false,  // do not flush inbound data
                    false,  // do not flush session messages
-                   false); // flush upstream (if any)
+                   false); // flush upstream (if any) ?
     stream_.idle ();
     stream_.stop (true,  // wait for worker(s) (if any)
-                  false, // wait for upstream (if any)
+                  false, // wait for upstream (if any) ?
                   true); // locked access ?
   } // end lock scope
 

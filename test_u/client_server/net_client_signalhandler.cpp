@@ -49,9 +49,13 @@ Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispa
               lock_in,
               this) // event handler handle
  , address_ ()
- , connector_ (NULL)
+ , eventDispatch_ (NET_EVENT_DEFAULT_DISPATCH)
+ , protocol_ (NET_TRANSPORTLAYER_INVALID)
  , timerId_ (-1)
- , useReactor_ (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
+ , AsynchTCPConnector_ (true)
+ , AsynchUDPConnector_ (true)
+ , TCPConnector_ (true)
+ , UDPConnector_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::Client_SignalHandler"));
 
@@ -68,10 +72,14 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
 
   // *TODO*: remove type inference
   address_ = configuration_in.address;
-  connector_ = configuration_in.connector;
+  if (configuration_in.dispatchState->configuration->numberOfReactorThreads > 0)
+    eventDispatch_ = COMMON_EVENT_DISPATCH_REACTOR;
+  else
+  { ACE_ASSERT (configuration_in.dispatchState->configuration->numberOfProactorThreads > 0);
+    eventDispatch_ = COMMON_EVENT_DISPATCH_PROACTOR;
+  } // end ELSE
+  protocol_ = configuration_in.protocol;
   timerId_ = configuration_in.actionTimerId;
-  useReactor_ =
-    (configuration_in.dispatchState->configuration->numberOfReactorThreads > 0);
 
   return inherited::initialize (configuration_in);
 }
@@ -148,31 +156,113 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   if (abort)
     iconnection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
 
-  // connect ?
-  if (connect &&
-      connector_)
+  Test_U_ITCPConnector_t* tcp_connector_p = NULL;
+  Test_U_IUDPConnector_t* udp_connector_p = NULL;
+  switch (protocol_)
   {
-    // sanity check(s)
-    ACE_ASSERT (inherited::configuration_);
-    ACE_ASSERT (inherited::configuration_->connectionConfiguration);
-
-    ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    try {
-      handle = connector_->connect (address_);
-    } catch (...) {
-      // *PORTABILITY*: tracing in a signal handler context is not portable
-      // *TODO*
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnector::connect(): \"%m\", continuing\n")));
-    }
-    if (handle == ACE_INVALID_HANDLE)
+    case NET_TRANSPORTLAYER_TCP:
     {
-      // *PORTABILITY*: tracing in a signal handler context is not portable
-      // *TODO*
+      switch (eventDispatch_)
+      {
+        case COMMON_EVENT_DISPATCH_PROACTOR:
+        {
+          tcp_connector_p = &AsynchTCPConnector_;
+          break;
+        }
+        case COMMON_EVENT_DISPATCH_REACTOR:
+        {
+          tcp_connector_p = &TCPConnector_;
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown event dispatch type (was: %d), returning\n"),
+                      eventDispatch_));
+          return;
+        }
+      } // end SWITCH
+      break;
+    }
+    case NET_TRANSPORTLAYER_UDP:
+    {
+      switch (eventDispatch_)
+      {
+        case COMMON_EVENT_DISPATCH_PROACTOR:
+        {
+          udp_connector_p = &AsynchUDPConnector_;
+          break;
+        }
+        case COMMON_EVENT_DISPATCH_REACTOR:
+        {
+          udp_connector_p = &UDPConnector_;
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown event dispatch type (was: %d), returning\n"),
+                      eventDispatch_));
+          return;
+        }
+      } // end SWITCH
+      break;
+    }
+    default:
+    {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%m\", continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
-    } // end IF
+                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                  protocol_));
+      return;
+    }
+  } // end SWITCH
+
+  // connect ?
+  if (connect)
+  {
+    ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+    switch (protocol_)
+    {
+      case NET_TRANSPORTLAYER_TCP:
+      { ACE_ASSERT (tcp_connector_p);
+        try {
+          handle_h = tcp_connector_p->connect (address_);
+        } catch (...) {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
+                      ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
+          return;
+        }
+        break;
+      }
+      case NET_TRANSPORTLAYER_UDP:
+      { ACE_ASSERT (udp_connector_p);
+        try {
+          handle_h = udp_connector_p->connect (address_);
+        } catch (...) {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
+                      ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
+          return;
+        }
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                    protocol_));
+        return;
+      }
+    } // end SWITCH
+    //if (handle_h == ACE_INVALID_HANDLE)
+    //{
+    //  // *PORTABILITY*: tracing in a signal handler context is not portable
+    //  // *TODO*
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%m\", continuing\n"),
+    //              ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
+    //} // end IF
   } // end IF
 
   // ...shutdown ?
@@ -207,26 +297,75 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
                            true); // N/A
 
     // step3: cancel connection attempts (if any)
-    if (connector_ &&
-        !useReactor_)
+    if (eventDispatch_ == COMMON_EVENT_DISPATCH_PROACTOR)
     {
-      Test_U_ITCPAsynchConnector_t* iasynch_connector_p =
-          dynamic_cast<Test_U_ITCPAsynchConnector_t*> (connector_);
-      ACE_ASSERT (iasynch_connector_p);
-      try {
-        iasynch_connector_p->abort ();
-      } catch (...) {
-        // *PORTABILITY*: tracing in a signal handler context is not portable
-        // *TODO*
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IAsynchConnector_T::abort(), continuing\n")));
-      }
+      switch (protocol_)
+      {
+        case NET_TRANSPORTLAYER_TCP:
+        { ACE_ASSERT (tcp_connector_p);
+          Test_U_ITCPAsynchConnector_t* iasynch_connector_p =
+              dynamic_cast<Test_U_ITCPAsynchConnector_t*> (tcp_connector_p);
+          ACE_ASSERT (iasynch_connector_p);
+          try {
+            iasynch_connector_p->abort ();
+          } catch (...) {
+            // *PORTABILITY*: tracing in a signal handler context is not portable
+            // *TODO*
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("caught exception in Net_IAsynchConnector_T::abort(), continuing\n")));
+          }
+          break;
+        }
+        case NET_TRANSPORTLAYER_UDP:
+        { ACE_ASSERT (udp_connector_p);
+          Test_U_IUDPAsynchConnector_t* iasynch_connector_p =
+              dynamic_cast<Test_U_IUDPAsynchConnector_t*> (udp_connector_p);
+          ACE_ASSERT (iasynch_connector_p);
+          try {
+            iasynch_connector_p->abort ();
+          } catch (...) {
+            // *PORTABILITY*: tracing in a signal handler context is not portable
+            // *TODO*
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("caught exception in Net_IAsynchConnector_T::abort(), continuing\n")));
+          }
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                      protocol_));
+          return;
+        }
+      } // end SWITCH
     } // end IF
 
     // step4: stop accepting connections, abort open connections
-    iconnection_manager_p->stop (false, // wait for completion ?
-                                 true); // N/A
-    iconnection_manager_p->abort ();
+    switch (protocol_)
+    {
+      case NET_TRANSPORTLAYER_TCP:
+      {
+        iconnection_manager_p->stop (false, // wait for completion ?
+                                     true); // N/A
+        iconnection_manager_p->abort ();
+        break;
+      }
+      case NET_TRANSPORTLAYER_UDP:
+      {
+        iconnection_manager_2->stop (false, // wait for completion ?
+                                     true); // N/A
+        iconnection_manager_2->abort ();
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                    protocol_));
+        return;
+      }
+    } // end SWITCH
 
     // step5: stop reactor (&& proactor, if applicable)
     Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,

@@ -69,6 +69,10 @@ typedef Net_IConnector_T<ACE_INET_Addr,
                          Test_U_TCPConnectionConfiguration> Test_U_ITCPConnector_t;
 typedef Net_IAsynchConnector_T<ACE_INET_Addr,
                                Test_U_TCPConnectionConfiguration> Test_U_ITCPAsynchConnector_t;
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         Test_U_UDPConnectionConfiguration> Test_U_IUDPConnector_t;
+typedef Net_IAsynchConnector_T<ACE_INET_Addr,
+                               Test_U_UDPConnectionConfiguration> Test_U_IUDPAsynchConnector_t;
 
 class Net_IPing
 {
@@ -97,16 +101,16 @@ struct Client_SignalHandlerConfiguration
    , address ()
    , actionTimerId (-1)
    , connectionConfiguration (NULL)
-   , connector (NULL)
    , messageAllocator (NULL)
+   , protocol (NET_TRANSPORTLAYER_TCP)
    , statisticReportingInterval (0)
   {}
 
   ACE_INET_Addr                      address;
   long                               actionTimerId;
   Test_U_TCPConnectionConfiguration* connectionConfiguration;
-  Test_U_ITCPConnector_t*            connector;
   Stream_IAllocator*                 messageAllocator;
+  enum Net_TransportLayerType        protocol;
   unsigned int                       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 

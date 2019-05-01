@@ -64,14 +64,16 @@ class Client_TimeoutHandler
     ALTERNATING_STATE_INVALID = -1
   };
 
-  Client_TimeoutHandler (enum ActionModeType,      // mode
-                         unsigned int,             // max #connections
-                         Test_U_ITCPConnector_t*,  // connector
-                         Test_U_IUDPConnector_t*); // connector
+  Client_TimeoutHandler (enum ActionModeType,         // mode
+                         unsigned int,                // max #connections
+                         enum Net_TransportLayerType, // protocol
+                         enum Common_EventDispatchType = NET_EVENT_DEFAULT_DISPATCH);
   inline virtual ~Client_TimeoutHandler () {}
 
-  void mode (enum ActionModeType);
-  enum ActionModeType mode () const;
+  inline void mode (enum ActionModeType mode_in) { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_); mode_ = mode_in; }
+  inline enum ActionModeType mode () const { enum ActionModeType result = ACTION_INVALID; { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, ACTION_INVALID); result = mode_; } /* end lock scope */ return result; }
+  inline void protocol (enum Net_TransportLayerType protocol_in) { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_); protocol_ = protocol_in; }
+  inline enum Net_TransportLayerType protocol () const { enum Net_TransportLayerType result = NET_TRANSPORTLAYER_INVALID; { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, NET_TRANSPORTLAYER_INVALID); result = protocol_; } /* end lock scope */ return result; }
 
   // implement specific behaviour
   virtual void handle (const void*); // asynchronous completion token
@@ -82,18 +84,23 @@ class Client_TimeoutHandler
   ACE_UNIMPLEMENTED_FUNC (Client_TimeoutHandler& operator= (const Client_TimeoutHandler&))
 
   enum AlternatingModeStateType      alternatingModeState_;
-  Test_U_ITCPConnector_t*            TCPConnector_;
-  Test_U_IUDPConnector_t*            UDPConnector_;
+  enum Common_EventDispatchType      eventDispatch_;
   mutable ACE_SYNCH_MUTEX            lock_;
   unsigned int                       maximumNumberOfConnections_;
   enum ActionModeType                mode_;
+  enum Net_TransportLayerType        protocol_;
+
+  Client_TCP_AsynchConnector_t       AsynchTCPConnector_;
+  Client_UDP_AsynchConnector_t       AsynchUDPConnector_;
+  Client_TCP_Connector_t             TCPConnector_;
+  Client_UDP_Connector_t             UDPConnector_;
+
+  // probability
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   char                               randomStateInitializationBuffer_[BUFSIZ];
   struct random_data                 randomState_;
 #endif
-
-  // probability
   std::uniform_int_distribution<int> randomDistribution_;
   std::default_random_engine         randomEngine_;
   std::function<int ()>              randomGenerator_;

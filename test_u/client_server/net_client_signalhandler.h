@@ -27,7 +27,7 @@
 #include "common_isignal.h"
 #include "common_signal_handler.h"
 
-#include "net_client_common.h"
+#include "net_client_connector_common.h"
 
 class Client_SignalHandler
  : public Common_SignalHandler_T<struct Client_SignalHandlerConfiguration>
@@ -38,6 +38,8 @@ class Client_SignalHandler
   Client_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
                         ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~Client_SignalHandler () {}
+
+  inline void protocol (enum Net_TransportLayerType protocol_in) { protocol_ = protocol_in; }
 
   // override Common_IInitialize_T
   virtual bool initialize (const struct Client_SignalHandlerConfiguration&);
@@ -50,10 +52,15 @@ class Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (Client_SignalHandler (const Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Client_SignalHandler& operator= (const Client_SignalHandler&))
 
-  ACE_INET_Addr           address_;
-  Test_U_ITCPConnector_t* connector_;
-  long                    timerId_;
-  bool                    useReactor_;
+  ACE_INET_Addr                 address_;
+  enum Common_EventDispatchType eventDispatch_;
+  enum Net_TransportLayerType   protocol_;
+  long                          timerId_;
+
+  Client_TCP_AsynchConnector_t  AsynchTCPConnector_;
+  Client_UDP_AsynchConnector_t  AsynchUDPConnector_;
+  Client_TCP_Connector_t        TCPConnector_;
+  Client_UDP_Connector_t        UDPConnector_;
 };
 
 #endif

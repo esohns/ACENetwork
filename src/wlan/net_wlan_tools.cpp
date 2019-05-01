@@ -72,6 +72,8 @@ Net_WLAN_Tools::decodeSSID (void* data_in,
   return result;
 }
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#elif defined (ACE_LINUX)
 bool
 Net_WLAN_Tools::isInterface (const std::string& interfaceIdentifier_in)
 {
@@ -114,3 +116,4 @@ Net_WLAN_Tools::isInterface (const std::string& interfaceIdentifier_in)
 
   return result;
 }
+#endif // ACE_WIN32 || ACE_WIN64 || ACE_LINUX

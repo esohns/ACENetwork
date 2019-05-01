@@ -145,7 +145,7 @@ do_printUsage (const std::string& programName_in)
 #if defined (GUI_SUPPORT)
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g[[STRING]] : UI file [\"")
             << UI_file_path
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\" --> no GUI}")
@@ -236,7 +236,7 @@ do_processArguments (int argc_in,
 #if defined (GUI_SUPPORT)
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
 #endif // GUI_SUPPORT
   useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   connectionInterval_out = NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
@@ -595,7 +595,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   if (useUDP_in)
   {
     configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                   &connection_configuration_2));
+                                                                      &connection_configuration_2));
     iterator_2 =
         configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
@@ -603,7 +603,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   else
   {
     configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                   &connection_configuration));
+                                                                      &connection_configuration));
     iterator =
         configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
@@ -1138,7 +1138,7 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
 #endif // GUI_SUPPORT
   bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   unsigned int connection_interval =

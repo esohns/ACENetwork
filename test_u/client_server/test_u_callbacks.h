@@ -27,14 +27,14 @@
 
 // idle routines
 gboolean idle_finalize_UI_cb (gpointer);
-gboolean idle_update_log_display_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
 
 //////////////////////////////////////////
 
 gboolean idle_initialize_client_UI_cb (gpointer);
 gboolean idle_update_progress_client_cb (gpointer);
-gboolean idle_end_session_client_cb (gpointer);
+gboolean idle_start_session_client_cb (gpointer);
+gboolean idle_end_session_cb (gpointer);
 
 //////////////////////////////////////////
 
@@ -70,7 +70,6 @@ G_MODULE_EXPORT void spinbutton_ping_interval_value_changed_server_cb (GtkSpinBu
 
 //G_MODULE_EXPORT gint spinbutton_messages_value_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT gint spinbutton_session_messages_value_changed_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint button_clear_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);
 #ifdef __cplusplus

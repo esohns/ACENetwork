@@ -32,20 +32,14 @@
 #define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME          "spinbutton_messages"
 #define NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME   "spinbutton_session_messages"
 #define NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME         "spinbutton_ping_interval"
-#define NET_UI_GTK_TEXTVIEW_NAME                        "textview"
-#define NET_UI_GTK_ADJUSTMENT_NAME                      "scrolledwindow_vadjustment"
 #define NET_UI_GTK_SCROLLMARK_NAME                      "insert"
 #define NET_UI_GTK_BUTTONBOX_ACTIONS_NAME               "vbuttonbox"
 #define NET_UI_GTK_BUTTON_ABOUT_NAME                    "about"
-#define NET_UI_GTK_BUTTON_CLEAR_NAME                    "clear"
 #define NET_UI_GTK_BUTTON_CLOSEALL_NAME                 "close_all"
 #define NET_UI_GTK_BUTTON_REPORT_NAME                   "report"
 #define NET_UI_GTK_BUTTON_QUIT_NAME                     "quit"
 #define NET_UI_GTK_DIALOG_ABOUT_NAME                    "dialog_about"
 #define NET_UI_GTK_DIALOG_MAIN_NAME                     "dialog_main"
-#define NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION           "Monospace 8"
-#define NET_UI_GTK_PANGO_LOG_COLOR_BASE                 "#FFFFFF" // white
-#define NET_UI_GTK_PANGO_LOG_COLOR_TEXT                 "#000000" // green
 
 // -----------------------------------------------------------------------------
 
