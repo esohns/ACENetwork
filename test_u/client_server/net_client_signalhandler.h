@@ -24,9 +24,13 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "common.h"
 #include "common_isignal.h"
 #include "common_signal_handler.h"
 
+#include "net_common.h"
+
+#include "net_client_common.h"
 #include "net_client_connector_common.h"
 
 class Client_SignalHandler

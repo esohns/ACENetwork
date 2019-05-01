@@ -30,11 +30,9 @@
 
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
+#include "test_u_stream.h"
 #include "test_u_tcpconnection.h"
 #include "test_u_udpconnection.h"
-
-// forward declarations
-class Test_U_Stream;
 
 //////////////////////////////////////////
 

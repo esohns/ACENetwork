@@ -699,7 +699,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   configuration_in.signalHandlerConfiguration.address = peer_address;
   configuration_in.signalHandlerConfiguration.connectionConfiguration =
     &connection_configuration;
-  configuration_in.signalHandlerConfiguration.connector = connector_p;
+  configuration_in.signalHandlerConfiguration.protocol =
+    (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
 
   if (useUDP_in)
     connection_configuration_2.peerAddress = peer_address;
@@ -708,8 +709,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   Client_TimeoutHandler timeout_handler (actionMode_in,
                                          maxNumConnections_in,
-                                         connector_p,
-                                         connector_2);
+                                         (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP),
+                                         (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR));
   configuration_in.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();

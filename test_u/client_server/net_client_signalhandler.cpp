@@ -41,8 +41,6 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_sessionmessage.h"
 
-#include "net_client_common.h"
-
 Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
                                             ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
  : inherited (dispatchMode_in,
