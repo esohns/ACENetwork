@@ -570,6 +570,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration_in.protocolConfiguration.pingInterval = pingInterval_in;
   configuration_in.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
+  configuration_in.protocolConfiguration.transportLayer =
+    (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
   // ********************** stream configuration data **************************
   configuration_in.streamConfiguration.configuration_.cloneModule =
     !(UIDefinitionFile_in.empty ());
@@ -612,39 +614,33 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Net_ConnectionConfigurationsIterator_t iterator, iterator_2;
   Test_U_TCPConnectionConfiguration* connection_configuration_p = NULL;
   Test_U_UDPConnectionConfiguration* connection_configuration_p_2 = NULL;
-  if (useUDP_in)
-  {
-    connection_configuration_2.messageAllocator = &message_allocator;
-    connection_configuration_2.initialize (configuration_in.allocatorConfiguration,
-                                           configuration_in.streamConfiguration);
-    configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                      &connection_configuration_2));
-    iterator_2 =
-      configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
-    connection_configuration_p_2 =
-        dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator).second);
-    ACE_ASSERT (connection_configuration_p_2);
-  } // end IF
-  else
-  {
-    configuration_in.listenerConfiguration.messageAllocator =
-        &message_allocator;
-    configuration_in.listenerConfiguration.connectionConfiguration =
-        &connection_configuration;
+  configuration_in.listenerConfiguration.messageAllocator =
+    &message_allocator;
+  configuration_in.listenerConfiguration.connectionConfiguration =
+    &connection_configuration;
 
-    connection_configuration.messageAllocator = &message_allocator;
-    connection_configuration.initialize (configuration_in.allocatorConfiguration,
-                                         configuration_in.streamConfiguration);
-    configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                      &connection_configuration));
-    iterator =
-      configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    connection_configuration_p =
-        dynamic_cast<Test_U_TCPConnectionConfiguration*> ((*iterator).second);
-    ACE_ASSERT (connection_configuration_p);
-  } // end ELSE
+  connection_configuration.messageAllocator = &message_allocator;
+  connection_configuration.initialize (configuration_in.allocatorConfiguration,
+                                       configuration_in.streamConfiguration);
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
+                                                                    &connection_configuration));
+  iterator =
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
+  ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
+  connection_configuration_p =
+    dynamic_cast<Test_U_TCPConnectionConfiguration*> ((*iterator).second);
+  ACE_ASSERT (connection_configuration_p);
+  connection_configuration_2.messageAllocator = &message_allocator;
+  connection_configuration_2.initialize (configuration_in.allocatorConfiguration,
+    configuration_in.streamConfiguration);
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
+                                                                    &connection_configuration_2));
+  iterator_2 =
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+  ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
+  connection_configuration_p_2 =
+    dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
+  ACE_ASSERT (connection_configuration_p_2);
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -708,10 +704,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
   if (!useUDP_in)
   {
     if (useReactor_in)
-      configuration_in.listener = SERVER_LISTENER_SINGLETON::instance ();
+      configuration_in.TCPListener =
+        SERVER_LISTENER_SINGLETON::instance ();
     else
-      configuration_in.listener = SERVER_ASYNCHLISTENER_SINGLETON::instance ();
-    signal_handler_configuration.listener = configuration_in.listener;
+      configuration_in.TCPListener =
+        SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+    signal_handler_configuration.TCPListener = configuration_in.TCPListener;
   } // end IF
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
@@ -902,8 +900,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Server_UDP_AsynchConnector_t udp_asynch_connector (true);
   Server_UDP_Connector_t udp_connector (true);
   if (!useUDP_in)
-  { ACE_ASSERT (configuration_in.listener);
-    if (!configuration_in.listener->initialize (configuration_in.listenerConfiguration))
+  { ACE_ASSERT (configuration_in.TCPListener);
+    if (!configuration_in.TCPListener->initialize (configuration_in.listenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, returning\n")));
@@ -932,9 +930,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
       return;
     } // end IF
     ACE_thread_t thread_id = 0;
-    configuration_in.listener->start (thread_id);
+    configuration_in.TCPListener->start (thread_id);
     ACE_UNUSED_ARG (thread_id);
-    if (!configuration_in.listener->isRunning ())
+    if (!configuration_in.TCPListener->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start listener (port: %u), returning\n"),
@@ -967,10 +965,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   else
   {
     if (useReactor_in)
-      configuration_in.connector = &udp_connector;
+      configuration_in.UDPConnector = &udp_connector;
     else
-      configuration_in.connector = &udp_asynch_connector;
-    if (!configuration_in.connector->initialize (*connection_configuration_p_2))
+      configuration_in.UDPConnector = &udp_asynch_connector;
+    if (!configuration_in.UDPConnector->initialize (*connection_configuration_p_2))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector, returning\n")));
@@ -1000,17 +998,17 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end IF
 
     ACE_HANDLE handle_h =
-      configuration_in.connector->connect (connection_configuration_p_2->listenAddress);
-    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-    if (configuration_in.connector->useReactor ())
+      configuration_in.UDPConnector->connect (connection_configuration_p_2->listenAddress);
+    ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
+    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+    if (configuration_in.UDPConnector->useReactor ())
     {
-      if (handle_h != ACE_INVALID_HANDLE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        iconnection_p =
-          connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+      iconnection_p =
+        connection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
 #else
-        iconnection_p =
-          connection_manager_2->get (static_cast<Net_ConnectionId_t> (handle_h));
+      iconnection_p =
+        connection_manager_2->get (static_cast<Net_ConnectionId_t> (handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     else
@@ -1024,7 +1022,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       {
         // *TODO*: avoid these tight loops
         iconnection_p =
-          connection_manager_p->get (connection_configuration_p_2->listenAddress,
+          connection_manager_2->get (connection_configuration_p_2->listenAddress,
                                      false);
         if (iconnection_p)
           break;

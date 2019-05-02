@@ -64,12 +64,14 @@ struct Test_U_ProtocolConfiguration
    , pingInterval (ACE_Time_Value::zero)
    , pingAutoAnswer (true)
    , printPongMessages (true)
+   , transportLayer (NET_TRANSPORTLAYER_TCP)
   {}
 
-  unsigned int   PDUSize; // pdu size (if fixed)
-  ACE_Time_Value pingInterval; // {0: off}
-  bool           pingAutoAnswer;
-  bool           printPongMessages;
+  unsigned int                PDUSize; // pdu size (if fixed)
+  ACE_Time_Value              pingInterval; // {0: off}
+  bool                        pingAutoAnswer;
+  bool                        printPongMessages;
+  enum Net_TransportLayerType transportLayer;
 };
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,

@@ -113,12 +113,10 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-
-  // sanity check(s)
-  ACE_ASSERT (proactor_p);
   if (unlikely (inherited::configuration_->writeOnly))
   { ACE_ASSERT (inherited::configuration_->connect);
   } // end IF
+  ACE_ASSERT (proactor_p);
 
   // step0: configure addresses
   if (unlikely (inherited::configuration_->sourcePort))

@@ -98,12 +98,12 @@ class Test_U_NetlinkConnectionConfiguration
 };
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
-typedef std::map<std::string,
-                 Test_U_TCPConnectionConfiguration> Test_U_TCPConnectionConfigurations_t;
-typedef Test_U_TCPConnectionConfigurations_t::iterator Test_U_TCPConnectionConfigurationIterator_t;
-typedef std::map<std::string,
-                 Test_U_UDPConnectionConfiguration> Test_U_UDPConnectionConfigurations_t;
-typedef Test_U_UDPConnectionConfigurations_t::iterator Test_U_UDPConnectionConfigurationIterator_t;
+//typedef std::map<std::string,
+//                 Test_U_TCPConnectionConfiguration> Test_U_TCPConnectionConfigurations_t;
+//typedef Test_U_TCPConnectionConfigurations_t::iterator Test_U_TCPConnectionConfigurationIterator_t;
+//typedef std::map<std::string,
+//                 Test_U_UDPConnectionConfiguration> Test_U_UDPConnectionConfigurations_t;
+//typedef Test_U_UDPConnectionConfigurations_t::iterator Test_U_UDPConnectionConfigurationIterator_t;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,

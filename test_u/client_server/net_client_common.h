@@ -64,6 +64,7 @@
 class Stream_IAllocator;
 class Test_U_SessionMessage;
 class Test_U_Message;
+class Client_SignalHandler;
 class Client_TimeoutHandler;
 typedef Net_IConnector_T<ACE_INET_Addr,
                          Test_U_TCPConnectionConfiguration> Test_U_ITCPConnector_t;
@@ -100,7 +101,8 @@ struct Client_SignalHandlerConfiguration
    : Common_SignalHandlerConfiguration ()
    , address ()
    , actionTimerId (-1)
-   , connectionConfiguration (NULL)
+   , TCPConnectionConfiguration (NULL)
+   , UDPConnectionConfiguration (NULL)
    , messageAllocator (NULL)
    , protocol (NET_TRANSPORTLAYER_TCP)
    , statisticReportingInterval (0)
@@ -108,7 +110,8 @@ struct Client_SignalHandlerConfiguration
 
   ACE_INET_Addr                      address;
   long                               actionTimerId;
-  Test_U_TCPConnectionConfiguration* connectionConfiguration;
+  Test_U_TCPConnectionConfiguration* TCPConnectionConfiguration;
+  Test_U_UDPConnectionConfiguration* UDPConnectionConfiguration;
   Stream_IAllocator*                 messageAllocator;
   enum Net_TransportLayerType        protocol;
   unsigned int                       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
@@ -120,10 +123,13 @@ struct Client_Configuration
   Client_Configuration ()
    : ClientServer_Configuration ()
    , signalHandlerConfiguration ()
+   , signalHandler (NULL)
    , timeoutHandler (NULL)
   {}
 
   struct Client_SignalHandlerConfiguration signalHandlerConfiguration;
+  Client_SignalHandler*                    signalHandler;
+
   Client_TimeoutHandler*                   timeoutHandler;
 };
 

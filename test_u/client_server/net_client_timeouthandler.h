@@ -67,6 +67,8 @@ class Client_TimeoutHandler
   Client_TimeoutHandler (enum ActionModeType,         // mode
                          unsigned int,                // max #connections
                          enum Net_TransportLayerType, // protocol
+                         const Test_U_TCPConnectionConfiguration&,
+                         const Test_U_UDPConnectionConfiguration&,
                          enum Common_EventDispatchType = NET_EVENT_DEFAULT_DISPATCH);
   inline virtual ~Client_TimeoutHandler () {}
 

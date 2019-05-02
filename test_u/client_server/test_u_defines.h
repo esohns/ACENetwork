@@ -65,6 +65,8 @@
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_LABEL      "normal"
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_LABEL "alternating"
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_LABEL      "stress"
+#define NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME          "radiobutton_tcp"
+#define NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME          "radiobutton_udp"
 
 // GTK progress/status bar
 #define NET_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL          27 // ms (?)

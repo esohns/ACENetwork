@@ -63,6 +63,9 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
   Test_U_ITCPConnectionManager_t* iconnection_manager_p =
       TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
+  Test_U_IUDPConnectionManager_t* iconnection_manager_2 =
+    TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (iconnection_manager_2);
 
   bool shutdown = false;
   bool report = false;
@@ -137,10 +140,10 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 
     // step2: invoke controller (if any)
-    if (inherited::configuration_->listener)
+    if (inherited::configuration_->TCPListener)
     {
       try {
-        inherited::configuration_->listener->stop ();
+        inherited::configuration_->TCPListener->stop ();
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
@@ -172,6 +175,8 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     // step4: stop accepting connections, abort open connections
     iconnection_manager_p->stop (false, true);
     iconnection_manager_p->abort ();
+    iconnection_manager_2->stop (false, true);
+    iconnection_manager_2->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
     Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,

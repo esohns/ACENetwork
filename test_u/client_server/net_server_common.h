@@ -24,7 +24,6 @@
 #include <list>
 
 #include "ace/INET_Addr.h"
-#include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_istatistic.h"
@@ -70,37 +69,41 @@ typedef Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
                                     NET_TRANSPORTLAYER_TCP> Server_ListenerConfiguration_t;
 
 typedef Net_IListener_T<Server_ListenerConfiguration_t,
-                        Test_U_TCPConnectionConfiguration> Server_IListener_t;
+                        Test_U_TCPConnectionConfiguration> Server_ITCPListener_t;
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         Test_U_UDPConnectionConfiguration> Test_U_IUDPConnector_t;
+
 struct Server_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
   Server_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
-   , listener (NULL)
+   , TCPListener (NULL)
+   , UDPConnector (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
   {}
 
-  Server_IListener_t*      listener;
+  Server_ITCPListener_t*   TCPListener;
+  Test_U_IUDPConnector_t*  UDPConnector;
+
   Net_IStatisticHandler_t* statisticReportingHandler;
   long                     statisticReportingTimerId;
 };
 
-typedef Net_IConnector_T<ACE_INET_Addr,
-                         Test_U_UDPConnectionConfiguration> Test_U_IUDPConnector_t;
 struct Server_Configuration
  : ClientServer_Configuration
 {
   Server_Configuration ()
    : ClientServer_Configuration ()
-   , connector (NULL)
-   , listener (NULL)
+   , UDPConnector (NULL)
+   , TCPListener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
   {}
 
-  Test_U_IUDPConnector_t*                  connector;
-  Server_IListener_t*                      listener;
+  Server_ITCPListener_t*                   TCPListener;
+  Test_U_IUDPConnector_t*                  UDPConnector;
   Server_ListenerConfiguration_t           listenerConfiguration;
 
   struct Server_SignalHandlerConfiguration signalHandlerConfiguration;

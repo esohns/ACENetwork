@@ -67,6 +67,8 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   // sanity check(s)
   ACE_ASSERT (configuration_in.dispatchState);
   ACE_ASSERT (configuration_in.dispatchState->configuration);
+  ACE_ASSERT (configuration_in.TCPConnectionConfiguration);
+  ACE_ASSERT (configuration_in.UDPConnectionConfiguration);
 
   // *TODO*: remove type inference
   address_ = configuration_in.address;
@@ -78,6 +80,11 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   } // end ELSE
   protocol_ = configuration_in.protocol;
   timerId_ = configuration_in.actionTimerId;
+
+  AsynchTCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
+  TCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
+  AsynchUDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
+  UDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
 
   return inherited::initialize (configuration_in);
 }

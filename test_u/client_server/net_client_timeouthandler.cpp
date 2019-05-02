@@ -40,6 +40,8 @@
 Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
                                               unsigned int maximumNumberOfConnections_in,
                                               enum Net_TransportLayerType protocol_in,
+                                              const Test_U_TCPConnectionConfiguration& TCPConnectionConfiguration_in,
+                                              const Test_U_UDPConnectionConfiguration& UDPConnectionConfiguration_in,
                                               enum Common_EventDispatchType eventDispatch_in)
  : inherited (this,  // dispatch interface
               false) // invoke only once ?
@@ -63,6 +65,11 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
  , randomGenerator_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::Client_TimeoutHandler"));
+
+  AsynchTCPConnector_.initialize (TCPConnectionConfiguration_in);
+  TCPConnector_.initialize (TCPConnectionConfiguration_in);
+  AsynchUDPConnector_.initialize (UDPConnectionConfiguration_in);
+  UDPConnector_.initialize (UDPConnectionConfiguration_in);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

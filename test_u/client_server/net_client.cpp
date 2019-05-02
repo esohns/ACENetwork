@@ -541,6 +541,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                                              : pingInterval_in);
   configuration_in.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
+  configuration_in.protocolConfiguration.transportLayer =
+    (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
@@ -696,20 +698,17 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   ACE_INET_Addr peer_address (serverPortNumber_in,
                               serverHostname_in.c_str (),
                               ACE_ADDRESS_FAMILY_INET);
-  configuration_in.signalHandlerConfiguration.address = peer_address;
-  configuration_in.signalHandlerConfiguration.connectionConfiguration =
-    &connection_configuration;
-  configuration_in.signalHandlerConfiguration.protocol =
-    (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
-
   if (useUDP_in)
     connection_configuration_2.peerAddress = peer_address;
   else
     connection_configuration.address = peer_address;
 
+  configuration_in.signalHandler = &signalHandler_in;
   Client_TimeoutHandler timeout_handler (actionMode_in,
                                          maxNumConnections_in,
                                          (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP),
+                                         connection_configuration,
+                                         connection_configuration_2,
                                          (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR));
   configuration_in.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
@@ -748,12 +747,17 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step0e: initialize signal handling
+  configuration_in.signalHandlerConfiguration.address = peer_address;
+  configuration_in.signalHandlerConfiguration.TCPConnectionConfiguration =
+    &connection_configuration;
+  configuration_in.signalHandlerConfiguration.UDPConnectionConfiguration =
+    &connection_configuration_2;
+  configuration_in.signalHandlerConfiguration.protocol =
+    (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
   configuration_in.signalHandlerConfiguration.dispatchState =
     &event_dispatch_state_s;
   configuration_in.signalHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration_in.signalHandlerConfiguration.connectionConfiguration =
-    &connection_configuration;
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,

@@ -42,6 +42,7 @@
 #include "test_u_stream.h"
 
 #include "net_client_common.h"
+#include "net_client_signalhandler.h"
 #include "net_client_timeouthandler.h"
 
 #include "net_server_common.h"
@@ -235,10 +236,8 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                              std::numeric_limits<double>::max ());
 
   // step3: initialize options
-  enum Client_TimeoutHandler::ActionModeType action_mode =
-    data_p->configuration->timeoutHandler->mode ();
   std::string radio_button_name;
-  switch (action_mode)
+  switch (data_p->configuration->timeoutHandler->mode ())
   {
     case Client_TimeoutHandler::ACTION_NORMAL:
       radio_button_name =
@@ -256,15 +255,39 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid mode (was: %d), aborting\n"),
-                  action_mode));
+                  data_p->configuration->timeoutHandler->mode ()));
       return G_SOURCE_REMOVE;
     }
   } // end SWITCH
   GtkRadioButton* radiobutton_p =
     GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               radio_button_name.c_str ()));
-  //ACE_ASSERT (radiobutton_p);
-  //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
+  ACE_ASSERT (radiobutton_p);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
+
+  switch (data_p->configuration->timeoutHandler->protocol ())
+  {
+    case NET_TRANSPORTLAYER_TCP:
+      radio_button_name =
+        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME);
+      break;
+    case NET_TRANSPORTLAYER_UDP:
+      radio_button_name =
+        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME);
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("unknown/invalid protocol (was: %d), aborting\n"),
+                  data_p->configuration->timeoutHandler->protocol ()));
+      return G_SOURCE_REMOVE;
+    }
+  } // end SWITCH
+  radiobutton_p =
+    GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              radio_button_name.c_str ()));
+  ACE_ASSERT (radiobutton_p);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
 
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -335,145 +358,6 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                       G_CALLBACK (gtk_widget_destroyed),
                       NULL);
   ACE_ASSERT (result);
-
-  // step6b: connect custom signals
-  //gtk_builder_connect_signals ((*iterator).second.second,
-  //                             userData_in);
-  //GObject* object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_CONNECT_NAME));
-  //ACE_ASSERT (object_p);
-  //result = g_signal_connect (object_p,
-  //                           ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                           G_CALLBACK (button_connect_clicked_cb),
-  //                           userData_in);
-  //ACE_ASSERT (result);
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                    G_CALLBACK (button_close_clicked_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_CLOSEALL_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                    G_CALLBACK (button_close_all_clicked_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_PING_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                    G_CALLBACK (button_ping_clicked_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_TEST_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                    G_CALLBACK (togglebutton_test_toggled_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("value-changed"),
-  //                    G_CALLBACK (spinbutton_connections_value_changed_client_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-
-  //--------------------------------------
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("toggled"),
-  //                    G_CALLBACK (radiobutton_mode_toggled_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("toggled"),
-  //                    G_CALLBACK (radiobutton_mode_toggled_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("toggled"),
-  //                    G_CALLBACK (radiobutton_mode_toggled_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("value-changed"),
-  //                    G_CALLBACK (spinbutton_ping_interval_value_changed_client_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-
-  //--------------------------------------
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_ABOUT_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                    G_CALLBACK (button_about_clicked_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_QUIT_NAME));
-  //ACE_ASSERT (object_p);
-  //result =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                    G_CALLBACK (button_quit_clicked_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result);
-  //ACE_UNUSED_ARG (result);
-
-  //   // step8: use correct screen
-  //   if (parentWidget_in)
-  //     gtk_window_set_screen (GTK_WINDOW (dialog_p),
-  //                            gtk_widget_get_screen (const_cast<GtkWidget*> (//parentWidget_in)));
 
   // step9: draw main dialog
   gtk_widget_show_all (dialog_p);
@@ -693,6 +577,31 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                              0.0,
                              std::numeric_limits<double>::max ());
 
+  std::string radio_button_name;
+  switch (data_p->configuration->protocolConfiguration.transportLayer)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+      radio_button_name =
+        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME);
+      break;
+    case NET_TRANSPORTLAYER_UDP:
+      radio_button_name =
+        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME);
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("unknown/invalid protocol (was: %d), aborting\n"),
+                  data_p->configuration->protocolConfiguration.transportLayer));
+      return G_SOURCE_REMOVE;
+    }
+  } // end SWITCH
+  GtkRadioButton* radiobutton_p =
+    GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              radio_button_name.c_str ()));
+  ACE_ASSERT (radiobutton_p);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
+
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME)));
@@ -752,6 +661,8 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   //glade_xml_signal_autoconnect(userData_out.xml);
   //gtk_builder_connect_signals ((*iterator).second.second,
   //                             userData_in);
+  gtk_builder_connect_signals ((*iterator).second.second,
+                               userData_in);
 
   // step6a: connect default signals
   gulong result =
@@ -760,96 +671,6 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                       G_CALLBACK (gtk_widget_destroyed),
                       &dialog_p);
   ACE_ASSERT (result);
-
-  // step6b: connect custom signals
-  // *NOTE*: glade_xml_signal_connect_data does not work reliably on Windows
-  //glade_xml_signal_connect_data(userData_out.xml,
-  //                              ACE_TEXT_ALWAYS_CHAR("togglebutton_listen_toggled_cb"),
-  //                              G_CALLBACK(togglebutton_listen_toggled_cb),
-  //                              &userData_out);
-  GObject* object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_GTK_BUTTON_LISTEN_NAME));
-  ACE_ASSERT (object_p);
-  result =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                      G_CALLBACK (togglebutton_listen_toggled_cb),
-                      userData_in);
-  ACE_ASSERT (result);
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-      ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_CLOSEALL_NAME));
-  ACE_ASSERT (object_p);
-  result =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                      G_CALLBACK (button_close_all_clicked_cb),
-                      userData_in);
-  ACE_ASSERT (result);
-
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_REPORT_NAME));
-  ACE_ASSERT (object_p);
-  result =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                      G_CALLBACK (button_report_clicked_cb),
-                      userData_in);
-  ACE_ASSERT (result);
-
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-      ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME));
-  ACE_ASSERT (object_p);
-  result =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("value-changed"),
-                      G_CALLBACK (spinbutton_connections_value_changed_server_cb),
-                      userData_in);
-  ACE_ASSERT (result);
-
-  // -------------------------------------
-
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-      ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME));
-  ACE_ASSERT (object_p);
-  result =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("value-changed"),
-                      G_CALLBACK (spinbutton_ping_interval_value_changed_server_cb),
-                      userData_in);
-  ACE_ASSERT (result);
-
-  // -------------------------------------
-
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_ABOUT_NAME));
-  ACE_ASSERT (object_p);
-  result = g_signal_connect (object_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (button_about_clicked_cb),
-                             userData_in);
-  ACE_ASSERT (result);
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_QUIT_NAME));
-  ACE_ASSERT (object_p);
-  result =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                      G_CALLBACK (button_quit_clicked_cb),
-                      userData_in);
-  ACE_ASSERT (result);
-  ACE_UNUSED_ARG (result);
-
-  //   // step7: use correct screen
-  //   if (parentWidget_in)
-  //     gtk_window_set_screen (GTK_WINDOW (dialog_p),
-  //                            gtk_widget_get_screen (const_cast<GtkWidget*> (//parentWidget_in)));
 
   // step8: draw main dialog
   gtk_widget_show_all (dialog_p);
@@ -897,8 +718,8 @@ idle_update_progress_server_cb (gpointer userData_in)
   } // end IF
 
   // step2: update progress bar text
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  ACE_TCHAR buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   int result = -1;
   float speed = data_p->statistic.bytesPerSecond;
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
@@ -914,7 +735,7 @@ idle_update_progress_server_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer, ACE_TEXT ("%.2f %s"),
+    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
                               speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
@@ -922,7 +743,7 @@ idle_update_progress_server_cb (gpointer userData_in)
   } // end IF
   gtk_progress_bar_set_text (progress_bar_p,
                              (done ? ACE_TEXT_ALWAYS_CHAR ("")
-                                   : ACE_TEXT_ALWAYS_CHAR (buffer)));
+                                   : ACE_TEXT_ALWAYS_CHAR (buffer_a)));
   gtk_progress_bar_pulse (progress_bar_p);
 
   // --> reschedule ?
@@ -1010,13 +831,38 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_ping_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (userData_in);
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
 
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+
+  unsigned int number_of_connections = 0;
+  switch (data_p->configuration->protocolConfiguration.transportLayer)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+    {
+      number_of_connections =
+        TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
+      break;
+    }
+    case NET_TRANSPORTLAYER_UDP:
+    {
+      number_of_connections =
+        TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                  data_p->configuration->protocolConfiguration.transportLayer));
+      return FALSE;
+    }
+  } // end SWITCH
   // sanity check
-  unsigned int number_of_connections =
-    TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
-  if (number_of_connections == 0)
-    return FALSE;
+  ACE_ASSERT (number_of_connections > 0);
 
   // grab a (random) connection handler
   int index = 0;
@@ -1030,32 +876,64 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   index = ((ACE_OS::rand_r (&usecs) % number_of_connections) + 1);
 #endif
 
-  Test_U_TCPConnectionManager_t::CONNECTION_T* connection_base_p =
-      TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
-  if (!connection_base_p)
+  Net_IPing* iping_p = NULL;
+  Test_U_TCPConnectionManager_t::CONNECTION_T* connection_base_p = NULL;
+  Test_U_UDPConnectionManager_t::CONNECTION_T* connection_base_2 = NULL;
+  switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve connection handler (%d), aborting\n"),
-                index - 1));
-    return FALSE;
-  } // end IF
-  Net_IPing* iping_p = dynamic_cast<Net_IPing*> (connection_base_p);
+    case NET_TRANSPORTLAYER_TCP:
+    {
+      connection_base_p =
+        TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
+      ACE_ASSERT (connection_base_p);
+      iping_p = dynamic_cast<Net_IPing*> (connection_base_p);
+      break;
+    }
+    case NET_TRANSPORTLAYER_UDP:
+    {
+      connection_base_2 =
+        TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
+      ACE_ASSERT (connection_base_2);
+      iping_p = dynamic_cast<Net_IPing*> (connection_base_2);
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                  data_p->configuration->protocolConfiguration.transportLayer));
+      return FALSE;
+    }
+  } // end SWITCH
   ACE_ASSERT (iping_p);
   try {
     iping_p->ping ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
-    connection_base_p->decrease ();
-    connection_base_p->close ();
     return FALSE;
   }
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("session %u: sent ping\n"),
-  //            connection_base_p->id ()));
 
-  // clean up
-  connection_base_p->decrease ();
+  switch (data_p->configuration->protocolConfiguration.transportLayer)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+    { ACE_ASSERT (connection_base_p);
+      connection_base_p->decrease ();
+      break;
+    }
+    case NET_TRANSPORTLAYER_UDP:
+    { ACE_ASSERT (connection_base_2);
+      connection_base_2->decrease ();
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                  data_p->configuration->protocolConfiguration.transportLayer));
+      return FALSE;
+    }
+  } // end SWITCH
 
   return FALSE;
 } // button_ping_clicked_cb
@@ -1219,6 +1097,53 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
   return FALSE;
 }
 
+gint
+radiobutton_protocol_group_changed_cb (GtkWidget* widget_in,
+                                       gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::radiobutton_protocol_group_changed_cb"));
+
+  int result = -1;
+
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->timeoutHandler);
+  ACE_ASSERT (data_p->UIState);
+
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  // step0: activated ?
+  enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_INVALID;
+  GtkRadioButton* radio_button_p =
+    GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME)));
+  ACE_ASSERT (radio_button_p);
+  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)))
+    protocol_e = NET_TRANSPORTLAYER_TCP;
+  else
+  {
+    radio_button_p =
+      GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME)));
+    ACE_ASSERT (radio_button_p);
+    if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)))
+      protocol_e = NET_TRANSPORTLAYER_UDP;
+  } // end ELSE
+
+  data_p->configuration->timeoutHandler->protocol (protocol_e);
+  data_p->configuration->signalHandler->protocol (protocol_e);
+
+  return FALSE;
+}
+
 // -----------------------------------------------------------------------------
 
 gint
@@ -1234,27 +1159,83 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->listener);
 
+  Net_ConnectionConfigurationsIterator_t iterator;
+  Test_U_UDPConnectionConfiguration* connection_configuration_p = NULL;
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in)))
   {
-    ACE_thread_t thread_id = 0;
-    try {
-      data_p->configuration->listener->start (thread_id);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Test_U_Server_IListener::start(): \"%m\", continuing\n")));
-    } // end catch
-    ACE_UNUSED_ARG (thread_id);
+    switch (data_p->configuration->protocolConfiguration.transportLayer)
+    {
+      case NET_TRANSPORTLAYER_TCP:
+      { ACE_ASSERT (data_p->configuration->TCPListener);
+        ACE_thread_t thread_id = 0;
+        data_p->configuration->TCPListener->start (thread_id);
+        ACE_UNUSED_ARG (thread_id);
+        break;
+      }
+      case NET_TRANSPORTLAYER_UDP:
+      { ACE_ASSERT (data_p->configuration->UDPConnector);
+        iterator =
+          data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+        ACE_ASSERT (iterator != data_p->configuration->connectionConfigurations.end ());
+        connection_configuration_p =
+          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator).second);
+        ACE_ASSERT (connection_configuration_p);
+        ACE_HANDLE handle_h =
+          data_p->configuration->UDPConnector->connect (connection_configuration_p->listenAddress);
+        ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("connected to %s\n"),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->listenAddress).c_str ())));
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                    data_p->configuration->protocolConfiguration.transportLayer));
+        return FALSE;
+      }
+    } // end SWITCH
   } // end IF
   else
   {
-    try {
-      data_p->configuration->listener->stop ();
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_Server_IListener::stop(): \"%m\", continuing\n")));
-    } // end catch
+    switch (data_p->configuration->protocolConfiguration.transportLayer)
+    {
+      case NET_TRANSPORTLAYER_TCP:
+      { ACE_ASSERT (data_p->configuration->TCPListener);
+        data_p->configuration->TCPListener->stop ();
+        break;
+      }
+      case NET_TRANSPORTLAYER_UDP:
+      {
+        iterator =
+          data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+        ACE_ASSERT (iterator != data_p->configuration->connectionConfigurations.end ());
+        connection_configuration_p =
+          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator).second);
+        ACE_ASSERT (connection_configuration_p);
+        Test_U_IUDPConnectionManager_t* connection_manager_p =
+          TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+        ACE_ASSERT (connection_manager_p);
+        Test_U_IUDPConnectionManager_t::CONNECTION_T* connection_p =
+          connection_manager_p->get (connection_configuration_p->listenAddress, false);
+        ACE_ASSERT (connection_p);
+        connection_p->close ();
+        connection_p->decrease (); connection_p = NULL;
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("disconnected from %s\n"),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->listenAddress).c_str ())));
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                    data_p->configuration->protocolConfiguration.transportLayer));
+        return FALSE;
+      }
+    } // end SWITCH
   } // end IF
 
   return FALSE;
@@ -1299,6 +1280,7 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1390,6 +1372,7 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
