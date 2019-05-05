@@ -54,34 +54,34 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct DHCP_SocketHandl
                                   ACE_INET_Addr,
                                   struct DHCP_ConnectionConfiguration,
                                   struct DHCP_ConnectionState,
-                                  DHCP_RuntimeStatistic_t,
+                                  Net_Statistic_t,
                                   DHCP_Stream_t,
-                                  struct DHCP_Stream_UserData,
+                                  struct Net_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct DHCP_ModuleHandlerConfiguration> DHCP_TCPHandler_t;
 typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct DHCP_SocketHandlerConfiguration>,
                                         ACE_INET_Addr,
                                         struct DHCP_ConnectionConfiguration,
                                         struct DHCP_ConnectionState,
-                                        DHCP_RuntimeStatistic_t,
+                                        Net_Statistic_t,
                                         DHCP_Stream_t,
-                                        struct DHCP_Stream_UserData,
+                                        struct Net_UserData,
                                         struct Stream_ModuleConfiguration,
                                         struct DHCP_ModuleHandlerConfiguration> DHCP_AsynchTCPHandler_t;
 typedef Net_TCPConnectionBase_T<DHCP_TCPHandler_t,
                                 struct DHCP_ConnectionConfiguration,
                                 struct DHCP_ConnectionState,
-                                DHCP_RuntimeStatistic_t,
+                                Net_Statistic_t,
                                 DHCP_Stream_t,
                                 struct DHCP_SocketHandlerConfiguration,
-                                struct DHCP_Stream_UserData> DHCP_TCPConnection_t;
+                                struct Net_UserData> DHCP_TCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<DHCP_AsynchTCPHandler_t,
                                       struct DHCP_ConnectionConfiguration,
                                       struct DHCP_ConnectionState,
-                                      DHCP_RuntimeStatistic_t,
+                                      Net_Statistic_t,
                                       DHCP_Stream_t,
                                       struct DHCP_SocketHandlerConfiguration,
-                                      struct DHCP_Stream_UserData> DHCP_AsynchTCPConnection_t;
+                                      struct Net_UserData> DHCP_AsynchTCPConnection_t;
 
 /////////////////////////////////////////
 
@@ -101,45 +101,43 @@ typedef Net_ISocketConnection_T<ACE_INET_Addr,
 //                       struct Net_SocketConfiguration,
 //                       struct DHCP_ConnectionConfiguration,
 //                       struct DHCP_ConnectionState,
-//                       DHCP_RuntimeStatistic_t,
+//                       Net_Statistic_t,
 //                       DHCP_Stream> DHCP_ISession_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
                          struct DHCP_SocketHandlerConfiguration> DHCP_IConnector_t;
-//typedef Net_IConnector_T<ACE_INET_Addr,
-//                         struct DHCP_ConnectorConfiguration> DHCP_IConnector_t;
 typedef Net_Client_Connector_T<DHCP_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                struct DHCP_ConnectionConfiguration,
                                struct DHCP_ConnectionState,
-                               DHCP_RuntimeStatistic_t,
+                               Net_Statistic_t,
                                DHCP_Stream_t,
                                struct DHCP_SocketHandlerConfiguration,
-                               struct DHCP_Stream_UserData> DHCP__Connector_t;
+                               struct Net_UserData> DHCP__Connector_t;
 typedef Net_Client_AsynchConnector_T<DHCP_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      struct DHCP_ConnectionConfiguration,
                                      struct DHCP_ConnectionState,
-                                     DHCP_RuntimeStatistic_t,
+                                     Net_Statistic_t,
                                      DHCP_Stream_t,
                                      struct DHCP_SocketHandlerConfiguration,
-                                     struct DHCP_Stream_UserData> DHCP_AsynchConnector_t;
+                                     struct Net_UserData> DHCP_AsynchConnector_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct DHCP_ConnectionConfiguration,
                                  struct DHCP_ConnectionState,
-                                 DHCP_RuntimeStatistic_t,
-                                 struct DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
+                                 Net_Statistic_t,
+                                 struct Net_UserData> DHCP_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct DHCP_ConnectionConfiguration,
                                  struct DHCP_ConnectionState,
-                                 DHCP_RuntimeStatistic_t,
-                                 struct DHCP_Stream_UserData> DHCP_Connection_Manager_t;
+                                 Net_Statistic_t,
+                                 struct Net_UserData> DHCP_Connection_Manager_t;
 
 typedef ACE_Singleton<DHCP_Connection_Manager_t,
                       ACE_SYNCH_MUTEX> DHCP_CONNECTIONMANAGER_SINGLETON;

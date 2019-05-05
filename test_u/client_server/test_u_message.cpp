@@ -79,7 +79,8 @@ Test_U_Message::command () const
                                                 : remaining);
       ACE_OS::memcpy (wr_ptr_p, message_block_p->rd_ptr (), bytes_to_write);
       remaining -= bytes_to_write;
-      if (!remaining) break; // done
+      if (!remaining)
+        break; // done
 
       wr_ptr_p += bytes_to_write;
     } // end FOR
@@ -213,8 +214,8 @@ Test_U_Message::dump_state () const
 //        iter != myHeaders.end ();
 //        iter++)
 //   {
-//     RPG_Net_Protocol_Layer::ProtocolLayer2String(iter->first,
-//                                                         protocol_layer);
+//     Net_Protocol_Layer::ProtocolLayer2String(iter->first,
+//                                              protocol_layer);
 //
 //     ACE_DEBUG ((LM_INFO,
 //                 ACE_TEXT ("--> header type: \"%s\" @ offset: %u\n"),
@@ -230,7 +231,7 @@ Test_U_Message::dump_state () const
 //   {
 //     switch (iter->first)
 //     {
-// //       case RPG_Net_Protocol_Layer::ASTERIX:
+// //       case Net_Protocol_Layer::ASTERIX:
 // //       {
 // //         Stream_ASTERIXHeader header(*this,
 // //                                     iter->second);
@@ -242,7 +243,7 @@ Test_U_Message::dump_state () const
 // //
 // //         break;
 // //       }
-// //       case RPG_Net_Protocol_Layer::ASTERIX_offset: // "resilience" bytes...
+// //       case Net_Protocol_Layer::ASTERIX_offset: // "resilience" bytes...
 // //       {
 // //         // remember size
 // //         sum_header_size += FLB_RPS_ASTERIX_RESILIENCE_BYTES;
@@ -254,7 +255,7 @@ Test_U_Message::dump_state () const
 // //
 // //         break;
 // //       }
-//       case RPG_Net_Protocol_Layer::TCP:
+//       case Net_Protocol_Layer::TCP:
 //       {
 //         struct tcphdr* header = reinterpret_cast<struct tcphdr*> (//                                                      (rd_ptr() + iter->second));
 //
@@ -288,7 +289,7 @@ Test_U_Message::dump_state () const
 //
 //         break;
 //       }
-//       case RPG_Net_Protocol_Layer::UDP:
+//       case Net_Protocol_Layer::UDP:
 //       {
 //         struct udphdr* header = reinterpret_cast<struct udphdr*> (//                                                      (rd_ptr() + iter->second));
 //
@@ -310,7 +311,7 @@ Test_U_Message::dump_state () const
 //
 //         break;
 //       }
-//       case RPG_Net_Protocol_Layer::IPv4:
+//       case Net_Protocol_Layer::IPv4:
 //       {
 //         struct iphdr* header = reinterpret_cast<struct iphdr*> (//                                                     (rd_ptr() + iter->second));
 //
@@ -345,7 +346,7 @@ Test_U_Message::dump_state () const
 //
 //         break;
 //       }
-//       case RPG_Net_Protocol_Layer::FDDI_LLC_SNAP:
+//       case Net_Protocol_Layer::FDDI_LLC_SNAP:
 //       {
 //         struct fddihdr* header = reinterpret_cast<struct fddihdr*> (//                                                       (rd_ptr() + iter->second));
 //
@@ -369,7 +370,7 @@ Test_U_Message::dump_state () const
 //
 //         break;
 //       }
-//       case RPG_Net_Protocol_Layer::ETHERNET:
+//       case Net_Protocol_Layer::ETHERNET:
 //       {
 //         struct ether_header* header = reinterpret_cast<struct ether_header*> (//                                                            (rd_ptr() + iter->second));
 //

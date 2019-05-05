@@ -893,7 +893,7 @@ do_work (
       //                    Test_U_UDPAsynchConnector_t (connection_manager_p,
       //                                                 configuration.streamConfiguration.statisticReportingInterval));
       //bool result_2 =
-      //  iconnector_p->initialize (configuration.socketHandlerConfiguration);
+      //  iconnector_p->initialize (configuration);
       //if (!iconnector_p)
       //{
       //  ACE_DEBUG ((LM_CRITICAL,

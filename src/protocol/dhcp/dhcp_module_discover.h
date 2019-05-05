@@ -118,7 +118,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename TimerManagerType>
 class DHCP_Module_DiscoverH_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -132,7 +132,7 @@ class DHCP_Module_DiscoverH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       struct Stream_UserData>
 {
   typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
@@ -147,7 +147,7 @@ class DHCP_Module_DiscoverH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       struct Stream_UserData> inherited;
 
  public:

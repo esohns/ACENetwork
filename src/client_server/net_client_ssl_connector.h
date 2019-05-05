@@ -72,15 +72,15 @@ class Net_Client_SSL_Connector_T
                            ConfigurationType> ICONNECTOR_T;
 
   Net_Client_SSL_Connector_T (bool = true); // managed ?
-  inline virtual ~Net_Client_SSL_Connector_T () {};
+  inline virtual ~Net_Client_SSL_Connector_T () {}
 
   // implement Net_Client_IConnector_T
   virtual enum Net_TransportLayerType transportLayer () const;
-  inline virtual bool useReactor () const { return true; };
+  inline virtual bool useReactor () const { return true; }
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& getR () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration.connectionConfiguration = &configuration_; return true; };
+  inline virtual const ConfigurationType& getR () const { return configuration_; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; return true; }
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);

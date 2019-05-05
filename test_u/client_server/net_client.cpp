@@ -699,7 +699,11 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                               serverHostname_in.c_str (),
                               ACE_ADDRESS_FAMILY_INET);
   if (useUDP_in)
+  {
+    if (!useReactor_in)
+      connection_configuration_2.connect = true;
     connection_configuration_2.peerAddress = peer_address;
+  } // end IF
   else
     connection_configuration.address = peer_address;
 

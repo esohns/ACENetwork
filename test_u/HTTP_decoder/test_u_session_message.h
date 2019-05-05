@@ -52,7 +52,7 @@ class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_HTTPDecoder_SessionData_t,
-                                      struct Net_UserData>
+                                      struct Stream_UserData>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -64,7 +64,7 @@ class Test_U_SessionMessage
   typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_HTTPDecoder_SessionData_t,
-                                      struct Net_UserData> inherited;
+                                      struct Stream_UserData> inherited;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
@@ -72,7 +72,7 @@ class Test_U_SessionMessage
   Test_U_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
                          Test_U_HTTPDecoder_SessionData_t*&, // session data container handle
-                         struct Net_UserData*);
+                         struct Stream_UserData*);
   inline virtual ~Test_U_SessionMessage () {}
 
   // overloaded from ACE_Message_Block

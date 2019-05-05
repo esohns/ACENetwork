@@ -184,8 +184,6 @@ connection_setup_function (void* arg_in)
   IRC_Client_IConnector_t* connector_p = &connector;
   if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
     connector_p = &asynch_connector;
-  //IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
-  //IRC_Client_ConnectorConfiguration connector_configuration;
 
   // step2b: set up configuration passed to processing stream
   IRC_Client_ConnectionConfiguration* configuration_p = NULL;
@@ -195,8 +193,6 @@ connection_setup_function (void* arg_in)
                              user_data_p);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
-  //ACE_ASSERT (configuration_p->socketHandlerConfiguration);
-  //ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
 
   // step2c: initialize connector
   if (!connector_p->initialize (*configuration_p))

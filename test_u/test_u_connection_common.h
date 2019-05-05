@@ -29,42 +29,4 @@
 
 #include "test_u_common.h"
 
-//struct Test_U_StreamConfiguration;
-//struct Test_U_ConnectionConfiguration
-// : Net_ConnectionConfiguration
-//{
-//  inline Test_U_ConnectionConfiguration ()
-//   : Net_ConnectionConfiguration ()
-//   ///////////////////////////////////////
-//   , socketHandlerConfiguration (NULL)
-//   , streamConfiguration (NULL)
-//   , userData (NULL)
-//  {};
-
-//  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  struct Test_U_StreamConfiguration*        streamConfiguration;
-
-//  struct Test_U_UserData*                   userData;
-//};
-
-//struct Test_U_ConnectionState
-// : Net_ConnectionState
-//{
-//  inline Test_U_ConnectionState ()
-//   : Net_ConnectionState ()
-//   , userData (NULL)
-//  {};
-
-//  struct Net_UserData* userData;
-//};
-
-//////////////////////////////////////////
-
-//typedef Net_IConnection_T<ACE_INET_Addr,
-//                          struct Test_U_ConnectionConfiguration,
-//                          struct Test_U_ConnectionState,
-//                          Net_Statistic_t> Test_U_IConnection_t;
-
-//////////////////////////////////////////
-
 #endif

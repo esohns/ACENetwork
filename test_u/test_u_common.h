@@ -35,9 +35,8 @@
 
 #include "net_common.h"
 
-typedef Net_Statistic_t Test_U_Statistic_t;
-typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_IStatistic_t;
-typedef Common_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
+typedef Common_IStatistic_T<Net_Statistic_t> Test_U_IStatistic_t;
+typedef Common_StatisticHandler_T<Net_Statistic_t> Test_U_StatisticHandler_t;
 
 struct Test_U_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
@@ -48,14 +47,6 @@ struct Test_U_SignalHandlerConfiguration
 };
 
 //////////////////////////////////////////
-
-//struct Test_U_UserData
-// : Net_UserData
-//{
-//  Test_U_UserData ()
-//   : Net_UserData ()
-//  {}
-//};
 
 struct Test_U_Configuration
 {
@@ -80,13 +71,13 @@ struct Test_U_UI_ProgressData
 {
   Test_U_UI_ProgressData ()
    : state (NULL)
-   , statistic ()
+   //, statistic ()
   {
-    ACE_OS::memset (&statistic, 0, sizeof (Test_U_Statistic_t));
+    //ACE_OS::memset (&statistic, 0, sizeof (Net_Statistic_t));
   }
 
   struct Common_UI_State* state;
-  Test_U_Statistic_t      statistic;
+  //Net_Statistic_t      statistic;
 };
 
 struct Test_U_UI_CBData

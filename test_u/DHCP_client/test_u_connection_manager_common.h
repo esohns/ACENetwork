@@ -35,13 +35,13 @@
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  DHCPClient_ConnectionConfiguration,
-                                 struct DHCPClient_ConnectionState,
+                                 struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,
                                  struct Net_UserData> DHCPClient_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  DHCPClient_ConnectionConfiguration,
-                                 struct DHCPClient_ConnectionState,
+                                 struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,
                                  struct Net_UserData> DHCPClient_ConnectionManager_t;
 

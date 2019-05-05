@@ -1,4 +1,10 @@
-﻿include (CMakeDependentOption)
+﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/Threads.cmake)
+
+include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/SSLConfig.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/NetlinkConfig.cmake)
+
+include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/ACE.cmake)
+
 option (BUILD_TEST_U "build test_u" OFF)
 
 # user interface

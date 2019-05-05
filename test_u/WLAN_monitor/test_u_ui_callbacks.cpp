@@ -68,13 +68,13 @@ load_wlan_interfaces (GtkListStore* listStore_in
 
   GtkTreeIter tree_iterator;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
+  Net_WLAN_IMonitor_t* iwlanmonitor_p =
+      NET_WLAN_MONITOR_SINGLETON::instance ();
+  ACE_ASSERT (iwlanmonitor_p);
 #endif // ACE_WIN32 || ACE_WIN64
   Net_InterfaceIdentifiers_t interface_identifiers_a =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_WLAN_Tools::getInterfaces (iinetwlanmonitor_p->get_2 ());
+      Net_WLAN_Tools::getInterfaces (iwlanmonitor_p->get_2 ());
 #elif defined (ACE_LINUX)
 #if defined (WEXT_USE)
       Net_WLAN_Tools::getInterfaces (AF_UNSPEC, 0);
@@ -1726,21 +1726,20 @@ togglebutton_backgroundscan_toggled_cb (GtkToggleButton* toggleButton_in,
     (gtk_toggle_button_get_active (toggleButton_in) ? TRUE : FALSE);
 #else
       gtk_toggle_button_get_active (toggleButton_in);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-    NET_WLAN_INETMONITOR_SINGLETON::instance ();
+  Net_WLAN_IMonitor_t* iwlanmonitor_p = NET_WLAN_MONITOR_SINGLETON::instance ();
   // sanity check(s)
-  ACE_ASSERT (iinetwlanmonitor_p);
+  ACE_ASSERT (iwlanmonitor_p);
   //if (!iinetwlanmonitor_p->isRunning ())
   //  return; // nothing to do
 
-  Net_WLAN_Tools::setDeviceSettingBool (iinetwlanmonitor_p->get_2 (),
+  Net_WLAN_Tools::setDeviceSettingBool (iwlanmonitor_p->get_2 (),
                                         data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
                                         wlan_intf_opcode_background_scan_enabled,
                                         data_p->configuration->WLANMonitorConfiguration.enableBackgroundScans);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 void

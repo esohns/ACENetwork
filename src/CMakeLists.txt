@@ -1,68 +1,9 @@
-﻿if (UNIX)
- option (NETLINK_SUPPORT "enable netlink support" ON)
+﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/Threads.cmake)
 
-# include (CheckLibraryExists)
-# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- include (FindThreads)
- set (CMAKE_THREAD_PREFER_PTHREAD ON)
- find_package (Threads)
-endif (UNIX)
-# *TODO*: automatize support option support
-option (SSL_SUPPORT "enable SSL support" OFF)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/SSLConfig.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/NetlinkConfig.cmake)
 
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_LIB_FILE}")
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE
-#                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
-elseif (WIN32)
-# *TODO*: this does not work
- set (LIB_FILE_SUFFIX "")
- if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  set (LIB_FILE_SUFFIX "d")
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}")
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-else ()
- #message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
-endif ()
-add_definitions (-DACE_HAS_DLL)
-
-if (UNIX)
- if (NETLINK_SUPPORT)
-  pkg_check_modules (PKG_LIBNL REQUIRED libnl-3.0)
-  add_definitions (-DNETLINK_SUPPORT)
- endif (NETLINK_SUPPORT)
-
- if (SSL_SUPPORT)
-  find_package (OpenSSL MODULE
-                COMPONENTS Crypto SSL)
-  if (OPENSSL_FOUND)
-   add_definitions (-DSSL_SUPPORT)
-  endif (OPENSSL_FOUND)
-#  pkg_check_modules (PKG_SSL REQUIRED libssl)
- endif (SSL_SUPPORT)
-endif (UNIX)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/ACE.cmake)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -131,14 +72,13 @@ endif (UNIX)
 
 add_library (${PROJECT_NAME} STATIC "")
 
+if (SSL_SUPPORT)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${SSL_INCLUDE_DIRS})
+endif (SSL_SUPPORT)
 if (UNIX)
  if (NETLINK_SUPPORT)
-  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_LIBNL_INCLUDE_DIRS})
+  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_NETLINK_INCLUDE_DIRS})
  endif (NETLINK_SUPPORT)
-
- if (SSL_SUPPORT)
-  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_SSL_INCLUDE_DIRS})
- endif (SSL_SUPPORT)
 
  if (DHCLIENT_SUPPORT)
   set (BIND9_CONFIG_EXECUTABLE /usr/bin/bind9-export-config)

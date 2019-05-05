@@ -52,12 +52,9 @@ struct FileServer_SessionData
   FileServer_SessionData ()
    : Test_U_StreamSessionData ()
    , connection (NULL)
-   , userData (NULL)
   {}
 
   FileServer_TCPIConnection_t* connection;
-
-  struct Net_UserData*         userData;
 };
 typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 
@@ -67,12 +64,9 @@ struct FileServer_StreamState
   FileServer_StreamState ()
    : Test_U_StreamState ()
    , sessionData (NULL)
-   , userData (NULL)
   {}
 
   struct FileServer_SessionData* sessionData;
-
-  struct Net_UserData*           userData;
 };
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
@@ -83,24 +77,6 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<FileServer_ISessionNotify_t*> FileServer_Subscribers_t;
 typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_t;
 
-//class Test_U_UDPStream;
-//typedef Net_IStreamConnection_T<ACE_INET_Addr,
-//                                FileServer_ConnectionConfiguration_t,
-//                                struct FileServer_ConnectionState,
-//                                Net_Statistic_t,
-//                                struct Net_SocketConfiguration,
-//                                struct FileServer_SocketHandlerConfiguration,
-//                                Test_U_UDPStream,
-//                                enum Stream_StateMachine_ControlState> FileServer_UDPIStreamConnection_t;
-//typedef std::map<std::string,
-//                 struct FileServer_ConnectionConfiguration> FileServer_ConnectionConfigurations_t;
-//typedef FileServer_ConnectionConfigurations_t::iterator FileServer_ConnectionConfigurationIterator_t;
-//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-//                                 ACE_INET_Addr,
-//                                 FileServer_ConnectionConfiguration_t,
-//                                 struct FileServer_ConnectionState,
-//                                 Net_Statistic_t,
-//                                 struct Net_UserData> FileServer_IInetConnectionManager_t;
 //extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
@@ -146,12 +122,12 @@ struct FileServer_StreamConfiguration
   FileServer_StreamConfiguration ()
    : Stream_Configuration ()
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
-   , userData (NULL)
+   //, userData (NULL)
   {}
 
   enum Common_EventDispatchType dispatch;
 
-  struct Net_UserData*   userData;   // user data
+  //struct Net_UserData*   userData;   // user data
 };
 
 #endif

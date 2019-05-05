@@ -51,42 +51,10 @@
 #include "IRC_client_network.h"
 
 // forward declarations
-//struct IRC_Client_ConnectionConfiguration;
-struct IRC_Client_CursesState;
-//struct IRC_Client_SessionState;
-//class IRC_Record;
-//struct IRC_ModuleHandlerConfiguration;
-//class IRC_Client_Stream;
-//struct IRC_Stream_SessionData;
 struct Net_UserData;
-//typedef Net_IConnection_T<ACE_INET_Addr,
-//                          IRC_Client_ConnectionConfiguration_t,
-//                          struct IRC_Client_ConnectionState,
-//                          IRC_Statistic_t,
-//                          IRC_Client_Stream> IRC_Client_IConnection_t;
-//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-//                                 ACE_INET_Addr,
-//                                 IRC_Client_ConnectionConfiguration_t,
-//                                 struct IRC_Client_SessionState,
-//                                 IRC_Statistic_t,
-//                                 struct Net_UserData> IRC_Client_IConnection_Manager_t;
+struct IRC_Client_CursesState;
 
-//struct IRC_Client_ConnectorConfiguration
-//{
-//  IRC_Client_ConnectorConfiguration ()
-//   : /*configuration (NULL)
-//   ,*/ connectionManager (NULL)
-//   , socketHandlerConfiguration (NULL)
-//   //, statisticCollectionInterval (0)
-//  {}
-//
-//  //struct IRC_Client_Configuration*            configuration;
-//  IRC_Client_IConnection_Manager_t*             connectionManager;
-//  struct IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  unsigned int                                  statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
-//};
-
-struct IRC_Client_ConnectionConfiguration;
+class IRC_Client_ConnectionConfiguration;
 struct IRC_Client_InputHandlerConfiguration
 {
   IRC_Client_InputHandlerConfiguration ()
@@ -94,9 +62,9 @@ struct IRC_Client_InputHandlerConfiguration
    , connectionConfiguration (NULL)
   {}
 
-  IRC_IControl*                              controller;
+  IRC_IControl*                       controller;
 
-  struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
+  IRC_Client_ConnectionConfiguration* connectionConfiguration;
 };
 
 struct IRC_Client_Configuration

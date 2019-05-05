@@ -25,6 +25,7 @@
 #include "net_macros.h"
 
 template <ACE_SYNCH_DECL,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -32,6 +33,7 @@ template <ACE_SYNCH_DECL,
           typename TimerManagerType,
           typename UserDataType>
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
@@ -45,6 +47,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
 }
 
 template <ACE_SYNCH_DECL,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -53,6 +56,7 @@ template <ACE_SYNCH_DECL,
           typename UserDataType>
 int
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
@@ -191,6 +195,7 @@ retry:
 }
 
 template <ACE_SYNCH_DECL,
+          typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -199,6 +204,7 @@ template <ACE_SYNCH_DECL,
           typename UserDataType>
 int
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
+                        SocketHandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
@@ -253,31 +259,17 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
 continue_:
   ACE_ASSERT (inherited::writeBuffer_);
 
-//  // finished ?
-//  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection &&
-//                (inherited::writeBuffer_->msg_type () == ACE_Message_Block::MB_STOP)))
-//  {
-////       ACE_DEBUG ((LM_DEBUG,
-////                   ACE_TEXT ("[%u]: finished sending\n"),
-////                   peer_.get_handle ()));
-//
-//    // clean up
-//    inherited::writeBuffer_->release ();
-//    inherited::writeBuffer_ = NULL;
-//
-//    return -1; // <-- remove 'this' from dispatch
-//  } // end IF
-
   // place data into the socket
   // *TODO*: the iovec-based implementation kept blocking in
   //         ACE::handle_write_ready(), i.e. obviously currently does not work
-  //         with multi-threaded (thread pool) reactors...
+  //         (with multi-threaded (thread pool) reactors...)
   //         --> use 'traditional' method for now
   //size_t bytes_transferred = 0;
   //bytes_sent =
-  //    inherited::peer_.send_n (writeBuffer_, // buffer
+  //    inherited::peer_.send_n (writeBuffer_,        // buffer
   //                             NULL,                // timeout
   //                             &bytes_transferred); // bytes transferred
+  ACE_ASSERT (!inherited::writeBuffer_->cont ());
   bytes_sent =
     inherited::peer_.send_n (inherited::writeBuffer_->rd_ptr (),                    // data
                              static_cast<int> (inherited::writeBuffer_->length ()), // #bytes to send
@@ -313,17 +305,12 @@ continue_:
                     this->id (),
                     handle_in));
 #endif
-
       // *TODO*: remove type inference
       { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock, -1);
         if (likely (inherited::state_.status == NET_CONNECTION_STATUS_OK))
           inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
       } // end lock scope
-
-      // clean up
-      inherited::writeBuffer_->release ();
-      inherited::writeBuffer_ = NULL;
-
+      inherited::writeBuffer_->release (); inherited::writeBuffer_ = NULL;
       return -1; // <-- remove 'this' from dispatch
     }
     // *** GOOD CASES ***
@@ -340,44 +327,35 @@ continue_:
                   this->id (),
                   handle_in));
 #endif
-
       // *TODO*: remove type inference
       { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock, -1);
         if (likely (inherited::state_.status == NET_CONNECTION_STATUS_OK))
           inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
       } // end lock scope
-
-      // clean up
-      inherited::writeBuffer_->release ();
-      inherited::writeBuffer_ = NULL;
-
+      inherited::writeBuffer_->release (); inherited::writeBuffer_ = NULL;
       return -1; // <-- remove 'this' from dispatch
     }
     default:
     {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("0x%@: sent %u bytes\n"),
-//                  handle_in,
-//                  bytes_sent));
-//#else
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("%d: sent %u bytes\n"),
-//                  handle_in,
-//                  bytes_sent));
-//#endif
-
+#if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: sent %u bytes\n"),
+                  handle_in,
+                  bytes_sent));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: sent %u bytes\n"),
+                  handle_in,
+                  bytes_sent));
+#endif // ACE_WIN32 || ACE_WIN64
+#endif // _DEBUG
       // finished with this buffer ?
       inherited::writeBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
       if (unlikely (inherited::writeBuffer_->length () > 0))
         break; // there's more data
-
-      // clean up
-      inherited::writeBuffer_->release ();
-      inherited::writeBuffer_ = NULL;
-
+      inherited::writeBuffer_->release (); inherited::writeBuffer_ = NULL;
       result = 0;
-
       break;
     }
   } // end SWITCH
@@ -391,13 +369,15 @@ continue_:
 
 /////////////////////////////////////////
 
-template <typename ConfigurationType,
+template <typename SocketHandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
-Net_AsynchTCPConnectionBase_T<ConfigurationType,
+Net_AsynchTCPConnectionBase_T<SocketHandlerType,
+                              ConfigurationType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
@@ -409,14 +389,16 @@ Net_AsynchTCPConnectionBase_T<ConfigurationType,
 
 }
 
-template <typename ConfigurationType,
+template <typename SocketHandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 void
-Net_AsynchTCPConnectionBase_T<ConfigurationType,
+Net_AsynchTCPConnectionBase_T<SocketHandlerType,
+                              ConfigurationType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
@@ -516,14 +498,16 @@ error:
 #endif // ACE_WIN32 || ACE_WIN64
 }
 
-template <typename ConfigurationType,
+template <typename SocketHandlerType,
+          typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
 int
-Net_AsynchTCPConnectionBase_T<ConfigurationType,
+Net_AsynchTCPConnectionBase_T<SocketHandlerType,
+                              ConfigurationType,
                               StateType,
                               StatisticContainerType,
                               StreamType,

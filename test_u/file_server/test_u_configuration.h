@@ -50,43 +50,4 @@
 //#include "file_server_defines.h"
 //#include "file_server_stream_common.h"
 
-// forward declarations
-//struct Test_U_ConnectionState;
-//struct FileServer_ConnectionConfiguration;
-//struct FileServer_UserData;
-
-//typedef Net_IConnectionManager_T<ACE_INET_Addr,
-//                                 struct FileServer_ConnectionConfiguration,
-//                                 struct Test_U_ConnectionState,
-//                                 Net_RuntimeStatistic_t,
-//                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
-
-//struct Test_U_ProtocolConfiguration
-//{
-//  inline Test_U_ProtocolConfiguration ()
-//   : PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-//   , pingInterval (ACE_Time_Value::zero)
-//   , pingAutoAnswer (true)
-//   , printPongMessages (true)
-//  {};
-//
-//  unsigned int   PDUSize; // pdu size (if fixed)
-//  ACE_Time_Value pingInterval; // {0: off}
-//  bool           pingAutoAnswer;
-//  bool           printPongMessages;
-//};
-
-//struct Test_U_ConnectionConfiguration;
-//struct FileServer_Configuration
-// : Test_U_Configuration
-//{
-//  FileServer_Configuration ()
-//   : Test_U_Configuration ()
-//   , allocatorConfiguration ()
-//  {};
-
-//  // **************************** stream data **********************************
-//  struct Stream_AllocatorConfiguration allocatorConfiguration;
-//};
-
 #endif

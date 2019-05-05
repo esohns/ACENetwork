@@ -229,7 +229,7 @@ endif (WIN32 AND MSVC)
 if (UNIX)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
-# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${OPENSSL_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent $ENV{LIB_ROOT}/openssl/libcrypto.lib)
 
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
 endif ()

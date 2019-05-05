@@ -48,6 +48,9 @@
 
 #include "http_common.h"
 
+// forward declarations
+//struct HTTP_StreamConfiguration;
+
 //class HTTP_ConnectionConfiguration
 // : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
 //                                        struct HTTP_StreamConfiguration,
@@ -59,15 +62,15 @@
 //  {}
 //};
 
-//struct HTTP_ConnectionState
-// : Net_ConnectionState
-//{
-//  HTTP_ConnectionState ()
-//   : Net_ConnectionState ()
-//   , configuration (NULL)
-//  {}
+struct HTTP_ConnectionState
+ : Net_ConnectionState
+{
+  HTTP_ConnectionState ()
+   : Net_ConnectionState ()
+   //, configuration (NULL)
+  {}
 
-//  HTTP_ConnectionConfiguration* configuration;
-//};
+  //HTTP_ConnectionConfiguration* configuration;
+};
 
 #endif

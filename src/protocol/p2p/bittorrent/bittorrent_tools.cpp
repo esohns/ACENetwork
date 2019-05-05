@@ -554,14 +554,6 @@ BitTorrent_Tools::ListToString (const Bencoding_List_t& list_in)
 }
 
 std::string
-BitTorrent_Tools::MetaInfoToString (const Bencoding_Dictionary_t& metaInfo_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfoToString"));
-
-  return BitTorrent_Tools::DictionaryToString (metaInfo_in);
-}
-
-std::string
 BitTorrent_Tools::bencode (const Bencoding_Dictionary_t& dictionary_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::bencode"));

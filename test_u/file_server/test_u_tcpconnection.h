@@ -45,6 +45,7 @@ class Test_U_Stream;
 
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+                                  Net_TCPSocketHandler_t,
                                   FileServer_TCPConnectionConfiguration,
                                   struct Net_ConnectionState,
                                   Net_Statistic_t,
@@ -53,6 +54,7 @@ class Test_U_TCPConnection
                                   struct Net_UserData>
 {
   typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+                                  Net_TCPSocketHandler_t,
                                   FileServer_TCPConnectionConfiguration,
                                   struct Net_ConnectionState,
                                   Net_Statistic_t,
@@ -80,14 +82,16 @@ class Test_U_TCPConnection
 //////////////////////////////////////////
 
 class Test_U_AsynchTCPConnection
- : public Net_AsynchTCPConnectionBase_T<FileServer_TCPConnectionConfiguration,
+ : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
+                                        FileServer_TCPConnectionConfiguration,
                                         struct Net_ConnectionState,
                                         Net_Statistic_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
                                         struct Net_UserData>
 {
-  typedef Net_AsynchTCPConnectionBase_T<FileServer_TCPConnectionConfiguration,
+  typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
+                                        FileServer_TCPConnectionConfiguration,
                                         struct Net_ConnectionState,
                                         Net_Statistic_t,
                                         Test_U_Stream,

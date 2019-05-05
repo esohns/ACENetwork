@@ -58,9 +58,9 @@ enum Net_LinkLayerType
 {
   NET_LINKLAYER_802_3   = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
   NET_LINKLAYER_802_11  = 0x02, // i.e. Wireless LAN aka 'WLAN' (EU; US: 'WiFi')
-  NET_LINKLAYER_ATM     = 0x04,
-  NET_LINKLAYER_FDDI    = 0x08,
-  NET_LINKLAYER_PPP     = 0x10,
+  NET_LINKLAYER_PPP     = 0x04,
+  NET_LINKLAYER_FDDI    = 0x10,
+  NET_LINKLAYER_ATM     = 0x11,
   ////////////////////////////////////////
   NET_LINKLAYER_MAX,
   NET_LINKLAYER_INVALID = -1,
@@ -79,8 +79,8 @@ enum Net_NetworkLayerType
 enum Net_TransportLayerType
 {
   NET_TRANSPORTLAYER_INVALID = -1,
-  NET_TRANSPORTLAYER_IP_CAST = 0, // 'pseudo' (LAN-only, no flow control)
-  NET_TRANSPORTLAYER_NETLINK, // 'pseudo' ((Linux-)host only, no flow control) kernel<->user space protocol
+  NET_TRANSPORTLAYER_IP_CAST = 0,  // 'pseudo' (LAN-only, no flow control)
+  NET_TRANSPORTLAYER_NETLINK,      // 'pseudo' ((Linux-)host only, no flow control) kernel<->user space protocol
   NET_TRANSPORTLAYER_TCP,
   NET_TRANSPORTLAYER_UDP,
   ////////////////////////////////////////
@@ -200,7 +200,7 @@ class Net_Netlink_Addr
 };
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
-typedef Stream_Statistic Net_Statistic_t;
+typedef struct Stream_Statistic Net_Statistic_t;
 typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;
 typedef Common_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
 

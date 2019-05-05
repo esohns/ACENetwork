@@ -55,10 +55,10 @@ struct WLANMonitor_UI_GTK_Configuration
 {
   WLANMonitor_UI_GTK_Configuration ()
    : Common_UI_GTK_Configuration_t ()
-   , interface (NULL)
+   , definition (NULL)
   {}
 
-  WLANMonitor_UI_GTK_IDefinition_t* interface;
+  WLANMonitor_UI_GTK_IDefinition_t* definition;
 };
 #endif // GTK_USE
 #endif // GUI_SUPPORT

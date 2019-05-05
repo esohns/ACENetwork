@@ -580,12 +580,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 //      ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
 
 //      // step2aa: set up the socket configuration
-//      // *TODO*: remove type inferences
-//      ACE_ASSERT ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
-//      socket_configuration_p =
-//        dynamic_cast<struct Net_UDPSocketConfiguration*> ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
-//      ACE_ASSERT (socket_configuration_p);
-//      write_only = socket_configuration_p->writeOnly;
+//      write_only = (*iterator).second->writeOnly;
 //      socket_configuration_p->writeOnly = true;
 
 //      // step2ab: set up the connection manager
@@ -960,7 +955,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename TimerManagerType>
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
                         ControlMessageType,
@@ -974,12 +969,12 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         SessionDataContainerType,
                         StatisticContainerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                        StatisticHandlerType>::DHCP_Module_DiscoverH_T (ISTREAM_T* stream_in,
+                        TimerManagerType>::DHCP_Module_DiscoverH_T (ISTREAM_T* stream_in,
 #else
-                        StatisticHandlerType>::DHCP_Module_DiscoverH_T (typename inherited::ISTREAM_T* stream_in,
+                        TimerManagerType>::DHCP_Module_DiscoverH_T (typename inherited::ISTREAM_T* stream_in,
 #endif
-                                                                        bool autoStart_in,
-                                                                        bool generateSessionMessages_in)
+                                                                    bool autoStart_in,
+                                                                    bool generateSessionMessages_in)
  : inherited (stream_in,
               autoStart_in,
               STREAM_HEADMODULECONCURRENCY_PASSIVE,
@@ -1002,7 +997,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename TimerManagerType>
 bool
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1016,7 +1011,7 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         SessionDataType,
                         SessionDataContainerType,
                         StatisticContainerType,
-                        StatisticHandlerType>::initialize (const ConfigurationType& configuration_in,
+                        TimerManagerType>::initialize (const ConfigurationType& configuration_in,
                                                            Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::initialize"));
@@ -1046,7 +1041,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename TimerManagerType>
 void
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1060,7 +1055,7 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         SessionDataType,
                         SessionDataContainerType,
                         StatisticContainerType,
-                        StatisticHandlerType>::handleDataMessage (DataMessageType*& message_inout,
+                        TimerManagerType>::handleDataMessage (DataMessageType*& message_inout,
                                                                   bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleDataMessage"));
@@ -1081,7 +1076,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename TimerManagerType>
 void
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1095,7 +1090,7 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         SessionDataType,
                         SessionDataContainerType,
                         StatisticContainerType,
-                        StatisticHandlerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                        TimerManagerType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                      bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleSessionMessage"));
@@ -1109,10 +1104,10 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
     {
       // retain session ID for reporting
       const SessionDataContainerType& session_data_container_r =
-          message_inout->get ();
-      const SessionDataType& session_data_r = session_data_container_r.get ();
+          message_inout->getR ();
+      const SessionDataType& session_data_r = session_data_container_r.getR ();
       ACE_ASSERT (inherited::streamState_);
-      ACE_ASSERT (inherited::streamState_->currentSessionData);
+      ACE_ASSERT (inherited::streamState_->sessionData);
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
       inherited::streamState_->sessionData->sessionId =
           session_data_r.sessionId;
@@ -1140,7 +1135,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename TimerManagerType>
 bool
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1154,14 +1149,14 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         SessionDataType,
                         SessionDataContainerType,
                         StatisticContainerType,
-                        StatisticHandlerType>::collect (StatisticContainerType& data_out)
+                        TimerManagerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::collect"));
 
   // step1: initialize info container POD
   data_out.bytes = 0.0;
   data_out.dataMessages = 0;
-  data_out.droppedMessages = 0;
+  //data_out.droppedMessages = 0;
   data_out.timeStamp = COMMON_TIME_NOW;
 
   // *NOTE*: information is collected by the statistic module (if any)
@@ -1176,70 +1171,3 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
 
   return true;
 }
-
-//template <typename LockType,
-//          ACE_SYNCH_DECL,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename DataMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//bool
-//DHCP_Module_DiscoverH_T<LockType,
-//                        ACE_SYNCH_USE,
-//                        TimePolicyType,
-//                        SessionMessageType,
-//                        DataMessageType,
-//                        ConfigurationType,
-//                        StreamStateType,
-//                        SessionDataType,
-//                        SessionDataContainerType,
-//                        StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::putStatisticMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::configuration_);
-//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-//
-////  // step1: initialize session data
-////  IRC_StreamSessionData* session_data_p = NULL;
-////  ACE_NEW_NORETURN (session_data_p,
-////                    IRC_StreamSessionData ());
-////  if (!session_data_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-////    return false;
-////  } // end IF
-////  //ACE_OS::memset (data_p, 0, sizeof (IRC_SessionData));
-//  SessionDataType& session_data_r =
-//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-//  session_data_r.currentStatistic = statisticData_in;
-//
-////  // step2: allocate session data container
-////  IRC_StreamSessionData_t* session_data_container_p = NULL;
-////  // *NOTE*: fire-and-forget stream_session_data_p
-////  ACE_NEW_NORETURN (session_data_container_p,
-////                    IRC_StreamSessionData_t (stream_session_data_p,
-////                                                    true));
-////  if (!session_data_container_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//
-////    // clean up
-////    delete stream_session_data_p;
-//
-////    return false;
-////  } // end IF
-//
-//  // step3: send the data downstream...
-//  // *NOTE*: fire-and-forget session_data_container_p
-//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-//                                       *inherited::sessionData_,
-//                                       inherited::configuration_->streamConfiguration->messageAllocator);
-//}

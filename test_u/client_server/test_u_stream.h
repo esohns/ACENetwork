@@ -60,7 +60,7 @@ class Test_U_Stream
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_StreamState,
                                         struct Test_U_StreamConfiguration,
-                                        Test_U_Statistic_t,
+                                        Net_Statistic_t,
                                         Common_Timer_Manager_t,
                                         struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
@@ -82,7 +82,7 @@ class Test_U_Stream
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_StreamState,
                                         struct Test_U_StreamConfiguration,
-                                        Test_U_Statistic_t,
+                                        Net_Statistic_t,
                                         Common_Timer_Manager_t,
                                         struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
@@ -117,7 +117,7 @@ class Test_U_Stream
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Test_U_Statistic_t&); // return value: statistic data
+  virtual bool collect (Net_Statistic_t&); // return value: statistic data
   virtual void report () const;
 
  private:

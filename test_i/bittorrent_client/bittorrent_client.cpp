@@ -619,8 +619,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize configuration (part 2)
-  //peer_connection_configuration.socketHandlerConfiguration.bufferSize =
-  //  BITTORRENT_CLIENT_BUFFER_SIZE;
+  //peer_connection_configuration.bufferSize = BITTORRENT_CLIENT_BUFFER_SIZE;
   peer_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
 

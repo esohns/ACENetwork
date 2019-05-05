@@ -55,7 +55,7 @@ class Test_U_Message;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  DHCPClient_ConnectionConfiguration,
-                                 struct DHCPClient_ConnectionState,
+                                 struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,
                                  struct Net_UserData> DHCPClient_ConnectionManager_t;
 
@@ -74,7 +74,7 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      DHCPClient_ConnectionManager_t,
-                                     struct Net_UserData> DHCPClient_Module_Net_Writer_t;
+                                     struct Stream_UserData> DHCPClient_Module_Net_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      DHCPClient_ControlMessage_t,
                                      Test_U_Message,
@@ -89,7 +89,7 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      DHCPClient_ConnectionManager_t,
-                                     struct Net_UserData> DHCPClient_Module_Net_Reader_t;
+                                     struct Stream_UserData> DHCPClient_Module_Net_Reader_t;
 
 typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -113,7 +113,7 @@ typedef DHCP_Module_DiscoverH_T<ACE_MT_SYNCH,
                                 struct DHCPClient_SessionData,
                                 DHCPClient_SessionData_t,
                                 DHCP_Statistic_t,
-                                DHCP_StatisticHandler_t> DHCPClient_Module_DHCPDiscoverH;
+                                Common_Timer_Manager_t> DHCPClient_Module_DHCPDiscoverH;
 
 typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -158,7 +158,7 @@ typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              DHCPClient_ControlMessage_t,
                              Test_U_Message,
                              Test_U_SessionMessage,
-                             struct Net_UserData> DHCPClient_Module_Dump;
+                             struct Stream_UserData> DHCPClient_Module_Dump;
 
 // declare module(s)
 DATASTREAM_MODULE_DUPLEX (struct DHCPClient_SessionData,                  // session data type

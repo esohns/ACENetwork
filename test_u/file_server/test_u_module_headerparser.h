@@ -52,8 +52,20 @@ class Test_U_Module_HeaderParser
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Net_UserData>
+                                 struct Stream_UserData>
 {
+  typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 Common_ILock_T<ACE_MT_SYNCH>,
+                                 struct Stream_ModuleHandlerConfiguration,
+                                 ACE_Message_Block,
+                                 Test_U_Message,
+                                 Test_U_SessionMessage,
+                                 Stream_SessionId_t,
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_UserData> inherited;
+
  public:
   Test_U_Module_HeaderParser (ISTREAM_T*); // stream handle
   inline virtual ~Test_U_Module_HeaderParser () {}
@@ -66,18 +78,6 @@ class Test_U_Module_HeaderParser
   virtual void dump_state () const;
 
  private:
-  typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
-                                 Common_TimePolicy_t,
-                                 Common_ILock_T<ACE_MT_SYNCH>,
-                                 struct Stream_ModuleHandlerConfiguration,
-                                 ACE_Message_Block,
-                                 Test_U_Message,
-                                 Test_U_SessionMessage,
-                                 Stream_SessionId_t,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 struct Net_UserData> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser ());
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser (const Test_U_Module_HeaderParser&));
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser& operator= (const Test_U_Module_HeaderParser&));

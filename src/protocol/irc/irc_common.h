@@ -28,12 +28,6 @@
 
 #include "stream_common.h"
 
-//#include "irc_icontrol.h"
-
-// forward declarations
-struct IRC_Configuration;
-//struct IRC_UserData;
-
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
 enum IRC_CharacterEncoding
@@ -175,6 +169,7 @@ struct IRC_LoginOptions
 
 //////////////////////////////////////////
 
+// *TODO*
 typedef struct Stream_Statistic IRC_Statistic_t;
 typedef Common_StatisticHandler_T<IRC_Statistic_t> IRC_StatisticHandler_t;
 

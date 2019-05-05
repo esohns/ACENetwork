@@ -63,9 +63,11 @@ Net_WLAN_Monitor_T<//AddressType,
                    ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
-                   UserDataType>::start ()
+                   UserDataType>::start (ACE_thread_t& threadId_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
+
+  ACE_UNUSED_ARG (threadId_out);
 
   // sanity check(s)
   if (unlikely (!inherited::isInitialized_))

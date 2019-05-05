@@ -170,12 +170,13 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
           return;
         } // end IF
         // step1: initialize reply
-        Net_Remote_Comm::PongMessage* pong_struct =
+        ACE_ASSERT (message_p->capacity () >= sizeof (Net_Remote_Comm::PongMessage));
+        Net_Remote_Comm::PongMessage* pong_p =
           reinterpret_cast<Net_Remote_Comm::PongMessage*> (message_p->wr_ptr ());
-        ACE_OS::memset (pong_struct, 0, sizeof (Net_Remote_Comm::PongMessage));
-        pong_struct->header.length =
-          sizeof (Net_Remote_Comm::PongMessage) - sizeof (unsigned int);
-        pong_struct->header.type =
+        //ACE_OS::memset (pong_p, 0, sizeof (Net_Remote_Comm::PongMessage));
+        pong_p->header.length =
+          sizeof (Net_Remote_Comm::PongMessage) - sizeof (pong_p->header.length);
+        pong_p->header.type =
           Net_Remote_Comm::NET_MESSAGE_PONG;
         message_p->wr_ptr (sizeof (Net_Remote_Comm::PongMessage));
         // step2: send it upstream
@@ -185,10 +186,7 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("%s: failed to ACE_Task::reply(): \"%m\", returning\n"),
                       inherited::mod_->name ()));
-
-          // clean up
-          message_p->release ();
-
+          message_p->release (); message_p = NULL;
           return;
         } // end IF
       } // end IF
@@ -315,7 +313,7 @@ Test_U_Module_ProtocolHandler::handle (const void* arg_in)
   // step0: get a message buffer
   Test_U_Message* message_p =
       inherited::allocateMessage (sizeof (Net_Remote_Comm::PingMessage));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to allocate ping message(%u), returning\n"),
@@ -325,33 +323,27 @@ Test_U_Module_ProtocolHandler::handle (const void* arg_in)
   } // end IF
 
   // step1: initialize message data
+  ACE_ASSERT (message_p->capacity () >= sizeof (Net_Remote_Comm::PingMessage));
   // *TODO*: handle endianness consistently !
-  Net_Remote_Comm::PingMessage* ping_struct =
+  Net_Remote_Comm::PingMessage* ping_p =
     reinterpret_cast<Net_Remote_Comm::PingMessage*> (message_p->wr_ptr ());
-  ACE_OS::memset (ping_struct, 0, sizeof (Net_Remote_Comm::PingMessage));
-  ping_struct->header.length =
+  //ACE_OS::memset (ping_p, 0, sizeof (Net_Remote_Comm::PingMessage));
+  ping_p->header.length =
     (sizeof (Net_Remote_Comm::PingMessage) - sizeof (unsigned int));
-  ping_struct->header.type = Net_Remote_Comm::NET_MESSAGE_PING;
-  ping_struct->counter = counter_++;
+  ping_p->header.type = Net_Remote_Comm::NET_MESSAGE_PING;
+  ping_p->counter = counter_++;
   message_p->wr_ptr (sizeof (Net_Remote_Comm::PingMessage));
 
   // step2: send it upstream
   int result = inherited::reply (message_p, NULL);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_Task::reply(): \"%m\", returning\n"),
                 inherited::mod_->name ()));
-
-    // clean up
-    message_p->release ();
-
+    message_p->release (); message_p = NULL;
     return;
   } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("%s: session %u: scheduled ping message\n"),
-//              inherited::mod_->name (),
-//              sessionId_));
 }
 
 void

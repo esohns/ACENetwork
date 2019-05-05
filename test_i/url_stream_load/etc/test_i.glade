@@ -9,7 +9,6 @@
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
-    <property name="has_resize_grip">False</property>
     <property name="program_name">URL stream load</property>
     <property name="version">0.1</property>
     <property name="website">http://www.github.com/esohns/libACENetwork</property>
@@ -41,8 +40,6 @@
   </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
-    <property name="hexpand">True</property>
-    <property name="vexpand">True</property>
     <property name="border_width">5</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
@@ -50,29 +47,21 @@
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="hbox_main">
+          <object class="GtkHBox" id="hbox_main">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">start</property>
-            <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
             <child>
-              <object class="GtkBox" id="vbox_main">
+              <object class="GtkVBox" id="vbox_main">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="valign">start</property>
-                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkBox" id="box_actions_information">
+                  <object class="GtkHBox" id="hbox_actions_information">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkButtonBox" id="buttonbox_actions">
+                      <object class="GtkVButtonBox" id="buttonbox_actions">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="orientation">vertical</property>
                         <property name="homogeneous">True</property>
                         <property name="layout_style">start</property>
                         <child>
@@ -167,7 +156,6 @@
                                         <property name="xalign">1</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="caps_lock_warning">False</property>
-                                        <property name="input_purpose">number</property>
                                         <property name="numeric">True</property>
                                         <property name="wrap">True</property>
                                       </object>
@@ -190,7 +178,6 @@
                                         <property name="xalign">1</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="caps_lock_warning">False</property>
-                                        <property name="input_purpose">number</property>
                                         <property name="numeric">True</property>
                                         <property name="wrap">True</property>
                                       </object>
@@ -235,7 +222,6 @@
                                     <property name="xalign">1</property>
                                     <property name="invisible_char_set">True</property>
                                     <property name="caps_lock_warning">False</property>
-                                    <property name="input_purpose">number</property>
                                     <property name="numeric">True</property>
                                   </object>
                                   <packing>
@@ -334,10 +320,9 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="vbox_configuration">
+                  <object class="GtkVBox" id="vbox_configuration">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkFrame" id="frame_url">
                         <property name="visible">True</property>
@@ -364,9 +349,6 @@
                                 <property name="primary_icon_activatable">False</property>
                                 <property name="primary_icon_sensitive">False</property>
                                 <property name="primary_icon_tooltip_text" translatable="yes">URL</property>
-                                <property name="placeholder_text">enter stream URL (e.g. https://www.youtube.com/watch?v=fvq5uhqGCWM&amp;list=RDGMEMYH9CUrFO7CfLJpaD7UR85wVMfvq5uhqGCWM)</property>
-                                <property name="completion">entrycompletion_url</property>
-                                <property name="input_purpose">url</property>
                                 <signal name="activate" handler="entry_url_activate_cb" swapped="no"/>
                               </object>
                             </child>
@@ -429,59 +411,25 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkGrid" id="grid_options">
+                              <object class="GtkHBox" id="hbox_options">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="row_homogeneous">True</property>
-                                <property name="column_homogeneous">True</property>
                                 <child>
-                                  <object class="GtkBox" id="hbox_options">
+                                  <object class="GtkVBox" id="vbox_options">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="homogeneous">True</property>
                                     <child>
-                                      <object class="GtkBox" id="vbox_options">
+                                      <object class="GtkCheckButton" id="checkbutton_fullscreen">
+                                        <property name="label">gtk-fullscreen</property>
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="orientation">vertical</property>
-                                        <property name="homogeneous">True</property>
-                                        <child>
-                                          <object class="GtkCheckButton" id="checkbutton_fullscreen">
-                                            <property name="label">gtk-fullscreen</property>
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="relief">half</property>
-                                            <property name="use_stock">True</property>
-                                            <property name="focus_on_click">False</property>
-                                            <property name="xalign">0</property>
-                                            <property name="draw_indicator">True</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkCheckButton" id="checkbutton_save">
-                                            <property name="label">gtk-save</property>
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="has_tooltip">True</property>
-                                            <property name="tooltip_text" translatable="yes">save to file</property>
-                                            <property name="relief">half</property>
-                                            <property name="use_stock">True</property>
-                                            <property name="focus_on_click">False</property>
-                                            <property name="xalign">0</property>
-                                            <property name="draw_indicator">True</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="relief">half</property>
+                                        <property name="use_stock">True</property>
+                                        <property name="focus_on_click">False</property>
+                                        <property name="xalign">0</property>
+                                        <property name="draw_indicator">True</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -490,51 +438,19 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkBox" id="vbox_options_misc">
+                                      <object class="GtkCheckButton" id="checkbutton_save">
+                                        <property name="label">gtk-save</property>
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="orientation">vertical</property>
-                                        <property name="homogeneous">True</property>
-                                        <child>
-                                          <object class="GtkCheckButton" id="checkbutton_asynch">
-                                            <property name="label" translatable="yes">Asynchronous</property>
-                                            <property name="visible">True</property>
-                                            <property name="sensitive">False</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="has_tooltip">True</property>
-                                            <property name="tooltip_text" translatable="yes">asynchronous event dispatch</property>
-                                            <property name="relief">half</property>
-                                            <property name="focus_on_click">False</property>
-                                            <property name="xalign">0</property>
-                                            <property name="draw_indicator">True</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkCheckButton" id="checkbutton_loopback">
-                                            <property name="label">Loopback</property>
-                                            <property name="visible">True</property>
-                                            <property name="sensitive">False</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="receives_default">False</property>
-                                            <property name="has_tooltip">True</property>
-                                            <property name="tooltip_text" translatable="yes">loopback interface</property>
-                                            <property name="relief">half</property>
-                                            <property name="focus_on_click">False</property>
-                                            <property name="xalign">0</property>
-                                            <property name="draw_indicator">True</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_markup" translatable="yes">save to file</property>
+                                        <property name="tooltip_text" translatable="yes">save to file</property>
+                                        <property name="relief">half</property>
+                                        <property name="use_stock">True</property>
+                                        <property name="focus_on_click">False</property>
+                                        <property name="xalign">0</property>
+                                        <property name="draw_indicator">True</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -544,10 +460,63 @@
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">0</property>
-                                    <property name="top_attach">0</property>
-                                    <property name="width">1</property>
-                                    <property name="height">1</property>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkVBox" id="vbox_options_misc">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkCheckButton" id="checkbutton_asynch">
+                                        <property name="label" translatable="yes">Asynchronous</property>
+                                        <property name="visible">True</property>
+                                        <property name="sensitive">False</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_markup" translatable="yes">asynchronous event dispatch</property>
+                                        <property name="tooltip_text" translatable="yes">asynchronous event dispatch</property>
+                                        <property name="relief">half</property>
+                                        <property name="focus_on_click">False</property>
+                                        <property name="xalign">0</property>
+                                        <property name="draw_indicator">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkCheckButton" id="checkbutton_loopback">
+                                        <property name="label">Loopback</property>
+                                        <property name="visible">True</property>
+                                        <property name="sensitive">False</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">False</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_markup" translatable="yes">loopback interface</property>
+                                        <property name="tooltip_text" translatable="yes">loopback interface</property>
+                                        <property name="relief">half</property>
+                                        <property name="focus_on_click">False</property>
+                                        <property name="xalign">0</property>
+                                        <property name="draw_indicator">True</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                               </object>
@@ -585,8 +554,6 @@
                 <property name="can_focus">False</property>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_text" translatable="yes">video</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -602,11 +569,9 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="hbox_status">
+          <object class="GtkHBox" id="hbox_status">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="valign">start</property>
-            <property name="hexpand">True</property>
             <child>
               <object class="GtkSpinner" id="spinner">
                 <property name="visible">True</property>
@@ -658,10 +623,8 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="action_area_dialog">
+          <object class="GtkHButtonBox" id="action_area_dialog">
             <property name="can_focus">False</property>
-            <property name="valign">start</property>
-            <property name="hexpand">True</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="button_about">
@@ -713,8 +676,5 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkEntryCompletion" id="entrycompletion_url">
-    <property name="inline_completion">True</property>
   </object>
 </interface>

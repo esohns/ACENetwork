@@ -159,7 +159,24 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 
   // abort ?
   if (abort)
-    iconnection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
+  {
+    switch (protocol_)
+    {
+      case NET_TRANSPORTLAYER_TCP:
+        iconnection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
+        break;
+      case NET_TRANSPORTLAYER_UDP:
+        iconnection_manager_2->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
+        break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                    protocol_));
+        return;
+      }
+    } // end SWITCH
+  } // end IF
 
   Test_U_ITCPConnector_t* tcp_connector_p = NULL;
   Test_U_IUDPConnector_t* udp_connector_p = NULL;

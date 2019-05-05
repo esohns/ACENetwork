@@ -45,7 +45,6 @@ struct DHCP_Configuration;
 struct DHCP_Record;
 class DHCP_SessionMessage;
 struct DHCP_Stream_SessionData;
-struct DHCP_Stream_UserData;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     struct DHCP_Stream_SessionData,
@@ -128,20 +127,15 @@ struct DHCP_ConnectionState
 {
   DHCP_ConnectionState ()
    : Net_ConnectionState ()
-   , configuration (NULL)
-   , userData (NULL)
    , serverAddress (static_cast<u_short> (0),
                     static_cast<ACE_UINT32> (INADDR_ANY))
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
   {}
 
-  struct DHCP_Configuration*   configuration;
-  struct DHCP_Stream_UserData* userData;
-
-  ACE_INET_Addr                serverAddress;
-  ACE_Time_Value               timeStamp; // lease timeout
-  ACE_UINT32                   xid;       // session id
+  ACE_INET_Addr  serverAddress;
+  ACE_Time_Value timeStamp; // lease timeout
+  ACE_UINT32     xid;       // session id
 };
 
 #endif

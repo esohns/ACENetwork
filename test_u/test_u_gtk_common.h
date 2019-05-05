@@ -54,12 +54,12 @@ struct Test_U_GTK_ProgressData
    , transferred (0)
    , statistic ()
   {
-    ACE_OS::memset (&statistic, 0, sizeof (Test_U_Statistic_t));
+    ACE_OS::memset (&statistic, 0, sizeof (Net_Statistic_t));
   }
 
-  size_t             size; // bytes
-  size_t             transferred; // bytes
-  Test_U_Statistic_t statistic;
+  size_t          size; // bytes
+  size_t          transferred; // bytes
+  Net_Statistic_t statistic;
 };
 
 struct Test_U_GTK_CBData

@@ -213,7 +213,7 @@ Test_U_Stream::ping ()
 }
 
 bool
-Test_U_Stream::collect (Test_U_Statistic_t& data_out)
+Test_U_Stream::collect (Net_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::collect"));
 

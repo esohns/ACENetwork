@@ -941,10 +941,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
     Test_I_TCPConnector_t connector (true);
-#if defined (SSL_SUPPORT)
-    Test_I_SSLTCPConnector_t ssl_connector (iconnection_manager_p,
-                                            (*iterator_3).second.second.statisticReportingInterval);
-#endif
+#if defined (SSL_USE)
+    Test_I_SSLConnector_t ssl_connector (true);
+#endif // SSL_USE
     Test_I_AsynchTCPConnector_t asynch_connector (true);
     Test_I_IConnector_t* iconnector_p = NULL;
     Test_I_IStreamConnection_t* istream_connection_p = NULL;
@@ -1061,19 +1060,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
     {
-#if defined (SSL_SUPPORT)
+#if defined (SSL_USE)
       if (use_SSL)
         iconnector_p = &ssl_connector;
       else
-#endif // SSL_SUPPORT
+#endif // SSL_USE
         iconnector_p = &connector;
     } // end IF
     else
     {
-#if defined (SSL_SUPPORT)
+#if defined (SSL_USE)
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
-#endif // SSL_SUPPORT
+#endif // SSL_USE
       iconnector_p = &asynch_connector;
     } // end ELSE
     if (!iconnector_p->initialize (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)))
@@ -1148,7 +1147,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened TCP socket to %s\n"),
@@ -1186,10 +1185,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-
-      // clean up
-      delete HTTP_record_p;
-
+      delete HTTP_record_p; HTTP_record_p = NULL;
       goto error;
     } // end IF
     // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
@@ -1207,14 +1203,12 @@ allocate:
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
-
-      // clean up
-      delete message_data_p;
-
+      delete message_data_p; message_data_p = NULL;
       goto error;
     } // end IF
     // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
     message_p->initialize (message_data_p,
+                           message_p->sessionId (),
                            NULL);
 
     //Test_I_ConnectionStream& stream_r =

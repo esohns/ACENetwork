@@ -28,7 +28,6 @@
 #include "common.h"
 
 #include "bittorrent_common.h"
-//#include "bittorrent_exports.h"
 
 class BitTorrent_Tools
 {
@@ -38,7 +37,7 @@ class BitTorrent_Tools
   // debug info
   static std::string DictionaryToString (const Bencoding_Dictionary_t&);
   static std::string ListToString (const Bencoding_List_t&);
-  static std::string MetaInfoToString (const Bencoding_Dictionary_t&);
+  inline static std::string MetaInfoToString (const Bencoding_Dictionary_t& metaInfo_in) { return BitTorrent_Tools::DictionaryToString (metaInfo_in); }
 
   static std::string HandShakeToString (const struct BitTorrent_PeerHandShake&);
   static std::string RecordToString (const struct BitTorrent_PeerRecord&);
@@ -69,7 +68,6 @@ class BitTorrent_Tools
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
-  //ACE_UNIMPLEMENTED_FUNC (~BitTorrent_Tools ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools (const BitTorrent_Tools&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools& operator= (const BitTorrent_Tools&))
 

@@ -1,86 +1,17 @@
-﻿option (SSL_SUPPORT "enable SSL support" OFF)
-
-if (UNIX)
- include (CheckLibraryExists)
-# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- set (CMAKE_THREAD_PREFER_PTHREAD ON)
- find_package (Threads)
-endif (UNIX)
-
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_LIB_FILE}"
-                NO_DEFAULT_PATH)
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-endif (NOT ACE_LIBRARY)
-
-if (SSL_SUPPORT)
- set (ACE_SSL_LIB_FILE libACE_SSL.so)
- if (UNIX)
-  if (DEFINED ENV{ACE_ROOT})
-   find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-#                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
-                 PATHS ENV ACE_ROOT
-                 PATH_SUFFIXES lib
-                 DOC "searching for ${ACE_SSL_LIB_FILE}"
-                 NO_DEFAULT_PATH)
-  else ()
-   find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-                 DOC "searching for ${ACE_SSL_LIB_FILE} (system paths)")
-  endif ()
- elseif (WIN32)
-  if (CMAKE_BUILD_TYPE STREQUAL Debug)
-   set (LIB_FILE_SUFFIX d)
-  endif ()
-  unset (ACE_SSL_LIB_FILE)
-  set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
-  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
-                DOC "searching for ${ACE_SSL_LIB_FILE}"
-                NO_DEFAULT_PATH)
- endif ()
- #if (NOT EXISTS ACE_LIBRARY)
- if (NOT ACE_SSL_LIBRARY)
-  message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
- endif ()
-endif ()
-
+﻿
 set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
 #                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
-                PATHS ENV ACE_ROOT
+                PATHS ENV{ACE_ROOT}
                 PATH_SUFFIXES lib
                 DOC "searching for ${ACE_XML_LIB_FILE}"
                 NO_DEFAULT_PATH)
  else ()
   find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
                 HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
-#                PATHS ENV ACE_ROOT
+#                PATHS ENV{ACE_ROOT}
                 PATH_SUFFIXES lib
                 DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
  endif ()
@@ -104,6 +35,7 @@ endif ()
 if (NOT ACE_XML_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
 endif ()
+
 set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
@@ -140,17 +72,6 @@ endif ()
 if (NOT ACE_XML_PARSER_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
 endif ()
-
-if (UNIX)
- if (SSL_SUPPORT)
-  pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
- endif ()
-
-# if (DBUS_SUPPORT)
-#  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-# endif ()
-# pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libswscale)
-endif (UNIX)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -189,9 +110,6 @@ endif ()
 add_definitions (-DNET_HAS_DLL)
 add_definitions (-DHTTP_HAS_DLL)
 
-if (SSL_SUPPORT)
- add_definitions (-DSSL_SUPPORT)
-endif (SSL_SUPPORT)
 #add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
@@ -296,6 +214,10 @@ if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
+if (WIN32)
+ set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
+endif (WIN32)
+
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
 add_dependencies (${EXECUTABLE} CommonLog)
@@ -307,10 +229,10 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE} ${SSL_LIBRARIES})
+endif ()
 if (UNIX)
- if (SSL_SUPPORT)
-  target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
- endif ()
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
 elseif (WIN32)
  set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
@@ -321,11 +243,6 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} mfplat.lib)
 
 # *TODO*: repair WIN32 pkgconfig support
- if (SSL_SUPPORT)
-  #target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
-  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
- endif (SSL_SUPPORT)
-
  target_link_libraries (${EXECUTABLE} ${ACE_XML_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${ACE_XML_PARSER_LIBRARY})
 

@@ -52,7 +52,6 @@ struct Test_U_ModuleHandlerConfiguration;
 struct FileServer_SessionData;
 typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 class Test_U_SessionMessage;
-struct Net_UserData;
 
 extern const char stream_name_string_[];
 
@@ -77,7 +76,7 @@ class Test_U_Stream
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         FileServer_TCPConnectionManager_t,
-                                        struct Net_UserData>
+                                        struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -99,7 +98,7 @@ class Test_U_Stream
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         FileServer_TCPConnectionManager_t,
-                                        struct Net_UserData> inherited;
+                                        struct Stream_UserData> inherited;
 
  public:
   Test_U_Stream ();
@@ -144,7 +143,7 @@ class Test_U_UDPStream
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         FileServer_UDPConnectionManager_t,
-                                        struct Net_UserData>
+                                        struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -166,7 +165,7 @@ class Test_U_UDPStream
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         FileServer_UDPConnectionManager_t,
-                                        struct Net_UserData> inherited;
+                                        struct Stream_UserData> inherited;
 
  public:
   Test_U_UDPStream ();

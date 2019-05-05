@@ -530,8 +530,7 @@ do_work (unsigned int bufferSize_in,
   } // end IF
   connection_configuration.useLoopBackDevice =
     connection_configuration.address.is_loopback ();
-//  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
-//    true;
+//  connection_configuration.writeOnly = true;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
@@ -715,22 +714,21 @@ do_work (unsigned int bufferSize_in,
   ACE_Message_Block* message_block_p = NULL;
   if (useReactor_in)
   {
-#if defined (SSL_SUPPORT)
+#if defined (SSL_USE)
     if (port_in == HTTPS_DEFAULT_SERVER_PORT)
       ACE_NEW_NORETURN (iconnector_p,
-                        Test_U_SSLTCPConnector_t (connection_manager_p,
-                                                  (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
+                        Test_U_SSLConnector_t (true));
     else
-#endif
+#endif // SSL_USE
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_TCPConnector_t (true));
   } // end IF
   else
   {
-#if defined (SSL_SUPPORT)
+#if defined (SSL_USE)
     // *TODO*: add SSL support to the proactor framework
     ACE_ASSERT (port_in != HTTPS_DEFAULT_SERVER_PORT);
-#endif
+#endif // SSL_USE
     ACE_NEW_NORETURN (iconnector_p,
                       Test_U_TCPAsynchConnector_t (true));
   } // end ELSE

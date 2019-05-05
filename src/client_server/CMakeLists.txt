@@ -1,11 +1,11 @@
 ﻿add_library (${PROJECT_NAME}_Client STATIC "")
 add_library (${PROJECT_NAME}_Server STATIC "")
 
+if (SSL_SUPPORT)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC ${SSL_INCLUDE_DIRS})
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC ${SSL_INCLUDE_DIRS})
+endif (SSL_SUPPORT)
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Client PUBLIC
-                              $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
- target_include_directories (${PROJECT_NAME}_Server PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC ${BIND9_CFLAGS})
  target_include_directories (${PROJECT_NAME}_Server PUBLIC ${BIND9_CFLAGS})
 
@@ -161,6 +161,8 @@ target_sources (${PROJECT_NAME}_Server
                 ${absolute_source_files_server})
 
 if (WIN32)
+ set_target_properties (${PROJECT_NAME}_Server PROPERTIES DEFINE_SYMBOL _CRT_SECURE_NO_WARNINGS)
+
  target_link_libraries (${PROJECT_NAME}_Server ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Server Common)
 endif ()

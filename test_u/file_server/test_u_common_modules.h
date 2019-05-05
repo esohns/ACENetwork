@@ -66,7 +66,7 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      FileServer_TCPConnectionManager_t,
-                                     struct Net_UserData> Test_U_Module_Net_Writer_t;
+                                     struct Stream_UserData> Test_U_Module_Net_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Test_U_ControlMessage_t,
                                      Test_U_Message,
@@ -81,7 +81,7 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      FileServer_TCPConnectionManager_t,
-                                     struct Net_UserData> Test_U_Module_Net_Reader_t;
+                                     struct Stream_UserData> Test_U_Module_Net_Reader_t;
 DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,            // session data type
                           enum Stream_SessionMessageType,           // session event type
                           struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
@@ -174,7 +174,7 @@ typedef Stream_Module_FileReader_Writer_T<ACE_MT_SYNCH,
                                           Test_U_Message,
                                           Test_U_SessionMessage,
                                           struct FileServer_SessionData,
-                                          struct Net_UserData> Test_U_FileReader;
+                                          struct Stream_UserData> Test_U_FileReader;
 typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
                                     Test_U_ControlMessage_t,
                                     Test_U_Message,
@@ -187,7 +187,7 @@ typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
                                     FileServer_SessionData_t,
                                     Net_Statistic_t,
                                     Common_Timer_Manager_t,
-                                    struct Net_UserData> Test_U_FileReaderH;
+                                    struct Stream_UserData> Test_U_FileReaderH;
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type

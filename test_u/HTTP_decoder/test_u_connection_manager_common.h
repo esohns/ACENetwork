@@ -32,9 +32,6 @@
 
 #include "test_u_connection_common.h"
 
-// forward declarations
-struct Net_UserData;
-
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_U_ConnectionConfiguration,

@@ -766,8 +766,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   IRC_Client_ConnectionConfiguration connection_configuration;
   connection_configuration.address = serverAddress_in;
 
-  //connection_configuration.socketHandlerConfiguration.bufferSize =
-  //  IRC_CLIENT_BUFFER_SIZE;
+  //connection_configuration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
 
@@ -789,10 +788,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   //IRC_Client_ConnectorConfiguration connector_configuration;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  //connector_configuration.connectionManager = connection_manager_p;
-  //connector_configuration.userData = &configuration_in.streamUserData;
-  //connector_configuration.socketHandlerConfiguration =
-  //  &configuration_in.socketHandlerConfiguration;
   IRC_Client_SessionConnector_t connector (true);
   IRC_Client_AsynchSessionConnector_t asynch_connector (true);
   IRC_Client_IConnector_t* connector_p = NULL;

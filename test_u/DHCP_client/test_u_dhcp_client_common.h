@@ -91,10 +91,10 @@ struct DHCPClient_MessageData
 };
 typedef Stream_DataBase_T<struct DHCPClient_MessageData> DHCPClient_MessageData_t;
 
-struct DHCPClient_ConnectionState;
+struct DHCP_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           DHCPClient_ConnectionConfiguration,
-                          struct DHCPClient_ConnectionState,
+                          struct DHCP_ConnectionState,
                           DHCP_Statistic_t> DHCPClient_IConnection_t;
 struct DHCPClient_SessionData
  : Test_U_StreamSessionData
@@ -107,6 +107,7 @@ struct DHCPClient_SessionData
                     static_cast<ACE_UINT32> (INADDR_ANY))
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
+   //, userData (NULL)
   {}
   struct DHCPClient_SessionData& operator= (struct DHCPClient_SessionData& rhs_in)
   {
@@ -126,6 +127,8 @@ struct DHCPClient_SessionData
   ACE_INET_Addr             serverAddress;
   ACE_Time_Value            timeStamp;           // lease timeout
   ACE_UINT32                xid;                 // session id
+
+  //struct Stream_UserData*   userData;
 };
 typedef Stream_SessionData_T<struct DHCPClient_SessionData> DHCPClient_SessionData_t;
 
@@ -141,7 +144,7 @@ typedef DHCPClient_Subscribers_t::const_iterator DHCPClient_SubscribersIterator_
 
 //typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //                                 DHCPClient_ConnectionConfiguration_t,
-//                                 struct DHCPClient_ConnectionState,
+//                                 struct DHCP_ConnectionState,
 //                                 DHCP_Statistic_t,
 //                                 Test_U_UserData> DHCPClient_IConnectionManager_t;
 
@@ -192,10 +195,10 @@ struct DHCPClient_StreamConfiguration
 {
   DHCPClient_StreamConfiguration ()
    : DHCP_StreamConfiguration ()
-   , userData (NULL)
+   //, userData (NULL)
   {}
 
-  struct Net_UserData* userData;
+  //struct Net_UserData* userData;
 };
 
 struct DHCPClient_StreamState
@@ -204,44 +207,13 @@ struct DHCPClient_StreamState
   DHCPClient_StreamState ()
    : Test_U_StreamState ()
    , sessionData (NULL)
+   , userData (NULL)
   {}
 
   struct DHCPClient_SessionData* sessionData;
+
+  struct Stream_UserData*        userData;
 };
-
-//struct DHCPClient_SocketHandlerConfiguration;
-//struct DHCPClient_ListenerConfiguration
-// : Net_ListenerConfiguration
-//{
-//  DHCPClient_ListenerConfiguration ()
-//   : Net_ListenerConfiguration ()
-//   , socketHandlerConfiguration ()
-//   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
-//                                 0)
-//  {
-//    int result =
-//      socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-//                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
-//                                                                        1,
-//                                                                        0);
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-//    result =
-//      socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
-//                                                                          static_cast<ACE_UINT32> (INADDR_ANY),
-//                                                                          1,
-//                                                                          0);
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-//  }
-
-//  struct DHCPClient_SocketHandlerConfiguration socketHandlerConfiguration;
-//  ACE_Time_Value                               statisticReportingInterval; // [ACE_Time_Value::zero: off]
-//};
-//typedef Net_IListener_T<struct DHCPClient_ListenerConfiguration,
-//                        struct DHCPClient_SocketHandlerConfiguration> DHCPClient_IListener_t;
 
 struct DHCPClient_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration

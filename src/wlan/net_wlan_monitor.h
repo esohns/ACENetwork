@@ -161,7 +161,7 @@ class Net_WLAN_Monitor_T<//AddressType,
   inline virtual ~Net_WLAN_Monitor_T () {}
 
   // override (part of) Common_ITaskControl_T
-  virtual void start ();
+  virtual void start (ACE_thread_t&); // return value: thread handle (if any)
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
 //  inline bool isRunning () const { return isActive_; }

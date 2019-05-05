@@ -503,8 +503,8 @@ do_work (bool autoAssociate_in,
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
-  iwlanmonitor_p = NET_WLAN_INETWLANAPIMONITOR_SINGLETON::instance ();
-  istatistic_handler_p = NET_WLAN_INETWLANAPIMONITOR_SINGLETON::instance ();
+  iwlanmonitor_p = NET_WLAN_WLANAPIMONITOR_SINGLETON::instance ();
+  istatistic_handler_p = NET_WLAN_WLANAPIMONITOR_SINGLETON::instance ();
 #else
       ACE_ASSERT (false);
       ACE_NOTSUP;
@@ -985,7 +985,7 @@ ACE_TMAIN (int argc_in,
       idle_finalize_ui_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_ui_cb;
-  ui_cb_data.configuration->GTKConfiguration.interface = &gtk_ui_definition;
+  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
   if (!UI_definition_file_path.empty ())
     WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE

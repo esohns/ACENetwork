@@ -1098,10 +1098,10 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
 }
 
 gint
-radiobutton_protocol_group_changed_cb (GtkWidget* widget_in,
-                                       gpointer userData_in)
+radiobutton_protocol_toggled_cb (GtkWidget* widget_in,
+                                 gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::radiobutton_protocol_group_changed_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::radiobutton_protocol_toggled_cb"));
 
   int result = -1;
 
@@ -1114,6 +1114,9 @@ radiobutton_protocol_group_changed_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->timeoutHandler);
   ACE_ASSERT (data_p->UIState);
+  GtkRadioButton* radio_button_p = GTK_RADIO_BUTTON (widget_in);
+  if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)))
+    return FALSE;
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1122,7 +1125,7 @@ radiobutton_protocol_group_changed_cb (GtkWidget* widget_in,
 
   // step0: activated ?
   enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_INVALID;
-  GtkRadioButton* radio_button_p =
+  radio_button_p =
     GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME)));
   ACE_ASSERT (radio_button_p);

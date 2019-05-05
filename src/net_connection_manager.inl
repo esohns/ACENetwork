@@ -178,7 +178,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
 
-  //ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
+  ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
 
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   userData_ = userData_in;
@@ -206,10 +206,10 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
 
-  //ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
-  configuration_out = configuration_;
-  userData_out = userData_;
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
+    configuration_out = configuration_;
+    userData_out = userData_;
+  } // end lock scope
 }
 
 template <ACE_SYNCH_DECL,

@@ -46,7 +46,7 @@ typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     struct Test_U_ConnectionState,
                                     Test_U_TCPConnectionConfiguration,
                                     Test_U_Stream,
-                                    struct Test_U_UserData> Server_AsynchListener_t;
+                                    struct Net_UserData> Server_AsynchListener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
@@ -55,28 +55,28 @@ typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               struct Test_U_ConnectionState,
                               Test_U_TCPConnectionConfiguration,
                               Test_U_Stream,
-                              struct Test_U_UserData> Server_Listener_t;
+                              struct Net_UserData> Server_Listener_t;
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
                                      ACE_INET_Addr,
                                      Test_U_UDPConnectionConfiguration,
                                      struct Test_U_ConnectionState,
-                                     Test_U_Statistic_t,
+                                     Net_Statistic_t,
                                      Net_UDPSocketConfiguration_t,
                                      Net_UDPSocketConfiguration_t,
                                      Test_U_Stream,
-                                     struct Test_U_UserData> Server_UDP_AsynchConnector_t;
+                                     struct Net_UserData> Server_UDP_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Test_U_UDPConnection,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                Test_U_UDPConnectionConfiguration,
                                struct Test_U_ConnectionState,
-                               Test_U_Statistic_t,
+                               Net_Statistic_t,
                                Net_UDPSocketConfiguration_t,
                                Net_UDPSocketConfiguration_t,
                                Test_U_Stream,
-                               struct Test_U_UserData> Server_UDP_Connector_t;
+                               struct Net_UserData> Server_UDP_Connector_t;
 
 typedef ACE_Singleton<Server_AsynchListener_t,
                       ACE_SYNCH_RECURSIVE_MUTEX> SERVER_ASYNCHLISTENER_SINGLETON;

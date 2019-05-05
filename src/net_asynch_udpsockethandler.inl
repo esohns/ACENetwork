@@ -98,7 +98,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   ACE_UNUSED_ARG (messageBlock_in);
 
   static ACE_INET_Addr inet_addr_sap_any (ACE_sap_any_cast (const ACE_INET_Addr&));
-  ACE_INET_Addr source_SAP;
+  ACE_INET_Addr source_SAP = inet_addr_sap_any;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   int result = -1;
 #if defined (ACE_LINUX)
@@ -222,20 +222,17 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       drop_privileges = true;
   } // end IF
 #endif // ACE_LINUX
-  result =
-    inherited2::open ((inherited::configuration_->writeOnly ? (inherited::configuration_->sourcePort ? source_SAP
-                                                                                                     : inet_addr_sap_any)
-                                                            : inherited::configuration_->listenAddress), // local SAP
-                      ACE_PROTOCOL_FAMILY_INET,                                                    // protocol family
-                      0,                                                                           // protocol
-                      1);                                                                          // reuse_addr
+  if (likely (!inherited::configuration_->writeOnly))
+    source_SAP = inherited::configuration_->listenAddress;
+  result = inherited2::open (source_SAP,               // local SAP
+                             ACE_PROTOCOL_FAMILY_INET, // protocol family
+                             0,                        // protocol
+                             1);                       // reuse_addr
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((inherited::configuration_->writeOnly ? (inherited::configuration_->sourcePort ? source_SAP
-                                                                                                                                              : inet_addr_sap_any)
-                                                                                                     : inherited::configuration_->listenAddress)).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
@@ -253,6 +250,12 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_LINUX
   handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("opened socket %s (handle: 0x%@)\n"),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
+              handle));
+#endif // _DEBUG
   if (likely (!inherited::configuration_->writeOnly))
   { ACE_ASSERT (writeHandle_ == ACE_INVALID_HANDLE);
     writeHandle_ = ACE_OS::socket (AF_INET,    // family
@@ -269,14 +272,19 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                     ACE_TEXT ("failed to SocketType::close(): \"%m\", continuing\n")));
       goto error;
     } // end IF
+#if defined (_DEBUG)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("opened write socket (handle: 0x%@)\n"),
+                writeHandle_));
+#endif // _DEBUG
 
     // set source address ?
     if (unlikely (inherited::configuration_->sourcePort))
     {
-      source_SAP.set (static_cast<u_short> (inherited::configuration_->sourcePort),
-                      static_cast<ACE_UINT32> (INADDR_ANY),
-                      1,
-                      0);
+      //source_SAP.set (static_cast<u_short> (inherited::configuration_->sourcePort),
+      //                static_cast<ACE_UINT32> (INADDR_ANY),
+      //                1,
+      //                0);
       result =
         ACE_OS::bind (writeHandle_,
                       reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
@@ -298,6 +306,12 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
+#if defined (_DEBUG)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
+                  writeHandle_,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#endif // _DEBUG
     } // end IF
   } // end IF
   else
@@ -311,9 +325,8 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   inherited3::proactor (proactor_p);
 
   // step1: connect ?
-  if (likely (inherited::configuration_->connect &&
-              !inherited::configuration_->peerAddress.is_any ()))
-  {
+  if (likely (inherited::configuration_->connect))
+  { ACE_ASSERT (!inherited::configuration_->peerAddress.is_any ());
     result =
         ACE_OS::connect (writeHandle_,
                          reinterpret_cast<struct sockaddr*> (inherited::configuration_->peerAddress.get_addr ()),
@@ -410,9 +423,12 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   PDUSize_ = Net_Common_Tools::getMTU (handle);
   if (!PDUSize_) // --> fall back
     PDUSize_ = inherited::configuration_->bufferSize;
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("maximum message size: %u\n"),
-  //            PDUSize_));
+  ACE_ASSERT (PDUSize_);
+//#if defined (_DEBUG)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("maximum message size: %u\n"),
+//              PDUSize_));
+//#endif // _DEBUG
 
   // step4a: tweak outbound socket (if any)
   if (likely (inherited::configuration_->bufferSize))
@@ -550,6 +566,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
   int result = 0;
   ACE_HANDLE handle_h = SocketType::get_handle ();
+  ACE_ASSERT (handle_in == handle_h);
 
   if (handle_h != ACE_INVALID_HANDLE)
   {
@@ -805,6 +822,13 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     // *** GOOD CASES ***
     default:
     {
+#if defined (_DEBUG)
+       ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT ("[%d]: sent %u bytes\n"),
+                   result_in.handle (),
+                   result_in.bytes_transferred ()));
+#endif // _DEBUG
+
       // finished with this buffer ?
       if (unlikely (result_in.message_block ()->length () > 0))
       {

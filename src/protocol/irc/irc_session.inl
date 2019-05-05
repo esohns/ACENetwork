@@ -1095,12 +1095,6 @@ IRC_Session_T<ConnectionType,
     ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->end ());
   } // end ELSE
   (*iterator).second.second.subscriber = this;
-//  (*iterator).second.second.userData =
-//    connection_configuration_p->socketHandlerConfiguration.userData;
-//  ACE_ASSERT ((*iterator).second.second.userData);
-//  const IRC_ConnectionState& connection_state_r = inherited::state ();
-//  module_handler_configuration_p->userData->connectionState =
-//      &const_cast<IRC_ConnectionState&> (connection_state_r);
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
@@ -1152,42 +1146,6 @@ IRC_Session_T<ConnectionType,
 
   // step0: intialize configuration object
   ModuleHandlerConfigurationIteratorType iterator;
-//  if (!inherited::manager_)
-//  {
-//    // *NOTE*: client-side: arg_in is a handle to the connector
-//    //         server-side: arg_in is a handle to the listener
-//    const IRC_Client_SocketHandlerConfiguration* handler_configuration_p = NULL;
-//    switch (inherited::role ())
-//    {
-//      case NET_ROLE_CLIENT:
-//      {
-//        typename inherited::ICONNECTOR_T* iconnector_p = inherited::act ();
-//        ACE_ASSERT (iconnector_p);
-//        handler_configuration_p = &iconnector_p->get ();
-//        break;
-//      }
-//      case NET_ROLE_SERVER:
-//      {
-//        typename inherited::ILISTENER_T* ilistener_p = inherited::act ();
-//        ACE_ASSERT (ilistener_p);
-//        handler_configuration_p = &ilistener_p->get ();
-//        break;
-//      }
-//      default:
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("invalid/unknown role (was: %d), aborting\n"),
-//                    inherited::role ()));
-//        return -1;
-//      }
-//    } // end SWITCH
-//    ACE_ASSERT (handler_configuration_p);
-//    // *TODO*: remove type inference
-//    module_handler_configuration_p =
-//        handler_configuration_p->streamModuleHandlerConfiguration;
-//    ACE_ASSERT (module_handler_configuration_p);
-//  } // end IF
-//  else
   iterator =
       inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->end ());

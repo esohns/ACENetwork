@@ -173,9 +173,9 @@ idle_session_start_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_value (spin_button_p, 0.0);
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-
-  ACE_OS::memset (&data_p->progressData.statistic, 0, sizeof (Stream_Statistic));
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+    ACE_OS::memset (&data_p->progressData.statistic, 0, sizeof (Net_Statistic_t));
+  } // end lock scope
 
   return G_SOURCE_REMOVE;
 }

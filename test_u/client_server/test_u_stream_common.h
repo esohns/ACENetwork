@@ -44,12 +44,12 @@ struct Test_U_StreamSessionData
   Test_U_StreamSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
-   , statistic ()
+   //, statistic ()
    , userData (NULL)
   {};
 
   struct Net_ConnectionState* connectionState;
-  Test_U_Statistic_t          statistic;
+  //Test_U_Statistic_t          statistic;
 
   struct Net_UserData*        userData;
 };

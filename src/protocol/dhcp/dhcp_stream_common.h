@@ -21,44 +21,9 @@
 #ifndef DHCP_STREAM_COMMON_H
 #define DHCP_STREAM_COMMON_H
 
-//#include "ace/Synch_Traits.h"
-
-//#include "common_inotify.h"
-//#include "common_time_common.h"
-
 #include "stream_configuration.h"
-//#include "stream_imodule.h"
-//#include "stream_inotify.h"
-//#include "stream_session_data.h"
 
-//#include "dhcp_common.h"
-
-// forward declarations
-struct DHCP_ConnectionState;
-struct DHCP_ModuleHandlerConfiguration;
-//template <typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename SessionMessageType>
-//class DHCP_Message_T;
-//class DHCP_SessionMessage;
-//template <typename StreamStateType,
-//          typename ConfigurationType,
-//          typename StatisticContainerType,
-//          typename ModuleHandlerConfigurationType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType>
-//class DHCP_Stream_T;
-struct DHCP_StreamConfiguration;
-
-//typedef Stream_IModuleHandler_T<DHCP_ModuleHandlerConfiguration> DHCP_IModuleHandler_t;
-//typedef Stream_IModule_T<ACE_MT_SYNCH,
-//                         Common_TimePolicy_t,
-//                         Stream_ModuleConfiguration,
-//                         DHCP_ModuleHandlerConfiguration> DHCP_IModule_t;
-//typedef DHCP_Message_T<Stream_AllocatorConfiguration> DHCP_Message_t;
+#include "dhcp_common.h"
 
 struct DHCP_Stream_SessionData
  : Stream_SessionData
@@ -66,26 +31,12 @@ struct DHCP_Stream_SessionData
   DHCP_Stream_SessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
-   //, currentStatistic ()
+   , statistic ()
   {}
 
   struct DHCP_ConnectionState* connectionState;
 
-  //DHCP_RuntimeStatistic_t currentStatistic;
-};
-
-struct DHCP_Stream_UserData
- : Stream_UserData
-{
-  DHCP_Stream_UserData ()
-   : Stream_UserData ()
-   , moduleConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
-  {}
-
-  // *TODO*: remove these ASAP
-  struct Stream_ModuleConfiguration*      moduleConfiguration;
-  struct DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  DHCP_Statistic_t             statistic;
 };
 
 struct DHCP_StreamState
@@ -93,12 +44,10 @@ struct DHCP_StreamState
 {
   DHCP_StreamState ()
    : Stream_State ()
-   , currentSessionData (NULL)
-   , userData (NULL)
+   , sessionData (NULL)
   {}
 
-  struct DHCP_Stream_SessionData* currentSessionData;
-  struct DHCP_Stream_UserData*    userData;
+  struct DHCP_Stream_SessionData* sessionData;
 };
 
 #endif

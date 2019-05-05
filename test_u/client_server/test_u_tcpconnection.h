@@ -46,6 +46,7 @@ class Test_U_Stream;
 
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
+                                  Net_TCPSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
@@ -55,6 +56,7 @@ class Test_U_TCPConnection
  , public Net_IPing
 {
   typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
+                                  Net_TCPSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
@@ -84,7 +86,8 @@ class Test_U_TCPConnection
 //////////////////////////////////////////
 
 class Test_U_AsynchTCPConnection
- : public Net_AsynchTCPConnectionBase_T<Test_U_TCPConnectionConfiguration,
+ : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
+                                        Test_U_TCPConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
                                         Test_U_Stream,
@@ -92,7 +95,8 @@ class Test_U_AsynchTCPConnection
                                         struct Net_UserData>
  , public Net_IPing
 {
- typedef Net_AsynchTCPConnectionBase_T<Test_U_TCPConnectionConfiguration,
+ typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
+                                       Test_U_TCPConnectionConfiguration,
                                        struct Test_U_ConnectionState,
                                        Net_Statistic_t,
                                        Test_U_Stream,

@@ -318,7 +318,7 @@ IRC_Tools::merge (const std::string& modes_in,
 }
 
 char
-IRC_Tools::ChannelModeToChar (const IRC_ChannelMode& mode_in)
+IRC_Tools::ChannelModeToChar (enum IRC_ChannelMode mode_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Tools::ChannelModeToChar"));
 
@@ -359,7 +359,7 @@ IRC_Tools::ChannelModeToChar (const IRC_ChannelMode& mode_in)
 }
 
 char
-IRC_Tools::UserModeToChar (const IRC_UserMode& mode_in)
+IRC_Tools::UserModeToChar (enum IRC_UserMode mode_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserModeToChar"));
 
@@ -1334,7 +1334,7 @@ IRC_Tools::CharToUserMode (char mode_in)
 }
 
 std::string
-IRC_Tools::ChannelModeToString (const IRC_ChannelMode& mode_in)
+IRC_Tools::ChannelModeToString (enum IRC_ChannelMode mode_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Tools::ChannelModeToString"));
 
@@ -1384,7 +1384,7 @@ IRC_Tools::ChannelModeToString (const IRC_ChannelMode& mode_in)
 }
 
 std::string
-IRC_Tools::UserModeToString (const IRC_UserMode& mode_in)
+IRC_Tools::UserModeToString (enum IRC_UserMode mode_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserModeToString"));
 
@@ -1645,93 +1645,3 @@ IRC_Tools::stringify (const IRC_Parameters_t& parameters_in,
 
   return result;
 }
-
-//ACE_HANDLE
-//IRC_Tools::connect (IRC_IConnector_t& connector_in,
-//                    const ACE_INET_Addr& peerAddress_in,
-//                    const IRC_LoginOptions& loginOptions_in,
-//                    bool cloneModule_in,
-//                    bool deleteModule_in,
-//                    Stream_Module_t*& finalModule_inout)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::connect"));
-//
-//  ACE_HANDLE return_value = ACE_INVALID_HANDLE;
-//
-//  int result = -1;
-//  IRC_Configuration configuration;
-//  IRC_Stream_UserData* stream_user_data_p = NULL;
-//
-//  // step0: retrieve default configuration
-//  IRC_IConnection_Manager_t* iconnection_manager_p =
-//    IRC_CONNECTIONMANAGER_SINGLETON::instance ();
-//  ACE_ASSERT (iconnection_manager_p);
-//  iconnection_manager_p->get (configuration,
-//                              stream_user_data_p);
-//  ACE_ASSERT (stream_user_data_p);
-//  // *TODO*: remove type inferences
-//  ACE_ASSERT (stream_user_data_p->configuration);
-//
-//  // step1: set up configuration
-//  stream_user_data_p->configuration->protocolConfiguration.loginOptions =
-//    loginOptions_in;
-//  stream_user_data_p->configuration->socketConfiguration.peerAddress =
-//    peerAddress_in;
-//  if (finalModule_inout)
-//  {
-//    stream_user_data_p->configuration->streamConfiguration.cloneModule =
-//      cloneModule_in;
-//    stream_user_data_p->configuration->streamConfiguration.deleteModule =
-//      deleteModule_in;
-//    stream_user_data_p->configuration->streamConfiguration.module =
-//      finalModule_inout;
-//    if (deleteModule_in) finalModule_inout = NULL;
-//  } // end IF
-//
-//  // stepTo: initialize connector
-//  if (!connector_in.initialize (stream_user_data_p->configuration->socketHandlerConfiguration))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
-//    goto error;
-//  } // end IF
-//
-//  //iconnection_manager_p->lock ();
-//  //stream_user_data_p->configuration = &configuration;
-//  //iconnection_manager_p->set (configuration,
-//  //                            stream_user_data_p);
-//
-//  // step3: (try to) connect to the server
-//  return_value = connector_in.connect (peerAddress_in);
-//  if (return_value == ACE_INVALID_HANDLE)
-//  {
-//    // debug info
-//    ACE_TCHAR buffer[BUFSIZ];
-//    ACE_OS::memset (buffer, 0, sizeof (buffer));
-//    result = peerAddress_in.addr_to_string (buffer,
-//                                            sizeof (buffer));
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("failed to connect(\"%s\"): \"%m\", aborting\n"),
-//                buffer));
-//    goto error;
-//  } // end IF
-//
-//  //iconnection_manager_p->unlock ();
-//
-//  // *NOTE*: handlers automagically register with the connection manager and
-//  //         will also de-register and self-destruct on disconnects !
-//
-//  return return_value;
-//
-//error:
-//  if (deleteModule_in)
-//  {
-//    delete finalModule_inout;
-//    finalModule_inout = NULL;
-//  } // end IF
-//
-//  return ACE_INVALID_HANDLE;
-//}

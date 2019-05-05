@@ -167,7 +167,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Test_U_SessionMessage,
                                       ACE_INET_Addr,
                                       FileServer_TCPConnectionManager_t,
-                                      struct Net_UserData> Test_U_TCPNetStream_t;
+                                      struct Stream_UserData> Test_U_TCPNetStream_t;
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       stream_name_string_,
@@ -188,7 +188,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Test_U_SessionMessage,
                                       ACE_INET_Addr,
                                       FileServer_UDPConnectionManager_t,
-                                      struct Net_UserData> Test_U_UDPNetStream_t;
+                                      struct Stream_UserData> Test_U_UDPNetStream_t;
 
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_UDPSocketHandler_t,

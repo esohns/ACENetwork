@@ -51,23 +51,7 @@
 
 //////////////////////////////////////////
 
-//struct IRC_Client_ConnectionConfiguration;
-//struct IRC_Client_SocketHandlerConfiguration
-// : IRC_SocketHandlerConfiguration
-//{
-//  IRC_Client_SocketHandlerConfiguration ()
-//   : IRC_SocketHandlerConfiguration ()
-//   ///////////////////////////////////////
-//   , connectionConfiguration (NULL)
-//   , userData (NULL)
-//  {}
-
-//  struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
-
-//  struct Net_UserData*                userData;
-//};
-
-struct IRC_Client_ConnectionConfiguration;
+class IRC_Client_ConnectionConfiguration;
 struct IRC_Client_StreamConfiguration;
 struct IRC_Client_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
@@ -87,7 +71,6 @@ typedef Stream_Configuration_T<//stream_name_string_,
 //   , cursesState (NULL)
 //   , protocolConfiguration (NULL)
 //   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
-//   //   , userData (NULL)
 //  {
 //    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
 //  }
@@ -95,8 +78,6 @@ typedef Stream_Configuration_T<//stream_name_string_,
 //  struct IRC_Client_CursesState*    cursesState;
 //  struct IRC_ProtocolConfiguration* protocolConfiguration;
 //  bool                              logToFile;
-
-//  //  struct Net_UserData*                  userData;
 //};
 
 struct IRC_Client_ConnectionState
@@ -138,13 +119,15 @@ struct IRC_Client_SessionState
 //////////////////////////////////////////
 
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+                                Net_TCPSocketHandler_t,
                                 IRC_Client_ConnectionConfiguration,
                                 struct IRC_Client_SessionState,
                                 IRC_Statistic_t,
                                 IRC_Client_Stream_t,
                                 Common_Timer_Manager_t,
                                 struct Net_UserData> IRC_Client_TCPConnection_t;
-typedef Net_AsynchTCPConnectionBase_T<IRC_Client_ConnectionConfiguration,
+typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
+                                      IRC_Client_ConnectionConfiguration,
                                       struct IRC_Client_SessionState,
                                       IRC_Statistic_t,
                                       IRC_Client_Stream_t,

@@ -108,6 +108,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
   // sanity check
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->PDUSize);
 
   // *TODO*: remove type inference
   message_block_p =
@@ -146,34 +147,32 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
           (error != ENOTSOCK)   &&
           (error != ECONNABORTED)) // <-- connection abort()ed locally
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to SocketType::recv(): \"%m\", returning\n")));
-
-      // clean up
-      message_block_p->release ();
-
+                    ACE_TEXT ("%u: failed to SocketType::recv(): \"%m\", returning\n"),
+                    this->id ()));
+      message_block_p->release (); message_block_p = NULL;
       return -1; // <-- remove 'this' from dispatch
     }
     // *** GOOD CASES ***
     case 0:
     {
-      // clean up
-      message_block_p->release ();
-
+      message_block_p->release (); message_block_p = NULL;
       return -1; // <-- remove 'this' from dispatch
     }
     default:
     {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("[0x%@]: received %d byte(s)\n"),
-//                  handle_in,
-//                  bytes_received));
-//#else
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("[%d]: received %d byte(s)\n"),
-//                  handle_in,
-//                  bytes_received));
-//#endif
+#if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("[0x%@]: received %d byte(s)\n"),
+                  handle_in,
+                  bytes_received));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("[%d]: received %d byte(s)\n"),
+                  handle_in,
+                  bytes_received));
+#endif
+#endif // _DEBUG
 
       // adjust write pointer
       message_block_p->wr_ptr (static_cast<size_t> (bytes_received));
@@ -193,10 +192,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                   ACE_TEXT ("%u/%s: failed to ACE_Stream::put(): \"%m\", aborting\n"),
                   this->id (),
                   ACE_TEXT (inherited::stream_.name ().c_str ())));
-
-    // clean up
-    message_block_p->release ();
-
+    message_block_p->release (); message_block_p = NULL;
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 
@@ -332,52 +328,40 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
       if (inherited::errorQueue_)
         this->processErrorQueue ();
 #endif
-
-      // clean up
-      message_block_p->release ();
-      //writeBuffer_ = NULL;
-
+      message_block_p->release (); message_block_p = NULL;
       result = -1; // <-- remove 'this' from dispatch
-
       break;
     }
     // *** GOOD CASES ***
     case 0:
     {
-      // clean up
-      message_block_p->release ();
-      //writeBuffer_ = NULL;
-
+      message_block_p->release (); message_block_p = NULL;
       result = -1; // <-- remove 'this' from dispatch
-
       break;
     }
     default:
     {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("0x%@: sent %d bytes\n"),
-//                  handle_in,
-//                  bytes_sent));
-//#else
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("%d: sent %d bytes\n"),
-//                  handle_in,
-//                  bytes_sent));
-//#endif
+#if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: sent %d bytes\n"),
+                  handle_in,
+                  bytes_sent));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: sent %d bytes\n"),
+                  handle_in,
+                  bytes_sent));
+#endif
+#endif // _DEBUG
 
       // finished with this buffer ?
       message_block_p->rd_ptr (static_cast<size_t> (bytes_sent));
       ACE_ASSERT (!message_block_p->length ());
       //if (unlikely (message_block_p->length ()))
       //  break; // there's more data
-
-      // clean up
-      message_block_p->release ();
-      //writeBuffer_ = NULL;
-
+      message_block_p->release (); message_block_p = NULL;
       result = 0;
-
       break;
     }
   } // end SWITCH
@@ -790,8 +774,9 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     // clean up
     delete fake_result_p;
   } // end ELSE
-  //ACE_ASSERT (this->count () == 2); // connection manager, read operation
-  //                                     (+ stream module(s))
+  ACE_ASSERT (this->count () >= 2); // connection manager, read operation
+                                    // (+ stream module(s))
+  this->decrease ();
 
 continue_:
   return;

@@ -62,7 +62,6 @@
 // forward declarations
 struct FileServer_ConnectionConfiguration;
 struct FileServer_ConnectionState;
-struct Net_UserData;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FileServer_TCPConnectionConfiguration,

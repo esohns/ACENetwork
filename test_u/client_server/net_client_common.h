@@ -83,17 +83,6 @@ class Net_IPing
   virtual void ping () = 0;
 };
 
-//struct Test_U_ConnectorConfiguration
-//{
-//  Test_U_ConnectorConfiguration ()
-//   : connectionManager (NULL)
-//   , socketHandlerConfiguration (NULL)
-//  {}
-
-//  Test_U_ITCPConnectionManager_t*     connectionManager;
-//  struct Net_SocketConfigurationBase* socketHandlerConfiguration;
-//};
-
 struct Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {

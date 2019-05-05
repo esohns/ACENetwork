@@ -177,29 +177,6 @@ typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_TrackerStreamState,
                                    BitTorrent_Client_TrackerConnection_Manager_t,
                                    struct Net_UserData> BitTorrent_Client_TrackerStream_t;
 
-//struct BitTorrent_Client_UI_CBData;
-//struct BitTorrent_Client_PeerConnectionConfiguration;
-//struct BitTorrent_Client_TrackerConnectionConfiguration;
-//struct BitTorrent_Client_PeerConnectionState;
-//struct Net_SocketConfiguration;
-//struct BitTorrent_Client_PeerSocketHandlerConfiguration;
-//struct BitTorrent_Client_TrackerSocketHandlerConfiguration;
-//class BitTorrent_Client_PeerStream;
-//enum Stream_StateMachine_ControlState;
-//struct BitTorrent_Client_SessionConfiguration;
-//struct BitTorrent_Client_SessionState;
-//typedef BitTorrent_ISession_T<ACE_INET_Addr,
-//                              BitTorrent_Client_PeerConnectionConfiguration_t,
-//                              BitTorrent_Client_TrackerConnectionConfiguration_t,
-//                              struct BitTorrent_Client_PeerConnectionState,
-//                              BitTorrent_Statistic_t,
-//                              struct Net_SocketConfiguration,
-//                              struct BitTorrent_Client_PeerSocketHandlerConfiguration,
-//                              struct BitTorrent_Client_TrackerSocketHandlerConfiguration,
-//                              BitTorrent_Client_PeerStream_t,
-//                              enum Stream_StateMachine_ControlState,
-//                              struct BitTorrent_Client_SessionConfiguration,
-//                              struct BitTorrent_Client_SessionState> BitTorrent_Client_ISession_t;
 //extern const char stream_name_string_[];
 struct BitTorrent_AllocatorConfiguration;
 struct BitTorrent_Client_PeerStreamConfiguration;

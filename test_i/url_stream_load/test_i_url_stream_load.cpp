@@ -566,11 +566,6 @@ do_work (bool debugParser_in,
                                                &heap_allocator,         // heap allocator handle
                                                true);                   // block ?
 
-  Test_I_ConnectionManager_t* connection_manager_p =
-    TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
-  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
   connection_configuration.address = remoteHost_in;
@@ -578,8 +573,6 @@ do_work (bool debugParser_in,
     connection_configuration.address.is_loopback ();
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  //connection_configuration.socketHandlerConfiguration.userData =
-  //  &CBData_in.configuration->userData;
   connection_configuration.messageAllocator = &message_allocator;
   //connection_configuration.PDUSize = bufferSize_in;
   //connection_configuration.userData = &CBData_in.configuration->userData;
@@ -598,8 +591,10 @@ do_work (bool debugParser_in,
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
   // ********************** module configuration data **************************
+  struct Common_FlexParserAllocatorConfiguration allocator_configuration;
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &configuration_in.streamConfiguration.allocatorConfiguration_;
   modulehandler_configuration.connectionConfigurations =
@@ -622,9 +617,13 @@ do_work (bool debugParser_in,
     &message_allocator;
   configuration_in.streamConfiguration.configuration_.module =
     &event_handler_module;
-  configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                               std::make_pair (module_configuration,
-                                                                               modulehandler_configuration)));
+  configuration_in.streamConfiguration.initialize (module_configuration,
+                                                   modulehandler_configuration,
+                                                   allocator_configuration,
+                                                   stream_configuration);
+  //configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+  //                                                             std::make_pair (module_configuration,
+  //                                                                             modulehandler_configuration)));
   configuration_in.streamConfiguration.configuration_.printFinalReport =
     true;
   //configuration_in.streamConfiguration.configuration_.userData =
@@ -633,6 +632,9 @@ do_work (bool debugParser_in,
   //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
 
   // step0c: initialize connection manager
+  Test_I_ConnectionManager_t* connection_manager_p =
+    TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator).second),
                              NULL);
@@ -651,7 +653,7 @@ do_work (bool debugParser_in,
   if (useReactor_in)
     configuration_in.dispatchConfiguration.numberOfReactorThreads = 1;
   else
-    configuration_in.dispatchConfiguration.numberOfProactorThreads = 1;
+    configuration_in.dispatchConfiguration.numberOfProactorThreads = 3;
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
@@ -936,6 +938,7 @@ ACE_TMAIN (int argc_in,
   ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
   struct Test_I_URLStreamLoad_UI_CBData ui_cb_data;
+  ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
   std::string gtk_rc_file;
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -965,14 +968,14 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
-  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
-  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
-  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+  configuration.GTKConfiguration.argc = argc_in;
+  configuration.GTKConfiguration.argv = argv_in;
+  configuration.GTKConfiguration.CBData = &ui_cb_data;
+  configuration.GTKConfiguration.eventHooks.finiHook =
       idle_finalize_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+  configuration.GTKConfiguration.eventHooks.initHook =
       idle_initialize_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
+  configuration.GTKConfiguration.definition = &gtk_ui_definition;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   ACE_High_Res_Timer timer;

@@ -214,10 +214,10 @@ Net_Server_SSL_Listener_T<HandlerType,
   // *TODO*: remove type inferences
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  if (unlikely (configuration_->socketHandlerConfiguration.socketConfiguration.useLoopBackDevice))
+  if (unlikely (configuration_->useLoopBackDevice))
   {
     result =
-      configuration_->address.set (configuration_->socketHandlerConfiguration.socketConfiguration.address.get_port_number (), // port
+      configuration_->address.set (configuration_->address.get_port_number (), // port
                                    // *PORTABILITY*: disambiguate this under Windows
                                    // *TODO*: bind to specific interface/address ?
                                    ACE_LOCALHOST,                                                                             // hostname
@@ -231,12 +231,12 @@ Net_Server_SSL_Listener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-      inherited::open (configuration_->socketHandlerConfiguration.socketConfiguration.address, // local address
-                       ACE_Reactor::instance (),                                               // reactor handle
-                       ACE_NONBLOCK,                                                           // flags (use non-blocking sockets)
-                       //0,                                                                    // flags (*NOTE*: default is blocking sockets)
-                       1,                                                                      // accept all pending connections
-                       1);                                                                     // try to re-use address
+      inherited::open (configuration_->address,  // local address
+                       ACE_Reactor::instance (), // reactor handle
+                       ACE_NONBLOCK,             // flags (use non-blocking sockets)
+                       //0,                      // flags (*NOTE*: default is blocking sockets)
+                       1,                        // accept all pending connections
+                       1);                       // try to re-use address
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -249,12 +249,12 @@ Net_Server_SSL_Listener_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG
 

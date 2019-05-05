@@ -43,16 +43,14 @@ struct IRC_ModuleHandlerConfiguration;
 class IRC_Tools
 {
  public:
-  inline virtual ~IRC_Tools () {};
-
   // debug info
   static std::string dump (const IRC_Record&);
   static std::string dump (const IRC_UserModes_t&);
   static std::string dump (const IRC_ChannelModes_t&);
 
   static std::string CommandToString (const IRC_NumericCommand_t&);
-  static std::string ChannelModeToString (const IRC_ChannelMode&);
-  static std::string UserModeToString (const IRC_UserMode&);
+  static std::string ChannelModeToString (enum IRC_ChannelMode);
+  static std::string UserModeToString (enum IRC_UserMode);
   static std::string RecordToString (const IRC_Record&);
 
   static IRC_CommandType_t CommandToType (const std::string&);
@@ -60,8 +58,8 @@ class IRC_Tools
                              IRC_UserModes_t&);  // input/return value: (merged) user modes
   static unsigned int merge (const std::string&,   // mode string (e.g. "+i")
                              IRC_ChannelModes_t&); // input/return value: (merged) channel modes
-  static char ChannelModeToChar (const IRC_ChannelMode&);
-  static char UserModeToChar (const IRC_UserMode&);
+  static char ChannelModeToChar (enum IRC_ChannelMode);
+  static char UserModeToChar (enum IRC_UserMode);
 
   static bool isValidChannelName (const std::string&); // string
 
@@ -75,7 +73,6 @@ class IRC_Tools
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools ())
-  //ACE_UNIMPLEMENTED_FUNC (~IRC_Tools ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools (const IRC_Tools&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools& operator= (const IRC_Tools&))
 

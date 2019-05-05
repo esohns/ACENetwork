@@ -47,7 +47,6 @@ struct DHCP_Record;
 struct DHCP_ModuleHandlerConfiguration;
 class DHCP_SessionMessage;
 struct DHCP_Stream_SessionData;
-struct DHCP_Stream_UserData;
 
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          struct DHCP_Configuration,
@@ -59,50 +58,12 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  struct DHCP_Configuration,
                                  struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,
-                                 struct DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
+                                 struct Net_UserData> DHCP_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
 //                         struct DHCP_Stream_SessionData,
 //                         DHCP_Record,
 //                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
-
-struct DHCP_StreamConfiguration;
-//struct DHCP_ConnectionConfiguration
-// : Net_ConnectionConfiguration
-//{
-//  DHCP_ConnectionConfiguration ()
-//   : Net_ConnectionConfiguration ()
-//   ///////////////////////////////////////
-//   , socketHandlerConfiguration ()
-//   , streamConfiguration (NULL)
-//   , userData (NULL)
-//  {
-//    PDUSize = DHCP_MESSAGE_SIZE;
-//    //PDUSize = DHCP_BUFFER_SIZE;
-//  }
-
-//  struct DHCP_SocketHandlerConfiguration socketHandlerConfiguration;
-//  struct DHCP_StreamConfiguration*       streamConfiguration;
-
-//  struct DHCP_Stream_UserData*           userData;
-//};
-//typedef std::deque<struct DHCP_ConnectionConfiguration> DHCP_ConnectionConfigurations_t;
-//typedef DHCP_ConnectionConfigurations_t::iterator DHCP_ConnectionConfigurationIterator_t;
-
-//struct DHCP_ConnectorConfiguration
-//{
-//  inline DHCP_ConnectorConfiguration ()
-//   : /*configuration (NULL)
-//   ,*/ connectionManager (NULL)
-//   , socketHandlerConfiguration (NULL)
-//   //, statisticCollectionInterval (0)
-//  {};
-//
-//  //struct DHCP_Configuration*            configuration;
-//  DHCP_IConnection_Manager_t*             connectionManager;
-//  struct DHCP_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  unsigned int                            statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
-//};
 
 struct DHCP_ProtocolConfiguration
 {
@@ -148,14 +109,11 @@ struct DHCP_StreamConfiguration
    , moduleConfiguration ()
    , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
-   //, userData (NULL)
   {}
 
   struct Stream_ModuleConfiguration* moduleConfiguration;        // stream module configuration
   DHCP_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
   struct DHCP_ProtocolConfiguration* protocolConfiguration;      // protocol configuration
-
-  //struct DHCP_Stream_UserData*           userData;
 };
 
 #endif

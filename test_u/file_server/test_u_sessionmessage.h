@@ -40,7 +40,7 @@ class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<struct Net_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       FileServer_SessionData_t,
-                                      struct Net_UserData>
+                                      struct Stream_UserData>
 {
 //  // enable access to private ctor(s)
 //  friend class Net_StreamMessageAllocator;
@@ -53,14 +53,14 @@ class Test_U_SessionMessage
   typedef Stream_SessionMessageBase_T<struct Net_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       FileServer_SessionData_t,
-                                      struct Net_UserData> inherited;
+                                      struct Stream_UserData> inherited;
 
  public:
   // *NOTE*: assumes responsibility for the third argument !
   Test_U_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
                          FileServer_SessionData_t*&,     // session data handle
-                         struct Net_UserData*);
+                         struct Stream_UserData*);
   // *NOTE*: to be used by message allocators
   Test_U_SessionMessage (Stream_SessionId_t,
                          ACE_Allocator*); // message allocator

@@ -1,6 +1,4 @@
-﻿option (SSL_SUPPORT "enable SSL support" OFF)
-
-if (UNIX)
+﻿if (UNIX)
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
@@ -30,33 +28,6 @@ endif ()
 #if (NOT EXISTS ACE_LIBRARY)
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-endif ()
-
-if (SSL_SUPPORT)
- set (ACE_SSL_LIB_FILE libACE_SSL.so)
- if (UNIX)
-  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_SSL_LIB_FILE}"
-                NO_DEFAULT_PATH)
- elseif (WIN32)
-  if (CMAKE_BUILD_TYPE STREQUAL Debug)
-   set (LIB_FILE_SUFFIX d)
-  endif ()
-  unset (ACE_SSL_LIB_FILE)
-  set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
-  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_SSL_LIB_FILE}"
-                NO_DEFAULT_PATH)
- endif ()
- #if (NOT EXISTS ACE_LIBRARY)
- if (NOT ACE_SSL_LIBRARY)
-  message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
- endif ()
 endif ()
 
 include (FindPkgConfig)
@@ -276,9 +247,11 @@ target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
 # set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+ set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
 
-# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
- target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl_win32_bin/lib/ssleay32.lib)
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE} $ENV{LIB_ROOT}/openssl/libssl.lib)
+endif (SSL_SUPPORT)
 endif (WIN32)
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (SSL_SUPPORT)
@@ -385,18 +358,22 @@ if (UNIX)
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/url_stream_load
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
+# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK2_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
+ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${FFMPEG_PATH}
+                           ${GTK2_PATH}
+                           ${ICONV_PATH}
+                           ${LIBXML2_PATH})
  create_target_launcher (${EXECUTABLE}
                          ARGS "-l -r -t"
 #                         FORWARD_ARGS
-                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../openssl/bin
-                                              ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../ffmpeg/libavcodec
-                                              ${PROJECT_SOURCE_DIR}/../ffmpeg/libavformat
-                                              ${PROJECT_SOURCE_DIR}/../ffmpeg/libavutil
-                                              ${PROJECT_SOURCE_DIR}/../ffmpeg/libswscale
-                                              ${PROJECT_SOURCE_DIR}/../ffmpeg/libswresample
-                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
+                         RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                                               G:/software/Development/dll
+                                              ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug

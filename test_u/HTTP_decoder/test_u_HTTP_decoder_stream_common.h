@@ -71,7 +71,7 @@ struct Test_U_HTTPDecoder_SessionData
    , connectionState (NULL)
    , format (STREAM_COMPRESSION_FORMAT_NONE)
    , targetFileName ()
-   , userData (NULL)
+   //, userData (NULL)
   {};
   
   struct Test_U_HTTPDecoder_SessionData& operator= (struct Test_U_HTTPDecoder_SessionData& rhs_in)
@@ -92,7 +92,7 @@ struct Test_U_HTTPDecoder_SessionData
   enum Stream_Decoder_CompressionFormatType format; // decompressor module
   std::string                               targetFileName; // file writer module
 
-  struct Net_UserData*                      userData;
+  //struct Net_UserData*                      userData;
 };
 typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
 
@@ -141,10 +141,10 @@ struct Test_U_StreamConfiguration
 {
   Test_U_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
-   , userData (NULL)
+   //, userData (NULL)
   {};
 
-  struct Net_UserData* userData;
+  //struct Net_UserData* userData;
 };
 
 struct Test_U_HTTPDecoder_StreamState

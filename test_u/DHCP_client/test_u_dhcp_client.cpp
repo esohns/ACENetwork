@@ -830,17 +830,6 @@ do_work (bool requestBroadcastReplies_in,
                                                                    connection_configuration));
   } // end IF
 
-//  if (useReactor_in);
-//  else
-//    configuration_in.listenerconfiguration_in.socketHandlerConfiguration.socketConfiguration_2.connect =
-//        true;
-//  configuration_in.listenerconfiguration_in.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
-//    useLoopback_in;
-//  configuration_in.listenerconfiguration_in.socketHandlerConfiguration.connectionConfiguration =
-//    &(*iterator).second;
-//  configuration_in.listenerconfiguration_in.statisticReportingInterval =
-//    statisticReportingInterval_in;
-
   // step0b: initialize event dispatch
   if (useReactor_in)
     configuration_in.dispatchConfiguration.numberOfReactorThreads =
@@ -964,9 +953,9 @@ do_work (bool requestBroadcastReplies_in,
                              &configuration_in.userData);
 
   //Test_U_OutboundConnector_t connector (connection_manager_p,
-  //                                      configuration_in.socketHandlerConfiguration.statisticReportingInterval);
+  //                                      configuration_in.statisticReportingInterval);
   //Test_U_OutboundAsynchConnector_t asynch_connector (connection_manager_p,
-  //                                                   configuration_in.socketHandlerConfiguration.statisticReportingInterval);
+  //                                                   configuration_in.statisticReportingInterval);
   DHCPClient_OutboundConnectorBcast_t connector (true);
   DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector (true);
   if (useReactor_in)
@@ -1233,8 +1222,8 @@ allocate:
       dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> ((*iterator_2).second.second.connection);
     ACE_ASSERT (istream_connection_p);
 
-    struct DHCPClient_ConnectionState& state_r =
-        const_cast<struct DHCPClient_ConnectionState&> (istream_connection_p->state ());
+    struct DHCP_ConnectionState& state_r =
+        const_cast<struct DHCP_ConnectionState&> (istream_connection_p->state ());
     state_r.timeStamp = COMMON_TIME_NOW;
     state_r.xid = DHCP_record.xid;
 

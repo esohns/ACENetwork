@@ -95,7 +95,7 @@ class Test_I_ConnectionStream
   inline virtual ~Test_I_ConnectionStream () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
+  virtual bool load (Stream_ILayout*, // i/o value: layout
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T

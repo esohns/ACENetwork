@@ -61,7 +61,6 @@ typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 class Test_U_Message;
 class Test_U_SessionMessage;
-struct Test_U_ConnectionConfiguration;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
@@ -85,7 +84,6 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Test_U_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct Net_UserData> Test_U_ConnectionManager_t;
-struct Net_UserData;
 
 extern const char stream_name_string_[];
 
@@ -111,7 +109,7 @@ class Test_U_Stream_T
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         Test_U_ConnectionManager_t,
-                                        struct Net_UserData>
+                                        struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -133,7 +131,7 @@ class Test_U_Stream_T
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         Test_U_ConnectionManager_t,
-                                        struct Net_UserData> inherited;
+                                        struct Stream_UserData> inherited;
 
  public:
   Test_U_Stream_T ();
@@ -169,7 +167,7 @@ class Test_U_Stream_T
                                        TimerManagerType,
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t,
-                                       struct Net_UserData> WRITER_T;
+                                       struct Stream_UserData> WRITER_T;
   typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                        Test_U_HTTPDecoder_ControlMessage_t,
                                        Test_U_Message,
@@ -184,7 +182,7 @@ class Test_U_Stream_T
                                        TimerManagerType,
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t,
-                                       struct Net_UserData> READER_T;
+                                       struct Stream_UserData> READER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,                             // task synch type
                                 Common_TimePolicy_t,                      // time policy
                                 Stream_SessionId_t,                       // session id type

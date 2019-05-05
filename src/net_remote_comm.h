@@ -27,7 +27,7 @@ class Net_Remote_Comm
 {
  public:
   // define different types of messages
-  enum MessageType
+  enum MessageType : int8_t
   {
     NET_MESSAGE_INVALID = -1,
     NET_MESSAGE_PING,
@@ -42,10 +42,8 @@ class Net_Remote_Comm
 #endif
   struct MessageHeader
   {
-    // *NOTE*: messageLength is (currently) defined as:
-    // *PORTABILITY*: total message length - sizeof(unsigned int) !
-    unsigned int length;
-    MessageType  type;
+    uint16_t    length;
+    MessageType type;
 #ifdef __GNUC__
   } __attribute__ ((__packed__));
 #else
@@ -56,7 +54,7 @@ class Net_Remote_Comm
   struct PingMessage
   {
     MessageHeader header;
-    unsigned int  counter;
+    uint32_t      counter;
 #ifdef __GNUC__
   } __attribute__ ((__packed__));
 #else

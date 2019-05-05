@@ -848,6 +848,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                        INADDR_LOOPBACK,
                                                        1,
                                                        0);
+      if (!useReactor_in)
+        connection_configuration_p_2->connect = true;
     } // end IF
     else
       result =
@@ -887,8 +889,25 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       connection_configuration_p_2->listenAddress.set_port_number (listeningPortNumber_in,
                                                                    1);
-      connection_configuration_p_2->peerAddress.set_port_number (listeningPortNumber_in,
-                                                                 1);
+
+      std::string interface_identifier =
+        Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+      ACE_ASSERT (!interface_identifier.empty ());
+      ACE_INET_Addr peer_address, gateway_address;
+      Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                              peer_address,
+                                              gateway_address);
+      result =
+        connection_configuration_p_2->peerAddress.set (listeningPortNumber_in,
+                                                       peer_address.get_ip_address (),
+                                                       1,
+                                                       0);
+      ACE_ASSERT (result != -1);
+      if (!useReactor_in)
+        connection_configuration_p_2->connect = true;
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("set peer address to %s\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
     } // end IF
     else
       connection_configuration_p->address.set_port_number (listeningPortNumber_in,

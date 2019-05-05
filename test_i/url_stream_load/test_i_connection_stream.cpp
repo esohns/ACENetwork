@@ -40,40 +40,39 @@ Test_I_ConnectionStream::Test_I_ConnectionStream ()
 }
 
 bool
-Test_I_ConnectionStream::load (Stream_ModuleList_t& modules_out,
+Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
                                bool& deleteModules_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream::load"));
 
+  bool result = inherited::load (layout_in,
+                                 deleteModules_out);
+  ACE_ASSERT (result);
+
   Stream_Module_t* module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Module_Dump_Module (this,
-  //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
-  //                false);
-  //modules_out.push_back (module_p);
-  //module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Module_HTMLParser_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR ("HTMLParser")),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_StatisticReport_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_HTTPMarshal_Module (this,
                                              ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
-  modules_out.push_back (module_p);
-//  module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetIO")),
-//                  false);
-//  modules_out.push_back (module_p);
+  layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_StatisticReport_Module (this,
+  //                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Module_HTMLParser_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR ("HTMLParser")),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_Module_Dump_Module (this,
+  //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
 
   deleteModules_out = true;
 
