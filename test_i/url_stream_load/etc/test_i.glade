@@ -14,7 +14,6 @@
     <property name="website">http://www.github.com/esohns/libACENetwork</property>
     <property name="website_label" translatable="yes">github project</property>
     <property name="authors">Erik Sohns</property>
-    <property name="license_type">gpl-3-0</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_about_vbox">
         <property name="can_focus">False</property>

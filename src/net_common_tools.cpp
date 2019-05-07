@@ -330,12 +330,12 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
 
   int result = -1;
   ACE_INET_Addr inet_addr;
-  char buffer_a[32]; // "xxx.xxx.xxx.xxx:yyyyy\0"
-  ACE_OS::memset (&buffer_a, 0, sizeof (char[32]));
+  char buffer_a[BUFSIZ]; // "xxx.xxx.xxx.xxx:yyyyy\0"
+  ACE_OS::memset (&buffer_a, 0, sizeof (char[BUFSIZ]));
   result = inet_addr.set (port_in,
                           IPAddress_in,
                           0,  // no need to encode, data IS in network byte order !
-                          0); // only needed for IPv6...
+                          0); // only needed for IPv6
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -343,7 +343,7 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
     return return_value;
   } // end IF
   result = inet_addr.addr_to_string (buffer_a,
-                                     sizeof (char[32]),
+                                     sizeof (char[BUFSIZ]),
                                      1); // want IP address, not hostname !
   if (unlikely (result == -1))
   {
@@ -351,8 +351,6 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
                 ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string(): \"%m\", aborting\n")));
     return return_value;
   } // end IF
-
-  // copy string from buffer
   return_value = buffer_a;
 
   // clean up: if port number was 0, cut off the trailing ":0" !

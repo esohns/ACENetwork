@@ -60,6 +60,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
  : inherited ()
  , inherited2 (managed_in)
  , stream_ ()
+ , allocator_ (NULL)
  , sendLock_ ()
  , writeBuffer_ (NULL)
  , notify_ (true)
@@ -147,25 +148,25 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::open"));
 
+  int result = -1;
   bool handle_manager = false;
   bool handle_stream = false;
+  AddressType local_SAP;
   ICONNECTOR_T* iconnector_p = NULL;
   ILISTENER_T* ilistener_p = NULL;
-  int result = -1;
-  AddressType local_SAP, peer_SAP;
-
+  AddressType peer_SAP;
+  enum Net_TransportLayerType transport_layer_e = this->transportLayer ();
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
     NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  ConfigurationType* configuration_p = NULL;
 
   // step0: initialize connection base
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
 
-  // *TODO*: remove type inference
-  ConfigurationType* configuration_p = NULL;
-  switch (this->transportLayer ())
+  switch (transport_layer_e)
   {
     case NET_TRANSPORTLAYER_TCP:
     {
@@ -243,8 +244,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     //            ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  info (inherited2::state_.handle,
-        local_SAP, peer_SAP);
+  inherited2::state_.handle = inherited::get_handle ();
 
   // step2: register with the connection manager ?
   if (likely (inherited2::isManaged_))
@@ -1084,12 +1084,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   int result = -1;
   int error = 0;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   handle_out = inherited::get_handle ();
-#else
-  handle_out = inherited::get_handle ();
-#endif
-
   result = inherited::peer_.get_local_addr (localSAP_out);
   if (unlikely (result == -1))
   {
@@ -1098,7 +1093,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     if (error != ENOTSOCK) // 10038: TCP: socket already closed
 #else
     if (error != EBADF)    // 9    : Linux: socket already closed
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n"),
                   id ()));
@@ -1114,7 +1109,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 #else
     if ((error != EBADF) &&    // 9    : Linux: socket already closed
         (error != ENOTCONN))   // 107  : Linux: perhaps UDP ?
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n"),
                   id ()));
@@ -1532,6 +1527,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
  : inherited ()
  , inherited2 (managed_in)
  , stream_ ()
+ , allocator_ (NULL)
  , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::Net_AsynchStreamConnectionBase_T"));

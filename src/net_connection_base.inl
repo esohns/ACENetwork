@@ -150,8 +150,6 @@ Net_ConnectionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::register_"));
 
-  AddressType local_address, remote_address;
-
   // sanity check(s)
   ACE_ASSERT (!isRegistered_);
 
@@ -176,21 +174,21 @@ Net_ConnectionBase_T<AddressType,
     return false;
   } // end IF
 
+#if defined (_DEBUG)
+  AddressType local_address;
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+  AddressType remote_address;
   try {
-    this->info (state_.handle,
-                local_address,
-                remote_address);
+    this->info (handle_h,
+                local_address, remote_address);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
-    return false;
+                ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
   }
-
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [0x%@/0x%@]: %s %s %s (total: %d)\n"),
-              this, state_.handle,
+              this, handle_h,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
               (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
@@ -198,7 +196,7 @@ Net_ConnectionBase_T<AddressType,
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [%@/%d]: %s %s %s (total: %d)\n"),
-              this, state_.handle,
+              this, handle_h,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
               (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
@@ -229,9 +227,14 @@ Net_ConnectionBase_T<AddressType,
   if (unlikely (!isRegistered_))
     return;
 
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  ICONNECTION_MANAGER_T* manager_p =
+    CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  ACE_ASSERT (manager_p);
+
 #if defined (_DEBUG)
-  AddressType local_address, remote_address;
+  AddressType local_address;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  AddressType remote_address;
   try {
     this->info (handle,
                 local_address,
@@ -240,12 +243,8 @@ Net_ConnectionBase_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
   }
-#endif // _DEBUG
-
-  ICONNECTION_MANAGER_T* manager_p =
-      CONNECTION_MANAGER_T::SINGLETON_T::instance ();
-  ACE_ASSERT (manager_p);
   unsigned int number_of_connections = manager_p->count () - 1;
+#endif // _DEBUG
 
   // (try to) de-register with the connection manager
   isRegistered_ = false;

@@ -827,16 +827,14 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::collect"));
 
-  // initialize result
+  // initialize return values
   ACE_OS::memset (&data_out, 0, sizeof (data_out));
 
-  // *NOTE*: called from report () only !
-//  ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
-
+  // aggregate statistic data
   StatisticContainerType statistic;
-  // aggregate statistical data
   // *WARNING*: this assumes the caller is holding the lock !
   ICONNECTION_T* connection_p = NULL;
+  // *NOTE*: called from report () only !
   //{ ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);

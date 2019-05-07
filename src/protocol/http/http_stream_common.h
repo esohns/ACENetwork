@@ -109,9 +109,9 @@ struct HTTP_ModuleHandlerConfiguration
   HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
+   , allocatorConfiguration (NULL)
    , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
    , printProgressDot (false)
-   //, protocolConfiguration (NULL)
    , URL ()
   {
     printFinalReport = true;

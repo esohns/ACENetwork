@@ -358,12 +358,15 @@ if (UNIX)
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/url_stream_load
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
+ if (SSL_USE)
+  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
+ endif (SSL_USE)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK2_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${SSL_PATH}
                            ${FFMPEG_PATH}
                            ${GTK2_PATH}
                            ${ICONV_PATH}
