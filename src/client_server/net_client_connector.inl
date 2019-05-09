@@ -419,12 +419,13 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
     // leaks.
     // The connection was already made; so this close is a "normal"
     // close operation.
-    handler_in->close (NORMAL_CLOSE_OPERATION);
+    handler_in->close (CLOSE_DURING_NEW_CONNECTION);
     return -1;
   }
   else
     return 0;
 }
+
 template <ACE_SYNCH_DECL,
           typename HandlerType,
           typename ConnectorType,
@@ -461,92 +462,110 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   return (handler_out ? 0 : -1);
 }
-//template <typename HandlerType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StreamType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType>
-//int
-//Net_Client_Connector_T<Net_UDPConnection_T<HandlerType,
-//                                           StateType,
-//                                           HandlerConfigurationType,
-//                                           UserDataType>,
-//                       ACE_INET_Addr,
-//                       ConfigurationType,
-//                       StateType,
-//                       StreamType,
-//                       HandlerConfigurationType,
-//                       UserDataType>::connect_svc_handler (CONNECTION_T*& handler_inout,
-//                                                           const ACE_SOCK_Connector::PEER_ADDR& remoteAddress_in,
-//                                                           ACE_Time_Value* timeout_in,
-//                                                           const ACE_SOCK_Connector::PEER_ADDR& localAddress_in,
-//                                                           int reuseAddress_in,
-//                                                           int flags_in,
-//                                                           int permissions_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect_svc_handler"));
-//
-//  //ACE_UNUSED_ARG (remoteAddress_in);
-//  ACE_UNUSED_ARG (timeout_in);
-//  ACE_UNUSED_ARG (localAddress_in);
-//  ACE_UNUSED_ARG (reuseAddress_in);
-//  ACE_UNUSED_ARG (flags_in);
-//  ACE_UNUSED_ARG (permissions_in);
-//
-//  // sanity check(s)
-//  ACE_ASSERT (handler_inout);
-//
-//  Net_ICONNECTOR_T* iconnector_p = this;
-//  result = handler_inout->open (iconnector_p);
-//  if (result == -1)
-//  {
-//    ACE_TCHAR buffer[BUFSIZ];
-//    ACE_OS::memset (buffer, 0, sizeof (buffer));
-//    result = remoteAddress_in.addr_to_string (buffer, sizeof (buffer));
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_UDPConnection_T::open(address was: \"%s\"): \"%m\", aborting\n"),
-//                buffer));
-//    return ACE_INVALID_HANDLE;
-//  } // end IF
-//
-//  return handler_inout->get_handle ();
-//}
-//template <typename HandlerType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StreamType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType>
-//int
-//Net_Client_Connector_T<Net_UDPConnection_T<HandlerType,
-//                                           StateType,
-//                                           HandlerConfigurationType,
-//                                           UserDataType>,
-//                       ACE_INET_Addr,
-//                       ConfigurationType,
-//                       StateType,
-//                       StreamType,
-//                       HandlerConfigurationType,
-//                       UserDataType>::connect_svc_handler (CONNECTION_T*& handler_inout,
-//                                                           CONNECTION_T*& handlerCopy_inout,
-//                                                           const ACE_SOCK_Connector::PEER_ADDR& remoteAddress_in,
-//                                                           ACE_Time_Value* timeout_in,
-//                                                           const ACE_SOCK_Connector::PEER_ADDR& localAddress_in,
-//                                                           int reuseAddress_in,
-//                                                           int flags_in,
-//                                                           int permissions_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect_svc_handler"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP_RETURN (-1);
-//
-//  ACE_NOTREACHED (return -1);
-//}
+
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
+          typename ConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename UserDataType>
+int
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
+                       ConnectorType,
+                       ACE_INET_Addr,
+                       ConfigurationType,
+                       StateType,
+                       StatisticContainerType,
+                       Net_UDPSocketConfiguration_t,
+                       HandlerConfigurationType,
+                       StreamType,
+                       UserDataType>::connect_svc_handler (CONNECTION_T*& handler_inout,
+                                                           const ACE_SOCK_Connector::PEER_ADDR& remoteAddress_in,
+                                                           ACE_Time_Value* timeout_in,
+                                                           const ACE_SOCK_Connector::PEER_ADDR& localAddress_in,
+                                                           int reuseAddress_in,
+                                                           int flags_in,
+                                                           int permissions_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect_svc_handler"));
+
+  //ACE_UNUSED_ARG (remoteAddress_in);
+  ACE_UNUSED_ARG (timeout_in);
+  ACE_UNUSED_ARG (localAddress_in);
+  ACE_UNUSED_ARG (reuseAddress_in);
+  ACE_UNUSED_ARG (flags_in);
+  ACE_UNUSED_ARG (permissions_in);
+
+  // sanity check(s)
+  ACE_ASSERT (handler_inout);
+
+  ICONNECTOR_T* iconnector_p = this;
+  int result = handler_inout->open (iconnector_p);
+  if (unlikely (result == -1))
+  {
+    ACE_TCHAR buffer_a[BUFSIZ];
+    ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+    int result_2 =
+      localAddress_in.addr_to_string (buffer_a, sizeof (ACE_TCHAR[BUFSIZ]));
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_TCHAR buffer_2[BUFSIZ];
+    ACE_OS::memset (buffer_2, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+    result_2 =
+      remoteAddress_in.addr_to_string (buffer_2, sizeof (ACE_TCHAR[BUFSIZ]));
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_UDPConnection_T::open(local/remote address was: %s/%s): \"%m\", aborting\n"),
+                buffer_a, buffer_2));
+    return -1;
+  } // end IF
+
+  return 0;
+}
+
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
+          typename ConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename UserDataType>
+int
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
+                       ConnectorType,
+                       ACE_INET_Addr,
+                       ConfigurationType,
+                       StateType,
+                       StatisticContainerType,
+                       Net_UDPSocketConfiguration_t,
+                       HandlerConfigurationType,
+                       StreamType,
+                       UserDataType>::connect_svc_handler (CONNECTION_T*& handler_inout,
+                                                           CONNECTION_T*& handlerCopy_inout,
+                                                           const ACE_SOCK_Connector::PEER_ADDR& remoteAddress_in,
+                                                           ACE_Time_Value* timeout_in,
+                                                           const ACE_SOCK_Connector::PEER_ADDR& localAddress_in,
+                                                           int reuseAddress_in,
+                                                           int flags_in,
+                                                           int permissions_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::connect_svc_handler"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (-1);
+
+  ACE_NOTREACHED (return -1);
+}
 
 /////////////////////////////////////////
 

@@ -1,43 +1,11 @@
-﻿if (UNIX)
- include (CheckLibraryExists)
-# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- set (CMAKE_THREAD_PREFER_PTHREAD ON)
- find_package (Threads)
-endif ()
-
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_LIB_FILE}"
-               NO_DEFAULT_PATH)
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-endif ()
-
-include (FindPkgConfig)
+﻿include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
 # *NOTE*: Common requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
- if (SSL_SUPPORT)
-  pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
- endif ()
+# if (SSL_SUPPORT)
+#  pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
+# endif ()
  #pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
  pkg_check_modules (PKG_LIBXML2 REQUIRED libxml-2.0)
 # pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
@@ -133,7 +101,7 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/stat)
 elseif (WIN32)
  if (SSL_SUPPORT)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+  include_directories (${SSL_INCLUDE_DIRS})
  endif (SSL_SUPPORT)
  include_directories ("$ENV{PROGRAMFILES}/Microsoft SDKs/Windows/v7.0/Samples/multimedia/directshow/baseclasses")
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
@@ -258,7 +226,9 @@ if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
 if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
+ if (SSL_SUPPORT)
+  target_link_libraries (${EXECUTABLE} ${SSL_LIBRARIES})
+ endif (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE} ${PKG_LIBXML2_LIBRARIES})
 
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})

@@ -26,7 +26,7 @@ include (FindPkgConfig)
 if (UNIX)
 # *NOTE*: Common requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
- pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
+# pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
 # *TODO*: repair WIN32 pkgconfig support
 elseif (WIN32)
 endif ()
@@ -72,7 +72,7 @@ endif ()
 
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
- include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
+# include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
@@ -89,9 +89,11 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/stat)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+ if (SSL_SUPPORT)
+  include_directories (${SSL_INCLUDE_DIRS})
+ endif (SSL_SUPPORT)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 

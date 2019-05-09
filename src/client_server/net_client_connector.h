@@ -197,23 +197,23 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   virtual int activate_svc_handler (HandlerType*);
   // override default instantiation strategy
   virtual int make_svc_handler (HandlerType*&);
-  //virtual int connect_svc_handler (CONNECTION_T*&,
-  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
-  //                                 ACE_Time_Value*,
-  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
-  //                                 int,
-  //                                 int,
-  //                                 int);
-  //// *TODO*: it's not quite clear what this API does (see Connector.h:514),
-  ////         needs overriding to please the compiler...
-  //virtual int connect_svc_handler (CONNECTION_T*&,
-  //                                 CONNECTION_T*&,
-  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
-  //                                 ACE_Time_Value*,
-  //                                 const ACE_SOCK_Connector::PEER_ADDR&,
-  //                                 int,
-  //                                 int,
-  //                                 int);
+  virtual int connect_svc_handler (CONNECTION_T*&,
+                                   const ACE_SOCK_Connector::PEER_ADDR&,
+                                   ACE_Time_Value*,
+                                   const ACE_SOCK_Connector::PEER_ADDR&,
+                                   int,
+                                   int,
+                                   int);
+  // *TODO*: it's not quite clear what this API does (see Connector.h:514),
+  //         needs overriding to please the compiler...
+  virtual int connect_svc_handler (CONNECTION_T*&,
+                                   CONNECTION_T*&,
+                                   const ACE_SOCK_Connector::PEER_ADDR&,
+                                   ACE_Time_Value*,
+                                   const ACE_SOCK_Connector::PEER_ADDR&,
+                                   int,
+                                   int,
+                                   int);
 
  private:
   // convenient types

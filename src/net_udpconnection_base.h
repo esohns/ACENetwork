@@ -109,6 +109,8 @@ class Net_UDPConnectionBase_T
                                      UserDataType> STREAM_CONNECTION_BASE_T;
 
   Net_UDPConnectionBase_T (bool); // managed ?
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Net_UDPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual ~Net_UDPConnectionBase_T () {}
 
   // implement (part of) Net_ITransportLayer_T
@@ -135,10 +137,6 @@ class Net_UDPConnectionBase_T
 
   // implement Common_IReset
   virtual void reset ();
-
- protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_UDPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnectionBase_T (const Net_UDPConnectionBase_T&))
