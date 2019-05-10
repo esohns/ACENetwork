@@ -97,6 +97,8 @@ class Net_Client_Connector_T
   virtual ACE_HANDLE connect (const AddressType&);
 
  protected:
+  //virtual void initialize_svc_handler (ACE_HANDLE,
+  //                                     HandlerType*);
   // override default activation strategy
   virtual int activate_svc_handler (HandlerType*);
   // override default instantiation strategy
@@ -121,13 +123,11 @@ class Net_Client_Connector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  ConfigurationType*     configuration_; // connection-
-
-  bool                   managed_;
+  ConfigurationType* configuration_; // connection-
+  bool               managed_;
 };
 
 //////////////////////////////////////////
-
 // specialization (for UDP)
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T
@@ -137,7 +137,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -150,7 +149,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                              StateType,
                              StatisticContainerType,
                              Net_UDPSocketConfiguration_t,
-                             HandlerConfigurationType,
+                             Net_UDPSocketConfiguration_t,
                              StreamType,
                              UserDataType>
  : public Net_IConnector_T<ACE_INET_Addr,
@@ -171,7 +170,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                   StateType,
                                   StatisticContainerType,
                                   Net_UDPSocketConfiguration_t,
-                                  HandlerConfigurationType,
+                                  Net_UDPSocketConfiguration_t,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
@@ -193,6 +192,8 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 
  protected:
+  virtual void initialize_svc_handler (ACE_HANDLE,
+                                       HandlerType*);
   // override default activation strategy
   virtual int activate_svc_handler (HandlerType*);
   // override default instantiation strategy
@@ -225,7 +226,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                  StateType,
                                  StatisticContainerType,
                                  Net_UDPSocketConfiguration_t,
-                                 HandlerConfigurationType,
+                                 Net_UDPSocketConfiguration_t,
                                  StreamType,
                                  UserDataType> OWN_TYPE_T;
 
@@ -236,13 +237,12 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   // convenient types
   typedef Net_ITransportLayer_T<Net_UDPSocketConfiguration_t> ITRANSPORTLAYER_T;
 
-  ConfigurationType*     configuration_; // connection-
-  bool                   managed_;
+  ConfigurationType* configuration_; // connection-
+  bool               managed_;
 };
 
-//////////////////////////////////////////
-
 #if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+//////////////////////////////////////////
 // specialization (for Netlink)
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T
@@ -252,7 +252,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -265,7 +264,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                              StateType,
                              StatisticContainerType,
                              Net_NetlinkSocketConfiguration_t,
-                             HandlerConfigurationType,
+                             Net_NetlinkSocketConfiguration_t,
                              StreamType,
                              UserDataType>
  : public Net_IConnector_T<Net_Netlink_Addr,
@@ -285,7 +284,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                   StateType,
                                   StatisticContainerType,
                                   Net_NetlinkSocketConfiguration_t,
-                                  HandlerConfigurationType,
+                                  Net_NetlinkSocketConfiguration_t,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
@@ -317,8 +316,8 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   // convenient types
   typedef Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t> ITRANSPORTLAYER_T;
 
-  ConfigurationType*     configuration_; // connection-
-  bool                   managed_;
+  ConfigurationType* configuration_; // connection-
+  bool               managed_;
 };
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 

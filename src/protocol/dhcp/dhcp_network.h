@@ -50,7 +50,7 @@
 
 /////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct DHCP_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_t,
                                   ACE_INET_Addr,
                                   struct DHCP_ConnectionConfiguration,
                                   struct DHCP_ConnectionState,
@@ -59,7 +59,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct DHCP_SocketHandl
                                   struct Net_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct DHCP_ModuleHandlerConfiguration> DHCP_TCPHandler_t;
-typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct DHCP_SocketHandlerConfiguration>,
+typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_t,
                                         ACE_INET_Addr,
                                         struct DHCP_ConnectionConfiguration,
                                         struct DHCP_ConnectionState,
@@ -116,7 +116,7 @@ typedef Net_Client_Connector_T<DHCP_TCPConnection_t,
                                Net_Statistic_t,
                                DHCP_Stream_t,
                                struct DHCP_SocketHandlerConfiguration,
-                               struct Net_UserData> DHCP__Connector_t;
+                               struct Net_UserData> DHCP_Connector_t;
 typedef Net_Client_AsynchConnector_T<DHCP_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      struct DHCP_ConnectionConfiguration,
