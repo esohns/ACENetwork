@@ -83,6 +83,7 @@ enum Net_TransportLayerType
   NET_TRANSPORTLAYER_NETLINK,      // 'pseudo' ((Linux-)host only, no flow control) kernel<->user space protocol
   NET_TRANSPORTLAYER_TCP,
   NET_TRANSPORTLAYER_UDP,
+  NET_TRANSPORTLAYER_SSL,
   ////////////////////////////////////////
   NET_TRANSPORTLAYER_MAX
 };

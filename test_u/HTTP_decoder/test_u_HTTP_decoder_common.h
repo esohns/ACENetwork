@@ -73,7 +73,7 @@ struct Test_U_HTTPDecoder_Configuration
   {};
 
   // **************************** socket data **********************************
-  Test_U_ConnectionConfigurations_t                    connectionConfigurations;
+  Net_ConnectionConfigurations_t                       connectionConfigurations;
   // **************************** parser data **********************************
   struct Common_ParserConfiguration                    parserConfiguration;
   // **************************** signal data **********************************

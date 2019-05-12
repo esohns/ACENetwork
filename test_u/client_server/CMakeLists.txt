@@ -3,41 +3,7 @@
   include_directories (${PKG_LIBNL_INCLUDE_DIRS})
   add_definitions (-DNETLINK_SUPPORT)
  endif (NETLINK_SUPPORT)
-
-# include (CheckLibraryExists)
-# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- set (CMAKE_THREAD_PREFER_PTHREAD ON)
- find_package (Threads)
 endif (UNIX)
-
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES ace build/linux/ace
-                DOC "searching for ${ACE_LIB_FILE}")
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}")
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-else ()
- #message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
-endif ()
 
 if (UNIX)
 # *NOTE*: Common requires libcap
@@ -217,18 +183,21 @@ add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Client)
 
 target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_SOURCE} X11)
-elseif (WIN32)
-# target_link_libraries (${EXECUTABLE_SOURCE} ntdll.lib)
-
-# target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_WLAN)
 endif ()
+target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
+if (SSL_USE)
+ target_link_libraries (${EXECUTABLE_SOURCE} ${SSL_LIBRARIES})
+
+ target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_SSL_LIBRARY})
+endif (SSL_USE)
+
 target_link_libraries (${EXECUTABLE_SOURCE} Common)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonLog)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonSignal)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonTimer)
+
 if (UNIX)
 # set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES LINK_FLAGS -nostartfiles)
 elseif (WIN32)
@@ -336,18 +305,24 @@ add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
+
 if (UNIX)
  target_link_libraries (${EXECUTABLE_TARGET} X11)
-elseif (WIN32)
-# target_link_libraries (${EXECUTABLE_TARGET} ntdll.lib)
+endif (UNIX)
 
-# target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_WLAN)
-endif ()
+target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
+
+if (SSL_USE)
+ target_link_libraries (${EXECUTABLE_TARGET} ${SSL_LIBRARIES})
+
+ target_link_libraries (${EXECUTABLE_TARGET} ${ACE_SSL_LIBRARY})
+endif (SSL_USE)
+
 target_link_libraries (${EXECUTABLE_TARGET} Common)
 target_link_libraries (${EXECUTABLE_TARGET} CommonLog)
 target_link_libraries (${EXECUTABLE_TARGET} CommonSignal)
 target_link_libraries (${EXECUTABLE_TARGET} CommonTimer)
+
 if (UNIX)
 # set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS -nostartfiles)
 elseif (WIN32)
@@ -379,6 +354,12 @@ install (FILES etc/net_server.glade
          DESTINATION etc/lib${PROJECT_NAME}/test_u COMPONENT config)
 
 ##########################################
+
+if (SSL_USE)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
+ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${SSL_LIB_PATH})
+endif (SSL_USE)
 
 if (GUI_SUPPORT)
  file (TO_NATIVE_PATH "${ui_definition_file}" ui_definition_file)
@@ -430,8 +411,8 @@ if (UNIX)
  create_target_launcher (${EXECUTABLE_TARGET}
                          ARGS "-l -t"
 #                         FORWARD_ARGS
-                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
+                                              ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
@@ -445,7 +426,6 @@ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
 #                          ${FFMPEG_PATH}
 #                          ${PROJECT_SOURCE_DIR}/../assimp/cmake/code/${CMAKE_BUILD_TYPE}
                           ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
-                          ${PROJECT_SOURCE_DIR}/../openssl/bin
 #                          ${PROJECT_SOURCE_DIR}/../pdcurses/win32
 #                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
 #                                              G:/software/Development/dll

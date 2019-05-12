@@ -38,11 +38,20 @@ Test_U_TCPConnection::Test_U_TCPConnection (bool managed_in)
 
 }
 
-//////////////////////////////////////////
-
 Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (bool managed_in)
  : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
 
 }
+
+//////////////////////////////////////////
+
+#if defined (SSL_USE)
+Test_U_SSLConnection::Test_U_SSLConnection (bool managed_in)
+ : inherited (managed_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SSLConnection::Test_U_SSLConnection"));
+
+}
+#endif // SSL_USE

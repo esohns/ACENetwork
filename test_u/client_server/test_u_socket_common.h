@@ -53,37 +53,37 @@
 // forward declarations
 class Test_U_Stream;
 
-typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Test_U_AsynchTCPSocketHandler_t;
-
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-typedef Net_AsynchNetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Test_U_AsynchNetlinkSocketHandler_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-
-typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
-                                     Net_UDPSocketConfiguration_t> Test_U_AsynchUDPSocketHandler_t;
-typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
-                                     Net_UDPSocketConfiguration_t> Test_U_AsynchIPMulticastSocketHandler_t;
-typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-                                     Net_UDPSocketConfiguration_t> Test_U_AsynchIPBroadcastSocketHandler_t;
-
-//////////////////////////////////////////
-
-typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
-                               ACE_SOCK_STREAM,
-                               Net_TCPSocketConfiguration_t> Test_U_TCPSocketHandler_t;
-
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-typedef Net_NetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Test_U_NetlinkSocketHandler_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-
-typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
-                               Net_SOCK_Dgram,
-                               Net_UDPSocketConfiguration_t> Test_U_UDPSocketHandler_t;
-typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
-                               Net_SOCK_Dgram_Mcast,
-                               Net_UDPSocketConfiguration_t> Test_U_IPMulticastSocketHandler_t;
-typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
-                               Net_SOCK_Dgram_Bcast,
-                               Net_UDPSocketConfiguration_t> Test_U_IPBroadcastSocketHandler_t;
+//typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> Test_U_AsynchTCPSocketHandler_t;
+//
+//#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+//typedef Net_AsynchNetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Test_U_AsynchNetlinkSocketHandler_t;
+//#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+//
+//typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
+//                                     Net_UDPSocketConfiguration_t> Test_U_AsynchUDPSocketHandler_t;
+//typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
+//                                     Net_UDPSocketConfiguration_t> Test_U_AsynchIPMulticastSocketHandler_t;
+//typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
+//                                     Net_UDPSocketConfiguration_t> Test_U_AsynchIPBroadcastSocketHandler_t;
+//
+////////////////////////////////////////////
+//
+//typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
+//                               ACE_SOCK_STREAM,
+//                               Net_TCPSocketConfiguration_t> Test_U_TCPSocketHandler_t;
+//
+//#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+//typedef Net_NetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Test_U_NetlinkSocketHandler_t;
+//#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+//
+//typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+//                               Net_SOCK_Dgram,
+//                               Net_UDPSocketConfiguration_t> Test_U_UDPSocketHandler_t;
+//typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+//                               Net_SOCK_Dgram_Mcast,
+//                               Net_UDPSocketConfiguration_t> Test_U_IPMulticastSocketHandler_t;
+//typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+//                               Net_SOCK_Dgram_Bcast,
+//                               Net_UDPSocketConfiguration_t> Test_U_IPBroadcastSocketHandler_t;
 
 #endif

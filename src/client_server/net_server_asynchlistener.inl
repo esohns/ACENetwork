@@ -686,8 +686,17 @@ Net_Server_AsynchListener_T<HandlerType,
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (_DEBUG)
   else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("stopped listening\n")));
+                ACE_TEXT ("0x%@: stopped listening: %s\n"),
+                inherited::get_handle (),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: stopped listening: %s\n"),
+                inherited::get_handle (),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG
 
   isListening_ = false;

@@ -163,16 +163,12 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
                         <property name="n_rows">2</property>
                         <property name="n_columns">2</property>
                         <child>
                           <object class="GtkLabel" id="label_connections">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">start</property>
-                            <property name="valign">center</property>
                             <property name="label" translatable="yes">connections</property>
                             <property name="track_visited_links">False</property>
                           </object>
@@ -186,7 +182,6 @@
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
-                            <property name="hexpand">True</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">●</property>
@@ -208,8 +203,6 @@
                           <object class="GtkLabel" id="label_messages">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">start</property>
-                            <property name="valign">center</property>
                             <property name="label" translatable="yes">messages</property>
                             <property name="track_visited_links">False</property>
                           </object>
@@ -224,7 +217,6 @@
                           <object class="GtkVBox" id="vbox_messages">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="hexpand">True</property>
                             <child>
                               <object class="GtkSpinButton" id="spinbutton_session_messages">
                                 <property name="visible">True</property>
@@ -233,8 +225,6 @@
                                 <property name="has_tooltip">True</property>
                                 <property name="tooltip_markup" translatable="yes">session messages</property>
                                 <property name="tooltip_text" translatable="yes">session messages</property>
-                                <property name="valign">center</property>
-                                <property name="hexpand">True</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
@@ -261,8 +251,6 @@
                                 <property name="has_tooltip">True</property>
                                 <property name="tooltip_markup" translatable="yes">data messages</property>
                                 <property name="tooltip_text" translatable="yes">data messages</property>
-                                <property name="valign">center</property>
-                                <property name="hexpand">True</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
@@ -315,8 +303,6 @@
           <object class="GtkFrame" id="frame_options">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="valign">start</property>
             <property name="label_xalign">0</property>
             <property name="label_yalign">0</property>
             <child>
@@ -327,8 +313,6 @@
                   <object class="GtkHBox" id="hbox_options">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
                     <child>
                       <object class="GtkFrame" id="frame_protocol">
                         <property name="visible">True</property>
@@ -337,7 +321,7 @@
                         <property name="label_yalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="alignment1">
+                          <object class="GtkAlignment" id="alignment_protocol">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
@@ -345,6 +329,24 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="layout_style">start</property>
+                                <child>
+                                  <object class="GtkRadioButton" id="radiobutton_ssl">
+                                    <property name="label" translatable="yes">SSL</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="relief">half</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <signal name="toggled" handler="radiobutton_protocol_toggled_cb" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
                                 <child>
                                   <object class="GtkRadioButton" id="radiobutton_tcp">
                                     <property name="label" translatable="yes">TCP</property>
@@ -354,13 +356,14 @@
                                     <property name="relief">half</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="xalign">0</property>
-                                    <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
+                                    <property name="group">radiobutton_ssl</property>
+                                    <signal name="toggled" handler="radiobutton_protocol_toggled_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">0</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -373,12 +376,13 @@
                                     <property name="focus_on_click">False</property>
                                     <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
-                                    <property name="group">radiobutton_tcp</property>
+                                    <property name="group">radiobutton_ssl</property>
+                                    <signal name="toggled" handler="radiobutton_protocol_toggled_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
@@ -399,8 +403,6 @@
                       <object class="GtkFrame" id="frame_ping_interval">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="valign">start</property>
                         <property name="label_xalign">0</property>
                         <property name="label_yalign">0</property>
                         <property name="shadow_type">none</property>
@@ -417,8 +419,6 @@
                                 <property name="has_tooltip">True</property>
                                 <property name="tooltip_markup" translatable="yes">ping interval (ms)</property>
                                 <property name="tooltip_text" translatable="yes">ping interval (ms)</property>
-                                <property name="halign">start</property>
-                                <property name="valign">start</property>
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
                                 <property name="xalign">1</property>
@@ -495,11 +495,9 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog_action_area">
+          <object class="GtkHButtonBox" id="dialog_action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="valign">start</property>
-            <property name="hexpand">True</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="about">

@@ -93,17 +93,17 @@ struct Client_SignalHandlerConfiguration
    , TCPConnectionConfiguration (NULL)
    , UDPConnectionConfiguration (NULL)
    , messageAllocator (NULL)
-   , protocol (NET_TRANSPORTLAYER_TCP)
+   , protocolConfiguration (NULL)
    , statisticReportingInterval (0)
   {}
 
-  ACE_INET_Addr                      address;
-  long                               actionTimerId;
-  Test_U_TCPConnectionConfiguration* TCPConnectionConfiguration;
-  Test_U_UDPConnectionConfiguration* UDPConnectionConfiguration;
-  Stream_IAllocator*                 messageAllocator;
-  enum Net_TransportLayerType        protocol;
-  unsigned int                       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
+  ACE_INET_Addr                        address;
+  long                                 actionTimerId;
+  Test_U_TCPConnectionConfiguration*   TCPConnectionConfiguration;
+  Test_U_UDPConnectionConfiguration*   UDPConnectionConfiguration;
+  Stream_IAllocator*                   messageAllocator;
+  struct Test_U_ProtocolConfiguration* protocolConfiguration;
+  unsigned int                         statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Client_Configuration
@@ -125,36 +125,15 @@ struct Client_Configuration
 //////////////////////////////////////////
 
 #if defined (GUI_SUPPORT)
-//typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-//                                    struct Test_U_StreamSessionData,
-//                                    enum Stream_SessionMessageType,
-//                                    Test_U_Message,
-//                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
-//typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
-//typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
-
-//typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
-
 struct Client_UI_CBData
-#if defined (GTK_USE)
- : Test_U_GTK_CBData
-#elif defined (WXWIDGETS_USE)
- : Test_U_wxWidgets_CBData
-#endif
+ : ClientServer_UI_CBData
 {
   Client_UI_CBData ()
-#if defined (GTK_USE)
-   : Test_U_GTK_CBData ()
-#elif defined (WXWIDGETS_USE)
-   : Test_U_wxWidgets_CBData ()
-#endif
-   , configuration (NULL)
-   , subscribers ()
+   : ClientServer_UI_CBData ()
+   //, configuration (NULL)
   {}
 
-  struct Client_Configuration* configuration;
-
-  Test_U_Subscribers_t         subscribers;
+  //struct Client_Configuration* configuration;
 };
 #endif // GUI_SUPPORT
 

@@ -39,7 +39,7 @@
 
 Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
                                               unsigned int maximumNumberOfConnections_in,
-                                              enum Net_TransportLayerType protocol_in,
+                                              const struct Test_U_ProtocolConfiguration& protocolConfiguration_in,
                                               const Test_U_TCPConnectionConfiguration& TCPConnectionConfiguration_in,
                                               const Test_U_UDPConnectionConfiguration& UDPConnectionConfiguration_in,
                                               enum Common_EventDispatchType eventDispatch_in)
@@ -50,11 +50,12 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
  , lock_ ()
  , maximumNumberOfConnections_ (maximumNumberOfConnections_in)
  , mode_ (mode_in)
- , protocol_ (protocol_in)
+ , protocolConfiguration_ (&const_cast<struct Test_U_ProtocolConfiguration&> (protocolConfiguration_in))
  , AsynchTCPConnector_ (true)
  , AsynchUDPConnector_ (true)
  , TCPConnector_ (true)
  , UDPConnector_ (true)
+ , SSLConnector_ (true)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
  , randomStateInitializationBuffer_ ()
@@ -70,6 +71,7 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
   TCPConnector_.initialize (TCPConnectionConfiguration_in);
   AsynchUDPConnector_.initialize (UDPConnectionConfiguration_in);
   UDPConnector_.initialize (UDPConnectionConfiguration_in);
+  SSLConnector_.initialize (TCPConnectionConfiguration_in);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -327,9 +329,9 @@ continue_:
   if (do_connect)
   {
     ACE_INET_Addr peer_address;
-    Test_U_ITCPConnector_t* tcp_connector_p = NULL;
+    Test_U_ITCPConnector_t* ssl_tcp_connector_p = NULL;
     Test_U_IUDPConnector_t* udp_connector_p = NULL;
-    switch (protocol_)
+    switch (protocolConfiguration_->transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
       {
@@ -338,12 +340,12 @@ continue_:
         {
           case COMMON_EVENT_DISPATCH_PROACTOR:
           {
-            tcp_connector_p = &AsynchTCPConnector_;
+            ssl_tcp_connector_p = &AsynchTCPConnector_;
             break;
           }
           case COMMON_EVENT_DISPATCH_REACTOR:
           {
-            tcp_connector_p = &TCPConnector_;
+            ssl_tcp_connector_p = &TCPConnector_;
             break;
           }
           default:
@@ -381,11 +383,17 @@ continue_:
         } // end SWITCH
         break;
       }
+      case NET_TRANSPORTLAYER_SSL:
+      {
+        peer_address = configuration_r.address;
+        ssl_tcp_connector_p = &SSLConnector_;
+        break;
+      }
       default:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                    protocol_));
+                    protocolConfiguration_->transportLayer));
         if (connection_2)
         {
           connection_2->decrease (); connection_2 = NULL;
@@ -395,12 +403,13 @@ continue_:
     } // end SWITCH
 
     ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-    switch (protocol_)
+    switch (protocolConfiguration_->transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
-      { ACE_ASSERT (tcp_connector_p);
+      case NET_TRANSPORTLAYER_SSL:
+      { ACE_ASSERT (ssl_tcp_connector_p);
         try {
-          handle_h = tcp_connector_p->connect (peer_address);
+          handle_h = ssl_tcp_connector_p->connect (peer_address);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
@@ -433,7 +442,7 @@ continue_:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                    protocol_));
+                    protocolConfiguration_->transportLayer));
         if (connection_2)
         {
           connection_2->decrease (); connection_2 = NULL;
@@ -458,9 +467,10 @@ continue_:
       NULL;
     if (eventDispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
     {
-      switch (protocol_)
+      switch (protocolConfiguration_->transportLayer)
       {
         case NET_TRANSPORTLAYER_TCP:
+        case NET_TRANSPORTLAYER_SSL:
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           iconnection_p =
@@ -486,7 +496,7 @@ continue_:
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                      protocol_));
+                      protocolConfiguration_->transportLayer));
           if (connection_2)
           {
             connection_2->decrease (); connection_2 = NULL;
@@ -507,9 +517,10 @@ continue_:
       do
       {
         // *TODO*: avoid these tight loops
-        switch (protocol_)
+        switch (protocolConfiguration_->transportLayer)
         {
           case NET_TRANSPORTLAYER_TCP:
+          case NET_TRANSPORTLAYER_SSL:
           {
             iconnection_p = connection_manager_p->get (peer_address,
                                                        true);
@@ -529,7 +540,7 @@ continue_:
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                        protocol_));
+                        protocolConfiguration_->transportLayer));
             if (connection_2)
             {
               connection_2->decrease (); connection_2 = NULL;

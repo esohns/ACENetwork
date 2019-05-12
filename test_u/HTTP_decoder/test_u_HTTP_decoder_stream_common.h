@@ -124,16 +124,16 @@ struct Test_U_ModuleHandlerConfiguration
     inbound = true;
   };
 
-  struct Test_U_Configuration*       configuration;
-  Test_U_IConnection_t*              connection; // TCP target/IO module
-  Test_U_ConnectionConfigurations_t* connectionConfigurations;
-  Test_U_IConnectionManager_t*       connectionManager; // TCP IO module
-  std::string                        dumpFileName; // file writer module (HTTP)
-  std::string                        hostName; // net source module
-  bool                               printProgressDot; // file writer module
-  Test_U_StreamConfiguration_t*      streamConfiguration;
-  std::string                        targetFileName; // file writer module (HTML)
-  std::string                        URL;
+  struct Test_U_Configuration*    configuration;
+  Test_U_IConnection_t*           connection; // TCP target/IO module
+  Net_ConnectionConfigurations_t* connectionConfigurations;
+  Test_U_IConnectionManager_t*    connectionManager; // TCP IO module
+  std::string                     dumpFileName; // file writer module (HTTP)
+  std::string                     hostName; // net source module
+  bool                            printProgressDot; // file writer module
+  Test_U_StreamConfiguration_t*   streamConfiguration;
+  std::string                     targetFileName; // file writer module (HTML)
+  std::string                     URL;
 };
 
 struct Test_U_StreamConfiguration

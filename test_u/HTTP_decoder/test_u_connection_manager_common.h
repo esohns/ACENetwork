@@ -35,13 +35,13 @@
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 struct Net_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct Net_UserData> Test_U_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 struct Net_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct Net_UserData> Test_U_ConnectionManager_t;
 

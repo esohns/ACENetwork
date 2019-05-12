@@ -30,6 +30,10 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Time_Value.h"
+#if defined (SSL_USE)
+#include "ace/SSL/SSL_SOCK_Acceptor.h"
+#include "ace/SSL/SSL_SOCK_Connector.h"
+#endif // SSL_USE
 
 #include "common_timer_manager_common.h"
 
@@ -48,7 +52,7 @@ class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_TCPSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
+                                  struct Net_ConnectionState,
                                   Net_Statistic_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
@@ -58,7 +62,7 @@ class Test_U_TCPConnection
   typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_TCPSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
+                                  struct Net_ConnectionState,
                                   Net_Statistic_t,
                                   Test_U_Stream,
                                   Common_Timer_Manager_t,
@@ -83,12 +87,10 @@ class Test_U_TCPConnection
   ACE_UNIMPLEMENTED_FUNC (Test_U_TCPConnection& operator= (const Test_U_TCPConnection&))
 };
 
-//////////////////////////////////////////
-
 class Test_U_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                         Test_U_TCPConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
+                                        struct Net_ConnectionState,
                                         Net_Statistic_t,
                                         Test_U_Stream,
                                         Common_Timer_Manager_t,
@@ -97,7 +99,7 @@ class Test_U_AsynchTCPConnection
 {
  typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                        Test_U_TCPConnectionConfiguration,
-                                       struct Test_U_ConnectionState,
+                                       struct Net_ConnectionState,
                                        Net_Statistic_t,
                                        Test_U_Stream,
                                        Common_Timer_Manager_t,
@@ -121,5 +123,48 @@ class Test_U_AsynchTCPConnection
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection (const Test_U_AsynchTCPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection& operator= (const Test_U_AsynchTCPConnection&))
 };
+
+//////////////////////////////////////////
+
+#if defined (SSL_USE)
+class Test_U_SSLConnection
+ : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
+                                  Net_SSLSocketHandler_t,
+                                  Test_U_TCPConnectionConfiguration,
+                                  struct Net_ConnectionState,
+                                  Net_Statistic_t,
+                                  Test_U_Stream,
+                                  Common_Timer_Manager_t,
+                                  struct Net_UserData>
+ , public Net_IPing
+{
+  typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
+                                  Net_SSLSocketHandler_t,
+                                  Test_U_TCPConnectionConfiguration,
+                                  struct Net_ConnectionState,
+                                  Net_Statistic_t,
+                                  Test_U_Stream,
+                                  Common_Timer_Manager_t,
+                                  struct Net_UserData> inherited;
+
+  friend class ACE_Acceptor<Test_U_SSLConnection, ACE_SSL_SOCK_Acceptor>;
+  friend class ACE_Connector<Test_U_SSLConnection, ACE_SSL_SOCK_Connector>;
+
+ public:
+  Test_U_SSLConnection (bool); // managed ?
+  inline virtual ~Test_U_SSLConnection () {}
+
+  // implement Net_IPing
+  inline virtual void ping () { inherited::stream_.ping (); }
+
+ protected:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline Test_U_SSLConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_U_SSLConnection (const Test_U_SSLConnection&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_SSLConnection& operator= (const Test_U_SSLConnection&))
+};
+#endif // SSL_USE
 
 #endif

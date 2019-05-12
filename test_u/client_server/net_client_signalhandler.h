@@ -43,8 +43,6 @@ class Client_SignalHandler
                         ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~Client_SignalHandler () {}
 
-  inline void protocol (enum Net_TransportLayerType protocol_in) { protocol_ = protocol_in; }
-
   // override Common_IInitialize_T
   virtual bool initialize (const struct Client_SignalHandlerConfiguration&);
 
@@ -58,13 +56,13 @@ class Client_SignalHandler
 
   ACE_INET_Addr                 address_;
   enum Common_EventDispatchType eventDispatch_;
-  enum Net_TransportLayerType   protocol_;
   long                          timerId_;
 
   Client_TCP_AsynchConnector_t  AsynchTCPConnector_;
-  Client_UDP_AsynchConnector_t  AsynchUDPConnector_;
   Client_TCP_Connector_t        TCPConnector_;
+  Client_UDP_AsynchConnector_t  AsynchUDPConnector_;
   Client_UDP_Connector_t        UDPConnector_;
+  Client_SSL_Connector_t        SSLConnector_;
 };
 
 #endif

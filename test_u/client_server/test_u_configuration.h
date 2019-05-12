@@ -53,7 +53,6 @@
 
 // forward declarations
 struct Test_U_ConnectionConfiguration;
-struct Test_U_ConnectionState;
 class Test_U_Message;
 class Test_U_SessionMessage;
 
@@ -160,5 +159,31 @@ struct ClientServer_Configuration
   // *************************** protocol data *********************************
   struct Test_U_ProtocolConfiguration protocolConfiguration;
 };
+
+//////////////////////////////////////////
+
+#if defined (GUI_SUPPORT)
+struct ClientServer_UI_CBData
+#if defined (GTK_USE)
+ : Test_U_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_U_wxWidgets_CBData
+#endif
+{
+  ClientServer_UI_CBData ()
+#if defined (GTK_USE)
+   : Test_U_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_U_wxWidgets_CBData ()
+#endif
+   , configuration (NULL)
+   , subscribers ()
+  {}
+
+  struct ClientServer_Configuration* configuration;
+
+  Test_U_Subscribers_t               subscribers;
+};
+#endif // GUI_SUPPORT
 
 #endif

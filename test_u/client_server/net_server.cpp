@@ -705,11 +705,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     if (useReactor_in)
       configuration_in.TCPListener =
-        SERVER_LISTENER_SINGLETON::instance ();
+        SERVER_TCP_LISTENER_SINGLETON::instance ();
     else
       configuration_in.TCPListener =
-        SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+        SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
+    configuration_in.SSLListener =
+      SERVER_SSL_LISTENER_SINGLETON::instance ();
     signal_handler_configuration.TCPListener = configuration_in.TCPListener;
+    signal_handler_configuration.SSLListener = configuration_in.SSLListener;
   } // end IF
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
@@ -808,16 +811,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
-
-    // clean up
-    //		{ // synch access
-    //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-    //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-    //					 iterator != CBData_in.event_source_ids.end();
-    //					 iterator++)
-    //				g_source_remove(*iterator);
-    //		} // end lock scope
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -861,16 +854,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-
-      // clean up
-      //		{ // synch access
-      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-      //					 iterator != CBData_in.event_source_ids.end();
-      //					 iterator++)
-      //				g_source_remove(*iterator);
-      //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -920,23 +903,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Server_UDP_Connector_t udp_connector (true);
   if (!useUDP_in)
   { ACE_ASSERT (configuration_in.TCPListener);
+    ACE_ASSERT (configuration_in.SSLListener);
     if (!configuration_in.TCPListener->initialize (configuration_in.listenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize listener, returning\n")));
-
-      // clean up
+                  ACE_TEXT ("failed to initialize TCP listener, returning\n")));
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
-      //		{ // synch access
-      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-      //					 iterator != CBData_in.event_source_ids.end();
-      //					 iterator++)
-      //				g_source_remove(*iterator);
-      //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -948,27 +922,36 @@ do_work (unsigned int maximumNumberOfConnections_in,
       timer_manager_p->stop ();
       return;
     } // end IF
+    if (!configuration_in.SSLListener->initialize (configuration_in.listenerConfiguration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize SSL listener, returning\n")));
+      Common_Tools::finalizeEventDispatch (useReactor_in,
+                                           !useReactor_in,
+                                           group_id);
+#if defined (GUI_SUPPORT)
+      if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
+        gtk_manager_p->stop ();
+#else
+        ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+      timer_manager_p->stop ();
+      return;
+    } // end IF
+
     ACE_thread_t thread_id = 0;
     configuration_in.TCPListener->start (thread_id);
     ACE_UNUSED_ARG (thread_id);
     if (!configuration_in.TCPListener->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start listener (port: %u), returning\n"),
+                  ACE_TEXT ("failed to start TCP listener (port: %u), returning\n"),
                   listeningPortNumber_in));
-
-      // clean up
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
-      //		{ // synch access
-      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-      //					 iterator != CBData_in.event_source_ids.end();
-      //					 iterator++)
-      //				g_source_remove(*iterator);
-      //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -991,19 +974,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector, returning\n")));
-
-      // clean up
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
-      //		{ // synch access
-      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-      //					 iterator != CBData_in.event_source_ids.end();
-      //					 iterator++)
-      //				g_source_remove(*iterator);
-      //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1052,19 +1025,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p_2->listenAddress).c_str ())));
-
-      // clean up
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
-      //		{ // synch access
-      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-      //					 iterator != CBData_in.event_source_ids.end();
-      //					 iterator++)
-      //				g_source_remove(*iterator);
-      //		} // end lock scope
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1087,14 +1050,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // clean up
   // *NOTE*: listener has stopped, interval timer has been cancelled,
   // and connections have been aborted...
-  //		{ // synch access
-  //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //					 iterator != CBData_in.event_source_ids.end();
-  //					 iterator++)
-  //				g_source_remove(*iterator);
-  //		} // end lock scope
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)

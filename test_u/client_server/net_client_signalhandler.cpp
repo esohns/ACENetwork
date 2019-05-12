@@ -48,12 +48,12 @@ Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispa
               this) // event handler handle
  , address_ ()
  , eventDispatch_ (NET_EVENT_DEFAULT_DISPATCH)
- , protocol_ (NET_TRANSPORTLAYER_INVALID)
  , timerId_ (-1)
  , AsynchTCPConnector_ (true)
- , AsynchUDPConnector_ (true)
  , TCPConnector_ (true)
+ , AsynchUDPConnector_ (true)
  , UDPConnector_ (true)
+ , SSLConnector_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::Client_SignalHandler"));
 
@@ -69,6 +69,7 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   ACE_ASSERT (configuration_in.dispatchState->configuration);
   ACE_ASSERT (configuration_in.TCPConnectionConfiguration);
   ACE_ASSERT (configuration_in.UDPConnectionConfiguration);
+  ACE_ASSERT (configuration_in.protocolConfiguration);
 
   // *TODO*: remove type inference
   address_ = configuration_in.address;
@@ -78,13 +79,13 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   { ACE_ASSERT (configuration_in.dispatchState->configuration->numberOfProactorThreads > 0);
     eventDispatch_ = COMMON_EVENT_DISPATCH_PROACTOR;
   } // end ELSE
-  protocol_ = configuration_in.protocol;
   timerId_ = configuration_in.actionTimerId;
 
   AsynchTCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
   TCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
   AsynchUDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
   UDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
+  SSLConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
 
   return inherited::initialize (configuration_in);
 }
@@ -156,13 +157,15 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   } // end SWITCH
 
   // -------------------------------------
+  ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
   // abort ?
   if (abort)
   {
-    switch (protocol_)
+    switch (inherited::configuration_->protocolConfiguration->transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
+      case NET_TRANSPORTLAYER_SSL:
         iconnection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
         break;
       case NET_TRANSPORTLAYER_UDP:
@@ -172,15 +175,15 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                    protocol_));
+                    inherited::configuration_->protocolConfiguration->transportLayer));
         return;
       }
     } // end SWITCH
   } // end IF
 
-  Test_U_ITCPConnector_t* tcp_connector_p = NULL;
+  Test_U_ITCPConnector_t* ssl_tcp_connector_p = NULL;
   Test_U_IUDPConnector_t* udp_connector_p = NULL;
-  switch (protocol_)
+  switch (inherited::configuration_->protocolConfiguration->transportLayer)
   {
     case NET_TRANSPORTLAYER_TCP:
     {
@@ -188,12 +191,12 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       {
         case COMMON_EVENT_DISPATCH_PROACTOR:
         {
-          tcp_connector_p = &AsynchTCPConnector_;
+          ssl_tcp_connector_p = &AsynchTCPConnector_;
           break;
         }
         case COMMON_EVENT_DISPATCH_REACTOR:
         {
-          tcp_connector_p = &TCPConnector_;
+          ssl_tcp_connector_p = &TCPConnector_;
           break;
         }
         default:
@@ -230,11 +233,16 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       } // end SWITCH
       break;
     }
+    case NET_TRANSPORTLAYER_SSL:
+    {
+      ssl_tcp_connector_p = &SSLConnector_;
+      break;
+    }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                  protocol_));
+                  inherited::configuration_->protocolConfiguration->transportLayer));
       return;
     }
   } // end SWITCH
@@ -243,12 +251,13 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   if (connect)
   {
     ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-    switch (protocol_)
+    switch (inherited::configuration_->protocolConfiguration->transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
-      { ACE_ASSERT (tcp_connector_p);
+      case NET_TRANSPORTLAYER_SSL:
+      { ACE_ASSERT (ssl_tcp_connector_p);
         try {
-          handle_h = tcp_connector_p->connect (address_);
+          handle_h = ssl_tcp_connector_p->connect (address_);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
@@ -273,7 +282,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                    protocol_));
+                    inherited::configuration_->protocolConfiguration->transportLayer));
         return;
       }
     } // end SWITCH
@@ -321,12 +330,13 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     // step3: cancel connection attempts (if any)
     if (eventDispatch_ == COMMON_EVENT_DISPATCH_PROACTOR)
     {
-      switch (protocol_)
+      switch (inherited::configuration_->protocolConfiguration->transportLayer)
       {
         case NET_TRANSPORTLAYER_TCP:
-        { ACE_ASSERT (tcp_connector_p);
+        case NET_TRANSPORTLAYER_SSL:
+        { ACE_ASSERT (ssl_tcp_connector_p);
           Test_U_ITCPAsynchConnector_t* iasynch_connector_p =
-              dynamic_cast<Test_U_ITCPAsynchConnector_t*> (tcp_connector_p);
+              dynamic_cast<Test_U_ITCPAsynchConnector_t*> (ssl_tcp_connector_p);
           ACE_ASSERT (iasynch_connector_p);
           try {
             iasynch_connector_p->abort ();
@@ -357,16 +367,17 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                      protocol_));
+                      inherited::configuration_->protocolConfiguration->transportLayer));
           return;
         }
       } // end SWITCH
     } // end IF
 
     // step4: stop accepting connections, abort open connections
-    switch (protocol_)
+    switch (inherited::configuration_->protocolConfiguration->transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
+      case NET_TRANSPORTLAYER_SSL:
       {
         iconnection_manager_p->stop (false, // wait for completion ?
                                      true); // N/A
@@ -384,7 +395,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                    protocol_));
+                    inherited::configuration_->protocolConfiguration->transportLayer));
         return;
       }
     } // end SWITCH

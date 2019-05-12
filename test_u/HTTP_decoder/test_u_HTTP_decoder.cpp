@@ -539,8 +539,8 @@ do_work (unsigned int bufferSize_in,
                                        configuration.streamConfiguration);
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 connection_configuration));
-  Test_U_ConnectionConfigurationIterator_t iterator =
+                                                                 &connection_configuration));
+  Net_ConnectionConfigurationsIterator_t iterator =
     configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
 
@@ -601,9 +601,10 @@ do_work (unsigned int bufferSize_in,
       &configuration.dispatchConfiguration;
 
   // step0c: initialize connection manager
+  struct Net_UserData user_data_s;
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set ((*iterator).second,
-                             &configuration.userData);
+  connection_manager_p->set (*dynamic_cast<Test_U_ConnectionConfiguration*> ((*iterator).second),
+                             &user_data_s);
 
   // step0d: initialize regular (global) statistic reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -738,19 +739,19 @@ do_work (unsigned int bufferSize_in,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     goto clean_up;
   } // end IF
-  if (!iconnector_p->initialize ((*iterator).second))
+  if (!iconnector_p->initialize (*dynamic_cast<Test_U_ConnectionConfiguration*> ((*iterator).second)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
     goto clean_up;
   } // end IF
   handle =
-    iconnector_p->connect ((*iterator).second.address);
+    iconnector_p->connect (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->address);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->address).c_str ())));
     goto clean_up;
   } // end IF
   if (iconnector_p->useReactor ())
@@ -774,7 +775,8 @@ do_work (unsigned int bufferSize_in,
     //              &timeout));
     do
     {
-      connection_p = connection_manager_p->get ((*iterator).second.address);
+      connection_p =
+        connection_manager_p->get (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->address);
       if (connection_p)
         break;
     } while (COMMON_TIME_NOW < deadline);
@@ -783,7 +785,7 @@ do_work (unsigned int bufferSize_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->address).c_str ())));
     goto clean_up;
   } // end IF
   // step1b: wait for the connection to finish initializing
@@ -799,7 +801,7 @@ do_work (unsigned int bufferSize_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->address).c_str ()),
                 status));
 
     // clean up
@@ -828,7 +830,7 @@ do_work (unsigned int bufferSize_in,
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connected to %s\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->address).c_str ())));
 #endif // _DEBUG
 
   // step2: send HTTP request
@@ -885,7 +887,7 @@ do_work (unsigned int bufferSize_in,
   } // end IF
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (message_allocator.malloc ((*iterator).second.PDUSize));
+    static_cast<Test_U_Message*> (message_allocator.malloc (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->PDUSize));
   // keep retrying ?
   if (!message_p && !message_allocator.block ())
     goto allocate;

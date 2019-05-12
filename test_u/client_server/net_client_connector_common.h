@@ -22,11 +22,18 @@
 #define NET_CLIENT_CONNECTOR_COMMON_H
 
 #include "ace/INET_Addr.h"
+#if defined (SSL_USE)
+#include "ace/SSL/SSL_SOCK_Connector.h"
+#endif // SSL_USE
 
+#include "net_connection_configuration.h"
 #include "net_iconnector.h"
 
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
+#if defined (SSL_USE)
+#include "net_client_ssl_connector.h"
+#endif // SSL_USE
 
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
@@ -44,43 +51,53 @@ typedef Net_IConnector_T<ACE_INET_Addr,
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection,
                                      ACE_INET_Addr,
                                      Test_U_TCPConnectionConfiguration,
-                                     struct Test_U_ConnectionState,
+                                     struct Net_ConnectionState,
                                      Net_Statistic_t,
                                      Net_TCPSocketConfiguration_t,
                                      Net_TCPSocketConfiguration_t,
                                      Test_U_Stream,
-                                     struct Test_U_UserData> Client_TCP_AsynchConnector_t;
+                                     struct Net_UserData> Client_TCP_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Test_U_TCPConnection,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                Test_U_TCPConnectionConfiguration,
-                               struct Test_U_ConnectionState,
+                               struct Net_ConnectionState,
                                Net_Statistic_t,
                                Net_TCPSocketConfiguration_t,
                                Net_TCPSocketConfiguration_t,
                                Test_U_Stream,
-                               struct Test_U_UserData> Client_TCP_Connector_t;
+                               struct Net_UserData> Client_TCP_Connector_t;
+#if defined (SSL_USE)
+typedef Net_Client_SSL_Connector_T<Test_U_SSLConnection,
+                                   ACE_SSL_SOCK_Connector,
+                                   ACE_INET_Addr,
+                                   Test_U_TCPConnectionConfiguration,
+                                   struct Net_ConnectionState,
+                                   Net_Statistic_t,
+                                   Test_U_Stream,
+                                   struct Net_UserData> Client_SSL_Connector_t;
+#endif // SSL_USE
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
                                      ACE_INET_Addr,
                                      Test_U_UDPConnectionConfiguration,
-                                     struct Test_U_ConnectionState,
+                                     struct Net_ConnectionState,
                                      Net_Statistic_t,
                                      Net_UDPSocketConfiguration_t,
                                      Net_UDPSocketConfiguration_t,
                                      Test_U_Stream,
-                                     struct Test_U_UserData> Client_UDP_AsynchConnector_t;
+                                     struct Net_UserData> Client_UDP_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Test_U_UDPConnection,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                Test_U_UDPConnectionConfiguration,
-                               struct Test_U_ConnectionState,
+                               struct Net_ConnectionState,
                                Net_Statistic_t,
                                Net_UDPSocketConfiguration_t,
                                Net_UDPSocketConfiguration_t,
                                Test_U_Stream,
-                               struct Test_U_UserData> Client_UDP_Connector_t;
+                               struct Net_UserData> Client_UDP_Connector_t;
 
 #endif

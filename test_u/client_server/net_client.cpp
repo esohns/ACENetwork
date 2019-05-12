@@ -710,7 +710,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   configuration_in.signalHandler = &signalHandler_in;
   Client_TimeoutHandler timeout_handler (actionMode_in,
                                          maxNumConnections_in,
-                                         (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP),
+                                         configuration_in.protocolConfiguration,
                                          connection_configuration,
                                          connection_configuration_2,
                                          (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR));
@@ -756,8 +756,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     &connection_configuration;
   configuration_in.signalHandlerConfiguration.UDPConnectionConfiguration =
     &connection_configuration_2;
-  configuration_in.signalHandlerConfiguration.protocol =
-    (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
+  configuration_in.signalHandlerConfiguration.protocolConfiguration =
+    &configuration_in.protocolConfiguration;
   configuration_in.signalHandlerConfiguration.dispatchState =
     &event_dispatch_state_s;
   configuration_in.signalHandlerConfiguration.messageAllocator =

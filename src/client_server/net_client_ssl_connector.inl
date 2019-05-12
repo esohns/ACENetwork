@@ -31,7 +31,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Client_SSL_Connector_T<HandlerType,
@@ -40,11 +39,15 @@ Net_Client_SSL_Connector_T<HandlerType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
-                           HandlerConfigurationType,
                            StreamType,
                            UserDataType>::Net_Client_SSL_Connector_T (bool managed_in)
- : inherited ()
- , configuration_ ()
+ : inherited (ACE_Reactor::instance (), // default reactor
+              // *IMPORTANT NOTE*: ACE_NONBLOCK is only set if timeout != NULL
+              //                   (see: SOCK_Connector.cpp:94), set via the
+              //                   "synch options" (see line 200 below)
+              ACE_NONBLOCK)             // flags: non-blocking I/O
+              //0)                       // flags
+ , configuration_ (NULL)
  , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::Net_Client_SSL_Connector_T"));
@@ -57,7 +60,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_TransportLayerType
@@ -67,7 +69,6 @@ Net_Client_SSL_Connector_T<HandlerType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
-                           HandlerConfigurationType,
                            StreamType,
                            UserDataType>::transportLayer () const
 {
@@ -101,7 +102,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -111,7 +111,6 @@ Net_Client_SSL_Connector_T<HandlerType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
-                           HandlerConfigurationType,
                            StreamType,
                            UserDataType>::abort ()
 {
@@ -129,7 +128,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 ACE_HANDLE
@@ -139,7 +137,6 @@ Net_Client_SSL_Connector_T<HandlerType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
-                           HandlerConfigurationType,
                            StreamType,
                            UserDataType>::connect (const AddressType& address_in)
 {
@@ -148,54 +145,31 @@ Net_Client_SSL_Connector_T<HandlerType,
   int result = -1;
 
   HandlerType* handler_p = NULL;
-  result = make_svc_handler (handler_p);
-  if (result == -1)
+  ACE_Synch_Options synch_options = ACE_Synch_Options::defaults;
+  AddressType local_address = ACE_sap_any_cast (AddressType&);
+  int reuse_addr_i = 1; // set SO_REUSEADDR ?
+  int flags_i = O_RDWR;
+  int permissions_i = 0;
+  // *NOTE*: to enforce ACE_NONBLOCK, set ACE_Synch_Options::USE_REACTOR or
+  //         ACE_Synch_Options::USE_TIMEOUT in the synch options (see:
+  //         Connector.cpp:409 and net_sock_connector.cpp:219 and/or
+  //         SOCK_Connector.cpp:94)
+  result =
+      inherited::connect (handler_p,      // service handler
+                          address_in,     // remote SAP
+                          synch_options,  // synch options
+                          local_address,  // local SAP
+                          reuse_addr_i,   // re-use address ?
+                          flags_i,        // flags
+                          permissions_i); // permissions
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_SSL_Connector_T::make_svc_handler(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);
-
-  result =
-    inherited::connect (handler_p->peer (),              // return value: (connected) stream
-                        address_in,                      // remote SAP
-                        NULL,                            // timeout
-                        ACE_sap_any_cast (AddressType&), // local address
-                        1,                               // re-use address (SO_REUSEADDR) ?
-                        O_RDWR,                          // flags
-                        0);                              // perms
-  if (result == -1)
-  {
-    ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer,
-                                        sizeof (buffer),
-                                        1);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SSL_SOCK_Connector::connect(\"%s\"): \"%m\", aborting\n"),
-                buffer));
-  
-    // clean up
-    delete handler_p;
-
-    return ACE_INVALID_HANDLE;
-  } // end IF
-
-  result = activate_svc_handler (handler_p);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_SSL_Connector_T::activate_svc_handler(): \"%m\", aborting\n")));
-
-    // clean up
-    delete handler_p;
-
-    return ACE_INVALID_HANDLE;
-  } // end IF
 
   return handler_p->get_handle ();
 }
@@ -206,7 +180,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -216,7 +189,6 @@ Net_Client_SSL_Connector_T<HandlerType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
-                           HandlerConfigurationType,
                            StreamType,
                            UserDataType>::activate_svc_handler (HandlerType* handler_in)
 {
@@ -262,7 +234,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -272,7 +243,6 @@ Net_Client_SSL_Connector_T<HandlerType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
-                           HandlerConfigurationType,
                            StreamType,
                            UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {

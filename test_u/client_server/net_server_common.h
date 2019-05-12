@@ -78,12 +78,14 @@ struct Server_SignalHandlerConfiguration
 {
   Server_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
+   , SSLListener (NULL)
    , TCPListener (NULL)
    , UDPConnector (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
   {}
 
+  Server_ITCPListener_t*   SSLListener;
   Server_ITCPListener_t*   TCPListener;
   Test_U_IUDPConnector_t*  UDPConnector;
 
@@ -96,12 +98,14 @@ struct Server_Configuration
 {
   Server_Configuration ()
    : ClientServer_Configuration ()
-   , UDPConnector (NULL)
+   , SSLListener (NULL)
    , TCPListener (NULL)
+   , UDPConnector (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
   {}
 
+  Server_ITCPListener_t*                   SSLListener;
   Server_ITCPListener_t*                   TCPListener;
   Test_U_IUDPConnector_t*                  UDPConnector;
   Server_ListenerConfiguration_t           listenerConfiguration;
@@ -121,25 +125,14 @@ typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
 #if defined (GUI_SUPPORT)
 struct Server_UI_CBData
-#if defined (GTK_USE)
- : Test_U_GTK_CBData
-#elif defined (WXWIDGETS_USE)
- : Test_U_wxWidgets_CBData
-#endif
+ : ClientServer_UI_CBData
 {
   Server_UI_CBData ()
-#if defined (GTK_USE)
-   : Test_U_GTK_CBData ()
-#elif defined (WXWIDGETS_USE)
-   : Test_U_wxWidgets_CBData ()
-#endif
-   , configuration (NULL)
-   , subscribers ()
+   : ClientServer_UI_CBData ()
+   //, configuration (NULL)
   {}
 
-  struct Server_Configuration* configuration;
-
-  Test_U_Subscribers_t         subscribers;
+  //struct Server_Configuration* configuration;
 };
 #endif // GUI_SUPPORT
 

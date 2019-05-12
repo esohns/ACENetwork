@@ -40,6 +40,21 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-media-play</property>
+  </object>
+  <object class="GtkImage" id="image_disconnect_all">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-disconnect</property>
+  </object>
+  <object class="GtkImage" id="image_ping">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-yes</property>
+  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
@@ -451,7 +466,7 @@
                         <property name="label_yalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="alignment1">
+                          <object class="GtkAlignment" id="alignment_protocol">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
@@ -459,6 +474,24 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="layout_style">start</property>
+                                <child>
+                                  <object class="GtkRadioButton" id="radiobutton_ssl">
+                                    <property name="label" translatable="yes">SSL</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="relief">half</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <signal name="toggled" handler="radiobutton_protocol_toggled_cb" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
                                 <child>
                                   <object class="GtkRadioButton" id="radiobutton_tcp">
                                     <property name="label" translatable="yes">TCP</property>
@@ -468,14 +501,14 @@
                                     <property name="relief">half</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="xalign">0</property>
-                                    <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
+                                    <property name="group">radiobutton_ssl</property>
                                     <signal name="toggled" handler="radiobutton_protocol_toggled_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">0</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -488,13 +521,13 @@
                                     <property name="focus_on_click">False</property>
                                     <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
-                                    <property name="group">radiobutton_tcp</property>
+                                    <property name="group">radiobutton_ssl</property>
                                     <signal name="toggled" handler="radiobutton_protocol_toggled_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
@@ -659,21 +692,6 @@
       <action-widget response="0">about</action-widget>
       <action-widget response="0">quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-media-play</property>
-  </object>
-  <object class="GtkImage" id="image_disconnect_all">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-disconnect</property>
-  </object>
-  <object class="GtkImage" id="image_ping">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-yes</property>
   </object>
   <object class="GtkAdjustment" id="spinbutton_connections_adjustment">
     <property name="upper">100</property>

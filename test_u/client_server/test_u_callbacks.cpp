@@ -182,11 +182,12 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   struct Client_UI_CBData* data_p =
     static_cast<struct Client_UI_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->timeoutHandler);
+  struct Client_Configuration* configuration_p =
+    static_cast<struct Client_Configuration*> (data_p->configuration);
+  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->timeoutHandler);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -237,7 +238,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 
   // step3: initialize options
   std::string radio_button_name;
-  switch (data_p->configuration->timeoutHandler->mode ())
+  switch (configuration_p->timeoutHandler->mode ())
   {
     case Client_TimeoutHandler::ACTION_NORMAL:
       radio_button_name =
@@ -255,7 +256,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid mode (was: %d), aborting\n"),
-                  data_p->configuration->timeoutHandler->mode ()));
+                  configuration_p->timeoutHandler->mode ()));
       return G_SOURCE_REMOVE;
     }
   } // end SWITCH
@@ -265,21 +266,25 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   ACE_ASSERT (radiobutton_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
 
-  switch (data_p->configuration->timeoutHandler->protocol ())
+  switch (configuration_p->timeoutHandler->protocol ())
   {
     case NET_TRANSPORTLAYER_TCP:
       radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME);
+        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_TCP_NAME);
       break;
     case NET_TRANSPORTLAYER_UDP:
       radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME);
+        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_UDP_NAME);
+      break;
+    case NET_TRANSPORTLAYER_SSL:
+      radio_button_name =
+        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME);
       break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid protocol (was: %d), aborting\n"),
-                  data_p->configuration->timeoutHandler->protocol ()));
+                  configuration_p->timeoutHandler->protocol ()));
       return G_SOURCE_REMOVE;
     }
   } // end SWITCH
@@ -315,7 +320,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the info view
     guint event_source_id =
-      g_timeout_add (NET_UI_GTKEVENT_RESOLUTION,
+      g_timeout_add (NET_UI_GTK_EVENT_RESOLUTION,
                      idle_update_info_display_cb,
                      userData_in);
     if (event_source_id > 0)
@@ -577,16 +582,26 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                              0.0,
                              std::numeric_limits<double>::max ());
 
+  GtkFrame* frame_p =
+    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_FRAME_PROTOCOL_NAME)));
+  ACE_ASSERT (frame_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p), FALSE);
+
   std::string radio_button_name;
   switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
     case NET_TRANSPORTLAYER_TCP:
       radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME);
+        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_TCP_NAME);
       break;
     case NET_TRANSPORTLAYER_UDP:
       radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME);
+        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_UDP_NAME);
+      break;
+    case NET_TRANSPORTLAYER_SSL:
+      radio_button_name =
+        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME);
       break;
     default:
     {
@@ -630,7 +645,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the log view
     guint event_source_id =
-      g_timeout_add (NET_UI_GTKEVENT_RESOLUTION,
+      g_timeout_add (NET_UI_GTK_EVENT_RESOLUTION,
                      idle_update_info_display_cb,
                      userData_in);
     if (event_source_id > 0)
@@ -947,13 +962,16 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   int result = -1;
 
   ACE_UNUSED_ARG (widget_in);
-  struct Client_UI_CBData* data_p =
-    static_cast<struct Client_UI_CBData*> (userData_in);
 
   // sanity check(s)
+  struct Client_UI_CBData* data_p =
+    static_cast<struct Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->timeoutHandler);
+  struct Client_Configuration* configuration_p =
+    static_cast<struct Client_Configuration*> (data_p->configuration);
+  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->timeoutHandler);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -961,10 +979,10 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // schedule action interval timer ?
-  if (data_p->configuration->signalHandlerConfiguration.actionTimerId == -1)
+  if (configuration_p->signalHandlerConfiguration.actionTimerId == -1)
   {
     ACE_Time_Value interval = ACE_Time_Value::max_time;
-    switch (data_p->configuration->timeoutHandler->mode ())
+    switch (configuration_p->timeoutHandler->mode ())
     {
       case Client_TimeoutHandler::ActionModeType::ACTION_ALTERNATING:
       case Client_TimeoutHandler::ActionModeType::ACTION_NORMAL:
@@ -983,16 +1001,16 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown action mode (was: %d), aborting\n"),
-                    data_p->configuration->timeoutHandler->mode ()));
+                    configuration_p->timeoutHandler->mode ()));
         return FALSE;
       }
     } // end SWITCH
-    data_p->configuration->signalHandlerConfiguration.actionTimerId =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (data_p->configuration->timeoutHandler, // event handler handle
+    configuration_p->signalHandlerConfiguration.actionTimerId =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (configuration_p->timeoutHandler, // event handler handle
                                                                   NULL,                                  // asynchronous completion token
                                                                   COMMON_TIME_NOW + interval,            // first wakeup time
                                                                   interval);                             // interval
-    if (data_p->configuration->signalHandlerConfiguration.actionTimerId == -1)
+    if (configuration_p->signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
@@ -1003,15 +1021,15 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   {
     const void* act_p = NULL;
     result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->configuration->signalHandlerConfiguration.actionTimerId,
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (configuration_p->signalHandlerConfiguration.actionTimerId,
                                                                 &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                  data_p->configuration->signalHandlerConfiguration.actionTimerId));
+                  configuration_p->signalHandlerConfiguration.actionTimerId));
 
     // clean up
-    data_p->configuration->signalHandlerConfiguration.actionTimerId = -1;
+    configuration_p->signalHandlerConfiguration.actionTimerId = -1;
   } // end ELSE
 
   // toggle button image/label
@@ -1044,7 +1062,10 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
   ACE_ASSERT (widget_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->timeoutHandler);
+  struct Client_Configuration* configuration_p =
+    static_cast<struct Client_Configuration*> (data_p->configuration);
+  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->timeoutHandler);
 
   // step0: activated ?
   GtkToggleButton* toggle_button_p = GTK_TOGGLE_BUTTON (widget_in);
@@ -1087,7 +1108,7 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
   } // end ELSE
 
   try {
-    data_p->configuration->timeoutHandler->mode (mode);
+    configuration_p->timeoutHandler->mode (mode);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_Client_TimeoutHandler::mode(), aborting\n")));
@@ -1105,14 +1126,13 @@ radiobutton_protocol_toggled_cb (GtkWidget* widget_in,
 
   int result = -1;
 
-  struct Client_UI_CBData* data_p =
-    static_cast<struct Client_UI_CBData*> (userData_in);
+  struct ClientServer_UI_CBData* data_p =
+    static_cast<struct ClientServer_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->timeoutHandler);
   ACE_ASSERT (data_p->UIState);
   GtkRadioButton* radio_button_p = GTK_RADIO_BUTTON (widget_in);
   if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)))
@@ -1127,7 +1147,7 @@ radiobutton_protocol_toggled_cb (GtkWidget* widget_in,
   enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_INVALID;
   radio_button_p =
     GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME)));
+                                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_TCP_NAME)));
   ACE_ASSERT (radio_button_p);
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)))
     protocol_e = NET_TRANSPORTLAYER_TCP;
@@ -1135,14 +1155,21 @@ radiobutton_protocol_toggled_cb (GtkWidget* widget_in,
   {
     radio_button_p =
       GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME)));
+                                                ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_UDP_NAME)));
     ACE_ASSERT (radio_button_p);
     if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)))
       protocol_e = NET_TRANSPORTLAYER_UDP;
+    else
+    {
+      radio_button_p =
+        GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                  ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME)));
+      ACE_ASSERT (radio_button_p);
+      if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)))
+        protocol_e = NET_TRANSPORTLAYER_SSL;
+    } // end ELSE
   } // end ELSE
-
-  data_p->configuration->timeoutHandler->protocol (protocol_e);
-  data_p->configuration->signalHandler->protocol (protocol_e);
+  data_p->configuration->protocolConfiguration.transportLayer = protocol_e;
 
   return FALSE;
 }
@@ -1156,40 +1183,56 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
   ACE_UNUSED_ARG (widget_in);
+  // sanity check(s)
   struct Server_UI_CBData* data_p =
     static_cast<struct Server_UI_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
+  struct Server_Configuration* configuration_p =
+    static_cast<struct Server_Configuration*> (data_p->configuration);
+  ACE_ASSERT (configuration_p);
 
-  Net_ConnectionConfigurationsIterator_t iterator;
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
   Test_U_UDPConnectionConfiguration* connection_configuration_p = NULL;
-  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in)))
+  Net_ConnectionConfigurationsIterator_t iterator_2;
+  bool is_active_b =
+    gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in));
+  if (is_active_b)
   {
     switch (data_p->configuration->protocolConfiguration.transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
-      { ACE_ASSERT (data_p->configuration->TCPListener);
+      { ACE_ASSERT (configuration_p->TCPListener);
         ACE_thread_t thread_id = 0;
-        data_p->configuration->TCPListener->start (thread_id);
+        configuration_p->TCPListener->start (thread_id);
         ACE_UNUSED_ARG (thread_id);
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
-      { ACE_ASSERT (data_p->configuration->UDPConnector);
-        iterator =
+      { ACE_ASSERT (configuration_p->UDPConnector);
+        iterator_2 =
           data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
-        ACE_ASSERT (iterator != data_p->configuration->connectionConfigurations.end ());
+        ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
         connection_configuration_p =
-          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator).second);
+          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
         ACE_ASSERT (connection_configuration_p);
         ACE_HANDLE handle_h =
-          data_p->configuration->UDPConnector->connect (connection_configuration_p->listenAddress);
+          configuration_p->UDPConnector->connect (connection_configuration_p->listenAddress);
         ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("connected to %s\n"),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->listenAddress).c_str ())));
+        break;
+      }
+      case NET_TRANSPORTLAYER_SSL:
+      { ACE_ASSERT (configuration_p->SSLListener);
+        ACE_thread_t thread_id = 0;
+        configuration_p->SSLListener->start (thread_id);
+        ACE_UNUSED_ARG (thread_id);
         break;
       }
       default:
@@ -1206,17 +1249,17 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     switch (data_p->configuration->protocolConfiguration.transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
-      { ACE_ASSERT (data_p->configuration->TCPListener);
-        data_p->configuration->TCPListener->stop ();
+      { ACE_ASSERT (configuration_p->TCPListener);
+        configuration_p->TCPListener->stop ();
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
       {
-        iterator =
+        iterator_2 =
           data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
-        ACE_ASSERT (iterator != data_p->configuration->connectionConfigurations.end ());
+        ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
         connection_configuration_p =
-          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator).second);
+          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
         ACE_ASSERT (connection_configuration_p);
         Test_U_IUDPConnectionManager_t* connection_manager_p =
           TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
@@ -1231,6 +1274,11 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->listenAddress).c_str ())));
         break;
       }
+      case NET_TRANSPORTLAYER_SSL:
+      { ACE_ASSERT (configuration_p->SSLListener);
+        configuration_p->SSLListener->stop ();
+        break;
+      }
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1240,6 +1288,13 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
       }
     } // end SWITCH
   } // end IF
+
+  GtkFrame* frame_p =
+    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_FRAME_PROTOCOL_NAME)));
+  ACE_ASSERT (frame_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
+                            !is_active_b);
 
   return FALSE;
 } // togglebutton_listen_toggled_cb

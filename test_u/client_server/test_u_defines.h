@@ -26,13 +26,12 @@
 
 // -----------------------------------------------------------------------------
 
-#define NET_UI_GTKEVENT_RESOLUTION                      200 // ms --> 5 FPS
-#define NET_UI_GTK_PROGRESSBAR_NAME                     "progressbar"
-#define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME       "spinbutton_connections"
-#define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME          "spinbutton_messages"
-#define NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME   "spinbutton_session_messages"
-#define NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME         "spinbutton_ping_interval"
-#define NET_UI_GTK_SCROLLMARK_NAME                      "insert"
+#define NET_UI_GTK_EVENT_RESOLUTION                     200 // ms --> 5 FPS
+
+// GTK progress/status bar
+#define NET_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL          27 // ms (?)
+#define NET_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION        "Network::main"
+
 #define NET_UI_GTK_BUTTONBOX_ACTIONS_NAME               "vbuttonbox"
 #define NET_UI_GTK_BUTTON_ABOUT_NAME                    "about"
 #define NET_UI_GTK_BUTTON_CLOSEALL_NAME                 "close_all"
@@ -40,6 +39,15 @@
 #define NET_UI_GTK_BUTTON_QUIT_NAME                     "quit"
 #define NET_UI_GTK_DIALOG_ABOUT_NAME                    "dialog_about"
 #define NET_UI_GTK_DIALOG_MAIN_NAME                     "dialog_main"
+#define NET_UI_GTK_FRAME_PROTOCOL_NAME                  "frame_protocol"
+#define NET_UI_GTK_PROGRESSBAR_NAME                     "progressbar"
+#define NET_UI_GTK_RADIOBUTTON_SSL_NAME                 "radiobutton_ssl"
+#define NET_UI_GTK_RADIOBUTTON_TCP_NAME                 "radiobutton_tcp"
+#define NET_UI_GTK_RADIOBUTTON_UDP_NAME                 "radiobutton_udp"
+#define NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME       "spinbutton_connections"
+#define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME          "spinbutton_messages"
+#define NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME   "spinbutton_session_messages"
+#define NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME         "spinbutton_ping_interval"
 
 // -----------------------------------------------------------------------------
 
@@ -51,6 +59,7 @@
 #define NET_CLIENT_DEF_SERVER_STRESS_INTERVAL           1 // ms
 
 #define NET_CLIENT_UI_FILE                              "net_client.glade"
+
 #define NET_CLIENT_UI_GTK_BUTTON_CONNECT_NAME           "connect"
 #define NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME             "close"
 #define NET_CLIENT_UI_GTK_BUTTON_PING_NAME              "ping"
@@ -65,12 +74,6 @@
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_LABEL      "normal"
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_LABEL "alternating"
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_LABEL      "stress"
-#define NET_CLIENT_UI_GTK_RADIOBUTTON_TCP_NAME          "radiobutton_tcp"
-#define NET_CLIENT_UI_GTK_RADIOBUTTON_UDP_NAME          "radiobutton_udp"
-
-// GTK progress/status bar
-#define NET_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL          27 // ms (?)
-#define NET_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION        "Network::main"
 
 // define behaviour
 #define NET_CLIENT_U_TEST_CONNECT_PROBABILITY           0.5F // 50%
@@ -80,8 +83,7 @@
 // -----------------------------------------------------------------------------
 
 #define NET_SERVER_UI_FILE                              "net_server.glade"
-//#define NET_SERVER_UI_GTK_BUTTON_START_NAME            "start"
-//#define NET_SERVER_UI_GTK_BUTTON_STOP_NAME             "stop"
-#define NET_SERVER_UI_GTK_BUTTON_LISTEN_NAME            "listen"
+
+#define NET_SERVER_UI_GTK_TOGGLEBUTTON_LISTEN_NAME      "listen"
 
 #endif

@@ -21,6 +21,7 @@
 #ifndef NET_CLIENT_SSL_CONNECTOR_H
 #define NET_CLIENT_SSL_CONNECTOR_H
 
+#include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
@@ -28,6 +29,7 @@
 #include "stream_statemachine_control.h"
 
 #include "net_common.h"
+#include "net_connection_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
@@ -40,16 +42,18 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
-          ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Client_SSL_Connector_T
- : public ConnectorType
+ : public ACE_Connector<HandlerType,
+                        ConnectorType>
  , public Net_IConnector_T<AddressType,
                            ConfigurationType>
 {
+  typedef ACE_Connector<HandlerType,
+                        ConnectorType> inherited;
+
  public:
   typedef AddressType ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
@@ -63,8 +67,8 @@ class Net_Client_SSL_Connector_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  struct Net_TCPSocketConfiguration,
-                                  HandlerConfigurationType,
+                                  Net_TCPSocketConfiguration_t,
+                                  Net_TCPSocketConfiguration_t,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
@@ -79,8 +83,8 @@ class Net_Client_SSL_Connector_T
   inline virtual bool useReactor () const { return true; }
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& getR () const { return configuration_; }
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; return true; }
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
@@ -92,8 +96,6 @@ class Net_Client_SSL_Connector_T
   virtual int make_svc_handler (HandlerType*&);
 
  private:
-  typedef ConnectorType inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T (const Net_Client_SSL_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T& operator= (const Net_Client_SSL_Connector_T&))
@@ -105,13 +107,12 @@ class Net_Client_SSL_Connector_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     HandlerConfigurationType,
                                      StreamType,
                                      UserDataType> OWN_TYPE_T;
-  typedef Net_ITransportLayer_T<struct Net_TCPSocketConfiguration> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<Net_TCPSocketConfiguration_t> ITRANSPORTLAYER_T;
 
-  ConfigurationType      configuration_; // connection-
-  bool                   managed_;
+  ConfigurationType* configuration_; // connection-
+  bool               managed_;
 };
 
 // include template definition

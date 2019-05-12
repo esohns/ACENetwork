@@ -24,6 +24,9 @@
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
+#if defined (SSL_USE)
+#include "ace/SSL/SSL_SOCK_Acceptor.h"
+#endif // SSL_USE
 
 #include "net_common.h"
 
@@ -43,24 +46,35 @@ typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
                                     Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
                                                                 NET_TRANSPORTLAYER_TCP>,
-                                    struct Test_U_ConnectionState,
+                                    struct Net_ConnectionState,
                                     Test_U_TCPConnectionConfiguration,
                                     Test_U_Stream,
-                                    struct Net_UserData> Server_AsynchListener_t;
+                                    struct Net_UserData> Server_Asynch_TCP_Listener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
                               Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
                                                           NET_TRANSPORTLAYER_TCP>,
-                              struct Test_U_ConnectionState,
+                              struct Net_ConnectionState,
                               Test_U_TCPConnectionConfiguration,
                               Test_U_Stream,
-                              struct Net_UserData> Server_Listener_t;
+                              struct Net_UserData> Server_TCP_Listener_t;
+#if defined (SSL_USE)
+typedef Net_Server_Listener_T<Test_U_SSLConnection,
+                              ACE_SSL_SOCK_Acceptor,
+                              ACE_INET_Addr,
+                              Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
+                                                          NET_TRANSPORTLAYER_TCP>,
+                              struct Net_ConnectionState,
+                              Test_U_TCPConnectionConfiguration,
+                              Test_U_Stream,
+                              struct Net_UserData> Server_SSL_Listener_t;
+#endif // SSL_USE
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
                                      ACE_INET_Addr,
                                      Test_U_UDPConnectionConfiguration,
-                                     struct Test_U_ConnectionState,
+                                     struct Net_ConnectionState,
                                      Net_Statistic_t,
                                      Net_UDPSocketConfiguration_t,
                                      Net_UDPSocketConfiguration_t,
@@ -71,16 +85,20 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                Test_U_UDPConnectionConfiguration,
-                               struct Test_U_ConnectionState,
+                               struct Net_ConnectionState,
                                Net_Statistic_t,
                                Net_UDPSocketConfiguration_t,
                                Net_UDPSocketConfiguration_t,
                                Test_U_Stream,
                                struct Net_UserData> Server_UDP_Connector_t;
 
-typedef ACE_Singleton<Server_AsynchListener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_ASYNCHLISTENER_SINGLETON;
-typedef ACE_Singleton<Server_Listener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_LISTENER_SINGLETON;
+typedef ACE_Singleton<Server_Asynch_TCP_Listener_t,
+                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_ASYNCH_TCP_LISTENER_SINGLETON;
+typedef ACE_Singleton<Server_TCP_Listener_t,
+                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_TCP_LISTENER_SINGLETON;
+#if defined (SSL_USE)
+typedef ACE_Singleton<Server_SSL_Listener_t,
+                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_SSL_LISTENER_SINGLETON;
+#endif // SSL_USE
 
 #endif
