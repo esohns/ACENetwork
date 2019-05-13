@@ -62,7 +62,9 @@ class Client_SignalHandler
   Client_TCP_Connector_t        TCPConnector_;
   Client_UDP_AsynchConnector_t  AsynchUDPConnector_;
   Client_UDP_Connector_t        UDPConnector_;
+#if defined (SSL_USE)
   Client_SSL_Connector_t        SSLConnector_;
+#endif // SSL_USE
 };
 
 #endif

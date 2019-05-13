@@ -1,5 +1,4 @@
-﻿
-set (ACE_XML_LIB_FILE libACEXML.so)
+﻿set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
@@ -10,7 +9,8 @@ if (UNIX)
                 NO_DEFAULT_PATH)
  else ()
   find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local
 #                PATHS ENV{ACE_ROOT}
                 PATH_SUFFIXES lib
                 DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
@@ -26,7 +26,7 @@ elseif (WIN32)
  set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
                PATHS ENV ACE_ROOT
-               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../../ATCD/ACE
+               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../../ACE_TAO/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_XML_LIB_FILE}"
                NO_DEFAULT_PATH)
@@ -40,14 +40,16 @@ set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local
                 PATHS ENV ACE_ROOT
                 PATH_SUFFIXES lib
                 DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
                 NO_DEFAULT_PATH)
  else ()
   find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local
 #                PATHS ENV ACE_ROOT
                 PATH_SUFFIXES lib
                 DOC "searching for ${ACE_XML_PARSER_LIB_FILE} (system paths)")

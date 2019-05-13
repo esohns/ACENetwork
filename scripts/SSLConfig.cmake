@@ -1,10 +1,12 @@
 if (UNIX)
  find_package (SSL MODULE)
  if (SSL_FOUND)
+  message (STATUS "found SSL")
  else ()
   find_package (OpenSSL MODULE
                 COMPONENTS Crypto SSL)
   if (OPENSSL_FOUND)
+   message (STATUS "found OpenSSL")
    set (SSL_FOUND TRUE)
    set (SSL_INCLUDE_DIRS ${OpenSSL_INCLUDE_DIRS})
    set (SSL_LIBRARIES ${OpenSSL_LIBRARIES})
@@ -26,7 +28,7 @@ endif ()
 set (ACE_SSL_LIB_FILE libACE_SSL.so)
 if (UNIX)
  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE
+               HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../ACE_TAO/ACE
                PATHS $ENV{ACE_ROOT}
                PATH_SUFFIXES lib
                DOC "searching for ${ACE_SSL_LIB_FILE}"

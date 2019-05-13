@@ -50,7 +50,8 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${BIND9_CFLAGS})
 
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/cmake>)

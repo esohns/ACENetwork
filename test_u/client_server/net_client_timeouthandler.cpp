@@ -55,7 +55,9 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
  , AsynchUDPConnector_ (true)
  , TCPConnector_ (true)
  , UDPConnector_ (true)
+#if defined (SSL_USE)
  , SSLConnector_ (true)
+#endif // SSL_USE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
  , randomStateInitializationBuffer_ ()
@@ -71,7 +73,9 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
   TCPConnector_.initialize (TCPConnectionConfiguration_in);
   AsynchUDPConnector_.initialize (UDPConnectionConfiguration_in);
   UDPConnector_.initialize (UDPConnectionConfiguration_in);
+#if defined (SSL_USE)
   SSLConnector_.initialize (TCPConnectionConfiguration_in);
+#endif // SSL_USE
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -386,7 +390,9 @@ continue_:
       case NET_TRANSPORTLAYER_SSL:
       {
         peer_address = configuration_r.address;
+#if defined (SSL_USE)
         ssl_tcp_connector_p = &SSLConnector_;
+#endif // SSL_USE
         break;
       }
       default:

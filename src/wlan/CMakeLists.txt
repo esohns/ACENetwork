@@ -24,49 +24,6 @@ elseif (WIN32)
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif ()
 
-if (UNIX)
-# # DHCP client
-# if (DHCLIENT_SUPPORT)
-#  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
-#  set (JSON_LIB_FILE libjson-c.so.3)
-#  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
-#                HINTS /usr/lib
-#                PATH_SUFFIXES x86_64-linux-gnu
-#                DOC "searching for ${JSON_LIB_FILE} (system paths)")
-#  if (NOT JSON_LIBRARY)
-#   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
-#  else ()
-#   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
-#  endif ()
-
-#  set (ISC_LIB_FILE libisc.a)
-#  #set (ISC_LIB_FILE libisc.so.166)
-#  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
-#                HINTS /usr/lib64 /usr/lib
-#                PATH_SUFFIXES dhcp x86_64-linux-gnu
-#                DOC "searching for ${ISC_LIB_FILE} (system paths)")
-#  if (NOT ISC_LIBRARY)
-#   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
-#  else ()
-#   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
-#  endif ()
-
-#  set (DHCPCTL_LIB_FILE libdhcpctl.a)
-#  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
-#               HINTS /usr/lib64 /usr/lib
-#               PATH_SUFFIXES dhcp x86_64-linux-gnu
-#               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
-#  if (NOT DHCPCTL_LIBRARY)
-#   message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
-#  else ()
-#   message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
-#  endif ()
-#  pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
-#  add_definitions (-DDHCLIENT_SUPPORT)
-# endif (DHCLIENT_SUPPORT)
-elseif (WIN32)
-endif ()
-
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
@@ -124,7 +81,8 @@ if (UNIX)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/cmake>)

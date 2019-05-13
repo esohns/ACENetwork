@@ -643,7 +643,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<ACE_SYNCH_USE,
@@ -654,7 +653,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_NetlinkSocketConfiguration_t,
-                       HandlerConfigurationType,
+                       Net_NetlinkSocketConfiguration_t,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (bool managed_in)
  : configuration_ (NULL)
@@ -670,7 +669,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 ACE_HANDLE
@@ -682,7 +680,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_NetlinkSocketConfiguration_t,
-                       HandlerConfigurationType,
+                       Net_NetlinkSocketConfiguration_t,
                        StreamType,
                        UserDataType>::connect (const Net_Netlink_Addr& address_in)
 {
@@ -720,7 +718,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -732,7 +729,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_NetlinkSocketConfiguration_t,
-                       HandlerConfigurationType,
+                       Net_NetlinkSocketConfiguration_t,
                        StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {

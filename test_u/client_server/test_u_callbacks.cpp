@@ -1203,13 +1203,12 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in));
   if (is_active_b)
   {
+    ACE_thread_t thread_id = 0;
     switch (data_p->configuration->protocolConfiguration.transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
       { ACE_ASSERT (configuration_p->TCPListener);
-        ACE_thread_t thread_id = 0;
         configuration_p->TCPListener->start (thread_id);
-        ACE_UNUSED_ARG (thread_id);
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
@@ -1229,10 +1228,11 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
         break;
       }
       case NET_TRANSPORTLAYER_SSL:
-      { ACE_ASSERT (configuration_p->SSLListener);
-        ACE_thread_t thread_id = 0;
+      {
+#if defined (SSL_USE)
+        ACE_ASSERT (configuration_p->SSLListener);
         configuration_p->SSLListener->start (thread_id);
-        ACE_UNUSED_ARG (thread_id);
+#endif // SSL_USE
         break;
       }
       default:
@@ -1243,6 +1243,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
         return FALSE;
       }
     } // end SWITCH
+    ACE_UNUSED_ARG (thread_id);
   } // end IF
   else
   {
@@ -1275,8 +1276,11 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
         break;
       }
       case NET_TRANSPORTLAYER_SSL:
-      { ACE_ASSERT (configuration_p->SSLListener);
+      {
+#if defined (SSL_USE)
+        ACE_ASSERT (configuration_p->SSLListener);
         configuration_p->SSLListener->stop ();
+#endif // SSL_USE
         break;
       }
       default:

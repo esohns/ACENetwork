@@ -53,7 +53,9 @@ Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispa
  , TCPConnector_ (true)
  , AsynchUDPConnector_ (true)
  , UDPConnector_ (true)
+#if defined (SSL_USE)
  , SSLConnector_ (true)
+#endif // SSL_USE
 {
   NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::Client_SignalHandler"));
 
@@ -85,7 +87,9 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   TCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
   AsynchUDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
   UDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
+#if defined (SSL_USE)
   SSLConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
+#endif // SSL_USE
 
   return inherited::initialize (configuration_in);
 }
@@ -235,7 +239,9 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
     case NET_TRANSPORTLAYER_SSL:
     {
+#if defined (SSL_USE)
       ssl_tcp_connector_p = &SSLConnector_;
+#endif // SSL_USE
       break;
     }
     default:

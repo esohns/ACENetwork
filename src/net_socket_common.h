@@ -36,6 +36,7 @@
 #include "net_tcpsockethandler.h"
 #include "net_udpsockethandler.h"
 #if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#include "net_asynch_netlinksockethandler.h"
 #include "net_netlinksockethandler.h"
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 

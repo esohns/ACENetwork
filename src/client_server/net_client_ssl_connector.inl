@@ -23,6 +23,7 @@
 
 #include "common_defines.h"
 
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 template <typename HandlerType,

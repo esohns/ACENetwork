@@ -709,10 +709,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
     else
       configuration_in.TCPListener =
         SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
+#if defined (SSL_USE)
     configuration_in.SSLListener =
       SERVER_SSL_LISTENER_SINGLETON::instance ();
+#endif // SSL_USE
     signal_handler_configuration.TCPListener = configuration_in.TCPListener;
+#if defined (SSL_USE)
     signal_handler_configuration.SSLListener = configuration_in.SSLListener;
+#endif // SSL_USE
   } // end IF
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
@@ -903,7 +907,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Server_UDP_Connector_t udp_connector (true);
   if (!useUDP_in)
   { ACE_ASSERT (configuration_in.TCPListener);
-    ACE_ASSERT (configuration_in.SSLListener);
     if (!configuration_in.TCPListener->initialize (configuration_in.listenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -922,6 +925,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
       timer_manager_p->stop ();
       return;
     } // end IF
+#if defined (SSL_USE)
+    ACE_ASSERT (configuration_in.SSLListener);
     if (!configuration_in.SSLListener->initialize (configuration_in.listenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -940,6 +945,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       timer_manager_p->stop ();
       return;
     } // end IF
+#endif // SSL_USE
 
     ACE_thread_t thread_id = 0;
     configuration_in.TCPListener->start (thread_id);
