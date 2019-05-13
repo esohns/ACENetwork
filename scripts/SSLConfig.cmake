@@ -28,7 +28,7 @@ endif ()
 set (ACE_SSL_LIB_FILE libACE_SSL.so)
 if (UNIX)
  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../ACE_TAO/ACE
+               HINTS ${CMAKE_CURRENT_LIST_DIR}/../../ACE_TAO/ACE
                PATHS $ENV{ACE_ROOT}
                PATH_SUFFIXES lib
                DOC "searching for ${ACE_SSL_LIB_FILE}"
