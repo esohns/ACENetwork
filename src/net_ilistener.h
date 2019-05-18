@@ -27,19 +27,15 @@
 #include "common_ilock.h"
 #include "common_itask.h"
 
-template <typename ConfigurationType,
-          typename ConnectionConfigurationType>
+template <typename ConfigurationType> // connection-
 class Net_IListener_T
  : public Common_ITask_T<ACE_MT_SYNCH,
                          Common_ILock_T<ACE_MT_SYNCH> >
- , public Common_IGetR_2_T<ConnectionConfigurationType>
- //, public Common_IInitialize_T<ConnectionConfigurationType>
+ , public Common_IGetR_2_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_IDumpState
 {
  public:
-  //virtual bool initialize (const ConnectionConfigurationType&) = 0;
-
   virtual bool useReactor () const = 0; // ? : uses proactor
 };
 

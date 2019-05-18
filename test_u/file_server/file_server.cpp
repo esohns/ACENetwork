@@ -669,10 +669,10 @@ do_work (
   } // end IF
   else
   {
-    configuration.listenerConfiguration.messageAllocator =
-        &message_allocator;
-    configuration.listenerConfiguration.connectionConfiguration =
-        &tcp_connection_configuration;
+    //configuration.listenerConfiguration.messageAllocator =
+    //    &message_allocator;
+    //configuration.listenerConfiguration.connectionConfiguration =
+    //    &tcp_connection_configuration;
 
     tcp_connection_configuration.messageAllocator = &message_allocator;
     tcp_connection_configuration.initialize (configuration.allocatorConfiguration,
@@ -733,11 +733,9 @@ do_work (
 
   // step2: signal handling
   if (useReactor_in)
-    configuration.listener =
-      FILESERVER_LISTENER_SINGLETON::instance ();
+    configuration.listener = FILESERVER_LISTENER_SINGLETON::instance ();
   else
-    configuration.listener =
-      FILESERVER_ASYNCHLISTENER_SINGLETON::instance ();
+    configuration.listener = FILESERVER_ASYNCHLISTENER_SINGLETON::instance ();
 
   signal_handler_configuration.dispatchState =
     &event_dispatch_state_s;
@@ -772,10 +770,10 @@ do_work (
   if (useLoopBack_in)
   {
     result =
-      configuration.listenerConfiguration.address.set (listeningPortNumber_in,
-                                                       INADDR_LOOPBACK,
-                                                       1,
-                                                       0);
+      NET_SOCKET_CONFIGURATION_TCP_CAST((*iterator).second)->address.set (listeningPortNumber_in,
+                                                                          INADDR_LOOPBACK,
+                                                                          1,
+                                                                          0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -796,8 +794,8 @@ do_work (
   } // end IF
   else
   {
-    configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                 1);
+    NET_SOCKET_CONFIGURATION_TCP_CAST((*iterator).second)->address.set_port_number (listeningPortNumber_in,
+                                                                                    1);
 //    configuration.UDPListenerConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
 //                                                                          1);
   } // end ELSE
@@ -873,7 +871,7 @@ do_work (
   if (UIDefinitionFile_in.empty ())
   {
 #endif // GUI_SUPPORT
-    if (!configuration.listener->initialize (configuration.listenerConfiguration))
+    if (!configuration.listener->initialize (*dynamic_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, aborting\n")));

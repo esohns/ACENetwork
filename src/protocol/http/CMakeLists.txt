@@ -74,7 +74,7 @@ elseif (WIN32)
 #                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ffmpeg>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)

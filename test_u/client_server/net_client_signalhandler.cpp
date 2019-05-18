@@ -103,9 +103,9 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Test_U_ITCPConnectionManager_t* iconnection_manager_p =
+  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
-  Test_U_IUDPConnectionManager_t* iconnection_manager_2 =
+  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
       TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   ACE_ASSERT (iconnection_manager_2);

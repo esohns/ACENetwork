@@ -1262,10 +1262,10 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
         connection_configuration_p =
           dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
         ACE_ASSERT (connection_configuration_p);
-        Test_U_IUDPConnectionManager_t* connection_manager_p =
+        typename Test_U_UDPConnectionManager_t::INTERFACE_T* connection_manager_p =
           TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
         ACE_ASSERT (connection_manager_p);
-        Test_U_IUDPConnectionManager_t::CONNECTION_T* connection_p =
+        typename Test_U_UDPConnectionManager_t::CONNECTION_T* connection_p =
           connection_manager_p->get (connection_configuration_p->listenAddress, false);
         ACE_ASSERT (connection_p);
         connection_p->close ();

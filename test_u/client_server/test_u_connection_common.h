@@ -67,31 +67,5 @@ class Test_U_UDPConnectionConfiguration
    ///////////////////////////////////////
   {}
 };
-//#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-//class Test_U_NetlinkConnectionConfiguration
-// : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
-//                                        Test_U_StreamConfiguration_t,
-//                                        NET_TRANSPORTLAYER_NETLINK>
-//{
-// public:
-//  Test_U_NetlinkConnectionConfiguration ()
-//   : Net_ConnectionConfiguration_T ()
-//   ///////////////////////////////////////
-//  {}
-//};
-//#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 Test_U_TCPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
-                                 struct Net_UserData> Test_U_ITCPConnectionManager_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 Test_U_UDPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
-                                 struct Net_UserData> Test_U_IUDPConnectionManager_t;
 
 #endif

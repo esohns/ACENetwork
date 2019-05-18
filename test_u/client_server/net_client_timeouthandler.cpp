@@ -106,18 +106,18 @@ Client_TimeoutHandler::handle (const void* arg_in)
 
   int result = -1;
   int index_i = 0;
-  Test_U_ITCPConnectionManager_t::CONNECTION_T* connection_p = NULL;
-  Test_U_ITCPConnectionManager_t::CONNECTION_T* connection_2 = NULL;
-  Test_U_IUDPConnectionManager_t::CONNECTION_T* connection_2_p = NULL;
-  Test_U_IUDPConnectionManager_t::CONNECTION_T* connection_2_2 = NULL;
+  Test_U_TCPConnectionManager_t::CONNECTION_T* connection_p = NULL;
+  Test_U_TCPConnectionManager_t::CONNECTION_T* connection_2 = NULL;
+  Test_U_UDPConnectionManager_t::CONNECTION_T* connection_2_p = NULL;
+  Test_U_UDPConnectionManager_t::CONNECTION_T* connection_2_2 = NULL;
   bool do_abort = false;
   bool do_abort_oldest = false;
   bool do_abort_youngest = false;
   bool do_connect = false;
   bool do_ping = false;
-  Test_U_ITCPConnectionManager_t* connection_manager_p =
+  typename Test_U_TCPConnectionManager_t::INTERFACE_T* connection_manager_p =
     TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
-  Test_U_IUDPConnectionManager_t* connection_manager_2 =
+  typename Test_U_UDPConnectionManager_t::INTERFACE_T* connection_manager_2 =
     TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
 
   // sanity check(s)

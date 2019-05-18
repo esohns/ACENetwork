@@ -36,7 +36,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_Listener_T<HandlerType,
@@ -44,7 +43,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::Net_Server_Listener_T ()
  : inherited (NULL, // use global (default) reactor
@@ -65,7 +63,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_Listener_T<HandlerType,
@@ -73,7 +70,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::~Net_Server_Listener_T ()
 {
@@ -103,7 +99,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -112,7 +107,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::handle_accept_error (void)
 {
@@ -133,7 +127,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -142,7 +135,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::start (ACE_thread_t& threadId_out)
 {
@@ -267,7 +259,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -276,7 +267,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::stop (bool waitForCompletion_in,
                                            bool lockedAccess_in)
@@ -319,7 +309,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 bool
@@ -328,7 +317,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
@@ -346,7 +334,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -355,7 +342,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::dump_state () const
 {
@@ -385,7 +371,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -394,7 +379,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {
@@ -419,7 +403,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -428,7 +411,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::accept_svc_handler (HandlerType* handler_in)
 {
@@ -436,8 +418,9 @@ Net_Server_Listener_T<HandlerType,
 
   ACE_ASSERT (handler_in);
 
-  Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = handler_in;
-  ilinklayer_p->set (NET_ROLE_SERVER);
+  //Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = handler_in;
+  //ilinklayer_p->set (NET_ROLE_SERVER);
+  handler_in->set(NET_ROLE_SERVER);
 
   return inherited::accept_svc_handler (handler_in);
 }
@@ -447,7 +430,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -456,7 +438,6 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::activate_svc_handler (HandlerType* svc_handler)
 {

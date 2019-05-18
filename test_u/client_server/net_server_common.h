@@ -65,11 +65,10 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 struct Server_ListenerConfiguration;
 
-typedef Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
-                                    NET_TRANSPORTLAYER_TCP> Server_ListenerConfiguration_t;
+//typedef Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
+//                                    NET_TRANSPORTLAYER_TCP> Server_ListenerConfiguration_t;
 
-typedef Net_IListener_T<Server_ListenerConfiguration_t,
-                        Test_U_TCPConnectionConfiguration> Server_ITCPListener_t;
+typedef Net_IListener_T<Test_U_TCPConnectionConfiguration> Test_U_ITCPListener_t;
 typedef Net_IConnector_T<ACE_INET_Addr,
                          Test_U_UDPConnectionConfiguration> Test_U_IUDPConnector_t;
 
@@ -88,9 +87,9 @@ struct Server_SignalHandlerConfiguration
   {}
 
 #if defined (SSL_USE)
-  Server_ITCPListener_t*   SSLListener;
+  Test_U_ITCPListener_t*   SSLListener;
 #endif // SSL_USE
-  Server_ITCPListener_t*   TCPListener;
+  Test_U_ITCPListener_t*   TCPListener;
   Test_U_IUDPConnector_t*  UDPConnector;
 
   Net_IStatisticHandler_t* statisticReportingHandler;
@@ -107,16 +106,16 @@ struct Server_Configuration
 #endif // SSL_USE
    , TCPListener (NULL)
    , UDPConnector (NULL)
-   , listenerConfiguration ()
+   //, listenerConfiguration ()
    , signalHandlerConfiguration ()
   {}
 
 #if defined (SSL_USE)
-  Server_ITCPListener_t*                   SSLListener;
+  Test_U_ITCPListener_t*                   SSLListener;
 #endif // SSL_USE
-  Server_ITCPListener_t*                   TCPListener;
+  Test_U_ITCPListener_t*                   TCPListener;
   Test_U_IUDPConnector_t*                  UDPConnector;
-  Server_ListenerConfiguration_t           listenerConfiguration;
+  //Server_ListenerConfiguration_t           listenerConfiguration;
 
   struct Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };

@@ -51,7 +51,7 @@ Net_ConnectionBase_T<AddressType,
   // initialize configuration/user data
   if (likely (isManaged_))
   {
-    ICONNECTION_MANAGER_T* manager_p =
+    typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
         CONNECTION_MANAGER_T::SINGLETON_T::instance ();
     ACE_ASSERT (manager_p);
     try {
@@ -153,7 +153,7 @@ Net_ConnectionBase_T<AddressType,
   // sanity check(s)
   ACE_ASSERT (!isRegistered_);
 
-  ICONNECTION_MANAGER_T* manager_p =
+  typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
       CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (manager_p);
 
@@ -227,7 +227,7 @@ Net_ConnectionBase_T<AddressType,
   if (unlikely (!isRegistered_))
     return;
 
-  ICONNECTION_MANAGER_T* manager_p =
+  typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
     CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (manager_p);
 

@@ -645,12 +645,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Test_U_TCPConnectionManager_t* connection_manager_p =
     TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  Test_U_ITCPConnectionManager_t* iconnection_manager_p =
+  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     connection_manager_p;
   Test_U_UDPConnectionManager_t* connection_manager_2 =
     TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_2);
-  Test_U_IUDPConnectionManager_t* iconnection_manager_2 =
+  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
     connection_manager_2;
 
   Client_TCP_AsynchConnector_t asynch_connector (true);
@@ -695,9 +695,22 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                              NULL);
 
   // step0e: initialize action timer
-  ACE_INET_Addr peer_address (serverPortNumber_in,
-                              serverHostname_in.c_str (),
-                              ACE_ADDRESS_FAMILY_INET);
+//  ACE_INET_Addr peer_address (serverPortNumber_in,
+//                              serverHostname_in.c_str (),
+//                              ACE_ADDRESS_FAMILY_INET);
+  ACE_INET_Addr peer_address;
+  result = peer_address.set (serverPortNumber_in,
+                             INADDR_LOOPBACK,
+                             1,
+                             0);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set() (was: %s), continuing\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+  else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set server address: %s\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
   if (useUDP_in)
   {
     if (!useReactor_in)
@@ -751,6 +764,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step0e: initialize signal handling
+  // *WORKAROUND*: ACE_INET_Addr::operator= is broken
   configuration_in.signalHandlerConfiguration.address = peer_address;
   configuration_in.signalHandlerConfiguration.TCPConnectionConfiguration =
     &connection_configuration;

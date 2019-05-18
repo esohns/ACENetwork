@@ -393,13 +393,13 @@ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
 #                          ${LIBPNG_PATH}
 #                          ${FFMPEG_PATH}
 #                          ${PROJECT_SOURCE_DIR}/../assimp/cmake/code/${CMAKE_BUILD_TYPE}
-                          ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib)
+                          ${PROJECT_SOURCE_DIR}/../ACE_TAO/ACE/lib)
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE_SOURCE}
                          ARGS "-l -t"
 #                         FORWARD_ARGS
-                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib
  #                                             ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
@@ -412,7 +412,7 @@ if (UNIX)
                          ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
-                                              ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/modules/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
@@ -425,7 +425,7 @@ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
 #                          ${LIBPNG_PATH}
 #                          ${FFMPEG_PATH}
 #                          ${PROJECT_SOURCE_DIR}/../assimp/cmake/code/${CMAKE_BUILD_TYPE}
-                          ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
+                          ${PROJECT_SOURCE_DIR}/../ACE_TAO/ACE/lib
 #                          ${PROJECT_SOURCE_DIR}/../pdcurses/win32
 #                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
 #                                              G:/software/Development/dll

@@ -79,20 +79,20 @@ struct Net_SessionConfiguration
   struct Common_ParserConfiguration* parserConfiguration;
 };
 
-template <typename ConnectionConfigurationType,
-          enum Net_TransportLayerType TransportLayerType_e>
-class Net_ListenerConfiguration_T
- : public Net_ConnectionConfigurationBase_T<TransportLayerType_e>
-{
- public:
-  Net_ListenerConfiguration_T ()
-//   : Net_ConnectionConfigurationBase_T ()
-   : addressFamily (ACE_ADDRESS_FAMILY_INET)
-   , connectionConfiguration (NULL)
-  {}
-
-  int                          addressFamily;
-  ConnectionConfigurationType* connectionConfiguration;
-};
+//template <typename ConnectionConfigurationType,
+//          enum Net_TransportLayerType TransportLayerType_e>
+//class Net_ListenerConfiguration_T
+// //: public Net_ConnectionConfigurationBase_T<TransportLayerType_e>
+//{
+// public:
+//  Net_ListenerConfiguration_T ()
+////   : Net_ConnectionConfigurationBase_T ()
+//   : addressFamily (ACE_ADDRESS_FAMILY_INET)
+//   , connectionConfiguration (NULL)
+//  {}
+//
+//  int                          addressFamily;
+//  ConnectionConfigurationType* connectionConfiguration;
+//};
 
 #endif

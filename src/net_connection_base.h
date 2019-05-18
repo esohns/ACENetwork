@@ -64,14 +64,6 @@ class Net_ConnectionBase_T
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> CONNECTION_MANAGER_T;
-//  typedef ACE_Singleton<CONNECTION_MANAGER_T,
-//                        ACE_SYNCH_MUTEX> CONNECTION_MANAGER_SINGLETON_T;
-  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                   AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
 
   // implement (part of) Net_IConnection_T
   using REFERENCECOUNTER_T::decrease;

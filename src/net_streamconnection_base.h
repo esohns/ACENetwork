@@ -46,7 +46,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           ////////////////////////////////
           typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
-          typename ListenerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           typename StreamStatusType, // state machine-
@@ -153,8 +152,7 @@ class Net_StreamConnectionBase_T
   // convenient types
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<ListenerConfigurationType,
-                          ConfigurationType> ILISTENER_T;
+  typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
 
   // *NOTE*: if there is no default ctor, this will not compile
   inline Net_StreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
@@ -192,7 +190,6 @@ template <typename HandlerType, // implements ACE_Service_Handler
           ////////////////////////////////
           typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
-          typename ListenerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           typename StreamStatusType,
@@ -293,8 +290,7 @@ class Net_AsynchStreamConnectionBase_T
   typedef StreamType STREAM_T;
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<ListenerConfigurationType,
-                          ConfigurationType> ILISTENER_T;
+  typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
 
   // *NOTE*: if there is no default ctor, this will not compile
   inline Net_AsynchStreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

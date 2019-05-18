@@ -32,10 +32,8 @@ template <typename HandlerType,
           typename AcceptorType,
           ////////////////////////////////
           typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
-          ////////////////////////////////
-          typename ConnectionConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -43,8 +41,7 @@ template <typename HandlerType,
 class Net_Server_Listener_T
  : public ACE_Acceptor<HandlerType,
                        AcceptorType>
- , public Net_IListener_T<ConfigurationType, 
-                          ConnectionConfigurationType>
+ , public Net_IListener_T<ConfigurationType>
 {
   typedef ACE_Acceptor<HandlerType,
                        AcceptorType> inherited;
@@ -55,7 +52,6 @@ class Net_Server_Listener_T
                                                    AddressType,
                                                    ConfigurationType,
                                                    StateType,
-                                                   ConnectionConfigurationType,
                                                    StreamType,
                                                    UserDataType>,
                              ACE_SYNCH_RECURSIVE_MUTEX>;
@@ -67,7 +63,6 @@ class Net_Server_Listener_T
                                               AddressType,
                                               ConfigurationType,
                                               StateType,
-                                              ConnectionConfigurationType,
                                               StreamType,
                                               UserDataType>,
                         ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
@@ -86,8 +81,7 @@ class Net_Server_Listener_T
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; }
 
-  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); ACE_ASSERT (configuration_->connectionConfiguration); return *(configuration_->connectionConfiguration); }
-  //virtual bool initialize (const ConnectionConfigurationType&);
+  inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *configuration_; }
   virtual bool initialize (const ConfigurationType&);
   inline virtual bool useReactor () const { return true; }
 
@@ -104,8 +98,7 @@ class Net_Server_Listener_T
 
  private:
   // convenient types
-  typedef Net_IListener_T<ConfigurationType,
-                          ConnectionConfigurationType> ILISTENER_T;
+  typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
 
   Net_Server_Listener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T (const Net_Server_Listener_T&))

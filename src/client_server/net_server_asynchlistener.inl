@@ -47,14 +47,12 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::Net_Server_AsynchListener_T ()
  : inherited ()
@@ -70,14 +68,12 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::~Net_Server_AsynchListener_T ()
 {
@@ -98,7 +94,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -106,7 +101,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
                                                                 const ACE_INET_Addr& remoteAddress_in,
@@ -132,7 +126,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -140,7 +133,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::accept (size_t bytesToRead_in,
                                                    const void* act_in)
@@ -251,7 +243,8 @@ Net_Server_AsynchListener_T<HandlerType,
                             0,                                   // priority
                             COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL, // (real-time) signal
                             //this->addr_family_,                // address family
-                            configuration_->addressFamily);
+                            ACE_ADDRESS_FAMILY_INET);                 
+                            //configuration_->addressFamily);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -278,7 +271,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 bool
@@ -286,7 +278,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
@@ -304,7 +295,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -312,7 +302,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::open (const AddressType& listenAddress_in,
                                                  size_t numberOfBytesToRead_in,
@@ -538,7 +527,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -546,7 +534,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::start (ACE_thread_t& threadId_out)
 {
@@ -625,7 +612,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -633,7 +619,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::stop (bool waitForCompletion_in,
                                                  bool lockedAccess_in)
@@ -706,7 +691,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -714,25 +698,22 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::handle_accept (const ACE_Asynch_Accept::Result &result)
 {
   ACE_TRACE ("Net_Server_AsynchListener_T::handle_accept");
 
-  // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Asynch_Acceptor.cpp
-
-  // Variable for error tracking
   int error = 0;
+  ACE_HANDLE listen_handle = ACE_INVALID_HANDLE;
+  AddressType remote_address, local_address;
+  HandlerType* handler_p = NULL;
 
-  // If the asynchronous accept fails.
-  if (unlikely (!result.success () || result.accept_handle () == ACE_INVALID_HANDLE))
-  {
+  if (unlikely (!result.success () ||
+                (result.accept_handle () == ACE_INVALID_HANDLE)))
     error = 1;
-  }
 
-  ACE_HANDLE listen_handle = this->handle ();
-#if defined (ACE_WIN32)
+  listen_handle = this->handle ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   // In order to use accept handle with other Window Sockets 1.1
   // functions, we call the setsockopt function with the
   // SO_UPDATE_ACCEPT_CONTEXT option. This option initializes the
@@ -742,84 +723,61 @@ Net_Server_AsynchListener_T<HandlerType,
                 ACE_OS::setsockopt (result.accept_handle (),
                                     SOL_SOCKET,
                                     SO_UPDATE_ACCEPT_CONTEXT,
-                                    (char *)&listen_handle,
+                                    (char*)&listen_handle,
                                     sizeof (listen_handle)) == -1))
-  {
     error = 1;
-  }
-#endif /* ACE_WIN32 */
+#endif // ACE_WIN32 || ACE_WIN64
 
-  // Parse address.
-  AddressType local_address;
-  AddressType remote_address;
+  // retrieve addresses ?
   if (likely (!error &&
               (this->validate_new_connection () || this->pass_addresses ())))
-    // Parse the addresses.
     this->parse_address (result,
-                          remote_address,
-                          local_address);
+                         remote_address,
+                         local_address);
 
-  // Validate remote address
+  // validate remote address
   if (unlikely (!error &&
                 this->validate_new_connection () &&
                 (this->validate_connection (result,
                                             remote_address, local_address) == -1)))
-  {
     error = 1;
-  }
 
-  HandlerType *new_handler = 0;
   if (likely (!error))
   {
-    // The Template method
-    new_handler = this->make_handler ();
-    if (unlikely (new_handler == 0))
-    {
+    handler_p = this->make_handler ();
+    if (unlikely (!handler_p))
       error = 1;
-    }
-  }
+  } // end IF
 
-  // If no errors
   if (likely (!error))
   {
-    // Update the Proactor unless make_handler() or constructed handler
-    // set up its own.
-    if (unlikely (new_handler->proactor () == 0))
-      new_handler->proactor (this->proactor ());
+    if (unlikely (!handler_p->proactor ()))
+      handler_p->proactor (this->proactor ());
 
-    // Pass the addresses
     if (likely (this->pass_addresses ()))
-      new_handler->addresses (remote_address,
-                              local_address);
+      handler_p->addresses (remote_address,
+                            local_address);
 
     // *EDIT*: set role
-    Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = new_handler;
-    ilinklayer_p->set (NET_ROLE_SERVER);
+//    Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = ;
+    handler_p->set (NET_ROLE_SERVER);
 
     // Pass the ACT
-    if (unlikely (result.act () != 0))
-      new_handler->act (result.act ());
+    if (unlikely (result.act ()))
+      handler_p->act (result.act ());
 
-    // Set up the handler's new handle value
-    new_handler->handle (result.accept_handle ());
+    handler_p->handle (result.accept_handle ());
 
-    // Initiate the handler
-    new_handler->open (result.accept_handle (),
-                       result.message_block ());
-  }
+    handler_p->open (result.accept_handle (),
+                     result.message_block ());
+  } // end IF
 
-  // On failure, no choice but to close the socket
   if (unlikely (error &&
                 result.accept_handle () != ACE_INVALID_HANDLE))
     ACE_OS::closesocket (result.accept_handle ());
-
-  // Delete the dynamically allocated message_block
   result.message_block ().release ();
 
-  // Start off another asynchronous accept to keep the backlog going,
-  // unless we closed the listen socket already (from the destructor),
-  // or this callback is the result of a canceled/aborted accept.
-#if defined (ACE_WIN32)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (likely (this->should_reissue_accept ()               &&
               (listen_handle != ACE_INVALID_HANDLE)        &&
               (result.error () != ERROR_OPERATION_ABORTED)))
@@ -835,7 +793,6 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 HandlerType*
@@ -843,7 +800,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::make_handler (void)
 {

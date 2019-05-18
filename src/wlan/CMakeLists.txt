@@ -122,7 +122,7 @@ elseif (WIN32)
                               $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
  else ()
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE>)
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE>)
  endif (DEFINED ENV{ACE_ROOT})
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC

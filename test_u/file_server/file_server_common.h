@@ -71,10 +71,9 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
 class Test_U_SessionMessage;
 class Test_U_Message;
 
-typedef Net_ListenerConfiguration_T<FileServer_TCPConnectionConfiguration,
-                                    NET_TRANSPORTLAYER_TCP> FileServer_TCPListenerConfiguration_t;
-typedef Net_IListener_T<FileServer_TCPListenerConfiguration_t,
-                        FileServer_TCPConnectionConfiguration> Test_U_IListener_t;
+//typedef Net_ListenerConfiguration_T<FileServer_TCPConnectionConfiguration,
+//                                    NET_TRANSPORTLAYER_TCP> FileServer_TCPListenerConfiguration_t;
+typedef Net_IListener_T<FileServer_TCPConnectionConfiguration> Test_U_IListener_t;
 
 //////////////////////////////////////////
 
@@ -118,7 +117,7 @@ struct FileServer_Configuration
    , connectionConfigurations ()
    , handle (ACE_INVALID_HANDLE)
    , listener (NULL)
-   , listenerConfiguration ()
+   //, listenerConfiguration ()
    , signalHandlerConfiguration ()
    , streamConfiguration ()
    , userData ()
@@ -128,7 +127,7 @@ struct FileServer_Configuration
   Net_ConnectionConfigurations_t               connectionConfigurations;
   ACE_HANDLE                                   handle;
   Test_U_IListener_t*                          listener;
-  FileServer_TCPListenerConfiguration_t        listenerConfiguration;
+  //FileServer_TCPListenerConfiguration_t        listenerConfiguration;
   struct FileServer_SignalHandlerConfiguration signalHandlerConfiguration;
   FileServer_StreamConfiguration_t             streamConfiguration;
 

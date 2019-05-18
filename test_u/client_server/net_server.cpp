@@ -614,10 +614,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Net_ConnectionConfigurationsIterator_t iterator, iterator_2;
   Test_U_TCPConnectionConfiguration* connection_configuration_p = NULL;
   Test_U_UDPConnectionConfiguration* connection_configuration_p_2 = NULL;
-  configuration_in.listenerConfiguration.messageAllocator =
-    &message_allocator;
-  configuration_in.listenerConfiguration.connectionConfiguration =
-    &connection_configuration;
+  //configuration_in.listenerConfiguration.messageAllocator =
+  //  &message_allocator;
+  //configuration_in.listenerConfiguration.connectionConfiguration =
+  //  &connection_configuration;
 
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.initialize (configuration_in.allocatorConfiguration,
@@ -907,7 +907,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Server_UDP_Connector_t udp_connector (true);
   if (!useUDP_in)
   { ACE_ASSERT (configuration_in.TCPListener);
-    if (!configuration_in.TCPListener->initialize (configuration_in.listenerConfiguration))
+    if (!configuration_in.TCPListener->initialize (*connection_configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize TCP listener, returning\n")));
@@ -927,7 +927,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end IF
 #if defined (SSL_USE)
     ACE_ASSERT (configuration_in.SSLListener);
-    if (!configuration_in.SSLListener->initialize (configuration_in.listenerConfiguration))
+    if (!configuration_in.SSLListener->initialize (*connection_configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize SSL listener, returning\n")));

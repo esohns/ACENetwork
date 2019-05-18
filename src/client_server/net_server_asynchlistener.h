@@ -33,18 +33,15 @@
 template <typename HandlerType,
           ////////////////////////////////
           typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
-          ////////////////////////////////
-          typename ConnectionConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
- , public Net_IListener_T<ConfigurationType,
-                          ConnectionConfigurationType>
+ , public Net_IListener_T<ConfigurationType>
 {
   typedef ACE_Asynch_Acceptor<HandlerType> inherited;
 
@@ -53,7 +50,6 @@ class Net_Server_AsynchListener_T
                                                          AddressType,
                                                          ConfigurationType,
                                                          StateType,
-                                                         ConnectionConfigurationType,
                                                          StreamType,
                                                          UserDataType>,
                              ACE_SYNCH_RECURSIVE_MUTEX>;
@@ -64,7 +60,6 @@ class Net_Server_AsynchListener_T
                                                     AddressType,
                                                     ConfigurationType,
                                                     StateType,
-                                                    ConnectionConfigurationType,
                                                     StreamType,
                                                     UserDataType>,
                         ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
@@ -87,8 +82,7 @@ class Net_Server_AsynchListener_T
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); ACE_ASSERT (configuration_->connectionConfiguration); return *(configuration_->connectionConfiguration); }
-  //virtual bool initialize (const ConnectionConfigurationType&);
+  inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *(configuration_); }
   virtual bool initialize (const ConfigurationType&); // configuration
   inline virtual bool useReactor () const { return false; }
 
@@ -104,8 +98,7 @@ class Net_Server_AsynchListener_T
   virtual HandlerType* make_handler (void); // return value: socket handler handle
 
  private:
-  typedef Net_IListener_T<ConfigurationType,
-                          ConnectionConfigurationType> ILISTENER_T;
+  typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
 
   Net_Server_AsynchListener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&))

@@ -44,29 +44,23 @@
 
 typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
-                                    Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
-                                                                NET_TRANSPORTLAYER_TCP>,
-                                    struct Net_ConnectionState,
                                     Test_U_TCPConnectionConfiguration,
+                                    struct Net_ConnectionState,
                                     Test_U_Stream,
                                     struct Net_UserData> Server_Asynch_TCP_Listener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
-                              Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
-                                                          NET_TRANSPORTLAYER_TCP>,
-                              struct Net_ConnectionState,
                               Test_U_TCPConnectionConfiguration,
+                              struct Net_ConnectionState,
                               Test_U_Stream,
                               struct Net_UserData> Server_TCP_Listener_t;
 #if defined (SSL_USE)
 typedef Net_Server_Listener_T<Test_U_SSLConnection,
                               ACE_SSL_SOCK_Acceptor,
                               ACE_INET_Addr,
-                              Net_ListenerConfiguration_T<Test_U_TCPConnectionConfiguration,
-                                                          NET_TRANSPORTLAYER_TCP>,
-                              struct Net_ConnectionState,
                               Test_U_TCPConnectionConfiguration,
+                              struct Net_ConnectionState,
                               Test_U_Stream,
                               struct Net_UserData> Server_SSL_Listener_t;
 #endif // SSL_USE

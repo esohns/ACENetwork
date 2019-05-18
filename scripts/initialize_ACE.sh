@@ -26,7 +26,7 @@ PROJECT_DIRECTORY=${DEFAULT_PROJECT_DIRECTORY}
 
 SOURCE_DIRECTORY=${PROJECT_DIRECTORY}/3rd_party/ACE_wrappers/ace
 [ ! -d ${SOURCE_DIRECTORY} ] && echo "ERROR: invalid source directory (was: \"${SOURCE_DIRECTORY}\"), aborting" && exit 1
-ACE_ROOT=/mnt/win_d/projects/ATCD/ACE
+ACE_ROOT=/mnt/win_d/projects/ACE_TAO/ACE
 [ ! -d ${ACE_ROOT} ] && echo "ERROR: invalid ACE directory (was: \"${ACE_ROOT}\"), aborting" && exit 1
 TARGET_DIRECTORY=${ACE_ROOT}/ace
 [ ! -d ${TARGET_DIRECTORY} ] && echo "ERROR: invalid target directory (was: \"${TARGET_DIRECTORY}\"), aborting" && exit 1

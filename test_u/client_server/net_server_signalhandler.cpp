@@ -60,10 +60,10 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
   NETWORK_TRACE (ACE_TEXT ("Server_SignalHandler::handle"));
 
   int result = -1;
-  Test_U_ITCPConnectionManager_t* iconnection_manager_p =
+  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  Test_U_IUDPConnectionManager_t* iconnection_manager_2 =
+  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
     TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_2);
 

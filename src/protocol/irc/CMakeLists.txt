@@ -59,7 +59,7 @@ if (UNIX)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
 #                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)
