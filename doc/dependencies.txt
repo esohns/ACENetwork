@@ -8,3 +8,11 @@ src/wlan:      NetworkManager-libnm-devel
 test_u:
 test_i:
 
+* Fedora 30 ('sudo dnf install')
+src:           json-c-devel bind-export-devel dhcp-devel krb5-devel
+src/protocols: flex-devel bison-devel
+src/wlan:      NetworkManager-libnm-devel
+
+test_u:
+test_i:
+

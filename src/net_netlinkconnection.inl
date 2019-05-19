@@ -27,14 +27,12 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        ListenerConfigurationType,
                         StreamType,
                         UserDataType>::Net_NetlinkConnection_T (bool managed_in)
  : inherited (managed_in)
@@ -48,7 +46,6 @@ Net_NetlinkConnection_T<HandlerType,
 //          typename StateType,
 //          typename StatisticContainerType,
 //          typename StreamType,
-//          typename ListenerConfigurationType,
 //          typename UserDataType>
 //bool
 //Net_NetlinkConnection_T<HandlerType,
@@ -56,7 +53,6 @@ Net_NetlinkConnection_T<HandlerType,
 //                        StateType,
 //                        StatisticContainerType,
 //                        StreamType,
-//                        ListenerConfigurationType,
 //                        UserDataType>::initialize (Common_DispatchType dispatch_in,
 //                                                   Net_ClientServerRole role_in,
 //                                                   const Net_SocketConfiguration& configuration_in)
@@ -129,7 +125,6 @@ Net_NetlinkConnection_T<HandlerType,
 //          typename StateType,
 //          typename StatisticContainerType,
 //          typename StreamType,
-//          typename ListenerConfigurationType,
 //          typename UserDataType>
 //void
 //Net_NetlinkConnection_T<HandlerType,
@@ -137,7 +132,6 @@ Net_NetlinkConnection_T<HandlerType,
 //                        StateType,
 //                        StatisticContainerType,
 //                        StreamType,
-//                        ListenerConfigurationType,
 //                        UserDataType>::finalize ()
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkConnection_T::finalize"));
@@ -178,7 +172,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -186,7 +179,6 @@ Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        ListenerConfigurationType,
                         StreamType,
                         UserDataType>::info (ACE_HANDLE& handle_out,
                                              Net_Netlink_Addr& localSAP_out,
@@ -207,7 +199,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_ConnectionId_t
@@ -215,7 +206,6 @@ Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        ListenerConfigurationType,
                         StreamType,
                         UserDataType>::id () const
 {
@@ -234,7 +224,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -242,7 +231,6 @@ Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        ListenerConfigurationType,
                         StreamType,
                         UserDataType>::dump_state () const
 {
@@ -518,7 +506,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -526,7 +513,6 @@ Net_NetlinkConnection_T<HandlerType,
                         ConfigurationType,
                         StateType,
                         StatisticContainerType,
-                        ListenerConfigurationType,
                         StreamType,
                         UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                      ACE_Reactor_Mask mask_in)
@@ -652,14 +638,12 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              ListenerConfigurationType,
                               StreamType,
                               UserDataType>::Net_AsynchNetlinkConnection_T (bool managed_in)
  : inherited (managed_in)
@@ -775,7 +759,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 //          typename StateType,
 //          typename StatisticContainerType,
 //          typename StreamType,
-//          typename ListenerConfigurationType,
 //          typename UserDataType>
 //bool
 //Net_AsynchNetlinkConnection_T<HandlerType,
@@ -783,7 +766,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 //                              StateType,
 //                              StatisticContainerType,
 //                              StreamType,
-//                              ListenerConfigurationType,
 //                              UserDataType>::initialize (Common_DispatchType dispatch_in,
 //                                                         Net_ClientServerRole role_in,
 //                                                         const Net_SocketConfiguration& configuration_in)
@@ -859,7 +841,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 //          typename StateType,
 //          typename StatisticContainerType,
 //          typename StreamType,
-//          typename ListenerConfigurationType,
 //          typename UserDataType>
 //void
 //Net_AsynchNetlinkConnection_T<HandlerType,
@@ -867,7 +848,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 //                              StateType,
 //                              StatisticContainerType,
 //                              StreamType,
-//                              ListenerConfigurationType,
 //                              UserDataType>::finalize ()
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkConnection_T::finalize"));
@@ -909,7 +889,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 //          typename StateType,
 //          typename StatisticContainerType,
 //          typename StreamType,
-//          typename ListenerConfigurationType,
 //          typename UserDataType>
 //void
 //Net_AsynchNetlinkConnection_T<HandlerType,
@@ -917,7 +896,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 //                              StateType,
 //                              StatisticContainerType,
 //                              StreamType,
-//                              ListenerConfigurationType,
 //                              UserDataType>::info (ACE_HANDLE& handle_out,
 //                                                   Net_Netlink_Addr& localSAP_out,
 //                                                   Net_Netlink_Addr& remoteSAP_out) const
@@ -933,7 +911,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_ConnectionId_t
@@ -941,7 +918,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              ListenerConfigurationType,
                               StreamType,
                               UserDataType>::id () const
 {
@@ -960,7 +936,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -968,7 +943,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              ListenerConfigurationType,
                               StreamType,
                               UserDataType>::dump_state () const
 {
@@ -1011,7 +985,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -1019,7 +992,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              ListenerConfigurationType,
                               StreamType,
                               UserDataType>::open (ACE_HANDLE handle_in,
                                                    ACE_Message_Block& messageBlock_in)
@@ -1086,7 +1058,6 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename ListenerConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -1094,7 +1065,6 @@ Net_AsynchNetlinkConnection_T<HandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
-                              ListenerConfigurationType,
                               StreamType,
                               UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                            ACE_Reactor_Mask mask_in)

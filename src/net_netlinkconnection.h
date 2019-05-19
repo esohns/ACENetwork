@@ -44,9 +44,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-//          typename HandlerConfigurationType, // socket-
-          typename ListenerConfigurationType,
-          ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
           typename UserDataType>
@@ -59,7 +56,6 @@ class Net_NetlinkConnection_T
                                      StatisticContainerType,
                                      Net_NetlinkSocketConfiguration_t,
                                      Net_NetlinkSocketConfiguration_t,
-                                     ListenerConfigurationType,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      Common_Timer_Manager_t,
@@ -74,7 +70,6 @@ class Net_NetlinkConnection_T
                                      StatisticContainerType,
                                      Net_NetlinkSocketConfiguration_t,
                                      Net_NetlinkSocketConfiguration_t,
-                                     ListenerConfigurationType,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      Common_Timer_Manager_t,
@@ -85,7 +80,6 @@ class Net_NetlinkConnection_T
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
-                                                     Net_NetlinkSocketConfiguration_t,
                                                      StreamType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
@@ -133,9 +127,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-//          typename HandlerConfigurationType,
-          typename ListenerConfigurationType,
-          ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
           typename UserDataType>
@@ -147,7 +138,6 @@ class Net_AsynchNetlinkConnection_T
                                            StatisticContainerType,
                                            Net_NetlinkSocketConfiguration_t,
                                            Net_NetlinkSocketConfiguration_t,
-                                           ListenerConfigurationType,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            Common_Timer_Manager_t,
@@ -161,7 +151,6 @@ class Net_AsynchNetlinkConnection_T
                                            StatisticContainerType,
                                            Net_NetlinkSocketConfiguration_t,
                                            Net_NetlinkSocketConfiguration_t,
-                                           ListenerConfigurationType,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            Common_Timer_Manager_t,
@@ -172,7 +161,6 @@ class Net_AsynchNetlinkConnection_T
                                                                   ConfigurationType,
                                                                   StateType,
                                                                   StatisticContainerType,
-                                                                  Net_NetlinkSocketConfiguration_t,
                                                                   StreamType,
                                                                   UserDataType> >;
 

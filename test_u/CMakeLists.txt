@@ -97,32 +97,32 @@ if (UNIX)
  endif (GUI_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/ACE>)
+                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/cmake>)
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/Common/src>)
+                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/src>)
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/Common/src/timer>)
+                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/src/timer>)
  if (GUI_SUPPORT)
   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/Common/src/ui>)
+                              $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/src/ui>)
   if (GTK_USE)
    target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/Common/src/ui/gtk>)
+                               $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/src/ui/gtk>)
   elseif (WXWIDGETS_USE)
    target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/Common/src/ui/wxwidgets>)
+                               $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/src/ui/wxwidgets>)
   endif ()
  endif (GUI_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../ACEStream/cmake>)
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/ACEStream/src>)
+                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/modules/ACEStream/src/modules/lib>)
+                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../ACEStream/src/modules/lib>)
 elseif (WIN32)
  if (GUI_SUPPORT)
   if (GTK_USE)
