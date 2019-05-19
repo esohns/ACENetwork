@@ -82,6 +82,10 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
+#include "test_u_defines.h"
+
+#include "net_client_defines.h"
+#include "net_client_server_defines.h"
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "test_u_callbacks.h"
@@ -89,12 +93,9 @@
 #endif // GUI_SUPPORT
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
-#include "test_u_defines.h"
 #include "test_u_stream.h"
 #include "test_u_eventhandler.h"
 #include "test_u_module_eventhandler.h"
-
-#include "net_client_defines.h"
 
 #include "net_server_common.h"
 #include "net_server_common_tools.h"
@@ -184,6 +185,10 @@ do_printUsage (const std::string& programName_in)
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-S           : use SSL [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]   : statistic reporting interval (second(s)) [")
             << NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
@@ -206,6 +211,10 @@ bool
 do_processArguments (const int& argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      unsigned int& maximumNumberOfConnections_out,
+#if defined (SSL_SUPPORT)
+                    std::string& certificateFile_out,
+                    std::string& privateKeyFile_out,
+#endif // SSL_SUPPORT
 #if defined (GUI_SUPPORT)
                      std::string& UIFile_out,
 #endif // GUI_SUPPORT
@@ -219,7 +228,7 @@ do_processArguments (const int& argc_in,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
-                     bool& useUDP_out,
+                     enum Net_TransportLayerType& protocol_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
 {
@@ -231,10 +240,26 @@ do_processArguments (const int& argc_in,
   // initialize results
   maximumNumberOfConnections_out =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
-  std::string path = configuration_path;
+  std::string path;
+#if defined (SSL_SUPPORT)
+  path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR ("..");
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR ("..");
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+  certificateFile_out = path;
+  certificateFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  certificateFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_PEM_CERTIFICATE_FILE);
+  privateKeyFile_out = path;
+  privateKeyFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  privateKeyFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_PEM_PRIVATE_KEY_FILE);
+#endif // SSL_SUPPORT
 #if defined (GUI_SUPPORT)
+  path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -244,7 +269,6 @@ do_processArguments (const int& argc_in,
                         (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
   logToFile_out = false;
-  useUDP_out = false;
   networkInterface_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   useLoopBack_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
@@ -254,7 +278,7 @@ do_processArguments (const int& argc_in,
   statisticReportingInterval_out =
       NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
-  useUDP_out = false;
+  protocol_out = NET_TRANSPORTLAYER_TCP;
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -262,9 +286,9 @@ do_processArguments (const int& argc_in,
   ACE_Get_Opt argument_parser (argc_in,                                // argc
                                argv_in,                                // argv
 #if defined (GUI_SUPPORT)
-                               ACE_TEXT ("c:g::hi:k:lmn:op:rs:tuvx:"), // optstring
+                               ACE_TEXT ("c:e:f:g::hi:k:ln:op:rSs:tuvx:"), // optstring
 #else
-                               ACE_TEXT ("c:hi:k:lmn:op:rs:tuvx:"), // optstring
+                               ACE_TEXT ("c:e:f:hi:k:ln:op:rSs:tuvx:"), // optstring
 #endif // GUI_SUPPORT
                                1,                                      // skip_args
                                1,                                      // report_errors
@@ -324,11 +348,6 @@ do_processArguments (const int& argc_in,
         logToFile_out = true;
         break;
       }
-      case 'm':
-      {
-        useUDP_out = true;
-        break;
-      }
       case 'n':
       {
         networkInterface_out =
@@ -361,6 +380,11 @@ do_processArguments (const int& argc_in,
         converter >> statisticReportingInterval_out;
         break;
       }
+      case 'S':
+      {
+        protocol_out = NET_TRANSPORTLAYER_SSL;
+        break;
+      }
       case 't':
       {
         traceInformation_out = true;
@@ -368,7 +392,7 @@ do_processArguments (const int& argc_in,
       }
       case 'u':
       {
-        useUDP_out = true;
+        protocol_out = NET_TRANSPORTLAYER_UDP;
         break;
       }
       case 'v':
@@ -493,6 +517,10 @@ do_initializeSignals (bool useReactor_in,
 
 void
 do_work (unsigned int maximumNumberOfConnections_in,
+#if defined (SSL_SUPPORT)
+         const std::string& certificateFile_in,
+         const std::string& privateKeyFile_in,
+#endif // SSL_SUPPORT
 #if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFile_in,
 #endif // GUI_SUPPORT
@@ -505,7 +533,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
-         bool useUDP_in,
+         enum Net_TransportLayerType protocol_in,
          struct Server_Configuration& configuration_in,
 #if defined (GUI_SUPPORT)
          struct Server_UI_CBData& CBData_in,
@@ -570,8 +598,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration_in.protocolConfiguration.pingInterval = pingInterval_in;
   configuration_in.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
-  configuration_in.protocolConfiguration.transportLayer =
-    (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
+  configuration_in.protocolConfiguration.transportLayer = protocol_in;
   // ********************** stream configuration data **************************
   configuration_in.streamConfiguration.configuration_.cloneModule =
     !(UIDefinitionFile_in.empty ());
@@ -701,23 +728,20 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step2: signal handling
   struct Server_SignalHandlerConfiguration signal_handler_configuration;
-  if (!useUDP_in)
-  {
-    if (useReactor_in)
-      configuration_in.TCPListener =
-        SERVER_TCP_LISTENER_SINGLETON::instance ();
-    else
-      configuration_in.TCPListener =
-        SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
+  if (useReactor_in)
+    configuration_in.TCPListener =
+      SERVER_TCP_LISTENER_SINGLETON::instance ();
+  else
+    configuration_in.TCPListener =
+      SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
 #if defined (SSL_USE)
-    configuration_in.SSLListener =
-      SERVER_SSL_LISTENER_SINGLETON::instance ();
+  configuration_in.SSLListener =
+    SERVER_SSL_LISTENER_SINGLETON::instance ();
 #endif // SSL_USE
-    signal_handler_configuration.TCPListener = configuration_in.TCPListener;
+  signal_handler_configuration.TCPListener = configuration_in.TCPListener;
 #if defined (SSL_USE)
-    signal_handler_configuration.SSLListener = configuration_in.SSLListener;
+  signal_handler_configuration.SSLListener = configuration_in.SSLListener;
 #endif // SSL_USE
-  } // end IF
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
   signal_handler_configuration.statisticReportingTimerId = timer_id;
@@ -828,32 +852,27 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step4c: start listening
-//  configuration.listenerConfiguration.connectionConfiguration =
-//    &((*iterator).second);
-  //if (networkInterface_in.empty ()); // *TODO*
+  if (!useReactor_in)
+    connection_configuration_p_2->connect = true;
   if (useLoopBack_in)
   {
-    if (useUDP_in)
-    {
-      result =
-        connection_configuration_p_2->listenAddress.set (listeningPortNumber_in,
-                                                         INADDR_LOOPBACK,
-                                                         1,
-                                                         0);
-      result =
-        connection_configuration_p_2->peerAddress.set (listeningPortNumber_in,
+    result =
+      connection_configuration_p_2->listenAddress.set (listeningPortNumber_in,
                                                        INADDR_LOOPBACK,
                                                        1,
                                                        0);
-      if (!useReactor_in)
-        connection_configuration_p_2->connect = true;
-    } // end IF
-    else
-      result =
-        connection_configuration_p->address.set (listeningPortNumber_in,
-                                                 INADDR_LOOPBACK,
-                                                 1,
-                                                 0);
+    ACE_ASSERT (!result);
+    result =
+      connection_configuration_p_2->peerAddress.set (listeningPortNumber_in,
+                                                     INADDR_LOOPBACK,
+                                                     1,
+                                                     0);
+    ACE_ASSERT (!result);
+    result =
+      connection_configuration_p->address.set (listeningPortNumber_in,
+                                               INADDR_LOOPBACK,
+                                               1,
+                                               0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -872,89 +891,106 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
   else
   {
-    if (useUDP_in)
-    {
-      connection_configuration_p_2->listenAddress.set_port_number (listeningPortNumber_in,
-                                                                   1);
+    connection_configuration_p_2->listenAddress.set_port_number (listeningPortNumber_in,
+                                                                 1);
 
-      std::string interface_identifier =
-        Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
-      ACE_ASSERT (!interface_identifier.empty ());
-      ACE_INET_Addr peer_address, gateway_address;
-      Net_Common_Tools::interfaceToIPAddress (interface_identifier,
-                                              peer_address,
-                                              gateway_address);
-      result =
-        connection_configuration_p_2->peerAddress.set (listeningPortNumber_in,
-                                                       peer_address.get_ip_address (),
-                                                       1,
-                                                       0);
-      ACE_ASSERT (result != -1);
-      if (!useReactor_in)
-        connection_configuration_p_2->connect = true;
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("set peer address to %s\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-    } // end IF
-    else
-      connection_configuration_p->address.set_port_number (listeningPortNumber_in,
-                                                           1);
+    std::string interface_identifier =
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+    ACE_ASSERT (!interface_identifier.empty ());
+    ACE_INET_Addr peer_address, gateway_address;
+    Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                            peer_address,
+                                            gateway_address);
+    result =
+      connection_configuration_p_2->peerAddress.set (listeningPortNumber_in,
+                                                     peer_address.get_ip_address (),
+                                                     1,
+                                                     0);
+    ACE_ASSERT (result != -1);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set peer address to %s\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+
+    connection_configuration_p->address.set_port_number (listeningPortNumber_in,
+                                                         1);
   } // end ELSE
-//  configuration.listenerConfiguration.connectionManager = connection_manager_p;
-  //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
+
+  ACE_ASSERT (configuration_in.TCPListener);
+  if (!configuration_in.TCPListener->initialize (*connection_configuration_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize TCP listener, returning\n")));
+    Common_Tools::finalizeEventDispatch (useReactor_in,
+                                         !useReactor_in,
+                                         group_id);
+#if defined (GUI_SUPPORT)
+    if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
+      gtk_manager_p->stop ();
+#else
+      ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+    timer_manager_p->stop ();
+    return;
+  } // end IF
+#if defined (SSL_USE)
+  ACE_ASSERT (configuration_in.SSLListener);
+  if (!configuration_in.SSLListener->initialize (*connection_configuration_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize SSL listener, returning\n")));
+    Common_Tools::finalizeEventDispatch (useReactor_in,
+                                         !useReactor_in,
+                                         group_id);
+#if defined (GUI_SUPPORT)
+    if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
+      gtk_manager_p->stop ();
+#else
+      ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+    timer_manager_p->stop ();
+    return;
+  } // end IF
+#endif // SSL_USE
 
   Server_UDP_AsynchConnector_t udp_asynch_connector (true);
   Server_UDP_Connector_t udp_connector (true);
-  if (!useUDP_in)
-  { ACE_ASSERT (configuration_in.TCPListener);
-    if (!configuration_in.TCPListener->initialize (*connection_configuration_p))
+  Test_U_ITCPListener_t* listener_p = NULL;
+  switch (protocol_in)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+      listener_p = configuration_in.TCPListener;
+      break;
+    case NET_TRANSPORTLAYER_SSL:
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize TCP listener, returning\n")));
-      Common_Tools::finalizeEventDispatch (useReactor_in,
-                                           !useReactor_in,
-                                           group_id);
-#if defined (GUI_SUPPORT)
-      if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-        gtk_manager_p->stop ();
-#else
-        ;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-      timer_manager_p->stop ();
-      return;
-    } // end IF
-#if defined (SSL_USE)
-    ACE_ASSERT (configuration_in.SSLListener);
-    if (!configuration_in.SSLListener->initialize (*connection_configuration_p))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize SSL listener, returning\n")));
-      Common_Tools::finalizeEventDispatch (useReactor_in,
-                                           !useReactor_in,
-                                           group_id);
-#if defined (GUI_SUPPORT)
-      if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-        gtk_manager_p->stop ();
-#else
-        ;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-      timer_manager_p->stop ();
-      return;
-    } // end IF
-#endif // SSL_USE
-
+      listener_p = configuration_in.SSLListener;
+      if (!Net_Common_Tools::setCertificates (certificateFile_in,
+                                              privateKeyFile_in,
+                                              NULL))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
+                    ACE_TEXT (certificateFile_in.c_str ()),
+                    ACE_TEXT (privateKeyFile_in.c_str ())));
+        return;
+      } // end IF
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
+  if (listener_p)
+  {
     ACE_thread_t thread_id = 0;
-    configuration_in.TCPListener->start (thread_id);
+    listener_p->start (thread_id);
     ACE_UNUSED_ARG (thread_id);
-    if (!configuration_in.TCPListener->isRunning ())
+    if (!listener_p->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start TCP listener (port: %u), returning\n"),
-                  listeningPortNumber_in));
+                  ACE_TEXT ("failed to start listener, returning\n")));
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
@@ -1162,10 +1198,26 @@ ACE_TMAIN (int argc_in,
   // step1a set defaults
   unsigned int maximum_number_of_connections =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
-  std::string path = configuration_path;
+  std::string path;
+#if defined (SSL_SUPPORT)
+  path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR ("..");
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR ("..");
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+  std::string certificate_file = path;
+  certificate_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  certificate_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_PEM_CERTIFICATE_FILE);
+  std::string private_key_file = path;
+  private_key_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  private_key_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_PEM_PRIVATE_KEY_FILE);
+#endif // SSL_SUPPORT
 #if defined (GUI_SUPPORT)
+  path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -1184,7 +1236,7 @@ ACE_TMAIN (int argc_in,
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;
-  bool use_UDP = false;
+  enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_TCP;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -1193,6 +1245,10 @@ ACE_TMAIN (int argc_in,
   if (!do_processArguments (argc_in,
                             argv_in,
                             maximum_number_of_connections,
+#if defined (SSL_SUPPORT)
+                            certificate_file,
+                            private_key_file,
+#endif // SSL_SUPPORT
 #if defined (GUI_SUPPORT)
                             UI_file_path,
 #endif // GUI_SUPPORT
@@ -1206,7 +1262,7 @@ ACE_TMAIN (int argc_in,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
-                            use_UDP,
+                            protocol_e,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   {
@@ -1240,7 +1296,8 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
   if ((!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
       (use_thread_pool && !use_reactor)                                         ||
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
+      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)     ||
+      (!use_reactor && (protocol_e == NET_TRANSPORTLAYER_SSL)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
@@ -1452,6 +1509,10 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   // step2: do actual work
   do_work (maximum_number_of_connections,
+#if defined (SSL_SUPPORT)
+           certificate_file,
+           private_key_file,
+#endif // SSL_SUPPORT
 #if defined (GUI_SUPPORT)
            UI_file_path,
 #endif // GUI_SUPPORT
@@ -1464,7 +1525,7 @@ ACE_TMAIN (int argc_in,
            use_reactor,
            statistic_reporting_interval,
            number_of_dispatch_threads,
-           use_UDP,
+           protocol_e,
            configuration,
 #if defined (GUI_SUPPORT)
            ui_cb_data,

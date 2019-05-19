@@ -30,10 +30,10 @@
 #include "net_macros.h"
 
 #include "net_client_defines.h"
+#include "net_client_server_defines.h"
 
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
-#include "test_u_defines.h"
 #include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 
@@ -244,12 +244,12 @@ Client_TimeoutHandler::handle (const void* arg_in)
         float probability_f = static_cast<float> (randomGenerator_ ()) / 100.0F;
 
         if ((number_of_connections_i > 0) &&
-            (probability_f <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
+            (probability_f <= NET_CLIENT_DEFAULT_ABORT_PROBABILITY))
           do_abort_youngest = true;
 
         // allow some probability_f for opening connections in between
         probability_f = static_cast<float> (randomGenerator_ ()) / 100.0F;
-        if (probability_f <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
+        if (probability_f <= NET_CLIENT_DEFAULT_CONNECT_PROBABILITY)
           do_connect = true;
 
         // ping the server

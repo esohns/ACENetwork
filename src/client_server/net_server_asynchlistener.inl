@@ -705,8 +705,8 @@ Net_Server_AsynchListener_T<HandlerType,
 
   int error = 0;
   ACE_HANDLE listen_handle = ACE_INVALID_HANDLE;
-  AddressType remote_address, local_address;
   HandlerType* handler_p = NULL;
+  AddressType remote_address, local_address;
 
   if (unlikely (!result.success () ||
                 (result.accept_handle () == ACE_INVALID_HANDLE)))

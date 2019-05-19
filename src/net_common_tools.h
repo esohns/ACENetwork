@@ -49,7 +49,10 @@
 // forward declarations
 #if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 //struct nl_msg;
-#endif // NETLINK_SUPPORT
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#if defined (SSL_SUPPORT)
+class ACE_SSL_Context;
+#endif // SSL_SUPPORT
 
 //////////////////////////////////////////
 
@@ -296,6 +299,14 @@ class Net_Common_Tools
 
 //  // stream
 //  static std::string generateUniqueName (const std::string&); // prefix
+
+#if defined (SSL_SUPPORT)
+  // --- SSL ---
+  // *IMPORTANT NOTE*: certificates must be in PEM format
+  static bool setCertificates (const std::string&,       // certificate file (FQ-)path
+                               const std::string&,       // private key file (FQ-)path
+                               ACE_SSL_Context* = NULL); // context handle {NULL: global}
+#endif // SSL_SUPPORT
 
   // --- OS services ---
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

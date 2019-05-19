@@ -342,10 +342,12 @@ elseif (WIN32)
  target_link_libraries (${PROJECT_NAME} iphlpapi.lib)
  target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
 
- target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
-
  target_link_libraries (${PROJECT_NAME} Common)
 endif ()
+target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
+if (SSL_SUPPORT)
+ target_link_libraries (${PROJECT_NAME} ${ACE_SSL_LIBRARY})
+endif (SSL_SUPPORT)
 
 # add PCH
 set_target_properties (${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

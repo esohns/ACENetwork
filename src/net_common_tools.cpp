@@ -53,6 +53,9 @@
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
+#if defined (SSL_SUPPORT)
+#include "ace/SSL/SSL_Context.h"
+#endif // SSL_SUPPORT
 
 #include "common_defines.h"
 #include "common_file_tools.h"
@@ -4656,6 +4659,51 @@ clean:
 
   return result;
 }
+
+#if defined (SSL_SUPPORT)
+bool
+Net_Common_Tools::setCertificates (const std::string& certificate_in,
+                                   const std::string& privateKey_in,
+                                   ACE_SSL_Context* context_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setCertificates"));
+
+  // sanity check(s)
+  ACE_ASSERT (Common_File_Tools::isReadable (certificate_in));
+  ACE_ASSERT (Common_File_Tools::isReadable (privateKey_in));
+
+  ACE_SSL_Context* context_p =
+      (context_in ? context_in : ACE_SSL_Context::instance ());
+  if (unlikely (!context_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SSL_Context::instance(), aborting\n")));
+    return false;
+  } // end IF
+  int result = context_p->certificate (certificate_in.c_str (),
+                                       SSL_FILETYPE_PEM);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SSL_Context::certificate(\"%s\"), aborting\n"),
+                ACE_TEXT (certificate_in.c_str ())));
+    context_p->report_error ();
+    return false;
+  } // end IF
+  result = context_p->private_key (privateKey_in.c_str (),
+                                   SSL_FILETYPE_PEM);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SSL_Context::private_key(\"%s\"), aborting\n"),
+                ACE_TEXT (privateKey_in.c_str ())));
+    context_p->report_error ();
+    return false;
+  } // end IF
+
+  return true;
+}
+#endif // SSL_SUPPORT
 
 bool
 Net_Common_Tools::networkManagerManageInterface (const std::string& interfaceIdentifier_in,

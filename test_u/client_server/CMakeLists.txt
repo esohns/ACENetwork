@@ -112,6 +112,7 @@ set (${EXECUTABLE_SOURCE}_SRCS
      net_client.cpp
      net_client_common.h
      net_client_connector_common.h
+     net_client_server_defines.h
      net_client_signalhandler.cpp
      net_client_signalhandler.h
      net_client_timeouthandler.cpp
@@ -122,7 +123,6 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_configuration.h
      test_u_connection_common.h
      test_u_connection_manager_common.h
-     test_u_defines.h
      test_u_eventhandler.cpp
      test_u_eventhandler.h
      test_u_message.cpp
@@ -232,6 +232,7 @@ install (FILES etc/net_client.glade
 ########### next target ###############
 set (EXECUTABLE_TARGET server)
 set (${EXECUTABLE_TARGET}_SRCS
+     net_client_server_defines.h
      net_client_timeouthandler.cpp
      net_client_timeouthandler.h
      net_server.cpp
@@ -245,7 +246,6 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_configuration.h
      test_u_connection_common.h
      test_u_connection_manager_common.h
-     test_u_defines.h
      test_u_message.cpp
      test_u_message.h
      test_u_eventhandler.cpp

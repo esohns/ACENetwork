@@ -46,4 +46,8 @@
 // statistic
 #define TEST_U_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 
+// SSL
+#define TEST_U_PEM_CERTIFICATE_FILE                 "dummy.pem"
+#define TEST_U_PEM_PRIVATE_KEY_FILE                 "key.pem"
+
 #endif

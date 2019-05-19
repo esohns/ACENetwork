@@ -163,6 +163,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   switch (transport_layer_e)
   {
     case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
     {
       switch (this->role ())
       {
@@ -1539,6 +1540,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   switch (this->transportLayer ())
   {
     case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
     {
       switch (this->role ())
       {
@@ -1945,7 +1947,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited::cancel ();
 
   // step2b: deregister with the connection manager (if any) ?
-  close_socket_b = (inherited2::count () == 2);
+  close_socket_b = (inherited2::count () <= 2);
   if (likely (inherited2::isRegistered_))
     inherited2::deregister ();
 
@@ -2406,6 +2408,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_read_stream"));
 
   int result = -1;
+  bool close_b =
+      (inherited2::state_.status == NET_CONNECTION_STATUS_CLOSED);
+  bool release_message_block_b = true;
 
   // sanity check
   if (unlikely (!result_in.success ()))
@@ -2487,7 +2492,13 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         break;
       } // end IF
 
-      // start next read
+      // start next read ?
+      if (close_b)
+      {
+        release_message_block_b = false;
+        break;
+      } // end IF
+
       if (unlikely (!inherited::initiate_read ()))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -2501,14 +2512,14 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end SWITCH
 
   // clean up
-  result_in.message_block ().release ();
+  if (release_message_block_b)
+    result_in.message_block ().release ();
 
   Net_ConnectionId_t id = this->id ();
   // *WARNING*: most likely 'delete''s 'this'
   result =
       handle_close (result_in.handle (),
-                    ((result_in.bytes_transferred () == 0) ? ACE_Event_Handler::READ_MASK // peer closed the connection
-                                                           : ACE_Event_Handler::ALL_EVENTS_MASK));
+                    ACE_Event_Handler::ALL_EVENTS_MASK);
   if (unlikely (result == -1))
   {
 //    error = ACE_OS::last_error ();

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_NET_DEFINES_H
-#define TEST_U_NET_DEFINES_H
+#ifndef NET_CLIENT_SERVER_DEFINES_H
+#define NET_CLIENT_SERVER_DEFINES_H
 
 #define TEST_U_STREAM_MODULE_HEADERPARSER_NAME          "HeaderParser"
 #define TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME       "ProtocolHandler"
@@ -51,20 +51,11 @@
 
 // -----------------------------------------------------------------------------
 
-#define NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS         0
-#define NET_CLIENT_DEF_SERVER_HOSTNAME                  ACE_LOCALHOST
-#define NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL          0
-#define NET_CLIENT_DEF_SERVER_PING_INTERVAL             0 // ms {0: OFF}
-#define NET_CLIENT_DEF_SERVER_TEST_INTERVAL             20 // ms
-#define NET_CLIENT_DEF_SERVER_STRESS_INTERVAL           1 // ms
-
-#define NET_CLIENT_UI_FILE                              "net_client.glade"
-
 #define NET_CLIENT_UI_GTK_BUTTON_CONNECT_NAME           "connect"
 #define NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME             "close"
 #define NET_CLIENT_UI_GTK_BUTTON_PING_NAME              "ping"
-#define NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_START       "T_est"
-#define NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_STOP        "S_top"
+//#define NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_START       "T_est"
+//#define NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_STOP        "S_top"
 #define NET_CLIENT_UI_GTK_BUTTON_TEST_NAME              "test"
 #define NET_CLIENT_UI_GTK_IMAGE_START_NAME              "image_start"
 #define NET_CLIENT_UI_GTK_IMAGE_STOP_NAME               "image_stop"
@@ -75,14 +66,7 @@
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_LABEL "alternating"
 #define NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_LABEL      "stress"
 
-// define behaviour
-#define NET_CLIENT_U_TEST_CONNECT_PROBABILITY           0.5F // 50%
-#define NET_CLIENT_U_TEST_ABORT_PROBABILITY             0.2F // 20%
-#define NET_CLIENT_U_TEST_DEFAULT_MODE                  Net_Client_TimeoutHandler::ACTION_NORMAL
-
 // -----------------------------------------------------------------------------
-
-#define NET_SERVER_UI_FILE                              "net_server.glade"
 
 #define NET_SERVER_UI_GTK_TOGGLEBUTTON_LISTEN_NAME      "listen"
 

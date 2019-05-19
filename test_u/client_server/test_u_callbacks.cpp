@@ -36,12 +36,12 @@
 #include "net_macros.h"
 
 #include "test_u_connection_manager_common.h"
-#include "test_u_defines.h"
 #include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 #include "test_u_stream.h"
 
 #include "net_client_common.h"
+#include "net_client_server_defines.h"
 #include "net_client_signalhandler.h"
 #include "net_client_timeouthandler.h"
 
@@ -266,6 +266,17 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   ACE_ASSERT (radiobutton_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
 
+#if defined (SSL_SUPPORT)
+#if defined (SSL_USE)
+#else
+  radiobutton_p =
+      GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME)));
+    ACE_ASSERT (radiobutton_p);
+    gtk_widget_set_sensitive (GTK_WIDGET (radiobutton_p), FALSE);
+#endif // SSL_USE
+#endif // SSL_SUPPORT
+
   switch (configuration_p->timeoutHandler->protocol ())
   {
     case NET_TRANSPORTLAYER_TCP:
@@ -476,11 +487,38 @@ idle_end_session_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_end_session_cb"));
 
-  struct Test_U_GTK_CBData* data_p =
-    static_cast<struct Test_U_GTK_CBData*> (userData_in);
+  struct ClientServer_UI_CBData* data_p =
+    static_cast<struct ClientServer_UI_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+
+  unsigned int number_of_connections = 0;
+  switch (data_p->configuration->protocolConfiguration.transportLayer)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
+    {
+      number_of_connections =
+        TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
+      break;
+    }
+    case NET_TRANSPORTLAYER_UDP:
+    {
+      number_of_connections =
+        TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                  data_p->configuration->protocolConfiguration.transportLayer));
+      return FALSE;
+    }
+  } // end SWITCH
+  bool idle_b = !number_of_connections;
 
   // synch access
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
@@ -492,13 +530,6 @@ idle_end_session_cb (gpointer userData_in)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // step1: idle ?
-  bool idle_b = false;
-  GtkSpinButton* spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-  ACE_ASSERT (spin_button_p);
-  idle_b = !gtk_spin_button_get_value_as_int (spin_button_p);
-
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME)));
@@ -588,6 +619,18 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   ACE_ASSERT (frame_p);
   gtk_widget_set_sensitive (GTK_WIDGET (frame_p), FALSE);
 
+  GtkRadioButton* radiobutton_p = NULL;
+#if defined (SSL_SUPPORT)
+#if defined (SSL_USE)
+#else
+  radiobutton_p =
+      GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME)));
+    ACE_ASSERT (radiobutton_p);
+    gtk_widget_set_sensitive (GTK_WIDGET (radiobutton_p), FALSE);
+#endif // SSL_USE
+#endif // SSL_SUPPORT
+
   std::string radio_button_name;
   switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
@@ -611,7 +654,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
       return G_SOURCE_REMOVE;
     }
   } // end SWITCH
-  GtkRadioButton* radiobutton_p =
+  radiobutton_p =
     GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               radio_button_name.c_str ()));
   ACE_ASSERT (radiobutton_p);
@@ -857,6 +900,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
     case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
     {
       number_of_connections =
         TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
@@ -897,6 +941,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
     case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
     {
       connection_base_p =
         TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
@@ -932,6 +977,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
     case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
     { ACE_ASSERT (connection_base_p);
       connection_base_p->decrease ();
       break;
@@ -987,14 +1033,14 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
       case Client_TimeoutHandler::ActionModeType::ACTION_ALTERNATING:
       case Client_TimeoutHandler::ActionModeType::ACTION_NORMAL:
       {
-        interval.set ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL / 1000),
-                      ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL % 1000) * 1000));
+        interval.set ((NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL / 1000),
+                      ((NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL % 1000) * 1000));
         break;
       }
       case Client_TimeoutHandler::ActionModeType::ACTION_STRESS:
       {
-        interval.set ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000),
-                      ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000));
+        interval.set ((NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL / 1000),
+                      ((NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL % 1000) * 1000));
         break;
       }
       default:
@@ -1034,15 +1080,9 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
 
   // toggle button image/label
   bool is_active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in));
-  GtkImage* image_p =
-    GTK_IMAGE (gtk_builder_get_object ((*iterator).second.second,
-                                       (is_active ? ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_IMAGE_STOP_NAME)
-                                                  : ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_IMAGE_START_NAME))));
-  ACE_ASSERT (image_p);
-  gtk_button_set_image (GTK_BUTTON (widget_in), GTK_WIDGET (image_p));
   gtk_button_set_label (GTK_BUTTON (widget_in),
-                        (is_active ? ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_STOP)
-                                   : ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_TEST_LABEL_START)));
+                        (is_active ? GTK_STOCK_MEDIA_STOP
+                                   : GTK_STOCK_MEDIA_PLAY));
 
   return FALSE;
 }
@@ -1124,7 +1164,7 @@ radiobutton_protocol_toggled_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::radiobutton_protocol_toggled_cb"));
 
-  int result = -1;
+//  int result = -1;
 
   struct ClientServer_UI_CBData* data_p =
     static_cast<struct ClientServer_UI_CBData*> (userData_in);

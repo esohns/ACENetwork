@@ -36,7 +36,7 @@
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -60,13 +60,6 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
   NETWORK_TRACE (ACE_TEXT ("Server_SignalHandler::handle"));
 
   int result = -1;
-  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-      TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (iconnection_manager_p);
-  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
-    TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (iconnection_manager_2);
-
   bool shutdown = false;
   bool report = false;
   switch (signal_in.signal)
@@ -101,21 +94,28 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
 
       break;
     }
+    // ignore all of these
+    case SIGCHLD:
+      return;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("received invalid/unknown signal: \"%S\", returning\n"),
-                  signal_in.signal));
+                  ACE_TEXT ("received invalid/unknown signal: %u [%S], returning\n"),
+                  signal_in.signal, signal_in.signal));
       return;
     }
   } // end SWITCH
 
   // -------------------------------------
 
+  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+    NULL;
+  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
+    NULL;
+
   // report ?
-  if (report &&
-      inherited::configuration_->statisticReportingHandler)
-  {
+  if (report)
+  { ACE_ASSERT (inherited::configuration_->statisticReportingHandler);
     try {
       inherited::configuration_->statisticReportingHandler->report ();
     } catch (...) {
@@ -137,7 +137,11 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     // step1: stop GTK event processing
     // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
     //         compared to doing it here
+//#if defined (GUI_SUPPORT)
+//#if defined (GTK_USE)
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
+//#endif // GTK_USE
+//#endif // GUI_SUPPORT
 
     // step2: invoke controller (if any)
     if (inherited::configuration_->TCPListener)
@@ -150,6 +154,18 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
         return;
       }
     } // end IF
+#if defined (SSL_USE)
+    if (inherited::configuration_->SSLListener)
+    {
+      try {
+        inherited::configuration_->SSLListener->stop ();
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
+        return;
+      }
+    } // end IF
+#endif // SSL_USE
 
     // step3: stop timer
     if (inherited::configuration_->statisticReportingTimerId >= 0)
@@ -173,6 +189,11 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     } // end IF
 
     // step4: stop accepting connections, abort open connections
+    iconnection_manager_p = TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+    ACE_ASSERT (iconnection_manager_p);
+    iconnection_manager_2 = TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+    ACE_ASSERT (iconnection_manager_2);
+
     iconnection_manager_p->stop (false, true);
     iconnection_manager_p->abort ();
     iconnection_manager_2->stop (false, true);

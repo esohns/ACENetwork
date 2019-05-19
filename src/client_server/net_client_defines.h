@@ -30,4 +30,19 @@
 
 #define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS      3
 
+// define behaviour
+#define NET_CLIENT_DEFAULT_CONNECT_PROBABILITY             0.5F // 50%
+#define NET_CLIENT_DEFAULT_ABORT_PROBABILITY               0.2F // 20%
+#define NET_CLIENT_DEFAULT_DEFAULT_MODE                    Net_Client_TimeoutHandler::ACTION_NORMAL
+
+#define NET_CLIENT_DEFAULT_MAX_NUM_OPEN_CONNECTIONS        0
+#define NET_CLIENT_DEFAULT_SERVER_HOSTNAME                 ACE_LOCALHOST
+#define NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL         0
+#define NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL            0 // ms {0: OFF}
+#define NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL            20 // ms
+#define NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL          1 // ms
+
+// *** UI ***
+#define NET_CLIENT_UI_FILE                                 "net_client.glade"
+
 #endif

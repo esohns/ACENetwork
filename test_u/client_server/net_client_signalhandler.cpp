@@ -343,15 +343,19 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
         { ACE_ASSERT (ssl_tcp_connector_p);
           Test_U_ITCPAsynchConnector_t* iasynch_connector_p =
               dynamic_cast<Test_U_ITCPAsynchConnector_t*> (ssl_tcp_connector_p);
-          ACE_ASSERT (iasynch_connector_p);
-          try {
-            iasynch_connector_p->abort ();
-          } catch (...) {
-            // *PORTABILITY*: tracing in a signal handler context is not portable
-            // *TODO*
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in Net_IAsynchConnector_T::abort(), continuing\n")));
-          }
+          // *NOTE*: SSL currently supported 'synchronous-only'
+//          ACE_ASSERT (iasynch_connector_p);
+          if (iasynch_connector_p)
+          {
+            try {
+              iasynch_connector_p->abort ();
+            } catch (...) {
+              // *PORTABILITY*: tracing in a signal handler context is not portable
+              // *TODO*
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in Net_IAsynchConnector_T::abort(), continuing\n")));
+            }
+          } // end IF
           break;
         }
         case NET_TRANSPORTLAYER_UDP:
