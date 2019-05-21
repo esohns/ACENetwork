@@ -153,10 +153,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\" --> no GUI}")
             << std::endl;
 #endif // GUI_SUPPORT
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [\"")
-            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
-            << ACE_TEXT_ALWAYS_CHAR ("\"]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [VALUE]   : connection interval (s) [")
             << NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] {0 --> OFF}")
@@ -193,6 +189,7 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  // *IMPORTANT NOTE*: iff -r is set and this is <= 1, use the 'select' reactor
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]   : #dispatch threads [")
             << NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -215,7 +212,6 @@ do_processArguments (int argc_in,
 #if defined (GUI_SUPPORT)
                      std::string& UIFile_out,
 #endif // GUI_SUPPORT
-                     bool& useThreadPool_out,
                      unsigned int& connectionInterval_out,
                      bool& logToFile_out,
                      std::string& serverHostname_out,
@@ -260,7 +256,6 @@ do_processArguments (int argc_in,
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
 #endif // GUI_SUPPORT
-  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   connectionInterval_out = NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL;
   logToFile_out = false;
   serverHostname_out =
@@ -279,9 +274,9 @@ do_processArguments (int argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (GUI_SUPPORT)
-                              ACE_TEXT ("ac:e:f:g::hi:ln:p:rSs:tuvx:y"),
+                              ACE_TEXT ("ac:e:f:g::i:ln:p:rSs:tuvx:y"),
 #else
-                              ACE_TEXT ("ac:e:f:hi:ln:p:rSs:tuvx:y"),
+                              ACE_TEXT ("ac:e:f:i:ln:p:rSs:tuvx:y"),
 #endif // GUI_SUPPORT
                               1,                         // skip command name
                               1,                         // report parsing errors
@@ -318,11 +313,6 @@ do_processArguments (int argc_in,
         break;
       }
 #endif // GUI_SUPPORT
-      case 'h':
-      {
-        useThreadPool_out = true;
-        break;
-      }
       case 'i':
       {
         converter.clear ();
@@ -514,7 +504,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFile_in,
 #endif // GUI_SUPPORT
-         bool useThreadPool_in,
          unsigned int connectionInterval_in,
          const std::string& serverHostname_in,
          unsigned short serverPortNumber_in,
@@ -602,13 +591,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   configuration_in.streamConfiguration.configuration_.printFinalReport = true;
   // *TODO*: is this correct ?
   configuration_in.streamConfiguration.configuration_.serializeOutput =
-    useThreadPool_in;
-  configuration_in.streamConfiguration.configuration_.userData =
-    &configuration_in.userData;
+    (useReactor_in && (numberOfDispatchThreads_in > 1)); // <-- using 'threadpool' reactor
+  //configuration_in.streamConfiguration.configuration_.userData =
+  //  &configuration_in.userData;
   configuration_in.streamConfiguration.initialize (module_configuration,
-                                                modulehandler_configuration,
-                                                configuration_in.streamConfiguration.allocatorConfiguration_,
-                                                configuration_in.streamConfiguration.configuration_);
+                                                   modulehandler_configuration,
+                                                   configuration_in.streamConfiguration.allocatorConfiguration_,
+                                                   configuration_in.streamConfiguration.configuration_);
 
   // ********************** connection configuration data **********************
   Test_U_TCPConnectionConfiguration tcp_connection_configuration;
@@ -621,39 +610,21 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   udp_connection_configuration.messageAllocator = &message_allocator;
   udp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
+  //udp_connection_configuration.writeOnly = true;
   udp_connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
                                            configuration_in.streamConfiguration);
   Net_ConnectionConfigurationsIterator_t iterator, iterator_2;
 
-  switch (protocol_in)
-  {
-    case NET_TRANSPORTLAYER_TCP:
-    case NET_TRANSPORTLAYER_SSL:
-    {
-      configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                        &tcp_connection_configuration));
-      iterator =
-          configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-      break;
-    }
-    case NET_TRANSPORTLAYER_UDP:
-    {
-      configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                        &udp_connection_configuration));
-      iterator_2 =
-          configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown protocol (was: %d), returning\n"),
-                  protocol_in));
-      return;
-    }
-  } // end SWITCH
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
+                                                                    &tcp_connection_configuration));
+  iterator =
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
+  ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
+                                                                    &udp_connection_configuration));
+  iterator_2 =
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+  ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -673,8 +644,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
   if (useReactor_in)
+  {
     configuration_in.dispatchConfiguration.numberOfReactorThreads =
       numberOfDispatchThreads_in;
+    configuration_in.dispatchConfiguration.reactorType =
+      ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_THREAD_POOL
+                                        : COMMON_REACTOR_ACE_DEFAULT);
+  } // end IF
   else
     configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
@@ -789,45 +765,30 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                              NULL);
 
   // step0e: initialize action timer
-//  ACE_INET_Addr peer_address (serverPortNumber_in,
-//                              serverHostname_in.c_str (),
-//                              ACE_ADDRESS_FAMILY_INET);
-  ACE_INET_Addr peer_address;
-  result = peer_address.set (serverPortNumber_in,
-                             INADDR_LOOPBACK,
-                             1,
-                             0);
+  ACE_INET_Addr peer_address (serverPortNumber_in,
+                              serverHostname_in.c_str (),
+                              ACE_ADDRESS_FAMILY_INET);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("set peer address: %s\n"),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+  tcp_connection_configuration.address = peer_address;
+  if (!useReactor_in)
+    udp_connection_configuration.connect = true;
+  udp_connection_configuration.peerAddress = peer_address;
+  ACE_INET_Addr listen_address;
+  result =
+    udp_connection_configuration.listenAddress.set (static_cast<u_short> (serverPortNumber_in + 1),
+                                                    static_cast<ACE_UINT32> (INADDR_ANY),
+                                                    1,
+                                                    0);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::set() (was: %s), continuing\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
   else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("set server address: %s\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-  switch (protocol_in)
-  {
-    case NET_TRANSPORTLAYER_TCP:
-    case NET_TRANSPORTLAYER_SSL:
-    {
-      tcp_connection_configuration.address = peer_address;
-      break;
-    }
-    case NET_TRANSPORTLAYER_UDP:
-    {
-      if (!useReactor_in)
-        udp_connection_configuration.connect = true;
-      udp_connection_configuration.peerAddress = peer_address;
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown protocol (was: %d), returning\n"),
-                  protocol_in));
-      return;
-    }
-  } // end SWITCH
+                ACE_TEXT ("set listen address: %s\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (udp_connection_configuration.listenAddress).c_str ())));
 
   configuration_in.signalHandler = &signalHandler_in;
   Client_TimeoutHandler timeout_handler (actionMode_in,
@@ -1288,7 +1249,6 @@ ACE_TMAIN (int argc_in,
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
 #endif // GUI_SUPPORT
-  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   unsigned int connection_interval =
    NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL;
   bool log_to_file = false;
@@ -1321,7 +1281,6 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
                             UI_file_path,
 #endif // GUI_SUPPORT
-                            use_thread_pool,
                             connection_interval,
                             log_to_file,
                             server_hostname,
@@ -1359,7 +1318,7 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
       (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
 #endif // GUI_SUPPORT
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)     ||
+      //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)     ||
       (run_stress_test && ((ping_interval != ACE_Time_Value::zero)              ||
                            (connection_interval != 0)))                         ||
       (alternating_mode && run_stress_test))
@@ -1599,7 +1558,6 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
            UI_file_path,
 #endif // GUI_SUPPORT
-           use_thread_pool,
            connection_interval,
            server_hostname,
            server_port_number,

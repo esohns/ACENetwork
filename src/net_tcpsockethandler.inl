@@ -521,6 +521,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   // - accept failed (e.g. too many connections)
   // - ... ?
 
+  int error = 0;
   switch (mask_in)
   {
     // *NOTE*: this is already being removed from the reactor (check stack)
@@ -539,7 +540,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
       // *NOTE*: --> client side: connection failed, no need to deregister from
       //                          the reactor
       //         --> server side: too many open connections
-      int error = ACE_OS::last_error ();
+      error = ACE_OS::last_error ();
       if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
           ((error == ETIMEDOUT) ||   // 110: failed to connect: timed out
            (error == ECONNREFUSED))) // 111: failed to connect: connection refused
@@ -547,7 +548,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
         // *IMPORTANT NOTE*: the connection hasn't been open()ed / registered
         //                   --> remove the (final) reference manually
         // *NOTE*: the dtor (deregisters from the reactor and) close()s the
-        //         stream handle
+        //         socket handle
         inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
         result = inherited2::remove_reference ();
         ACE_ASSERT (result == 0);
@@ -564,7 +565,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
         result = reactor_p->remove_handler (this,
                                             (mask_in |
                                              ACE_Event_Handler::DONT_CALL));
-        if (result == -1)
+        if (unlikely (result == -1))
         {
           error = ACE_OS::last_error ();
           if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
@@ -600,10 +601,20 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
     }
   } // end SWITCH
 
-  result = inherited2::peer_.close ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SSL_SOCK_Stream::close(): \"%m\", continuing\n")));
+  result = inherited2::peer_.close (); // shutdown SSL context
+  if (unlikely (result == -1))
+  {
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (error != ENOTSOCK) // 10038: local close
+#else
+    if (true) // *TODO*
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SSL_SOCK_Stream::close(): \"%m\", aborting\n")));
+    else
+      result = 0;
+  } // end IF
 
   return result;
 }

@@ -121,10 +121,6 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-o          : use thread pool [")
-            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-p [VALUE]  : port number [")
             << HTTP_DEFAULT_SERVER_PORT
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -161,7 +157,6 @@ do_processArguments (int argc_in,
                      std::string& outputFileName_out,
                      std::string& hostName_out,
                      bool& logToFile_out,
-                     bool& useThreadPool_out,
                      unsigned short& port_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
@@ -184,7 +179,6 @@ do_processArguments (int argc_in,
   outputFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   hostName_out.clear ();
   logToFile_out = false;
-  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   port_out = HTTP_DEFAULT_SERVER_PORT;
   useReactor_out =
           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -196,7 +190,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
-                               ACE_TEXT ("b:df:lors:tu:vx:"),
+                               ACE_TEXT ("b:df:lrs:tu:vx:"),
                                1,                         // skip command name
                                1,                         // report parsing errors
                                ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -229,11 +223,6 @@ do_processArguments (int argc_in,
       case 'l':
       {
         logToFile_out = true;
-        break;
-      }
-      case 'o':
-      {
-        useThreadPool_out = true;
         break;
       }
       case 'r':
@@ -475,7 +464,6 @@ do_work (unsigned int bufferSize_in,
          bool debugParser_in,
          const std::string& fileName_in,
          const std::string& hostName_in,
-         bool useThreadPool_in,
          unsigned short port_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
@@ -1044,7 +1032,6 @@ ACE_TMAIN (int argc_in,
   std::string output_file = ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   std::string host_name;
   bool log_to_file = false;
-  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   bool use_reactor =
             (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -1064,7 +1051,6 @@ ACE_TMAIN (int argc_in,
                             output_file,
                             host_name,
                             log_to_file,
-                            use_thread_pool,
                             port,
                             use_reactor,
                             statistic_reporting_interval,
@@ -1094,17 +1080,8 @@ ACE_TMAIN (int argc_in,
   if (TEST_U_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could (!) lead to deadlocks --> make sure you know what you are doing...\n")));
-  if (use_reactor                      &&
-      (number_of_dispatch_threads > 1) &&
-      !use_thread_pool)
-  { // *NOTE*: see also: man (2) select
-    // *TODO*: verify this for MS Windows based systems
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("the select()-based reactor is not reentrant, using the thread-pool reactor instead...\n")));
-    use_thread_pool = true;
-  } // end IF
   if (host_name.empty ()                                                    ||
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool) ||
+      //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool) ||
       URL.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1256,7 +1233,6 @@ ACE_TMAIN (int argc_in,
            debug_parser,
            output_file,
            host_name,
-           use_thread_pool,
            port,
            use_reactor,
            statistic_reporting_interval,

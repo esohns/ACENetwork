@@ -180,10 +180,6 @@ do_printUsage (const std::string& programName_in)
             << NET_INTERFACE_DEFAULT_USE_LOOPBACK
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-p          : use thread pool [")
-            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-q          : send request on offer [")
             << TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -235,7 +231,6 @@ do_processArguments (int argc_in,
                      std::string& interfaceIdentifier_out,
 #endif // ACE_WIN32 || ACE_WIN64
                      bool& useLoopback_out,
-                     bool& useThreadPool_out,
                      bool& sendRequestOnOffer_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
@@ -279,7 +274,6 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
 #endif
   useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
-  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   sendRequestOnOffer_out = TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
   useReactor_out =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -294,22 +288,22 @@ do_processArguments (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("bde:f::g::lopqrs:tvx:"),
+                              ACE_TEXT ("bde:f::g::loqrs:tvx:"),
 #else
-                              ACE_TEXT ("bdf::g::lopqrs:tvx:"),
+                              ACE_TEXT ("bdf::g::loqrs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("bdf::lopqrs:tvx:"),
+                              ACE_TEXT ("bdf::loqrs:tvx:"),
 #endif // GUI_SUPPORT
 #else
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("bde:f::g::ln::opqrs:tvx:"),
+                              ACE_TEXT ("bde:f::g::ln::oqrs:tvx:"),
 #else
-                              ACE_TEXT ("bdf::g::ln::opqrs:tvx:"),
+                              ACE_TEXT ("bdf::g::ln::oqrs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("bdf::ln::opqrs:tvx:"),
+                              ACE_TEXT ("bdf::ln::oqrs:tvx:"),
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                               1,                         // skip command name
@@ -382,11 +376,6 @@ do_processArguments (int argc_in,
       case 'o':
       {
         useLoopback_out = true;
-        break;
-      }
-      case 'p':
-      {
-        useThreadPool_out = true;
         break;
       }
       case 'q':
@@ -548,7 +537,6 @@ do_work (bool requestBroadcastReplies_in,
          const std::string& interfaceIdentifier_in,
 #endif // ACE_WIN32 || ACE_WIN64
          bool useLoopback_in,
-         bool useThreadPool_in,
          bool sendRequestOnOffer_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
@@ -1456,7 +1444,6 @@ ACE_TMAIN (int argc_in,
   std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
-  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   bool send_request_on_offer =
       TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
   bool use_reactor =
@@ -1493,7 +1480,6 @@ ACE_TMAIN (int argc_in,
                             interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
                             use_loopback,
-                            use_thread_pool,
                             send_request_on_offer,
                             use_reactor,
                             statistic_reporting_interval,
@@ -1522,15 +1508,6 @@ ACE_TMAIN (int argc_in,
   if (TEST_U_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could (!) lead to deadlocks --> make sure you know what you are doing...\n")));
-  if (use_reactor                      &&
-      (number_of_dispatch_threads > 1) &&
-      !use_thread_pool)
-  { // *NOTE*: see also: man (2) select
-    // *TODO*: verify this for MS Windows based systems
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("the select()-based reactor is not reentrant, using the thread-pool reactor instead...\n")));
-    use_thread_pool = true;
-  } // end IF
   if (
 #if defined (GUI_SUPPORT)
       (ui_definition_file.empty () ||
@@ -1550,7 +1527,8 @@ ACE_TMAIN (int argc_in,
       interface_identifier.empty ()                         ||
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // GUI_SUPPORT
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
+      //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)
+     false)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
@@ -1797,7 +1775,6 @@ ACE_TMAIN (int argc_in,
            interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
            use_loopback,
-           use_thread_pool,
            send_request_on_offer,
            use_reactor,
            statistic_reporting_interval,

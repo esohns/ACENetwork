@@ -86,7 +86,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
 
   // read some data from the socket
-retry:
+//retry:
   bytes_received =
     inherited::peer_.recv (message_block_p->wr_ptr (),   // buffer
                            message_block_p->capacity (), // #bytes to read
@@ -101,7 +101,7 @@ retry:
       // [- data buffer is empty (SSL)]
       int error = ACE_OS::last_error ();
       if (error == EWOULDBLOCK)      // 11: SSL_read() failed (buffer is empty)
-        goto retry;
+        goto continue_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       if (//(error != EPIPE)  && // 9    : write() on a close()d socket *TODO*
           (error != ENOTSOCK) && // 10038: local close()
@@ -191,6 +191,7 @@ retry:
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 
+continue_:
   return 0;
 }
 
@@ -337,19 +338,19 @@ continue_:
     }
     default:
     {
-#if defined (_DEBUG)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("0x%@: sent %u bytes\n"),
-                  handle_in,
-                  bytes_sent));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%d: sent %u bytes\n"),
-                  handle_in,
-                  bytes_sent));
-#endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("0x%@: sent %u bytes\n"),
+//                  handle_in,
+//                  bytes_sent));
+//#else
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%d: sent %u bytes\n"),
+//                  handle_in,
+//                  bytes_sent));
+//#endif // ACE_WIN32 || ACE_WIN64
+//#endif // _DEBUG
       // finished with this buffer ?
       inherited::writeBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
       if (unlikely (inherited::writeBuffer_->length () > 0))

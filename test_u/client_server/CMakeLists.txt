@@ -336,7 +336,6 @@ target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Network)
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Test_U)

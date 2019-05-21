@@ -155,10 +155,6 @@ do_printUsage (const std::string& programName_in)
             << UI_file_path
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [")
-            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [STRING]  : network interface [\"")
             << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -214,7 +210,6 @@ do_processArguments (const int& argc_in,
 #endif
                      std::string& fileName_out,
                      std::string& UIFile_out,
-                     bool& useThreadPool_out,
                      std::string& networkInterface_out,
                      //unsigned int& keepAliveTimeout_out,
                      bool& logToFile_out,
@@ -250,7 +245,6 @@ do_processArguments (const int& argc_in,
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_STR;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
-  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   networkInterface_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
@@ -272,9 +266,9 @@ do_processArguments (const int& argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                              ACE_TEXT ("cf:g::hi:k:ln:op:rs:tuvx:"));
+                              ACE_TEXT ("cf:g::i:k:ln:op:rs:tuvx:"));
 #else
-                              ACE_TEXT ("f:g::hi:k:ln:op:rs:tuvx:"));
+                              ACE_TEXT ("f:g::i:k:ln:op:rs:tuvx:"));
 #endif
   int option = 0;
   std::stringstream converter;
@@ -302,11 +296,6 @@ do_processArguments (const int& argc_in,
           UIFile_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
         else
           UIFile_out.clear ();
-        break;
-      }
-      case 'h':
-      {
-        useThreadPool_out = true;
         break;
       }
       case 'i':
@@ -499,7 +488,6 @@ do_work (
 #endif // ACE_WIN32 || ACE_WIN64
          const std::string& fileName_in,
          const std::string& UIDefinitionFile_in,
-         bool useThreadPool_in,
          const std::string& networkInterface_in,
          //unsigned int keepAliveTimeout_in,
          unsigned int maximumNumberOfConnections_in,
@@ -633,7 +621,7 @@ do_work (
     (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                    : COMMON_EVENT_DISPATCH_PROACTOR);
   configuration.streamConfiguration.configuration_.serializeOutput =
-    useThreadPool_in;
+    (useReactor_in && (numberOfDispatchThreads_in > 1));
 
   // ********************** socket configuration data **************************
   FileServer_TCPConnectionConfiguration tcp_connection_configuration;
@@ -1170,7 +1158,6 @@ ACE_TMAIN (int argc_in,
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_STR;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
-  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   std::string network_interface =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
@@ -1197,7 +1184,6 @@ ACE_TMAIN (int argc_in,
 #endif
                             source_file,
                             UI_file_path,
-                            use_thread_pool,
                             network_interface,
                             //keep_alive_timeout,
                             log_to_file,
@@ -1229,8 +1215,6 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("using (privileged) port #: %d...\n"),
                 listening_port_number));
-  if (use_reactor && (number_of_dispatch_threads > 1))
-    use_thread_pool = true;
 
   // *IMPORTANT NOTE*: iff the number of message buffers is limited, the
   //                   reactor/proactor thread could (dead)lock on the
@@ -1239,10 +1223,10 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((!Common_File_Tools::isReadable (source_file))                       ||
-      (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path))      ||
-      (use_thread_pool && !use_reactor)                                    ||
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
+  if ((!Common_File_Tools::isReadable (source_file))                            ||
+      (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
+      //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)
+      false)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
@@ -1452,7 +1436,6 @@ ACE_TMAIN (int argc_in,
 #endif
            source_file,
            UI_file_path,
-           use_thread_pool,
            network_interface,
            //keep_alive_timeout,
            maximum_number_of_connections,

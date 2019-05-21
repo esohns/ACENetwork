@@ -145,10 +145,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
 #endif // GUI_SUPPORT
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [")
-            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [VALUE]   : client ping interval (ms) [")
             << NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
@@ -218,7 +214,6 @@ do_processArguments (const int& argc_in,
 #if defined (GUI_SUPPORT)
                      std::string& UIFile_out,
 #endif // GUI_SUPPORT
-                     bool& useThreadPool_out,
                      ACE_Time_Value& pingInterval_out,
                      //unsigned int& keepAliveTimeout_out,
                      bool& logToFile_out,
@@ -264,7 +259,6 @@ do_processArguments (const int& argc_in,
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
 #endif // GUI_SUPPORT
-  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
                         (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
@@ -286,9 +280,9 @@ do_processArguments (const int& argc_in,
   ACE_Get_Opt argument_parser (argc_in,                                // argc
                                argv_in,                                // argv
 #if defined (GUI_SUPPORT)
-                               ACE_TEXT ("c:e:f:g::hi:k:ln:op:rSs:tuvx:"), // optstring
+                               ACE_TEXT ("c:e:f:g::i:k:ln:op:rSs:tuvx:"), // optstring
 #else
-                               ACE_TEXT ("c:e:f:hi:k:ln:op:rSs:tuvx:"), // optstring
+                               ACE_TEXT ("c:e:f:i:k:ln:op:rSs:tuvx:"), // optstring
 #endif // GUI_SUPPORT
                                1,                                      // skip_args
                                1,                                      // report_errors
@@ -319,11 +313,6 @@ do_processArguments (const int& argc_in,
         break;
       }
 #endif // GUI_SUPPORT
-      case 'h':
-      {
-        useThreadPool_out = true;
-        break;
-      }
       case 'i':
       {
         unsigned int ping_interval = 0;
@@ -524,7 +513,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFile_in,
 #endif // GUI_SUPPORT
-         bool useThreadPool_in,
          const ACE_Time_Value& pingInterval_in,
          //unsigned int keepAliveTimeout_in,
          const std::string& networkInterface_in,
@@ -633,7 +621,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // *TODO*: is this correct ?
   configuration_in.streamConfiguration.configuration_.serializeOutput =
-    useThreadPool_in;
+    (useReactor_in && (numberOfDispatchThreads_in > 1));
 
   // ********************** connection configuration data **********************
   Test_U_TCPConnectionConfiguration connection_configuration;
@@ -683,8 +671,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
   if (useReactor_in)
+  {
     configuration_in.dispatchConfiguration.numberOfReactorThreads =
       numberOfDispatchThreads_in;
+    configuration_in.dispatchConfiguration.reactorType =
+      ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_THREAD_POOL
+                                        : COMMON_REACTOR_ACE_DEFAULT);
+  } // end IF
   else
     configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
@@ -902,8 +895,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                             peer_address,
                                             gateway_address);
     result =
-      connection_configuration_p_2->peerAddress.set (listeningPortNumber_in,
-                                                     peer_address.get_ip_address (),
+      connection_configuration_p_2->peerAddress.set (static_cast<u_short> (listeningPortNumber_in + 1),
+                                                     //peer_address.get_ip_address (),
+                                                     static_cast<ACE_UINT32> (INADDR_LOOPBACK),
                                                      1,
                                                      0);
     ACE_ASSERT (result != -1);
@@ -1006,31 +1000,32 @@ do_work (unsigned int maximumNumberOfConnections_in,
       return;
     } // end IF
   } // end IF
+
+  if (useReactor_in)
+    configuration_in.UDPConnector = &udp_connector;
   else
+    configuration_in.UDPConnector = &udp_asynch_connector;
+  if (!configuration_in.UDPConnector->initialize (*connection_configuration_p_2))
   {
-    if (useReactor_in)
-      configuration_in.UDPConnector = &udp_connector;
-    else
-      configuration_in.UDPConnector = &udp_asynch_connector;
-    if (!configuration_in.UDPConnector->initialize (*connection_configuration_p_2))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize connector, returning\n")));
-      Common_Tools::finalizeEventDispatch (useReactor_in,
-                                           !useReactor_in,
-                                           group_id);
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connector, returning\n")));
+    Common_Tools::finalizeEventDispatch (useReactor_in,
+                                          !useReactor_in,
+                                          group_id);
 #if defined (GUI_SUPPORT)
-      if (!UIDefinitionFile_in.empty ())
+    if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
-        gtk_manager_p->stop ();
+      gtk_manager_p->stop ();
 #else
-        ;
+      ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-      timer_manager_p->stop ();
-      return;
-    } // end IF
+    timer_manager_p->stop ();
+    return;
+  } // end IF
 
+  if (protocol_in == NET_TRANSPORTLAYER_UDP)
+  {
     ACE_HANDLE handle_h =
       configuration_in.UDPConnector->connect (connection_configuration_p_2->listenAddress);
     ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
@@ -1082,7 +1077,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       return;
     } // end IF
     iconnection_p->decrease ();
-  } // end ELSE
+  } // end IF
 
   // *NOTE*: from this point on, clean up any remote connections !
 
@@ -1222,7 +1217,6 @@ ACE_TMAIN (int argc_in,
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
 #endif // GUI_SUPPORT
-  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
                                 (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
@@ -1252,7 +1246,6 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
                             UI_file_path,
 #endif // GUI_SUPPORT
-                            use_thread_pool,
                             ping_interval,
                             //keep_alive_timeout,
                             log_to_file,
@@ -1284,8 +1277,8 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("using (privileged) port #: %d\n"),
                 listening_port_number));
-  if (use_reactor && (number_of_dispatch_threads > 1))
-    use_thread_pool = true;
+  //if (use_reactor && (number_of_dispatch_threads > 1))
+  //  use_thread_pool = true;
 
   // *IMPORTANT NOTE*: iff the number of message buffers is limited, the
   //                   reactor/proactor thread could (dead)lock on the
@@ -1295,8 +1288,8 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
   if ((!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
-      (use_thread_pool && !use_reactor)                                         ||
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)     ||
+      //(use_thread_pool && !use_reactor)                                         ||
+      //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)     ||
       (!use_reactor && (protocol_e == NET_TRANSPORTLAYER_SSL)))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1516,7 +1509,6 @@ ACE_TMAIN (int argc_in,
 #if defined (GUI_SUPPORT)
            UI_file_path,
 #endif // GUI_SUPPORT
-           use_thread_pool,
            ping_interval,
            //keep_alive_timeout,
            network_interface,

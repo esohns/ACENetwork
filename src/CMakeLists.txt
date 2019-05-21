@@ -203,6 +203,8 @@ set (source_files
      net_module_sockethandler.cpp
      net_module_sockethandler.h
      net_module_sockethandler.inl
+     net_os_tools.cpp
+     net_os_tools.h
      net_packet_headers.h
      net_parser_base.cpp
      net_parser_base.h
@@ -392,6 +394,7 @@ install (FILES
          net_netlinkconnection.inl
          net_netlinksockethandler.h
          net_netlinksockethandler.inl
+         net_os_tools.h
          net_packet_headers.h
          net_parser_base.h
          net_parser_base.inl

@@ -308,29 +308,11 @@ class Net_Common_Tools
                                ACE_SSL_Context* = NULL); // context handle {NULL: global}
 #endif // SSL_SUPPORT
 
-  // --- OS services ---
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-//  static bool ifUpDownManageInterface (const std::string&,
-//                                       bool); // toggle
-
-  static bool networkManagerManageInterface (const std::string&,
-                                             bool); // toggle
-#endif // ACE_WIN32 || ACE_WIN64
-
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools (const Net_Common_Tools&))
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools& operator= (const Net_Common_Tools&))
-
-  // helper methods
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  static bool isIfUpDownManagingInterface (const std::string&);
-
-  static bool isNetworkManagerManagingInterface (const std::string&);
-#endif // ACE_WIN32 || ACE_WIN64
 };
 
 #endif

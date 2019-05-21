@@ -964,13 +964,13 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to HandlerType::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                ACE_TEXT ("%u: failed to HandlerType::handle_close(0x%@,%d): \"%m\", aborting\n"),
                 id (),
                 handle_in,
                 mask_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
+                ACE_TEXT ("%u: failed to HandlerType::handle_close(%d,%d): \"%m\", aborting\n"),
                 id (),
                 handle_in,
                 mask_in));
@@ -1129,12 +1129,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   int result = -1;
 
-  // step1: stop the stream; no new outbound data will be dispatched
-  stream_.stop (false, // wait for completion ?
-                false, // recurse upstream (if any) ?
-                true); // locked access ?
+  inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
 
-  //  step2: wake up any open read operation; it will release the connection
+  // wake up any open read operation; it will release the connection
   ACE_HANDLE handle = inherited::get_handle ();
   if (likely (handle != ACE_INVALID_HANDLE))
   {
