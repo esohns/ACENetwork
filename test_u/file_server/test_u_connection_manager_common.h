@@ -35,27 +35,27 @@
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FileServer_TCPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
+                                 struct Net_StreamConnectionState,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> FileServer_TCPIConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FileServer_TCPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
+                                 struct Net_StreamConnectionState,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> FileServer_TCPConnectionManager_t;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FileServer_UDPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
+                                 struct Net_StreamConnectionState,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> FileServer_UDPIConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FileServer_UDPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
+                                 struct Net_StreamConnectionState,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> FileServer_UDPConnectionManager_t;
 
 typedef ACE_Singleton<FileServer_TCPConnectionManager_t,

@@ -294,15 +294,8 @@ struct DHCPClient_UI_ProgressData
   DHCPClient_UI_ProgressData ()
 #if defined (GTK_USE)
    : Test_U_GTK_ProgressData ()
-   , statistic ()
-#else
-   : statistic ()
 #endif // GTK_USE
-   , transferred (0)
   {}
-
-  DHCP_Statistic_t statistic;
-  unsigned int     transferred; // byte(s)
 };
 
 struct DHCPClient_UI_CBData

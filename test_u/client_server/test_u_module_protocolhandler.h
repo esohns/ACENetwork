@@ -95,14 +95,14 @@ class Test_U_Module_ProtocolHandler
   virtual void handle (const void*); // asynchronous completion token
 
   // timer
-  Common_TimerHandler pingHandler_;
-  ACE_Time_Value      pingInterval_;
-  long                pingTimerId_;
+  Common_Timer_Handler pingHandler_;
+  ACE_Time_Value       pingInterval_;
+  long                 pingTimerId_;
 
-  bool                automaticPong_;
-  unsigned int        counter_;
-  bool                printPongDot_;
-  Stream_SessionId_t  sessionId_;
+  bool                 automaticPong_;
+  unsigned int         counter_;
+  bool                 printPongDot_;
+  Stream_SessionId_t   sessionId_;
 };
 
 // declare module

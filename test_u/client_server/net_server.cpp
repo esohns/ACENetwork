@@ -697,9 +697,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   ACE_thread_t thread_id = 0;
   timer_manager_p->start (thread_id);
   ACE_UNUSED_ARG (thread_id);
-  Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
-                                            connection_manager_p,
-                                            false);
+  Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
+                                                  connection_manager_p,
+                                                  false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
@@ -762,10 +762,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step3: initialize connection manager
   struct Net_UserData user_data;
-  connection_manager_p->initialize (maximumNumberOfConnections_in);
+  connection_manager_p->initialize (maximumNumberOfConnections_in,
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*connection_configuration_p,
                              NULL);
-  connection_manager_2->initialize (maximumNumberOfConnections_in);
+  connection_manager_2->initialize (maximumNumberOfConnections_in,
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->set (*connection_configuration_p_2,
                              NULL);
 

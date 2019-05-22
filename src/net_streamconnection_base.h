@@ -50,16 +50,14 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename StreamType,
           typename StreamStatusType, // state machine-
           ////////////////////////////////
-          typename TimerManagerType, // implements Common_ITimer
-          ////////////////////////////////
           typename UserDataType>
 class Net_StreamConnectionBase_T
  : public HandlerType
- , public Net_ConnectionBase_T<AddressType,
+ , public Net_ConnectionBase_T<ACE_MT_SYNCH, // *TODO*: make this a template parameter
+                               AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               TimerManagerType,
                                UserDataType>
  , public Net_IStreamConnection_T<AddressType,
                                   ConfigurationType,
@@ -71,22 +69,22 @@ class Net_StreamConnectionBase_T
                                   StreamStatusType>
 {
   typedef HandlerType inherited;
-  typedef Net_ConnectionBase_T<AddressType,
+  typedef Net_ConnectionBase_T<ACE_MT_SYNCH,
+                               AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               TimerManagerType,
                                UserDataType> inherited2;
 
  public:
   // convenient types
   typedef AddressType addr_type; // required by ACE_Connector
   typedef HandlerType HANDLER_T;
-  typedef Net_ConnectionBase_T<AddressType,
+  typedef Net_ConnectionBase_T<ACE_MT_SYNCH,
+                               AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               TimerManagerType,
                                UserDataType> CONNECTION_BASE_T;
   typedef Net_IStreamConnection_T<AddressType,
                                   ConfigurationType,
@@ -118,7 +116,7 @@ class Net_StreamConnectionBase_T
   // implement (part of) Net_IStreamConnection_T
   //inline virtual unsigned int increase () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::increase (); }
   //inline virtual unsigned int decrease () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::decrease (); }
-  inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }
+  virtual bool collect (StatisticContainerType&);
   inline virtual void report () const { stream_.report (); }
   //using CONNECTION_BASE_T::getR;
   virtual void dump_state () const;
@@ -194,16 +192,14 @@ template <typename HandlerType, // implements ACE_Service_Handler
           typename StreamType,
           typename StreamStatusType,
           ////////////////////////////////
-          typename TimerManagerType, // implements Common_ITimer
-          ////////////////////////////////
           typename UserDataType>
 class Net_AsynchStreamConnectionBase_T
  : public HandlerType
- , public Net_ConnectionBase_T<AddressType,
+ , public Net_ConnectionBase_T<ACE_MT_SYNCH, // *TODO*: make this a template parameter
+                               AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               TimerManagerType,
                                UserDataType>
  , public Net_IStreamConnection_T<AddressType,
                                   ConfigurationType,
@@ -215,21 +211,20 @@ class Net_AsynchStreamConnectionBase_T
                                   StreamStatusType>
 {
   typedef HandlerType inherited;
-  typedef Net_ConnectionBase_T<AddressType,
+  typedef Net_ConnectionBase_T<ACE_MT_SYNCH,
+                               AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               TimerManagerType,
                                UserDataType> inherited2;
-
 
  public:
   // convenient types
-  typedef Net_ConnectionBase_T<AddressType,
+  typedef Net_ConnectionBase_T<ACE_MT_SYNCH,
+                               AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               TimerManagerType,
                                UserDataType> CONNECTION_BASE_T;
   typedef Net_IStreamConnection_T<AddressType,
                                   ConfigurationType,
@@ -258,7 +253,7 @@ class Net_AsynchStreamConnectionBase_T
   using inherited2::initialize;
 
   // implement (part of) Net_IStreamConnection_T
-  inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }
+  virtual bool collect (StatisticContainerType&);
   inline virtual void report () const { stream_.report (); }
   virtual void dump_state () const;
   //inline virtual void info (ACE_HANDLE& handle_out, AddressType& localSAP_out, AddressType& peerSAP_out) const { handle_out = inherited::handle (); localSAP_out = inherited::localSAP_; peerSAP_out = inherited::peerSAP_; }

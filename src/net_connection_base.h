@@ -22,13 +22,10 @@
 #define NET_CONNECTION_BASE_H
 
 #include "ace/Global_Macros.h"
-//#include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
 
 #include "common_isubscribe.h"
 #include "common_referencecounter_base.h"
-#include "common_statistic_handler.h"
 
 #include "net_connection_manager.h"
 #include "net_iconnection.h"
@@ -38,11 +35,11 @@
 class ACE_Message_Block;
 enum Net_Connection_Status;
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
           typename UserDataType>
 class Net_ConnectionBase_T
@@ -58,19 +55,23 @@ class Net_ConnectionBase_T
  public:
   // convenient types
   typedef Common_ReferenceCounterBase REFERENCECOUNTER_T;
-  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
                                    AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> CONNECTION_MANAGER_T;
 
+  inline virtual ~Net_ConnectionBase_T () { ACE_ASSERT (!isRegistered_); }
+
   // implement (part of) Net_IConnection_T
   using REFERENCECOUNTER_T::decrease;
   using REFERENCECOUNTER_T::increase;
-  // missing: Common_IStatistic_T
-  // *NOTE*: when using a connection manager, the (default) configuration is
-  //         retrieved in the ctor
+  inline virtual bool collect (StatisticContainerType& statistic_out) { statistic_out = state_.statistic; return true; }
+  virtual void update ();
+  virtual void report () const;
+  // *NOTE*: iff using a connection manager ('managed', see ctor argument), the
+  //         configuration is retrieved in the ctor already
   inline virtual bool initialize (const ConfigurationType& configuration_in) { /*ACE_ASSERT (!configuration_);*/ configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   // missing: Common_IDumpState
@@ -86,37 +87,31 @@ class Net_ConnectionBase_T
   // *NOTE*: if there is no default ctor, this will not compile
   inline Net_ConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   Net_ConnectionBase_T (bool); // managed ?
-  virtual ~Net_ConnectionBase_T ();
 
   // implement Common_IRegister
   virtual bool register_ ();
   virtual void deregister ();
 
-  ConfigurationType*     configuration_;
-  StateType              state_;
+  // helper methods
+  ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
-  bool                   isManaged_;
-  bool                   isRegistered_;
+  ConfigurationType* configuration_;
+  StateType          state_;
+
+  bool               isManaged_;
+  bool               isRegistered_;
 
  private:
   // convenient types
-  typedef Common_StatisticHandler_T<StatisticContainerType> STATISTIC_HANDLER_T;
-  typedef Net_ConnectionBase_T<AddressType,
+  typedef Net_ConnectionBase_T<ACE_SYNCH_USE,
+                               AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               TimerManagerType,
                                UserDataType> OWN_TYPE_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&))
-
-  // helper methods
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
-
-  // timer
-  STATISTIC_HANDLER_T    statisticHandler_;
-  long                   timerId_;
 };
 
 // include template definition

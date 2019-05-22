@@ -115,14 +115,12 @@ typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 struct DHCP_ConnectionState,
                                 DHCP_Statistic_t,
                                 Test_U_InboundConnectionStream,
-                                Common_Timer_Manager_t,
                                 struct Net_UserData> DHCPClient_InboundConnectionBcast_t;
 typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandlerBcast_t,
                                       DHCPClient_ConnectionConfiguration,
                                       struct DHCP_ConnectionState,
                                       DHCP_Statistic_t,
                                       Test_U_InboundConnectionStream,
-                                      Common_Timer_Manager_t,
                                       struct Net_UserData> DHCPClient_InboundAsynchConnectionBcast_t;
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_UDPSocketHandler_t,
@@ -130,14 +128,12 @@ typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 struct DHCP_ConnectionState,
                                 DHCP_Statistic_t,
                                 Test_U_InboundConnectionStream,
-                                Common_Timer_Manager_t,
                                 struct Net_UserData> DHCPClient_InboundConnection_t;
 typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
                                       DHCPClient_ConnectionConfiguration,
                                       struct DHCP_ConnectionState,
                                       DHCP_Statistic_t,
                                       Test_U_InboundConnectionStream,
-                                      Common_Timer_Manager_t,
                                       struct Net_UserData> DHCPClient_InboundAsynchConnection_t;
 
 // outbound
@@ -147,14 +143,12 @@ typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 struct DHCP_ConnectionState,
                                 DHCP_Statistic_t,
                                 Test_U_OutboundConnectionStream,
-                                Common_Timer_Manager_t,
                                 struct Net_UserData> DHCPClient_OutboundConnectionBcast_t;
 typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandlerBcast_t,
                                       DHCPClient_ConnectionConfiguration,
                                       struct DHCP_ConnectionState,
                                       DHCP_Statistic_t,
                                       Test_U_OutboundConnectionStream,
-                                      Common_Timer_Manager_t,
                                       struct Net_UserData> DHCPClient_OutboundAsynchConnectionBcast_t;
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_UDPSocketHandlerConnected_t,
@@ -162,14 +156,12 @@ typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 struct DHCP_ConnectionState,
                                 DHCP_Statistic_t,
                                 Test_U_OutboundConnectionStream,
-                                Common_Timer_Manager_t,
                                 struct Net_UserData> DHCPClient_OutboundConnection_t;
 typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandlerConnected_t,
                                       DHCPClient_ConnectionConfiguration,
                                       struct DHCP_ConnectionState,
                                       DHCP_Statistic_t,
                                       Test_U_OutboundConnectionStream,
-                                      Common_Timer_Manager_t,
                                       struct Net_UserData> DHCPClient_OutboundAsynchConnection_t;
 
 //////////////////////////////////////////

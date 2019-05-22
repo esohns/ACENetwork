@@ -87,13 +87,13 @@ struct Server_SignalHandlerConfiguration
   {}
 
 #if defined (SSL_USE)
-  Test_U_ITCPListener_t*   SSLListener;
+  Test_U_ITCPListener_t*         SSLListener;
 #endif // SSL_USE
-  Test_U_ITCPListener_t*   TCPListener;
-  Test_U_IUDPConnector_t*  UDPConnector;
+  Test_U_ITCPListener_t*         TCPListener;
+  Test_U_IUDPConnector_t*        UDPConnector;
 
-  Net_IStatisticHandler_t* statisticReportingHandler;
-  long                     statisticReportingTimerId;
+  Net_IStreamStatisticHandler_t* statisticReportingHandler;
+  long                           statisticReportingTimerId;
 };
 
 struct Server_Configuration

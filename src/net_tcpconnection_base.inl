@@ -30,7 +30,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                         SocketHandlerType,
@@ -38,7 +37,6 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::Net_TCPConnectionBase_T (bool managed_in)
  : inherited (managed_in)
 {
@@ -52,7 +50,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
@@ -61,7 +58,6 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::handle_input"));
@@ -201,7 +197,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_TCPConnectionBase_T<ACE_SYNCH_USE,
@@ -210,7 +205,6 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::handle_output"));
@@ -375,14 +369,12 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 Net_AsynchTCPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::Net_AsynchTCPConnectionBase_T (bool managed_in)
  : inherited (managed_in)
 {
@@ -395,7 +387,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchTCPConnectionBase_T<SocketHandlerType,
@@ -403,7 +394,6 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::open (ACE_HANDLE handle_in,
                                                    ACE_Message_Block& messageBlock_in)
 {
@@ -504,7 +494,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_AsynchTCPConnectionBase_T<SocketHandlerType,
@@ -512,7 +501,6 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::handle_output"));

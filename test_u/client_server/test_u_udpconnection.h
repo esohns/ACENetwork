@@ -47,20 +47,18 @@ class Test_U_UDPConnection
  : public Net_UDPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_UDPSocketHandler_t,
                                   Test_U_UDPConnectionConfiguration,
-                                  struct Net_ConnectionState,
-                                  Net_Statistic_t,
+                                  struct Net_StreamConnectionState,
+                                  Net_StreamStatistic_t,
                                   Test_U_Stream,
-                                  Common_Timer_Manager_t,
                                   struct Net_UserData>
  , public Net_IPing
 {
   typedef Net_UDPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_UDPSocketHandler_t,
                                   Test_U_UDPConnectionConfiguration,
-                                  struct Net_ConnectionState,
-                                  Net_Statistic_t,
+                                  struct Net_StreamConnectionState,
+                                  Net_StreamStatistic_t,
                                   Test_U_Stream,
-                                  Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
 
   friend class ACE_Connector<Test_U_UDPConnection, ACE_SOCK_CONNECTOR>;
@@ -84,19 +82,17 @@ class Test_U_UDPConnection
 class Test_U_AsynchUDPConnection
  : public Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
                                         Test_U_UDPConnectionConfiguration,
-                                        struct Net_ConnectionState,
-                                        Net_Statistic_t,
+                                        struct Net_StreamConnectionState,
+                                        Net_StreamStatistic_t,
                                         Test_U_Stream,
-                                        Common_Timer_Manager_t,
                                         struct Net_UserData>
  , public Net_IPing
 {
   typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
                                         Test_U_UDPConnectionConfiguration,
-                                        struct Net_ConnectionState,
-                                        Net_Statistic_t,
+                                        struct Net_StreamConnectionState,
+                                        Net_StreamStatistic_t,
                                         Test_U_Stream,
-                                        Common_Timer_Manager_t,
                                         struct Net_UserData> inherited;
 
  friend class ACE_Asynch_Connector<Test_U_AsynchUDPConnection>;

@@ -26,7 +26,10 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
+#include "common_icounter.h"
 #include "common_istatistic.h"
+
+#include "common_timer_resetcounterhandler.h"
 
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -45,6 +48,7 @@ class Net_Connection_Manager_T
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType>
+ , public Common_ICounter
  , public Common_IStatistic_T<StatisticContainerType>
 {
   // singleton has access to the ctor/dtors
@@ -80,17 +84,18 @@ class Net_Connection_Manager_T
                         ACE_SYNCH_MUTEX_T> SINGLETON_T;
 
   // configuration / initialization
-  void initialize (unsigned int); // maximum number of concurrent connections
+  void initialize (unsigned int,           // maximum number of concurrent connections
+                   const ACE_Time_Value&); // connection 'visit' interval
 
   // implement (part of) Net_IConnectionManager_T
   virtual bool lock (bool = true); // block ?
   virtual int unlock (bool = false); // unblock ?
   inline virtual const typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ();) }
-  inline virtual void start (ACE_thread_t& threadId_out) { threadId_out = 0; ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_); isActive_ = true; }
+  virtual void start (ACE_thread_t&); // N/A
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
-  virtual bool isRunning () const;
-  virtual void wait (bool = true) const; // wait for the message queue ? : worker thread(s) only
+  inline virtual bool isRunning () const { return isActive_; }
+  virtual void wait (bool = true) const; // N/A
   virtual void dump_state () const;
   virtual void abort (enum Net_Connection_AbortStrategy); // strategy
                                                           // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead
@@ -102,15 +107,16 @@ class Net_Connection_Manager_T
   virtual bool register_ (ICONNECTION_T*); // connection handle
   virtual void deregister (ICONNECTION_T*); // connection handle
 
-  // *WARNING*: these two methods are NOT (!) re-entrant. If you want to set a
-  //            specific configuration /user data per connection, use the
-  //            locking API (see below)
-  virtual void set (const ConfigurationType&, // connection handler (default)
-                                              // configuration
-                    UserDataType*);           // (stream) user data
-  virtual void get (ConfigurationType*&, // return value: (default)
-                                         // connection handler configuration
-                    UserDataType*&);     // return value: (stream) user data
+  // *WARNING*: these two methods are NOT (!) re-entrant. To set a specific
+  //            configuration/user data per connection, use the locking API
+  virtual void set (const ConfigurationType&, // (connection-) configuration
+                    UserDataType*);           // user data
+  // *IMPORTANT NOTE*: to be called by connections during construction, unless
+  //                   the configuration is already passed in via the Connector/
+  //                   Acceptor framework (see also: ACE_Event_Handler::open()
+  //                   overloads)
+  virtual void get (ConfigurationType*&, // return value: (connection-) configuration handle
+                    UserDataType*&);     // return value: user data handle
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
   virtual ICONNECTION_T* get (Net_ConnectionId_t) const; // id
   virtual ICONNECTION_T* get (const AddressType&, // address
@@ -138,16 +144,27 @@ class Net_Connection_Manager_T
   typedef ACE_DLList_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
   typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
-  // override/hide (part of) Common_ITaskControl
+  // override/hide (part of) Common_ITask_T/Common_ITaskControl
   inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held
   virtual bool collect (StatisticContainerType&); // return value: statistic data
+  inline virtual void update () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
+  // implement Common_ICounter
+  // *NOTE*: visits each connection updating its statistic to support throughput
+  //         measurement
+  virtual void reset ();
 
   void abortLeastRecent ();
   void abortMostRecent ();
+
+  // timer
+  Common_Timer_ResetCounterHandler      resetTimeoutHandler_;
+  long                                  resetTimeoutHandlerId_;
+  ACE_Time_Value                        resetTimeoutInterval_;
 
   // implement blocking wait
   mutable ACE_SYNCH_RECURSIVE_CONDITION condition_;

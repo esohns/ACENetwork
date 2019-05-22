@@ -182,7 +182,7 @@ class Net_WLAN_Monitor_Base_T
   HANDLE                                clientHandle_; // API-
 #endif // WLANAPI_SUPPORT
   long                                  scanTimerId_;
-  Common_TimerHandler                   timerHandler_;
+  Common_Timer_Handler                  timerHandler_;
   Common_ITimer_t*                      timerInterface_;
 #elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
@@ -309,6 +309,7 @@ class Net_WLAN_Monitor_Base_T
 
   // implement Common_IStatistic_T
   inline virtual bool collect (Net_Statistic_t& statistic_inout) { ACE_UNUSED_ARG (statistic_inout); ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual void update () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   // *TODO*: report (current) interface statistic(s)
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 

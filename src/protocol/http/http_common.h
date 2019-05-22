@@ -46,9 +46,9 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     struct HTTP_Record,
                                     HTTP_SessionMessage> HTTP_ISessionNotify_t;
 
-typedef struct Stream_Statistic HTTP_Statistic_t;
+typedef Net_StreamStatistic_t HTTP_Statistic_t;
 typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
-typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticHandler_t;
+//typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticHandler_t;
 
 typedef std::map<std::string, std::string> HTTP_Headers_t;
 typedef HTTP_Headers_t::const_iterator HTTP_HeadersConstIterator_t;

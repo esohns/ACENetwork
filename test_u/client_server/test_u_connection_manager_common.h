@@ -35,14 +35,14 @@
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_U_TCPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
+                                 struct Net_StreamConnectionState,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> Test_U_TCPConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_U_UDPConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
+                                 struct Net_StreamConnectionState,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> Test_U_UDPConnectionManager_t;
 
 typedef ACE_Singleton<Test_U_TCPConnectionManager_t,

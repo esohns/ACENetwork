@@ -542,9 +542,9 @@ do_work (
     connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
 
-  Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
-                                               connection_manager_p,
-                                               false);
+  Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
+                                                  connection_manager_p,
+                                                  false);
   Test_U_EventHandler ui_event_handler (
 #if defined (GUI_SUPPORT)
                                         &CBData_in
@@ -749,7 +749,8 @@ do_work (
   } // end IF
 
   // step3: initialize connection manager
-  connection_manager_p->initialize (maximumNumberOfConnections_in);
+  connection_manager_p->initialize (maximumNumberOfConnections_in,
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   iconnection_manager_p->set (*dynamic_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second),
                               NULL);
 

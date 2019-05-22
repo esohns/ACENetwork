@@ -201,9 +201,56 @@ class Net_Netlink_Addr
 };
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
-typedef struct Stream_Statistic Net_Statistic_t;
+struct Net_Statistic
+{
+  Net_Statistic ()
+    : sentBytes (0.0F)
+    , receivedBytes (0.0F)
+    , timeStamp (ACE_Time_Value::zero)
+    , previousBytes (0.0F)
+    , previousTimeStamp (ACE_Time_Value::zero)
+  {}
+  struct Net_Statistic operator+= (const struct Net_Statistic& rhs_in)
+  {
+    sentBytes += rhs_in.sentBytes;
+    receivedBytes += rhs_in.receivedBytes;
+
+    return *this;
+  }
+
+  float          sentBytes;
+  float          receivedBytes;
+
+  // statistic and speed calculations
+  ACE_Time_Value timeStamp;
+  float          previousBytes; // total-
+  ACE_Time_Value previousTimeStamp;
+};
+typedef struct Net_Statistic Net_Statistic_t;
 typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;
 typedef Common_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
+
+struct Net_StreamStatistic
+ : Net_Statistic
+{
+  Net_StreamStatistic ()
+   : Net_Statistic ()
+   , streamStatistic ()
+  {}
+  struct Net_StreamStatistic operator+= (const struct Net_StreamStatistic& rhs_in)
+  {
+    Net_Statistic::operator+= (rhs_in);
+
+    streamStatistic += rhs_in.streamStatistic;
+
+    return *this;
+  }
+
+  struct Stream_Statistic streamStatistic;
+};
+typedef struct Net_StreamStatistic Net_StreamStatistic_t;
+typedef Common_IStatistic_T<Net_StreamStatistic_t> Net_IStreamStatisticHandler_t;
+typedef Common_StatisticHandler_T<Net_StreamStatistic_t> Net_StreamStatisticHandler_t;
 
 struct Net_UserData
 {
@@ -234,6 +281,16 @@ struct Net_ConnectionState
   enum Net_Connection_Status status;
 
   struct Net_UserData*       userData;
+};
+struct Net_StreamConnectionState
+ : Net_ConnectionState
+{
+  Net_StreamConnectionState ()
+   : Net_ConnectionState ()
+   , statistic ()
+  {}
+
+  Net_StreamStatistic_t statistic;
 };
 
 typedef std::set<Net_ConnectionId_t> Net_ConnectionIds_t;

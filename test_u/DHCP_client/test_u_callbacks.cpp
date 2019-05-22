@@ -802,7 +802,7 @@ idle_update_progress_cb (gpointer userData_in)
   float speed = 0.0F;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
-    speed = data_p->statistic.bytesPerSecond;
+    speed = data_p->statistic.streamStatistic.bytesPerSecond;
   } // end lock scope
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
   if (speed)

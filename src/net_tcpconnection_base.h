@@ -53,8 +53,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
-          typename TimerManagerType, // implements Common_ITimer
-          ////////////////////////////////
           typename UserDataType>
 class Net_TCPConnectionBase_T
  : public Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -67,7 +65,6 @@ class Net_TCPConnectionBase_T
                                      Net_TCPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     TimerManagerType,
                                      UserDataType>
  , public Net_TransportLayer_TCP
 {
@@ -81,7 +78,6 @@ class Net_TCPConnectionBase_T
                                      Net_TCPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     TimerManagerType,
                                      UserDataType> inherited;
   typedef Net_TransportLayer_TCP inherited2;
 
@@ -91,7 +87,6 @@ class Net_TCPConnectionBase_T
                                                     StateType,
                                                     StatisticContainerType,
                                                     StreamType,
-                                                    TimerManagerType,
                                                     UserDataType>,
                             ACE_SOCK_ACCEPTOR>;
   friend class ACE_Acceptor<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
@@ -100,7 +95,6 @@ class Net_TCPConnectionBase_T
                                                     StateType,
                                                     StatisticContainerType,
                                                     StreamType,
-                                                    TimerManagerType,
                                                     UserDataType>,
                             Net_SOCK_Acceptor>;
   friend class ACE_Connector<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
@@ -109,7 +103,6 @@ class Net_TCPConnectionBase_T
                                                      StateType,
                                                      StatisticContainerType,
                                                      StreamType,
-                                                     TimerManagerType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
   friend class ACE_Connector<Net_TCPConnectionBase_T<ACE_SYNCH_USE,
@@ -118,7 +111,6 @@ class Net_TCPConnectionBase_T
                                                      StateType,
                                                      StatisticContainerType,
                                                      StreamType,
-                                                     TimerManagerType,
                                                      UserDataType>,
                              Net_SOCK_Connector>;
 #if defined (SSL_SUPPORT)
@@ -128,7 +120,6 @@ class Net_TCPConnectionBase_T
                                                      StateType,
                                                      StatisticContainerType,
                                                      StreamType,
-                                                     TimerManagerType,
                                                      UserDataType>,
                              ACE_SSL_SOCK_Connector>;
 #endif // SSL_SUPPORT
@@ -145,7 +136,6 @@ class Net_TCPConnectionBase_T
                                      Net_TCPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
 
   Net_TCPConnectionBase_T (bool); // managed ?
@@ -185,8 +175,6 @@ template <typename SocketHandlerType, // implements Net_AsynchTCPSocketHandler_T
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
-          typename TimerManagerType, // implements Common_ITimer
-          ////////////////////////////////
           typename UserDataType>
 class Net_AsynchTCPConnectionBase_T
  : public Net_AsynchStreamConnectionBase_T<SocketHandlerType,
@@ -198,7 +186,6 @@ class Net_AsynchTCPConnectionBase_T
                                            Net_TCPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           TimerManagerType,
                                            UserDataType>
  , public Net_TransportLayer_TCP
 {
@@ -211,7 +198,6 @@ class Net_AsynchTCPConnectionBase_T
                                            Net_TCPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           TimerManagerType,
                                            UserDataType> inherited;
   typedef Net_TransportLayer_TCP inherited2;
 
@@ -220,14 +206,12 @@ class Net_AsynchTCPConnectionBase_T
                                                                  StateType,
                                                                  StatisticContainerType,
                                                                  StreamType,
-                                                                 TimerManagerType,
                                                                  UserDataType> >;
   friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<SocketHandlerType,
                                                                   ConfigurationType,
                                                                   StateType,
                                                                   StatisticContainerType,
                                                                   StreamType,
-                                                                  TimerManagerType,
                                                                   UserDataType> >;
 
  public:
@@ -241,7 +225,6 @@ class Net_AsynchTCPConnectionBase_T
                                            Net_TCPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           TimerManagerType,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
 
   Net_AsynchTCPConnectionBase_T (bool); // managed ?

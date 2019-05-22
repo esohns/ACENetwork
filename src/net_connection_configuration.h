@@ -68,8 +68,8 @@ struct Net_SocketConfigurationBase
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , statisticCollectionInterval (0,
-                                  NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL * 1000)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
+                                  NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL_MS * 1000)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S,
                                  0)
    , useThreadPerConnection (false)
   {

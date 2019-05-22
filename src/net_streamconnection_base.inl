@@ -41,7 +41,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerType,
@@ -53,7 +52,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::Net_StreamConnectionBase_T (bool managed_in)
  : inherited ()
  , inherited2 (managed_in)
@@ -77,7 +75,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerType,
@@ -89,7 +86,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::~Net_StreamConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::~Net_StreamConnectionBase_T"));
@@ -124,7 +120,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -137,7 +132,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::open"));
@@ -367,7 +361,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -380,7 +373,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::close (u_long arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::close"));
@@ -828,7 +820,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -841,7 +832,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                         ACE_Reactor_Mask mask_in)
 {
@@ -995,7 +985,37 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
+          typename UserDataType>
+bool
+Net_StreamConnectionBase_T<ACE_SYNCH_USE,
+                           HandlerType,
+                           AddressType,
+                           ConfigurationType,
+                           StateType,
+                           StatisticContainerType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           StreamType,
+                           StreamStatusType,
+                           UserDataType>::collect (StatisticContainerType& statistic_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::collect"));
+
+  statistic_out = inherited2::state_.statistic;
+
+  return stream_.collect (statistic_out.streamStatistic);
+}
+
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename StreamStatusType,
           typename UserDataType>
 void
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1008,7 +1028,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::dump_state"));
@@ -1044,7 +1063,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1057,7 +1075,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::info (ACE_HANDLE& handle_out,
                                                 AddressType& localSAP_out,
                                                 AddressType& remoteSAP_out) const
@@ -1109,7 +1126,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1122,7 +1138,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::close"));
@@ -1161,7 +1176,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1174,7 +1188,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::waitForCompletion"));
@@ -1212,7 +1225,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1225,7 +1237,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::set (enum Net_ClientServerRole role_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::set"));
@@ -1264,7 +1275,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1277,7 +1287,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::send (ACE_Message_Block*& message_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::send"));
@@ -1320,7 +1329,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 bool
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1333,8 +1341,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           //UserDataType>::get () const
-                           TimerManagerType,
                            UserDataType>::wait (StreamStatusType state_in,
                                                 const ACE_Time_Value* timeValue_in)
 {
@@ -1391,7 +1397,6 @@ template <ACE_SYNCH_DECL,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 ACE_Message_Block*
 Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -1404,7 +1409,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           TimerManagerType,
                            UserDataType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::allocateMessage"));
@@ -1477,7 +1481,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 Net_AsynchStreamConnectionBase_T<HandlerType,
                                  AddressType,
@@ -1488,7 +1491,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::Net_AsynchStreamConnectionBase_T (bool managed_in)
  : inherited ()
  , inherited2 (managed_in)
@@ -1509,7 +1511,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -1521,7 +1522,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::act (const void* act_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::act"));
@@ -1615,7 +1615,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -1627,7 +1626,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::open (ACE_HANDLE handle_in,
                                                       ACE_Message_Block& messageBlock_in)
 {
@@ -1873,7 +1871,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -1885,7 +1882,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                               ACE_Reactor_Mask mask_in)
 {
@@ -1966,7 +1962,36 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
+          typename UserDataType>
+bool
+Net_AsynchStreamConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 StreamType,
+                                 StreamStatusType,
+                                 UserDataType>::collect (StatisticContainerType& statistic_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::collect"));
+
+  statistic_out = inherited2::state_.statistic;
+
+  return stream_.collect (statistic_out.streamStatistic);
+}
+
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename StreamStatusType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -1978,7 +2003,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::dump_state"));
@@ -2013,7 +2037,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2025,7 +2048,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::close ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::close"));
@@ -2045,7 +2067,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2057,7 +2078,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::waitForCompletion (bool waitForThreads_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::waitForCompletion"));
@@ -2094,7 +2114,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2106,7 +2125,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::set (enum Net_ClientServerRole role_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::set"));
@@ -2144,7 +2162,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2156,7 +2173,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::send (ACE_Message_Block*& message_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::send"));
@@ -2198,7 +2214,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2210,7 +2225,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::waitForIdleState () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::waitForIdleState"));
@@ -2235,7 +2249,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 bool
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2247,8 +2260,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 //UserDataType>::get () const
-                                 TimerManagerType,
                                  UserDataType>::wait (StreamStatusType state_in,
                                                       const ACE_Time_Value* timeValue_in)
 {
@@ -2304,7 +2315,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 ACE_Message_Block*
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2316,7 +2326,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::allocateMessage"));
@@ -2387,7 +2396,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2399,7 +2407,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_read_stream"));
@@ -2408,6 +2415,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   bool close_b =
       (inherited2::state_.status == NET_CONNECTION_STATUS_CLOSED);
   bool release_message_block_b = true;
+  size_t bytes_transferred_i = 0;
 
   // sanity check
   if (unlikely (!result_in.success ()))
@@ -2433,7 +2441,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 #endif
   } // end IF
 
-  switch (static_cast<int> (result_in.bytes_transferred ()))
+  bytes_transferred_i = result_in.bytes_transferred ();
+  switch (static_cast<int> (bytes_transferred_i))
   {
     case -1:
     {
@@ -2474,10 +2483,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
     default:
     {
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%d]: received %u bytes\n"),
-//                   result.handle (),
-//                   result.bytes_transferred ()));
+      // update statistic
+      inherited2::state_.statistic.receivedBytes += bytes_transferred_i;
 
       // push the buffer onto the stream for processing
       result = stream_.put (&result_in.message_block (), NULL);
@@ -2546,7 +2553,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2558,12 +2564,12 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_read_dgram"));
 
   int result = -1;
+  size_t bytes_transferred_i = 0;
 
   // sanity check
   if (unlikely (!result_in.success ()))
@@ -2592,7 +2598,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 #endif
   } // end IF
 
-  switch (static_cast<int> (result_in.bytes_transferred ()))
+  bytes_transferred_i = result_in.bytes_transferred ();
+  switch (static_cast<int> (bytes_transferred_i))
   {
     case -1:
     {
@@ -2630,12 +2637,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
     default:
     {
-#if defined (_DEBUG)
-       ACE_DEBUG ((LM_DEBUG,
-                   ACE_TEXT ("[%d]: received %u bytes\n"),
-                   result_in.handle (),
-                   result_in.bytes_transferred ()));
-#endif // _DEBUG
+      // update statistic
+      inherited2::state_.statistic.receivedBytes += bytes_transferred_i;
 
       // push the buffer into the stream for processing
       result = stream_.put (result_in.message_block (), NULL);
@@ -2700,7 +2703,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2712,7 +2714,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_write_stream"));
@@ -2770,7 +2771,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
@@ -2782,7 +2782,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 TimerManagerType,
                                  UserDataType>::handle_write_dgram (const ACE_Asynch_Write_Dgram::Result& result_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_write_dgram"));

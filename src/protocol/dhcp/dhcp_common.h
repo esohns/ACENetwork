@@ -52,7 +52,7 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     DHCP_Record,
                                     DHCP_SessionMessage> DHCP_ISessionNotify_t;
 
-typedef struct Stream_Statistic DHCP_Statistic_t;
+typedef Net_StreamStatistic_t DHCP_Statistic_t;
 typedef Common_IStatistic_T<DHCP_Statistic_t> DHCP_StatisticReportingHandler_t;
 typedef Common_StatisticHandler_T<DHCP_Statistic_t> DHCP_StatisticHandler_t;
 
@@ -123,10 +123,10 @@ struct DHCP_MessageData
 typedef Stream_DataBase_T<DHCP_MessageData> DHCP_MessageData_t;
 
 struct DHCP_ConnectionState
- : Net_ConnectionState
+ : Net_StreamConnectionState
 {
   DHCP_ConnectionState ()
-   : Net_ConnectionState ()
+   : Net_StreamConnectionState ()
    , serverAddress (static_cast<u_short> (0),
                     static_cast<ACE_UINT32> (INADDR_ANY))
    , timeStamp (ACE_Time_Value::zero)

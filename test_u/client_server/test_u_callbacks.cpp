@@ -423,7 +423,7 @@ idle_update_progress_client_cb (gpointer userData_in)
 
   // step2: update progress bar text
   std::ostringstream converter;
-  converter << data_p->statistic.messagesPerSecond;
+  converter << data_p->statistic.streamStatistic.messagesPerSecond;
   converter << ACE_TEXT_ALWAYS_CHAR (" mps");
   gtk_progress_bar_set_text (progress_bar_p,
                              (done ? ACE_TEXT_ALWAYS_CHAR ("")
@@ -779,7 +779,7 @@ idle_update_progress_server_cb (gpointer userData_in)
   ACE_TCHAR buffer_a[BUFSIZ];
   ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   int result = -1;
-  float speed = data_p->statistic.bytesPerSecond;
+  float speed = data_p->statistic.streamStatistic.bytesPerSecond;
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
   if (speed)
   {

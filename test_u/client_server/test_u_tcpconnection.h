@@ -52,20 +52,18 @@ class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_TCPSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
-                                  struct Net_ConnectionState,
-                                  Net_Statistic_t,
+                                  struct Net_StreamConnectionState,
+                                  Net_StreamStatistic_t,
                                   Test_U_Stream,
-                                  Common_Timer_Manager_t,
                                   struct Net_UserData>
  , public Net_IPing
 {
   typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_TCPSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
-                                  struct Net_ConnectionState,
-                                  Net_Statistic_t,
+                                  struct Net_StreamConnectionState,
+                                  Net_StreamStatistic_t,
                                   Test_U_Stream,
-                                  Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
 
   friend class ACE_Acceptor<Test_U_TCPConnection, ACE_SOCK_ACCEPTOR>;
@@ -90,19 +88,17 @@ class Test_U_TCPConnection
 class Test_U_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                         Test_U_TCPConnectionConfiguration,
-                                        struct Net_ConnectionState,
-                                        Net_Statistic_t,
+                                        struct Net_StreamConnectionState,
+                                        Net_StreamStatistic_t,
                                         Test_U_Stream,
-                                        Common_Timer_Manager_t,
                                         struct Net_UserData>
  , public Net_IPing
 {
  typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                        Test_U_TCPConnectionConfiguration,
-                                       struct Net_ConnectionState,
-                                       Net_Statistic_t,
+                                       struct Net_StreamConnectionState,
+                                       Net_StreamStatistic_t,
                                        Test_U_Stream,
-                                       Common_Timer_Manager_t,
                                        struct Net_UserData> inherited;
 
  friend class ACE_Asynch_Acceptor<Test_U_AsynchTCPConnection>;
@@ -131,20 +127,18 @@ class Test_U_SSLConnection
  : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_SSLSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
-                                  struct Net_ConnectionState,
-                                  Net_Statistic_t,
+                                  struct Net_StreamConnectionState,
+                                  Net_StreamStatistic_t,
                                   Test_U_Stream,
-                                  Common_Timer_Manager_t,
                                   struct Net_UserData>
  , public Net_IPing
 {
   typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_SSLSocketHandler_t,
                                   Test_U_TCPConnectionConfiguration,
-                                  struct Net_ConnectionState,
-                                  Net_Statistic_t,
+                                  struct Net_StreamConnectionState,
+                                  Net_StreamStatistic_t,
                                   Test_U_Stream,
-                                  Common_Timer_Manager_t,
                                   struct Net_UserData> inherited;
 
   friend class ACE_Acceptor<Test_U_SSLConnection, ACE_SSL_SOCK_Acceptor>;

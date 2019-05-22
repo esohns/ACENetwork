@@ -45,8 +45,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
-          typename TimerManagerType, // implements Common_ITimer
-          ////////////////////////////////
           typename UserDataType>
 class Net_UDPConnectionBase_T
  : public Net_StreamConnectionBase_T<ACE_SYNCH_USE,
@@ -59,7 +57,6 @@ class Net_UDPConnectionBase_T
                                      Net_UDPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     TimerManagerType,
                                      UserDataType>
  , public Net_TransportLayer_UDP
 {
@@ -73,7 +70,6 @@ class Net_UDPConnectionBase_T
                                      Net_UDPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     TimerManagerType,
                                      UserDataType> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
@@ -83,7 +79,6 @@ class Net_UDPConnectionBase_T
                                                      StateType,
                                                      StatisticContainerType,
                                                      StreamType,
-                                                     TimerManagerType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
@@ -99,7 +94,6 @@ class Net_UDPConnectionBase_T
                                      Net_UDPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
 
   Net_UDPConnectionBase_T (bool); // managed ?
@@ -152,8 +146,6 @@ template <typename SocketHandlerType, // implements Net_AsynchUDPSocketHandler_T
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
-          typename TimerManagerType, // implements Common_ITimer
-          ////////////////////////////////
           typename UserDataType>
 class Net_AsynchUDPConnectionBase_T
  : public Net_AsynchStreamConnectionBase_T<SocketHandlerType,
@@ -165,7 +157,6 @@ class Net_AsynchUDPConnectionBase_T
                                            Net_UDPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           TimerManagerType,
                                            UserDataType>
  , public Net_TransportLayer_UDP
 {
@@ -178,7 +169,6 @@ class Net_AsynchUDPConnectionBase_T
                                            Net_UDPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           TimerManagerType,
                                            UserDataType> inherited;
   typedef Net_TransportLayer_UDP inherited2;
 
@@ -187,7 +177,6 @@ class Net_AsynchUDPConnectionBase_T
                                                                   StateType,
                                                                   StatisticContainerType,
                                                                   StreamType,
-                                                                  TimerManagerType,
                                                                   UserDataType> >;
 
  public:
@@ -201,7 +190,6 @@ class Net_AsynchUDPConnectionBase_T
                                            Net_UDPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           TimerManagerType,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
 
   Net_AsynchUDPConnectionBase_T (bool); // managed ?

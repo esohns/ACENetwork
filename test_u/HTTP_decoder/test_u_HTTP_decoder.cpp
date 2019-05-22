@@ -590,7 +590,8 @@ do_work (unsigned int bufferSize_in,
 
   // step0c: initialize connection manager
   struct Net_UserData user_data_s;
-  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*dynamic_cast<Test_U_ConnectionConfiguration*> ((*iterator).second),
                              &user_data_s);
 
@@ -603,9 +604,9 @@ do_work (unsigned int bufferSize_in,
   ACE_thread_t thread_id = 0;
   timer_manager_p->start (thread_id);
   ACE_UNUSED_ARG (thread_id);
-  Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
-                                               connection_manager_p,
-                                               false);
+  Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
+                                                  connection_manager_p,
+                                                  false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
@@ -692,7 +693,7 @@ do_work (unsigned int bufferSize_in,
   Test_U_IConnection_t* connection_p = NULL;
   Test_U_IStreamConnection_t* istream_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT,
+  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S,
                                          0);
   ACE_Time_Value deadline;
   enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;

@@ -20,20 +20,22 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_time_common.h"
+
 #include "net_common_tools.h"
 #include "net_macros.h"
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename TimerManagerType,
           typename UserDataType>
-Net_ConnectionBase_T<AddressType,
+Net_ConnectionBase_T<ACE_SYNCH_USE,
+                     AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     TimerManagerType,
                      UserDataType>::Net_ConnectionBase_T (bool managed_in)
  : inherited (1,    // initial count
               true) // delete on zero ?
@@ -41,14 +43,10 @@ Net_ConnectionBase_T<AddressType,
  , state_ ()
  , isManaged_ (managed_in)
  , isRegistered_ (false)
- , statisticHandler_ (COMMON_STATISTIC_ACTION_COLLECT,
-                      this,
-                      true)
- , timerId_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 
-  // initialize configuration/user data
+  // initialize configuration/user data ?
   if (likely (isManaged_))
   {
     typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
@@ -64,88 +62,64 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::get(), continuing\n")));
     }
     ACE_ASSERT (configuration_);
-
-    // *TODO*: this must go into initialize () as well (un'managed' case)
-    if (configuration_->statisticCollectionInterval != ACE_Time_Value::zero)
-    {
-      // schedule regular statistic collection
-      typename TimerManagerType::INTERFACE_T* itimer_manager_p =
-          (configuration_->timerManager ? configuration_->timerManager
-                                        : TimerManagerType::SINGLETON_T::instance ());
-      ACE_ASSERT (itimer_manager_p);
-      timerId_ =
-        itimer_manager_p->schedule_timer (&statisticHandler_,                                            // event handler
-                                          NULL,                                                          // asynchronous completion token
-                                          COMMON_TIME_NOW + configuration_->statisticCollectionInterval, // first wakeup time
-                                          configuration_->statisticCollectionInterval);                  // interval
-      if (unlikely (timerId_ == -1))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_ITimer::schedule_timer(%#T): \"%m\", continuing\n"),
-                    &configuration_->statisticCollectionInterval));
-#if defined (_DEBUG)
-      else
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("scheduled statistic timer (id: %d, interval: %#T)\n"),
-                    timerId_,
-                    &configuration_->statisticCollectionInterval));
-#endif // _DEBUG
-    } // end IF
   } // end IF
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename TimerManagerType,
           typename UserDataType>
-Net_ConnectionBase_T<AddressType,
+void
+Net_ConnectionBase_T<ACE_SYNCH_USE,
+                     AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     TimerManagerType,
-                     UserDataType>::~Net_ConnectionBase_T ()
+                     UserDataType>::update ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::update"));
 
-  int result = -1;
-
-  // clean up timer, if necessary
-  if (timerId_ != -1)
-  {
-    typename TimerManagerType::INTERFACE_T* itimer_manager_p =
-        (configuration_ ? (configuration_->timerManager ? configuration_->timerManager
-                                                        : TimerManagerType::SINGLETON_T::instance ())
-                        : TimerManagerType::SINGLETON_T::instance ());
-    ACE_ASSERT (itimer_manager_p);
-    const void* act_p = NULL;
-    result = itimer_manager_p->cancel_timer (timerId_,
-                                             &act_p);
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
-                  timerId_));
-#if defined (_DEBUG)
-    else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("cancelled statistic timer (id was: %d)\n"),
-                  timerId_));
-#endif // _DEBUG
-  } // end IF
+  state_.statistic.previousBytes = state_.statistic.sentBytes +
+                                   state_.statistic.receivedBytes;
+  state_.statistic.previousTimeStamp = state_.statistic.timeStamp;
+  state_.statistic.timeStamp = COMMON_TIME_NOW;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename TimerManagerType,
+          typename UserDataType>
+void
+Net_ConnectionBase_T<ACE_SYNCH_USE,
+                     AddressType,
+                     ConfigurationType,
+                     StateType,
+                     StatisticContainerType,
+                     UserDataType>::report () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::report"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
           typename UserDataType>
 bool
-Net_ConnectionBase_T<AddressType,
+Net_ConnectionBase_T<ACE_SYNCH_USE,
+                     AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     TimerManagerType,
                      UserDataType>::register_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::register_"));
@@ -153,31 +127,26 @@ Net_ConnectionBase_T<AddressType,
   // sanity check(s)
   ACE_ASSERT (!isRegistered_);
 
+  // (try to) register with the connection manager
   typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
       CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (manager_p);
-
-  // (try to) register with the connection manager
   try {
     isRegistered_ = manager_p->register_ (this);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), continuing\n")));
-    isRegistered_ = false;
   }
   if (unlikely (!isRegistered_))
   {
     // *NOTE*: most probable reason: maximum number of connections has been
-    //         reached
-    //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
+    //         reached, or currently not accepting new connections
     return false;
   } // end IF
 
 #if defined (_DEBUG)
-  AddressType local_address;
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-  AddressType remote_address;
+  AddressType local_address, remote_address;
   try {
     this->info (handle_h,
                 local_address, remote_address);
@@ -207,18 +176,18 @@ Net_ConnectionBase_T<AddressType,
   return true;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename TimerManagerType,
           typename UserDataType>
 void
-Net_ConnectionBase_T<AddressType,
+Net_ConnectionBase_T<ACE_SYNCH_USE,
+                     AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     TimerManagerType,
                      UserDataType>::deregister ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));
@@ -230,11 +199,9 @@ Net_ConnectionBase_T<AddressType,
   typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
     CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (manager_p);
-
 #if defined (_DEBUG)
-  AddressType local_address;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  AddressType remote_address;
+  AddressType local_address, remote_address;
   try {
     this->info (handle,
                 local_address,
@@ -271,18 +238,18 @@ Net_ConnectionBase_T<AddressType,
 #endif // _DEBUG
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename TimerManagerType,
           typename UserDataType>
 ACE_Message_Block*
-Net_ConnectionBase_T<AddressType,
+Net_ConnectionBase_T<ACE_SYNCH_USE,
+                     AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     TimerManagerType,
                      UserDataType>::allocateMessage (unsigned int requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::allocateMessage"));

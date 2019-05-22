@@ -37,7 +37,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         SocketHandlerType,
@@ -45,7 +44,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::Net_UDPConnectionBase_T (bool managed_in)
  : inherited (managed_in)
 {
@@ -87,7 +85,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
@@ -96,13 +93,12 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::handle_input"));
 
   int result = -1;
-  ssize_t bytes_received = -1;
+  ssize_t bytes_received_i = -1;
   ACE_Message_Block* message_block_p = NULL;
   ACE_INET_Addr peer_address;
 
@@ -123,7 +119,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
 
   // read a datagram from the socket
-  bytes_received =
+  bytes_received_i =
     inherited::peer_.recv (message_block_p->wr_ptr (),   // buffer
                            message_block_p->capacity (), // buffer size
                            peer_address,                 // peer address
@@ -132,7 +128,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   //                                        inherited2::configuration_->PDUSize, // n
   //                                        0,                                   // flags
   //                                        NULL);                               // timeout
-  switch (bytes_received)
+  switch (bytes_received_i)
   {
     case -1:
     {
@@ -160,22 +156,11 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
     }
     default:
     {
-#if defined (_DEBUG)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("[0x%@]: received %d byte(s)\n"),
-                  handle_in,
-                  bytes_received));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("[%d]: received %d byte(s)\n"),
-                  handle_in,
-                  bytes_received));
-#endif
-#endif // _DEBUG
+      // update statistic
+      inherited::state_.statistic.receivedBytes += bytes_received_i;
 
       // adjust write pointer
-      message_block_p->wr_ptr (static_cast<size_t> (bytes_received));
+      message_block_p->wr_ptr (static_cast<size_t> (bytes_received_i));
 
       break;
     }
@@ -205,7 +190,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
@@ -214,7 +198,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::handle_output"));
@@ -392,7 +375,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
@@ -401,7 +383,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::info (ACE_HANDLE& handle_out,
                                              ACE_INET_Addr& localSAP_out,
                                              ACE_INET_Addr& peerSAP_out) const
@@ -462,7 +443,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
@@ -471,7 +451,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::reset ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::reset"));
@@ -509,7 +488,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
@@ -518,7 +496,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        TimerManagerType,
                         UserDataType>::processErrorQueue ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::processErrorQueue"));
@@ -636,14 +613,12 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::Net_AsynchUDPConnectionBase_T (bool managed_in)
  : inherited (managed_in)
 {
@@ -682,7 +657,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
@@ -690,7 +664,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::open (ACE_HANDLE handle_in,
                                                    ACE_Message_Block& messageBlock_in)
 {
@@ -801,7 +774,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 int
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
@@ -809,7 +781,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::handle_output"));
@@ -940,7 +911,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
@@ -948,7 +918,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::info (ACE_HANDLE& handle_out,
                                                    ACE_INET_Addr& localSAP_out,
                                                    ACE_INET_Addr& peerSAP_out) const
@@ -1008,7 +977,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
@@ -1016,7 +984,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::reset ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::reset"));
@@ -1072,7 +1039,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 bool
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
@@ -1080,7 +1046,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::initiate_read ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::initiate_read"));
@@ -1110,7 +1075,6 @@ template <typename SocketHandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename StreamType,
-          typename TimerManagerType,
           typename UserDataType>
 void
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
@@ -1118,7 +1082,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              TimerManagerType,
                               UserDataType>::processErrorQueue ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::processErrorQueue"));

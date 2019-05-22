@@ -757,10 +757,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end SWITCH
 
   // step0d: initialize connection manager
-  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (tcp_connection_configuration,
                              NULL);
-  connection_manager_2->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->set (udp_connection_configuration,
                              NULL);
 
@@ -1260,7 +1262,7 @@ ACE_TMAIN (int argc_in,
           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   ACE_Time_Value ping_interval (NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL / 1000,
                                 (NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL % 1000) * 1000);
-  ACE_Time_Value statistic_reporting_interval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
+  ACE_Time_Value statistic_reporting_interval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S,
                                                0);
   bool trace_information = false;
   enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_TCP;

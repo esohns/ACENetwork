@@ -197,7 +197,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
       } // end IF
 
 #if defined (GUI_SUPPORT)
-      CBData_->progressData.statistic = sessionData_->statistic;
+      CBData_->progressData.statistic.streamStatistic = sessionData_->statistic;
 #endif // GUI_SUPPORT
 
       if (sessionData_->lock)

@@ -38,9 +38,9 @@
 #include "net_client_connector_common.h"
 
 class Client_TimeoutHandler
- : public Common_TimerHandler
+ : public Common_Timer_Handler
 {
-  typedef Common_TimerHandler inherited;
+  typedef Common_Timer_Handler inherited;
 
  public:
   enum ActionModeType

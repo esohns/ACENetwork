@@ -491,7 +491,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
       bool reset_configuration = false;
       ACE_Time_Value deadline = ACE_Time_Value::zero;
-      ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
       enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //      bool use_reactor = false;
       ConnectionConfigurationIteratorType iterator;
@@ -794,7 +794,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (connection_manager_p);
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
   ACE_Time_Value deadline = ACE_Time_Value::zero;
-  ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+  ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
   typename ConnectorTypeBcast::ISTREAM_CONNECTION_T* istream_connection_p =
       NULL;

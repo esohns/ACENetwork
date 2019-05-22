@@ -60,7 +60,7 @@ class Test_U_Stream
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_StreamState,
                                         struct Test_U_StreamConfiguration,
-                                        Net_Statistic_t,
+                                        struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
@@ -82,7 +82,7 @@ class Test_U_Stream
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_StreamState,
                                         struct Test_U_StreamConfiguration,
-                                        Net_Statistic_t,
+                                        struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
@@ -114,11 +114,6 @@ class Test_U_Stream
   virtual bool initialize (const typename inherited::CONFIGURATION_T&,
 #endif
                            ACE_HANDLE); // socket handle
-
-  // implement Common_IStatistic_T
-  // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Net_Statistic_t&); // return value: statistic data
-  virtual void report () const;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))

@@ -68,7 +68,7 @@
 // --- UDP ---
 
 // *NOTE*: see also: SO_MAX_MSG_SIZE
-#define NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE                 65507
+#define NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE                 65507 // bytes
 
 // protocol parsers
 //#define YY_END_OF_BUFFER_CHAR                               0 // "\0\0"
@@ -90,7 +90,7 @@
 #define NET_SOCKET_DEFAULT_ERRORQUEUE                        true  // IP_RECVERR
 #endif // ACE_LINUX
 #define NET_SOCKET_DEFAULT_LINGER                            true  // SO_LINGER
-#define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE               ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+#define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE               ACE_DEFAULT_MAX_SOCKET_BUFSIZ // bytes
 #define NET_SOCKET_DEFAULT_TCP_NODELAY                       true  // SO_NODELAY
 #define NET_SOCKET_DEFAULT_TCP_KEEPALIVE                     false // SO_KEEPALIVE
 #define NET_SOCKET_DEFAULT_UDP_CONNECT                       false
@@ -100,11 +100,11 @@
 #define NET_CONNECTION_HANDLER_THREAD_GROUP_ID               20
 #define NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN                10
 
-#define NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT        3 // seconds
+#define NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S      3 // seconds
 
 // (asynchronous) connections
-#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT                60 // second(s)
-#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL       1  // second(s)
+#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S              60 // second(s)
+#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL_S     1  // second(s)
 
 // event dispatch
 //#define NET_EVENT_DISPATCH_THREAD_GROUP_ID                  22
@@ -115,14 +115,17 @@
 #define NET_STREAM_MAX_MESSAGES                              0  // 0 --> no limits
 #define NET_STREAM_MESSAGE_DATA_BUFFER_SIZE                  16384 // bytes
 
-#define NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL      0  // seconds [0: off]
+#define NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S    0  // seconds [0: off]
 #define NET_STREAM_DEFAULT_NAME                              "NetStream"
 
 #define NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING  "SocketHandler"
 
 // statistic
-#define NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL            0 // ms [0: off]
-#define NET_STATISTIC_DEFAULT_REPORTING_INTERVAL             0 // second(s) [0: off]
+// *NOTE*: lower values --> more overhead, better estimations
+//         higher values --> less overhead, worse estimations
+#define NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS              500 // ms
+#define NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL_MS         0 // ms [0: off]
+#define NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S           0 // second(s) [0: off]
 
 // platform
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

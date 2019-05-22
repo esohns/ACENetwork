@@ -540,9 +540,9 @@ do_work (bool autoAssociate_in,
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iwlanmonitor_p && istatistic_handler_p);
 
-  Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
-                                               dynamic_cast<Test_U_IStatistic_t*> (iwlanmonitor_p),
-                                               false);
+  Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
+                                            dynamic_cast<Net_IStatisticHandler_t*> (iwlanmonitor_p),
+                                            false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -835,7 +835,7 @@ ACE_TMAIN (int argc_in,
   bool log_to_file = false;
 //  bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval =
-    NET_STATISTIC_DEFAULT_REPORTING_INTERVAL;
+    NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   std::string SSID_string;
   bool trace_information = false;
   bool print_version_and_exit = false;

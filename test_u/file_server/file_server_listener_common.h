@@ -42,14 +42,14 @@ class Test_U_Stream;
 typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
                                     FileServer_TCPConnectionConfiguration,
-                                    struct Net_ConnectionState,
+                                    struct Net_StreamConnectionState,
                                     Test_U_Stream,
                                     struct Net_UserData> FileServer_AsynchListener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
                               FileServer_TCPConnectionConfiguration,
-                              struct Net_ConnectionState,
+                              struct Net_StreamConnectionState,
                               Test_U_Stream,
                               struct Net_UserData> FileServer_Listener_t;
 
