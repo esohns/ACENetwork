@@ -554,11 +554,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
   ACE_ASSERT (connection_manager_2);
 
   // step0a: initialize configuration
-  Test_U_EventHandler ui_event_handler (
+  Test_U_EventHandler_t ui_event_handler (
 #if defined (GUI_SUPPORT)
-                                        &CBData_in
+                                          &CBData_in
 #endif // GUI_SUPPORT
-                                        );
+                                         );
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 //  Test_U_Module_EventHandler* event_handler_p =

@@ -64,7 +64,7 @@ Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispa
 bool
 Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.dispatchState);
@@ -97,7 +97,7 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
 void
 Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::handle"));
 
   int result = -1;
   Common_Timer_Manager_t* timer_manager_p =

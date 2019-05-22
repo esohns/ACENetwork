@@ -45,7 +45,8 @@ Net_Client_AsynchConnector_T<HandlerType,
                              HandlerConfigurationType,
                              StreamType,
                              UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
- : configuration_ (NULL)
+ : inherited ()
+ , configuration_ (NULL)
  , handles_ ()
  , managed_ (managed_in)
  , SAP_ ()

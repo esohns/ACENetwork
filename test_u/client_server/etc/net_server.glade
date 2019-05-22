@@ -193,6 +193,7 @@
                             <property name="snap_to_ticks">True</property>
                             <property name="numeric">True</property>
                             <property name="wrap">True</property>
+                            <signal name="value-changed" handler="spinbutton_connections_value_changed_server_cb" swapped="no"/>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -495,7 +496,7 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog_action_area">
+          <object class="GtkButtonBox" id="dialog_action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>

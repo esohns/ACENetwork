@@ -125,6 +125,7 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_connection_manager_common.h
      test_u_eventhandler.cpp
      test_u_eventhandler.h
+     test_u_eventhandler.inl
      test_u_message.cpp
      test_u_message.h
      test_u_module_eventhandler.cpp
@@ -249,6 +250,7 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_message.h
      test_u_eventhandler.cpp
      test_u_eventhandler.h
+     test_u_eventhandler.inl
      test_u_module_eventhandler.cpp
      test_u_module_eventhandler.h
      test_u_module_headerparser.cpp

@@ -529,11 +529,11 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Common_Tools::initialize ();
 
   // step0a: initialize configuration
-  Test_U_EventHandler ui_event_handler (
 #if defined (GUI_SUPPORT)
-                                        &CBData_in
+  Test_U_EventHandler_t ui_event_handler (&CBData_in);
+#else
+  Test_U_EventHandler_t ui_event_handler ();
 #endif // GUI_SUPPORT
-                                       );
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_U_Module_EventHandler* event_handler_p =
@@ -577,8 +577,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
 #endif // GUI_SUPPORT
 
-  configuration_in.streamConfiguration.configuration_.cloneModule =
-    !(UIDefinitionFile_in.empty ());
+  configuration_in.streamConfiguration.configuration_.cloneModule = true;
   configuration_in.streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
   configuration_in.streamConfiguration.configuration_.module =
@@ -638,28 +637,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // ************ runtime data ************
 //	config.currentStatistics = {};
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
-
-  // step0b: initialize event dispatch
-  struct Common_EventDispatchState event_dispatch_state_s;
-  event_dispatch_state_s.configuration =
-    &configuration_in.dispatchConfiguration;
-  if (useReactor_in)
-  {
-    configuration_in.dispatchConfiguration.numberOfReactorThreads =
-      numberOfDispatchThreads_in;
-    configuration_in.dispatchConfiguration.reactorType =
-      ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_THREAD_POOL
-                                        : COMMON_REACTOR_ACE_DEFAULT);
-  } // end IF
-  else
-    configuration_in.dispatchConfiguration.numberOfProactorThreads =
-      numberOfDispatchThreads_in;
-  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize event dispatch, returing\n")));
-    return;
-  } // end IF
 
   // step0c: initialize connector
   Test_U_TCPConnectionManager_t* connection_manager_p =
@@ -844,8 +821,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     &udp_connection_configuration;
   configuration_in.signalHandlerConfiguration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
-  configuration_in.signalHandlerConfiguration.dispatchState =
-    &event_dispatch_state_s;
   configuration_in.signalHandlerConfiguration.messageAllocator =
     &message_allocator;
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
@@ -927,7 +902,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #endif // GUI_SUPPORT
 
   // step1b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Tools::startEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
@@ -970,8 +945,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                             event_dispatch_state_s.reactorGroupId,
+        Common_Tools::finalizeEventDispatch (configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId,
+                                             configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId,
                                              false);                                // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
@@ -1028,8 +1003,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                             event_dispatch_state_s.reactorGroupId,
+        Common_Tools::finalizeEventDispatch (configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId,
+                                             configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId,
                                              false);                                // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
@@ -1058,8 +1033,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // step2: dispatch events
   Common_Tools::dispatchEvents (useReactor_in,
-                                (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                               : event_dispatch_state_s.proactorGroupId));
+                                (useReactor_in ? configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId
+                                               : configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId));
 
   // step3: clean up
 #if defined (GUI_SUPPORT)
@@ -1379,6 +1354,7 @@ ACE_TMAIN (int argc_in,
   logstack_p = &state_r.logStack;
   lock_p = &state_r.logStackLock;
   ui_cb_data.UIState = &state_r;
+  ui_cb_data.progressData.state = &state_r;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -1412,6 +1388,54 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
 
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
+    return EXIT_FAILURE;
+  } // end IF
+
+  // step1f: handle specific program modes
+  if (print_version_and_exit)
+  {
+    do_printVersion (ACE::basename (argv_in[0]));
+
+    Common_Log_Tools::finalizeLogging ();
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
+    return EXIT_SUCCESS;
+  } // end IF
+
+  // step1d: initialize event dispatch
+  struct Client_Configuration configuration;
+  struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+    &configuration.dispatchConfiguration;
+  if (use_reactor)
+  {
+    configuration.dispatchConfiguration.numberOfReactorThreads =
+      number_of_dispatch_threads;
+    configuration.dispatchConfiguration.reactorType =
+      ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_THREAD_POOL
+                                        : COMMON_REACTOR_ACE_DEFAULT);
+  } // end IF
+  else
+    configuration.dispatchConfiguration.numberOfProactorThreads =
+    number_of_dispatch_threads;
+  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize event dispatch, aborting\n")));
+
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1465,6 +1489,8 @@ ACE_TMAIN (int argc_in,
 #endif
     return EXIT_FAILURE;
   } // end IF
+  configuration.signalHandlerConfiguration.dispatchState =
+    &event_dispatch_state_s;
   Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
 #if defined (GUI_SUPPORT)
@@ -1474,27 +1500,6 @@ ACE_TMAIN (int argc_in,
                                        NULL);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-
-  // step1f: handle specific program modes
-  if (print_version_and_exit)
-  {
-    do_printVersion (ACE::basename (argv_in[0]));
-
-    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                   signal_set,
-                                   previous_signal_actions,
-                                   previous_signal_mask);
-    Common_Log_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, finalize ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    result = ACE::fini ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-    return EXIT_SUCCESS;
-  } // end IF
 
   // step1g: set process resource limits
   // *NOTE*: settings will be inherited by any child processes
@@ -1530,7 +1535,6 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1h: initialize UI framework
-  struct Client_Configuration configuration;
 #if defined (GUI_SUPPORT)
   ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)

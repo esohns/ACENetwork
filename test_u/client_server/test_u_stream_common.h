@@ -48,10 +48,10 @@ struct Test_U_StreamSessionData
    , userData (NULL)
   {};
 
-  struct Net_ConnectionState* connectionState;
+  struct Net_StreamConnectionState* connectionState;
   //Test_U_Statistic_t          statistic;
 
-  struct Net_UserData*        userData;
+  struct Net_UserData*              userData;
 };
 typedef Stream_SessionData_T<struct Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 
