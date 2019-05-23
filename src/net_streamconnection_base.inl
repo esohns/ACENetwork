@@ -1940,6 +1940,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited::cancel ();
 
   // step2b: deregister with the connection manager (if any) ?
+  // *WARNING*: most likely 'delete's 'this'
   close_socket_b = (inherited2::count () <= 2);
   if (likely (inherited2::isRegistered_))
     inherited2::deregister ();

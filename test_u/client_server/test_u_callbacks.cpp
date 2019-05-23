@@ -424,7 +424,9 @@ idle_update_progress_client_cb (gpointer userData_in)
   // step2: update progress bar text
   std::ostringstream converter;
   converter << data_p->statistic.streamStatistic.messagesPerSecond;
-  converter << ACE_TEXT_ALWAYS_CHAR (" mps");
+  converter << ACE_TEXT_ALWAYS_CHAR (" mps - ");
+  converter << data_p->statistic.streamStatistic.bytesPerSecond;
+  converter << ACE_TEXT_ALWAYS_CHAR (" Bps ");
   gtk_progress_bar_set_text (progress_bar_p,
                              (done ? ACE_TEXT_ALWAYS_CHAR ("")
                                    : ACE_TEXT_ALWAYS_CHAR (converter.str ().c_str ())));
@@ -1062,6 +1064,10 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
       return FALSE;
     } // end IF
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("scheduled action timer (id: %d, interval: %#T)\n"),
+                configuration_p->signalHandlerConfiguration.actionTimerId,
+                &interval));
   } // end IF
   else
   {
@@ -1073,8 +1079,9 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
                   configuration_p->signalHandlerConfiguration.actionTimerId));
-
-    // clean up
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("cancelled action timer (id: %d)\n"),
+                configuration_p->signalHandlerConfiguration.actionTimerId));
     configuration_p->signalHandlerConfiguration.actionTimerId = -1;
   } // end ELSE
 

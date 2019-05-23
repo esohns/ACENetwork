@@ -209,7 +209,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 
   u_short port_number = DHCP_DEFAULT_SERVER_PORT;
   ACE_INET_Addr address;
-  bool clone_module, delete_module;
+  bool clone_module;
   typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
   bool reset_configuration = false;
   ConnectionManagerType* connection_manager_p = NULL;
@@ -290,13 +290,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (connection_manager_p);
   clone_module =
     inherited::configuration_->streamConfiguration->configuration_.cloneModule;
-  delete_module =
-    inherited::configuration_->streamConfiguration->configuration_.deleteModule;
   module_p =
     inherited::configuration_->streamConfiguration->configuration_.module;
   inherited::configuration_->streamConfiguration->configuration_.cloneModule =
-    false;
-  inherited::configuration_->streamConfiguration->configuration_.deleteModule =
     false;
   inherited::configuration_->streamConfiguration->configuration_.module =
     NULL;
@@ -338,8 +334,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   (*iterator_2).second.writeOnly = write_only;
   inherited::configuration_->streamConfiguration->configuration_.cloneModule =
     clone_module;
-  inherited::configuration_->streamConfiguration->configuration_.deleteModule =
-    delete_module;
   inherited::configuration_->streamConfiguration->configuration_.module =
     module_p;
 
@@ -352,8 +346,6 @@ error:
     (*iterator_2).second.writeOnly = write_only;
     inherited::configuration_->streamConfiguration->configuration_.cloneModule =
       clone_module;
-    inherited::configuration_->streamConfiguration->configuration_.deleteModule =
-      delete_module;
     inherited::configuration_->streamConfiguration->configuration_.module =
       module_p;
     //connection_manager_p->set ((*iterator_2).second,
@@ -666,8 +658,6 @@ error:
 //        (*iterator_2).second->writeOnly = write_only;
         inherited::configuration_->streamConfiguration->configuration_.cloneModule =
           clone_module;
-        inherited::configuration_->streamConfiguration->configuration_.deleteModule =
-          delete_module;
         inherited::configuration_->streamConfiguration->configuration_.module =
           module_p;
 

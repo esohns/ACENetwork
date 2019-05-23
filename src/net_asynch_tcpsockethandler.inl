@@ -308,7 +308,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
                   handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
-  inherited2::handle (ACE_INVALID_HANDLE);
+  // *NOTE*: 'this' has been delete'd
+  //inherited2::handle (ACE_INVALID_HANDLE);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (writeHandle_ != ACE_INVALID_HANDLE)

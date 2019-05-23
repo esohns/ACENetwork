@@ -56,6 +56,7 @@
 
 #include "common_signal_tools.h"
 
+#include "common_timer_second_publisher.h"
 #include "common_timer_tools.h"
 
 #if defined (GUI_SUPPORT)
@@ -601,6 +602,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GUI_SUPPORT
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  modulehandler_configuration.computeThroughput = true;
   modulehandler_configuration.printFinalReport = true;
   modulehandler_configuration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
@@ -689,14 +691,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step1: initialize regular (global) statistics reporting
+  Common_Timer_Tools::configuration_.dispatch =
+    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
+  Common_Timer_Tools::initialize (true); // publish seconds ?
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  struct Common_TimerConfiguration timer_configuration;
-  timer_manager_p->initialize (timer_configuration);
-  ACE_thread_t thread_id = 0;
-  timer_manager_p->start (thread_id);
-  ACE_UNUSED_ARG (thread_id);
   Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                   connection_manager_p,
                                                   false);
@@ -714,7 +714,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
-      timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
   } // end IF
@@ -744,7 +744,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
-    timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
   if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -756,7 +756,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
-    timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 
@@ -799,7 +799,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
 
-      timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
     BOOL was_visible_b = ShowWindow (window_p, SW_HIDE);
@@ -821,7 +821,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-      timer_manager_p->stop ();
+
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
 #endif // GTK_USE
@@ -834,6 +835,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
+
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -842,7 +844,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-    timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 
@@ -872,6 +874,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -880,7 +883,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-      timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
   } // end IF
@@ -916,6 +919,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize TCP listener, returning\n")));
+
     Common_Tools::finalizeEventDispatch (useReactor_in,
                                          !useReactor_in,
                                          group_id);
@@ -927,7 +931,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-    timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 #if defined (SSL_USE)
@@ -936,6 +940,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize SSL listener, returning\n")));
+
     Common_Tools::finalizeEventDispatch (useReactor_in,
                                          !useReactor_in,
                                          group_id);
@@ -947,7 +952,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-    timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 #endif // SSL_USE
@@ -971,6 +976,19 @@ do_work (unsigned int maximumNumberOfConnections_in,
                     ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
                     ACE_TEXT (certificateFile_in.c_str ()),
                     ACE_TEXT (privateKeyFile_in.c_str ())));
+
+        Common_Tools::finalizeEventDispatch (useReactor_in,
+                                             !useReactor_in,
+                                             group_id);
+#if defined (GUI_SUPPORT)
+        if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
+          gtk_manager_p->stop ();
+#else
+          ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+        Common_Timer_Tools::finalize ();
         return;
       } // end IF
       break;
@@ -987,6 +1005,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start listener, returning\n")));
+
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
@@ -998,7 +1017,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-      timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
   } // end IF
@@ -1011,6 +1030,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
+
     Common_Tools::finalizeEventDispatch (useReactor_in,
                                           !useReactor_in,
                                           group_id);
@@ -1022,7 +1042,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-    timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 
@@ -1064,6 +1084,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p_2->listenAddress).c_str ())));
+
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
                                            group_id);
@@ -1075,7 +1096,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-      timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
     iconnection_p->decrease ();
@@ -1097,7 +1118,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  timer_manager_p->stop ();
+  Common_Timer_Tools::finalize ();
 
   //// wait for connection processing to complete
   //NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();

@@ -55,7 +55,7 @@
 
 #include "common_signal_tools.h"
 
-#include "common_timer_manager.h"
+#include "common_timer_second_publisher.h"
 #include "common_timer_tools.h"
 
 #if defined (GUI_SUPPORT)
@@ -566,11 +566,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  modulehandler_configuration.computeThroughput = true;
+  modulehandler_configuration.printFinalReport = true;
   modulehandler_configuration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
   modulehandler_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
-  modulehandler_configuration.printFinalReport = true;
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
@@ -777,16 +778,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                          udp_connection_configuration,
                                          (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR));
   configuration_in.timeoutHandler = &timeout_handler;
+  Common_Timer_Tools::configuration_.dispatch =
+    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
+  Common_Timer_Tools::initialize (true); // publish seconds ?
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  struct Common_TimerConfiguration timer_configuration;
-  if (!Common_Timer_Tools::initializeTimers (timer_configuration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeTimers(), returning\n")));
-    return;
-  } // end IF
   if (
 #if defined (GUI_SUPPORT)
       UIDefinitionFile_in.empty () &&
@@ -807,7 +804,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", returning\n")));
-      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
   } // end IF
@@ -827,7 +824,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
-    Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
   if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -839,7 +836,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
-    Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 
@@ -878,7 +875,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
 #endif // GTK_USE
@@ -889,7 +886,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+      Common_Timer_Tools::finalize ();
 #if defined (GTK_USE)
       gtk_manager_p->stop (true,
                            true);
@@ -916,7 +913,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //					 iterator++)
 //				g_source_remove(*iterator);
 //		} // end lock scope
-    Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+    Common_Timer_Tools::finalize ();
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -956,7 +953,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       //					 iterator++)
       //				g_source_remove(*iterator);
       //		} // end lock scope
-      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+      Common_Timer_Tools::finalize ();
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1014,7 +1011,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       //					 iterator++)
       //				g_source_remove(*iterator);
       //		} // end lock scope
-      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
+      Common_Timer_Tools::finalize ();
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1054,6 +1051,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   //				g_source_remove(*iterator);
   //		} // end lock scope
   timer_manager_p->wait ();
+  Common_Timer_Tools::finalize ();
 
 //  connection_manager_p->abort ();
   //TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();

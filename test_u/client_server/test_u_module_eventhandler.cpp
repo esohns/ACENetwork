@@ -50,18 +50,13 @@ Test_U_Module_EventHandler::clone ()
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("%s: failed to allocate memory: \"%m\", aborting\n"),
                 inherited::mod_->name ()));
-  else
-  {
+  else if (inherited::isInitialized_)
+  { ACE_ASSERT (inherited::configuration_);
     inherited* inherited_p = dynamic_cast<inherited*> (task_p);
     ACE_ASSERT (inherited_p);
-
-    if (inherited::isInitialized_)
-    {
-      ACE_ASSERT (inherited::configuration_);
       inherited_p->initialize (*inherited::configuration_,
                                inherited::allocator_);
-    } // end IF
-  } // end ELSE
+  } // end ELSE IF
 
   return task_p;
 }
