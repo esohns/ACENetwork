@@ -933,7 +933,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
          iterator.advance ())
     { ACE_ASSERT (connection_p);
       try { // dump connection information
-        connection_p->update ();
+        connection_p->update (resetTimeoutInterval_);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IStatistic_T::update(), continuing\n")));

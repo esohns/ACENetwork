@@ -762,14 +762,17 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step3: initialize connection manager
   struct Net_UserData user_data;
+  ACE_thread_t thread_id = 0;
   connection_manager_p->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*connection_configuration_p,
                              NULL);
+  connection_manager_p->start (thread_id);
   connection_manager_2->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->set (*connection_configuration_p_2,
                              NULL);
+  connection_manager_2->start (thread_id);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
   // reactor/proactor event loop:
@@ -830,7 +833,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GUI_SUPPORT
 
   // step4b: initialize worker(s)
-  int group_id = -1;
   if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -922,7 +924,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     Common_Tools::finalizeEventDispatch (useReactor_in,
                                          !useReactor_in,
-                                         group_id);
+                                         (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                                        : event_dispatch_state_s.proactorGroupId));
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -943,7 +946,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     Common_Tools::finalizeEventDispatch (useReactor_in,
                                          !useReactor_in,
-                                         group_id);
+                                         (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                                        : event_dispatch_state_s.proactorGroupId));
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -979,7 +983,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
         Common_Tools::finalizeEventDispatch (useReactor_in,
                                              !useReactor_in,
-                                             group_id);
+                                             (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                                            : event_dispatch_state_s.proactorGroupId));
 #if defined (GUI_SUPPORT)
         if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1008,7 +1013,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
-                                           group_id);
+                                           (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                                          : event_dispatch_state_s.proactorGroupId));
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1032,8 +1038,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
 
     Common_Tools::finalizeEventDispatch (useReactor_in,
-                                          !useReactor_in,
-                                          group_id);
+                                         !useReactor_in,
+                                         (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                                        : event_dispatch_state_s.proactorGroupId));
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1087,7 +1094,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
       Common_Tools::finalizeEventDispatch (useReactor_in,
                                            !useReactor_in,
-                                           group_id);
+                                           (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                                          : event_dispatch_state_s.proactorGroupId));
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1105,7 +1113,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   Common_Tools::dispatchEvents (useReactor_in,
-                                group_id);
+                                (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                               : event_dispatch_state_s.proactorGroupId));
 
   // clean up
   // *NOTE*: listener has stopped, interval timer has been cancelled,

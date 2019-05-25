@@ -424,7 +424,7 @@ idle_update_progress_client_cb (gpointer userData_in)
   // step2: update progress bar text
   std::ostringstream converter;
   converter << data_p->statistic.streamStatistic.messagesPerSecond;
-  converter << ACE_TEXT_ALWAYS_CHAR (" mps - ");
+  converter << ACE_TEXT_ALWAYS_CHAR (" mps @ ");
   converter << data_p->statistic.streamStatistic.bytesPerSecond;
   converter << ACE_TEXT_ALWAYS_CHAR (" Bps ");
   gtk_progress_bar_set_text (progress_bar_p,
@@ -750,6 +750,18 @@ idle_update_progress_server_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->state);
 
+  bool done = false;
+  Test_U_TCPConnectionManager_t::INTERFACE_T* itcp_connection_manager_p = NULL;
+  Test_U_UDPConnectionManager_t::INTERFACE_T* iudp_connection_manager_p = NULL;
+  unsigned int number_of_connections_2 = 0;
+  Net_StreamStatistic_t statistic_s, statistic_2;
+  int result = -1;
+  float speed_f = 0.0F, factor_f = 0.0F;
+  std::string magnitude_string;
+  ACE_TCHAR buffer_a[BUFSIZ];
+  ACE_Time_Value interval = ACE_Time_Value::zero;
+  unsigned int interval_ms = 0;
+
   // synch access
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
 
@@ -764,7 +776,6 @@ idle_update_progress_server_cb (gpointer userData_in)
   ACE_ASSERT (progress_bar_p);
 
   // step1: done ?
-  bool done = false;
   GtkSpinButton* spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
@@ -775,32 +786,49 @@ idle_update_progress_server_cb (gpointer userData_in)
   {
     gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), false);
     done = true;
+    goto continue_;
   } // end IF
 
   // step2: update progress bar text
-  ACE_TCHAR buffer_a[BUFSIZ];
+  itcp_connection_manager_p =
+    TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+  iudp_connection_manager_p =
+    TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+  number_of_connections_2 += itcp_connection_manager_p->count ();
+  number_of_connections_2 += iudp_connection_manager_p->count ();
+  itcp_connection_manager_p->collect (statistic_s);
+  interval = statistic_s.timeStamp - statistic_s.previousTimeStamp;
+  interval_ms = interval.msec ();
+  factor_f =
+    1000.0F / (interval_ms ? static_cast<float> (interval_ms) : std::numeric_limits<float>::max ());
+  speed_f =
+    (((statistic_s.sentBytes + statistic_s.receivedBytes) - statistic_s.previousBytes) *
+    factor_f) / static_cast<float> (number_of_connections_2);
+  //iudp_connection_manager_p->collect (statistic_2);
+
   ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
-  int result = -1;
-  float speed = data_p->statistic.streamStatistic.bytesPerSecond;
-  std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
-  if (speed)
+  //speed_f = data_p->statistic.streamStatistic.bytesPerSecond;
+  magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
+  if (speed_f)
   {
-    if (speed >= 1024.0F)
+    if (speed_f >= 1024.0F)
     {
-      speed /= 1024.0F;
+      speed_f /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("kbyte(s)/s");
     } // end IF
-    if (speed >= 1024.0F)
+    if (speed_f >= 1024.0F)
     {
-      speed /= 1024.0F;
+      speed_f /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
     result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
-                              speed, magnitude_string.c_str ());
+                              speed_f, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
   } // end IF
+
+continue_:
   gtk_progress_bar_set_text (progress_bar_p,
                              (done ? ACE_TEXT_ALWAYS_CHAR ("")
                                    : ACE_TEXT_ALWAYS_CHAR (buffer_a)));

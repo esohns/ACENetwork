@@ -77,9 +77,11 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     UserDataType>::update ()
+                     UserDataType>::update (const ACE_Time_Value& interval_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::update"));
+
+  ACE_UNUSED_ARG (interval_in);
 
   state_.statistic.previousBytes = state_.statistic.sentBytes +
                                    state_.statistic.receivedBytes;

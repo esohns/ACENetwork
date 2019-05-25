@@ -215,6 +215,10 @@ struct Net_Statistic
     sentBytes += rhs_in.sentBytes;
     receivedBytes += rhs_in.receivedBytes;
 
+    timeStamp = rhs_in.timeStamp;
+    previousBytes += rhs_in.previousBytes;
+    previousTimeStamp = rhs_in.previousTimeStamp;
+
     return *this;
   }
 

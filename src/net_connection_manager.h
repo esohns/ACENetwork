@@ -49,7 +49,6 @@ class Net_Connection_Manager_T
                                    StatisticContainerType,
                                    UserDataType>
  , public Common_ICounter
- , public Common_IStatistic_T<StatisticContainerType>
 {
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_Connection_Manager_T<ACE_SYNCH_USE,
@@ -151,7 +150,7 @@ class Net_Connection_Manager_T
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held
   virtual bool collect (StatisticContainerType&); // return value: statistic data
-  inline virtual void update () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void update (const ACE_Time_Value&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // implement Common_ICounter
   // *NOTE*: visits each connection updating its statistic to support throughput

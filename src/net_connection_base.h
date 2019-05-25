@@ -68,7 +68,7 @@ class Net_ConnectionBase_T
   using REFERENCECOUNTER_T::decrease;
   using REFERENCECOUNTER_T::increase;
   inline virtual bool collect (StatisticContainerType& statistic_out) { statistic_out = state_.statistic; return true; }
-  virtual void update ();
+  virtual void update (const ACE_Time_Value&);
   virtual void report () const;
   // *NOTE*: iff using a connection manager ('managed', see ctor argument), the
   //         configuration is retrieved in the ctor already

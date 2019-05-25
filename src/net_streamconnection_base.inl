@@ -2719,47 +2719,23 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_write_stream"));
 
-  //// sanity check(s)
-  //ACE_ASSERT (!inherited::partialWrite_);
+  size_t bytes_transferred_i = result_in.bytes_transferred ();
+
+  switch (static_cast<int> (bytes_transferred_i))
+  {
+    case -1:
+    case 0:
+      break;
+    default:
+    {
+      inherited2::state_.statistic.sentBytes += bytes_transferred_i;
+      break;
+    }
+  } // end switch
 
   // *NOTE*: the message block is released by the base class
   inherited::handle_write_stream (result_in);
 
-  //// partial write ?
-  //if (inherited::partialWrite_)
-  //    goto continue_;
-
-//  // reschedule ?
-//  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
-//  {
-//    // *TODO*: put the buffer back into the queue and call handle_output()
-//    // *IMPORTANT NOTE*: this will fail if any buffers have been
-//    //                   dispatched in the meantime
-//    //                   --> i.e. works for single-threaded proactors only
-//
-////    result = handle_output (result_in.handle ());
-////    if (result == -1)
-////    { // *NOTE*: most probable reason: socket has been closed by the peer, which
-////      //         close()s the processing stream (see: handle_close()),
-////      //         shutting down the message queue
-////      int error = ACE_OS::last_error ();
-////#if defined (ACE_WIN32) || defined (ACE_WIN64)
-////      if ((error != ENOTSOCK)   && // 10038: happens on Win32
-////          (error != ECONNRESET) && // 10054: happens on Win32
-////          (error != ENOTCONN))     // 10057: happens on Win32
-////        ACE_DEBUG ((LM_ERROR,
-////                    ACE_TEXT ("failed to ACE_Event_Handler::handle_output(0x%@): \"%m\", continuing\n"),
-////                    handle));
-////#else
-////      if (error != ESHUTDOWN) // 108: happens on Linux
-////        ACE_DEBUG ((LM_ERROR,
-////                    ACE_TEXT ("failed to ACE_Event_Handler::handle_output(%d): \"%m\", continuing\n"),
-////                    handle));
-////#endif
-////    } // end IF
-//  } // end IF
-
-//continue_:
   this->decrease ();
 }
 

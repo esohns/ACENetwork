@@ -65,6 +65,7 @@ class Net_IConnectionManager_T
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType> >
+ , public Common_IStatistic_T<StatisticContainerType>
 {
  public:
   // convenience types
