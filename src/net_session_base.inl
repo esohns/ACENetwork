@@ -218,8 +218,8 @@ Net_SessionBase_T<AddressType,
   {
     deadline =
         (COMMON_TIME_NOW +
-         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT, 0));
-    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL, 0);
+         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
+    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL_S, 0);
     do
     {
       // *TODO*: this does not work...
@@ -251,7 +251,7 @@ Net_SessionBase_T<AddressType,
 
   // step3a: wait for the connection to finish initializing
   // *TODO*: avoid tight loop here
-  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT,
+  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S,
                                          0);
   deadline = COMMON_TIME_NOW + initialization_timeout;
   enum Net_Connection_Status status_e = NET_CONNECTION_STATUS_INVALID;

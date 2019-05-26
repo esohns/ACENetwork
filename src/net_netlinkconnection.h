@@ -58,7 +58,6 @@ class Net_NetlinkConnection_T
                                      Net_NetlinkSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     Common_Timer_Manager_t,
                                      UserDataType>
  , public Net_TransportLayer_Netlink
 {
@@ -72,7 +71,6 @@ class Net_NetlinkConnection_T
                                      Net_NetlinkSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
-                                     Common_Timer_Manager_t,
                                      UserDataType> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 
@@ -140,7 +138,6 @@ class Net_AsynchNetlinkConnection_T
                                            Net_NetlinkSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           Common_Timer_Manager_t,
                                            UserDataType>
  , public Net_TransportLayer_Netlink
 {
@@ -153,7 +150,6 @@ class Net_AsynchNetlinkConnection_T
                                            Net_NetlinkSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           Common_Timer_Manager_t,
                                            UserDataType> inherited;
   typedef Net_TransportLayer_Netlink inherited2;
 

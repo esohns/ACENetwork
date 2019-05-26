@@ -1,16 +1,11 @@
 ﻿set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
+#  message (STATUS "ACE_ROOT: \"$ENV{ACE_ROOT}\"")
   find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
 #                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
                 PATHS ENV{ACE_ROOT}
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_XML_LIB_FILE}"
-                NO_DEFAULT_PATH)
- else ()
-  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local
+                PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE /usr/local
 #                PATHS ENV{ACE_ROOT}
                 PATH_SUFFIXES lib
                 DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")

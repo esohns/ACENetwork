@@ -19,17 +19,45 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "net_os_tools.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (DBUS_SUPPORT)
+#include "dbus/dbus.h"
+#endif // DBUS_SUPPORT
+#include "linux/capability.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
+#include <regex>
+#include <string>
+
+#include "ace/Configuration.h"
+#include "ace/Configuration_Import_Export.h"
+#include "ace/SStringfwd.h"
+
+#include "common_file_tools.h"
+#include "common_string_tools.h"
+#include "common_tools.h"
+
+#include "common_dbus_defines.h"
+#include "common_dbus_tools.h"
+
+#include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
+
+#include "net_wlan_defines.h"
+#include "net_wlan_tools.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 //bool
-//Net_Common_Tools::ifUpDownManageInterface (const std::string& interfaceIdentifier_in,
+//Net_OS_Tools::ifUpDownManageInterface (const std::string& interfaceIdentifier_in,
 //                                           bool toggle_in)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::ifUpDownManageInterface"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_OS_Tools::ifUpDownManageInterface"));
 
 //  // sanity check(s)
 //  ACE_ASSERT (!interfaceIdentifier_in.empty ());
@@ -442,10 +470,10 @@
 //}
 
 bool
-Net_Common_Tools::networkManagerManageInterface (const std::string& interfaceIdentifier_in,
-                                                 bool toggle_in)
+Net_OS_Tools::networkManagerManageInterface (const std::string& interfaceIdentifier_in,
+                                             bool toggle_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::networkManagerManageInterface"));
+  NETWORK_TRACE (ACE_TEXT ("Net_OS_Tools::networkManagerManageInterface"));
 
   std::string configuration_file_path =
       ACE_TEXT_ALWAYS_CHAR ("/etc/NetworkManager/NetworkManager.conf");
@@ -468,7 +496,7 @@ Net_Common_Tools::networkManagerManageInterface (const std::string& interfaceIde
   std::smatch::iterator iterator;
   bool section_found_b = false, value_found_b = false, modified_b = false;
   bool is_managing_interface_b =
-      Net_Common_Tools::isNetworkManagerManagingInterface (interfaceIdentifier_in);
+      Net_OS_Tools::isNetworkManagerManagingInterface (interfaceIdentifier_in);
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
@@ -879,9 +907,9 @@ next_3:
 }
 
 bool
-Net_Common_Tools::isIfUpDownManagingInterface (const std::string& interfaceIdentifier_in)
+Net_OS_Tools::isIfUpDownManagingInterface (const std::string& interfaceIdentifier_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isIfUpDownManagingInterface"));
+  NETWORK_TRACE (ACE_TEXT ("Net_OS_Tools::isIfUpDownManagingInterface"));
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
@@ -1065,9 +1093,9 @@ map:
 }
 
 bool
-Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIdentifier_in)
+Net_OS_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIdentifier_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isNetworkManagerManagingInterface"));
+  NETWORK_TRACE (ACE_TEXT ("Net_OS_Tools::isNetworkManagerManagingInterface"));
 
   bool result = false;
 
