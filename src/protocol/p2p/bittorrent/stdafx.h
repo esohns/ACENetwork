@@ -31,6 +31,7 @@
 #include <string>
 
 // System Library Header Files
+//#define ACE_LACKS_STROPTS_H
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
