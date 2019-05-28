@@ -97,7 +97,7 @@ if (UNIX)
  endif (GUI_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../ACE_TAO/ACE>)
+                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/cmake>)

@@ -17,6 +17,7 @@
 #endif
 
 // C RunTime Header Files
+// *WORKAROUND*
 //#include <iostream>
 //using namespace std;
 //// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces

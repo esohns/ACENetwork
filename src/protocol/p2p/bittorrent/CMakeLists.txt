@@ -40,7 +40,7 @@ if (UNIX)
                              $<BUILD_INTERFACE:${PKG_FLEX_INCLUDE_DIRS}>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACE_TAO/ACE>)
+                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/cmake>)

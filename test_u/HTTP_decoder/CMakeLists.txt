@@ -5,9 +5,9 @@ if (UNIX)
   find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
 #                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
                 PATHS ENV{ACE_ROOT}
-                PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE /usr/local
+                PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE /usr/local/src/ACE_wrappers/ACEXML
 #                PATHS ENV{ACE_ROOT}
-                PATH_SUFFIXES lib
+                PATH_SUFFIXES lib common
                 DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
  endif ()
 elseif (WIN32)
@@ -36,9 +36,9 @@ if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
 #                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local/src/ACE_wrappers/ACEXML/parser
                 PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
+                PATH_SUFFIXES lib parser
                 DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
                 NO_DEFAULT_PATH)
  else ()

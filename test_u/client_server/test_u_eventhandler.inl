@@ -28,7 +28,19 @@
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "common_ui_gtk_manager_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
 #include "net_macros.h"
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "test_u_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 template <typename CallbackDataType>
 Test_U_EventHandler_T<CallbackDataType>::Test_U_EventHandler_T (

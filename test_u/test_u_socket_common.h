@@ -47,7 +47,7 @@
 #include "net_tcpsockethandler.h"
 #include "net_udpsockethandler.h"
 
-#include "test_u_configuration.h"
+//#include "test_u_configuration.h"
 #include "test_u_connection_common.h"
 #include "test_u_stream_common.h"
 
