@@ -2763,6 +2763,21 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_write_dgram"));
 
+  size_t bytes_transferred_i = result_in.bytes_transferred ();
+
+  switch (static_cast<int> (bytes_transferred_i))
+  {
+    case -1:
+    case 0:
+      break;
+    default:
+    {
+      inherited2::state_.statistic.sentBytes += bytes_transferred_i;
+      break;
+    }
+  } // end switch
+
+  // *NOTE*: the message block is released by the base class
   inherited::handle_write_dgram (result_in);
 
   this->decrease ();

@@ -25,6 +25,8 @@
 
 #include "ace/INET_Addr.h"
 
+#include "common_file_common.h"
+
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 

@@ -822,12 +822,12 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     // *** GOOD CASES ***
     default:
     {
-#if defined (_DEBUG)
-       ACE_DEBUG ((LM_DEBUG,
-                   ACE_TEXT ("[%d]: sent %u bytes\n"),
-                   result_in.handle (),
-                   result_in.bytes_transferred ()));
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//       ACE_DEBUG ((LM_DEBUG,
+//                   ACE_TEXT ("[%d]: sent %u bytes\n"),
+//                   result_in.handle (),
+//                   result_in.bytes_transferred ()));
+//#endif // _DEBUG
 
       // finished with this buffer ?
       if (unlikely (result_in.message_block ()->length () > 0))
