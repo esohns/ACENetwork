@@ -240,7 +240,7 @@ class Net_ConnectionConfigurationBase_T
   enum Common_EventDispatchType dispatch;
   bool                          generateUniqueIOModuleNames; // stream
   Stream_IAllocator*            messageAllocator;
-  Common_ITimer_t*              timerManager;
+  Common_ITimerCB_t*            timerManager;
 };
 
 template <typename AllocatorConfigurationType,
