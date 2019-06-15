@@ -558,11 +558,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   // initialize return value(s)
   passMessageDownstream_out = false;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::mod_);
-
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT ((message_inout->capacity () - message_inout->size ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was

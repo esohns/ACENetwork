@@ -635,7 +635,8 @@ do_work (bool debugParser_in,
   Test_I_ConnectionManager_t* connection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator).second),
                              NULL);
 

@@ -511,13 +511,15 @@ do_work (bool useThreadPool_in,
   BitTorrent_Client_PeerConnection_Manager_t* peer_connection_manager_p =
       BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
-  peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                         ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   peer_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
                                   NULL);
   BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =
       BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (tracker_connection_manager_p);
-  tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                            ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   tracker_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
                                      NULL);
 

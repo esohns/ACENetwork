@@ -831,7 +831,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step4: initialize connection manager
-  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
                              NULL);
 

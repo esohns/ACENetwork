@@ -1,0 +1,15 @@
+--- SSL_SOCK_Connector.orig	2019-06-10 15:35:49.985618710 +0200
++++ SSL_SOCK_Connector.h	2019-06-10 15:36:35.659862862 +0200
+@@ -297,12 +297,9 @@
+   int ssl_connect (ACE_SSL_SOCK_Stream &new_stream,
+                    const ACE_Time_Value *timeout);
+ 
+-private:
+-
+   /// The class that does all of the non-secure socket connection.
+   /// It is default contructed, and subsequently used by connect().
+   ACE_SOCK_Connector connector_;
+-
+ };
+ 
+ ACE_END_VERSIONED_NAMESPACE_DECL

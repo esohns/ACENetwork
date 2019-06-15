@@ -526,7 +526,8 @@ do_work (bool useThreadPool_in,
   IRC_Client_Connection_Manager_t* connection_manager_p =
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator).second),
                              NULL);
 

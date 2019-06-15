@@ -25,8 +25,10 @@
 #include "ace/Global_Macros.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/SOCK_Stream.h"
-//#include "ace/SSL/SSL_SOCK_Connector.h"
-//#include "ace/SSL/SSL_SOCK_Stream.h"
+#if defined (SSL_SUPPORT)
+#include "ace/SSL/SSL_SOCK_Connector.h"
+#include "ace/SSL/SSL_SOCK_Stream.h"
+#endif // SSL_SUPPORT
 
 // forward declarations
 class ACE_Time_Value;
@@ -82,38 +84,28 @@ class Net_SOCK_Connector
 
 //////////////////////////////////////////
 
-//class Net_SOCK_SSL_Connector
-// : public ACE_SSL_SOCK_Connector
-//{
-// public:
-//  Net_SOCK_SSL_Connector ();
-//  virtual ~Net_SOCK_SSL_Connector ();
-//
-//  int connect (ACE_SSL_SOCK_Stream&,                // stream
-//               const ACE_Addr&,                     // remote address
-//               const ACE_Time_Value* = 0,           // timeout
-//               const ACE_Addr& = ACE_Addr::sap_any, // local address
-//               int = 0,                             // SO_REUSEADDR ?
-//               int = 0,                             // flags
-//               int = 0);                            // permissions
-////#if !defined (ACE_HAS_WINCE)
-////  int connect (ACE_SSL_SOCK_Stream&,                // stream
-////               const ACE_Addr&,                     // remote address
-////               ACE_QoS_Params,                      // QoS parameters
-////               const ACE_Time_Value* = 0,           // timeout
-////               const ACE_Addr& = ACE_Addr::sap_any, // local address
-////               ACE_Protocol_Info* = 0,              // protocol info
-////               ACE_SOCK_GROUP = 0,                  // group
-////               u_long = 0,                          // flags
-////               int = 0,                             // SO_REUSEADDR ?
-////               int = 0);                            // permissions
-////#endif  // ACE_HAS_WINCE
-//
-// private:
-//  typedef ACE_SSL_SOCK_Connector inherited;
-//
-//  ACE_UNIMPLEMENTED_FUNC (Net_SOCK_SSL_Connector (const Net_SOCK_SSL_Connector&))
-//  ACE_UNIMPLEMENTED_FUNC (Net_SOCK_SSL_Connector& operator= (const Net_SOCK_SSL_Connector&))
-//};
+#if defined (SSL_SUPPORT)
+class Net_SOCK_SSL_Connector
+ : public ACE_SSL_SOCK_Connector
+{
+  typedef ACE_SSL_SOCK_Connector inherited;
+
+ public:
+  Net_SOCK_SSL_Connector ();
+  inline virtual ~Net_SOCK_SSL_Connector () {}
+
+  int connect (ACE_SSL_SOCK_Stream&,                // stream
+               const ACE_Addr&,                     // remote address
+               const ACE_Time_Value* = 0,           // timeout
+               const ACE_Addr& = ACE_Addr::sap_any, // local address
+               int = 0,                             // SO_REUSEADDR ?
+               int = 0,                             // flags
+               int = 0);                            // permissions
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_SOCK_SSL_Connector (const Net_SOCK_SSL_Connector&))
+  ACE_UNIMPLEMENTED_FUNC (Net_SOCK_SSL_Connector& operator= (const Net_SOCK_SSL_Connector&))
+};
+#endif // SSL_SUPPORT
 
 #endif

@@ -448,8 +448,10 @@ HTTP_Tools::parseURL (const std::string& URL_in,
     hostName_out += ':';
     hostName_out += match_results[3];
   } // end IF
-  ACE_ASSERT (match_results[4].matched);
-  URI_out = match_results[4];
+  if (match_results[4].matched)
+    URI_out = match_results[4];
+  else
+    URI_out = ACE_TEXT_ALWAYS_CHAR ("/");
 
   // step2: validate address/verify host name exists
   //        --> resolve
@@ -480,10 +482,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
 //  } // end IF
 
   // step3: validate URI
-  regex_string =
-    ACE_TEXT_ALWAYS_CHAR ("^(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
-  //regex_string =
-  //    ACE_TEXT_ALWAYS_CHAR ("^(?:http(?:s)?://)?((.+\\.)+([^\\/]+))(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
+  regex_string = ACE_TEXT_ALWAYS_CHAR ("^\\/([^\\/]+\\/)*(.*?)$");
   regex.assign (regex_string,
                 (std::regex_constants::ECMAScript |
                  std::regex_constants::icase));
