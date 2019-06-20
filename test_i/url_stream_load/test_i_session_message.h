@@ -42,8 +42,13 @@ class Test_I_SessionMessage
  : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_I_URLStreamLoad_SessionData_t,
-                                      struct HTTP_Stream_UserData>
+                                      struct Stream_UserData>
 {
+  typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      Test_I_URLStreamLoad_SessionData_t,
+                                      struct Stream_UserData> inherited;
+
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                                  struct Common_FlexParserAllocatorConfiguration,
@@ -57,7 +62,7 @@ class Test_I_SessionMessage
   Test_I_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
                          Test_I_URLStreamLoad_SessionData_t*&, // session data container handle
-                         struct HTTP_Stream_UserData*);
+                         struct Stream_UserData*);
   // copy ctor to be used by duplicate()
   Test_I_SessionMessage (const Test_I_SessionMessage&);
   inline virtual ~Test_I_SessionMessage () {}
@@ -66,11 +71,6 @@ class Test_I_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
-                                      Test_I_URLStreamLoad_SessionData_t,
-                                      struct HTTP_Stream_UserData> inherited;
-
   // *NOTE*: these may be used by message allocators
   // *WARNING*: these ctors are NOT threadsafe
   Test_I_SessionMessage (Stream_SessionId_t,

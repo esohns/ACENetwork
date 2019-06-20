@@ -68,12 +68,9 @@ struct IRC_Client_SessionData
   IRC_Client_SessionData ()
    : IRC_Stream_SessionData ()
    , connectionState (NULL)
-//   , userData (NULL)
   {}
 
   struct IRC_Client_SessionState* connectionState;
-
-//  struct IRC_Client_UserData*     userData;
 };
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
 
@@ -83,12 +80,9 @@ struct IRC_Client_StreamState
   IRC_Client_StreamState ()
    : IRC_StreamState ()
    , sessionData (NULL)
-//   , userData (NULL)
   {}
 
   struct IRC_Client_SessionData* sessionData;
-
-//  struct IRC_Client_UserData*    userData;
 };
 
 //struct IRC_Client_ConnectionConfiguration;
@@ -126,15 +120,12 @@ struct IRC_Client_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-//   , userData (NULL)
   {}
 
   Net_ConnectionConfigurations_t*   connectionConfigurations;
   IRC_Client_StreamConfiguration_t* streamConfiguration;
   IRC_Client_ISessionNotify_t*      subscriber; // (initial) subscriber
   IRC_Client_ISubscribers_t*        subscribers;
-
-//  struct IRC_Client_UserData*       userData;
 };
 
 struct IRC_Client_StreamConfiguration
@@ -142,10 +133,7 @@ struct IRC_Client_StreamConfiguration
 {
   IRC_Client_StreamConfiguration ()
    : IRC_StreamConfiguration ()
-//   , userData (NULL)
   {}
-
-//  struct IRC_Client_UserData* userData;
 };
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,

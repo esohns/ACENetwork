@@ -40,7 +40,6 @@
 #include "stream_stat_statistic_report.h"
 
 #include "bittorrent_common.h"
-//#include "bittorrent_exports.h"
 //#include "bittorrent_module_bisector.h"
 //#include "bittorrent_module_handler.h"
 #include "bittorrent_module_parser.h"
@@ -219,7 +218,7 @@ class BitTorrent_PeerStream_T
                                                         DataMessageType,
                                                         SessionMessageType,
                                                         enum BitTorrent_MessageType,
-                                                        BitTorrent_Statistic_t,
+                                                        StatisticContainerType,
                                                         TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_READER_T;
@@ -230,7 +229,7 @@ class BitTorrent_PeerStream_T
                                                         DataMessageType,
                                                         SessionMessageType,
                                                         enum BitTorrent_MessageType,
-                                                        BitTorrent_Statistic_t,
+                                                        StatisticContainerType,
                                                         TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_WRITER_T;

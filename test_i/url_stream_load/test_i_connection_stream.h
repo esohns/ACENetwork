@@ -54,7 +54,7 @@ class Test_I_ConnectionStream
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_I_URLStreamLoad_StreamState,
                                         struct Test_I_URLStreamLoad_StreamConfiguration,
-                                        HTTP_Statistic_t,
+                                        struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
@@ -66,7 +66,7 @@ class Test_I_ConnectionStream
                                         Test_I_SessionMessage,
                                         ACE_INET_Addr,
                                         Test_I_ConnectionManager_t,
-                                        struct HTTP_Stream_UserData>
+                                        struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -76,7 +76,7 @@ class Test_I_ConnectionStream
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_I_URLStreamLoad_StreamState,
                                         struct Test_I_URLStreamLoad_StreamConfiguration,
-                                        HTTP_Statistic_t,
+                                        struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
@@ -88,7 +88,7 @@ class Test_I_ConnectionStream
                                         Test_I_SessionMessage,
                                         ACE_INET_Addr,
                                         Test_I_ConnectionManager_t,
-                                        struct HTTP_Stream_UserData> inherited;
+                                        struct Stream_UserData> inherited;
 
  public:
   Test_I_ConnectionStream ();

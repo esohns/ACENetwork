@@ -64,15 +64,9 @@ struct IRC_Stream_SessionData
   IRC_Stream_SessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
-   , statistic ()
-   , userData (NULL)
   {};
 
   struct IRC_ConnectionState* connectionState;
-
-  IRC_Statistic_t             statistic;
-
-  struct Net_UserData*        userData;
 };
 typedef Stream_SessionData_T<struct IRC_Stream_SessionData> IRC_Stream_SessionData_t;
 
@@ -82,12 +76,9 @@ struct IRC_StreamState
   IRC_StreamState ()
    : Stream_State ()
    , sessionData (NULL)
-   , userData (NULL)
   {};
 
   struct IRC_Stream_SessionData* sessionData;
-
-  struct Net_UserData*           userData;
 };
 
 //////////////////////////////////////////

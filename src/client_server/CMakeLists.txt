@@ -46,10 +46,10 @@ if (UNIX)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
 #                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE>)
+                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
 #                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE>)
+                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/cmake>)

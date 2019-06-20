@@ -157,7 +157,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: reporting interval (seconds: 0 --> OFF) {")
-            << NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t        : trace information {")
@@ -221,9 +221,8 @@ do_processArguments (int argc_in,
   logToFile_out                  = IRC_CLIENT_SESSION_DEFAULT_LOG;
   useCursesLibrary_out           = IRC_CLIENT_SESSION_USE_CURSES;
   useReactor_out                 =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
-  statisticReportingInterval_out =
-    NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+  statisticReportingInterval_out = NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
@@ -741,7 +740,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     return;
   } // end IF
   configuration_in.streamConfiguration.configuration_.cloneModule = true;
-  configuration_in.streamConfiguration.configuration_.deleteModule = false;
+  //configuration_in.streamConfiguration.configuration_.deleteModule = false;
   configuration_in.streamConfiguration.configuration_.module = &IRC_handler;
 
   // step2: initialize event dispatch
@@ -1115,7 +1114,7 @@ ACE_TMAIN (int argc_in,
   bool use_reactor                           =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
-    NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =

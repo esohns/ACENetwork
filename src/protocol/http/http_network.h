@@ -63,10 +63,10 @@
 //};
 
 struct HTTP_ConnectionState
- : Net_ConnectionState
+ : Net_StreamConnectionState
 {
   HTTP_ConnectionState ()
-   : Net_ConnectionState ()
+   : Net_StreamConnectionState ()
    //, configuration (NULL)
   {}
 

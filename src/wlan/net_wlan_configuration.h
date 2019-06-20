@@ -106,7 +106,7 @@ struct Net_WLAN_MonitorConfiguration
   struct _GUID                  interfaceIdentifier;
   WLAN_NOTIFICATION_CALLBACK    notificationCB;
   PVOID                         notificationCBData;
-  Common_ITimer_t*              timerInterface;
+  Common_ITimerCB_t*            timerInterface;
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
   bool                          enableBackgroundScans;

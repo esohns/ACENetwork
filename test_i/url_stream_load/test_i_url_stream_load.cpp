@@ -156,10 +156,6 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-p        : use thread pool [")
-            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r        : use reactor [")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -196,7 +192,6 @@ do_process_arguments (int argc_in,
                       std::string& UIDefinitonFileName_out,
                       std::string& hostName_out,
                       bool& logToFile_out,
-                      bool& useThreadPool_out,
                       unsigned short& port_out,
                       bool& useReactor_out,
                       ACE_Time_Value& statisticReportingInterval_out,
@@ -237,7 +232,6 @@ do_process_arguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
   hostName_out.clear ();
   logToFile_out = false;
-  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   port_out = 0;
   useReactor_out =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -262,9 +256,9 @@ do_process_arguments (int argc_in,
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:lprs:tu:v"),
+                               ACE_TEXT ("cde:f:g:lrs:tu:v"),
 #else
-                               ACE_TEXT ("de:f:g:lprs:tu:v"),
+                               ACE_TEXT ("de:f:g:lrs:tu:v"),
 #endif
                                1,                         // skip command name
                                1,                         // report parsing errors
@@ -312,11 +306,6 @@ do_process_arguments (int argc_in,
       case 'l':
       {
         logToFile_out = true;
-        break;
-      }
-      case 'p':
-      {
-        useThreadPool_out = true;
         break;
       }
       case 'r':
@@ -526,7 +515,6 @@ void
 do_work (bool debugParser_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
-         bool useThreadPool_in,
          bool useReactor_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const std::string& URL_in,
@@ -926,7 +914,6 @@ ACE_TMAIN (int argc_in,
   std::string hostname;
   std::string ui_definition_file;
   bool log_to_file;
-  bool use_thread_pool;
   unsigned short port;
   bool use_reactor;
   ACE_Time_Value statistic_reporting_interval;
@@ -1028,7 +1015,6 @@ ACE_TMAIN (int argc_in,
   ui_definition_file +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
   log_to_file = false;
-  use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   port = HTTP_DEFAULT_SERVER_PORT;
   use_reactor =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -1055,7 +1041,6 @@ ACE_TMAIN (int argc_in,
                              ui_definition_file,
                              hostname,
                              log_to_file,
-                             use_thread_pool,
                              port,
                              use_reactor,
                              statistic_reporting_interval,
@@ -1220,7 +1205,6 @@ ACE_TMAIN (int argc_in,
   do_work (debug_parser,
            output_file,
            ui_definition_file,
-           use_thread_pool,
            use_reactor,
            statistic_reporting_interval,
            url,

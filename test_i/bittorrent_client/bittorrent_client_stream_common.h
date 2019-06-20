@@ -138,7 +138,7 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> BitTorrent_Client_PeerConnection_Manager_t;
 typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
                                 struct BitTorrent_Client_PeerStreamConfiguration,
-                                BitTorrent_Statistic_t,
+                                struct Stream_Statistic,
                                 Common_Timer_Manager_t,
                                 struct BitTorrent_Client_PeerModuleHandlerConfiguration,
                                 struct BitTorrent_Client_PeerSessionData,
@@ -161,7 +161,7 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> BitTorrent_Client_TrackerConnection_Manager_t;
 typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_TrackerStreamState,
                                    struct BitTorrent_Client_TrackerStreamConfiguration,
-                                   BitTorrent_Statistic_t,
+                                   struct Stream_Statistic,
                                    Common_Timer_Manager_t,
                                    struct BitTorrent_Client_TrackerModuleHandlerConfiguration,
                                    struct BitTorrent_Client_TrackerSessionData,
@@ -199,7 +199,6 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-   , userData (NULL)
   {}
 
 #if defined (GUI_SUPPORT)
@@ -209,8 +208,6 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration
   BitTorrent_Client_PeerStreamConfiguration_t* streamConfiguration;
   BitTorrent_Client_IPeerNotify_t*             subscriber; // (initial) subscriber
   BitTorrent_Client_IPeerSubscribers_t*        subscribers;
-
-  struct Net_UserData*       userData;
 };
 
 struct BitTorrent_AllocatorConfiguration;
@@ -234,7 +231,6 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-   , userData (NULL)
   {}
 
 #if defined (GUI_SUPPORT)
@@ -244,8 +240,6 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration
   BitTorrent_Client_TrackerStreamConfiguration_t* streamConfiguration;
   BitTorrent_Client_ITrackerNotify_t*             subscriber; // (initial) subscriber
   BitTorrent_Client_ITrackerSubscribers_t*        subscribers;
-
-  struct Net_UserData*       userData;
 };
 
 struct BitTorrent_Client_PeerStreamState

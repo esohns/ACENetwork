@@ -170,7 +170,7 @@ struct IRC_LoginOptions
 //////////////////////////////////////////
 
 // *TODO*
-typedef struct Stream_Statistic IRC_Statistic_t;
+typedef struct Net_StreamStatistic IRC_Statistic_t;
 typedef Common_StatisticHandler_T<IRC_Statistic_t> IRC_StatisticHandler_t;
 
 #endif

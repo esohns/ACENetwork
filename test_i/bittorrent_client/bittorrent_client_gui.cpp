@@ -140,10 +140,6 @@ do_printUsage (const std::string& programName_in)
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-h              : use thread-pool [")
-            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l              : log to a file [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -183,7 +179,6 @@ do_processArguments (int argc_in,
                      std::string& configurationFile_out,
                      bool& debug_out,
                      std::string& UIRCFile_out,
-                     bool& useThreadpool_out,
                      bool& logToFile_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
@@ -226,8 +221,6 @@ do_processArguments (int argc_in,
   UIRCFile_out                  +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
 
-  useThreadpool_out              = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
-
   logToFile_out                  = false;
 
   useReactor_out                 =
@@ -248,7 +241,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dg:hlrs:tu:vx:"),
+                              ACE_TEXT ("c:dg:lrs:tu:vx:"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -273,11 +266,6 @@ do_processArguments (int argc_in,
       case 'g':
       {
         UIRCFile_out = argumentParser.opt_arg ();
-        break;
-      }
-      case 'h':
-      {
-        useThreadpool_out = true;
         break;
       }
       case 'l':
@@ -442,8 +430,7 @@ do_initializeSignals (bool useReactor_in,
 }
 
 void
-do_work (bool useThreadPool_in,
-         unsigned int numberOfDispatchThreads_in,
+do_work (unsigned int numberOfDispatchThreads_in,
          bool useReactor_in,
          struct BitTorrent_Client_UI_CBData& CBData_in,
          const std::string& UIDefinitionFile_in,
@@ -1152,8 +1139,6 @@ ACE_TMAIN (int argc_in,
   rc_file_name                            +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
 
-  bool use_thread_pool                       =
-      COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   bool log_to_file                           = false;
 
   bool use_reactor                           =
@@ -1177,7 +1162,6 @@ ACE_TMAIN (int argc_in,
                             configuration_file_name,
                             debug,
                             rc_file_name,
-                            use_thread_pool,
                             log_to_file,
                             use_reactor,
                             reporting_interval,
@@ -1447,8 +1431,7 @@ ACE_TMAIN (int argc_in,
   // step9: do work
   ACE_High_Res_Timer timer;
   timer.start ();
-  do_work (use_thread_pool,
-           number_of_thread_pool_threads,
+  do_work (number_of_thread_pool_threads,
            use_reactor,
            ui_cb_data,
            ui_definition_file_name,

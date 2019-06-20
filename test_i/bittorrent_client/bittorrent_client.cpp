@@ -696,7 +696,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                                          ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   peer_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
                                   NULL);
-  tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                            ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   tracker_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
                                      NULL);
 

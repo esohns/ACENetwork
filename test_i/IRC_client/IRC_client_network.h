@@ -124,14 +124,12 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 struct IRC_Client_SessionState,
                                 IRC_Statistic_t,
                                 IRC_Client_Stream_t,
-                                Common_Timer_Manager_t,
                                 struct Net_UserData> IRC_Client_TCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                       IRC_Client_ConnectionConfiguration,
                                       struct IRC_Client_SessionState,
                                       IRC_Statistic_t,
                                       IRC_Client_Stream_t,
-                                      Common_Timer_Manager_t,
                                       struct Net_UserData> IRC_Client_AsynchTCPConnection_t;
 
 //////////////////////////////////////////

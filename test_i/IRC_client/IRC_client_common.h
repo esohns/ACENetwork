@@ -116,21 +116,6 @@ struct IRC_Client_InputThreadData
   struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
-struct IRC_Client_UserData
-{
-  IRC_Client_UserData ()
-   //: connectionConfiguration (NULL)
-   //, moduleConfiguration (NULL)
-   //, moduleHandlerConfiguration (NULL)
-  {}
-
-  //struct IRC_Client_ConnectionConfiguration*    connectionConfiguration;
-
-  //// *TODO*: remove these ASAP
-  //struct Stream_ModuleConfiguration*            moduleConfiguration;
-  //struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
-};
-
 typedef Net_IConnector_T<ACE_INET_Addr,
                          IRC_Client_ConnectionConfiguration> IRC_Client_IConnector_t;
 struct IRC_Client_CursesState;

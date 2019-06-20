@@ -111,14 +111,11 @@ struct IRC_StreamConfiguration
    //, moduleConfiguration_2 ()
    //, moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
-   , userData (NULL)
   {}
 
   //struct Stream_ModuleConfiguration moduleConfiguration_2;       // stream module configuration
   //IRC_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
   struct IRC_ProtocolConfiguration* protocolConfiguration;       // protocol configuration
-
-  struct Net_UserData*              userData;
 };
 
 #endif

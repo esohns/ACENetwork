@@ -75,31 +75,15 @@ struct HTTP_Stream_SessionData
 };
 typedef Stream_SessionData_T<struct HTTP_Stream_SessionData> HTTP_Stream_SessionData_t;
 
-struct HTTP_Stream_UserData
- : Stream_UserData
-{
-  HTTP_Stream_UserData ()
-   : Stream_UserData ()
-   //, moduleConfiguration (NULL)
-   //, moduleHandlerConfiguration (NULL)
-  {};
-
-  // *TODO*: remove these ASAP
-  //struct Stream_ModuleConfiguration*      moduleConfiguration;
-  //struct HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
-};
-
 struct HTTP_StreamState
  : Stream_State
 {
   HTTP_StreamState ()
    : Stream_State ()
-   , currentSessionData (NULL)
-   , userData (NULL)
+   , sessionData (NULL)
   {};
 
-  struct HTTP_Stream_SessionData* currentSessionData;
-  struct HTTP_Stream_UserData*    userData;
+  struct HTTP_Stream_SessionData* sessionData;
 };
 
 //struct HTTP_ProtocolConfiguration;
@@ -130,12 +114,12 @@ struct HTTP_StreamConfiguration
   HTTP_StreamConfiguration ()
    : Stream_Configuration ()
    //, protocolConfiguration (NULL)
-   , userData (NULL)
+   //, userData (NULL)
   {};
 
   //struct HTTP_ProtocolConfiguration* protocolConfiguration;       // protocol configuration
 
-  struct HTTP_Stream_UserData*       userData;
+  //struct HTTP_Stream_UserData*       userData;
 };
 
 //typedef Common_INotify_T<unsigned int,

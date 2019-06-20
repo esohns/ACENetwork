@@ -85,8 +85,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
     {
       peer_configuration_p->streamConfiguration_->configuration_.cloneModule =
         cloneModule_in;
-      peer_configuration_p->streamConfiguration_->configuration_.deleteModule =
-        deleteModule_in;
+      //peer_configuration_p->streamConfiguration_->configuration_.deleteModule =
+      //  deleteModule_in;
       peer_configuration_p->streamConfiguration_->configuration_.module =
         finalModule_inout;
     } // end IF
@@ -94,8 +94,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
     {
       tracker_configuration_p->streamConfiguration_->configuration_.cloneModule =
         cloneModule_in;
-      tracker_configuration_p->streamConfiguration_->configuration_.deleteModule =
-        deleteModule_in;
+      //tracker_configuration_p->streamConfiguration_->configuration_.deleteModule =
+      //  deleteModule_in;
       tracker_configuration_p->streamConfiguration_->configuration_.module =
         finalModule_inout;
     } // end ELSE

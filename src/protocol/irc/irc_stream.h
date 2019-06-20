@@ -39,7 +39,6 @@
 #include "stream_stat_statistic_report.h"
 
 #include "irc_common.h"
-//#include "irc_exports.h"
 #include "irc_module_bisector.h"
 #include "irc_module_parser.h"
 #include "irc_module_streamer.h"
@@ -193,7 +192,7 @@ class IRC_Stream_T
                                                         DataMessageType,
                                                         SessionMessageType,
                                                         IRC_CommandType_t,
-                                                        IRC_Statistic_t,
+                                                        StatisticContainerType,
                                                         TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_READER_T;
@@ -204,7 +203,7 @@ class IRC_Stream_T
                                                         DataMessageType,
                                                         SessionMessageType,
                                                         IRC_CommandType_t,
-                                                        IRC_Statistic_t,
+                                                        StatisticContainerType,
                                                         TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_WRITER_T;

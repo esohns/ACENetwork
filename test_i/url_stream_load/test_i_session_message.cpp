@@ -29,7 +29,7 @@
 Test_I_SessionMessage::Test_I_SessionMessage (Stream_SessionId_t sessionId_in,
                                               enum Stream_SessionMessageType messageType_in,
                                               Test_I_URLStreamLoad_SessionData_t*& sessionData_in,
-                                              struct HTTP_Stream_UserData* userData_in)
+                                              struct Stream_UserData* userData_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_in,

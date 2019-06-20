@@ -141,7 +141,6 @@ struct Test_I_URLStreamLoad_SessionData
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
    , parserContext ()
    , targetFileName ()
-   , userData (NULL)
   {}
 
   struct Test_I_URLStreamLoad_SessionData& operator= (struct Test_I_URLStreamLoad_SessionData& rhs_in)
@@ -160,8 +159,6 @@ struct Test_I_URLStreamLoad_SessionData
   enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
   struct Test_I_URLStreamLoad_SAXParserContext parserContext; // HTML parser module
   std::string                                  targetFileName; // file writer module
-
-  struct HTTP_Stream_UserData*                 userData;
 };
 typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData> Test_I_URLStreamLoad_SessionData_t;
 
@@ -217,12 +214,9 @@ struct Test_I_URLStreamLoad_StreamState
   Test_I_URLStreamLoad_StreamState ()
    : Test_I_StreamState ()
    , sessionData (NULL)
-   , userData (NULL)
   {}
 
   struct Test_I_URLStreamLoad_SessionData* sessionData;
-
-  struct HTTP_Stream_UserData*             userData;
 };
 
 #endif

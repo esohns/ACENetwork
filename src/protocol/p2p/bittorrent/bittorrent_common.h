@@ -186,7 +186,7 @@ enum BitTorrent_Event
 
 //////////////////////////////////////////
 
-typedef struct Stream_Statistic BitTorrent_Statistic_t;
+typedef struct Net_StreamStatistic BitTorrent_Statistic_t;
 typedef Common_StatisticHandler_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_t;
 
 #endif

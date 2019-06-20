@@ -229,7 +229,6 @@ struct BitTorrent_TrackerSessionData
    : Stream_SessionData ()
    , connectionState (NULL)
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
-//   , userData (NULL)
   {}
 
   struct BitTorrent_TrackerSessionData& operator+= (const struct BitTorrent_TrackerSessionData& rhs_in)
@@ -246,7 +245,6 @@ struct BitTorrent_TrackerSessionData
 
   struct BitTorrent_ConnectionState*        connectionState;
   enum Stream_Decoder_CompressionFormatType format;
-//  struct BitTorrent_UserData*               userData;
 };
 
 struct BitTorrent_PeerStreamState
@@ -255,11 +253,9 @@ struct BitTorrent_PeerStreamState
   BitTorrent_PeerStreamState ()
    : Stream_State ()
    , sessionData (NULL)
-   , userData (NULL)
   {}
 
   struct BitTorrent_PeerSessionData* sessionData;
-  struct BitTorrent_UserData*        userData;
 };
 struct BitTorrent_TrackerStreamState
  : Stream_State
@@ -267,11 +263,9 @@ struct BitTorrent_TrackerStreamState
   BitTorrent_TrackerStreamState ()
    : Stream_State ()
    , sessionData (NULL)
-   , userData (NULL)
   {}
 
   struct BitTorrent_TrackerSessionData* sessionData;
-  struct BitTorrent_UserData*           userData;
 };
 
 //////////////////////////////////////////

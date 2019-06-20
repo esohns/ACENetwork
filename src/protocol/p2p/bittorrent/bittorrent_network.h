@@ -53,10 +53,10 @@
 struct BitTorrent_SessionConfiguration;
 struct BitTorrent_SessionState;
 struct BitTorrent_PeerConnectionState
- : Net_ConnectionState
+ : Net_StreamConnectionState
 {
   BitTorrent_PeerConnectionState ()
-   : Net_ConnectionState ()
+   : Net_StreamConnectionState ()
    , configuration (NULL)
    //, connection (NULL)
    , handshake (NULL)
@@ -69,10 +69,10 @@ struct BitTorrent_PeerConnectionState
   //BitTorrent_ISession_t*           session;
 };
 struct BitTorrent_TrackerConnectionState
- : Net_ConnectionState
+ : Net_StreamConnectionState
 {
   BitTorrent_TrackerConnectionState ()
-   : Net_ConnectionState ()
+   : Net_StreamConnectionState ()
    , configuration (NULL)
    //, connection (NULL)
    //, session (NULL)
@@ -82,8 +82,6 @@ struct BitTorrent_TrackerConnectionState
   //BitTorrent_ITrackerConnection_t* connection;
   //BitTorrent_ISession_t*           session;
 };
-
-struct BitTorrent_UserData;
 
 struct BitTorrent_AllocatorConfiguration;
 struct BitTorrent_PeerStreamConfiguration;

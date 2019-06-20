@@ -259,8 +259,8 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   {
     configuration_p->streamConfiguration_->configuration_.cloneModule =
       cloneModule_in;
-    configuration_p->streamConfiguration_->configuration_.deleteModule =
-      deleteModule_in;
+    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //  deleteModule_in;
     configuration_p->streamConfiguration_->configuration_.module =
       finalModule_inout;
     if (deleteModule_in)

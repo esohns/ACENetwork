@@ -25,12 +25,8 @@
 #include "stream_inotify.h"
 #include "stream_session_data.h"
 
-//#include "stream_module_htmlparser.h"
-
 // forward declarations
-typedef Stream_Statistic Test_I_Statistic_t;
 struct Net_ConnectionState;
-struct Test_I_UserData;
 
 struct Test_I_StreamSessionData
  : Stream_SessionData
@@ -39,14 +35,11 @@ struct Test_I_StreamSessionData
    : Stream_SessionData ()
    , connectionState (NULL)
    , statistic ()
-   , userData (NULL)
   {};
 
   struct Net_ConnectionState* connectionState;
 
   Test_I_Statistic_t          statistic;
-
-  struct Test_I_UserData*     userData;
 };
 typedef Stream_SessionData_T<struct Test_I_StreamSessionData> Test_I_StreamSessionData_t;
 
@@ -56,12 +49,9 @@ struct Test_I_StreamState
   Test_I_StreamState ()
    : Stream_State ()
    , sessionData (NULL)
-   , userData (NULL)
   {};
 
   struct Test_I_StreamSessionData* sessionData;
-
-  struct Test_I_UserData*          userData;
 };
 
 //typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
