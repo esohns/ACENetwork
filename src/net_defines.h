@@ -103,7 +103,7 @@
 #define NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S      3 // seconds
 
 // (asynchronous) connections
-#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S              60 // second(s)
+#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S              10 // second(s)
 #define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL_S     1  // second(s)
 
 // event dispatch

@@ -1101,7 +1101,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->handle = ACE_INVALID_HANDLE;
 
       // *TODO*: avoid tight loop here
-      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
       //result = ACE_OS::sleep (timeout);
       //if (result == -1)
       //  ACE_DEBUG ((LM_ERROR,

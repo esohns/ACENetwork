@@ -354,15 +354,15 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
     clone_module =
       configuration_p->streamConfiguration_->configuration_.cloneModule;
-    delete_module =
-      configuration_p->streamConfiguration_->configuration_.deleteModule;
+    //delete_module =
+    //  configuration_p->streamConfiguration_->configuration_.deleteModule;
     module_p =
       configuration_p->streamConfiguration_->configuration_.module;
 
     configuration_p->streamConfiguration_->configuration_.cloneModule =
       false;
-    configuration_p->streamConfiguration_->configuration_.deleteModule =
-      false;
+    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //  false;
     configuration_p->streamConfiguration_->configuration_.module =
       peerHandlerModule_;
   } // end IF
@@ -382,8 +382,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
     configuration_p->streamConfiguration_->configuration_.cloneModule =
       clone_module;
-    configuration_p->streamConfiguration_->configuration_.deleteModule =
-      delete_module;
+    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //  delete_module;
     configuration_p->streamConfiguration_->configuration_.module = module_p;
   } // end IF
 };
@@ -933,7 +933,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   TrackerUserDataType* user_data_p = NULL;
   typename TrackerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
   bool clone_module = false;
-  bool delete_module = false;
+  //bool delete_module = false;
   Stream_Module_t* module_p = NULL;
   if (trackerConnectionManager_)
   {
@@ -955,22 +955,22 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
     clone_module =
       configuration_p->streamConfiguration_->configuration_.cloneModule;
-    delete_module =
-      configuration_p->streamConfiguration_->configuration_.deleteModule;
+    //delete_module =
+    //  configuration_p->streamConfiguration_->configuration_.deleteModule;
     module_p =
       configuration_p->streamConfiguration_->configuration_.module;
     ACE_ASSERT (!module_p);
 
     configuration_p->streamConfiguration_->configuration_.cloneModule =
       false;
-    configuration_p->streamConfiguration_->configuration_.deleteModule =
-      false;
+    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //  false;
     configuration_p->streamConfiguration_->configuration_.module =
       trackerHandlerModule_;
   } // end IF
 
   ACE_Time_Value deadline;
-  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT,
+  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S,
                                          0);
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
   typename TrackerConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
@@ -1003,8 +1003,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   {
     deadline =
         (COMMON_TIME_NOW +
-         ACE_Time_Value (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0));
-    ACE_Time_Value delay (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT_INTERVAL,
+         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
+    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL_S,
                           0);
     do
     {
@@ -1085,8 +1085,8 @@ error:
 
     configuration_p->streamConfiguration_->configuration_.cloneModule =
       clone_module;
-    configuration_p->streamConfiguration_->configuration_.deleteModule =
-      delete_module;
+    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //  delete_module;
     configuration_p->streamConfiguration_->configuration_.module =
       module_p;
   } // end IF

@@ -517,7 +517,7 @@ continue_:
       // *TODO*: avoid these tight loops
       ACE_Time_Value deadline =
         (COMMON_TIME_NOW +
-         ACE_Time_Value (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0));
+         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
       // *TODO*: this may not be accurate/applicable for/to all protocols
       bool done_b = false;
       do

@@ -22,27 +22,27 @@
 #define NET_CLIENT_DEFINES_H
 
 // (asynchronous) connections
-#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT          10 // second(s)
+//#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT_S          10 // second(s)
 // *IMPORTANT NOTE*: unfortunately, this means that asynchronous connections
 //                   take at least this amount of time to establish
 // *TODO*: remove ASAP
-#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT_INTERVAL NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL  // second(s)
+//#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT_INTERVAL_S NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL_S // second(s)
 
-#define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS      3
+#define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS        3
 
 // define behaviour
-#define NET_CLIENT_DEFAULT_CONNECT_PROBABILITY             0.5F // 50%
-#define NET_CLIENT_DEFAULT_ABORT_PROBABILITY               0.2F // 20%
-#define NET_CLIENT_DEFAULT_DEFAULT_MODE                    Net_Client_TimeoutHandler::ACTION_NORMAL
+#define NET_CLIENT_DEFAULT_CONNECT_PROBABILITY               0.5F // 50%
+#define NET_CLIENT_DEFAULT_ABORT_PROBABILITY                 0.2F // 20%
+#define NET_CLIENT_DEFAULT_DEFAULT_MODE                      Net_Client_TimeoutHandler::ACTION_NORMAL
 
-#define NET_CLIENT_DEFAULT_MAX_NUM_OPEN_CONNECTIONS        0
-#define NET_CLIENT_DEFAULT_SERVER_HOSTNAME                 ACE_LOCALHOST
-#define NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL         0
-#define NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL            0 // ms {0: OFF}
-#define NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL            20 // ms
-#define NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL          1 // ms
+#define NET_CLIENT_DEFAULT_MAX_NUM_OPEN_CONNECTIONS          0
+#define NET_CLIENT_DEFAULT_SERVER_HOSTNAME                   ACE_LOCALHOST
+#define NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL           0
+#define NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL              0 // ms {0: OFF}
+#define NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL              20 // ms
+#define NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL            1 // ms
 
 // *** UI ***
-#define NET_CLIENT_UI_FILE                                 "net_client.glade"
+#define NET_CLIENT_UI_FILE                                   "net_client.glade"
 
 #endif

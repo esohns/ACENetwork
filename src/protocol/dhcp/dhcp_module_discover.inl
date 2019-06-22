@@ -837,7 +837,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     // step2: wait for the connection to register with the manager
     // *TODO*: avoid tight loop here
     deadline = (COMMON_TIME_NOW +
-                ACE_Time_Value (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT,
+                ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S,
                                 0));
     //result = ACE_OS::sleep (timeout);
     //if (result == -1)

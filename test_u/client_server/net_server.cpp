@@ -1073,7 +1073,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       // step1: wait for the connection to register with the manager
       // *TODO*: avoid these tight loops
-      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
       ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
       // *TODO*: this may not be accurate/applicable for/to all protocols
       do

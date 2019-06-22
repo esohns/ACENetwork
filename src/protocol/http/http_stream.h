@@ -172,7 +172,7 @@ class HTTP_Stream_T
                                                         DataMessageType,
                                                         SessionMessageType,
                                                         HTTP_Method_t,
-                                                        HTTP_Statistic_t,
+                                                        StatisticContainerType,
                                                         TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_READER_T;
@@ -183,7 +183,7 @@ class HTTP_Stream_T
                                                         DataMessageType,
                                                         SessionMessageType,
                                                         HTTP_Method_t,
-                                                        HTTP_Statistic_t,
+                                                        StatisticContainerType,
                                                         TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_WRITER_T;
