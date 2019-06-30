@@ -50,7 +50,7 @@ class Test_U_Module_HeaderParser
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Net_UserData>
+                                 struct Stream_UserData>
 {
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
@@ -62,7 +62,7 @@ class Test_U_Module_HeaderParser
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Net_UserData> inherited;
+                                 struct Stream_UserData> inherited;
 
  public:
   Test_U_Module_HeaderParser (ISTREAM_T*); // stream handle

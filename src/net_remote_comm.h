@@ -37,41 +37,41 @@ class Net_Remote_Comm
   };
 
   // define a common message header
-#ifdef _MSC_VER
+#if defined (_MSC_VER)
 #pragma pack (push, 1)
-#endif
+#endif // _MSC_VER
   struct MessageHeader
   {
     uint16_t    length;
     MessageType type;
-#ifdef __GNUC__
+#if defined (__GNUC__)
   } __attribute__ ((__packed__));
 #else
   };
-#endif
+#endif // __GNUC__
 
   // -----------**** protocol messages ****-----------
   struct PingMessage
   {
     MessageHeader header;
     uint32_t      counter;
-#ifdef __GNUC__
+#if defined (__GNUC__)
   } __attribute__ ((__packed__));
 #else
   };
-#endif
+#endif // __GNUC__
   struct PongMessage
   {
     MessageHeader header;
-#ifdef __GNUC__
+#if defined (__GNUC__)
   } __attribute__ ((__packed__));
 #else
   };
-#endif
+#endif // __GNUC__
   // -----------**** protocol messages END ****-----------
-#ifdef _MSC_VER
+#if defined (_MSC_VER)
 #pragma pack (pop)
-#endif
+#endif // _MSC_VER
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Remote_Comm ())

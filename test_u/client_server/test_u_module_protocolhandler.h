@@ -25,6 +25,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_ilock.h"
+
 #include "common_itimerhandler.h"
 #include "common_time_common.h"
 #include "common_timer_handler.h"
@@ -53,7 +54,7 @@ class Test_U_Module_ProtocolHandler
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Net_UserData>
+                                 struct Stream_UserData>
  , public Common_ITimerHandler
 {
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
@@ -66,7 +67,7 @@ class Test_U_Module_ProtocolHandler
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 struct Net_UserData> inherited;
+                                 struct Stream_UserData> inherited;
 
  public:
   Test_U_Module_ProtocolHandler (ISTREAM_T*); // stream handle

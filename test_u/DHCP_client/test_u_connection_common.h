@@ -79,9 +79,9 @@ class DHCPClient_ConnectionConfiguration
    : Net_ConnectionConfiguration_T ()
   {}
 };
-typedef std::map<std::string,
-                 DHCPClient_ConnectionConfiguration> DHCPClient_ConnectionConfigurations_t;
-typedef DHCPClient_ConnectionConfigurations_t::iterator DHCPClient_ConnectionConfigurationIterator_t;
+//typedef std::map<std::string,
+//                 DHCPClient_ConnectionConfiguration> DHCPClient_ConnectionConfigurations_t;
+//typedef DHCPClient_ConnectionConfigurations_t::iterator DHCPClient_ConnectionConfigurationIterator_t;
 
 //////////////////////////////////////////
 
