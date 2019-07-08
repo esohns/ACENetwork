@@ -33,9 +33,6 @@
 #include <guiddef.h>
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#endif // ACE_WIN32 || ACE_WIN64
-
 #if defined (NETLINK_SUPPORT)
 #include "ace/Netlink_Addr.h"
 #endif // NETLINK_SUPPORT

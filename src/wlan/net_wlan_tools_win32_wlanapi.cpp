@@ -26,6 +26,7 @@
 #include <Ks.h>
 #include <l2cmn.h>
 #include <mstcpip.h>
+#define __CGUID_H__
 #include <OleAuto.h>
 #include <shlwapi.h>
 #include <wlanapi.h>

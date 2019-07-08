@@ -393,7 +393,7 @@ Net_Server_AsynchListener_T<HandlerType,
   // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if ((address_type == ACE_ADDRESS_FAMILY_INET) &&
       listenAddress_in.is_loopback ()           &&
-      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH))
+      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
     if (unlikely (!Net_Common_Tools::setLoopBackFastPath (listen_handle)))
     {
       ACE_DEBUG ((LM_ERROR,

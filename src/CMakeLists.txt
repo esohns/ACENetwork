@@ -201,9 +201,9 @@ set (source_files
      net_ipconnection.h
      net_itransportlayer.h
      net_macros.h
-     net_module_sockethandler.cpp
-     net_module_sockethandler.h
-     net_module_sockethandler.inl
+#     net_module_sockethandler.cpp
+#     net_module_sockethandler.h
+#     net_module_sockethandler.inl
      net_os_tools.cpp
      net_os_tools.h
      net_packet_headers.h
@@ -389,8 +389,8 @@ install (FILES
          net_ipconnection.h
          net_itransportlayer.h
          net_macros.h
-         net_module_sockethandler.h
-         net_module_sockethandler.inl
+#         net_module_sockethandler.h
+#         net_module_sockethandler.inl
          net_netlinkconnection.h
          net_netlinkconnection.inl
          net_netlinksockethandler.h

@@ -29,7 +29,7 @@
 //#include "ace/Assert.h"
 //#include "ace/Basic_Types.h"
 #include "ace/config-lite.h"
-//#include "ace/OS.h"
+#include "ace/OS.h"
 
 #include "common_statistic_handler.h"
 
@@ -119,7 +119,7 @@ struct BitTorrent_PeerHandShake
    , info_hash ()
    , peer_id ()
   {
-    ACE_OS::memset (reserved, 0, sizeof (reserved));
+    ACE_OS::memset (reserved, 0, sizeof (ACE_UINT8[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE]));
   }
 
   std::string pstr;
