@@ -255,7 +255,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
   // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if ((protocol_family_i == ACE_ADDRESS_FAMILY_INET) &&
       remoteAddress_in.is_loopback ()                &&
@@ -267,7 +267,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                   socket_h));
       goto error;
     } // end IF
-#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // _WIN32_WINNT_WIN8
 #endif // ACE_WIN32 || ACE_WIN64
 
   ///////////////////////////////////////

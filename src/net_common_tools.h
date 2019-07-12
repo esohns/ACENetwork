@@ -249,10 +249,10 @@ class Net_Common_Tools
   // --- socket API ---
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_SDK_VERSION(0x0602) // _WIN32_WINNT_WIN8
   // *NOTE*: applies to TCP sockets only (see also: SO_MAX_MSG_SIZE)
   static bool setLoopBackFastPath (ACE_HANDLE); // socket handle
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0602)
+#endif // _WIN32_WINNT_WIN8
 #endif // ACE_WIN32 || ACE_WIN64
 
   // MTU

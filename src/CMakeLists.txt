@@ -341,8 +341,8 @@ if (UNIX)
 
  target_link_libraries (${PROJECT_NAME} ${PROJECT_NAME}_WLAN)
 elseif (WIN32)
-# target_link_libraries (${PROJECT_NAME} ntdll.lib)
- target_link_libraries (${PROJECT_NAME} iphlpapi.lib)
+ target_link_libraries (${PROJECT_NAME} Ntdll.lib)
+ target_link_libraries (${PROJECT_NAME} Iphlpapi.lib)
  target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
 
  target_link_libraries (${PROJECT_NAME} Common)

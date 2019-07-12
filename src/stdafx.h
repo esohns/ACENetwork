@@ -8,6 +8,8 @@
 // *NOTE*: work around quirky MSVC...
 #define NOMINMAX
 
+#define _WIN32_WINNT 0x0602 // _WIN32_WINNT_WIN8
+
 // Windows Header Files
 #include <windows.h>
 #endif

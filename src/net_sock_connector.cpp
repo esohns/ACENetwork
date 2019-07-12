@@ -192,7 +192,7 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
   ///////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
   // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if (likely (remoteAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET))
   { // *TODO*: use static_cast<> and assert here
@@ -214,7 +214,7 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
         goto close;
       } // end IF
   } // end IF
-#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // _WIN32_WINNT_WIN8
 #endif // ACE_WIN32 || ACE_WIN64
 
   return 0;
