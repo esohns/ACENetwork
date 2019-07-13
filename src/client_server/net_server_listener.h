@@ -54,7 +54,7 @@ class Net_Server_Listener_T
                                                    StateType,
                                                    StreamType,
                                                    UserDataType>,
-                             ACE_SYNCH_RECURSIVE_MUTEX>;
+                             ACE_SYNCH_MUTEX>;
 
  public:
   // convenient types
@@ -65,7 +65,7 @@ class Net_Server_Listener_T
                                               StateType,
                                               StreamType,
                                               UserDataType>,
-                        ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
+                        ACE_SYNCH_MUTEX> SINGLETON_T;
 
   inline bool isInitialized () const { return isInitialized_; }
 

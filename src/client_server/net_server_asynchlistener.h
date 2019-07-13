@@ -52,7 +52,7 @@ class Net_Server_AsynchListener_T
                                                          StateType,
                                                          StreamType,
                                                          UserDataType>,
-                             ACE_SYNCH_RECURSIVE_MUTEX>;
+                             ACE_SYNCH_MUTEX>;
 
  public:
   // convenient types
@@ -62,7 +62,7 @@ class Net_Server_AsynchListener_T
                                                     StateType,
                                                     StreamType,
                                                     UserDataType>,
-                        ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
+                        ACE_SYNCH_MUTEX> SINGLETON_T;
 
   virtual int accept (size_t = 0,          // bytes to read
                       const void* = NULL); // ACT
