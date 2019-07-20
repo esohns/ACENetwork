@@ -199,7 +199,7 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v           : print version information and exit")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]   : #dispatch threads [")
-            << NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS
+            << NET_SERVER_DEFAULT_NUMBER_OF_DISPATCH_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 }
@@ -276,7 +276,7 @@ do_processArguments (const int& argc_in,
   protocol_out = NET_TRANSPORTLAYER_TCP;
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out =
-    NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
+    NET_SERVER_DEFAULT_NUMBER_OF_DISPATCH_THREADS;
 
   ACE_Get_Opt argument_parser (argc_in,                                // argc
                                argv_in,                                // argv
@@ -969,6 +969,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     case NET_TRANSPORTLAYER_TCP:
       listener_p = configuration_in.TCPListener;
       break;
+#if defined (SSL_USE)
     case NET_TRANSPORTLAYER_SSL:
     {
       listener_p = configuration_in.SSLListener;
@@ -998,6 +999,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       } // end IF
       break;
     }
+#endif // SSL_USE
     default:
       break;
   } // end SWITCH
@@ -1265,7 +1267,7 @@ ACE_TMAIN (int argc_in,
   enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_TCP;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
-    NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
+    NET_SERVER_DEFAULT_NUMBER_OF_DISPATCH_THREADS;
 
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,

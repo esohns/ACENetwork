@@ -182,12 +182,12 @@ struct DHCPClient_ModuleHandlerConfiguration
     passive = false;
   }
 
-  DHCPClient_IConnection_t*              connection; // UDP target/net IO module
-  DHCPClient_ConnectionConfigurations_t* connectionConfigurations;
-  DHCPClient_StreamConfiguration_t*      streamConfiguration; // dhcp discover module
-  DHCPClient_ISessionNotify_t*           subscriber;
-  DHCPClient_Subscribers_t*              subscribers;
-  std::string                            targetFileName; // dump module
+  DHCPClient_IConnection_t*         connection; // UDP target/net IO module
+  Net_ConnectionConfigurations_t*   connectionConfigurations;
+  DHCPClient_StreamConfiguration_t* streamConfiguration; // dhcp discover module
+  DHCPClient_ISessionNotify_t*      subscriber;
+  DHCPClient_Subscribers_t*         subscribers;
+  std::string                       targetFileName; // dump module
 };
 
 struct DHCPClient_StreamConfiguration
@@ -267,7 +267,7 @@ struct DHCPClient_Configuration
   // **************************** signal data **********************************
   struct DHCPClient_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  DHCPClient_ConnectionConfigurations_t        connectionConfigurations;
+  Net_ConnectionConfigurations_t               connectionConfigurations;
   // **************************** parser data **********************************
   struct Common_ParserConfiguration            parserConfiguration;
   // **************************** stream data **********************************

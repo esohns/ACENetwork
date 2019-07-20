@@ -38,7 +38,6 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
-          typename ConnectionConfigurationIteratorType, // (const-)
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>

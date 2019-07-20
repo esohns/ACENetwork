@@ -21,7 +21,7 @@ elseif (WIN32)
  set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
                PATHS ENV ACE_ROOT
-               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../../ACE_TAO/ACE
+               PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_XML_LIB_FILE}"
                NO_DEFAULT_PATH)
@@ -60,7 +60,7 @@ elseif (WIN32)
  set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
                PATHS ENV ACE_ROOT
-               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../../ATCD/ACE
+               PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
                NO_DEFAULT_PATH)

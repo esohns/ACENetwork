@@ -168,7 +168,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]      : #thread pool threads [")
-            << TEST_I_DEFAULT_NUMBER_OF_TP_THREADS
+            << TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 } // end print_usage
@@ -237,7 +237,7 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
+  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
@@ -1156,7 +1156,7 @@ ACE_TMAIN (int argc_in,
 
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
-      TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
+    TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             configuration_file_name,

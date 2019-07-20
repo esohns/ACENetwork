@@ -687,8 +687,8 @@ do_work (bool requestBroadcastReplies_in,
                                        configuration_in.streamConfiguration);
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Out"),
-                                                                    connection_configuration));
-  DHCPClient_ConnectionConfigurationIterator_t iterator =
+                                                                    &connection_configuration));
+  Net_ConnectionConfigurationsIterator_t iterator =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
 
@@ -799,7 +799,7 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In"),
-                                                                 connection_configuration));
+                                                                    &connection_configuration));
 
   if (requestBroadcastReplies_in)
   {
@@ -815,7 +815,7 @@ do_work (bool requestBroadcastReplies_in,
       return;
     } // end IF
     configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In_2"),
-                                                                   connection_configuration));
+                                                                      &connection_configuration));
   } // end IF
 
   // step0b: initialize event dispatch
@@ -853,7 +853,7 @@ do_work (bool requestBroadcastReplies_in,
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set ((*iterator).second,
+  connection_manager_p->set (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
                              &configuration_in.userData);
 
   // step0d: initialize regular (global) statistic reporting
@@ -938,7 +938,7 @@ do_work (bool requestBroadcastReplies_in,
   //         connection to the unicast address is handled by the discovery
   //         module
   configuration_in.streamConfiguration.configuration_.module = NULL;
-  connection_manager_p->set ((*iterator).second,
+  connection_manager_p->set (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
                              &configuration_in.userData);
 
   //Test_U_OutboundConnector_t connector (connection_manager_p,
@@ -951,19 +951,19 @@ do_work (bool requestBroadcastReplies_in,
     iconnector_p = &connector;
   else
     iconnector_p = &asynch_connector;
-  if (unlikely (!iconnector_p->initialize ((*iterator).second)))
+  if (unlikely (!iconnector_p->initialize (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second))))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
     return;
   } // end IF
   handle =
-    iconnector_p->connect ((*iterator).second.peerAddress);
+    iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress);
   if (unlikely (handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ())));
     return;
   } // end IF
   if (unlikely (iconnector_p->useReactor ()))
@@ -988,7 +988,7 @@ do_work (bool requestBroadcastReplies_in,
     do
     {
       (*iterator_2).second.second.connection =
-          connection_manager_p->get ((*iterator).second.peerAddress);
+          connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress);
       if ((*iterator_2).second.second.connection)
         break;
     } while (COMMON_TIME_NOW < deadline);
@@ -997,7 +997,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ())));
     return;
   } // end IF
   // step1b: wait for the connection to finish initializing
@@ -1014,7 +1014,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ()),
                 status));
     return;
   } // end IF
@@ -1034,15 +1034,15 @@ do_work (bool requestBroadcastReplies_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
               (*iterator_2).second.second.connection->id (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.peerAddress).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ())));
 #endif // _DEBUG
 
   // step1ca: reinitialize connection manager
   if (useReactor_in)
     ;
   else
-    (*iterator).second.connect = false;
-  (*iterator).second.writeOnly = false;
+    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->connect = false;
+  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->writeOnly = false;
   configuration_in.streamConfiguration.configuration_.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
@@ -1058,7 +1058,7 @@ do_work (bool requestBroadcastReplies_in,
       iconnector_p = &connector_2;
     else
       iconnector_p = &asynch_connector_2;
-    if (!iconnector_p->initialize ((*iterator).second))
+    if (!iconnector_p->initialize (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -1071,12 +1071,12 @@ do_work (bool requestBroadcastReplies_in,
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     configuration_in.handle =
-        iconnector_p->connect ((*iterator).second.listenAddress);
+        iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress);
     if (configuration_in.handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1103,7 +1103,7 @@ do_work (bool requestBroadcastReplies_in,
       do
       {
         iconnection_p =
-          connection_manager_p->get ((*iterator).second.listenAddress);
+          connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress);
         if (iconnection_p)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1122,7 +1122,7 @@ do_work (bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1130,7 +1130,7 @@ do_work (bool requestBroadcastReplies_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: listening to (UDP) %s\n"),
                 iconnection_p->id (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
 #endif // _DEBUG
 
     // step2: send DHCP request
@@ -1164,7 +1164,7 @@ do_work (bool requestBroadcastReplies_in,
 //    } // end IF
 allocate:
     message_p =
-        static_cast<Test_U_Message*> (message_allocator.malloc ((*iterator).second.PDUSize));
+        static_cast<Test_U_Message*> (message_allocator.malloc ((*iterator).second->PDUSize));
     // keep retrying ?
     if (!message_p && !message_allocator.block ())
       goto allocate;
@@ -1184,7 +1184,7 @@ allocate:
     if (configuration_in.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
     struct ether_addr ether_addrs_s =
-      Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second.interfaceIdentifier);
+      Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second->interfaceIdentifier);
     ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
     ACE_OS::memcpy (&(DHCP_record.chaddr),
                     &(ether_addrs_s.ether_addr_octet),

@@ -97,7 +97,6 @@ typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Test_U_Message,
                                Test_U_SessionMessage,
                                struct DHCPClient_ModuleHandlerConfiguration,
-                               DHCPClient_ConnectionConfigurationIterator_t,
                                DHCPClient_ConnectionManager_t,
                                DHCPClient_OutboundConnectorBcast_t,
                                DHCPClient_OutboundConnector_t> DHCPClient_Module_DHCPDiscover;

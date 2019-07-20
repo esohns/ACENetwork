@@ -42,7 +42,6 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionConfigurationIteratorType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
@@ -52,7 +51,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        DataMessageType,
                        SessionMessageType,
                        ConfigurationType,
-                       ConnectionConfigurationIteratorType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -75,7 +73,6 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionConfigurationIteratorType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
@@ -85,7 +82,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        DataMessageType,
                        SessionMessageType,
                        ConfigurationType,
-                       ConnectionConfigurationIteratorType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
                        ConnectorType>::~DHCP_Module_Discover_T ()
@@ -131,7 +127,6 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionConfigurationIteratorType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
@@ -142,7 +137,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        DataMessageType,
                        SessionMessageType,
                        ConfigurationType,
-                       ConnectionConfigurationIteratorType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
                        ConnectorType>::initialize (const ConfigurationType& configuration_in,
@@ -171,7 +165,6 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionConfigurationIteratorType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
@@ -182,7 +175,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        DataMessageType,
                        SessionMessageType,
                        ConfigurationType,
-                       ConnectionConfigurationIteratorType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
                        ConnectorType>::handleDataMessage (DataMessageType*& message_inout,
@@ -217,7 +209,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   bool write_only = false;
   DHCP_OptionsIterator_t iterator;
   int result = -1;
-  ConnectionConfigurationIteratorType iterator_2;
+  Net_ConnectionConfigurationsIterator_t iterator_2;
 
   iterator_2 =
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
@@ -266,10 +258,13 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (!session_data_r.connection);
 
-  address = (*iterator_2).second.peerAddress;
-  write_only = (*iterator_2).second.writeOnly;
-  (*iterator_2).second.peerAddress = session_data_r.serverAddress;
-  (*iterator_2).second.writeOnly = true;
+  address =
+    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress;
+  write_only =
+    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly;
+  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress =
+    session_data_r.serverAddress;
+  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = true;
 
   // step2ab: set up the connection manager
   // *NOTE*: the stream configuration may contain a module handle that is
@@ -330,8 +325,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   } // end IF
 
   // step2e: reset the connection configuration
-  (*iterator_2).second.peerAddress = address;
-  (*iterator_2).second.writeOnly = write_only;
+  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
+  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
   inherited::configuration_->streamConfiguration->configuration_.cloneModule =
     clone_module;
   inherited::configuration_->streamConfiguration->configuration_.module =
@@ -342,8 +337,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 error:
   if (reset_configuration)
   {
-    (*iterator_2).second.peerAddress = address;
-    (*iterator_2).second.writeOnly = write_only;
+    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
+    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
     inherited::configuration_->streamConfiguration->configuration_.cloneModule =
       clone_module;
     inherited::configuration_->streamConfiguration->configuration_.module =
@@ -364,13 +359,13 @@ continue_:
     return; // done
 
   DataMessageType* message_p =
-      inherited::allocateMessage ((*iterator_2).second.PDUSize);
+      inherited::allocateMessage ((*iterator_2).second->PDUSize);
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u): \"%m\", returning\n"),
                 inherited::mod_->name (),
-                (*iterator_2).second.PDUSize));
+                (*iterator_2).second->PDUSize));
     return;
   } // end IF
   struct DHCP_Record DHCP_record;
@@ -382,7 +377,7 @@ continue_:
   if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   struct ether_addr ether_addrs_s =
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -438,7 +433,6 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionConfigurationIteratorType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
@@ -449,7 +443,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        DataMessageType,
                        SessionMessageType,
                        ConfigurationType,
-                       ConnectionConfigurationIteratorType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
                        ConnectorType>::handleSessionMessage (SessionMessageType*& message_inout,
@@ -486,7 +479,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
       enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //      bool use_reactor = false;
-      ConnectionConfigurationIteratorType iterator;
+      //Net_ConnectionConfigurationsIterator_t iterator;
       bool write_only = false;
 //      struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
@@ -751,7 +744,6 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionConfigurationIteratorType,
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
@@ -762,7 +754,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        DataMessageType,
                        SessionMessageType,
                        ConfigurationType,
-                       ConnectionConfigurationIteratorType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
                        ConnectorType>::connect (const ACE_INET_Addr& address_in,
@@ -791,7 +782,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   typename ConnectorType::ISTREAM_CONNECTION_T* isocket_connection_2 = NULL;
   bool is_broadcast = (address_in.get_ip_address () == INADDR_BROADCAST);
   typename ConnectorType::ICONNECTOR_T* iconnector_p = NULL;
-  ConnectionConfigurationIteratorType iterator =
+  Net_ConnectionConfigurationsIterator_t iterator =
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
   if (iterator == inherited::configuration_->connectionConfigurations->end ())
     iterator =
@@ -808,7 +799,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     iconnector_p = &broadcast_connector;
   else
     iconnector_p = &connector;
-  if (unlikely (!iconnector_p->initialize ((*iterator).second)))
+  if (unlikely (!iconnector_p->initialize (*dynamic_cast<typename ConnectionManagerType::CONFIGURATION_T*> ((*iterator).second))))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to initialize connector, aborting\n"),

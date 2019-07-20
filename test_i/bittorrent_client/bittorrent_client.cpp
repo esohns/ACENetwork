@@ -174,7 +174,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-x [VALUE]: #thread pool threads ([")
-            << TEST_I_DEFAULT_NUMBER_OF_TP_THREADS
+            << TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS
             << ACE_TEXT ("]")
             << std::endl;
 } // end print_usage
@@ -216,7 +216,7 @@ do_processArguments (int argc_in,
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
+  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
@@ -917,7 +917,7 @@ ACE_TMAIN (int argc_in,
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
-      TEST_I_DEFAULT_NUMBER_OF_TP_THREADS;
+    TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             debug_parser,

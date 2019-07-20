@@ -121,7 +121,7 @@ class BitTorrent_Client_TrackerStreamHandler_T
 #else
                                             >
 #endif // GUI_SUPPORT
- , public Common_IInitialize_T<struct Common_ParserConfiguration>
+ //, public Common_IInitialize_T<struct Common_ParserConfiguration>
 {
  public:
   BitTorrent_Client_TrackerStreamHandler_T (SessionInterfaceType* // session handle
@@ -146,7 +146,7 @@ class BitTorrent_Client_TrackerStreamHandler_T
                                                          UserDataType>&); // session message
 
   // implement Common_IInitialize_T
-  inline virtual bool initialize (const struct Common_ParserConfiguration& configuration_in) { configuration_ = &const_cast<struct Common_ParserConfiguration&> (configuration_in); return true; }
+  //inline virtual bool initialize (const struct Common_ParserConfiguration& configuration_in) { configuration_ = &const_cast<struct Common_ParserConfiguration&> (configuration_in); return true; }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStreamHandler_T ())
@@ -162,7 +162,7 @@ class BitTorrent_Client_TrackerStreamHandler_T
                                       UserDataType> SESSION_MESSAGE_T;
   typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;
 
-  struct Common_ParserConfiguration* configuration_;
+  //struct Common_ParserConfiguration* configuration_;
 #if defined (GUI_SUPPORT)
   CBDataType*                        CBData_;
 #endif // GUI_SUPPORT

@@ -87,12 +87,12 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                struct Net_UserData> Server_UDP_Connector_t;
 
 typedef ACE_Singleton<Server_Asynch_TCP_Listener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_ASYNCH_TCP_LISTENER_SINGLETON;
+                      ACE_SYNCH_MUTEX> SERVER_ASYNCH_TCP_LISTENER_SINGLETON;
 typedef ACE_Singleton<Server_TCP_Listener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_TCP_LISTENER_SINGLETON;
+                      ACE_SYNCH_MUTEX> SERVER_TCP_LISTENER_SINGLETON;
 #if defined (SSL_USE)
 typedef ACE_Singleton<Server_SSL_Listener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_SSL_LISTENER_SINGLETON;
+                      ACE_SYNCH_MUTEX> SERVER_SSL_LISTENER_SINGLETON;
 #endif // SSL_USE
 
 #endif

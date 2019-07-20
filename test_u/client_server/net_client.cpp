@@ -653,7 +653,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   Client_TCP_AsynchConnector_t asynch_tcp_connector (true);
   Client_TCP_Connector_t tcp_connector (true);
+#if defined (SSL_USE)
   Client_SSL_Connector_t ssl_connector (true);
+#endif // SSL_USE
   Client_UDP_AsynchConnector_t asynch_udp_connector (true);
   Client_UDP_Connector_t udp_connector (true);
   Test_U_ITCPConnector_t* connector_p = NULL;
@@ -668,6 +670,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
         connector_p = &asynch_tcp_connector;
       break;
     }
+#if defined (SSL_USE)
     case NET_TRANSPORTLAYER_SSL:
     {
       if (useReactor_in)
@@ -686,6 +689,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       } // end IF
       break;
     }
+#endif // SSL_USE
     case NET_TRANSPORTLAYER_UDP:
     {
       if (useReactor_in)
@@ -980,7 +984,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     {
       // step1: wait for the connection to register with the manager
       // *TODO*: avoid these tight loops
-      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
       ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
       // *TODO*: this may not be accurate/applicable for/to all protocols
       do

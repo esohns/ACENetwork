@@ -272,7 +272,7 @@ typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPSocketConfigura
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPSocketConfiguration_t;
 
 typedef std::map<std::string,
-                 Net_SocketConfigurationBase*> Net_ConnectionConfigurations_t;
+                 struct Net_SocketConfigurationBase*> Net_ConnectionConfigurations_t;
 typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationsIterator_t;
 
 #if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)

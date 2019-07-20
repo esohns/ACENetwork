@@ -125,7 +125,7 @@ elseif (WIN32)
                                $<BUILD_INTERFACE:$ENV{SSL_ROOT}>)
   else ()
    target_include_directories (${PROJECT_NAME} PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include>)
+                               $<BUILD_INTERFACE:$ENV{LIB_ROOT}/openssl/include>)
   endif (DEFINED ENV{SSL_ROOT})
  endif (SSL_SUPPORT)
 
@@ -134,7 +134,7 @@ elseif (WIN32)
                               $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
  else ()
   target_include_directories (${PROJECT_NAME} PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
+                              $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
  endif (DEFINED ENV{ACE_ROOT})
 
  target_include_directories (${PROJECT_NAME} PUBLIC

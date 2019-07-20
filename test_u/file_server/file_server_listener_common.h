@@ -54,8 +54,8 @@ typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               struct Net_UserData> FileServer_Listener_t;
 
 typedef ACE_Singleton<FileServer_AsynchListener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> FILESERVER_ASYNCHLISTENER_SINGLETON;
+                      ACE_SYNCH_MUTEX> FILESERVER_ASYNCHLISTENER_SINGLETON;
 typedef ACE_Singleton<FileServer_Listener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> FILESERVER_LISTENER_SINGLETON;
+                      ACE_SYNCH_MUTEX> FILESERVER_LISTENER_SINGLETON;
 
 #endif
