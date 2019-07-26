@@ -150,10 +150,10 @@ set (${EXECUTABLE}_EXE_SRCS
      FILE_Stream.cpp
      FILE_Stream.h
      FILE_Stream.inl
-     IOStream_alt_macros.h
-     IOStream_alt_T.cpp
-     IOStream_alt_T.h
-     IOStream_alt_T.inl
+   #  IOStream_alt_macros.h
+   #  IOStream_alt_T.cpp
+   #  IOStream_alt_T.h
+   #  IOStream_alt_T.inl
      IRC_client.cpp
      IRC_client_common.h
      IRC_client_common_modules.h

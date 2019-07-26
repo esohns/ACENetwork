@@ -54,8 +54,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType> // *NOTE*: needs to inherit from ACE_FILE_IO
+          typename InputHandlerConfigurationType> // *NOTE*: needs to inherit from ACE_FILE_IO
 class IRC_Session_T
  : public ConnectionType
  //, virtual public Net_ISession_T<ACE_INET_Addr,
@@ -78,8 +77,7 @@ class IRC_Session_T
                                           ConnectionConfigurationType,
                                           ConnectionManagerType,
                                           InputHandlerType,
-                                          InputHandlerConfigurationType,
-                                          LogOutputType>,
+                                          InputHandlerConfigurationType>,
                             ACE_SOCK_CONNECTOR>;
  friend class ACE_Asynch_Connector<IRC_Session_T<ConnectionType,
                                                  SessionDataType,
@@ -93,8 +91,7 @@ class IRC_Session_T
                                                  ConnectionConfigurationType,
                                                  ConnectionManagerType,
                                                  InputHandlerType,
-                                                 InputHandlerConfigurationType,
-                                                 LogOutputType> >;
+                                                 InputHandlerConfigurationType> >;
 
  public:
  // *NOTE*: if there is no default ctor, this will not compile
@@ -136,7 +133,6 @@ class IRC_Session_T
   bool              close_;
   InputHandlerType* inputHandler_;
   bool              logToFile_;
-  LogOutputType     output_;
   bool              shutDownOnEnd_;
   StateType*        UIState_;
 };

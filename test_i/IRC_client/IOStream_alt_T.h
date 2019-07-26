@@ -189,16 +189,16 @@ public:
   virtual void osfx (void) {  if (flags () & unitbuf) flush (); }
 #  else
 #    if defined (__GNUC__)
-  virtual int ipfx0 (void) { return iostream::ipfx0 (); }  // Optimized ipfx(0)
-  virtual int ipfx1 (void) { return iostream::ipfx1 (); }  // Optimized ipfx(1)
+//  virtual int ipfx0 (void) { /*return iostream::ipfx0 ();*/ }  // Optimized ipfx(0)
+//  virtual int ipfx1 (void) { /*return iostream::ipfx1 ();*/ }  // Optimized ipfx(1)
 #    else
   inline virtual int ipfx0 (void) { return iostream::ipfx (0); }
   inline virtual int ipfx1 (void) { return iostream::ipfx (1); }
 #    endif /* __GNUC__ */
-  virtual int ipfx (int need = 0) {  return iostream::ipfx (need); }
-  virtual void isfx (void)        {  iostream::isfx (); }
-  virtual int opfx (void)         {  return iostream::opfx (); }
-  virtual void osfx (void)        {  iostream::osfx (); }
+//  virtual int ipfx (int need = 0) {  /*return iostream::ipfx (need);*/ }
+//  virtual void isfx (void)        {  /*iostream::isfx ();*/ }
+//  virtual int opfx (void)         {  /*return iostream::opfx ();*/ }
+//  virtual void osfx (void)        {  /*iostream::osfx ();*/ }
 #  endif /* ACE_LACKS_IOSTREAM_FX */
 
   /// Allow the programmer to provide a timeout for read operations.

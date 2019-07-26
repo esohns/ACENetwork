@@ -88,17 +88,17 @@ typedef ostream& (*__omanip_) (ostream&);
         return *this;                                 \
         }
 #  else
-#define GET_CODE {                                    \
-        if (ipfx (0))                                 \
-                {                                     \
-                iostream::operator>> (v);             \
-                }                                     \
-        isfx ();                                      \
-        return *this;                                 \
-        }
-#  endif
-#define GET_PROT(MT,DT,CODE)    GET_SIG(MT,DT)  CODE
-#define GET_FUNC(MT,DT)         GET_PROT(MT,DT,GET_CODE)
+//#define GET_CODE {                                    \
+//        if (ipfx (0))                                 \
+//                {                                     \
+///*                iostream::operator>> (v);             */ \
+//                }                                     \
+//        isfx ();                                      \
+//        return *this;                                 \
+//        }
+//#  endif
+//#define GET_PROT(MT,DT,CODE)    GET_SIG(MT,DT)  CODE
+//#define GET_FUNC(MT,DT)         GET_PROT(MT,DT,GET_CODE)
 
 // This macro defines the put operator for class MT into datatype DT.
 // We will use it below to quickly override most (all?)  iostream put
@@ -191,15 +191,15 @@ typedef ostream& (*__omanip_) (ostream&);
           PUT_FUNC_SET0(MT,CODE,CODE2)
 #  endif /* ACE_LACKS_SIGNED_CHAR */
 
-#define GET_MANIP_CODE  { if (ipfx ()) { (*func) (*this); } isfx (); return *this; }
-#define PUT_MANIP_CODE  { if (opfx ()) { (*func) (*this); } osfx (); return *this; }
+//#define GET_MANIP_CODE  { if (ipfx ()) { (*func) (*this); } isfx (); return *this; }
+//#define PUT_MANIP_CODE  { if (opfx ()) { (*func) (*this); } osfx (); return *this; }
 
-#define GET_FUNC_SET(MT)        GET_FUNC_SET1(MT,GET_CODE,GET_MANIP_CODE)
+//#define GET_FUNC_SET(MT)        GET_FUNC_SET1(MT,GET_CODE,GET_MANIP_CODE)
 #define PUT_FUNC_SET(MT)        PUT_FUNC_SET1(MT,PUT_CODE,PUT_MANIP_CODE)
-#define GETPUT_FUNC_SET(MT)     GET_FUNC_SET(MT) PUT_FUNC_SET(MT)
+//#define GETPUT_FUNC_SET(MT)     GET_FUNC_SET(MT) PUT_FUNC_SET(MT)
 
-#define GET_SIG_SET(MT)         GET_FUNC_SET1(MT,= 0;,= 0;)
+//#define GET_SIG_SET(MT)         GET_FUNC_SET1(MT,= 0;,= 0;)
 #define PUT_SIG_SET(MT)         PUT_FUNC_SET1(MT,= 0;,= 0;)
-#define GETPUT_SIG_SET(MT)      GET_SIG_SET(MT) PUT_SIG_SET(MT)
+//#define GETPUT_SIG_SET(MT)      GET_SIG_SET(MT) PUT_SIG_SET(MT)
 
 #  endif /* ACE_IOSTREAM_ALT_MACROS_H */

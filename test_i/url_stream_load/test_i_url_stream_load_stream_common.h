@@ -26,16 +26,18 @@
 #include <set>
 #include <string>
 
-#include "ace/INET_Addr.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Singleton.h"
-#include "ace/Time_Value.h"
+#include "libxml/tree.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "gtk/gtk.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
+#include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Singleton.h"
+#include "ace/Time_Value.h"
 
 #include "common.h"
 #include "common_istatistic.h"

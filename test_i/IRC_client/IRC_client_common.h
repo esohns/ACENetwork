@@ -49,7 +49,7 @@
 #include "irc_stream_common.h"
 
 #include "FILE_Stream.h"
-#include "IOStream_alt_T.h"
+//#include "IOStream_alt_T.h"
 #include "IRC_client_defines.h"
 
 #include "IRC_client_network.h"
@@ -96,7 +96,7 @@ typedef IRC_Client_MessageQueue_t::iterator IRC_Client_MessageQueueIterator_t;
 typedef IRC_Client_MessageQueue_t::reverse_iterator IRC_Client_MessageQueueReverseIterator_t;
 
 //  ACE_IOStream<ACE_FILE_Stream> output_;
-typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
+//typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
 
 struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;

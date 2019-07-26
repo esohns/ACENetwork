@@ -47,8 +47,6 @@
 #include "irc_icontrol.h"
 #include "irc_tools.h"
 
-
-
 template <typename ConnectionType,
           typename SessionDataType,
 //          typename ControllerType,
@@ -61,8 +59,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 IRC_Session_T<ConnectionType,
               SessionDataType,
 //              ControllerType,
@@ -75,13 +72,12 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::IRC_Session_T (bool managed_in)
+              InputHandlerConfigurationType>::IRC_Session_T (bool managed_in)
  : inherited (managed_in)
  , close_ (false)
  , inputHandler_ (NULL)
  , logToFile_ (IRC_SESSION_DEF_LOG)
- , output_ (ACE_STREAMBUF_SIZE)
+// , output_ (ACE_STREAMBUF_SIZE)
  , shutDownOnEnd_ (true) // *TODO*: allow more sessions
  , UIState_ (NULL)
 {
@@ -101,8 +97,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 IRC_Session_T<ConnectionType,
               SessionDataType,
 //              ControllerType,
@@ -115,8 +110,7 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::~IRC_Session_T ()
+              InputHandlerConfigurationType>::~IRC_Session_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::~IRC_Session_T"));
 
@@ -148,10 +142,10 @@ IRC_Session_T<ConnectionType,
     //if (result == -1)
     //  ACE_DEBUG ((LM_ERROR,
     //              ACE_TEXT ("failed to ACE_FILE_Stream::close(): \"%m\", continuing\n")));
-    result = output_.close ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to IRC_Client_IOStream_t::close(): \"%m\", continuing\n")));
+//    result = output_.close ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to IRC_Client_IOStream_t::close(): \"%m\", continuing\n")));
   } // end IF
 }
 
@@ -176,8 +170,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -191,9 +184,8 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::start (Stream_SessionId_t sessionId_in,
-                                     const SessionDataType& sessionData_in)
+              InputHandlerConfigurationType>::start (Stream_SessionId_t sessionId_in,
+                                                     const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::start"));
 
@@ -278,27 +270,27 @@ IRC_Session_T<ConnectionType,
       return;
     } // end IF
     ACE_FILE_Connector connector;
-    result = connector.connect (output_,
-                                address,
-                                NULL,
-                                ACE_Addr::sap_any,
-                                O_CREAT | O_TEXT | O_TRUNC | O_WRONLY,
-                                ACE_DEFAULT_FILE_PERMS);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_FILE_Connector::connect(\"%s\"): \"%m\", returning\n"),
-                  ACE_TEXT (file_name.c_str ())));
+//    result = connector.connect (output_,
+//                                address,
+//                                NULL,
+//                                ACE_Addr::sap_any,
+//                                O_CREAT | O_TEXT | O_TRUNC | O_WRONLY,
+//                                ACE_DEFAULT_FILE_PERMS);
+//    if (result == -1)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_FILE_Connector::connect(\"%s\"): \"%m\", returning\n"),
+//                  ACE_TEXT (file_name.c_str ())));
 
-      // close connection
-      inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
+//      // close connection
+//      inherited::close (NET_CONNECTION_CLOSE_REASON_INITIALIZATION);
 
-      return;
-    } // end IF
+//      return;
+//    } // end IF
     close_ = true;
   } // end IF
-  else
-    output_.set_handle (ACE_STDOUT);
+//  else
+//    output_.set_handle (ACE_STDOUT);
 
   // step2: initialize input
   if (!configuration_p->cursesState &&
@@ -347,8 +339,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -362,9 +353,8 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::notify (Stream_SessionId_t sessionId_in,
-                                      const enum Stream_SessionMessageType& sessionEvent_in)
+              InputHandlerConfigurationType>::notify (Stream_SessionId_t sessionId_in,
+                                                      const enum Stream_SessionMessageType& sessionEvent_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
@@ -389,8 +379,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -404,8 +393,7 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::end (Stream_SessionId_t sessionId_in)
+              InputHandlerConfigurationType>::end (Stream_SessionId_t sessionId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::end"));
 
@@ -440,8 +428,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -455,9 +442,8 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::notify (Stream_SessionId_t sessionId_in,
-                                      const MessageType& message_in)
+              InputHandlerConfigurationType>::notify (Stream_SessionId_t sessionId_in,
+                                                      const MessageType& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
@@ -966,8 +952,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -981,9 +966,8 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::notify (Stream_SessionId_t sessionId_in,
-                                      const SessionMessageType& sessionrecord_r)
+              InputHandlerConfigurationType>::notify (Stream_SessionId_t sessionId_in,
+                                                      const SessionMessageType& sessionrecord_r)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
@@ -1003,8 +987,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 int
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -1018,8 +1001,7 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::open (void* arg_in)
+              InputHandlerConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::open"));
 
@@ -1118,8 +1100,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -1133,9 +1114,8 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::open (ACE_HANDLE handle_in,
-                                    ACE_Message_Block& messageBlock_in)
+              InputHandlerConfigurationType>::open (ACE_HANDLE handle_in,
+                                                    ACE_Message_Block& messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::open"));
 
@@ -1173,8 +1153,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -1188,8 +1167,7 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::error (const IRC_Record& record_r)
+              InputHandlerConfigurationType>::error (const IRC_Record& record_r)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::error"));
 
@@ -1211,8 +1189,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -1226,9 +1203,8 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::log (const std::string& channel_in,
-                                   const std::string& messageText_in)
+              InputHandlerConfigurationType>::log (const std::string& channel_in,
+                                                   const std::string& messageText_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
 
@@ -1236,8 +1212,8 @@ IRC_Session_T<ConnectionType,
 
   if (UIState_)
   {
-    if (logToFile_)
-      output_ << messageText_in;
+//    if (logToFile_)
+//      output_ << messageText_in;
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
     curses_log (channel_in,     // channel
@@ -1247,12 +1223,12 @@ IRC_Session_T<ConnectionType,
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
   } // end IF
-  else
-    output_ << messageText_in;
-  result = output_.sync ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_IOStream_t::sync(): \"%m\", continuing\n")));
+//  else
+//    output_ << messageText_in;
+//  result = output_.sync ();
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to IRC_Client_IOStream_t::sync(): \"%m\", continuing\n")));
 }
 
 template <typename ConnectionType,
@@ -1267,8 +1243,7 @@ template <typename ConnectionType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType>
+          typename InputHandlerConfigurationType>
 void
 IRC_Session_T<ConnectionType,
               SessionDataType,
@@ -1282,8 +1257,7 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType,
-              LogOutputType>::log (const IRC_Record& record_r)
+              InputHandlerConfigurationType>::log (const IRC_Record& record_r)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
 

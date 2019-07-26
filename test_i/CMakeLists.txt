@@ -311,7 +311,7 @@ target_sources (${PROJECT_NAME}_Test_I
 
 # ----------------------------------------
 
-add_subdirectory (bittorrent_client)
+#add_subdirectory (bittorrent_client)
 add_subdirectory (IRC_client)
 add_subdirectory (url_stream_load)
 

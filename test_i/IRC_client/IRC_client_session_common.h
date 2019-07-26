@@ -48,8 +48,7 @@ typedef IRC_Session_T<IRC_Client_TCPConnection_t,
                       IRC_Client_ConnectionConfiguration,
                       IRC_Client_Connection_Manager_t,
                       IRC_Client_InputHandler,
-                      struct IRC_Client_InputHandlerConfiguration,
-                      IRC_Client_IOStream_t> IRC_Client_IRCSession_t;
+                      struct IRC_Client_InputHandlerConfiguration> IRC_Client_IRCSession_t;
 typedef IRC_Session_T<IRC_Client_AsynchTCPConnection_t,
                       struct IRC_Client_SessionData,
 //                      IRC_IControl,
@@ -62,8 +61,7 @@ typedef IRC_Session_T<IRC_Client_AsynchTCPConnection_t,
                       IRC_Client_ConnectionConfiguration,
                       IRC_Client_Connection_Manager_t,
                       IRC_Client_InputHandler,
-                      struct IRC_Client_InputHandlerConfiguration,
-                      IRC_Client_IOStream_t> IRC_Client_AsynchIRCSession_t;
+                      struct IRC_Client_InputHandlerConfiguration> IRC_Client_AsynchIRCSession_t;
 
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                IRC_Client_IRCSession_t,
