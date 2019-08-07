@@ -29,6 +29,11 @@
 // - WARNING: current implementation cannot support 0 !!!
 #define NET_SERVER_LOG_MAXIMUM_NUMBER_OF_FILES           5
 
+// *IMPORTANT NOTE*: on Linux, specifying 1 will not work correctly for proactor
+//                   scenarios using the default (rt signal) proactor
+//                   implementation. The thread blocked in sigwaitinfo (see man
+//                   pages) will not awaken when the dispatch set is changed
+//                   (*TODO*: to be verified)
 #define NET_SERVER_DEFAULT_NUMBER_OF_DISPATCH_THREADS    10
 
 #define NET_SERVER_DEFAULT_TRANSPORT_LAYER               TRANSPORTLAYER_TCP

@@ -21,7 +21,16 @@
 #ifndef NET_CLIENT_DEFINES_H
 #define NET_CLIENT_DEFINES_H
 
-#define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS        3
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS        1
+#else
+// *IMPORTANT NOTE*: on Linux, specifying 1 will not work correctly for proactor
+//                   scenarios using the default (rt signal) proactor
+//                   implementation. The thread blocked in sigwaitinfo (see man
+//                   pages) will not awaken when the dispatch set is changed
+//                   (*TODO*: to be verified)
+#define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS        2
+#endif // ACE_WIN32 || ACE_WIN64
 
 // define behaviour
 #define NET_CLIENT_DEFAULT_CONNECT_PROBABILITY               0.5F // 50%
