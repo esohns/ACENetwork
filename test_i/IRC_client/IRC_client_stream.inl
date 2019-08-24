@@ -39,35 +39,49 @@ IRC_Client_Stream_T<TimerManagerType>::IRC_Client_Stream_T ()
 
 template <typename TimerManagerType>
 bool
-IRC_Client_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
+IRC_Client_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_in,
                                              bool& delete_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::load"));
 
+  if (!inherited::load (layout_in,
+                        delete_out))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::load(), aborting\n"),
+                ACE_TEXT (libacenetwork_default_irc_stream_name_string)));
+    return false;
+  } // end IF
+
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  IRC_Client_Module_IRCHandler_Module (this,
-                                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME)),
+                  IRC_Client_Module_Marshal_Module (this,
+                                                    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  IRC_Client_Module_StatisticReport_Module (this,
-                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   IRC_Client_Module_Parser_Module (this,
                                                    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_PARSER_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  IRC_Client_Module_Marshal_Module (this,
-                                                    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
+                  IRC_Client_Module_StatisticReport_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  IRC_Client_Module_IRCHandler_Module (this,
+                                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME)),
+                  false);
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
   delete_out = true;
 
@@ -82,6 +96,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::initialize"));
 
   // sanity check(s)
+  ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
   ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!inherited::isRunning ());
 
@@ -120,6 +135,14 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;
+
+  IRC_Client_Connection_Manager_t* connection_manager_p =
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  IRC_Client_IConnection_t* iconnection_p =
+    connection_manager_p->get (handle_in);
+  ACE_ASSERT (iconnection_p);
+  session_data_p->connectionState =
+    &const_cast<struct IRC_Client_SessionState&> (iconnection_p->state ());
 
   // ---------------------------------------------------------------------------
   // ******************* Marshal ************************

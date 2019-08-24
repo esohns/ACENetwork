@@ -72,6 +72,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (IRC_Client_GUI_Connections
 
   // sanity check(s)
   ACE_ASSERT (connections_in);
+  ACE_ASSERT (CBData_in);
   if (!Common_File_Tools::isDirectory (UIFileDirectory_in))
   {
     ACE_DEBUG ((LM_ERROR,

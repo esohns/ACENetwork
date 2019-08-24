@@ -96,7 +96,7 @@ class Test_I_ConnectionStream
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // i/o value: layout
-                     bool&);               // return value: delete modules ?
+                     bool&);          // return value: delete modules ?
 
   // implement Common_IInitialize_T
   virtual bool initialize (const inherited::CONFIGURATION_T&,

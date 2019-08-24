@@ -126,11 +126,31 @@ connection_setup_function (void* arg_in)
 
   // *NOTE*: this schedules addition of a new server page
   //         --> make sure to remove it again, if things go wrong
+  struct IRC_Client_UI_HandlerCBData* handler_cb_data_p = NULL;
+  ACE_NEW_NORETURN (handler_cb_data_p,
+                    struct IRC_Client_UI_HandlerCBData ());
+  if (!handler_cb_data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+
+    // clean up
+//    gdk_threads_leave ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
+#else
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
+#endif
+    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
+    delete data_p;
+
+    return result;
+  } // end IF
   IRC_Client_GUI_Connection* connection_p = NULL;
 //  gdk_threads_enter ();
   ACE_NEW_NORETURN (connection_p,
                     IRC_Client_GUI_Connection (&data_p->CBData->connections,
-                                               NULL, // *TODO*
+                                               handler_cb_data_p,
                                                context_id,
                                                data_p->phonebookEntry.hostName,
                                                data_p->CBData->UIFileDirectory));
@@ -1377,6 +1397,7 @@ idle_update_progress_cb (gpointer userData_in)
   ACE_ASSERT (thread_manager_p);
   // synch access
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+    Common_UI_GTK_PendingActionsIterator_t iterator_3;
     for (Common_UI_GTK_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
          iterator_2 != data_p->completedActions.end ();
          ++iterator_2)
@@ -1401,8 +1422,12 @@ idle_update_progress_cb (gpointer userData_in)
 #endif
       } // end IF
 
-      Common_UI_GTK_PendingActionsIterator_t iterator_3 =
-          data_p->pendingActions.find (*iterator_2);
+      for (iterator_3 = data_p->pendingActions.begin ();
+           iterator_3 != data_p->pendingActions.end ();
+           ++iterator_3)
+        if ((*iterator_3).second.id () == *iterator_2)
+          break;
+      //iterator_3 = data_p->pendingActions.find (*iterator_2);
       ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
       data_p->state->eventSourceIds.erase ((*iterator_3).first);
       data_p->pendingActions.erase (iterator_3);

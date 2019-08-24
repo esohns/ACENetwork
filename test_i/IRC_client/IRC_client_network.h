@@ -85,11 +85,11 @@ struct IRC_Client_ConnectionState
 {
   IRC_Client_ConnectionState ()
    : IRC_ConnectionState ()
-   , configuration (NULL)
+   //, configuration (NULL)
 //   , userData (NULL)
   {}
 
-  IRC_Client_ConnectionConfiguration* configuration;
+  //IRC_Client_ConnectionConfiguration* configuration;
 
 //  struct Net_UserData*           userData;
 };

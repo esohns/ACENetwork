@@ -466,9 +466,12 @@ do_work (unsigned int numberOfDispatchThreads_in,
     statisticReportingInterval_in;
   modulehandler_configuration.streamConfiguration =
     &CBData_in.configuration->streamConfiguration;
-  CBData_in.configuration->streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                       std::make_pair (module_configuration,
-                                                                                       modulehandler_configuration)));
+  struct IRC_AllocatorConfiguration allocator_configuration;
+  struct IRC_Client_StreamConfiguration stream_configuration;
+  CBData_in.configuration->streamConfiguration.initialize (module_configuration,
+                                                           modulehandler_configuration,
+                                                           allocator_configuration,
+                                                           stream_configuration);
 
   //IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
   //                                                 NULL,
@@ -559,8 +562,10 @@ do_work (unsigned int numberOfDispatchThreads_in,
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-
-  ACE_ASSERT (CBData_in.UIState);
+  ACE_ASSERT (!CBData_in.UIState);
+  const Common_UI_GTK_State_t& state_r =
+    gtk_manager_p->getR_2 ();
+  CBData_in.UIState = &const_cast<Common_UI_GTK_State_t&> (state_r);
   CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
 

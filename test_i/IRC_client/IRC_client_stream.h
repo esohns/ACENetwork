@@ -121,8 +121,8 @@ class IRC_Client_Stream_T
   inline virtual ~IRC_Client_Stream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
+  virtual bool load (Stream_ILayout*, // i/o value: layout
+                     bool&);          // return value: delete modules ?
 
   virtual bool initialize (const IRC_Client_StreamConfiguration_t&,
                            ACE_HANDLE);
