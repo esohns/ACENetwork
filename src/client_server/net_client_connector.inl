@@ -417,8 +417,8 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // pre-initialize the connection handler
   Net_ILinkLayer_T<Net_UDPSocketConfiguration_t>* ilinklayer_p = handler_p;
-  ilinklayer_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
-                                                            : NET_ROLE_SERVER);
+  ilinklayer_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_SERVER
+                                                            : NET_ROLE_CLIENT);
 
   result = activate_svc_handler (handler_p);
   if (unlikely (result == -1))

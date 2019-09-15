@@ -566,7 +566,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
   int result = 0;
   ACE_HANDLE handle_h = SocketType::get_handle ();
-  ACE_ASSERT (handle_in == handle_h);
+  //ACE_ASSERT (handle_in == handle_h);
 
   if (handle_h != ACE_INVALID_HANDLE)
   {
@@ -800,7 +800,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     case -1:
     case 0:
     {
-      ACE_ASSERT (!result_in.success ());
+      //ACE_ASSERT (!result_in.success ());
       //      error = result_in.error ();
 //      if ((error != ECONNRESET) &&
 //          (error != EPIPE)      &&

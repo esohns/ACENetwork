@@ -2182,11 +2182,13 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   Stream_Module_t* module_p = NULL;
   Stream_Task_t* task_p = NULL;
 
-  // *NOTE*: feed the data into the stream (queue of the head module 'reader'
-  //         task)
-  module_p = stream_.head ();
+  // *NOTE*: feed the data into the stream (queue of the tail module 'reader'
+  //         task; Note: 'tail' module to support potential 'streamer' modules)
+  module_p = stream_.tail ();
   ACE_ASSERT (module_p);
   task_p = module_p->reader ();
+  ACE_ASSERT (task_p);
+  task_p = task_p->next ();
   ACE_ASSERT (task_p);
   //result = task_p->reply (message_inout, NULL);
   result = task_p->put (message_inout, NULL);

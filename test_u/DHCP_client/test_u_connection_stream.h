@@ -94,8 +94,8 @@ class Test_U_InboundConnectionStream
   virtual ~Test_U_InboundConnectionStream ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete modules ?
 
   // implement Common_IInitialize_T
   virtual bool initialize (const inherited::CONFIGURATION_T&,
@@ -161,8 +161,8 @@ class Test_U_OutboundConnectionStream
   virtual ~Test_U_OutboundConnectionStream ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete modules ?
 
   // implement Common_IInitialize_T
   virtual bool initialize (const inherited::CONFIGURATION_T&,

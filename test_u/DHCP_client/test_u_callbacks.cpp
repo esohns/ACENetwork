@@ -1319,7 +1319,7 @@ allocate:
   DHCP_record.ciaddr = IP_address.get_ip_address ();
   struct ether_addr ether_addrs_s =
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
-  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_ASSERT (DHCP_CHADDR_SIZE > ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
                   ETH_ALEN);
@@ -1572,7 +1572,7 @@ allocate:
   DHCP_record.ciaddr = IP_address.get_ip_address ();
   struct ether_addr ether_addrs_s =
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
-  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_ASSERT (DHCP_CHADDR_SIZE > ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
                   ETH_ALEN);
@@ -1876,7 +1876,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 #else
               static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif
-          iconnection_p->decrease ();
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);

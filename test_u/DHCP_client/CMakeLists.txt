@@ -277,3 +277,42 @@ elseif (UNIX)
  install (FILES ${PROJECT_NAME}_DHCPClient_EXE_CFG
           DESTINATION $ENV{APPDATA}/lib${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 endif ()
+
+##########################################
+
+if (UNIX)
+ create_target_launcher (${EXECUTABLE}
+                         ARGS "-l -t"
+#                         FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              /usr/local/lib
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/DHCP_client
+                         ENVIRONMENT foo=bar)
+elseif (WIN32)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
+ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${ACE_LIB_PATH}
+                           ${GTK_LIB_PATH})
+ create_target_launcher (${EXECUTABLE}
+                         ARGS "-l -t"
+#                        FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                                              G:/software/Development/dll
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/image/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/math/Debug
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dev/Debug
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/vis/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/dhcp/Debug
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/DHCP_client
+                         ENVIRONMENT foo=bar)
+endif ()

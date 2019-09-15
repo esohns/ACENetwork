@@ -55,46 +55,43 @@ Test_U_InboundConnectionStream::~Test_U_InboundConnectionStream ()
 }
 
 bool
-Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
+Test_U_InboundConnectionStream::load (Stream_ILayout* layout_inout,
                                       bool& deleteModules_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::load"));
 
   Stream_Module_t* module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
-                  DHCPClient_Module_Dump_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DUMP_DEFAULT_NAME_STRING)),
+                  DHCPClient_Module_Net_IO_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  DHCPClient_Module_DHCPDiscover_Module (this,
-                                                         ACE_TEXT_ALWAYS_CHAR (DHCP_DEFAULT_MODULE_DISCOVER_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  DHCPClient_Module_StatisticReport_Module (this,
-                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
-//  module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  DHCPClient_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
-//                  false);
-//  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   DHCPClient_Module_Marshal_Module (this,
                                                     ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                DHCPClient_Module_StatisticReport_Module (this,
+  //                                                          ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  DHCPClient_Module_Net_IO_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
+                  DHCPClient_Module_DHCPDiscover_Module (this,
+                                                         ACE_TEXT_ALWAYS_CHAR (DHCP_DEFAULT_MODULE_DISCOVER_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  DHCPClient_Module_Dump_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DUMP_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
 
   deleteModules_out = true;
 
@@ -221,7 +218,7 @@ Test_U_OutboundConnectionStream::~Test_U_OutboundConnectionStream ()
 }
 
 bool
-Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
+Test_U_OutboundConnectionStream::load (Stream_ILayout* layout_inout,
                                        bool& deleteModules_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::load"));
@@ -231,22 +228,22 @@ Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  DHCPClient_Module_StatisticReport_Module (this,
-                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  DHCPClient_Module_Net_IO_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
+  layout_inout->append (module_p, NULL, 0);
   ACE_NEW_RETURN (module_p,
                   DHCPClient_Module_Streamer_Module (this,
                                                      ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  DHCPClient_Module_Net_IO_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
+  //ACE_NEW_RETURN (module_p,
+  //                DHCPClient_Module_StatisticReport_Module (this,
+  //                                                          ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+  //                false);
+  //modules_out.push_back (module_p);
+  //module_p = NULL;
 
   return true;
 }

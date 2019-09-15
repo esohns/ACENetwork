@@ -957,6 +957,8 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
     return;
   } // end IF
+  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->connect = true;
+  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->writeOnly = true;
   handle =
     iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress);
   if (unlikely (handle == ACE_INVALID_HANDLE))
@@ -1238,8 +1240,9 @@ allocate:
   {
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
-
-    ACE_ASSERT (CBData_in.UIState);
+    Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    CBData_in.UIState = &state_r;
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =

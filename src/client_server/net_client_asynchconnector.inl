@@ -797,8 +797,8 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // pre-initialize the connection handler
   Net_ILinkLayer_T<Net_UDPSocketConfiguration_t>* ilinklayer_p = handler_p;
-  ilinklayer_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
-                                                            : NET_ROLE_SERVER);
+  ilinklayer_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_SERVER
+                                                            : NET_ROLE_CLIENT);
 
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
