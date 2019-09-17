@@ -67,6 +67,9 @@ class Test_U_Message
                                                Test_U_Message,
                                                Test_U_SessionMessage>;
 
+  typedef HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
+                         enum Stream_MessageType> inherited;
+
  public:
   Test_U_Message (unsigned int); // size
   inline virtual ~Test_U_Message () {}
@@ -84,11 +87,6 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-//  typedef Stream_DataMessageBase_T<xmlDoc,
-//                                   Stream_CommandType_t> inherited;
-  typedef HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
-                         enum Stream_MessageType> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by message allocators
   Test_U_Message (Stream_SessionId_t,

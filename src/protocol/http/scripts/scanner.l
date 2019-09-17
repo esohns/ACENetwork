@@ -36,6 +36,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 #include "ace/Message_Block.h"
 #include "ace/OS_Memory.h"
 
+#include "common_string_tools.h"
 #include "common_tools.h"
 
 #include "net_macros.h"
@@ -549,6 +550,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 //                                 }
 //                                 ACE_ASSERT (std::has_facet<std::ctype<char> >(locale));
                                  std::string value_string = (*iterator).second;
+                                 value_string = Common_String_Tools::strip (value_string);
                                  std::transform (value_string.begin (), value_string.end (),
                                                  value_string.begin (),
                                                  [](unsigned char c) { return std::tolower (c); });

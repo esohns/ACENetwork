@@ -51,7 +51,7 @@ Test_U_Stream_T<TimerManagerType>::~Test_U_Stream_T ()
 
 template <typename TimerManagerType>
 bool
-Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
+Test_U_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_inout,
                                          bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::load"));
@@ -62,22 +62,10 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
   // modules
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_FileWriter_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+                  IO_MODULE_T (this,
+                               ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Marshal_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
   //ACE_NEW_RETURN (module_p,
   //                Test_U_Module_FileWriter_Module (this,
@@ -86,10 +74,23 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
   //modules_out.push_back (module_p);
   //module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  IO_MODULE_T (this,
-                               ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
+                  Test_U_Module_Marshal_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_U_Module_StatisticReport_Module (this,
+  //                                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+  //                false);
+  //modules_out.push_back (module_p);
+  //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Module_FileWriter_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
 
   deleteModules_out = true;
 

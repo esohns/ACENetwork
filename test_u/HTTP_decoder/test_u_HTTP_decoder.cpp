@@ -477,13 +477,14 @@ do_work (unsigned int bufferSize_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
+  struct Common_FlexParserAllocatorConfiguration allocator_configuration;
   struct Test_U_HTTPDecoder_Configuration configuration;
   configuration.dispatch = (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                                           : COMMON_EVENT_DISPATCH_PROACTOR);
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_FlexParserAllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
+  if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -536,6 +537,7 @@ do_work (unsigned int bufferSize_in,
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_U_StreamConfiguration stream_configuration;
   //configuration.moduleHandlerConfiguration.allocatorConfiguration =
   //  &configuration.allocatorConfiguration;
   // *NOTE*: yyparse() does not currently return until the whole entity has been
@@ -564,12 +566,12 @@ do_work (unsigned int bufferSize_in,
   // ******************** (sub-)stream configuration data **********************
   //if (bufferSize_in)
   //  configuration.streamConfiguration.bufferSize = bufferSize_in;
-  configuration.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
+  configuration.streamConfiguration.initialize (module_configuration,
+                                                modulehandler_configuration,
+                                                allocator_configuration,
+                                                stream_configuration);
+  configuration.streamConfiguration.configuration_.messageAllocator = &message_allocator;
   configuration.streamConfiguration.configuration_.printFinalReport = true;
-  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            std::make_pair (module_configuration,
-                                                                            modulehandler_configuration)));
 
   // step0b: initialize event dispatch
   if (useReactor_in)
@@ -794,10 +796,10 @@ do_work (unsigned int bufferSize_in,
                 status));
 
     // clean up
-    connection_p->close ();
-    connection_p->decrease ();
+    //connection_p->close ();
+    //connection_p->decrease ();
 
-    goto clean_up;
+    //goto clean_up;
   } // end IF
   // step1c: wait for the connection stream to finish initializing
   istream_connection_p =
@@ -814,8 +816,8 @@ do_work (unsigned int bufferSize_in,
 
     goto clean_up;
   } // end IF
-  istream_connection_p->wait (STREAM_STATE_RUNNING,
-                              NULL); // <-- block
+  //istream_connection_p->wait (STREAM_STATE_RUNNING,
+  //                            NULL); // <-- block
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connected to %s\n"),

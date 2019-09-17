@@ -102,7 +102,7 @@
 #define NET_CONNECTION_HANDLER_THREAD_GROUP_ID               20
 #define NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN                10
 
-#define NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S      3 // seconds
+#define NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S      5 // seconds
 
 // (asynchronous) connections
 #define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S              10 // second(s)
