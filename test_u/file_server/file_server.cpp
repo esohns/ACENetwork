@@ -806,9 +806,26 @@ do_work (
 #if defined (GTK_USE)
     gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
+    Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
+
+    //Common_UI_GladeDefinition ui_definition (argc_in,
+//                                         argv_in);
+    Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
+    //CBData_in.configuration->GTKConfiguration.argc = argc_in;
+    //CBData_in.configuration->GTKConfiguration.argv = argv_in;
+    CBData_in.configuration->GTKConfiguration.CBData = &CBData_in;
+    CBData_in.configuration->GTKConfiguration.definition = &gtk_ui_definition;
+    CBData_in.configuration->GTKConfiguration.eventHooks.finiHook =
+      idle_finalize_ui_cb;
+    CBData_in.configuration->GTKConfiguration.eventHooks.initHook =
+      idle_initialize_ui_cb;
+    CBData_in.UIState = &state_r;
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
+    ACE_ASSERT (gtk_manager_p);
+    gtk_manager_p->initialize (CBData_in.configuration->GTKConfiguration);
 #endif // GTK_USE
     //CBData_in.userData = &CBData_in;
 
@@ -1224,7 +1241,7 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((!Common_File_Tools::isReadable (source_file))                            ||
+  if ((UI_file_path.empty () && !Common_File_Tools::isReadable (source_file))   ||
       (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
       //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)
       false)
@@ -1323,21 +1340,6 @@ ACE_TMAIN (int argc_in,
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
-#if defined (GTK_USE)
-  //Common_UI_GladeDefinition ui_definition (argc_in,
-  //                                         argv_in);
-  Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
-  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
-  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
-  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
-  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
-      idle_finalize_ui_cb;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
-      idle_initialize_ui_cb;
-  if (!UI_file_path.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
-#endif // GTK_USE
 #endif // GUI_SUPPORT
 
   // step1e: (pre-)initialize signal handling

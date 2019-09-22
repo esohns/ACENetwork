@@ -15,14 +15,13 @@
     <property name="website">http://www.github.com/esohns/libACENetwork</property>
     <property name="website_label" translatable="yes">github project page</property>
     <property name="authors">Erik Sohns</property>
-    <property name="license_type">gpl-2-0</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="aboutdialog-vbox1">
+      <object class="GtkVBox" id="aboutdialog-vbox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="aboutdialog-action_area1">
+          <object class="GtkHButtonBox" id="aboutdialog-action_area">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
@@ -81,7 +80,7 @@
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="vbox_outer">
+      <object class="GtkVBox" id="vbox_outer">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -93,7 +92,6 @@
               <object class="GtkFrame" id="frame_actions">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="valign">start</property>
                 <property name="label_xalign">0</property>
                 <property name="label_yalign">0</property>
                 <child>
@@ -187,7 +185,6 @@
               <object class="GtkFrame" id="frame_info">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="valign">start</property>
                 <property name="label_xalign">0</property>
                 <property name="label_yalign">0</property>
                 <child>
@@ -207,7 +204,6 @@
                           <object class="GtkLabel" id="label_connections">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">center</property>
                             <property name="label" translatable="yes">connections</property>
                             <property name="track_visited_links">False</property>
                           </object>
@@ -222,7 +218,6 @@
                             <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="tooltip_text" translatable="yes">open connections</property>
-                            <property name="hexpand">True</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="xalign">1</property>
@@ -241,7 +236,6 @@
                           <object class="GtkLabel" id="label_messages">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">center</property>
                             <property name="label" translatable="yes">messages</property>
                             <property name="track_visited_links">False</property>
                           </object>
@@ -255,7 +249,6 @@
                           <object class="GtkVBox" id="vbox_messages">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="valign">center</property>
                             <child>
                               <object class="GtkSpinButton" id="spinbutton_session_messages">
                                 <property name="visible">True</property>
@@ -264,7 +257,6 @@
                                 <property name="has_tooltip">True</property>
                                 <property name="tooltip_markup" translatable="yes">session messages</property>
                                 <property name="tooltip_text" translatable="yes">session messages</property>
-                                <property name="hexpand">True</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
@@ -289,7 +281,6 @@
                                 <property name="has_tooltip">True</property>
                                 <property name="tooltip_markup" translatable="yes">data messages</property>
                                 <property name="tooltip_text" translatable="yes">data messages</property>
-                                <property name="hexpand">True</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
@@ -318,7 +309,6 @@
                           <object class="GtkLabel" id="label_data">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">center</property>
                             <property name="label" translatable="yes">data</property>
                             <property name="single_line_mode">True</property>
                           </object>
@@ -334,7 +324,6 @@
                             <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">bytes</property>
-                            <property name="hexpand">True</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">●</property>
@@ -385,7 +374,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkBox" id="box_configuration">
+                  <object class="GtkVBox" id="box_configuration">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>
@@ -400,7 +389,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkBox" id="box_network">
+                              <object class="GtkVBox" id="box_network">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="orientation">vertical</property>
@@ -441,7 +430,6 @@
                                     <property name="secondary_icon_sensitive">False</property>
                                     <property name="primary_icon_tooltip_text" translatable="yes">port</property>
                                     <property name="primary_icon_tooltip_markup" translatable="yes">port</property>
-                                    <property name="input_purpose">number</property>
                                     <property name="adjustment">adjustment_port</property>
                                     <property name="snap_to_ticks">True</property>
                                     <property name="numeric">True</property>
@@ -527,8 +515,6 @@
                         <property name="can_default">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">log</property>
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
                         <property name="editable">False</property>
                         <property name="wrap_mode">word</property>
                         <property name="cursor_visible">False</property>
@@ -551,7 +537,7 @@
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog_action_area">
+          <object class="GtkVButtonBox" id="dialog_action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
@@ -571,7 +557,6 @@
                 <property name="fill">False</property>
                 <property name="position">0</property>
                 <property name="secondary">True</property>
-                <property name="non_homogeneous">True</property>
               </packing>
             </child>
             <child>
