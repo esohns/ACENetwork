@@ -304,11 +304,13 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           notification_string =
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_profile_blocked");
           break;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0602)
         case wlan_notification_acm_scan_list_refresh:
         {
           try {
             imonitor_p->onScanComplete (data_in->InterfaceGuid);
-          } catch (...) {
+          }
+          catch (...) {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("\"%s\": caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n"),
                         ACE_TEXT (Net_Common_Tools::interfaceToString (data_in->InterfaceGuid).c_str ())));
@@ -317,7 +319,6 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_scan_list_refresh");
           break;
         }
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0602)
         //case wlan_notification_acm_operational_state_change:
         //  notification_string =
         //    ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_operational_state_change");

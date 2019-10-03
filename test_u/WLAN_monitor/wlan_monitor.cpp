@@ -466,6 +466,8 @@ do_work (bool autoAssociate_in,
          const std::string& SSID_in,
 #if defined (GUI_SUPPORT)
          struct WLANMonitor_UI_CBData& CBData_in,
+#else
+         struct WLANMonitor_Configuration& configuration_in,
 #endif // GUI_SUPPORT
            const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -492,13 +494,18 @@ do_work (bool autoAssociate_in,
 #endif // GUI_SUPPORT
 
   // step0a: initialize configuration
-  struct WLANMonitor_Configuration configuration;
-  CBData_in.configuration = &configuration;
+  struct WLANMonitor_Configuration* configuration_p =
+#if defined (GUI_SUPPORT)
+    CBData_in.configuration;
+#else
+    &configuration_in;
+#endif // GUI_SUPPORT
+  ACE_ASSERT (configuration_p);
 
   timer_manager_p = COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  configuration.WLANMonitorConfiguration.timerInterface =
+  configuration_p->WLANMonitorConfiguration.timerInterface =
     timer_manager_p;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -551,12 +558,12 @@ do_work (bool autoAssociate_in,
 #endif // GUI_SUPPORT
 
   // ********************** monitor configuration data *************************
-  configuration.signalHandlerConfiguration.monitor = iwlanmonitor_p;
-  configuration.signalHandlerConfiguration.statisticReportingHandler =
+  configuration_p->signalHandlerConfiguration.monitor = iwlanmonitor_p;
+  configuration_p->signalHandlerConfiguration.statisticReportingHandler =
       istatistic_handler_p;
-  configuration.WLANMonitorConfiguration.autoAssociate =
+  configuration_p->WLANMonitorConfiguration.autoAssociate =
       autoAssociate_in;
-  configuration.WLANMonitorConfiguration.interfaceIdentifier =
+  configuration_p->WLANMonitorConfiguration.interfaceIdentifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       interfaceIdentifier_in;
@@ -566,11 +573,11 @@ do_work (bool autoAssociate_in,
 #else
       interfaceIdentifier_in;
 #endif // ACE_WIN32 || ACE_WIN64
-  configuration.WLANMonitorConfiguration.SSID = SSID_in;
-  configuration.WLANMonitorConfiguration.subscriber = &ui_event_handler;
+  configuration_p->WLANMonitorConfiguration.SSID = SSID_in;
+  configuration_p->WLANMonitorConfiguration.subscriber = &ui_event_handler;
 
   // step1: initialize regular (global) statistic reporting ?
-  timer_manager_p->initialize (configuration.timerConfiguration);
+  timer_manager_p->initialize (configuration_p->timerConfiguration);
   ACE_thread_t thread_id = 0;
   timer_manager_p->start (thread_id);
   ACE_UNUSED_ARG (thread_id);
@@ -580,12 +587,12 @@ do_work (bool autoAssociate_in,
   {
     ACE_Time_Value interval (statisticReportingInterval_in,
                              0);
-    configuration.signalHandlerConfiguration.statisticReportingTimerId =
+    configuration_p->signalHandlerConfiguration.statisticReportingTimerId =
       timer_manager_p->schedule_timer (&statistic_handler,         // event handler handle
                                        NULL,                       // asynchronous completion token
                                        COMMON_TIME_NOW + interval, // first wakeup time
                                        interval);                  // interval
-    if (configuration.signalHandlerConfiguration.statisticReportingTimerId == -1)
+    if (configuration_p->signalHandlerConfiguration.statisticReportingTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", aborting\n")));
@@ -594,7 +601,7 @@ do_work (bool autoAssociate_in,
   } // end IF
 
   // step2: signal handling
-  if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
+  if (!signalHandler_in.initialize (configuration_p->signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, aborting\n")));
@@ -671,7 +678,7 @@ do_work (bool autoAssociate_in,
   else
   {
 #endif // GUI_SUPPORT
-    if (!iwlanmonitor_p->initialize (configuration.WLANMonitorConfiguration))
+    if (!iwlanmonitor_p->initialize (configuration_p->WLANMonitorConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize WLAN monitor, aborting\n")));
@@ -965,13 +972,14 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1h: initialize UI framework
+  struct WLANMonitor_Configuration configuration;
 #if defined (GUI_SUPPORT)
   struct WLANMonitor_UI_CBData ui_cb_data;
   ui_cb_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
-
+  ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
   ui_cb_data.UIState = &state_r;
 
@@ -1098,6 +1106,8 @@ ACE_TMAIN (int argc_in,
            SSID_string,
 #if defined (GUI_SUPPORT)
            ui_cb_data,
+#else
+           configuration,
 #endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,

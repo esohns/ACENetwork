@@ -303,10 +303,10 @@ idle_update_info_display_cb (gpointer userData_in)
   ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   GtkSpinButton* spin_button_p = NULL;
-  GtkScale* scale_p =
-    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
-  ACE_ASSERT (scale_p);
+  //GtkScale* scale_p =
+  //  GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
+  //                                     ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
+  //ACE_ASSERT (scale_p);
   GtkSpinner* spinner_p =
     GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
                                          ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
@@ -342,10 +342,10 @@ idle_update_info_display_cb (gpointer userData_in)
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME)));
 
-          gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-                                    TRUE);
-          gtk_widget_set_visible (GTK_WIDGET (scale_p),
-                                  TRUE);
+          //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
+          //                          TRUE);
+          //gtk_widget_set_visible (GTK_WIDGET (scale_p),
+          //                        TRUE);
 
           break;
         }
@@ -355,10 +355,10 @@ idle_update_info_display_cb (gpointer userData_in)
               GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                        ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME)));
 
-          gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-                                    FALSE);
-          gtk_widget_set_visible (GTK_WIDGET (scale_p),
-                                  FALSE);
+          //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
+          //                          FALSE);
+          //gtk_widget_set_visible (GTK_WIDGET (scale_p),
+          //                        FALSE);
 
           break;
         }
@@ -751,23 +751,23 @@ idle_initialize_ui_cb (gpointer userData_in)
   gtk_progress_bar_set_pulse_step (progress_bar_p,
                                    1.0 / static_cast<double> (width));
 
-  GtkScale* scale_p =
-    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
-  ACE_ASSERT (scale_p);
-  gtk_range_set_show_fill_level (GTK_RANGE (scale_p),
-                                 TRUE);
-#if GTK_CHECK_VERSION(2,30,0)
-  GValue value = G_VALUE_INIT;
-#else
-  GValue value;
-  g_value_init (&value, G_TYPE_INT);
-#endif // GTK_CHECK_VERSION (2,30,0)
-  g_value_set_int (&value, 0);
-  g_object_set_property (G_OBJECT (scale_p),
-                         ACE_TEXT_ALWAYS_CHAR ("slider-width"),
-                         &value);
-  g_value_unset (&value);
+//  GtkScale* scale_p =
+//    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
+//                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
+//  ACE_ASSERT (scale_p);
+//  gtk_range_set_show_fill_level (GTK_RANGE (scale_p),
+//                                 TRUE);
+//#if GTK_CHECK_VERSION(2,30,0)
+//  GValue value = G_VALUE_INIT;
+//#else
+//  GValue value;
+//  g_value_init (&value, G_TYPE_INT);
+//#endif // GTK_CHECK_VERSION (2,30,0)
+//  g_value_set_int (&value, 0);
+//  g_object_set_property (G_OBJECT (scale_p),
+//                         ACE_TEXT_ALWAYS_CHAR ("slider-width"),
+//                         &value);
+//  g_value_unset (&value);
 
   // step5: disable some functions ?
   GtkButton* button_p =
@@ -940,8 +940,9 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
     GValue value_s = G_VALUE_INIT;
 #else
     GValue value_s;
-#endif
+    ACE_OS::memset (&value_s, 0, sizeof (GValue));
     g_value_init (&value_s, G_TYPE_STRING);
+#endif
     GtkTreeIter iterator_2;
     GtkComboBox* combo_box_p =
         GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -1098,10 +1099,10 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 //      GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
 //                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_FRAME_CONFIGURATION_NAME)));
 //  ACE_ASSERT (frame_p);
-  GtkScale* scale_p =
-    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
-  ACE_ASSERT (scale_p);
+  //GtkScale* scale_p =
+  //  GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
+  //                                     ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
+  //ACE_ASSERT (scale_p);
   GtkSpinner* spinner_p =
       GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
@@ -1124,10 +1125,10 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     //         callbacks
     if (!ui_cb_data_p->monitor->isRunning ())
     {
-      gtk_widget_set_visible (GTK_WIDGET (scale_p),
-                              TRUE);
-      gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-                                TRUE);
+      //gtk_widget_set_visible (GTK_WIDGET (scale_p),
+      //                        TRUE);
+      //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
+      //                          TRUE);
     } // end IF
     gtk_widget_set_visible (GTK_WIDGET (spinner_p),
                             TRUE);
@@ -1207,10 +1208,10 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     //         callbacks
     if (!ui_cb_data_p->monitor->isRunning ())
     {
-      gtk_widget_set_visible (GTK_WIDGET (scale_p),
-                              FALSE);
-      gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-                                FALSE);
+      //gtk_widget_set_visible (GTK_WIDGET (scale_p),
+      //                        FALSE);
+      //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
+      //                          FALSE);
     } // end IF
     gtk_spinner_stop (spinner_p);
     gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
@@ -1296,6 +1297,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   GValue value = G_VALUE_INIT;
 #else
   GValue value;
+  ACE_OS::memset (&value, 0, sizeof (GValue));
   g_value_init (&value, G_TYPE_STRING);
 #endif // GTK_CHECK_VERSION (2,30,0)
   gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
@@ -1457,8 +1459,9 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   GValue value = G_VALUE_INIT;
 #else
   GValue value;
-#endif // GTK_CHECK_VERSION (2,30,0)
+  ACE_OS::memset (&value, 0, sizeof (GValue));
   g_value_init (&value, G_TYPE_STRING);
+#endif // GTK_CHECK_VERSION (2,30,0)
 
   GtkTreeIter iterator_2;
   std::string current_essid_string =
