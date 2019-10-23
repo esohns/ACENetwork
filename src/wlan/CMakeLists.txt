@@ -1,7 +1,7 @@
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/PreXMLImplementation.cmake)
 #include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/SetXMLImplementation.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/PreMonitorImplementation.cmake)
-#include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/SetMonitorImplementation.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/SetMonitorImplementation.cmake)
 
 add_library (${PROJECT_NAME}_WLAN STATIC "")
 
@@ -39,6 +39,7 @@ add_definitions (-DCOMMON_HAS_DLL)
 if (UNIX)
  if (DBUS_SUPPORT)
   add_definitions (-DCOMMON_DBUS_HAS_DLL)
+  add_definitions (-DSD_BUS_SUPPORT)
  endif (DBUS_SUPPORT)
 endif (UNIX)
 #find_package (CommonXML ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
@@ -81,7 +82,8 @@ if (UNIX)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
+                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
+#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/cmake>)

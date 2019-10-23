@@ -103,7 +103,8 @@ if (UNIX)
  endif (GUI_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
+                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
+#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)

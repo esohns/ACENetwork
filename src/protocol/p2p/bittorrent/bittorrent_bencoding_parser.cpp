@@ -34,7 +34,7 @@
 
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+//#include "ace/OS.h"
 #include "bittorrent_bencoding_parser.h"
 
 
@@ -77,15 +77,15 @@
 //                       prevent ace/iosfwd.h from causing any harm
 /*#define ACE_IOSFWD_H*/
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+#include "unistd.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS_Memory.h"
 
 #include "net_macros.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
-/*#include <ace/Synch.h>*/
-#include "bittorrent_bencoding_parser_driver.h"
+//#include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_tools.h"
 

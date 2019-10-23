@@ -81,19 +81,19 @@ class BitTorrent_Bencoding_ParserDriver_T
 //  virtual void error (const YYLTYPE&,      // location
   virtual void error (const yy::location&, // location
                       const std::string&); // message
-  inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (bencoding_); return *bencoding_; };
-  inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (bencoding_); return *bencoding_; }
+  inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   virtual void record (Bencoding_Dictionary_t*&); // data record
-  inline virtual Bencoding_Dictionary_t& getDictionary () { return *dictionaries_.top (); };
-  inline virtual std::string& getKey () { return *keys_.top (); };
-  inline virtual Bencoding_List_t& getList () { return *lists_.top (); };
-  inline virtual void popDictionary () { dictionaries_.pop (); };
-  inline virtual void popKey () { keys_.pop (); };
-  inline virtual void popList () { lists_.pop (); };
+  inline virtual Bencoding_Dictionary_t& getDictionary () { return *dictionaries_.top (); }
+  inline virtual std::string& getKey () { return *keys_.top (); }
+  inline virtual Bencoding_List_t& getList () { return *lists_.top (); }
+  inline virtual void popDictionary () { dictionaries_.pop (); }
+  inline virtual void popKey () { keys_.pop (); }
+  inline virtual void popList () { lists_.pop (); }
   // *IMPORTANT NOTE*: this also sets metaInfo_ (on first invocation)
   virtual void pushDictionary (Bencoding_Dictionary_t*); // dictionary
-  inline virtual void pushKey (std::string* key_in) { keys_.push (key_in); };
-  inline virtual void pushList (Bencoding_List_t* list_in) { lists_.push (list_in); };
+  inline virtual void pushKey (std::string* key_in) { keys_.push (key_in); }
+  inline virtual void pushList (Bencoding_List_t* list_in) { lists_.push (list_in); }
 //  inline virtual const Bencoding_Dictionary_t& get () const { return *dictionaries_.top (); };
 //  inline virtual const Bencoding_List_t& get () const { return *lists_.top (); };
 

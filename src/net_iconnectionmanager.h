@@ -21,6 +21,8 @@
 #ifndef NET_ICONNECTIONMANAGER_H
 #define NET_ICONNECTIONMANAGER_H
 
+#include "ace/Global_Macros.h"
+
 #include "common_idumpstate.h"
 #include "common_ilock.h"
 #include "common_isubscribe.h"

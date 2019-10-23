@@ -24,7 +24,8 @@
 #include <map>
 #include <string>
 
-#include "common_statistic_handler.h"
+#include "common_istatistic.h"
+//#include "common_statistic_handler.h"
 
 #include "stream_common.h"
 #include "stream_data_base.h"
@@ -65,9 +66,9 @@ struct HTTP_Record
    , status (HTTP_Codes::HTTP_STATUS_INVALID)
    , URI ()
    , version (HTTP_Codes::HTTP_VERSION_INVALID)
-  {};
+  {}
   void operator+= (struct HTTP_Record rhs_in)
-  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
+  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   HTTP_Form_t             form; // request
   HTTP_Headers_t          headers;

@@ -203,7 +203,7 @@ class Net_WLAN_Monitor_T<AddressType,
                          ConfigurationType,
                          ACE_SYNCH_USE,
                          TimePolicyType,
-                         NET_WLAN_MONITOR_API_IOCTL,
+                         NET_WLAN_MONITOR_API_WEXT,
                          UserDataType>
  : public Net_WLAN_Monitor_Base_T<AddressType,
                                   ConfigurationType,
@@ -220,7 +220,7 @@ class Net_WLAN_Monitor_T<AddressType,
                                                 ConfigurationType,
                                                 ACE_SYNCH_USE,
                                                 TimePolicyType,
-                                                NET_WLAN_MONITOR_API_IOCTL,
+                                                NET_WLAN_MONITOR_API_WEXT,
                                                 UserDataType>,
                              ACE_SYNCH_MUTEX>;
 

@@ -37,7 +37,7 @@
 #include "ace/Global_Macros.h"
 //#include "ace/Log_Msg.h"
 //#include "ace/OS.h"
-#include "ace/Synch_Traits.h"
+//#include "ace/Synch_Traits.h"
 
 #if defined (VALGRIND_SUPPORT)
 #include "valgrind/valgrind.h"

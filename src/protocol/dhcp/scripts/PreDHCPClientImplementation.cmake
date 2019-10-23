@@ -20,9 +20,8 @@ if (UNIX)
 #   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
 #  endif (JSON_LIBRARY)
 
-#  set (ISC_LIB_FILE libisc.a)
-#  set (ISC_LIB_FILE libisc.so.166)
- set (ISC_LIB_FILE libisc-export.so)
+#  set (ISC_LIB_FILE libisc-export.so)
+ set (ISC_LIB_FILE libisc-export.so.1100)
  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -85,8 +84,8 @@ if (UNIX)
   message (STATUS "Found GeoIP library \"${GEOIP_LIBRARY}\"")
  endif ()
 
-#  set (DNS_LIB_FILE libdns.a)
- set (DNS_LIB_FILE libdns-export.so)
+  set (DNS_LIB_FILE libdns-export.so.1104)
+# set (DNS_LIB_FILE libdns-export.so)
  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -98,8 +97,8 @@ if (UNIX)
   message (STATUS "Found dns library \"${DNS_LIBRARY}\"")
  endif (NOT DNS_LIBRARY)
 
-#  set (ISC_CFG_LIB_FILE libisccfg.a)
- set (ISC_CFG_LIB_FILE libisccfg-export.so)
+  set (ISC_CFG_LIB_FILE libisccfg-export.so.163)
+# set (ISC_CFG_LIB_FILE libisccfg-export.so)
  find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -112,7 +111,7 @@ if (UNIX)
  endif (NOT ISC_CFG_LIBRARY)
 
 #  set (IRS_LIB_FILE libirs.a)
- set (IRS_LIB_FILE libirs-export.so)
+ set (IRS_LIB_FILE libirs-export.so.161)
  find_library (IRS_LIBRARY ${IRS_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -124,8 +123,8 @@ if (UNIX)
   message (STATUS "Found irs library \"${IRS_LIBRARY}\"")
  endif (NOT IRS_LIBRARY)
 
-#  set (OMAPI_LIB_FILE libomapi.a)
- set (OMAPI_LIB_FILE libomapi.so)
+ set (OMAPI_LIB_FILE libomapi.a)
+# set (OMAPI_LIB_FILE libomapi.so)
  find_library (OMAPI_LIBRARY ${OMAPI_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES dhcp x86_64-linux-gnu
@@ -137,8 +136,8 @@ if (UNIX)
   message (STATUS "Found omapi library \"${OMAPI_LIBRARY}\"")
  endif (NOT OMAPI_LIBRARY)
 
-#  set (DHCPCTL_LIB_FILE libdhcpctl.a)
- set (DHCPCTL_LIB_FILE libdhcpctl.so)
+  set (DHCPCTL_LIB_FILE libdhcpctl.a)
+# set (DHCPCTL_LIB_FILE libdhcpctl.so)
  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES dhcp x86_64-linux-gnu

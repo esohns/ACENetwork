@@ -34,7 +34,6 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (NETLINK_SUPPORT)
-//#include "ace/OS.h"
 #include "ace/Netlink_Addr.h"
 #endif // NETLINK_SUPPORT
 #include "ace/Synch_Traits.h"

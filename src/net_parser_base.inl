@@ -19,8 +19,6 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
-#include "ace/Message_Block.h"
-#include "ace/Message_Queue.h"
 
 #include "stream_common.h"
 

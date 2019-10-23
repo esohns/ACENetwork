@@ -26,14 +26,13 @@
 #include <utility>
 #include <vector>
 
-//#include "ace/Assert.h"
-//#include "ace/Basic_Types.h"
 #include "ace/config-lite.h"
-#include "ace/OS.h"
+#include "ace/Assert.h"
+#include "ace/Basic_Types.h"
 
-#include "common_statistic_handler.h"
+//#include "common_statistic_handler.h"
 
-#include "stream_common.h"
+//#include "stream_common.h"
 
 #include "bittorrent_defines.h"
 
@@ -119,7 +118,7 @@ struct BitTorrent_PeerHandShake
    , info_hash ()
    , peer_id ()
   {
-    ACE_OS::memset (reserved, 0, sizeof (ACE_UINT8[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE]));
+//    ACE_OS::memset (reserved, 0, sizeof (ACE_UINT8[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE]));
   }
 
   std::string pstr;
@@ -186,7 +185,7 @@ enum BitTorrent_Event
 
 //////////////////////////////////////////
 
-typedef struct Net_StreamStatistic BitTorrent_Statistic_t;
-typedef Common_StatisticHandler_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_t;
+//typedef struct Net_StreamStatistic BitTorrent_Statistic_t;
+//typedef Common_StatisticHandler_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_t;
 
 #endif

@@ -174,7 +174,8 @@ if (UNIX)
 #  include_directories (/usr/include/dhcp)
  endif (DHCLIENT_USE)
 
- include_directories (/usr/local/src/ACE_wrappers)
+ # include_directories (/usr/local/src/ACE_wrappers)
+ include_directories ($ENV{LIB_ROOT}/ACE_TAO/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  if (DBUS_USE)

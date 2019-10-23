@@ -52,6 +52,8 @@ extern "C"
 #if defined (ACE_LINUX) && defined (DBUS_SUPPORT) && defined (SD_BUS_SUPPORT)
 #include "common_dbus_defines.h"
 #include "common_dbus_tools.h"
+
+#include "net_os_tools.h"
 #endif // ACE_LINUX && DBUS_SUPPORT && SD_BUS_SUPPORT
 
 #include "common_math_tools.h"
@@ -730,11 +732,11 @@ Net_WLAN_Monitor_T<AddressType,
 #if defined (ACE_LINUX) && defined (DBUS_SUPPORT) && defined (SD_BUS_SUPPORT)
   if (Common_DBus_Tools::isUnitRunning (NULL,
                                         COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
-    if (!Net_Common_Tools::networkManagerManageInterface (configuration_in.interfaceIdentifier,
-                                                          false))
+    if (!Net_OS_Tools::networkManagerManageInterface (configuration_in.interfaceIdentifier,
+                                                      false))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::networkManagerManageInterface(\"%s\",false), aborting\n"),
+                  ACE_TEXT ("failed to Net_OS_Tools::networkManagerManageInterface(\"%s\",false), aborting\n"),
                   ACE_TEXT (configuration_in.interfaceIdentifier.c_str ())));
       return false;
     } // end IF

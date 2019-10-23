@@ -81,7 +81,8 @@ if (UNIX)
  endif (NETLINK_SUPPORT)
 
  if (DHCLIENT_SUPPORT)
-  set (BIND9_CONFIG_EXECUTABLE /usr/bin/bind9-export-config)
+#  set (BIND9_CONFIG_EXECUTABLE /usr/bin/bind9-export-config)
+  set (BIND9_CONFIG_EXECUTABLE /usr/bin/bind9-config)
   execute_process (COMMAND ${BIND9_CONFIG_EXECUTABLE} --cflags
                    OUTPUT_VARIABLE BIND9_CFLAGS
                    ERROR_VARIABLE BIND9_ERROR
@@ -97,9 +98,8 @@ if (UNIX)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
-#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)
-#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
-                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
+                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
+#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)

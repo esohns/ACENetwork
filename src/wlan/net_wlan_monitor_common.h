@@ -53,7 +53,7 @@ typedef ACE_Singleton<Net_WLAN_WlanAPIMonitor_t,
 typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               NET_WLAN_MONITOR_API_IOCTL,
+                               NET_WLAN_MONITOR_API_WEXT,
                                struct Net_UserData> Net_WLAN_WExtMonitor_t;
 typedef ACE_Singleton<Net_WLAN_WExtMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_WEXTMONITOR_SINGLETON;

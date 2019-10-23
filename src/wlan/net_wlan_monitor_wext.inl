@@ -67,7 +67,7 @@ Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
-                   NET_WLAN_MONITOR_API_IOCTL,
+                   NET_WLAN_MONITOR_API_WEXT,
                    UserDataType>::Net_WLAN_Monitor_T ()
  : inherited ()
  , range_ ()
@@ -89,7 +89,7 @@ Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
-                   NET_WLAN_MONITOR_API_IOCTL,
+                   NET_WLAN_MONITOR_API_WEXT,
                    UserDataType>::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
@@ -109,7 +109,7 @@ Net_WLAN_Monitor_T<AddressType,
   } // end IF
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::handle_ == ACE_INVALID_HANDLE);
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_SUPPORT) && defined (SD_BUS_SUPPORT)
   if (Common_DBus_Tools::isUnitRunning (NULL,
                                         COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
   {
@@ -124,7 +124,7 @@ Net_WLAN_Monitor_T<AddressType,
                 ACE_TEXT ("systemd unit \"%s\" is running; this may interfere with the monitoring activities, continuing\n"),
                 ACE_TEXT (COMMON_SYSTEMD_UNIT_WPASUPPLICANT)));
   } // end ELSE IF
-#endif // DBUS_SUPPORT
+#endif // DBUS_SUPPORT && SD_BUS_SUPPORT
 
   inherited::handle_ = ACE_OS::socket (AF_INET,
                                        SOCK_DGRAM,
@@ -199,7 +199,7 @@ Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
-                   NET_WLAN_MONITOR_API_IOCTL,
+                   NET_WLAN_MONITOR_API_WEXT,
                    UserDataType>::stop (bool waitForCompletion_in,
                                         bool lockedAccess_in)
 {
@@ -258,7 +258,7 @@ Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
-                   NET_WLAN_MONITOR_API_IOCTL,
+                   NET_WLAN_MONITOR_API_WEXT,
                    UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initialize"));
@@ -286,7 +286,7 @@ Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
-                   NET_WLAN_MONITOR_API_IOCTL,
+                   NET_WLAN_MONITOR_API_WEXT,
                    UserDataType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::handle_input"));

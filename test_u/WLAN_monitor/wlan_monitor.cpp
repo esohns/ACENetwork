@@ -140,7 +140,7 @@ do_printUsage (const std::string& programName_in)
 #else
 #if defined (WEXT_SUPPORT)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i           : use ioctl implementation [")
-            << (NET_WLAN_MONITOR_DEFAULT_API == NET_WLAN_MONITOR_API_IOCTL)
+            << (NET_WLAN_MONITOR_DEFAULT_API == NET_WLAN_MONITOR_API_WEXT)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 #endif // WEXT_SUPPORT
@@ -285,7 +285,7 @@ do_processArguments (const int& argc_in,
 #if defined (WEXT_SUPPORT)
       case 'i':
       {
-        API_out = NET_WLAN_MONITOR_API_IOCTL;
+        API_out = NET_WLAN_MONITOR_API_WEXT;
         break;
       }
 #endif // WEXT_SUPPORT

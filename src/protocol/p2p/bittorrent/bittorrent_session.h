@@ -80,7 +80,7 @@ class BitTorrent_Session_T
  : public Net_SessionBase_T<ACE_INET_Addr,
                             PeerConnectionConfigurationType,
                             PeerConnectionStateType,
-                            BitTorrent_Statistic_t,
+                            struct Net_StreamStatistic,
                             Net_TCPSocketConfiguration_t,
                             PeerHandlerConfigurationType,
                             typename PeerConnectionType::ICONNECTION_T,
@@ -92,7 +92,7 @@ class BitTorrent_Session_T
                                                   PeerConnectionConfigurationType,
                                                   TrackerConnectionConfigurationType,
                                                   PeerConnectionStateType,
-                                                  BitTorrent_Statistic_t,
+                                                  struct Net_StreamStatistic,
                                                   Net_TCPSocketConfiguration_t,
                                                   PeerHandlerConfigurationType,
                                                   TrackerHandlerConfigurationType,
@@ -101,6 +101,30 @@ class BitTorrent_Session_T
                                                   ConfigurationType,
                                                   StateType> >
 {
+  typedef Net_SessionBase_T<ACE_INET_Addr,
+                            PeerConnectionConfigurationType,
+                            PeerConnectionStateType,
+                            struct Net_StreamStatistic,
+                            Net_TCPSocketConfiguration_t,
+                            PeerHandlerConfigurationType,
+                            typename PeerConnectionType::ICONNECTION_T,
+                            PeerConnectionManagerType,
+                            PeerConnectorType,
+                            ConfigurationType,
+                            StateType,
+                            BitTorrent_ISession_T<ACE_INET_Addr,
+                                                  PeerConnectionConfigurationType,
+                                                  TrackerConnectionConfigurationType,
+                                                  PeerConnectionStateType,
+                                                  struct Net_StreamStatistic,
+                                                  Net_TCPSocketConfiguration_t,
+                                                  PeerHandlerConfigurationType,
+                                                  TrackerHandlerConfigurationType,
+                                                  PeerStreamType,
+                                                  StreamStatusType,
+                                                  ConfigurationType,
+                                                  StateType> > inherited;
+
  public:
   // convenient types
   typedef typename PeerConnectionType::ICONNECTION_T ICONNECTION_T;
@@ -123,30 +147,6 @@ class BitTorrent_Session_T
   TrackerConnectionManagerType*       trackerConnectionManager_;
 
  private:
-  typedef Net_SessionBase_T<ACE_INET_Addr,
-                            PeerConnectionConfigurationType,
-                            PeerConnectionStateType,
-                            BitTorrent_Statistic_t,
-                            Net_TCPSocketConfiguration_t,
-                            PeerHandlerConfigurationType,
-                            typename PeerConnectionType::ICONNECTION_T,
-                            PeerConnectionManagerType,
-                            PeerConnectorType,
-                            ConfigurationType,
-                            StateType,
-                            BitTorrent_ISession_T<ACE_INET_Addr,
-                                                  PeerConnectionConfigurationType,
-                                                  TrackerConnectionConfigurationType,
-                                                  PeerConnectionStateType,
-                                                  BitTorrent_Statistic_t,
-                                                  Net_TCPSocketConfiguration_t,
-                                                  PeerHandlerConfigurationType,
-                                                  TrackerHandlerConfigurationType,
-                                                  PeerStreamType,
-                                                  StreamStatusType,
-                                                  ConfigurationType,
-                                                  StateType> > inherited;
-
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T (const BitTorrent_Session_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T& operator= (const BitTorrent_Session_T&))
 
