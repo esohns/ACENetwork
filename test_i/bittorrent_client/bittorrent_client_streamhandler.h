@@ -123,6 +123,15 @@ class BitTorrent_Client_TrackerStreamHandler_T
 #endif // GUI_SUPPORT
  //, public Common_IInitialize_T<struct Common_ParserConfiguration>
 {
+ typedef BitTorrent_TrackerStreamHandler_T<SessionDataType,
+                                           UserDataType,
+                                           SessionInterfaceType
+#if defined (GUI_SUPPORT)
+                                           ,CBDataType> inherited;
+#else
+                                           > inherited;
+#endif // GUI_SUPPORT
+
  public:
   BitTorrent_Client_TrackerStreamHandler_T (SessionInterfaceType* // session handle
 #if defined (GUI_SUPPORT)
@@ -162,7 +171,7 @@ class BitTorrent_Client_TrackerStreamHandler_T
                                       UserDataType> SESSION_MESSAGE_T;
   typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;
 
-  //struct Common_ParserConfiguration* configuration_;
+//  struct Common_ParserConfiguration* configuration_;
 #if defined (GUI_SUPPORT)
   CBDataType*                        CBData_;
 #endif // GUI_SUPPORT

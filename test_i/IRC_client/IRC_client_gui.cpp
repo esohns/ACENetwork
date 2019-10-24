@@ -93,6 +93,7 @@
 #include "IRC_client_module_IRChandler.h"
 #include "IRC_client_network.h"
 #include "IRC_client_signalhandler.h"
+#include "IRC_client_stream.h"
 #include "IRC_client_tools.h"
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IRCClientStream");

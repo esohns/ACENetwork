@@ -338,6 +338,7 @@ if (UNIX)
  endif (DHCLIENT_USE)
 
  target_link_libraries (${EXECUTABLE} X11)
+ target_link_libraries (${EXECUTABLE} GLX)
 elseif (WIN32)
 # if (MSXML_USE)
   target_link_libraries (${EXECUTABLE} msxml2.lib)

@@ -91,11 +91,11 @@ using namespace std;
 
 #include "test_i_defines.h"
 
+#include "IRC_client_sessionmessage.h"
 #include "IRC_client_common_modules.h"
 #include "IRC_client_configuration.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_messageallocator.h"
-#include "IRC_client_sessionmessage.h"
 #include "IRC_client_module_IRChandler.h"
 #include "IRC_client_session_common.h"
 #include "IRC_client_signalhandler.h"

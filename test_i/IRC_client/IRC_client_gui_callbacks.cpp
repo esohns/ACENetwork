@@ -35,6 +35,7 @@
 #include "irc_common.h"
 #include "irc_tools.h"
 
+#include "IRC_client_sessionmessage.h"
 #include "IRC_client_common_modules.h"
 #include "IRC_client_configuration.h"
 #include "IRC_client_defines.h"

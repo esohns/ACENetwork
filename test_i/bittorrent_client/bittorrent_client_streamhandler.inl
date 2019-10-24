@@ -512,7 +512,7 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
   ACE_UNUSED_ARG (sessionId_in);
 
   // sanity check(s)
-  ACE_ASSERT (configuration_);
+  ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (session_);
 
 #if defined (_DEBUG)
@@ -523,14 +523,13 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
               ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
 #endif
 
-  struct Common_ParserConfiguration parser_configuration = *configuration_;
-  parser_configuration.block = false;
-  parser_configuration.messageQueue = NULL;
+  inherited::configuration_->block = false;
+  inherited::configuration_->messageQueue = NULL;
 
   // parse bencoded record
-  PARSER_T parser (parser_configuration.debugScanner,
-                   parser_configuration.debugParser);
-  if (!parser.initialize (parser_configuration))
+  PARSER_T parser (inherited::configuration_->debugScanner,
+                   inherited::configuration_->debugParser);
+  if (!parser.initialize (*inherited::configuration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to BitTorrent_Bencoding_ParserDriver_T::initialize(), returning\n")));

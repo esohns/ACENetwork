@@ -46,8 +46,8 @@
 #include "irc_network.h"
 
 #include "IRC_client_defines.h"
-#include "IRC_client_stream.h"
-#include "IRC_client_stream_common.h"
+//#include "IRC_client_stream.h"
+//#include "IRC_client_stream_common.h"
 
 //////////////////////////////////////////
 
@@ -117,6 +117,9 @@ struct IRC_Client_SessionState
 };
 
 //////////////////////////////////////////
+template <typename TimerManagerType> // implements Common_ITimer
+class IRC_Client_Stream_T;
+typedef IRC_Client_Stream_T<Common_Timer_Manager_t> IRC_Client_Stream_t;
 
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_TCPSocketHandler_t,

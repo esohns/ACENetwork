@@ -49,6 +49,7 @@
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_network.h"
+#include "IRC_client_stream.h"
 
 // forward declarations
 struct Net_UserData;

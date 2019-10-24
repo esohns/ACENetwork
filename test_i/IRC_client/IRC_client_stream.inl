@@ -28,6 +28,7 @@
 
 #include "IRC_client_common_modules.h"
 #include "IRC_client_module_IRChandler.h"
+#include "IRC_client_network.h"
 
 template <typename TimerManagerType>
 IRC_Client_Stream_T<TimerManagerType>::IRC_Client_Stream_T ()
@@ -106,6 +107,8 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
   struct IRC_Client_SessionData* session_data_p = NULL;
   typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
   IRC_Client_Module_Bisector_t* bisector_impl_p = NULL;
+  IRC_Client_Connection_Manager_t* connection_manager_p = NULL;
+  IRC_Client_IConnection_t* iconnection_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration_.setupPipeline =
@@ -136,10 +139,9 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;
 
-  IRC_Client_Connection_Manager_t* connection_manager_p =
+  connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  IRC_Client_IConnection_t* iconnection_p =
-    connection_manager_p->get (handle_in);
+  iconnection_p = connection_manager_p->get (handle_in);
   ACE_ASSERT (iconnection_p);
   session_data_p->connectionState =
     &const_cast<struct IRC_Client_SessionState&> (iconnection_p->state ());
