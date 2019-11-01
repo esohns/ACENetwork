@@ -484,7 +484,7 @@ void BitTorrent_Scanner_free ( void * , yyscan_t yyscanner );
  * The user has a chance to override it with an option.
  */
 /* %if-c-only */
-#include <unistd.h>
+//#include <unistd.h>
 /* %endif */
 /* %if-c++-only */
 /* %endif */
