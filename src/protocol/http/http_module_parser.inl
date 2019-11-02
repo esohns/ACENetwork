@@ -403,8 +403,12 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       SessionDataContainerType,
                       StatisticContainerType,
                       TimerManagerType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                      UserDataType>::HTTP_Module_ParserH_T (ISTREAM_T* stream_in)
+#else
                       UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
- : inherited (stream_in,                               // stream handle
+#endif // ACE_WIN32 || ACE_WIN64
+  : inherited (stream_in,                               // stream handle
               false,                                   // auto-start ? (active mode only)
               STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode
               true)                                    // generate sesssion messages ?

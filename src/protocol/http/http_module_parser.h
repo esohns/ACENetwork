@@ -170,7 +170,7 @@ class HTTP_Module_ParserH_T
   HTTP_Module_ParserH_T (ISTREAM_T*); // stream handle
 #else
   HTTP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   virtual ~HTTP_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()
