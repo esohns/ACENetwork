@@ -98,7 +98,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            HandlerConfigurationType,
                            SessionStateType,
                            ConnectionManagerType,
-                           UserDataType>::load (Stream_ModuleList_t& modules_out,
+                           UserDataType>::load (Stream_ILayout* layout_out,
                                                 bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::load"));
@@ -114,7 +114,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
 //                  false);
 //  modules_out.push_back (module_p);
 
-  return inherited::load (modules_out,
+  return inherited::load (layout_out,
                           deleteModules_out);
 }
 

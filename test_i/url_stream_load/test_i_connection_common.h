@@ -70,11 +70,11 @@ class Test_I_ConnectionStream;
 struct Test_I_URLStreamLoad_StreamConfiguration;
 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_FlexParserAllocatorConfiguration,
+                               struct Net_AllocatorConfiguration,
                                struct Test_I_URLStreamLoad_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_StreamConfiguration_t;
-typedef Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
+typedef Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
                                       Test_I_URLStreamLoad_StreamConfiguration_t,
                                       NET_TRANSPORTLAYER_TCP> Test_I_URLStreamLoad_ConnectionConfiguration_t;
 

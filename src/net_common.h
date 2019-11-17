@@ -56,12 +56,37 @@ enum Net_LinkLayerType
   NET_LINKLAYER_802_3   = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
   NET_LINKLAYER_802_11  = 0x02, // i.e. Wireless LAN aka 'WLAN' (EU; US: 'WiFi')
   NET_LINKLAYER_PPP     = 0x04,
-  NET_LINKLAYER_FDDI    = 0x10,
-  NET_LINKLAYER_ATM     = 0x11,
+  NET_LINKLAYER_FDDI    = 0x08,
+  NET_LINKLAYER_ATM     = 0x10,
   ////////////////////////////////////////
   NET_LINKLAYER_MAX,
   NET_LINKLAYER_INVALID = -1,
 };
+//enum Net_LinkLayerType& operator++ (enum Net_LinkLayerType& type_in)
+//{
+////#if MY_ENUMS_ARE_CONTIGUOUS && I_DO_NOT_WORRY_ABOUT_OVERFLOW
+////  return type_in = static_cast<enum Net_LinkLayerType> (++static_cast<int>(enum Net_LinkLayerType));
+////#else
+//  switch (type_in)
+//  {
+//    case NET_LINKLAYER_802_3: return type_in = NET_LINKLAYER_802_11;
+//    case NET_LINKLAYER_802_11: return type_in = NET_LINKLAYER_PPP;
+//    case NET_LINKLAYER_PPP: return type_in = NET_LINKLAYER_FDDI;
+//    case NET_LINKLAYER_FDDI: return type_in = NET_LINKLAYER_ATM;
+//    case NET_LINKLAYER_ATM: 
+//    default:
+//      return type_in = NET_LINKLAYER_MAX;
+//  }
+//  
+//  return type_in = NET_LINKLAYER_INVALID; // some compilers might warn otherwise
+////#endif
+//}
+//enum Net_LinkLayerType operator++ (enum Net_LinkLayerType& type_in, int)
+//{
+//  enum Net_LinkLayerType tmp (type_in);
+//  ++type_in;
+//  return tmp;
+//}
 
 enum Net_NetworkLayerType
 {

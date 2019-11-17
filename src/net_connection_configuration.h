@@ -54,7 +54,8 @@ struct Net_UserData;
 struct Net_SocketConfigurationBase
 {
   Net_SocketConfigurationBase ()
-   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
+   : allocatorConfiguration (NULL)
+   , bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
    , interfaceIdentifier (GUID_NULL)
@@ -66,7 +67,7 @@ struct Net_SocketConfigurationBase
 #endif // ACE_WIN32 || ACE_WIN64
    , linger (NET_SOCKET_DEFAULT_LINGER)
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   //, PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , statisticCollectionInterval (0,
                                   NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL_MS * 1000)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S,
@@ -80,28 +81,26 @@ struct Net_SocketConfigurationBase
   }
   inline virtual ~Net_SocketConfigurationBase () {}
 
-  int            bufferSize; // socket buffer size (I/O)
+  struct Net_AllocatorConfiguration* allocatorConfiguration;
+  int                                bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID   interfaceIdentifier; // NIC-
+  struct _GUID                       interfaceIdentifier; // NIC-
 #else
-  std::string    interfaceIdentifier; // NIC-
+  std::string                        interfaceIdentifier; // NIC-
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-  std::string    interfaceIdentifier; // NIC-
+  std::string                        interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64
   // *NOTE*: win32 udp sockets do not linger
-  bool           linger;
-  // *NOTE*: applies to the corresponding protocol, if it has fixed size
-  //         datagrams
-  // *NOTE*: this is the size of the chunks requested from the kernel
-  bool           useLoopBackDevice;   // (if any)
+  bool                               linger;
+  bool                               useLoopBackDevice;   // (if any)
 
   // *TODO*: move these into Net_SocketConfiguration_T ASAP
-  unsigned int   PDUSize; // package data unit size
-  ACE_Time_Value statisticCollectionInterval; // [ACE_Time_Value::zero: off]
-  ACE_Time_Value statisticReportingInterval; // [ACE_Time_Value::zero: off]
-  bool           useThreadPerConnection;
+  //unsigned int   PDUSize; // package data unit size
+  ACE_Time_Value                     statisticCollectionInterval; // [ACE_Time_Value::zero: off]
+  ACE_Time_Value                     statisticReportingInterval; // [ACE_Time_Value::zero: off]
+  bool                               useThreadPerConnection;
 };
 
 template <enum Net_TransportLayerType TransportLayerType_e>
@@ -237,10 +236,10 @@ class Net_ConnectionConfigurationBase_T
    , timerManager (NULL)
   {}
 
-  enum Common_EventDispatchType dispatch;
-  bool                          generateUniqueIOModuleNames; // stream
-  Stream_IAllocator*            messageAllocator;
-  Common_ITimerCB_t*            timerManager;
+  enum Common_EventDispatchType      dispatch;
+  bool                               generateUniqueIOModuleNames; // stream
+  Stream_IAllocator*                 messageAllocator;
+  Common_ITimerCB_t*                 timerManager;
 };
 
 template <typename AllocatorConfigurationType,

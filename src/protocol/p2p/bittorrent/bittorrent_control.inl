@@ -138,8 +138,9 @@ BitTorrent_Control_T<SessionAsynchType,
   std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY);
   std::string user_agent;
   // *TODO*: support more link layer types
-  int link_layers = (NET_LINKLAYER_802_3 | NET_LINKLAYER_PPP);
+  int link_layers = (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
   bool use_SSL = false;
+  size_t pdu_size_i = 0;
 
   // step1: parse metainfo
   ACE_ASSERT (configuration_->parserConfiguration);
@@ -314,9 +315,18 @@ BitTorrent_Control_T<SessionAsynchType,
     goto error;
   } // end IF
   ACE_ASSERT (!record_p);
+
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->trackerConnectionConfiguration);
+  ACE_ASSERT (configuration_->trackerConnectionConfiguration->allocatorConfiguration);
+
+  pdu_size_i =
+    configuration_->trackerConnectionConfiguration->allocatorConfiguration->defaultBufferSize;// +
+//    configuration_->trackerConnectionConfiguration->allocatorConfiguration->paddingBytes;
+
 allocate:
   message_p =
-    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerConnectionConfiguration->messageAllocator->malloc (configuration_->trackerConnectionConfiguration->PDUSize));
+    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerConnectionConfiguration->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p &&
       !configuration_->trackerConnectionConfiguration->messageAllocator->block ())

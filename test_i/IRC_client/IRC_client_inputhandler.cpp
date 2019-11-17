@@ -123,17 +123,21 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->connectionConfiguration);
+  ACE_ASSERT (configuration_->connectionConfiguration->allocatorConfiguration);
   ACE_ASSERT (configuration_->controller);
+
+  size_t pdu_size_i =
+    configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize +
+    configuration_->connectionConfiguration->allocatorConfiguration->paddingBytes;
 
   if (!currentReadBuffer_)
   { // allocate a message buffer
-    currentReadBuffer_ =
-      allocateMessage (configuration_->connectionConfiguration->PDUSize);
+    currentReadBuffer_ = allocateMessage (pdu_size_i);
     if (!currentReadBuffer_)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  configuration_->connectionConfiguration->PDUSize));
+                  pdu_size_i));
       return -1;
     } // end IF
   } // end IF
@@ -143,7 +147,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
   ssize_t bytes_received =
     ACE_OS::read (handle_in,
                   currentReadBuffer_->wr_ptr (),
-                  configuration_->connectionConfiguration->PDUSize - 1); // \0
+                  pdu_size_i - 1); // \0
   switch (bytes_received)
   {
     case -1:
@@ -155,11 +159,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::read(%d): \"%m\", aborting\n"),
                   ACE_STDIN));
-
-      // clean up
-      currentReadBuffer_->release ();
-      currentReadBuffer_ = NULL;
-
+      currentReadBuffer_->release (); currentReadBuffer_ = NULL;
       return -1;
     }
     // *** GOOD CASES ***
@@ -168,11 +168,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
       //       ACE_DEBUG ((LM_DEBUG,
       //                   ACE_TEXT ("[%u]: STDIN was closed...\n"),
       //                   handle_in));
-
-      // clean up
-      currentReadBuffer_->release ();
-      currentReadBuffer_ = NULL;
-
+      currentReadBuffer_->release (); currentReadBuffer_ = NULL;
       return -1;
     }
     default:

@@ -74,7 +74,7 @@ class IRC_Client_ConnectionConfiguration
    , protocolConfiguration (NULL)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
   {
-    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
+    //PDUSize = IRC_MAXIMUM_FRAME_SIZE;
   }
 
   struct IRC_Client_CursesState*    cursesState;

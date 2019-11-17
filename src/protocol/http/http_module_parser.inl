@@ -409,9 +409,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
   : inherited (stream_in,                               // stream handle
-              false,                                   // auto-start ? (active mode only)
-              STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode
-              true)                                    // generate sesssion messages ?
+               false,                                   // auto-start ? (active mode only)
+               STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode
+               true)                                    // generate sesssion messages ?
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
                COMMON_PARSER_DEFAULT_LEX_TRACE,                           // trace scanning ?
                COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?
@@ -560,7 +560,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   passMessageDownstream_out = false;
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT ((message_inout->capacity () - message_inout->size ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was

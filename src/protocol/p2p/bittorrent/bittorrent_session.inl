@@ -460,6 +460,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_Message_Block* message_block_p = NULL;
   ICONNECTION_T* iconnection_p = NULL;
   ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+  size_t pdu_size_i = 0;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
 
@@ -507,9 +508,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     goto error;
   } // end IF
   data_p = NULL;
+
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration->allocatorConfiguration);
+
+  pdu_size_i =
+    inherited::configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize;// +
+//    inherited::configuration_->connectionConfiguration->allocatorConfiguration->paddingBytes;
+
 allocate:
   message_p =
-    static_cast<typename PeerStreamType::MESSAGE_T*> (inherited::configuration_->connectionConfiguration->messageAllocator->malloc (inherited::configuration_->connectionConfiguration->PDUSize));
+    static_cast<typename PeerStreamType::MESSAGE_T*> (inherited::configuration_->connectionConfiguration->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p &&
       !inherited::configuration_->connectionConfiguration->messageAllocator->block ())
@@ -732,6 +742,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       NULL;
   ACE_Message_Block* message_block_p = NULL;
   bool use_SSL = false;
+  size_t pdu_size_i = 0;
 
   ACE_NEW_NORETURN (record_p,
                     struct HTTP_Record ());
@@ -797,9 +808,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     goto error;
   } // end IF
   record_p = NULL;
+
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration);
+  ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration->allocatorConfiguration);
+
+  pdu_size_i =
+    inherited::configuration_->trackerConnectionConfiguration->allocatorConfiguration->defaultBufferSize;// +
+//    inherited::configuration_->trackerConnectionConfiguration->allocatorConfiguration->paddingBytes;
+
 allocate:
   message_p =
-    static_cast<typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->trackerConnectionConfiguration->messageAllocator->malloc (inherited::configuration_->trackerConnectionConfiguration->PDUSize));
+    static_cast<typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->trackerConnectionConfiguration->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p &&
       !inherited::configuration_->trackerConnectionConfiguration->messageAllocator->block ())

@@ -39,7 +39,7 @@ class ACE_Allocator;
 class Test_U_SessionMessage;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
+                                struct Net_AllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -52,22 +52,22 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class Test_U_Message
- : public HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
+ : public HTTP_Message_T<struct Net_AllocatorConfiguration,
                          enum Stream_MessageType>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_FlexParserAllocatorConfiguration,
+                                                 struct Net_AllocatorConfiguration,
                                                  Test_U_HTTPDecoder_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
   friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               struct Common_FlexParserAllocatorConfiguration,
+                                               struct Net_AllocatorConfiguration,
                                                Test_U_HTTPDecoder_ControlMessage_t,
                                                Test_U_Message,
                                                Test_U_SessionMessage>;
 
-  typedef HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
+  typedef HTTP_Message_T<struct Net_AllocatorConfiguration,
                          enum Stream_MessageType> inherited;
 
  public:

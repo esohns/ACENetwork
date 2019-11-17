@@ -477,13 +477,13 @@ do_work (unsigned int bufferSize_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
-  struct Common_FlexParserAllocatorConfiguration allocator_configuration;
+  struct Net_AllocatorConfiguration allocator_configuration;
   struct Test_U_HTTPDecoder_Configuration configuration;
   configuration.dispatch = (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                                           : COMMON_EVENT_DISPATCH_PROACTOR);
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_FlexParserAllocatorConfiguration> heap_allocator;
+                         struct Net_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -523,7 +523,7 @@ do_work (unsigned int bufferSize_in,
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.PDUSize = bufferSize_in;
+  connection_configuration.allocatorConfiguration_.defaultBufferSize = bufferSize_in;
   connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
                                        configuration.streamConfiguration);
 
@@ -704,6 +704,8 @@ do_work (unsigned int bufferSize_in,
   Test_U_MessageData_t* message_data_container_p = NULL;
   Test_U_Message* message_p = NULL;
   ACE_Message_Block* message_block_p = NULL;
+  size_t pdu_size_i = 0;
+
   if (useReactor_in)
   {
 #if defined (SSL_USE)
@@ -876,9 +878,15 @@ do_work (unsigned int bufferSize_in,
 
     goto clean_up;
   } // end IF
+
+  ACE_ASSERT ((*iterator).second->allocatorConfiguration);
+  pdu_size_i =
+    (*iterator).second->allocatorConfiguration->defaultBufferSize;// +
+//    (*iterator).second->allocatorConfiguration->paddingBytes;
+
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (message_allocator.malloc (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator).second)->PDUSize));
+    static_cast<Test_U_Message*> (message_allocator.malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p && !message_allocator.block ())
     goto allocate;

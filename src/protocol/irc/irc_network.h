@@ -34,10 +34,10 @@
 class IRC_IControl;
 
 struct IRC_AllocatorConfiguration
- : Stream_AllocatorConfiguration
+ : Net_AllocatorConfiguration
 {
   IRC_AllocatorConfiguration ()
-   : Stream_AllocatorConfiguration ()
+   : Net_AllocatorConfiguration ()
   {
     defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
     // *NOTE*: this facilitates (message block) data buffers to be scanned with

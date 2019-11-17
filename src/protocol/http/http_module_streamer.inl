@@ -246,12 +246,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                 inherited::mod_->name (),
                 message_inout->id (),
                 message_inout->space (), buffer.size ()));
-
-    // clean up
     passMessageDownstream_out = false;
-    message_inout->release ();
-    message_inout = NULL;
-
+    message_inout->release (); message_inout = NULL;
     return;
   } // end IF
 
@@ -262,12 +258,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_Message_Block::copy(): \"%m\", aborting\n"),
                 inherited::mod_->name ()));
-
-    // clean up
     passMessageDownstream_out = false;
-    message_inout->release ();
-    message_inout = NULL;
-
+    message_inout->release (); message_inout = NULL;
     return;
   } // end IF
 
@@ -283,12 +275,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                 inherited::mod_->name (),
                 message_inout->id (),
                 message_inout->space (), content_buffer.size ()));
-
-    // clean up
     passMessageDownstream_out = false;
-    message_inout->release ();
-    message_inout = NULL;
-
+    message_inout->release (); message_inout = NULL;
     return;
   } // end IF
 
@@ -299,12 +287,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_Message_Block::copy(): \"%m\", aborting\n"),
                 inherited::mod_->name ()));
-
-    // clean up
     passMessageDownstream_out = false;
-    message_inout->release ();
-    message_inout = NULL;
-
+    message_inout->release (); message_inout = NULL;
     return;
   } // end IF
 

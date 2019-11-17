@@ -358,14 +358,17 @@ continue_:
   if (data_r.xid != session_data_r.xid)
     return; // done
 
-  DataMessageType* message_p =
-      inherited::allocateMessage ((*iterator_2).second->PDUSize);
+  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
+  size_t pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+  DataMessageType* message_p = inherited::allocateMessage (pdu_size_i);
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u): \"%m\", returning\n"),
                 inherited::mod_->name (),
-                (*iterator_2).second->PDUSize));
+                pdu_size_i));
     return;
   } // end IF
   struct DHCP_Record DHCP_record;

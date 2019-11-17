@@ -42,7 +42,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inputStream_ ()
  , outputStream_ ()
  , partialWrite_ (false)
- , PDUSize_ (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+ //, PDUSize_ (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
  , localSAP_ ()
  , peerSAP_ ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -112,7 +112,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 
-  PDUSize_ = inherited::configuration_->PDUSize;
+  //PDUSize_ = inherited::configuration_->PDUSize;
 
   // step1: tweak socket
   if (likely (inherited::configuration_->bufferSize))
@@ -204,13 +204,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(0x%@,%s,-1), aborting\n"),
                   handle_in,
                   (inherited::configuration_->linger ? ACE_TEXT ("true")
-                                                  : ACE_TEXT ("false"))));
+                                                     : ACE_TEXT ("false"))));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
                   handle_in,
                   (inherited::configuration_->linger ? ACE_TEXT ("true")
-                                                  : ACE_TEXT ("false"))));
+                                                     : ACE_TEXT ("false"))));
 #endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     goto error;
@@ -561,13 +561,20 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::initiate_read"));
 
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->allocatorConfiguration);
+
   // allocate a data buffer
-  ACE_Message_Block* message_block_p = this->allocateMessage (PDUSize_);
+  size_t pdu_size_i =
+    inherited::configuration_->allocatorConfiguration->defaultBufferSize +
+    inherited::configuration_->allocatorConfiguration->paddingBytes;
+  ACE_Message_Block* message_block_p = this->allocateMessage (pdu_size_i);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::allocateMessage(%u), aborting\n"),
-                PDUSize_));
+                pdu_size_i));
     return false;
   } // end IF
 
@@ -576,14 +583,14 @@ receive:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   int result =
     inputStream_.readv (*message_block_p,                     // buffer
-                        PDUSize_,                             // bytes to read
+                        pdu_size_i,                           // bytes to read
                         NULL,                                 // ACT
                         0,                                    // priority
                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
 #else
   int result =
     inputStream_.read (*message_block_p,                     // buffer
-                       PDUSize_,                             // bytes to read
+                       pdu_size_i,                           // bytes to read
                        NULL,                                 // ACT
                        0,                                    // priority
                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -606,7 +613,7 @@ receive:
 #endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Stream::readv(%u): \"%m\", aborting\n"),
-                  PDUSize_));
+                  pdu_size_i));
 
     // clean up
     message_block_p->release ();

@@ -84,7 +84,7 @@ HTTP_Stream_T<StreamStateType,
               DataMessageType,
               SessionMessageType,
               ConnectionManagerType,
-              UserDataType>::load (Stream_ModuleList_t& modules_out,
+              UserDataType>::load (Stream_ILayout* layout_out,
                                    bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::load"));
@@ -92,18 +92,21 @@ HTTP_Stream_T<StreamStateType,
   // initialize return value(s)
   deleteModules_out = true;
 
+  inherited::load (layout_out,
+                   deleteModules_out);
+
   Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  MODULE_STATISTIC_T (this,
-                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   MODULE_MARSHAL_T (this,
                                     ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  layout_out->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  MODULE_STATISTIC_T (this,
+                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_out->append (module_p, NULL, 0);
 
   return true;
 }
@@ -179,65 +182,6 @@ HTTP_Stream_T<StreamStateType,
 //    &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
 
   // ---------------------------------------------------------------------------
-
-  //   // ******************* Handler ************************
-  //   IRC_Module_Handler* handler_impl = NULL;
-  //   handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
-  //   if (!handler_impl)
-  //   {
-  //     ACE_DEBUG ((LM_ERROR,
-  //                 ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
-  //     return false;
-  //   } // end IF
-  //   if (!handler_impl->initialize (configuration_in.messageAllocator,
-  //                                  (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
-  //                                                                       : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
-  //                                  (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
-  //   {
-  //     ACE_DEBUG ((LM_ERROR,
-  //                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //                 handler_.name ()));
-  //     return false;
-  //   } // end IF
-
-  // ******************* Runtime Statistic ************************
-  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
-  //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  //if (!runtimeStatistic_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
-  //                                          configuration_in.messageAllocator))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  return false;
-  //} // end IF
-
-  //// ******************* Parser ************************
-  //PARSER_T* parser_impl_p = NULL;
-  //parser_impl_p =
-  //  dynamic_cast<PARSER_T*> (parser_.writer ());
-  //if (!parser_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
-  //                                configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
-  //                                configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
-  //                                configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              parser_.name ()));
-  //  return false;
-  //} // end IF
 
   // ******************* Marshal ************************
   module_p =

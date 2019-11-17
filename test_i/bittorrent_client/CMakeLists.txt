@@ -385,12 +385,14 @@ if (UNIX)
 elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl OPENSSL_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${ACE_LIB_PATH}
                            ${OPENSSL_LIB_PATH}
+                           ${FFMPEG_LIB_PATH}
                            ${GTK_LIB_PATH})
- create_target_launcher (${EXECUTABLE_GUI}
+ create_target_launcher (${EXECUTABLE}
                          ARGS "-l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}

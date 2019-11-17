@@ -76,7 +76,7 @@ class FileServer_TCPConnectionConfiguration
   FileServer_TCPConnectionConfiguration ()
    : Net_ConnectionConfiguration_T ()
   {
-    PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
+    //PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
   }
 };
 //typedef std::map<std::string,
@@ -92,7 +92,7 @@ class FileServer_UDPConnectionConfiguration
   FileServer_UDPConnectionConfiguration ()
    : Net_ConnectionConfiguration_T ()
   {
-    PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
+    //PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
   }
 };
 //typedef std::map<std::string,

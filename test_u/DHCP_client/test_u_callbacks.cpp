@@ -307,8 +307,13 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              std::numeric_limits<double>::max ());
+
+  size_t pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> ((*iterator_2).second->PDUSize));
+                             static_cast<double> (pdu_size_i));
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -1097,13 +1102,18 @@ action_discover_activate_cb (GtkAction* action_in,
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
   ACE_ASSERT (spin_button_p);
-  (*iterator_2).second->PDUSize =
-    static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
+
+  size_t pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+
+  //(*iterator_2).second->PDUSize =
+  //  static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
 
   Test_U_Message* message_p = NULL;
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->PDUSize));
+    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
     goto allocate;
@@ -1267,9 +1277,13 @@ action_inform_activate_cb (GtkAction* action_in,
     dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
 
+  size_t pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->PDUSize));
+    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
     goto allocate;
@@ -1406,9 +1420,13 @@ action_request_activate_cb (GtkAction* action_in,
     dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
 
+  size_t pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->PDUSize));
+    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
     goto allocate;
@@ -1522,9 +1540,13 @@ action_release_activate_cb (GtkAction* action_in,
     dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
 
+  size_t pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->PDUSize));
+    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
   if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
     goto allocate;

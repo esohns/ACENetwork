@@ -92,13 +92,18 @@
 enum Net_LinkLayerType&
 operator++ (enum Net_LinkLayerType& lhs_inout) // prefix-
 { ACE_ASSERT (lhs_inout < NET_LINKLAYER_MAX);
-  int result = lhs_inout + 1;
-  if (unlikely (result == NET_LINKLAYER_MAX))
-    lhs_inout = NET_LINKLAYER_ATM;
-  else
-    lhs_inout = static_cast<enum Net_LinkLayerType> (result);
-
-  return lhs_inout;
+  switch (lhs_inout)
+  {
+    case NET_LINKLAYER_802_3: return lhs_inout = NET_LINKLAYER_802_11;
+    case NET_LINKLAYER_802_11: return lhs_inout = NET_LINKLAYER_PPP;
+    case NET_LINKLAYER_PPP: return lhs_inout = NET_LINKLAYER_FDDI;
+    case NET_LINKLAYER_FDDI: return lhs_inout = NET_LINKLAYER_ATM;
+    case NET_LINKLAYER_ATM: 
+    default:
+      return lhs_inout = NET_LINKLAYER_MAX;
+  }
+  
+  return lhs_inout = NET_LINKLAYER_INVALID; // some compilers might warn otherwise
 }
 enum Net_LinkLayerType
 operator++ (enum Net_LinkLayerType& lhs_in, int) // postfix-
@@ -1245,7 +1250,8 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   std::string filename_string =
       Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""));
   std::string command_line_string =
-      ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
+      //ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
+    ACE_TEXT_ALWAYS_CHAR ("curl http://myexternalip.com/raw >> ");
   command_line_string += filename_string;
 
   result = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
@@ -1277,6 +1283,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
                 ACE_TEXT (filename_string.c_str ())));
 
   std::string resolution_record_string = reinterpret_cast<char*> (data_p);
+  resolution_record_string.resize (file_size_i);
   delete [] data_p;
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("nslookup data: \"%s\"\n"),
@@ -1300,28 +1307,30 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   {
     converter.getline (buffer_a, sizeof (char[BUFSIZ]));
     buffer_string = buffer_a;
-    if (!std::regex_match (buffer_string,
-                           match_results,
-                           regex,
-                           std::regex_constants::match_default))
-      continue;
-//    ACE_ASSERT (match_results.ready () && !match_results.empty ());
-    ACE_ASSERT (!match_results.empty ());
-
-    if (match_results[1].matched &&
-        !ACE_OS::strcmp (match_results[1].str ().c_str (),
-                         ACE_TEXT_ALWAYS_CHAR (NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING)))
-    {
-      if (is_first)
-      {
-        is_first = false;
-        continue;
-      } // end IF
-
-      ACE_ASSERT (match_results[2].matched);
-      external_ip_address = match_results[2];
-      break;
-    } // end IF
+//    if (!std::regex_match (buffer_string,
+//                           match_results,
+//                           regex,
+//                           std::regex_constants::match_default))
+//      continue;
+////    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//    ACE_ASSERT (!match_results.empty ());
+//
+//    if (match_results[1].matched &&
+//        !ACE_OS::strcmp (match_results[1].str ().c_str (),
+//                         ACE_TEXT_ALWAYS_CHAR (NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING)))
+//    {
+//      if (is_first)
+//      {
+//        is_first = false;
+//        continue;
+//      } // end IF
+//
+//      ACE_ASSERT (match_results[2].matched);
+//      external_ip_address = match_results[2];
+//      break;
+//    } // end IF
+    external_ip_address = buffer_string;
+    break;
   } while (!converter.fail ());
   if (unlikely (external_ip_address.empty ()))
   {
@@ -3512,7 +3521,7 @@ clean:
     case NET_LINKLAYER_ATM:
     case NET_LINKLAYER_FDDI:
     {
-      ACE_ASSERT (false);
+      //ACE_ASSERT (false);
       ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_NOTREACHED (break;)
     }
@@ -3536,7 +3545,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
   // step1: retrieve 'default' device for each link layer type specified
   Net_InterfaceIdentifiers_t interfaces_a;
   std::string interface_identifier;
-  for (enum Net_LinkLayerType i = NET_LINKLAYER_ATM;
+  for (enum Net_LinkLayerType i = NET_LINKLAYER_802_3;
        i < NET_LINKLAYER_MAX;
        ++i)
     if (linkLayerType_in & i)

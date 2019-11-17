@@ -613,7 +613,7 @@ do_work (bool requestBroadcastReplies_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_FlexParserAllocatorConfiguration> heap_allocator;
+                         struct Net_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1164,9 +1164,15 @@ do_work (bool requestBroadcastReplies_in,
 //      delete message_data_p;
 //      goto clean_up;
 //    } // end IF
+
+    ACE_ASSERT ((*iterator).second->allocatorConfiguration);
+    size_t pdu_size_i =
+      (*iterator).second->allocatorConfiguration->defaultBufferSize +
+      (*iterator).second->allocatorConfiguration->paddingBytes;
+
 allocate:
     message_p =
-        static_cast<Test_U_Message*> (message_allocator.malloc ((*iterator).second->PDUSize));
+        static_cast<Test_U_Message*> (message_allocator.malloc (pdu_size_i));
     // keep retrying ?
     if (!message_p && !message_allocator.block ())
       goto allocate;

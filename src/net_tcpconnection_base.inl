@@ -68,25 +68,28 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
 
   // sanity check
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration);
 
-  // *TODO*: remove type inference
-  message_block_p =
-    inherited::allocateMessage (inherited::CONNECTION_BASE_T::configuration_->PDUSize);
+  // *TODO*: remove type inferences
+  size_t pdu_size_i =
+    inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize +
+    inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->paddingBytes;
+  message_block_p = inherited::allocateMessage (pdu_size_i);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to allocateMessage(%u), aborting\n"),
                 this->id (),
-                inherited::CONNECTION_BASE_T::configuration_->PDUSize));
+                pdu_size_i));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 
   // read some data from the socket
 //retry:
   bytes_received =
-    inherited::peer_.recv (message_block_p->wr_ptr (),   // buffer
-                           message_block_p->capacity (), // #bytes to read
-                           0);                           // flags
+    inherited::peer_.recv (message_block_p->wr_ptr (), // buffer
+                           pdu_size_i,                 // #bytes to read
+                           0);                         // flags
   switch (bytes_received)
   {
     case -1:

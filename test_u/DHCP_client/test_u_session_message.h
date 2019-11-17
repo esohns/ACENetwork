@@ -39,19 +39,19 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<struct Net_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       DHCPClient_SessionData_t,
                                       struct Stream_UserData>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_FlexParserAllocatorConfiguration,
+                                                 struct Net_AllocatorConfiguration,
                                                  DHCPClient_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
-  typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<struct Net_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       DHCPClient_SessionData_t,
                                       struct Stream_UserData> inherited;

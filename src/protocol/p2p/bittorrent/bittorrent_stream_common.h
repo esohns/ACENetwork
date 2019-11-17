@@ -48,17 +48,17 @@
 #include "bittorrent_sessionmessage.h"
 //#include "bittorrent_stream.h"
 
-struct BitTorrent_AllocatorConfiguration
- : Stream_AllocatorConfiguration
-{
-  BitTorrent_AllocatorConfiguration ()
-   : Stream_AllocatorConfiguration ()
-  {
-    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-    //         'flex's yy_scan_buffer() method
-    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  }
-};
+//struct BitTorrent_AllocatorConfiguration
+// : Stream_AllocatorConfiguration
+//{
+//  BitTorrent_AllocatorConfiguration ()
+//   : Stream_AllocatorConfiguration ()
+//  {
+//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+//    //         'flex's yy_scan_buffer() method
+//    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+//  }
+//};
 
 typedef Stream_DataBase_T<struct BitTorrent_PeerMessageData> BitTorrent_PeerMessageData_t;
 
@@ -97,7 +97,7 @@ typedef BitTorrent_SessionMessage_T<struct BitTorrent_TrackerSessionData,
                                     struct Stream_UserData> BitTorrent_TrackerSessionMessage_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct BitTorrent_AllocatorConfiguration> BitTorrent_ControlMessage_t;
+                                struct Net_AllocatorConfiguration> BitTorrent_ControlMessage_t;
 
 struct BitTorrent_Configuration;
 struct BitTorrent_ConnectionState;

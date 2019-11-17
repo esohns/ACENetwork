@@ -236,8 +236,11 @@ idle_initialize_UI_cb (gpointer userData_in)
   Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+  size_t pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_2).second->allocatorConfiguration->paddingBytes;
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> ((*iterator_2).second->PDUSize));
+                             static_cast<double> (pdu_size_i));
 
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
@@ -955,6 +958,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_Message_Block* message_block_p = NULL;
     GtkSpinner* spinner_p = NULL;
     GtkProgressBar* progressbar_p = NULL;
+    size_t pdu_size_i = 0;
 
     // retrieve buffer size
     spin_button_p =
@@ -1191,10 +1195,15 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
     message_data_p->setPR (HTTP_record_p);
 
+    ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
+    pdu_size_i =
+      (*iterator_2).second->allocatorConfiguration->defaultBufferSize;// +
+//      (*iterator_2).second->allocatorConfiguration->paddingBytes;
+
     ACE_ASSERT (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator);
 allocate:
     message_p =
-      static_cast<Test_I_Message*> (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->PDUSize));
+      static_cast<Test_I_Message*> (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
     // keep retrying ?
     if (!message_p &&
         !dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->block ())

@@ -77,7 +77,7 @@ class Net_AsynchTCPSocketHandler_T
   ACE_Asynch_Read_Stream              inputStream_;
   ACE_Asynch_Write_Stream             outputStream_;
   bool                                partialWrite_;
-  unsigned int                        PDUSize_;
+  //unsigned int                        PDUSize_;
   ACE_INET_Addr                       localSAP_;
   ACE_INET_Addr                       peerSAP_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

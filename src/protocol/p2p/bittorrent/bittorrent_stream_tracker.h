@@ -30,7 +30,7 @@
 #include "bittorrent_common.h"
 
 // forward declarations
-struct BitTorrent_AllocatorConfiguration;
+//struct Net_AllocatorConfiguration;
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -61,7 +61,7 @@ class BitTorrent_TrackerStream_T
                         ConfigurationType,
                         StatisticContainerType,
                         StatisticHandlerType,
-                        struct BitTorrent_AllocatorConfiguration,
+                        struct Net_AllocatorConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -75,7 +75,7 @@ class BitTorrent_TrackerStream_T
                         ConfigurationType,
                         StatisticContainerType,
                         StatisticHandlerType,
-                        struct BitTorrent_AllocatorConfiguration,
+                        struct Net_AllocatorConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -90,8 +90,8 @@ class BitTorrent_TrackerStream_T
   inline virtual ~BitTorrent_TrackerStream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete modules ?
 
 // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

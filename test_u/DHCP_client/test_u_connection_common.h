@@ -65,12 +65,12 @@ class DHCPClient_ConnectionConfiguration;
 struct DHCPClient_StreamConfiguration;
 struct DHCPClient_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_FlexParserAllocatorConfiguration,
+                               struct Net_AllocatorConfiguration,
                                struct DHCPClient_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct DHCPClient_ModuleHandlerConfiguration> DHCPClient_StreamConfiguration_t;
 class DHCPClient_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
                                         DHCPClient_StreamConfiguration_t,
                                         NET_TRANSPORTLAYER_UDP>
 {

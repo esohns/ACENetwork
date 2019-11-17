@@ -35,6 +35,7 @@ Net_ConnectionConfiguration_T<AllocatorConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionConfiguration_T::Net_ConnectionConfiguration_T"));
 
+  inherited::allocatorConfiguration = &allocatorConfiguration_;
 }
 
 template <typename AllocatorConfigurationType,

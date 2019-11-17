@@ -74,7 +74,7 @@ class Test_U_SessionMessage;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_FlexParserAllocatorConfiguration,
+                               struct Net_AllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
