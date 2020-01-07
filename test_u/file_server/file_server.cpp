@@ -562,7 +562,7 @@ do_work (
   } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Net_AllocatorConfiguration> heap_allocator;
+                         struct Common_FlexParserAllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,

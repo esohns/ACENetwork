@@ -173,10 +173,6 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-x [VALUE]: #thread pool threads ([")
-            << TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS
-            << ACE_TEXT ("]")
-            << std::endl;
 } // end print_usage
 
 bool
@@ -188,8 +184,7 @@ do_processArguments (int argc_in,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
-                     bool& printVersionAndExit_out,
-                     unsigned int& numThreadPoolThreads_out)
+                     bool& printVersionAndExit_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
@@ -216,15 +211,10 @@ do_processArguments (int argc_in,
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-#if defined (GUI_SUPPORT)
-                              ACE_TEXT ("df:lrs:tvx:"),
-#else
-                              ACE_TEXT ("df:lrs:tvx:"),
-#endif // GUI_SUPPORT
+                              ACE_TEXT ("df:lrs:tv"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -271,14 +261,6 @@ do_processArguments (int argc_in,
       case 'v':
       {
         printVersionAndExit_out = true;
-        break;
-      }
-      case 'x':
-      {
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter.clear ();
-        converter << argumentParser.opt_arg ();
-        converter >> numThreadPoolThreads_out;
         break;
       }
       // error handling
@@ -542,8 +524,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
       BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
   ACE_ASSERT (tracker_connection_manager_p);
-  Stream_CachedAllocatorHeap_T<struct Net_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                  BITTORRENT_BUFFER_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  Stream_CachedAllocatorHeap_T<struct Common_FlexParserAllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                               BITTORRENT_BUFFER_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (configuration_in.peerStreamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -578,7 +560,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   configuration_in.peerStreamConfiguration.configuration_.messageAllocator =
     &peer_message_allocator;
-  struct Net_AllocatorConfiguration allocator_configuration;
+  struct Common_FlexParserAllocatorConfiguration allocator_configuration;
   struct BitTorrent_Client_PeerStreamConfiguration peer_stream_configuration;
   configuration_in.peerStreamConfiguration.initialize (module_configuration,
                                                        peer_modulehandler_configuration,
@@ -927,8 +909,7 @@ ACE_TMAIN (int argc_in,
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
-  unsigned int number_of_thread_pool_threads =
-    TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
+  unsigned int number_of_thread_pool_threads = 2;
   if (!do_processArguments (argc_in,
                             argv_in,
                             debug_parser,
@@ -937,8 +918,7 @@ ACE_TMAIN (int argc_in,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
-                            print_version_and_exit,
-                            number_of_thread_pool_threads))
+                            print_version_and_exit))
   {
     do_printUsage (ACE::basename (argv_in[0]));
 

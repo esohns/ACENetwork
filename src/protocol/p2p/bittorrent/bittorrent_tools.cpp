@@ -369,12 +369,16 @@ BitTorrent_Tools::generatePeerId ()
   std::ostringstream converter;
   converter << now;
   std::string random_string = converter.str ();
-  unsigned char random_hash[SHA_DIGEST_LENGTH + 1];
-  SHA1 (reinterpret_cast<const unsigned char*> (random_string.c_str ()),
-        random_string.size (),
-        random_hash);
-  random_hash[SHA_DIGEST_LENGTH] = '\0';
-  result += reinterpret_cast<char*> (random_hash);
+  unsigned char random_hash[SHA256_DIGEST_LENGTH + 1];
+  ACE_OS::memset (&random_hash, 0, SHA256_DIGEST_LENGTH + 1);
+  SHA256_CTX context;
+  SHA256_Init (&context);
+  SHA256_Update (&context,
+                 reinterpret_cast<const unsigned char*> (random_string.c_str ()),
+                 random_string.size ());
+  SHA256_Final (random_hash, &context);
+  random_hash[SHA256_DIGEST_LENGTH] = '\0';
+  result = reinterpret_cast<char*> (random_hash);
   result.resize (BITTORRENT_PRT_PEER_ID_LENGTH);
 
   return result;
@@ -394,12 +398,16 @@ BitTorrent_Tools::generateKey ()
   std::ostringstream converter;
   converter << now;
   std::string random_string = converter.str ();
-  unsigned char random_hash[SHA_DIGEST_LENGTH + 1];
-  SHA1 (reinterpret_cast<const unsigned char*> (random_string.c_str ()),
-        random_string.size (),
-        random_hash);
-  random_hash[SHA_DIGEST_LENGTH] = '\0';
-  result += reinterpret_cast<char*> (random_hash);
+  unsigned char random_hash[SHA256_DIGEST_LENGTH + 1];
+  ACE_OS::memset (&random_hash, 0, SHA256_DIGEST_LENGTH + 1);
+  SHA256_CTX context;
+  SHA256_Init (&context);
+  SHA256_Update (&context,
+                 reinterpret_cast<const unsigned char*> (random_string.c_str ()),
+                 random_string.size ());
+  SHA256_Final (random_hash, &context);
+  random_hash[SHA256_DIGEST_LENGTH] = '\0';
+  result = reinterpret_cast<char*> (random_hash);
   result.resize (20);
 
   return result;

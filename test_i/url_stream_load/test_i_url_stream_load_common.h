@@ -100,10 +100,10 @@ struct Test_I_URLStreamLoad_Configuration
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Net_AllocatorConfiguration> Test_I_ControlMessage_t;
+                                struct Common_FlexParserAllocatorConfiguration> Test_I_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Net_AllocatorConfiguration,
+                                          struct Common_FlexParserAllocatorConfiguration,
                                           Test_I_ControlMessage_t,
                                           Test_I_Message,
                                           Test_I_SessionMessage> Test_I_MessageAllocator_t;

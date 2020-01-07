@@ -613,7 +613,7 @@ do_work (bool requestBroadcastReplies_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Net_AllocatorConfiguration> heap_allocator;
+                         struct DHCP_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,

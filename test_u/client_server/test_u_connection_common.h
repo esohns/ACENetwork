@@ -40,13 +40,13 @@
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Net_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
 
 class Test_U_TCPConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                         Test_U_StreamConfiguration_t,
                                         NET_TRANSPORTLAYER_TCP>
 {
@@ -57,7 +57,7 @@ class Test_U_TCPConnectionConfiguration
   {}
 };
 class Test_U_UDPConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                         Test_U_StreamConfiguration_t,
                                         NET_TRANSPORTLAYER_UDP>
 {

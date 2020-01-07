@@ -150,10 +150,10 @@ typedef DHCPClient_Subscribers_t::const_iterator DHCPClient_SubscribersIterator_
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Net_AllocatorConfiguration> DHCPClient_ControlMessage_t;
+                                struct DHCP_AllocatorConfiguration> DHCPClient_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Net_AllocatorConfiguration,
+                                          struct DHCP_AllocatorConfiguration,
                                           DHCPClient_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> DHCPClient_MessageAllocator_t;
@@ -162,7 +162,7 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
 struct DHCPClient_StreamConfiguration;
 struct DHCPClient_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Net_AllocatorConfiguration,
+                               struct DHCP_AllocatorConfiguration,
                                struct DHCPClient_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct DHCPClient_ModuleHandlerConfiguration> DHCPClient_StreamConfiguration_t;
@@ -271,7 +271,7 @@ struct DHCPClient_Configuration
   // **************************** parser data **********************************
   struct Common_ParserConfiguration            parserConfiguration;
   // **************************** stream data **********************************
-//  struct Common_FlexParserAllocatorConfiguration allocatorConfiguration;
+//  struct DHCP_AllocatorConfiguration allocatorConfiguration;
   DHCPClient_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
   struct DHCP_ProtocolConfiguration            protocolConfiguration;

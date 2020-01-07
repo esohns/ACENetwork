@@ -52,18 +52,18 @@
 class Stream_IAllocator;
 struct Net_UserData;
 
-struct Net_AllocatorConfiguration
- : Common_AllocatorConfiguration
-{
-  Net_AllocatorConfiguration ()
-   : Common_AllocatorConfiguration ()
-  {
-    defaultBufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-    //         'flex's yy_scan_buffer() method
-    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  }
-};
+//struct Net_AllocatorConfiguration
+// : Common_AllocatorConfiguration
+//{
+//  Net_AllocatorConfiguration ()
+//   : Common_AllocatorConfiguration ()
+//  {
+//    defaultBufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+//    //         'flex's yy_scan_buffer() method
+//    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+//  }
+//};
 
 //typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
 //typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;

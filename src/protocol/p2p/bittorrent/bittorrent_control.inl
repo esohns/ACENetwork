@@ -283,10 +283,10 @@ BitTorrent_Control_T<SessionAsynchType,
                                          converter.str ()));
   if (session_state_p->key.empty ())
     session_state_p->key = BitTorrent_Tools::generateKey ();
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_KEY_HEADER),
-                                         session_state_p->key));
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_TRACKERID_HEADER),
-                                         session_state_p->trackerId));
+  //record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_KEY_HEADER),
+  //                                       session_state_p->key));
+  //record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_TRACKERID_HEADER),
+  //                                       session_state_p->trackerId));
 
 #if defined (HAVE_CONFIG_H)
   user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);

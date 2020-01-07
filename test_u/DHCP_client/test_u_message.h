@@ -41,12 +41,15 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
- : public DHCP_Message_T<struct Net_AllocatorConfiguration,
+ : public DHCP_Message_T<struct DHCP_AllocatorConfiguration,
                          enum Stream_MessageType>
 {
+  typedef DHCP_Message_T<struct DHCP_AllocatorConfiguration,
+                         enum Stream_MessageType> inherited;
+
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Net_AllocatorConfiguration,
+                                                 struct DHCP_AllocatorConfiguration,
                                                  DHCPClient_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
@@ -66,14 +69,6 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-  typedef DHCP_Message_T<struct Net_AllocatorConfiguration,
-                         enum Stream_MessageType> inherited;
-//  typedef Stream_DataMessageBase_2<struct Net_AllocatorConfiguration,
-//                                   Test_U_MessageData_t,
-//                                   DHCP_MessageType_t> inherited;
-//  typedef DHCP_Message_T<Test_U_AllocatorConfiguration,
-//                         Test_U_MessageData_t> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by message allocators
   Test_U_Message (Stream_SessionId_t,

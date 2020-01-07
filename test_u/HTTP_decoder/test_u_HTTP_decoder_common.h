@@ -56,7 +56,7 @@ struct Test_U_HTTPDecoder_SignalHandlerConfiguration
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Net_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;

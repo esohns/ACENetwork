@@ -40,19 +40,19 @@ class ACE_Message_Block;
 class Test_U_Message;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<struct Net_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
                                       struct Net_UserData>
 {
   // enable access to private ctor(s)
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Net_AllocatorConfiguration,
+                                                 struct Common_FlexParserAllocatorConfiguration,
                                                  Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
-  typedef Stream_SessionMessageBase_T<struct Net_AllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
                                       struct Net_UserData> inherited;

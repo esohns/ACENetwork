@@ -794,7 +794,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   // *TODO*: always retrieve data from inherited::stream_
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
       inherited::stream_.upstream (true);
-  ACE_Message_Block* message_block_p, *message_block_2, *message_block_3 = NULL;
+  ACE_Message_Block* message_block_p = NULL;// , * message_block_2, * message_block_3 = NULL;
   unsigned int length = 0;
   size_t bytes_sent = 0;
   ssize_t result_2 = 0;

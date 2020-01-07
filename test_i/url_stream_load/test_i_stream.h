@@ -54,7 +54,7 @@ class Test_I_Stream_T
                         struct Test_I_StreamState,
                         struct Test_I_StreamConfiguration,
                         Test_I_Statistic_t,
-                        struct Test_I_AllocatorConfiguration,
+                        struct Net_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_I_StreamModuleHandlerConfiguration,
                         struct Test_I_StreamSessionData, // session data
@@ -72,7 +72,7 @@ class Test_I_Stream_T
                         struct Test_I_StreamState,
                         struct Test_I_StreamConfiguration,
                         Test_I_Statistic_t,
-                        struct Test_I_AllocatorConfiguration,
+                        struct Net_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_I_StreamModuleHandlerConfiguration,
                         struct Test_I_StreamSessionData, // session data

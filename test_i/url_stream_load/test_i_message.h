@@ -65,18 +65,18 @@ class Test_I_MessageDataContainer
 
 class Test_I_Message
  : public Stream_DataMessageBase_2<Test_I_MessageDataContainer,
-                                   struct Net_AllocatorConfiguration,
+                                   struct Common_FlexParserAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    HTTP_Method_t>
 {
   typedef Stream_DataMessageBase_2<Test_I_MessageDataContainer,
-                                   struct Net_AllocatorConfiguration,
+                                   struct Common_FlexParserAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    HTTP_Method_t> inherited;
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Net_AllocatorConfiguration,
+                                                 struct Common_FlexParserAllocatorConfiguration,
                                                  Test_I_ControlMessage_t,
                                                  Test_I_Message,
                                                  Test_I_SessionMessage>;

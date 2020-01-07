@@ -83,7 +83,7 @@ typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_
 struct FileServer_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Net_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct FileServer_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
@@ -106,7 +106,7 @@ struct Test_U_ModuleHandlerConfiguration
     inbound = true;
   }
 
-  struct Net_AllocatorConfiguration* allocatorConfiguration;
+  struct Common_FlexParserAllocatorConfiguration* allocatorConfiguration;
   FileServer_UDPIStreamConnection_t* connection;               // net target module
   Net_ConnectionConfigurations_t*    connectionConfigurations; // net target module
   Common_File_Identifier             fileIdentifier;           // file reader module

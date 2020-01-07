@@ -73,10 +73,10 @@ struct Test_U_StreamState
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Net_AllocatorConfiguration> Test_U_ControlMessage_t;
+                                struct Common_FlexParserAllocatorConfiguration> Test_U_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Net_AllocatorConfiguration,
+                                          struct Common_FlexParserAllocatorConfiguration,
                                           Test_U_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;

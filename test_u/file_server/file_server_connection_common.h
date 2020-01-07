@@ -63,12 +63,12 @@ class Test_U_UDPStream;
 struct FileServer_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Net_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct FileServer_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
 class FileServer_TCPConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                         FileServer_StreamConfiguration_t,
                                         NET_TRANSPORTLAYER_TCP>
 {
@@ -84,7 +84,7 @@ class FileServer_TCPConnectionConfiguration
 //typedef FileServer_TCPConnectionConfigurations_t::iterator FileServer_TCPConnectionConfigurationIterator_t;
 
 class FileServer_UDPConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                         FileServer_StreamConfiguration_t,
                                         NET_TRANSPORTLAYER_UDP>
 {
@@ -157,7 +157,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct FileServer_StreamConfiguration,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
-                                      struct Net_AllocatorConfiguration,
+                                      struct Common_FlexParserAllocatorConfiguration,
                                       struct Stream_ModuleConfiguration,
                                       struct Test_U_ModuleHandlerConfiguration,
                                       struct FileServer_SessionData,
@@ -178,7 +178,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct FileServer_StreamConfiguration,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
-                                      struct Net_AllocatorConfiguration,
+                                      struct Common_FlexParserAllocatorConfiguration,
                                       struct Stream_ModuleConfiguration,
                                       struct Test_U_ModuleHandlerConfiguration,
                                       struct FileServer_SessionData,

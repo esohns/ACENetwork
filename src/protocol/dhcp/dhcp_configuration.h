@@ -60,6 +60,19 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  DHCP_Statistic_t,
                                  struct Net_UserData> DHCP_IConnection_Manager_t;
 
+struct DHCP_AllocatorConfiguration
+  : Common_FlexParserAllocatorConfiguration
+{
+  DHCP_AllocatorConfiguration ()
+    : Common_FlexParserAllocatorConfiguration ()
+  {
+    defaultBufferSize = DHCP_MESSAGE_SIZE;
+    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+    //         'flex's yy_scan_buffer() method
+    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+  }
+};
+
 //typedef Common_INotify_T<unsigned int,
 //                         struct DHCP_Stream_SessionData,
 //                         DHCP_Record,

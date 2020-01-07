@@ -101,7 +101,7 @@ struct HTTP_ModuleHandlerConfiguration
     printFinalReport = true;
   };
 
-  struct Net_AllocatorConfiguration* allocatorConfiguration;
+  struct Common_FlexParserAllocatorConfiguration* allocatorConfiguration;
   bool                               crunchMessages; // http parser module
   bool                               printProgressDot; // file writer module
   std::string                        URL;

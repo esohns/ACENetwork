@@ -85,7 +85,7 @@ typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Net_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
@@ -151,7 +151,7 @@ struct ClientServer_Configuration
    , protocolConfiguration ()
   {}
 
-  struct Net_AllocatorConfiguration   allocatorConfiguration;
+  struct Common_FlexParserAllocatorConfiguration   allocatorConfiguration;
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t      connectionConfigurations;
   // **************************** stream data **********************************

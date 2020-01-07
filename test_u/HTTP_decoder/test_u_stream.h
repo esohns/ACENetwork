@@ -58,18 +58,18 @@ struct Test_U_HTTPDecoder_SessionData;
 typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Net_AllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
+                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 class Test_U_Message;
 class Test_U_SessionMessage;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Net_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
 class Test_U_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                         Test_U_StreamConfiguration_t,
                                         NET_TRANSPORTLAYER_TCP>
 {
@@ -99,7 +99,7 @@ class Test_U_Stream_T
                                         struct Test_U_StreamConfiguration,
                                         struct Stream_Statistic,
                                         TimerManagerType,
-                                        struct Net_AllocatorConfiguration,
+                                        struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct Test_U_HTTPDecoder_SessionData,
@@ -121,7 +121,7 @@ class Test_U_Stream_T
                                         struct Test_U_StreamConfiguration,
                                         struct Stream_Statistic,
                                         TimerManagerType,
-                                        struct Net_AllocatorConfiguration,
+                                        struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct Test_U_HTTPDecoder_SessionData,

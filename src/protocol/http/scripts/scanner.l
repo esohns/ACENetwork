@@ -738,14 +738,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                // switch buffer (next chunk ?)
                                if (!message_block_p->length ())
                                {
-                                 if (!iparser_p->switchBuffer ())
-                                 { // *NOTE*: most probable reason: connection
-                                   //         has been closed --> session end
-                                   ACE_DEBUG ((LM_DEBUG,
-                                               ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                                   yyterminate();
-                                 } // end IF
-                                 message_block_p = iparser_p->buffer ();
+//                                 if (!iparser_p->switchBuffer ())
+//                                 { // *NOTE*: most probable reason: connection
+//                                   //         has been closed --> session end
+//                                   ACE_DEBUG ((LM_DEBUG,
+//                                               ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
+//                                   yyterminate();
+//                                 } // end IF
+//                                 message_block_p = iparser_p->buffer ();
                                } // end IF
 
                                iparser_p->offset (chunk_size + 2);

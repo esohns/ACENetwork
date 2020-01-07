@@ -81,7 +81,7 @@ struct Net_SocketConfigurationBase
   }
   inline virtual ~Net_SocketConfigurationBase () {}
 
-  struct Net_AllocatorConfiguration* allocatorConfiguration;
+  struct Common_FlexParserAllocatorConfiguration* allocatorConfiguration;
   int                                bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA

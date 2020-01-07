@@ -29,9 +29,6 @@
 
 #include "bittorrent_common.h"
 
-// forward declarations
-//struct Net_AllocatorConfiguration;
-
 template <typename StreamStateType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -61,7 +58,7 @@ class BitTorrent_TrackerStream_T
                         ConfigurationType,
                         StatisticContainerType,
                         StatisticHandlerType,
-                        struct Net_AllocatorConfiguration,
+                        struct Common_FlexParserAllocatorConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -75,7 +72,7 @@ class BitTorrent_TrackerStream_T
                         ConfigurationType,
                         StatisticContainerType,
                         StatisticHandlerType,
-                        struct Net_AllocatorConfiguration,
+                        struct Common_FlexParserAllocatorConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,

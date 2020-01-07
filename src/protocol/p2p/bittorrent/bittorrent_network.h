@@ -86,7 +86,7 @@ struct BitTorrent_TrackerConnectionState
 //struct BitTorrent_AllocatorConfiguration;
 struct BitTorrent_PeerStreamConfiguration;
 class BitTorrent_PeerConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                         struct BitTorrent_PeerStreamConfiguration,
                                         NET_TRANSPORTLAYER_TCP>
 {
@@ -100,7 +100,7 @@ class BitTorrent_PeerConnectionConfiguration
 
 struct BitTorrent_TrackerStreamConfiguration;
 class BitTorrent_TrackerConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Net_AllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
                                         struct BitTorrent_TrackerStreamConfiguration,
                                         NET_TRANSPORTLAYER_TCP>
 {
