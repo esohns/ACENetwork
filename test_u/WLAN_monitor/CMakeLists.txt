@@ -443,6 +443,7 @@ elseif (WIN32)
  endif (GUI_SUPPORT)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${PROJECT_SOURCE_DIR}/../libiconv-1.9.2-1/bin
                            ${PROJECT_SOURCE_DIR}/../libxml2/win32/bin.msvc
@@ -453,7 +454,8 @@ elseif (WIN32)
 #                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libswscale
 #                           ${PROJECT_SOURCE_DIR}/../assimp/cmake/code/${CMAKE_BUILD_TYPE}
                            ${GTK_PATH}
-                           ${ACE_PATH})
+                           ${ACE_PATH}
+                           ${SSL_LIB_PATH})
 endif ()
 create_target_launcher (${EXECUTABLE}
                         ARGS ${ARGS}

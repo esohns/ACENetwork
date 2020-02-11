@@ -58,7 +58,7 @@
 #include "net_client_connector.h"
 #if defined (SSL_SUPPORT)
 #include "net_client_ssl_connector.h"
-#endif
+#endif // SSL_SUPPORT
 
 #include "http_common.h"
 #include "http_network.h"

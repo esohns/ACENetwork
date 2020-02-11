@@ -374,10 +374,10 @@ BitTorrent_Tools::generatePeerId ()
   SHA256_CTX context;
   SHA256_Init (&context);
   SHA256_Update (&context,
-                 reinterpret_cast<const unsigned char*> (random_string.c_str ()),
+                 reinterpret_cast<const void*> (random_string.c_str ()),
                  random_string.size ());
   SHA256_Final (random_hash, &context);
-  random_hash[SHA256_DIGEST_LENGTH] = '\0';
+  //random_hash[SHA256_DIGEST_LENGTH] = '\0';
   result = reinterpret_cast<char*> (random_hash);
   result.resize (BITTORRENT_PRT_PEER_ID_LENGTH);
 
@@ -403,10 +403,10 @@ BitTorrent_Tools::generateKey ()
   SHA256_CTX context;
   SHA256_Init (&context);
   SHA256_Update (&context,
-                 reinterpret_cast<const unsigned char*> (random_string.c_str ()),
+                 reinterpret_cast<const void*> (random_string.c_str ()),
                  random_string.size ());
   SHA256_Final (random_hash, &context);
-  random_hash[SHA256_DIGEST_LENGTH] = '\0';
+  //random_hash[SHA256_DIGEST_LENGTH] = '\0';
   result = reinterpret_cast<char*> (random_hash);
   result.resize (20);
 

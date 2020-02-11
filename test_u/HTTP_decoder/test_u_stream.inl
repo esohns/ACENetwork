@@ -139,8 +139,8 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
-//  struct Test_U_HTTPDecoder_SessionData& session_data_r =
-//      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
+  struct Test_U_HTTPDecoder_SessionData& session_data_r =
+      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
   //session_data_r.sessionId = configuration_in.sessionId;
   // *TODO*: remove type inferences
   //session_data_r.targetFileName =
@@ -177,7 +177,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
       const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
-  (*iterator).second.second.targetFileName.clear ();
+  session_data_r.targetFileName = (*iterator).second.second.targetFileName;
 
   // ******************* IO ************************
   module_p =

@@ -2496,7 +2496,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   // sanity check(s)
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (!configuration_->SSID.empty ());
+  //ACE_ASSERT (!configuration_->SSID.empty ());
   ACE_ASSERT (SSID_in.empty ());
 
   //struct Net_WLAN_AccessPointState access_point_state_s;

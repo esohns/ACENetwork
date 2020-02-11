@@ -1,4 +1,6 @@
-﻿set (ACE_XML_LIB_FILE libACEXML.so)
+﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/SSLConfig.cmake)
+
+set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
 #  message (STATUS "ACE_ROOT: \"$ENV{ACE_ROOT}\"")
@@ -133,13 +135,13 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
- if (SSL_SUPPORT)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
- endif (SSL_SUPPORT)
+ if (SSL_USE)
+  include_directories (${SSL_INCLUDE_DIRS})
+ endif (SSL_USE)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/flex)
@@ -296,12 +298,14 @@ elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${ACE_LIB_PATH}
                            ${GTK_LIB_PATH}
-                           ${FFMPEG_LIB_PATH})
+                           ${FFMPEG_LIB_PATH}
+                           ${SSL_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t -u http://www.tagesschau.de/index.html"
+                         ARGS "-l -r -t -u https://www.tagesschau.de/index.html"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                                               G:/software/Development/dll

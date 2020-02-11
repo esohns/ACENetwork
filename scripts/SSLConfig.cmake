@@ -20,9 +20,9 @@ if (UNIX)
   endif (OPENSSL_FOUND)
  endif (SSL_FOUND)
 elseif (WIN32)
- set (SSL_FOUND TRUE) # *NOTE*: it lives under $ENV{LIB_ROOT}/openssl
- set (SSL_INCLUDE_DIRS $ENV{LIB_ROOT}/openssl/include)
- set (SSL_LIBRARIES $ENV{LIB_ROOT}/openssl/libcrypto.lib;$ENV{LIB_ROOT}/openssl/libssl.lib)
+ set (SSL_FOUND TRUE CACHE BOOL "found SSL") # *NOTE*: it lives under $ENV{LIB_ROOT}/openssl
+ set (SSL_INCLUDE_DIRS $ENV{LIB_ROOT}/openssl/include CACHE STRING "SSL include directories")
+ set (SSL_LIBRARIES $ENV{LIB_ROOT}/openssl/libcrypto.lib;$ENV{LIB_ROOT}/openssl/libssl.lib CACHE STRING "SSL libraries")
 endif ()
 
 set (ACE_SSL_LIB_FILE libACE_SSL.so)
@@ -40,6 +40,7 @@ elseif (WIN32)
  unset (ACE_SSL_LIB_FILE)
  set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+               PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE
                PATHS $ENV{ACE_ROOT}
                PATH_SUFFIXES lib
                DOC "searching for ${ACE_SSL_LIB_FILE}"
@@ -54,6 +55,7 @@ endif ()
 
 ##########################################
 if (SSL_FOUND AND ACE_SSL_FOUND)
+ message (STATUS "found SSL")
  set (SSL_SUPPORT ON CACHE BOOL "SSL support available")
  add_definitions (-DSSL_SUPPORT)
 endif (SSL_FOUND AND ACE_SSL_FOUND)
@@ -65,4 +67,3 @@ if (SSL_USE)
  set (SSL_USE ON CACHE BOOL "SSL support enabled")
  add_definitions (-DSSL_USE)
 endif (SSL_USE)
-

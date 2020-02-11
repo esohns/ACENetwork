@@ -161,6 +161,7 @@ do_processArguments (int argc_in,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
+                     bool& useSSL_out,
                      std::string& URL_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
@@ -184,6 +185,7 @@ do_processArguments (int argc_in,
           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
+  useSSL_out = false;
   URL_out.clear ();
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out = TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -249,11 +251,10 @@ do_processArguments (int argc_in,
 
         // step1: parse URL
         std::string URI_string;
-        bool use_ssl = false;
         if (!HTTP_Tools::parseURL (URL_out,
                                    hostName_out,
                                    URI_string,
-                                   use_ssl))
+                                   useSSL_out))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
@@ -267,8 +268,8 @@ do_processArguments (int argc_in,
           hostName_out.find_last_of (':', std::string::npos);
         if (position == std::string::npos)
         {
-          port_out = (use_ssl ? HTTPS_DEFAULT_SERVER_PORT
-                              : HTTP_DEFAULT_SERVER_PORT);
+          port_out = (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT
+                                 : HTTP_DEFAULT_SERVER_PORT);
           hostname_string += ':';
           std::ostringstream converter;
           converter << port_out;
@@ -467,6 +468,7 @@ do_work (unsigned int bufferSize_in,
          unsigned short port_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
+         bool useSSL_in,
          const std::string& URL_in,
          unsigned int numberOfDispatchThreads_in,
          const ACE_Sig_Set& signalSet_in,
@@ -670,7 +672,6 @@ do_work (unsigned int bufferSize_in,
   // - perform statistics collecting/reporting
 
   // step1a: initialize worker(s)
-  int group_id = -1;
   if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -709,7 +710,7 @@ do_work (unsigned int bufferSize_in,
   if (useReactor_in)
   {
 #if defined (SSL_USE)
-    if (port_in == HTTPS_DEFAULT_SERVER_PORT)
+    if (useSSL_in)
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_SSLConnector_t (true));
     else
@@ -918,9 +919,9 @@ allocate:
 clean_up:
   timer_manager_p->stop ();
   connection_manager_p->stop ();
-  Common_Tools::finalizeEventDispatch (useReactor_in,
-                                       !useReactor_in,
-                                       group_id);
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                       event_dispatch_state_s.reactorGroupId,
+                                       true);
 
   delete iconnector_p;
 
@@ -1049,6 +1050,7 @@ ACE_TMAIN (int argc_in,
   unsigned int statistic_reporting_interval =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;
+  bool use_SSL = false;
   std::string URL;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
@@ -1066,6 +1068,7 @@ ACE_TMAIN (int argc_in,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
+                            use_SSL,
                             URL,
                             print_version_and_exit,
                             number_of_dispatch_threads))
@@ -1247,6 +1250,7 @@ ACE_TMAIN (int argc_in,
            port,
            use_reactor,
            statistic_reporting_interval,
+           use_SSL,
            URL,
            number_of_dispatch_threads,
            signal_set,

@@ -831,7 +831,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_ASSERT (record_inout == inherited2::record_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
-  // debug info
+  // debug info ?
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),

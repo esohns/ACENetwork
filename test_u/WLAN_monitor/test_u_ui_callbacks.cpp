@@ -503,16 +503,16 @@ idle_update_signal_quality_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
-  GtkScale* scale_p =
-    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
-  ACE_ASSERT (scale_p);
-  gtk_range_set_value (GTK_RANGE (scale_p),
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                       static_cast<gdouble> (ui_cb_data_p->monitor->get_4 ()));
-#else
-                       static_cast<gdouble> (ui_cb_data_p->monitor->get_3 ()));
-#endif // ACE_WIN32 || ACE_WIN64
+//  GtkScale* scale_p =
+//    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
+//                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
+//  ACE_ASSERT (scale_p);
+//  gtk_range_set_value (GTK_RANGE (scale_p),
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//                       static_cast<gdouble> (ui_cb_data_p->monitor->get_4 ()));
+//#else
+//                       static_cast<gdouble> (ui_cb_data_p->monitor->get_3 ()));
+//#endif // ACE_WIN32 || ACE_WIN64
   return G_SOURCE_REMOVE;
 }
 
