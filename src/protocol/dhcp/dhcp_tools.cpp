@@ -47,6 +47,7 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
+#include "dhcp_codes.h"
 #include "dhcp_defines.h"
 
 std::string

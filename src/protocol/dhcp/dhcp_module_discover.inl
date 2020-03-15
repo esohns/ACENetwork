@@ -210,8 +210,13 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   DHCP_OptionsIterator_t iterator;
   int result = -1;
   Net_ConnectionConfigurationsIterator_t iterator_2;
+  struct ether_addr ether_addrs_s;
   struct DHCP_Record DHCP_record;
   std::string buffer_2;
+  typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+  ACE_Message_Block* message_block_p = NULL;
+  DataMessageType* message_p = NULL;
+  size_t pdu_size_i = 0;
 
   iterator_2 =
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
@@ -362,10 +367,10 @@ continue_:
     return; // done
 
   ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
-  size_t pdu_size_i =
+  pdu_size_i =
     (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
     (*iterator_2).second->allocatorConfiguration->paddingBytes;
-  DataMessageType* message_p = inherited::allocateMessage (pdu_size_i);
+  message_p = inherited::allocateMessage (pdu_size_i);
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -381,7 +386,7 @@ continue_:
   DHCP_record.secs = data_r.secs;
   if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  struct ether_addr ether_addrs_s =
+  ether_addrs_s =
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
@@ -416,7 +421,7 @@ continue_:
                          message_p->id (),
                          NULL);
 
-  typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
+  istream_connection_p =
     dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (session_data_r.connection);
   if (unlikely (!istream_connection_p))
   {
@@ -427,7 +432,7 @@ continue_:
     message_p->release ();
     return;
   } // end IF
-  ACE_Message_Block* message_block_p = message_p;
+  message_block_p = message_p;
   istream_connection_p->send (message_block_p);
 
   return;
