@@ -284,7 +284,7 @@ install (TARGETS ${EXECUTABLE}
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t"
+                         ARGS "-l -r -t -u https://www.tagesschau.de/index.html"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../pdcurses/win32
