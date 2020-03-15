@@ -2504,7 +2504,7 @@ Net_WLAN_Tools::nL80211Command (struct nl_sock* socketHandle_in,
     //                   - close()/shutdown() do not work
     //                   - SIGINT might work, ugly
     //                   - flag-setting and sending a 'dummy request', ugly
-    //                   --> use ACE event dispatch and circumvent nl_revmsgs()
+    //                   --> use ACE event dispatch and circumvent nl_recvmsgs()
     result_2 = nl_recvmsgs (socket_handle_p, callback_2);
     if (unlikely (result_2 < 0))
     {
@@ -2535,7 +2535,7 @@ Net_WLAN_Tools::nL80211Command (struct nl_sock* socketHandle_in,
                   ACE_TEXT (ACE_OS::strerror (-(*error_p)))));
       break;
     } // end IF
-    if (*done_p)
+    if (*done_p || !result_2)
       break;
   } while (true);
 

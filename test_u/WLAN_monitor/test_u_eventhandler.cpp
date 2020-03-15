@@ -334,11 +334,11 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  guint event_source_id = g_idle_add (idle_update_ssids_cb,
+  guint event_source_id = g_idle_add (idle_update_scan_end_cb,
                                       CBData_);
   if (!event_source_id)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_update_ssids_cb): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to g_idle_add(idle_update_scan_end_cb): \"%m\", continuing\n")));
   //else
   //  CBData_->eventSourceIds.insert (event_source_id);
 #endif // GTK_USE

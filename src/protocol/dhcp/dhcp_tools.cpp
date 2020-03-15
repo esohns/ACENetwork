@@ -224,6 +224,49 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
         string_buffer += converter.str ();
         break;
       }
+      case DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESSES:
+      {
+        // sanity check(s)
+        ACE_ASSERT ((*iterator).second.size () >= 5);
+        unsigned int num_ip_addresses =
+          *reinterpret_cast<const unsigned char*> ((*iterator).second.c_str ()) / 4;
+        ACE_ASSERT (num_ip_addresses >= 1);
+
+        ACE_UINT32 ip_address =
+          *reinterpret_cast<const unsigned int*> ((*iterator).second.c_str () + 1);
+        if (num_ip_addresses == 1)
+          string_buffer += Net_Common_Tools::IPAddressToString (0, ip_address);
+        else
+        {
+          char* pointer_p =
+            const_cast<char*> ((*iterator).second.c_str () + 1);
+          unsigned int used_bytes = 1;
+next_list:
+          num_ip_addresses =
+            *reinterpret_cast<const unsigned char*> (pointer_p) / 4;
+          ++pointer_p;
+          for (unsigned int i = 0;
+            i < num_ip_addresses;
+            ++i)
+          {
+            ACE_UINT32 ip_address =
+              *reinterpret_cast<const unsigned int*> (pointer_p + (i * 4));
+            string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+            converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+            converter.clear ();
+            converter << ACE_TEXT_ALWAYS_CHAR ("\t#");
+            converter << (i + 1);
+            string_buffer += converter.str ();
+            string_buffer += ACE_TEXT_ALWAYS_CHAR (": ");
+            string_buffer += Net_Common_Tools::IPAddressToString (0, ip_address);
+          } // end FOR
+          pointer_p += num_ip_addresses * 4;
+          used_bytes += num_ip_addresses * 4;
+          if (used_bytes < (*iterator).second.size ())
+            goto next_list;
+        } // end ELSE
+        break;
+      }
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -316,14 +359,24 @@ DHCP_Tools::OptionToString (DHCP_Option_t option_in)
       result = ACE_TEXT_ALWAYS_CHAR ("IP_MTU"); break;
     case DHCP_Codes::DHCP_OPTION_IP_BROADCASTADDRESS:
       result = ACE_TEXT_ALWAYS_CHAR ("IP_BROADCASTADDRESS"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_NTP_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("DHCP_NTP_SERVER"); break;
     case DHCP_Codes::DHCP_OPTION_VENDORSPECIFICINFORMATION:
-      result = ACE_TEXT_ALWAYS_CHAR ("VENDORSPECIFICINFORMATION"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("DHCP_VENDORSPECIFICINFORMATION"); break;
     case DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME:
       result = ACE_TEXT_ALWAYS_CHAR ("DHCP_IPADDRESSLEASETIME"); break;
     case DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE:
       result = ACE_TEXT_ALWAYS_CHAR ("DHCP_MESSAGETYPE"); break;
     case DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER:
       result = ACE_TEXT_ALWAYS_CHAR ("DHCP_SERVERIDENTIFIER"); break;
+    case DHCP_Codes::DHCP_OPTION_DHCP_RENEWALT1TIME:
+      result = ACE_TEXT_ALWAYS_CHAR ("DHCP_RENEWALT1TIME"); break;
+    case DHCP_Codes::DHCP_OPTION_DHCP_REBINDINGT2TIME:
+      result = ACE_TEXT_ALWAYS_CHAR ("DHCP_REBINDINGT2TIME"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_PCP_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("PCP_SERVER"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -422,17 +475,22 @@ DHCP_Tools::OptionToFieldType (DHCP_Option_t option_in)
     case DHCP_Codes::DHCP_OPTION_DOMAINNAMESERVER:
     case DHCP_Codes::DHCP_OPTION_IP_BROADCASTADDRESS:
     case DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER:
+    case DHCP_Codes::DHCP_OPTION_NTP_SERVER:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESS;
     case DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_COMMAND;
     case DHCP_Codes::DHCP_OPTION_TIMEOFFSET:
     case DHCP_Codes::DHCP_OPTION_IP_MTU:
     case DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME:
+    case DHCP_Codes::DHCP_OPTION_DHCP_RENEWALT1TIME:
+    case DHCP_Codes::DHCP_OPTION_DHCP_REBINDINGT2TIME:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_INTEGER;
     case DHCP_Codes::DHCP_OPTION_HOSTNAME:
     case DHCP_Codes::DHCP_OPTION_DOMAINNAME:
     case DHCP_Codes::DHCP_OPTION_VENDORSPECIFICINFORMATION:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_STRING;
+    case DHCP_Codes::DHCP_OPTION_PCP_SERVER:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESSES;
     default:
     {
       ACE_DEBUG ((LM_ERROR,

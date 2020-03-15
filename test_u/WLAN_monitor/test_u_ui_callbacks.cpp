@@ -303,14 +303,6 @@ idle_update_info_display_cb (gpointer userData_in)
   ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   GtkSpinButton* spin_button_p = NULL;
-  //GtkScale* scale_p =
-  //  GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
-  //                                     ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
-  //ACE_ASSERT (scale_p);
-  GtkSpinner* spinner_p =
-    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
-  ACE_ASSERT (spinner_p);
   enum WLANMMMonitor_EventType* event_p = NULL;
   enum WLANMMMonitor_EventType event_e =
     static_cast<enum WLANMMMonitor_EventType> (COMMON_UI_EVENT_INVALID);
@@ -337,58 +329,22 @@ idle_update_info_display_cb (gpointer userData_in)
           break;
         }
         case WLAN_MONITOR_EVENT_ASSOCIATE:
-        {
-          spin_button_p =
-            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                     ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME)));
-
-          //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-          //                          TRUE);
-          //gtk_widget_set_visible (GTK_WIDGET (scale_p),
-          //                        TRUE);
-
-          break;
-        }
         case WLAN_MONITOR_EVENT_DISASSOCIATE:
         {
           spin_button_p =
               GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                        ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME)));
-
-          //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-          //                          FALSE);
-          //gtk_widget_set_visible (GTK_WIDGET (scale_p),
-          //                        FALSE);
-
           break;
         }
         case WLAN_MONITOR_EVENT_CONNECT:
-        {
-          spin_button_p =
-            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                     ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME)));
-
-          gtk_spinner_stop (spinner_p);
-          gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
-                                    FALSE);
-          gtk_widget_set_visible (GTK_WIDGET (spinner_p),
-                                  FALSE);
-
-          break;
-        }
         case WLAN_MONITOR_EVENT_DISCONNECT:
         {
           spin_button_p =
                 GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                          ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME)));
-
-          gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
-                                    TRUE);
-          gtk_widget_set_visible (GTK_WIDGET (spinner_p),
-                                  TRUE);
-
           break;
         }
+        case WLAN_MONITOR_EVENT_SCAN_START:
         case WLAN_MONITOR_EVENT_SIGNAL_QUALITY_CHANGED:
           break;
         default:
@@ -487,6 +443,70 @@ idle_update_ssids_cb (gpointer userData_in)
 }
 
 gboolean
+idle_update_scan_start_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_scan_start_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
+    static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  //ACE_ASSERT (ui_cb_data_p->monitor);
+
+  Common_UI_GTK_BuildersIterator_t iterator =
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
+
+  GtkSpinner* spinner_p =
+    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
+                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
+  ACE_ASSERT (spinner_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
+                            TRUE);
+  gtk_spinner_start (spinner_p);
+
+  return G_SOURCE_REMOVE;
+}
+gboolean
+idle_update_scan_end_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_scan_end_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct WLANMonitor_UI_CBData* ui_cb_data_p =
+    static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
+  ACE_ASSERT (ui_cb_data_p->UIState);
+  //ACE_ASSERT (ui_cb_data_p->monitor);
+
+  Common_UI_GTK_BuildersIterator_t iterator =
+    ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
+
+  GtkSpinner* spinner_p =
+    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
+                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
+  ACE_ASSERT (spinner_p);
+
+  guint event_source_id = g_idle_add (idle_update_ssids_cb,
+                                      userData_in);
+  if (!event_source_id)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_update_ssids_cb): \"%m\", continuing\n")));
+  //else
+  //  CBData_->eventSourceIds.insert (event_source_id);
+
+  gtk_spinner_stop (spinner_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
+                            FALSE);
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
 idle_update_signal_quality_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_signal_quality_cb"));
@@ -503,16 +523,16 @@ idle_update_signal_quality_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
-//  GtkScale* scale_p =
-//    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
-//                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
-//  ACE_ASSERT (scale_p);
-//  gtk_range_set_value (GTK_RANGE (scale_p),
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//                       static_cast<gdouble> (ui_cb_data_p->monitor->get_4 ()));
-//#else
-//                       static_cast<gdouble> (ui_cb_data_p->monitor->get_3 ()));
-//#endif // ACE_WIN32 || ACE_WIN64
+  GtkScale* scale_p =
+    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
+  ACE_ASSERT (scale_p);
+  gtk_range_set_value (GTK_RANGE (scale_p),
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                       static_cast<gdouble> (ui_cb_data_p->monitor->get_4 ()));
+#else
+                       static_cast<gdouble> (ui_cb_data_p->monitor->get_3 ()));
+#endif // ACE_WIN32 || ACE_WIN64
   return G_SOURCE_REMOVE;
 }
 
@@ -1095,18 +1115,14 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
 
   bool is_active = gtk_toggle_button_get_active (toggleButton_in);
-//  GtkFrame* frame_p =
-//      GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
-//                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_FRAME_CONFIGURATION_NAME)));
-//  ACE_ASSERT (frame_p);
-  //GtkScale* scale_p =
-  //  GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
-  //                                     ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
-  //ACE_ASSERT (scale_p);
-  GtkSpinner* spinner_p =
-      GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
-  ACE_ASSERT (spinner_p);
+  //GtkFrame* frame_p =
+  //    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+  //                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_FRAME_CONFIGURATION_NAME)));
+  //ACE_ASSERT (frame_p);
+  GtkScale* scale_p =
+    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
+  ACE_ASSERT (scale_p);
 
   if (is_active)
   {
@@ -1125,16 +1141,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     //         callbacks
     if (!ui_cb_data_p->monitor->isRunning ())
     {
-      //gtk_widget_set_visible (GTK_WIDGET (scale_p),
-      //                        TRUE);
-      //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-      //                          TRUE);
-    } // end IF
-    gtk_widget_set_visible (GTK_WIDGET (spinner_p),
-                            TRUE);
-    gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
+      gtk_widget_set_visible (GTK_WIDGET (scale_p),
                               TRUE);
-    gtk_spinner_start (spinner_p);
+    } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -1208,16 +1217,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     //         callbacks
     if (!ui_cb_data_p->monitor->isRunning ())
     {
-      //gtk_widget_set_visible (GTK_WIDGET (scale_p),
-      //                        FALSE);
-      //gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-      //                          FALSE);
+      gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
+                                FALSE);
     } // end IF
-    gtk_spinner_stop (spinner_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
-                              FALSE);
-    gtk_widget_set_visible (GTK_WIDGET (spinner_p),
-                            FALSE);
   } // end ELSE
 //  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
 //                            !is_active);
@@ -1226,14 +1228,6 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
 error:
 //  gtk_widget_set_sensitive (GTK_WIDGET (frame_p), true);
-  if (is_active)
-    gtk_spinner_stop (spinner_p);
-  else
-    gtk_spinner_start (spinner_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
-                            !is_active);
-  gtk_widget_set_visible (GTK_WIDGET (spinner_p),
-                          !is_active);
   toggling_connect_button = true;
   gtk_toggle_button_set_active (toggleButton_in,
                                 !is_active);
@@ -1858,8 +1852,8 @@ button_quit_clicked_cb (GtkButton* button_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance()->stop (false,  // wait ?
-                                                     false); // N/A
+  WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
+                                                           false); // N/A
 } // button_quit_clicked_cb
 #ifdef __cplusplus
 }

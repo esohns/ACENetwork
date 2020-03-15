@@ -546,6 +546,7 @@ do_work (bool autoAssociate_in,
   } // end SWITCH
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iwlanmonitor_p && istatistic_handler_p);
+  iwlanmonitor_p->initialize (configuration_p->WLANMonitorConfiguration);
 
   Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                             dynamic_cast<Net_IStatisticHandler_t*> (iwlanmonitor_p),

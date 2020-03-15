@@ -342,8 +342,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
     if (socketHandle_)
     {
-      nl_socket_free (socketHandle_); socketHandle_ = NULL;
-    } // end  IF
+      nl_close (socketHandle_); nl_socket_free (socketHandle_); socketHandle_ = NULL;
+    } // end IF
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -1840,9 +1840,10 @@ associate:
         inherited::change (NET_WLAN_MONITOR_STATE_DEAUTHENTICATE);
         break;
       } // end IF
-
-      inherited::change (configuration_->SSID.empty () ? NET_WLAN_MONITOR_STATE_ASSOCIATED
-                                                       : NET_WLAN_MONITOR_STATE_ASSOCIATE);
+      enum Net_WLAN_MonitorState next_state_e =
+              ((configuration_->SSID.empty () || (SSID_string == configuration_->SSID)) ? NET_WLAN_MONITOR_STATE_ASSOCIATED
+                                                                                        : NET_WLAN_MONITOR_STATE_ASSOCIATE);
+      inherited::change (next_state_e);
 //reset_state:
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
         inherited::state_ = NET_WLAN_MONITOR_STATE_AUTHENTICATED;

@@ -294,9 +294,11 @@ if (UNIX)
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${ACE_LIB_PATH}
+                           ${SSL_LIB_PATH}
                            ${GTK_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
                          ARGS "-l -t"

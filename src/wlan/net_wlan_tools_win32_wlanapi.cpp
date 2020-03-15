@@ -115,13 +115,14 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           break;
         case wlan_notification_acm_scan_complete:
         {
-          try {
-            imonitor_p->onScanComplete (data_in->InterfaceGuid);
-          } catch (...) {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("\"%s\": caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n"),
-                        ACE_TEXT (Net_Common_Tools::interfaceToString (data_in->InterfaceGuid).c_str ())));
-          }
+          // *NOTE*: invoke the callback in wlan_notification_acm_scan_list_refresh (see below)
+          //try {
+          //  imonitor_p->onScanComplete (data_in->InterfaceGuid);
+          //} catch (...) {
+          //  ACE_DEBUG ((LM_ERROR,
+          //              ACE_TEXT ("\"%s\": caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n"),
+          //              ACE_TEXT (Net_Common_Tools::interfaceToString (data_in->InterfaceGuid).c_str ())));
+          //}
           notification_string =
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_scan_complete");
           break;
@@ -307,6 +308,7 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0602)
         case wlan_notification_acm_scan_list_refresh:
         {
+          // *NOTE*: the list of SSIDs has been refreshed --> invoke the callback now (see above)
           try {
             imonitor_p->onScanComplete (data_in->InterfaceGuid);
           }

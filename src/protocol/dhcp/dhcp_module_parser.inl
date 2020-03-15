@@ -159,7 +159,7 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
   message_inout->initialize (*record_p,
                              message_inout->id (),
                              NULL);
-  isDriverInitialized_ = false;
+  //isDriverInitialized_ = false;
 }
 
 template <ACE_SYNCH_DECL,

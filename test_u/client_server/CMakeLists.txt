@@ -420,22 +420,21 @@ if (UNIX)
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
-set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-#                          ${LIBPNG_PATH}
-#                          ${FFMPEG_PATH}
-#                          ${PROJECT_SOURCE_DIR}/../assimp/cmake/code/${CMAKE_BUILD_TYPE}
-                          ${PROJECT_SOURCE_DIR}/../ACE_TAO/ACE/lib
-#                          ${PROJECT_SOURCE_DIR}/../pdcurses/win32
-#                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
-#                                              G:/software/Development/dll
-                          ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                          ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
-                          ${PROJECT_SOURCE_DIR}/../Common/cmake/src/image/Debug
-                          ${PROJECT_SOURCE_DIR}/../Common/cmake/src/math/Debug
-                          ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                          ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
-                          ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
-                          ${PROJECT_SOURCE_DIR}/cmake/src/Debug)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
+ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${ACE_LIB_PATH}
+                           ${SSL_LIB_PATH}
+                           ${GTK_LIB_PATH}
+                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
+                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
+                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/image/Debug
+                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/math/Debug
+                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
+                           ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
+                           ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
+                           ${PROJECT_SOURCE_DIR}/cmake/src/Debug)
  create_target_launcher (${EXECUTABLE_SOURCE}
                          ARGS "-l -t"
 #                        FORWARD_ARGS
@@ -443,7 +442,7 @@ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_TARGET}
-                         ARGS "-l -t"
+                         ARGS "-l -t -u"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server

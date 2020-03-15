@@ -101,7 +101,7 @@ Net_WLAN_Monitor_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
 
-  inherited::TASK_T::threadCount_ = 1;
+  inherited::TASK_T::threadCount_ = 2;
 
 //  inherited::TASK_T::reactor (ACE_Reactor::instance ());
 //  inherited2::proactor (ACE_Proactor::instance ());
@@ -182,7 +182,7 @@ Net_WLAN_Monitor_T<AddressType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_NL80211,
-                   UserDataType>::start ()
+                   UserDataType>::start (ACE_thread_t&)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
 
@@ -216,7 +216,7 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_Time_Value deadline;
 
   if (controlId_)
-    goto continue_3;
+    goto continue_;
 
   controlId_ =
       genl_ctrl_resolve (inherited::socketHandle_,
@@ -231,10 +231,26 @@ Net_WLAN_Monitor_T<AddressType,
     goto error;
   } // end IF
 
-continue_3:
+continue_:
+  if (unlikely (!Net_WLAN_Tools::getWiPhyFeatures (inherited::configuration_->interfaceIdentifier,
+                                                   inherited::configuration_->wiPhyIdentifier,
+                                                   inherited::socketHandle_,
+                                                   inherited::familyId_,
+                                                   features_)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Tools::getWiPhyFeatures(\"%s\",\"%s\",%@,%d), returning\n"),
+                ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
+                ACE_TEXT (inherited::configuration_->wiPhyIdentifier.c_str ()),
+                inherited::socketHandle_,
+                inherited::familyId_));
+    goto error;
+  } // end IF
+
+//continue_2:
   // subscribe to all defined nl80211 multicast groups (i.e. WLAN events)
   if (isSubscribedToMulticastGroups_)
-    goto continue_4;
+    goto continue_3;
 
   // step1: resolve multicast group ids
   multicast_group_ids_m.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (NL80211_MULTICAST_GROUP_CONFIG),
@@ -368,24 +384,9 @@ continue_3:
                       &(inherited::nl80211CBData_));
   ACE_ASSERT (result >= 0);
 
-  if (unlikely (!Net_WLAN_Tools::getWiPhyFeatures (inherited::configuration_->interfaceIdentifier,
-                                                   inherited::configuration_->wiPhyIdentifier,
-                                                   inherited::socketHandle_,
-                                                   inherited::familyId_,
-                                                   features_)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::getWiPhyFeatures(\"%s\",\"%s\",%@,%d), returning\n"),
-                ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
-                ACE_TEXT (inherited::configuration_->wiPhyIdentifier.c_str ()),
-                inherited::socketHandle_,
-                inherited::familyId_));
-    goto error;
-  } // end IF
-
   isSubscribedToMulticastGroups_ = true;
 
-continue_4:
+continue_3:
   ACE_ASSERT (socket_handle_h != ACE_INVALID_HANDLE);
   switch (inherited::configuration_->dispatch)
   {
@@ -604,9 +605,10 @@ Net_WLAN_Monitor_T<AddressType,
     isRegistered_ = false;
   } // end IF
 
-  inherited::isActive_ = false;
+  nl_close (inherited::socketHandle_); nl_socket_free (inherited::socketHandle_); inherited::socketHandle_ = NULL;
   inherited::stop (waitForCompletion_in,
                    lockedAccess_in);
+  inherited::isActive_ = false;
 }
 
 template <typename AddressType,
@@ -699,6 +701,7 @@ Net_WLAN_Monitor_T<AddressType,
   // *TODO*: remove type inference
   userData_ = configuration_in.userData;
 
+//  ACE_ASSERT (!inherited::socketHandle_);
   if (unlikely (!inherited::initialize (configuration_in)))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -758,7 +761,10 @@ Net_WLAN_Monitor_T<AddressType,
 //                ACE_TEXT ("systemd unit \"%s\" is running and managing interface \"%s\"; this may interfere with the WLAN monitoring activity: please reinstall, continuing\n"),
 //                ACE_TEXT (COMMON_SYSTEMD_UNIT_IFUPDOWN)));
 #endif // ACE_LINUX && DBUS_SUPPORT && SD_BUS_SUPPORT
-  if (!Net_WLAN_Tools::getProtocolFeatures (configuration_in.interfaceIdentifier,
+  std::string interface_identifier_string =
+          (configuration_in.interfaceIdentifier.empty () ? Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)
+                                                         : configuration_in.interfaceIdentifier);
+  if (!Net_WLAN_Tools::getProtocolFeatures (interface_identifier_string,
                                             inherited::socketHandle_,
                                             inherited::familyId_,
                                             protocolFeatures_))
@@ -1300,7 +1306,7 @@ Net_WLAN_Monitor_T<AddressType,
   return result;
 
 state_machine:
-  result = inherited::svc ();
+  result = inherited::STATEMACHINE_T::svc ();
 
   // *NOTE*: the base class is not aware of the fact that not all task threads
   //         are dispatching the message queue

@@ -50,6 +50,8 @@ void load_wlan_interfaces (GtkListStore*);
 gboolean idle_finalize_ui_cb (gpointer);
 gboolean idle_initialize_ui_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
+gboolean idle_update_scan_start_cb (gpointer);
+gboolean idle_update_scan_end_cb (gpointer);
 gboolean idle_update_ssids_cb (gpointer);
 gboolean idle_update_log_display_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);

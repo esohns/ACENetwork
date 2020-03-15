@@ -43,6 +43,7 @@ class DHCP_Codes
     DHCP_OPTION_FIELDTYPE_COMMAND, // reserved: option DHCP_MESSAGETYPE (53)
     DHCP_OPTION_FIELDTYPE_INTEGER,
     DHCP_OPTION_FIELDTYPE_STRING,
+    DHCP_OPTION_FIELDTYPE_ADDRESSES, // see e.g. RFC-7291
     /////////////////////////////////////
     DHCP_OPTION_FIELDTYPE_MAX,
     DHCP_OPTION_FIELDTYPE_INVALID
@@ -203,9 +204,11 @@ class DHCP_Codes
     // *NOTE*: see RFC-3442
     DHCP_OPTION_CLASSLESSROUTE = 121,
     //////////////////////////////////////
-    DHCP_OPTION_RESERVED_START = 128,
+    //DHCP_OPTION_RESERVED_START = 128,
+    // *NOTE*: see RFC-7291
+    DHCP_OPTION_PCP_SERVER = 158,
     //------------------------------------
-    DHCP_OPTION_RESERVED_END = 254,
+    //DHCP_OPTION_RESERVED_END = 254,
     DHCP_OPTION_END = 255,  // "fixed length"
     /////////////////////////////////////
     DHCP_OPTION_MAX,
