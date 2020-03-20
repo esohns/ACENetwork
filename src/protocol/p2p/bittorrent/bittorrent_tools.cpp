@@ -332,32 +332,32 @@ BitTorrent_Tools::generatePeerId ()
   std::string library_version = ACE_TEXT_ALWAYS_CHAR ("0000");
 #if defined (HAVE_CONFIG_H)
   // parse library version
-  library_version =
-      ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION);
-  std::string regex_string =
-    ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+).([[:digit:]]+).([[:digit:]]+)(.+)?$");
-  std::regex regex (regex_string);
-  std::smatch match_results;
-  if (!std::regex_match (library_version,
-                         match_results,
-                         regex,
-                         std::regex_constants::match_default))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid version string (was: \"%s\"), aborting\n"),
-                ACE_TEXT (library_version.c_str ())));
-    return std::string ();
-  } // end IF
-//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
-  ACE_ASSERT (!match_results.empty ());
-
-  library_version = match_results[1];
-  if (library_version.size () < 4)
-    library_version += match_results[2];
-  if (library_version.size () < 4)
-    library_version += match_results[3];
-  if (library_version.size () < 4)
-    library_version += ACE_TEXT_ALWAYS_CHAR ("0");
+//  library_version =
+//      ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION);
+//  std::string regex_string =
+//    ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)\\.([[:digit:]]+)\\.([[:digit:]]+)(.+)?$");
+//  std::regex regex (regex_string);
+//  std::smatch match_results;
+//  if (!std::regex_match (library_version,
+//                         match_results,
+//                         regex,
+//                         std::regex_constants::match_default))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("invalid version string (was: \"%s\"), aborting\n"),
+//                ACE_TEXT (library_version.c_str ())));
+//    return std::string ();
+//  } // end IF
+////  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//  ACE_ASSERT (!match_results.empty ());
+//
+//  library_version = match_results[1].str ();
+//  if (library_version.size () < 4)
+//    library_version += match_results[2].str ();
+//  if (library_version.size () < 4)
+//    library_version += match_results[3].str ();
+//  if (library_version.size () < 4)
+//    library_version += ACE_TEXT_ALWAYS_CHAR ("0");
   library_version.resize (4);
 #endif // HAVE_CONFIG_H
   result += library_version;
@@ -369,6 +369,19 @@ BitTorrent_Tools::generatePeerId ()
   std::ostringstream converter;
   converter << now;
   std::string random_string = converter.str ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  char buffer_a[BUFSIZ];
+  ACE_OS::memset (&buffer_a, 0, BUFSIZ);
+  ACE_OS::strcpy (buffer_a, ACE_TEXT ("XXXXXXXXXXXXXX"));
+  ACE_OS::mktemp (buffer_a);
+  if (unlikely (!ACE_OS::strlen (buffer_a)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
+    return std::string ();
+  } // end IF
+  result += buffer_a;
+#else
   unsigned char random_hash[SHA256_DIGEST_LENGTH + 1];
   ACE_OS::memset (&random_hash, 0, SHA256_DIGEST_LENGTH + 1);
   SHA256_CTX context;
@@ -379,6 +392,7 @@ BitTorrent_Tools::generatePeerId ()
   SHA256_Final (random_hash, &context);
   //random_hash[SHA256_DIGEST_LENGTH] = '\0';
   result = reinterpret_cast<char*> (random_hash);
+#endif // ACE_WIN32 || ACE_WIN64
   result.resize (BITTORRENT_PRT_PEER_ID_LENGTH);
 
   return result;
@@ -398,6 +412,19 @@ BitTorrent_Tools::generateKey ()
   std::ostringstream converter;
   converter << now;
   std::string random_string = converter.str ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  char buffer_a[BUFSIZ];
+  ACE_OS::memset (&buffer_a, 0, BUFSIZ);
+  ACE_OS::strcpy (buffer_a, ACE_TEXT ("XXXXXXXXXXXXXXXXXXXX"));
+  ACE_OS::mktemp (buffer_a);
+  if (unlikely (!ACE_OS::strlen (buffer_a)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+      ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
+    return std::string ();
+  } // end IF
+  result += buffer_a;
+#else
   unsigned char random_hash[SHA256_DIGEST_LENGTH + 1];
   ACE_OS::memset (&random_hash, 0, SHA256_DIGEST_LENGTH + 1);
   SHA256_CTX context;
@@ -409,6 +436,7 @@ BitTorrent_Tools::generateKey ()
   //random_hash[SHA256_DIGEST_LENGTH] = '\0';
   result = reinterpret_cast<char*> (random_hash);
   result.resize (20);
+#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
 }

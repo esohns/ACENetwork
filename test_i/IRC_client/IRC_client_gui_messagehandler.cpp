@@ -278,7 +278,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   gulong result = g_signal_connect (button_p,
                                     ACE_TEXT_ALWAYS_CHAR ("clicked"),
                                     G_CALLBACK (part_clicked_cb),
-                                    &CBData_);
+                                    CBData_);
   ACE_ASSERT (result);
 
   // togglebuttons
@@ -289,7 +289,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -298,7 +298,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -307,7 +307,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -316,7 +316,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -325,7 +325,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -334,7 +334,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -343,7 +343,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -352,7 +352,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -361,7 +361,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -370,7 +370,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -379,7 +379,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -388,7 +388,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -397,7 +397,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
@@ -406,7 +406,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (toggle_button_p,
                              ACE_TEXT_ALWAYS_CHAR ("toggled"),
                              G_CALLBACK (channel_mode_toggled_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
 
   // topic label
@@ -417,14 +417,14 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (event_box_p,
                              ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
                              G_CALLBACK (topic_clicked_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
 
   // context menu in treeview
   result = g_signal_connect (tree_view_p,
                              ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
                              G_CALLBACK (members_clicked_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   // actions in treeview
   GtkAction* action_p =
@@ -434,7 +434,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (action_p,
                              ACE_TEXT_ALWAYS_CHAR ("activate"),
                              G_CALLBACK (action_msg_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   action_p =
     GTK_ACTION (gtk_builder_get_object (builder_p,
@@ -443,7 +443,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (action_p,
                              ACE_TEXT_ALWAYS_CHAR ("activate"),
                              G_CALLBACK (action_invite_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   action_p =
     GTK_ACTION (gtk_builder_get_object (builder_p,
@@ -452,7 +452,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (action_p,
                              ACE_TEXT_ALWAYS_CHAR ("activate"),
                              G_CALLBACK (action_info_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   action_p =
     GTK_ACTION (gtk_builder_get_object (builder_p,
@@ -461,7 +461,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (action_p,
                              ACE_TEXT_ALWAYS_CHAR ("activate"),
                              G_CALLBACK (action_kick_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   action_p =
     GTK_ACTION (gtk_builder_get_object (builder_p,
@@ -470,7 +470,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   result = g_signal_connect (action_p,
                              ACE_TEXT_ALWAYS_CHAR ("activate"),
                              G_CALLBACK (action_ban_cb),
-                             &CBData_);
+                             CBData_);
   ACE_ASSERT (result);
   ACE_UNUSED_ARG (result);
 
@@ -498,7 +498,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
     CBData_->eventSourceId =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_add_channel_cb,
-                       &CBData_,
+                       CBData_,
                        NULL);
     if (!CBData_->eventSourceId)
     {
@@ -836,7 +836,7 @@ IRC_Client_GUI_MessageHandler::setModes (const std::string& modes_in,
   CBData_->eventSourceId =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_update_channel_modes_cb,
-                       &CBData_,
+                       CBData_,
                        NULL);
   if (CBData_->eventSourceId)
     state_r.eventSourceIds.insert (CBData_->eventSourceId);
