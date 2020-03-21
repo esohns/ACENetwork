@@ -104,18 +104,19 @@ BitTorrent_TrackerStream_T<StreamStateType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::load"));
 
   // initialize return value(s)
-//  deleteModules_out = true;
+  deleteModules_out = true;
 
-//  Stream_Module_t* module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  MODULE_HANDLER_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-//                                    NULL,
-//                                    false),
-//                  false);
-//  modules_out.push_back (module_p);
+  inherited::load (layout_out,
+                   deleteModules_out);
 
-  return inherited::load (layout_out,
-                          deleteModules_out);
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  MODULE_PARSER_T (this,
+                                   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_TRACKER_PARSER_MODULE_NAME)),
+                  false);
+  layout_out->append (module_p, NULL, 0);
+
+  return true;
 }
 
 template <typename StreamStateType,

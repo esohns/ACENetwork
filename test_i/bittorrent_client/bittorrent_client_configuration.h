@@ -42,17 +42,6 @@
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_stream_common.h"
 
-struct BitTorrent_Client_PeerUserData
-{
-  BitTorrent_Client_PeerUserData ()
-  {}
-};
-struct BitTorrent_Client_TrackerUserData
-{
-  BitTorrent_Client_TrackerUserData ()
-  {}
-};
-
 struct BitTorrent_Client_CursesState;
 struct BitTorrent_Client_Configuration
 #if defined (GUI_SUPPORT)
@@ -122,8 +111,8 @@ struct BitTorrent_Client_Configuration
   int                                                 groupId;
   bool                                                logToFile;
 
-  struct BitTorrent_Client_PeerUserData               peerUserData;
-  struct BitTorrent_Client_TrackerUserData            trackerUserData;
+  struct Net_UserData                                 peerUserData;
+  struct Net_UserData                                 trackerUserData;
 };
 
 #endif

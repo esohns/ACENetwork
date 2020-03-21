@@ -208,7 +208,7 @@ class HTTP_Module_ParserH_T
   DataMessageType* headFragment_;
 
  private:
-   typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
+  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
@@ -216,7 +216,7 @@ class HTTP_Module_ParserH_T
 
   // implement (part of) HTTP_IParser
   virtual void record (struct HTTP_Record*&); // data record
-  inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // convenience types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;

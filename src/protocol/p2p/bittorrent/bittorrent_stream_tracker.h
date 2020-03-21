@@ -28,6 +28,7 @@
 #include "http_stream.h"
 
 #include "bittorrent_common.h"
+#include "bittorrent_module_parser.h"
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -116,6 +117,23 @@ class BitTorrent_TrackerStream_T
                                      SessionStateType,
                                      ConnectionManagerType,
                                      UserDataType> OWN_TYPE_T;
+  typedef BitTorrent_Module_TrackerParser_T<ACE_MT_SYNCH,
+                                            Common_TimePolicy_t,
+                                            ModuleHandlerConfigurationType,
+                                            ControlMessageType,
+                                            DataMessageType,
+                                            SessionMessageType,
+                                            UserDataType> PARSER_T;
+  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         Stream_SessionId_t,
+                                         SessionDataType,
+                                         enum Stream_SessionMessageType,
+                                         struct Stream_ModuleConfiguration,
+                                         ModuleHandlerConfigurationType,
+                                         libacenetwork_protocol_bittorrent_default_tracker_parser_module_name_string,
+                                         Stream_INotify_t,
+                                         PARSER_T> MODULE_PARSER_T;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T (const BitTorrent_TrackerStream_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T& operator= (const BitTorrent_TrackerStream_T&))

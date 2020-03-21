@@ -28,400 +28,400 @@
 #include "bittorrent_defines.h"
 #include "bittorrent_tools.h"
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                           UserDataType>::BitTorrent_Module_Parser_T (ISTREAM_T* stream_in)
-#else
-                           UserDataType>::BitTorrent_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
-#endif
- : inherited (stream_in)
- , inherited2 (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
-               COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
- , headFragment_ (NULL)
- , crunch_ (true) // strip protocol data ?
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::BitTorrent_Module_Parser_T"));
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+//                           TimePolicyType,
+//                           ConfigurationType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//                           UserDataType>::BitTorrent_Module_PeerParser_T (ISTREAM_T* stream_in)
+//#else
+//                           UserDataType>::BitTorrent_Module_PeerParser_T (typename inherited::ISTREAM_T* stream_in)
+//#endif
+// : inherited (stream_in)
+// , inherited2 (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+//               COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+// , headFragment_ (NULL)
+// , crunch_ (true) // strip protocol data ?
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::BitTorrent_Module_PeerParser_T"));
 
-}
+//}
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           UserDataType>::~BitTorrent_Module_Parser_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::~BitTorrent_Module_Parser_T"));
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+//                           TimePolicyType,
+//                           ConfigurationType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//                           UserDataType>::~BitTorrent_Module_PeerParser_T ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::~BitTorrent_Module_PeerParser_T"));
 
-  if (headFragment_)
-    headFragment_->release ();
-}
+//  if (headFragment_)
+//    headFragment_->release ();
+//}
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-bool
-BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           UserDataType>::initialize (const ConfigurationType& configuration_in,
-                                                      Stream_IAllocator* allocator_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::initialize"));
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//bool
+//BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+//                           TimePolicyType,
+//                           ConfigurationType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//                           UserDataType>::initialize (const ConfigurationType& configuration_in,
+//                                                      Stream_IAllocator* allocator_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::initialize"));
 
-  int result = -1;
+//  int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.parserConfiguration);
+//  // sanity check(s)
+//  ACE_ASSERT (configuration_in.parserConfiguration);
 
-  if (inherited::isInitialized_)
-  {
-    ACE_ASSERT (inherited::msg_queue_);
-    result = inherited::msg_queue_->activate ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
+//  if (inherited::isInitialized_)
+//  {
+//    ACE_ASSERT (inherited::msg_queue_);
+//    result = inherited::msg_queue_->activate ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
 
-    crunch_ = true;
+//    crunch_ = true;
 
-    if (headFragment_)
-    {
-      headFragment_->release ();
-      headFragment_ = NULL;
-    } // end IF
-  } // end IF
+//    if (headFragment_)
+//    {
+//      headFragment_->release ();
+//      headFragment_ = NULL;
+//    } // end IF
+//  } // end IF
 
-//  crunch_ = configuration_in.crunchMessages;
-  const_cast<const ConfigurationType&> (configuration_in)->parserConfiguration.messageQueue =
-      inherited::msg_queue_;
-  if (!inherited2::initialize (configuration_in.parserConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize parser driver: \"%m\", aborting\n")));
-    return false;
-  } // end IF
+////  crunch_ = configuration_in.crunchMessages;
+//  ACE_ASSERT (configuration_in.parserConfiguration);
+//  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+//      inherited::msg_queue_;
+//  if (!inherited2::initialize (*configuration_in.parserConfiguration))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to initialize parser driver: \"%m\", aborting\n")));
+//    return false;
+//  } // end IF
 
-  return inherited::initialize (configuration_in,
-                                allocator_in);
-}
+//  return inherited::initialize (configuration_in,
+//                                allocator_in);
+//}
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-void
-BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           UserDataType>::handleDataMessage (DataMessageType*& message_inout,
-                                                             bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::handleDataMessage"));
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//void
+//BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+//                           TimePolicyType,
+//                           ConfigurationType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//                           UserDataType>::handleDataMessage (DataMessageType*& message_inout,
+//                                                             bool& passMessageDownstream_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::handleDataMessage"));
 
-  DataMessageType* message_p = NULL;
-  int result = -1;
-  bool release_inbound_message = true; // message_inout
-  bool release_message = false; // message_p
+//  DataMessageType* message_p = NULL;
+//  int result = -1;
+//  bool release_inbound_message = true; // message_inout
+//  bool release_message = false; // message_p
 
-  // initialize return value(s)
-  passMessageDownstream_out = false;
+//  // initialize return value(s)
+//  passMessageDownstream_out = false;
 
-  // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
-  *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
-  *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
-  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
+//  // append the "\0\0"-sequence, as required by flex
+//  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+//  *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
+//  *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
+//  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  {
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
-    if (!headFragment_)
-      headFragment_ = message_inout;
-    else
-    {
-      for (message_p = headFragment_;
-           message_p->cont ();
-           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
-      message_p->cont (message_inout);
-
-      //// just signal the parser (see below for an explanation)
-      //result = condition_.broadcast ();
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
-      //              inherited::mod_->name ()));
-    } // end ELSE
-
-    message_p = headFragment_;
-  } // end lock scope
-  ACE_ASSERT (message_p);
-  message_inout = NULL;
-  release_inbound_message = false;
-
-  { // *NOTE*: protect scanner/parser state
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
-    // OK: parse the message (fragment)
-
-    //  ACE_DEBUG ((LM_DEBUG,
-    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->id (),
-    //              message_p->length ()));
-
-    if (!this->parse (message_p))
-    { // *NOTE*: most probable reason: connection
-      //         has been closed --> session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message ID was: %d), returning\n"),
-                  inherited::mod_->name (),
-                  message_p->id ()));
-      goto error;
-    } // end IF
-    // the message fragment has been parsed successfully
-  } // end lock scope
-
-//  // *NOTE*: the message has been parsed successfully
-//  //         --> pass the data (chain) downstream
 //  {
 //    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-//    //// *NOTE*: new data fragments may have arrived by now
-//    ////         --> set the next head fragment ?
-//    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
-//    //if (message_2)
-//    //  message_p->cont (NULL);
-
-//    result = inherited::put_next (headFragment_, NULL);
-//    if (result == -1)
+//    if (!headFragment_)
+//      headFragment_ = message_inout;
+//    else
 //    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
-//                  inherited::mod_->name ()));
+//      for (message_p = headFragment_;
+//           message_p->cont ();
+//           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
+//      message_p->cont (message_inout);
 
-//      // clean up
-//      headFragment_->release ();
+//      //// just signal the parser (see below for an explanation)
+//      //result = condition_.broadcast ();
+//      //if (result == -1)
+//      //  ACE_DEBUG ((LM_ERROR,
+//      //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
+//      //              inherited::mod_->name ()));
+//    } // end ELSE
 
+//    message_p = headFragment_;
+//  } // end lock scope
+//  ACE_ASSERT (message_p);
+//  message_inout = NULL;
+//  release_inbound_message = false;
+
+//  { // *NOTE*: protect scanner/parser state
+//    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+//    // OK: parse the message (fragment)
+
+//    //  ACE_DEBUG ((LM_DEBUG,
+//    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
+//    //              message_p->id (),
+//    //              message_p->length ()));
+
+//    if (!this->parse (message_p))
+//    { // *NOTE*: most probable reason: connection
+//      //         has been closed --> session end
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message ID was: %d), returning\n"),
+//                  inherited::mod_->name (),
+//                  message_p->id ()));
 //      goto error;
 //    } // end IF
-//    headFragment_ = NULL;
+//    // the message fragment has been parsed successfully
 //  } // end lock scope
 
-continue_:
-error:
-  if (release_inbound_message)
-  {
-    ACE_ASSERT (message_inout);
-    message_inout->release ();
-    message_inout = NULL;
-  } // end IF
-  if (release_message)
-  {
-    ACE_ASSERT (message_p);
-    message_p->release ();
-  } // end IF
-}
+////  // *NOTE*: the message has been parsed successfully
+////  //         --> pass the data (chain) downstream
+////  {
+////    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-void
-BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::handleSessionMessage"));
+////    //// *NOTE*: new data fragments may have arrived by now
+////    ////         --> set the next head fragment ?
+////    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
+////    //if (message_2)
+////    //  message_p->cont (NULL);
 
-  //int result = -1;
+////    result = inherited::put_next (headFragment_, NULL);
+////    if (result == -1)
+////    {
+////      ACE_DEBUG ((LM_ERROR,
+////                  ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
+////                  inherited::mod_->name ()));
 
-  // don't care (implies yes per default, if part of a stream)
-  ACE_UNUSED_ARG (passMessageDownstream_out);
+////      // clean up
+////      headFragment_->release ();
 
-  switch (message_inout->type ())
-  {
-    case STREAM_SESSION_MESSAGE_END:
-    {
-      //// *NOTE*: (in a 'passive' scenario,) a parser thread may be waiting for
-      ////         additional (entity) fragments to arrive
-      ////         --> tell it to return
-      //ACE_ASSERT (inherited::msg_queue_);
-      //result = inherited::msg_queue_->pulse ();
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
+////      goto error;
+////    } // end IF
+////    headFragment_ = NULL;
+////  } // end lock scope
 
-      if (headFragment_)
-      {
-        headFragment_->release ();
-        headFragment_ = NULL;
-      } // end IF
+//continue_:
+//error:
+//  if (release_inbound_message)
+//  {
+//    ACE_ASSERT (message_inout);
+//    message_inout->release ();
+//    message_inout = NULL;
+//  } // end IF
+//  if (release_message)
+//  {
+//    ACE_ASSERT (message_p);
+//    message_p->release ();
+//  } // end IF
+//}
 
-      break;
-    }
-    default:
-      break;
-  } // end SWITCH
-}
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//void
+//BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+//                           TimePolicyType,
+//                           ConfigurationType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//                           UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
+//                                                                bool& passMessageDownstream_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::handleSessionMessage"));
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-void
-BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           UserDataType>::record (struct BitTorrent_PeerRecord*& record_inout)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::record"));
+//  //int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (record_inout);
-  ACE_ASSERT (headFragment_);
+//  // don't care (implies yes per default, if part of a stream)
+//  ACE_UNUSED_ARG (passMessageDownstream_out);
 
-  DATA_CONTAINER_T& data_container_r =
-      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-  data_container_r.set (record_inout);
-  record_inout = NULL;
+//  switch (message_inout->type ())
+//  {
+//    case STREAM_SESSION_MESSAGE_END:
+//    {
+//      //// *NOTE*: (in a 'passive' scenario,) a parser thread may be waiting for
+//      ////         additional (entity) fragments to arrive
+//      ////         --> tell it to return
+//      //ACE_ASSERT (inherited::msg_queue_);
+//      //result = inherited::msg_queue_->pulse ();
+//      //if (result == -1)
+//      //  ACE_DEBUG ((LM_ERROR,
+//      //              ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
 
-  const struct BitTorrent_PeerRecord& record_r = data_container_r.get ();
+//      if (headFragment_)
+//      {
+//        headFragment_->release ();
+//        headFragment_ = NULL;
+//      } // end IF
 
-  // debug info
-  if (inherited2::trace_)
-    ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::RecordToString (record_r).c_str ())));
+//      break;
+//    }
+//    default:
+//      break;
+//  } // end SWITCH
+//}
 
-  // set new head fragment ?
-  ACE_Message_Block* message_block_p = headFragment_;
-  do
-  {
-    if (!message_block_p->cont ()) break;
-    message_block_p = message_block_p->cont ();
-  } while (true);
-  if (message_block_p != inherited::fragment_)
-  {
-    message_block_p = headFragment_;
-    // *IMPORTANT NOTE*: the fragment has already been unlinked in the previous
-    //                   call to switchBuffer()
-    headFragment_ = dynamic_cast<DataMessageType*> (inherited::fragment_);
-    ACE_ASSERT (headFragment_);
-  } // end IF
-  else
-  {
-    message_block_p = headFragment_;
-    headFragment_ = NULL;
-  } // end ELSE
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//void
+//BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+//                           TimePolicyType,
+//                           ConfigurationType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//                           UserDataType>::record (struct BitTorrent_PeerRecord*& record_inout)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::record"));
 
-  // make sure the whole fragment chain references the same data record
-  DataMessageType* message_p =
-      dynamic_cast<DataMessageType*> (headFragment_->cont ());
-  while (message_p)
-  {
-    data_container_r.increase ();
-    DATA_CONTAINER_T* data_container_2 = &data_container_r;
-    message_p->initialize (data_container_2,
-                           NULL);
-    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
-  } // end WHILE
+//  // sanity check(s)
+//  ACE_ASSERT (record_inout);
+//  ACE_ASSERT (headFragment_);
 
-  int result = inherited::put_next (message_block_p, NULL);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", continuing\n"),
-                inherited::mod_->name ()));
+//  DATA_CONTAINER_T& data_container_r =
+//      const_cast<DATA_CONTAINER_T&> (headFragment_->getR ());
+//  data_container_r.setP (record_inout);
+//  record_inout = NULL;
+//  const struct BitTorrent_PeerRecord& record_r = data_container_r.getR ();
 
-    // clean up
-    message_block_p->release ();
-  } // end IF
-}
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-void
-BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           UserDataType>::handshake (struct BitTorrent_PeerHandShake*& handshake_inout)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::handshake"));
+//  // debug info
+//  if (inherited2::trace_)
+//    ACE_DEBUG ((LM_INFO,
+//                ACE_TEXT ("%s"),
+//                ACE_TEXT (BitTorrent_Tools::RecordToString (record_r).c_str ())));
 
-  // sanity check(s)
-  ACE_ASSERT (handshake_inout);
-  ACE_ASSERT (inherited::sessionData_);
+//  // set new head fragment ?
+//  ACE_Message_Block* message_block_p = headFragment_;
+//  do
+//  {
+//    if (!message_block_p->cont ()) break;
+//    message_block_p = message_block_p->cont ();
+//  } while (true);
+//  if (message_block_p != inherited2::fragment_)
+//  {
+//    message_block_p = headFragment_;
+//    // *IMPORTANT NOTE*: the fragment has already been unlinked in the previous
+//    //                   call to switchBuffer()
+//    headFragment_ = dynamic_cast<DataMessageType*> (inherited2::fragment_);
+//    ACE_ASSERT (headFragment_);
+//  } // end IF
+//  else
+//  {
+//    message_block_p = headFragment_;
+//    headFragment_ = NULL;
+//  } // end ELSE
 
-  // debug info
-  if (inherited2::trace_)
-    ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::HandShakeToString (*handshake_inout).c_str ())));
+//  // make sure the whole fragment chain references the same data record
+//  DataMessageType* message_p =
+//      dynamic_cast<DataMessageType*> (headFragment_->cont ());
+//  while (message_p)
+//  {
+//    data_container_r.increase ();
+//    DATA_CONTAINER_T* data_container_2 = &data_container_r;
+//    message_p->initialize (data_container_2,
+//                           NULL);
+//    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
+//  } // end WHILE
 
-  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+//  int result = inherited::put_next (message_block_p, NULL);
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", continuing\n"),
+//                inherited::mod_->name ()));
 
-  // sanity check(s)
-  ACE_ASSERT (!session_data_r.handshake);
+//    // clean up
+//    message_block_p->release ();
+//  } // end IF
+//}
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename ConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//void
+//BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+//                           TimePolicyType,
+//                           ConfigurationType,
+//                           ControlMessageType,
+//                           DataMessageType,
+//                           SessionMessageType,
+//                           UserDataType>::handshake (struct BitTorrent_PeerHandShake*& handshake_inout)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::handshake"));
 
-  // *TODO*: remove type inference
-  session_data_r.handshake = handshake_inout;
+//  // sanity check(s)
+//  ACE_ASSERT (handshake_inout);
+//  ACE_ASSERT (inherited::sessionData_);
 
-  handshake_inout = NULL;
-}
+//  // debug info
+//  if (inherited2::trace_)
+//    ACE_DEBUG ((LM_INFO,
+//                ACE_TEXT ("%s"),
+//                ACE_TEXT (BitTorrent_Tools::HandShakeToString (*handshake_inout).c_str ())));
+
+//  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+//      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
+
+//  // sanity check(s)
+//  ACE_ASSERT (!session_data_r.handshake);
+
+//  // *TODO*: remove type inference
+//  session_data_r.handshake = handshake_inout;
+
+//  handshake_inout = NULL;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -439,7 +439,7 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename UserDataType>
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -453,9 +453,9 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             StatisticContainerType,
                             TimerManagerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                            UserDataType>::BitTorrent_Module_ParserH_T (ISTREAM_T* stream_in)
+                            UserDataType>::BitTorrent_Module_PeerParserH_T (ISTREAM_T* stream_in)
 #else
-                            UserDataType>::BitTorrent_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
+                            UserDataType>::BitTorrent_Module_PeerParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif
  : inherited (stream_in,
               false,
@@ -466,7 +466,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
  , headFragment_ (NULL)
  , crunch_ (true) // strip protocol data ?
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::BitTorrent_Module_ParserH_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::BitTorrent_Module_PeerParserH_T"));
 
 }
 
@@ -484,7 +484,7 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename UserDataType>
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -497,9 +497,9 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataContainerType,
                             StatisticContainerType,
                             TimerManagerType,
-                            UserDataType>::~BitTorrent_Module_ParserH_T ()
+                            UserDataType>::~BitTorrent_Module_PeerParserH_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::~BitTorrent_Module_ParserH_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::~BitTorrent_Module_PeerParserH_T"));
 
   if (headFragment_)
     headFragment_->release ();
@@ -520,7 +520,7 @@ template <ACE_SYNCH_DECL,
           typename TimerManagerType,
           typename UserDataType>
 bool
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -536,7 +536,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             UserDataType>::initialize (const ConfigurationType& configuration_in,
                                                       Stream_IAllocator* allocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.parserConfiguration);
@@ -582,7 +582,7 @@ template <ACE_SYNCH_DECL,
           typename TimerManagerType,
           typename UserDataType>
 void
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -598,7 +598,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                               bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::handleDataMessage"));
 
   DataMessageType* message_p = NULL;
   int result = -1;
@@ -760,7 +760,7 @@ template <ACE_SYNCH_DECL,
           typename TimerManagerType,
           typename UserDataType>
 void
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -776,7 +776,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                  bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::handleSessionMessage"));
 
 //  int result = -1;
 
@@ -860,7 +860,7 @@ template <ACE_SYNCH_DECL,
           typename TimerManagerType,
           typename UserDataType>
 bool
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -875,7 +875,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimerManagerType,
                             UserDataType>::collect (StatisticContainerType& data_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::collect"));
 
   // step1: initialize info container POD
   data_out.capturedFrames = 0;
@@ -912,7 +912,7 @@ template <ACE_SYNCH_DECL,
           typename TimerManagerType,
           typename UserDataType>
 void
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -927,7 +927,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimerManagerType,
                             UserDataType>::record (struct BitTorrent_PeerRecord*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::record"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::record"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
@@ -1011,7 +1011,7 @@ template <ACE_SYNCH_DECL,
           typename TimerManagerType,
           typename UserDataType>
 void
-BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
+BitTorrent_Module_PeerParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -1026,7 +1026,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimerManagerType,
                             UserDataType>::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::handshake"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParserH_T::handshake"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
@@ -1100,6 +1100,363 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   } // end WHILE
 
   // step3: push message (chain)
+  int result = inherited::put_next (message_block_p, NULL);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", continuing\n"),
+                inherited::mod_->name ()));
+
+    // clean up
+    message_block_p->release ();
+  } // end IF
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
+                           TimePolicyType,
+                           ConfigurationType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                           UserDataType>::BitTorrent_Module_TrackerParser_T (ISTREAM_T* stream_in)
+#else
+                           UserDataType>::BitTorrent_Module_TrackerParser_T (typename inherited::ISTREAM_T* stream_in)
+#endif
+ : inherited (stream_in)
+ , inherited2 (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+               COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+ , headFragment_ (NULL)
+ , crunch_ (true) // strip protocol data ?
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerParser_T::BitTorrent_Module_TrackerParser_T"));
+
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
+                           TimePolicyType,
+                           ConfigurationType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           UserDataType>::~BitTorrent_Module_TrackerParser_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerParser_T::~BitTorrent_Module_TrackerParser_T"));
+
+  if (headFragment_)
+    headFragment_->release ();
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+bool
+BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
+                           TimePolicyType,
+                           ConfigurationType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                      Stream_IAllocator* allocator_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerParser_T::initialize"));
+
+  int result = -1;
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.parserConfiguration);
+
+  if (inherited::isInitialized_)
+  {
+    ACE_ASSERT (inherited::msg_queue_);
+    result = inherited::msg_queue_->activate ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
+
+    crunch_ = true;
+
+    if (headFragment_)
+    {
+      headFragment_->release ();
+      headFragment_ = NULL;
+    } // end IF
+  } // end IF
+
+//  crunch_ = configuration_in.crunchMessages;
+  ACE_ASSERT (configuration_in.parserConfiguration);
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      inherited::msg_queue_;
+  if (!inherited2::initialize (*configuration_in.parserConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize parser driver: \"%m\", aborting\n")));
+    return false;
+  } // end IF
+
+  return inherited::initialize (configuration_in,
+                                allocator_in);
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+void
+BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
+                           TimePolicyType,
+                           ConfigurationType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           UserDataType>::handleDataMessage (DataMessageType*& message_inout,
+                                                             bool& passMessageDownstream_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerParser_T::handleDataMessage"));
+
+  DataMessageType* message_p = NULL;
+  int result = -1;
+  bool release_inbound_message = true; // message_inout
+  bool release_message = false; // message_p
+
+  // initialize return value(s)
+  passMessageDownstream_out = false;
+
+  // append the "\0\0"-sequence, as required by flex
+  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
+  *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
+  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
+
+  {
+    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+    if (!headFragment_)
+      headFragment_ = message_inout;
+    else
+    {
+      for (message_p = headFragment_;
+           message_p->cont ();
+           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
+      message_p->cont (message_inout);
+
+      //// just signal the parser (see below for an explanation)
+      //result = condition_.broadcast ();
+      //if (result == -1)
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
+      //              inherited::mod_->name ()));
+    } // end ELSE
+
+    message_p = headFragment_;
+  } // end lock scope
+  ACE_ASSERT (message_p);
+  message_inout = NULL;
+  release_inbound_message = false;
+
+  { // *NOTE*: protect scanner/parser state
+    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+    // OK: parse the message (fragment)
+
+    //  ACE_DEBUG ((LM_DEBUG,
+    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
+    //              message_p->id (),
+    //              message_p->length ()));
+
+    if (!this->parse (message_p))
+    { // *NOTE*: most probable reason: connection
+      //         has been closed --> session end
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message ID was: %d), returning\n"),
+                  inherited::mod_->name (),
+                  message_p->id ()));
+      goto error;
+    } // end IF
+    // the message fragment has been parsed successfully
+  } // end lock scope
+
+//  // *NOTE*: the message has been parsed successfully
+//  //         --> pass the data (chain) downstream
+//  {
+//    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+
+//    //// *NOTE*: new data fragments may have arrived by now
+//    ////         --> set the next head fragment ?
+//    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
+//    //if (message_2)
+//    //  message_p->cont (NULL);
+
+//    result = inherited::put_next (headFragment_, NULL);
+//    if (result == -1)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
+//                  inherited::mod_->name ()));
+
+//      // clean up
+//      headFragment_->release ();
+
+//      goto error;
+//    } // end IF
+//    headFragment_ = NULL;
+//  } // end lock scope
+
+continue_:
+error:
+  if (release_inbound_message)
+  {
+    ACE_ASSERT (message_inout);
+    message_inout->release ();
+    message_inout = NULL;
+  } // end IF
+  if (release_message)
+  {
+    ACE_ASSERT (message_p);
+    message_p->release ();
+  } // end IF
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+void
+BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
+                           TimePolicyType,
+                           ConfigurationType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerParser_T::handleSessionMessage"));
+
+  //int result = -1;
+
+  // don't care (implies yes per default, if part of a stream)
+  ACE_UNUSED_ARG (passMessageDownstream_out);
+
+  switch (message_inout->type ())
+  {
+    case STREAM_SESSION_MESSAGE_END:
+    {
+      //// *NOTE*: (in a 'passive' scenario,) a parser thread may be waiting for
+      ////         additional (entity) fragments to arrive
+      ////         --> tell it to return
+      //ACE_ASSERT (inherited::msg_queue_);
+      //result = inherited::msg_queue_->pulse ();
+      //if (result == -1)
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
+
+      if (headFragment_)
+      {
+        headFragment_->release ();
+        headFragment_ = NULL;
+      } // end IF
+
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+void
+BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
+                           TimePolicyType,
+                           ConfigurationType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           UserDataType>::record (Bencoding_Dictionary_t*& bencoding_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerParser_T::record"));
+
+  // sanity check(s)
+  ACE_ASSERT (bencoding_inout);
+  ACE_ASSERT (headFragment_);
+
+  DATA_CONTAINER_T& data_container_r =
+      const_cast<DATA_CONTAINER_T&> (headFragment_->getR ());
+  DATA_T& data_r =
+      const_cast<DATA_T&> (data_container_r.getR ());
+
+  // debug info
+  if (inherited2::trace_)
+    ACE_DEBUG ((LM_INFO,
+                ACE_TEXT ("%s"),
+                ACE_TEXT (BitTorrent_Tools::DictionaryToString (*bencoding_inout).c_str ())));
+
+  // set new head fragment ?
+  ACE_Message_Block* message_block_p = headFragment_;
+  do
+  {
+    if (!message_block_p->cont ()) break;
+    message_block_p = message_block_p->cont ();
+  } while (true);
+  if (message_block_p != inherited2::fragment_)
+  {
+    message_block_p = headFragment_;
+    // *IMPORTANT NOTE*: the fragment has already been unlinked in the previous
+    //                   call to switchBuffer()
+    headFragment_ = dynamic_cast<DataMessageType*> (inherited2::fragment_);
+    ACE_ASSERT (headFragment_);
+  } // end IF
+  else
+  {
+    message_block_p = headFragment_;
+    headFragment_ = NULL;
+  } // end ELSE
+
+  // make sure the whole fragment chain references the same data record
+  DataMessageType* message_p =
+      dynamic_cast<DataMessageType*> (headFragment_->cont ());
+  while (message_p)
+  {
+    data_container_r.increase ();
+    DATA_CONTAINER_T* data_container_2 = &data_container_r;
+    message_p->initialize (data_container_2,
+                           NULL);
+    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
+  } // end WHILE
+
   int result = inherited::put_next (message_block_p, NULL);
   if (result == -1)
   {

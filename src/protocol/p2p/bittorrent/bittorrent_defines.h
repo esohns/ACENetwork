@@ -94,5 +94,6 @@
 
 // client
 #define BITTORRENT_DEFAULT_HANDLER_MODULE_NAME            "BitTorrentHandler"
+#define BITTORRENT_DEFAULT_TRACKER_PARSER_MODULE_NAME     "TrackerParser"
 
 #endif

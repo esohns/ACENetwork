@@ -21,3 +21,8 @@
 
 #include "ace/Synch.h"
 #include "bittorrent_module_parser.h"
+
+#include "bittorrent_defines.h"
+
+const char libacenetwork_protocol_bittorrent_default_tracker_parser_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_TRACKER_PARSER_MODULE_NAME);

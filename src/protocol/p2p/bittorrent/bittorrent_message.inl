@@ -207,16 +207,6 @@ allocate:
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_TrackerMessage_T<SessionDataType,
-                            UserDataType>::BitTorrent_TrackerMessage_T (unsigned int size_in)
- : inherited (size_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
-
-}
-
-template <typename SessionDataType,
-          typename UserDataType>
-BitTorrent_TrackerMessage_T<SessionDataType,
                             UserDataType>::BitTorrent_TrackerMessage_T (const BitTorrent_TrackerMessage_T& message_in)
  : inherited (message_in)
 {
@@ -246,6 +236,36 @@ BitTorrent_TrackerMessage_T<SessionDataType,
 //  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
 //
 //}
+
+template <typename SessionDataType,
+          typename UserDataType>
+HTTP_Method_t
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::command () const
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::command"));
+
+  // sanity check(s)
+  if (!inherited::isInitialized_)
+    return HTTP_Codes::HTTP_METHOD_INVALID;
+
+  const typename inherited::DATA_T& data_container_r = inherited::getR ();
+  const struct HTTP_Record& record_r = data_container_r.getR ();
+
+  return record_r.method;
+}
+
+template <typename SessionDataType,
+          typename UserDataType>
+std::string
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::CommandToString (HTTP_Method_t method_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::CommandToString"));
+
+  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
+                                                       : HTTP_Tools::MethodToString (method_in));
+}
 
 template <typename SessionDataType,
           typename UserDataType>

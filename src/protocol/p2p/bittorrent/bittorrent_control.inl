@@ -128,11 +128,12 @@ BitTorrent_Control_T<SessionAsynchType,
   int result = -1;
   typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T* istream_connection_p = NULL;
-  struct HTTP_Record* record_p = NULL;
   std::ostringstream converter;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
       NULL;
   ACE_Message_Block* message_block_p = NULL;
+  typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
+      NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
       NULL;
   std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY);
@@ -140,7 +141,6 @@ BitTorrent_Control_T<SessionAsynchType,
   // *TODO*: support more link layer types
   int link_layers = (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
   bool use_SSL = false;
-  size_t pdu_size_i = 0;
 
   // step1: parse metainfo
   ACE_ASSERT (configuration_->parserConfiguration);
@@ -188,9 +188,9 @@ BitTorrent_Control_T<SessionAsynchType,
   remove_session = true;
 
   // step3: connect to the tracker
-  ACE_NEW_NORETURN (record_p,
-                    struct HTTP_Record ());
-  if (!record_p)
+  ACE_NEW_NORETURN (data_p,
+                    typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T ());
+  if (!data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
@@ -209,7 +209,7 @@ BitTorrent_Control_T<SessionAsynchType,
   if (!HTTP_Tools::parseURL (*(*iterator).second->string,
                              host_name_string,
 //                             tracker_address,
-                             record_p->URI,
+                             data_p->URI,
                              use_SSL))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -228,33 +228,33 @@ BitTorrent_Control_T<SessionAsynchType,
   } // end IF
 
   // step4: send request to the tracker
-  record_p->method = HTTP_Codes::HTTP_METHOD_GET;
-  record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
+  data_p->method = HTTP_Codes::HTTP_METHOD_GET;
+  data_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                         HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*configuration_->metaInfo))));
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
-                                         HTTP_Tools::URLEncode (session_state_p->peerId)));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
+                                                   HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*configuration_->metaInfo))));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
+                                                   HTTP_Tools::URLEncode (session_state_p->peerId)));
   converter << BITTORRENT_DEFAULT_PORT;
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PORT_HEADER),
-                                         converter.str ()));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PORT_HEADER),
+                                                   converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << 0;
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_UPLOADED_HEADER),
-                                         converter.str ()));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_UPLOADED_HEADER),
+                                                   converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BitTorrent_Tools::MetaInfoToLength (*configuration_->metaInfo);
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
-                                         converter.str ()));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
+                                                   converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << 1;
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
-                                         converter.str ()));
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
-                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
+                                                   converter.str ()));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
+                                                   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
   interface_identifier = Net_Common_Tools::getDefaultInterface (link_layers);
   if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
                                                        external_ip_address))
@@ -274,13 +274,13 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT (interface_identifier.c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
   else
-    record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
-                                           Net_Common_Tools::IPAddressToString (external_ip_address).c_str ()));
+    data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
+                                                     Net_Common_Tools::IPAddressToString (external_ip_address).c_str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS;
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_NUMWANT_HEADER),
-                                         converter.str ()));
+  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_NUMWANT_HEADER),
+                                                   converter.str ()));
   if (session_state_p->key.empty ())
     session_state_p->key = BitTorrent_Tools::generateKey ();
   //record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_KEY_HEADER),
@@ -294,19 +294,19 @@ BitTorrent_Control_T<SessionAsynchType,
   user_agent += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION);
 #endif // HAVE_CONFIG_H
   if (!user_agent.empty ())
-    record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
-                                              user_agent));
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
-                                            host_name_string));
+    data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
+                                                        user_agent));
+  data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
+                                                      host_name_string));
 //                                            HTTP_Tools::IPAddress2HostName (tracker_address).c_str ()));
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
-                                            ACE_TEXT_ALWAYS_CHAR ("*/*")));
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
-                                            ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
+  data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
+                                                      ACE_TEXT_ALWAYS_CHAR ("*/*")));
+  data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
+                                                      ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
 
   // *IMPORTANT NOTE*: fire-and-forget API (record_p)
   ACE_NEW_NORETURN (data_container_p,
-                    typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T (record_p,
+                    typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T (data_p,
                                                                                                      true));
   if (!data_container_p)
   {
@@ -314,19 +314,15 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (!record_p);
+  ACE_ASSERT (!data_p);
 
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->trackerConnectionConfiguration);
   ACE_ASSERT (configuration_->trackerConnectionConfiguration->allocatorConfiguration);
 
-  pdu_size_i =
-    configuration_->trackerConnectionConfiguration->allocatorConfiguration->defaultBufferSize;// +
-//    configuration_->trackerConnectionConfiguration->allocatorConfiguration->paddingBytes;
-
 allocate:
   message_p =
-    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerConnectionConfiguration->messageAllocator->malloc (pdu_size_i));
+    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerConnectionConfiguration->messageAllocator->malloc (configuration_->trackerConnectionConfiguration->allocatorConfiguration->defaultBufferSize));
   // keep retrying ?
   if (!message_p &&
       !configuration_->trackerConnectionConfiguration->messageAllocator->block ())
@@ -392,8 +388,8 @@ error:
     iconnection_p->decrease ();
   if (isession_p)
     delete isession_p;
-  if (record_p)
-    delete record_p;
+  if (data_p)
+    delete data_p;
   if (data_container_p)
     data_container_p->decrease ();
   if (message_p)

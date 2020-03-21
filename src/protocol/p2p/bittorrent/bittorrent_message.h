@@ -36,19 +36,19 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-//template <typename SessionDataType,
-//          typename UserDataType>
-//class BitTorrent_SessionMessage_T;
+template <typename SessionDataType,
+          typename UserDataType>
+class BitTorrent_SessionMessage_T;
 //template <ACE_SYNCH_DECL,
 //          typename AllocatorConfigurationType,
 //          typename ControlMessageType,
 //          typename DataMessageType,
 //          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
-//template <ACE_SYNCH_DECL,
-//          typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 struct BitTorrent_PeerMessageData
 {
@@ -70,6 +70,27 @@ struct BitTorrent_PeerMessageData
   struct BitTorrent_PeerHandShake* handShakeRecord;
   struct BitTorrent_PeerRecord*    peerRecord;
 };
+
+//struct BitTorrent_TrackerMessageData
+//{
+//  BitTorrent_TrackerMessageData ()
+//   : HTTPRecord (NULL)
+//   , trackerRecord (NULL)
+//  {}
+//  ~BitTorrent_TrackerMessageData ()
+//  {
+//    if (HTTPRecord)
+//      delete HTTPRecord;
+//    if (trackerRecord)
+//      delete trackerRecord;
+//  }
+//  inline void operator+= (BitTorrent_TrackerMessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+//  inline operator struct HTTP_Record& () const { ACE_ASSERT (HTTPRecord); return *HTTPRecord; }
+//  inline operator Bencoding_Dictionary_t& () const { ACE_ASSERT (trackerRecord); return *trackerRecord; }
+
+//  struct HTTP_Record*     HTTPRecord;
+//  Bencoding_Dictionary_t* trackerRecord;
+//};
 
 template <typename SessionDataType, // *NOTE*: this implements Common_IReferenceCount !
           typename UserDataType>
@@ -151,13 +172,15 @@ class BitTorrent_Message_T
 template <typename SessionDataType, // *NOTE*: this implements Common_IReferenceCount !
           typename UserDataType>
 class BitTorrent_TrackerMessage_T
- : public HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
-                         enum Stream_MessageType>
+ : public Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
+                                   struct Common_FlexParserAllocatorConfiguration,
+                                   enum Stream_MessageType,
+                                   HTTP_Method_t>
 {
-//  typedef Stream_DataMessageBase_T<xmlDoc,
-//                                   Stream_CommandType_t> inherited;
-  typedef HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
-                         enum Stream_MessageType> inherited;
+  typedef Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
+                                   struct Common_FlexParserAllocatorConfiguration,
+                                   enum Stream_MessageType,
+                                   HTTP_Method_t> inherited;
 
   // grant access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -172,21 +195,22 @@ class BitTorrent_TrackerMessage_T
   //                                                                           UserDataType>,
   //                                               BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
   //                                                                           UserDataType> >;
-  //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-  //                                             struct Common_FlexParserAllocatorConfiguration,
-  //                                             Stream_ControlMessage_T<enum Stream_ControlMessageType,
-  //                                                                     struct Common_FlexParserAllocatorConfiguration,
-  //                                                                     BitTorrent_TrackerMessage_T<SessionDataType,
-  //                                                                                                 UserDataType>,
-  //                                                                     BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
-  //                                                                                                 UserDataType> >,
-  //                                             BitTorrent_TrackerMessage_T<SessionDataType,
-  //                                                                         UserDataType>,
-  //                                             BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
-  //                                                                         UserDataType> >;
+  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+                                               struct Common_FlexParserAllocatorConfiguration,
+                                               Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                                                       BitTorrent_TrackerMessage_T<SessionDataType,
+                                                                                                   UserDataType>,
+                                                                       struct Common_FlexParserAllocatorConfiguration>,
+                                               BitTorrent_TrackerMessage_T<SessionDataType,
+                                                                           UserDataType>,
+                                               BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
+                                                                           UserDataType> >;
 
  public:
-  BitTorrent_TrackerMessage_T (unsigned int); // size
+  // convenient types
+//  typedef HTTP_Method_t COMMAND_T;
+//  typedef Stream_DataBase_T<struct BitTorrent_TrackerMessageData> DATA_T;
+
   // *NOTE*: to be used by message allocators
   BitTorrent_TrackerMessage_T (Stream_SessionId_t,
                                ACE_Data_Block*,    // data block to use
@@ -194,6 +218,10 @@ class BitTorrent_TrackerMessage_T
                                bool = true);       // increment running message counter ?
   //BitTorrent_TrackerMessage_T (ACE_Allocator*); // message allocator
   inline virtual ~BitTorrent_TrackerMessage_T () {}
+
+  virtual HTTP_Method_t command () const; // return value: message type
+  static std::string CommandToString (HTTP_Method_t);
+//  using inherited::initialize;
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
