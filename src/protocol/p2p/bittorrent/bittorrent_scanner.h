@@ -2,12 +2,13 @@
 #define BitTorrent_Scanner_HEADER_H 1
 #define BitTorrent_Scanner_IN_HEADER 1
 
-#include "bittorrent_common.h"
-#include "bittorrent_exports.h"
-#include <ace/Synch.h>
-#include "bittorrent_iparser.h"
+#line 2 "scanner.l"
+//#include "bittorrent_common.h"
+//#include "bittorrent_exports.h"
+//#include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 //#undef PARSER_HEADER_H
+#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 
 typedef void* yyscan_t;
@@ -51,7 +52,7 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 3
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -72,71 +73,231 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
 /* %endif */
 
 /* %if-c-only */
-    #define yy_create_buffer BitTorrent_Scanner__create_buffer
+#ifdef yy_create_buffer
+#define BitTorrent_Scanner__create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer BitTorrent_Scanner__create_buffer
+#endif
 
-    #define yy_delete_buffer BitTorrent_Scanner__delete_buffer
+    
+#ifdef yy_delete_buffer
+#define BitTorrent_Scanner__delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer BitTorrent_Scanner__delete_buffer
+#endif
 
-    #define yy_scan_buffer BitTorrent_Scanner__scan_buffer
+    
+#ifdef yy_scan_buffer
+#define BitTorrent_Scanner__scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer BitTorrent_Scanner__scan_buffer
+#endif
 
-    #define yy_scan_string BitTorrent_Scanner__scan_string
+    
+#ifdef yy_scan_string
+#define BitTorrent_Scanner__scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string BitTorrent_Scanner__scan_string
+#endif
 
-    #define yy_scan_bytes BitTorrent_Scanner__scan_bytes
+    
+#ifdef yy_scan_bytes
+#define BitTorrent_Scanner__scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes BitTorrent_Scanner__scan_bytes
+#endif
 
-    #define yy_init_buffer BitTorrent_Scanner__init_buffer
+    
+#ifdef yy_init_buffer
+#define BitTorrent_Scanner__init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer BitTorrent_Scanner__init_buffer
+#endif
 
-    #define yy_flush_buffer BitTorrent_Scanner__flush_buffer
+    
+#ifdef yy_flush_buffer
+#define BitTorrent_Scanner__flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer BitTorrent_Scanner__flush_buffer
+#endif
 
-    #define yy_load_buffer_state BitTorrent_Scanner__load_buffer_state
+    
+#ifdef yy_load_buffer_state
+#define BitTorrent_Scanner__load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state BitTorrent_Scanner__load_buffer_state
+#endif
 
-    #define yy_switch_to_buffer BitTorrent_Scanner__switch_to_buffer
+    
+#ifdef yy_switch_to_buffer
+#define BitTorrent_Scanner__switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer BitTorrent_Scanner__switch_to_buffer
+#endif
 
-    #define yypush_buffer_state BitTorrent_Scanner_push_buffer_state
+    
+#ifdef yypush_buffer_state
+#define BitTorrent_Scanner_push_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state BitTorrent_Scanner_push_buffer_state
+#endif
 
-    #define yypop_buffer_state BitTorrent_Scanner_pop_buffer_state
+    
+#ifdef yypop_buffer_state
+#define BitTorrent_Scanner_pop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state BitTorrent_Scanner_pop_buffer_state
+#endif
 
-    #define yyensure_buffer_stack BitTorrent_Scanner_ensure_buffer_stack
+    
+#ifdef yyensure_buffer_stack
+#define BitTorrent_Scanner_ensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack BitTorrent_Scanner_ensure_buffer_stack
+#endif
 
-    #define yylex BitTorrent_Scanner_lex
+    
+#ifdef yylex
+#define BitTorrent_Scanner_lex_ALREADY_DEFINED
+#else
+#define yylex BitTorrent_Scanner_lex
+#endif
 
-    #define yyrestart BitTorrent_Scanner_restart
+    
+#ifdef yyrestart
+#define BitTorrent_Scanner_restart_ALREADY_DEFINED
+#else
+#define yyrestart BitTorrent_Scanner_restart
+#endif
 
-    #define yylex_init BitTorrent_Scanner_lex_init
+    
+#ifdef yylex_init
+#define BitTorrent_Scanner_lex_init_ALREADY_DEFINED
+#else
+#define yylex_init BitTorrent_Scanner_lex_init
+#endif
 
-    #define yylex_init_extra BitTorrent_Scanner_lex_init_extra
+    
+#ifdef yylex_init_extra
+#define BitTorrent_Scanner_lex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra BitTorrent_Scanner_lex_init_extra
+#endif
 
-    #define yylex_destroy BitTorrent_Scanner_lex_destroy
+    
+#ifdef yylex_destroy
+#define BitTorrent_Scanner_lex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy BitTorrent_Scanner_lex_destroy
+#endif
 
-    #define yyget_debug BitTorrent_Scanner_get_debug
+    
+#ifdef yyget_debug
+#define BitTorrent_Scanner_get_debug_ALREADY_DEFINED
+#else
+#define yyget_debug BitTorrent_Scanner_get_debug
+#endif
 
-    #define yyset_debug BitTorrent_Scanner_set_debug
+    
+#ifdef yyset_debug
+#define BitTorrent_Scanner_set_debug_ALREADY_DEFINED
+#else
+#define yyset_debug BitTorrent_Scanner_set_debug
+#endif
 
-    #define yyget_extra BitTorrent_Scanner_get_extra
+    
+#ifdef yyget_extra
+#define BitTorrent_Scanner_get_extra_ALREADY_DEFINED
+#else
+#define yyget_extra BitTorrent_Scanner_get_extra
+#endif
 
-    #define yyset_extra BitTorrent_Scanner_set_extra
+    
+#ifdef yyset_extra
+#define BitTorrent_Scanner_set_extra_ALREADY_DEFINED
+#else
+#define yyset_extra BitTorrent_Scanner_set_extra
+#endif
 
-    #define yyget_in BitTorrent_Scanner_get_in
+    
+#ifdef yyget_in
+#define BitTorrent_Scanner_get_in_ALREADY_DEFINED
+#else
+#define yyget_in BitTorrent_Scanner_get_in
+#endif
 
-    #define yyset_in BitTorrent_Scanner_set_in
+    
+#ifdef yyset_in
+#define BitTorrent_Scanner_set_in_ALREADY_DEFINED
+#else
+#define yyset_in BitTorrent_Scanner_set_in
+#endif
 
-    #define yyget_out BitTorrent_Scanner_get_out
+    
+#ifdef yyget_out
+#define BitTorrent_Scanner_get_out_ALREADY_DEFINED
+#else
+#define yyget_out BitTorrent_Scanner_get_out
+#endif
 
-    #define yyset_out BitTorrent_Scanner_set_out
+    
+#ifdef yyset_out
+#define BitTorrent_Scanner_set_out_ALREADY_DEFINED
+#else
+#define yyset_out BitTorrent_Scanner_set_out
+#endif
 
-    #define yyget_leng BitTorrent_Scanner_get_leng
+    
+#ifdef yyget_leng
+#define BitTorrent_Scanner_get_leng_ALREADY_DEFINED
+#else
+#define yyget_leng BitTorrent_Scanner_get_leng
+#endif
 
-    #define yyget_text BitTorrent_Scanner_get_text
+    
+#ifdef yyget_text
+#define BitTorrent_Scanner_get_text_ALREADY_DEFINED
+#else
+#define yyget_text BitTorrent_Scanner_get_text
+#endif
 
-    #define yyget_lineno BitTorrent_Scanner_get_lineno
+    
+#ifdef yyget_lineno
+#define BitTorrent_Scanner_get_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno BitTorrent_Scanner_get_lineno
+#endif
 
-    #define yyset_lineno BitTorrent_Scanner_set_lineno
+    
+#ifdef yyset_lineno
+#define BitTorrent_Scanner_set_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno BitTorrent_Scanner_set_lineno
+#endif
 
+    
+        
+#ifdef yyget_column
+#define BitTorrent_Scanner_get_column_ALREADY_DEFINED
+#else
+#define yyget_column BitTorrent_Scanner_get_column
+#endif
 
-        #define yyget_column BitTorrent_Scanner_get_column
+        
+#ifdef yyset_column
+#define BitTorrent_Scanner_set_column_ALREADY_DEFINED
+#else
+#define yyset_column BitTorrent_Scanner_set_column
+#endif
 
-        #define yyset_column BitTorrent_Scanner_set_column
+    
+    
+#ifdef yywrap
+#define BitTorrent_Scanner_wrap_ALREADY_DEFINED
+#else
+#define yywrap BitTorrent_Scanner_wrap
+#endif
 
-
-    #define yywrap BitTorrent_Scanner_wrap
 
 /* %endif */
 
@@ -145,14 +306,30 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
 
 
 
-    #define yyalloc BitTorrent_Scanner_alloc
+#ifdef yyalloc
+#define BitTorrent_Scanner_alloc_ALREADY_DEFINED
+#else
+#define yyalloc BitTorrent_Scanner_alloc
+#endif
 
-    #define yyrealloc BitTorrent_Scanner_realloc
+    
+#ifdef yyrealloc
+#define BitTorrent_Scanner_realloc_ALREADY_DEFINED
+#else
+#define yyrealloc BitTorrent_Scanner_realloc
+#endif
 
-    #define yyfree BitTorrent_Scanner_free
+    
+#ifdef yyfree
+#define BitTorrent_Scanner_free_ALREADY_DEFINED
+#else
+#define yyfree BitTorrent_Scanner_free
+#endif
+
 
 
 /* %if-c-only */
+
 
 /* %endif */
 
@@ -184,7 +361,7 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types.
+ * if you want the limit (max/min) macros for int types. 
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -201,7 +378,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t;
+typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 
@@ -234,12 +411,17 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
 /* %endif */
 
+/* begin standard C++ headers. */
 /* %if-c++-only */
 /* %endif */
 
@@ -284,16 +466,16 @@ typedef void* yyscan_t;
 
 
 
-///* For convenience, these vars (plus the bison vars far below)
-//   are macros in the reentrant scanner. */
-//#define yyin yyg->yyin_r
-//#define yyout yyg->yyout_r
-//#define yyextra yyg->yyextra_r
-//#define yyleng yyg->yyleng_r
-//#define yytext yyg->yytext_r
-//#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
-//#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
-//#define yy_flex_debug yyg->yy_flex_debug_r
+/* For convenience, these vars (plus the bison vars far below)
+   are macros in the reentrant scanner. */
+#define yyin yyg->yyin_r
+#define yyout yyg->yyout_r
+#define yyextra yyg->yyextra_r
+#define yyleng yyg->yyleng_r
+#define yytext yyg->yytext_r
+#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
+#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
+#define yy_flex_debug yyg->yy_flex_debug_r
 
 
 
@@ -350,59 +532,59 @@ typedef size_t yy_size_t;
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
-  {
+	{
 /* %if-c-only */
-  FILE *yy_input_file;
+	FILE *yy_input_file;
 /* %endif */
 
 /* %if-c++-only */
 /* %endif */
 
 
-  char *yy_ch_buf;		/* input buffer */
-  char *yy_buf_pos;		/* current position in input buffer */
+	char *yy_ch_buf;		/* input buffer */
+	char *yy_buf_pos;		/* current position in input buffer */
 
-  /* Size of input buffer in bytes, not including room for EOB
-   * characters.
-   */
-  int yy_buf_size;
+	/* Size of input buffer in bytes, not including room for EOB
+	 * characters.
+	 */
+	int yy_buf_size;
 
-  /* Number of characters read into yy_ch_buf, not including EOB
-   * characters.
-   */
-  int yy_n_chars;
+	/* Number of characters read into yy_ch_buf, not including EOB
+	 * characters.
+	 */
+	int yy_n_chars;
 
-  /* Whether we "own" the buffer - i.e., we know we created it,
-   * and can realloc() it to grow it, and should free() it to
-   * delete it.
-   */
-  int yy_is_our_buffer;
+	/* Whether we "own" the buffer - i.e., we know we created it,
+	 * and can realloc() it to grow it, and should free() it to
+	 * delete it.
+	 */
+	int yy_is_our_buffer;
 
-  /* Whether this is an "interactive" input source; if so, and
-   * if we're using stdio for input, then we want to use getc()
-   * instead of fread(), to make sure we stop fetching input after
-   * each newline.
-   */
-  int yy_is_interactive;
+	/* Whether this is an "interactive" input source; if so, and
+	 * if we're using stdio for input, then we want to use getc()
+	 * instead of fread(), to make sure we stop fetching input after
+	 * each newline.
+	 */
+	int yy_is_interactive;
 
-  /* Whether we're considered to be at the beginning of a line.
-   * If so, '^' rules will be active on the next match, otherwise
-   * not.
-   */
-  int yy_at_bol;
+	/* Whether we're considered to be at the beginning of a line.
+	 * If so, '^' rules will be active on the next match, otherwise
+	 * not.
+	 */
+	int yy_at_bol;
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
 
 
-  /* Whether to try to fill the input buffer when we reach the
-   * end of it.
-   */
-  int yy_fill_buffer;
+	/* Whether to try to fill the input buffer when we reach the
+	 * end of it.
+	 */
+	int yy_fill_buffer;
 
-  int yy_buffer_status;
+	int yy_buffer_status;
 
-  };
+	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 /* %if-c-only Standard (non-C++) definition */
@@ -419,25 +601,25 @@ struct yy_buffer_state
 
 /* %endif */
 
-void BitTorrent_Scanner_restart ( FILE *input_file , yyscan_t yyscanner );
-void BitTorrent_Scanner__switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-YY_BUFFER_STATE BitTorrent_Scanner__create_buffer ( FILE *file, int size , yyscan_t yyscanner );
-void BitTorrent_Scanner__delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void BitTorrent_Scanner__flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void BitTorrent_Scanner_push_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-void BitTorrent_Scanner_pop_buffer_state ( yyscan_t yyscanner );
+void yyrestart ( FILE *input_file , yyscan_t yyscanner );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size , yyscan_t yyscanner );
+void yy_delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yy_flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+void yypop_buffer_state ( yyscan_t yyscanner );
 
 
 
-YY_BUFFER_STATE BitTorrent_Scanner__scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
-YY_BUFFER_STATE BitTorrent_Scanner__scan_string ( const char *yy_str , yyscan_t yyscanner );
-YY_BUFFER_STATE BitTorrent_Scanner__scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
 
 /* %endif */
 
-void *BitTorrent_Scanner_alloc ( yy_size_t , yyscan_t yyscanner );
-void *BitTorrent_Scanner_realloc ( void *, yy_size_t , yyscan_t yyscanner );
-void BitTorrent_Scanner_free ( void * , yyscan_t yyscanner );
+void *yyalloc ( yy_size_t , yyscan_t yyscanner );
+void *yyrealloc ( void *, yy_size_t , yyscan_t yyscanner );
+void yyfree ( void * , yyscan_t yyscanner );
 
 
 
@@ -484,7 +666,7 @@ void BitTorrent_Scanner_free ( void * , yyscan_t yyscanner );
  * The user has a chance to override it with an option.
  */
 /* %if-c-only */
-//#include <unistd.h>
+#include <unistd.h>
 /* %endif */
 /* %if-c++-only */
 /* %endif */
@@ -509,9 +691,9 @@ void BitTorrent_Scanner_free ( void * , yyscan_t yyscanner );
 
 
 
-int BitTorrent_Scanner_lex_init (yyscan_t* scanner);
+int yylex_init (yyscan_t* scanner);
 
-int BitTorrent_Scanner_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
+int yylex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
 
 /* %endif */
 
@@ -521,66 +703,66 @@ int BitTorrent_Scanner_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* sc
    These are made visible to non-reentrant scanners for convenience. */
 
 
-int BitTorrent_Scanner_lex_destroy ( yyscan_t yyscanner );
+int yylex_destroy ( yyscan_t yyscanner );
 
 
 
-int BitTorrent_Scanner_get_debug ( yyscan_t yyscanner );
+int yyget_debug ( yyscan_t yyscanner );
 
 
 
-void BitTorrent_Scanner_set_debug ( int debug_flag , yyscan_t yyscanner );
+void yyset_debug ( int debug_flag , yyscan_t yyscanner );
 
 
 
-YY_EXTRA_TYPE BitTorrent_Scanner_get_extra ( yyscan_t yyscanner );
+YY_EXTRA_TYPE yyget_extra ( yyscan_t yyscanner );
 
 
 
-void BitTorrent_Scanner_set_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
+void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
 
 
 
-FILE *BitTorrent_Scanner_get_in ( yyscan_t yyscanner );
+FILE *yyget_in ( yyscan_t yyscanner );
 
 
 
-void BitTorrent_Scanner_set_in  ( FILE * _in_str , yyscan_t yyscanner );
+void yyset_in  ( FILE * _in_str , yyscan_t yyscanner );
 
 
 
-FILE *BitTorrent_Scanner_get_out ( yyscan_t yyscanner );
+FILE *yyget_out ( yyscan_t yyscanner );
 
 
 
-void BitTorrent_Scanner_set_out  ( FILE * _out_str , yyscan_t yyscanner );
+void yyset_out  ( FILE * _out_str , yyscan_t yyscanner );
 
 
 
-      int BitTorrent_Scanner_get_leng ( yyscan_t yyscanner );
+			int yyget_leng ( yyscan_t yyscanner );
 
 
 
-char *BitTorrent_Scanner_get_text ( yyscan_t yyscanner );
+char *yyget_text ( yyscan_t yyscanner );
 
 
 
-int BitTorrent_Scanner_get_lineno ( yyscan_t yyscanner );
+int yyget_lineno ( yyscan_t yyscanner );
 
 
 
-void BitTorrent_Scanner_set_lineno ( int _line_number , yyscan_t yyscanner );
-
-
-
-
-int BitTorrent_Scanner_get_column  ( yyscan_t yyscanner );
+void yyset_lineno ( int _line_number , yyscan_t yyscanner );
 
 
 
 
+int yyget_column  ( yyscan_t yyscanner );
 
-void BitTorrent_Scanner_set_column ( int _column_no , yyscan_t yyscanner );
+
+
+
+
+void yyset_column ( int _column_no , yyscan_t yyscanner );
 
 
 
@@ -593,9 +775,9 @@ void BitTorrent_Scanner_set_column ( int _column_no , yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int BitTorrent_Scanner_wrap ( yyscan_t yyscanner );
+extern "C" int yywrap ( yyscan_t yyscanner );
 #else
-extern int BitTorrent_Scanner_wrap ( yyscan_t yyscanner );
+extern int yywrap ( yyscan_t yyscanner );
 #endif
 #endif
 
@@ -671,9 +853,9 @@ static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
 
 
 
-extern int BitTorrent_Scanner_lex (yyscan_t yyscanner);
+extern int yylex (yyscan_t yyscanner);
 
-#define YY_DECL int BitTorrent_Scanner_lex (yyscan_t yyscanner)
+#define YY_DECL int yylex (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -711,6 +893,151 @@ extern int BitTorrent_Scanner_lex (yyscan_t yyscanner);
 #ifdef YY_DECL_IS_OURS
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
+#endif
+
+#ifndef BitTorrent_Scanner__create_buffer_ALREADY_DEFINED
+#undef yy_create_buffer
+#endif
+#ifndef BitTorrent_Scanner__delete_buffer_ALREADY_DEFINED
+#undef yy_delete_buffer
+#endif
+#ifndef BitTorrent_Scanner__scan_buffer_ALREADY_DEFINED
+#undef yy_scan_buffer
+#endif
+#ifndef BitTorrent_Scanner__scan_string_ALREADY_DEFINED
+#undef yy_scan_string
+#endif
+#ifndef BitTorrent_Scanner__scan_bytes_ALREADY_DEFINED
+#undef yy_scan_bytes
+#endif
+#ifndef BitTorrent_Scanner__init_buffer_ALREADY_DEFINED
+#undef yy_init_buffer
+#endif
+#ifndef BitTorrent_Scanner__flush_buffer_ALREADY_DEFINED
+#undef yy_flush_buffer
+#endif
+#ifndef BitTorrent_Scanner__load_buffer_state_ALREADY_DEFINED
+#undef yy_load_buffer_state
+#endif
+#ifndef BitTorrent_Scanner__switch_to_buffer_ALREADY_DEFINED
+#undef yy_switch_to_buffer
+#endif
+#ifndef BitTorrent_Scanner_push_buffer_state_ALREADY_DEFINED
+#undef yypush_buffer_state
+#endif
+#ifndef BitTorrent_Scanner_pop_buffer_state_ALREADY_DEFINED
+#undef yypop_buffer_state
+#endif
+#ifndef BitTorrent_Scanner_ensure_buffer_stack_ALREADY_DEFINED
+#undef yyensure_buffer_stack
+#endif
+#ifndef BitTorrent_Scanner_lex_ALREADY_DEFINED
+#undef yylex
+#endif
+#ifndef BitTorrent_Scanner_restart_ALREADY_DEFINED
+#undef yyrestart
+#endif
+#ifndef BitTorrent_Scanner_lex_init_ALREADY_DEFINED
+#undef yylex_init
+#endif
+#ifndef BitTorrent_Scanner_lex_init_extra_ALREADY_DEFINED
+#undef yylex_init_extra
+#endif
+#ifndef BitTorrent_Scanner_lex_destroy_ALREADY_DEFINED
+#undef yylex_destroy
+#endif
+#ifndef BitTorrent_Scanner_get_debug_ALREADY_DEFINED
+#undef yyget_debug
+#endif
+#ifndef BitTorrent_Scanner_set_debug_ALREADY_DEFINED
+#undef yyset_debug
+#endif
+#ifndef BitTorrent_Scanner_get_extra_ALREADY_DEFINED
+#undef yyget_extra
+#endif
+#ifndef BitTorrent_Scanner_set_extra_ALREADY_DEFINED
+#undef yyset_extra
+#endif
+#ifndef BitTorrent_Scanner_get_in_ALREADY_DEFINED
+#undef yyget_in
+#endif
+#ifndef BitTorrent_Scanner_set_in_ALREADY_DEFINED
+#undef yyset_in
+#endif
+#ifndef BitTorrent_Scanner_get_out_ALREADY_DEFINED
+#undef yyget_out
+#endif
+#ifndef BitTorrent_Scanner_set_out_ALREADY_DEFINED
+#undef yyset_out
+#endif
+#ifndef BitTorrent_Scanner_get_leng_ALREADY_DEFINED
+#undef yyget_leng
+#endif
+#ifndef BitTorrent_Scanner_get_text_ALREADY_DEFINED
+#undef yyget_text
+#endif
+#ifndef BitTorrent_Scanner_get_lineno_ALREADY_DEFINED
+#undef yyget_lineno
+#endif
+#ifndef BitTorrent_Scanner_set_lineno_ALREADY_DEFINED
+#undef yyset_lineno
+#endif
+#ifndef BitTorrent_Scanner_get_column_ALREADY_DEFINED
+#undef yyget_column
+#endif
+#ifndef BitTorrent_Scanner_set_column_ALREADY_DEFINED
+#undef yyset_column
+#endif
+#ifndef BitTorrent_Scanner_wrap_ALREADY_DEFINED
+#undef yywrap
+#endif
+#ifndef BitTorrent_Scanner_get_lval_ALREADY_DEFINED
+#undef yyget_lval
+#endif
+#ifndef BitTorrent_Scanner_set_lval_ALREADY_DEFINED
+#undef yyset_lval
+#endif
+#ifndef BitTorrent_Scanner_get_lloc_ALREADY_DEFINED
+#undef yyget_lloc
+#endif
+#ifndef BitTorrent_Scanner_set_lloc_ALREADY_DEFINED
+#undef yyset_lloc
+#endif
+#ifndef BitTorrent_Scanner_alloc_ALREADY_DEFINED
+#undef yyalloc
+#endif
+#ifndef BitTorrent_Scanner_realloc_ALREADY_DEFINED
+#undef yyrealloc
+#endif
+#ifndef BitTorrent_Scanner_free_ALREADY_DEFINED
+#undef yyfree
+#endif
+#ifndef BitTorrent_Scanner_text_ALREADY_DEFINED
+#undef yytext
+#endif
+#ifndef BitTorrent_Scanner_leng_ALREADY_DEFINED
+#undef yyleng
+#endif
+#ifndef BitTorrent_Scanner_in_ALREADY_DEFINED
+#undef yyin
+#endif
+#ifndef BitTorrent_Scanner_out_ALREADY_DEFINED
+#undef yyout
+#endif
+#ifndef BitTorrent_Scanner__flex_debug_ALREADY_DEFINED
+#undef yy_flex_debug
+#endif
+#ifndef BitTorrent_Scanner_lineno_ALREADY_DEFINED
+#undef yylineno
+#endif
+#ifndef BitTorrent_Scanner_tables_fload_ALREADY_DEFINED
+#undef yytables_fload
+#endif
+#ifndef BitTorrent_Scanner_tables_destroy_ALREADY_DEFINED
+#undef yytables_destroy
+#endif
+#ifndef BitTorrent_Scanner_TABLES_NAME_ALREADY_DEFINED
+#undef yyTABLES_NAME
 #endif
 
 

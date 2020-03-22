@@ -577,23 +577,24 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read ()
                 pdu_size_i));
     return false;
   } // end IF
+  message_block_p->size (inherited::configuration_->allocatorConfiguration->defaultBufferSize);
 
   // start (asynchronous) read
 receive:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   int result =
-    inputStream_.readv (*message_block_p,                     // buffer
-                        pdu_size_i,                           // bytes to read
-                        NULL,                                 // ACT
-                        0,                                    // priority
-                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+    inputStream_.readv (*message_block_p,                                                     // buffer
+                        inherited::configuration_->allocatorConfiguration->defaultBufferSize, // bytes to read
+                        NULL,                                                                 // ACT
+                        0,                                                                    // priority
+                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                                 // signal
 #else
   int result =
-    inputStream_.read (*message_block_p,                     // buffer
-                       pdu_size_i,                           // bytes to read
-                       NULL,                                 // ACT
-                       0,                                    // priority
-                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+    inputStream_.read (*message_block_p,                                                     // buffer
+                       inherited::configuration_->allocatorConfiguration->defaultBufferSize, // bytes to read
+                       NULL,                                                                 // ACT
+                       0,                                                                    // priority
+                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                                 // signal
 #endif // ACE_WIN32 || ACE_WIN64
   if (unlikely (result == -1))
   {

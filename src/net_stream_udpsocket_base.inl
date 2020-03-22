@@ -398,22 +398,24 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // read a datagram from the socket
   // *TODO*: remove type inferences
-  buffer_p =
-    allocateMessage (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize);
+  size_t pdu_size_i =
+    configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize +
+    configuration_r.streamConfiguration->allocatorConfiguration_.paddingBytes;
+  buffer_p = this->allocateMessage (pdu_size_i);
   if (unlikely (!buffer_p))
   { ACE_ASSERT (configuration_r.messageAllocator);
     if (configuration_r.messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize));
+                  pdu_size_i));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize,
+                      ACE_Message_Block (pdu_size_i,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -428,17 +430,19 @@ Net_StreamUDPSocketBase_T<HandlerType,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory (%u byte(s), aborting\n"),
-                  configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize));
+                  pdu_size_i));
       return -1;
     } // end IF
   } // end IF
   ACE_ASSERT (buffer_p);
+  buffer_p->size (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize);
 
   // read a datagram from the socket
-  bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),   // buffer
-                                          buffer_p->capacity (), // buffer size
-                                          peer_address,          // peer address
-                                          0);                    // flags
+  bytes_received =
+    inherited::peer_.recv (buffer_p->wr_ptr (),   // buffer
+                           configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize, // buffer size
+                           peer_address,          // peer address
+                           0);                    // flags
   //bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
   //                                        inherited2::configuration_->PDUSize, // n
   //                                        0,                                   // flags
@@ -1551,22 +1555,24 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 
   // read a datagram from the socket
   // *TODO*: remove type inferences
-  buffer_p =
-    allocateMessage (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize);
+  size_t pdu_size_i =
+    configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize +
+    configuration_r.streamConfiguration->allocatorConfiguration_.paddingBytes;
+  buffer_p = this->allocateMessage (pdu_size_i);
   if (unlikely (!buffer_p))
   { ACE_ASSERT (configuration_r.messageAllocator);
     if (configuration_r.messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize));
+                  pdu_size_i));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize,
+                      ACE_Message_Block (pdu_size_i,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -1581,18 +1587,19 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory (%u byte(s), aborting\n"),
-                  configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize));
+                  pdu_size_i));
       return -1;
     } // end IF
   } // end IF
   ACE_ASSERT (buffer_p);
+  buffer_p->size (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize);
 
   // read a datagram from the socket
   bytes_received =
-    inherited::peer_.recv (buffer_p->wr_ptr (),   // buffer
-                           buffer_p->capacity (), // buffer size
-                           0,                     // flags
-                           NULL);                 // timeout
+    inherited::peer_.recv (buffer_p->wr_ptr (),                                                            // buffer
+                           configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize, // buffer size
+                           0,                                                                              // flags
+                           NULL);                                                                          // timeout
   switch (bytes_received)
   {
     case -1:
@@ -2658,22 +2665,24 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   ACE_ASSERT (configuration_r.streamConfiguration);
 
   // read a datagram from the socket
-  buffer_p =
-      allocateMessage (configuration_r.streamConfiguration->allocatorConfiguration->defaultBufferSize);
+  size_t pdu_size_i =
+    configuration_r.streamConfiguration->allocatorConfiguration->defaultBufferSize +
+    configuration_r.streamConfiguration->allocatorConfiguration->paddingBytes;
+  buffer_p = this->allocateMessage (pdu_size_i);
   if (unlikely (!buffer_p))
   { ACE_ASSERT (configuration_r.messageAllocator);
     if (configuration_r.messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  configuration_r.streamConfiguration->allocatorConfiguration->defaultBufferSize));
+                  pdu_size_i));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (configuration_r.streamConfiguration->allocatorConfiguration->defaultBufferSize,
+                      ACE_Message_Block (pdu_size_i,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -2688,16 +2697,18 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  configuration_r.streamConfiguration->allocatorConfiguration->defaultBufferSize));
+                  pdu_size_i));
       return -1;
     } // end IF
   } // end IF
   ACE_ASSERT (buffer_p);
+  buffer_p->size (configuration_r.streamConfiguration->allocatorConfiguration->defaultBufferSize);
 
   // read a datagram from the socket
-  bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),   // buffer
-                                          buffer_p->capacity (), // buffer size
-                                          0);                    // flags
+  bytes_received =
+    inherited::peer_.recv (buffer_p->wr_ptr (),                                                            // buffer
+                           configuration_r.streamConfiguration->allocatorConfiguration->defaultBufferSize, // buffer size
+                           0);                                                                             // flags
   switch (bytes_received)
   {
     case -1:

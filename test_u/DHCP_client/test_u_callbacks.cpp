@@ -1179,7 +1179,7 @@ allocate:
   Test_U_InboundConnectionStream& stream_r =
       const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const DHCPClient_SessionData_t* session_data_container_p =
-    &stream_r.getR ();
+    &stream_r.getR_2 ();
   ACE_ASSERT (session_data_container_p);
   struct DHCPClient_SessionData& session_data_r =
       const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
@@ -1250,7 +1250,7 @@ action_inform_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const DHCPClient_SessionData_t* session_data_container_p =
-      &stream_r.getR ();
+      &stream_r.getR_2 ();
   ACE_ASSERT (session_data_container_p);
   struct DHCPClient_SessionData& session_data_r =
     const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
@@ -1393,7 +1393,7 @@ action_request_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const DHCPClient_SessionData_t* session_data_container_p =
-      &stream_r.getR ();
+      &stream_r.getR_2 ();
   ACE_ASSERT (session_data_container_p);
   struct DHCPClient_SessionData& session_data_r =
     const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
@@ -1513,7 +1513,7 @@ action_release_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const DHCPClient_SessionData_t* session_data_container_p =
-    &stream_r.getR ();
+    &stream_r.getR_2 ();
   ACE_ASSERT (session_data_container_p);
   struct DHCPClient_SessionData& session_data_r =
     const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());

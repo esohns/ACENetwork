@@ -1227,7 +1227,7 @@ allocate:
     Test_U_OutboundConnectionStream& stream_r =
         const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
     const DHCPClient_SessionData_t* session_data_container_p =
-        &stream_r.getR ();
+        &stream_r.getR_2 ();
     ACE_ASSERT (session_data_container_p);
     struct DHCPClient_SessionData& session_data_r =
         const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());

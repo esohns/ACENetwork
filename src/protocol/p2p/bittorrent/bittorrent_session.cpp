@@ -49,6 +49,10 @@ net_bittorrent_session_setup_function (void* arg_in)
     data_p->addresses->pop_back ();
   } // end lock scope
 
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connecting to peer \"%s\"...\n"),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+
   data_p->session->connect (peer_address);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

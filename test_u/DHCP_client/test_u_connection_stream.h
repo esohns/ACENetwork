@@ -93,6 +93,9 @@ class Test_U_InboundConnectionStream
   Test_U_InboundConnectionStream ();
   virtual ~Test_U_InboundConnectionStream ();
 
+//  using inherited::getR_2;
+  inline virtual const DHCPClient_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
+
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: layout
                      bool&);          // return value: delete modules ?
@@ -159,6 +162,9 @@ class Test_U_OutboundConnectionStream
  public:
   Test_U_OutboundConnectionStream ();
   virtual ~Test_U_OutboundConnectionStream ();
+
+//  using inherited::getR_2;
+  inline virtual const DHCPClient_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: layout

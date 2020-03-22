@@ -332,22 +332,25 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
 
   // read some data from the socket
   // *TODO*: remove type inference
-  readBuffer_ =
-    allocateMessage (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize);
+  size_t pdu_size_i =
+    configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize +
+    configuration_r.streamConfiguration->allocatorConfiguration_.paddingBytes;
+  readBuffer_ = this->allocateMessage (pdu_size_i);
   if (unlikely (!readBuffer_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize));
+                pdu_size_i));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
+  readBuffer_->size (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize);
 
   // read some data from the socket
 retry:
   bytes_received =
-    inherited::peer_.recv (readBuffer_->wr_ptr (),   // buffer
-                           readBuffer_->capacity (), // #bytes to read
-                           0);                       // flags
+    inherited::peer_.recv (readBuffer_->wr_ptr (),                                                         // buffer
+                           configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize, // #bytes to read
+                           0);                                                                             // flags
   switch (bytes_received)
   {
     case -1:

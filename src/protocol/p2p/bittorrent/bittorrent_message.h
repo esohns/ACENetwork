@@ -207,10 +207,6 @@ class BitTorrent_TrackerMessage_T
                                                                            UserDataType> >;
 
  public:
-  // convenient types
-//  typedef HTTP_Method_t COMMAND_T;
-//  typedef Stream_DataBase_T<struct BitTorrent_TrackerMessageData> DATA_T;
-
   // *NOTE*: to be used by message allocators
   BitTorrent_TrackerMessage_T (Stream_SessionId_t,
                                ACE_Data_Block*,    // data block to use

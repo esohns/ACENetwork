@@ -44,8 +44,8 @@ if %ERRORLEVEL% NEQ 0 (
 
 @rem @move /Y http_bisector.cpp .. >NUL
 @rem @move /Y http_bisector.h .. >NUL
-@move /Y http_scanner.cpp .. >NUL
-@move /Y http_scanner.h .. >NUL
+@move /Y bittorrent_scanner.cpp .. >NUL
+@move /Y bittorrent_scanner.h .. >NUL
 if %ERRORLEVEL% NEQ 0 (
  echo failed to move scanner file^(s^)^, exiting
  set RC=%ERRORLEVEL%

@@ -110,7 +110,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   size_t pdu_size_i =
     inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize +
     inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->paddingBytes;
-
   message_block_p = inherited::allocateMessage (pdu_size_i);
   if (unlikely (!message_block_p))
   {
@@ -120,13 +119,14 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                 pdu_size_i));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
+  message_block_p->size (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize);
 
   // read a datagram from the socket
   bytes_received_i =
-    inherited::peer_.recv (message_block_p->wr_ptr (), // buffer
-                           pdu_size_i,                 // buffer size
-                           peer_address,               // peer address
-                           0);                         // flags
+    inherited::peer_.recv (message_block_p->wr_ptr (),                                                              // buffer
+                           inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize, // buffer size
+                           peer_address,                                                                            // peer address
+                           0);                                                                                      // flags
   //bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
   //                                        inherited2::configuration_->PDUSize, // n
   //                                        0,                                   // flags

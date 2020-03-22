@@ -96,7 +96,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         HandlerConfigurationType,
                         SessionStateType,
                         ConnectionManagerType,
-                        UserDataType>::load (Stream_ModuleList_t& modules_out,
+                        UserDataType>::load (Stream_ILayout* layout_inout,
                                              bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::load"));
@@ -104,24 +104,27 @@ BitTorrent_PeerStream_T<StreamStateType,
   // initialize return value(s)
   deleteModules_out = true;
 
+  inherited::load (layout_inout,
+                   deleteModules_out);
+
   Stream_Module_t* module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  MODULE_HANDLER_T (this,
-//                                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)),
-//                  false);
-//  modules_out.push_back (module_p);
-//  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  MODULE_STATISTIC_T (this,
-                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   MODULE_MARSHAL_T (this,
                                     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
-  modules_out.push_back (module_p);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  MODULE_STATISTIC_T (this,
+                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  //ACE_NEW_RETURN (module_p,
+  //                MODULE_HANDLER_T (this,
+  //                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
+  //  module_p = NULL;
 
   return true;
 }
@@ -176,7 +179,7 @@ BitTorrent_PeerStream_T<StreamStateType,
 //  int result = -1;
   SessionDataType* session_data_p = NULL;
   typename inherited::MODULE_T* module_p = NULL;
-  PARSER_T* parser_impl_p = NULL;
+  typename inherited::WRITER_T* writer_impl_p = NULL;
 
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
@@ -207,77 +210,18 @@ BitTorrent_PeerStream_T<StreamStateType,
 
   // ---------------------------------------------------------------------------
 
-//  // ******************* Handler ************************
-//  IRC_Module_Handler* handler_impl = NULL;
-//  handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
-//  if (!handler_impl)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
-//    return false;
-//  } // end IF
-//  if (!handler_impl->initialize (configuration_in.messageAllocator,
-//                                 (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
-//                                  : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
-//                                 (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                handler_.name ()));
-//    return false;
-//  } // end IF
-
-  // ******************* Statistic Report ************************
-  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
-  //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  //if (!runtimeStatistic_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
-  //                                          configuration_in.messageAllocator))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  return false;
-  //} // end IF
-
-  //// ******************* Parser ************************
-  //PARSER_T* parser_impl_p = NULL;
-  //parser_impl_p =
-  //  dynamic_cast<PARSER_T*> (parser_.writer ());
-  //if (!parser_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
-  //                                configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
-  //                                configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
-  //                                configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              parser_.name ()));
-  //  return false;
-  //} // end IF
-
   // ******************* Marshal ************************
   module_p =
-      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
+      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
   ACE_ASSERT (module_p);
-  parser_impl_p = dynamic_cast<PARSER_T*> (module_p->writer ());
-  if (!parser_impl_p)
+  writer_impl_p = dynamic_cast<typename inherited::WRITER_T*> (module_p->writer ());
+  if (!writer_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<BitTorrent_Module_Parser_T*> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T*> failed, aborting\n")));
     goto error;
   } // end IF
-  parser_impl_p->setP (&(inherited::state_));
+  writer_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

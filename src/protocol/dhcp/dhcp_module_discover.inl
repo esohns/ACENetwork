@@ -216,7 +216,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
   ACE_Message_Block* message_block_p = NULL;
   DataMessageType* message_p = NULL;
-  size_t pdu_size_i = 0;
 
   iterator_2 =
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
@@ -367,16 +366,13 @@ continue_:
     return; // done
 
   ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
-  pdu_size_i =
-    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
-    (*iterator_2).second->allocatorConfiguration->paddingBytes;
-  message_p = inherited::allocateMessage (pdu_size_i);
+  message_p = inherited::allocateMessage ((*iterator_2).second->allocatorConfiguration->defaultBufferSize);
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u): \"%m\", returning\n"),
                 inherited::mod_->name (),
-                pdu_size_i));
+                (*iterator_2).second->allocatorConfiguration->defaultBufferSize));
     return;
   } // end IF
   DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;

@@ -83,13 +83,14 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                 pdu_size_i));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
+  message_block_p->size (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize);
 
   // read some data from the socket
 //retry:
   bytes_received =
-    inherited::peer_.recv (message_block_p->wr_ptr (), // buffer
-                           pdu_size_i,                 // #bytes to read
-                           0);                         // flags
+    inherited::peer_.recv (message_block_p->wr_ptr (),                                                              // buffer
+                           inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize, // #bytes to read
+                           0);                                                                                      // flags
   switch (bytes_received)
   {
     case -1:

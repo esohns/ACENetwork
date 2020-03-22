@@ -160,7 +160,7 @@ BitTorrent_ParserDriver_T<MessageType,
                                        state_in);
   else
     result_p = BitTorrent_Scanner__scan_bytes (buffer_in,
-                                               size_in,
+                                               size_in + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                                state_in);
   if (!result_p)
   {

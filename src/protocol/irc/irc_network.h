@@ -40,9 +40,6 @@ struct IRC_AllocatorConfiguration
    : Common_FlexParserAllocatorConfiguration ()
   {
     defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
-    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-    //         'flex's yy_scan_buffer() method
-    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
   }
 };
 

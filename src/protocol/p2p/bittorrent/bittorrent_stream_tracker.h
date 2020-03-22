@@ -45,7 +45,6 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
-          typename PeerStreamType,
           ////////////////////////////////
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
@@ -110,7 +109,6 @@ class BitTorrent_TrackerStream_T
                                      ControlMessageType,
                                      DataMessageType,
                                      SessionMessageType,
-                                     PeerStreamType,
                                      ConnectionConfigurationType,
                                      ConnectionStateType,
                                      HandlerConfigurationType, // socket-

@@ -1258,20 +1258,14 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 
   // step1: allocate a message buffer
   IRC_Message* message_p =
-      //inherited::allocateMessage ((*iterator).second.PDUSize);
     inherited::allocateMessage (inherited::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u), returning\n"),
                 inherited::mod_->name (),
-                //(*iterator).second.PDUSize));
                 inherited::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
-
-    // clean up
-    record_inout->decrease ();
-    record_inout = NULL;
-
+    record_inout->decrease (); record_inout = NULL;
     return;
   } // end IF
 

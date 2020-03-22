@@ -153,7 +153,7 @@ HTTP_Stream_T<StreamStateType,
   //  int result = -1;
 //  SessionDataType* session_data_p = NULL;
   typename inherited::MODULE_T* module_p = NULL;
-  PARSER_T* parser_impl_p = NULL;
+  typename inherited::WRITER_T* writer_impl_p = NULL;
 
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
@@ -185,17 +185,17 @@ HTTP_Stream_T<StreamStateType,
 
   // ******************* Marshal ************************
   module_p =
-      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
+      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
   ACE_ASSERT (module_p);
-  parser_impl_p = dynamic_cast<PARSER_T*> (module_p->writer ());
-  if (!parser_impl_p)
+  writer_impl_p = dynamic_cast<typename inherited::WRITER_T*> (module_p->writer ());
+  if (!writer_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<HTTP_Module_Parser_T> failed, aborting\n"),
+                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T*> failed, aborting\n"),
                 ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
-  parser_impl_p->setP (&(inherited::state_));
+  writer_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

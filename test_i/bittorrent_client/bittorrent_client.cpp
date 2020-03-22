@@ -551,6 +551,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
+  peer_modulehandler_configuration.concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   peer_modulehandler_configuration.parserConfiguration =
       &configuration_in.parserConfiguration;
   peer_modulehandler_configuration.statisticReportingInterval =
@@ -558,17 +559,16 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   peer_modulehandler_configuration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
 
-  configuration_in.peerStreamConfiguration.configuration_.messageAllocator =
-    &peer_message_allocator;
   struct Common_FlexParserAllocatorConfiguration allocator_configuration;
   struct BitTorrent_Client_PeerStreamConfiguration peer_stream_configuration;
+  peer_stream_configuration.messageAllocator = &peer_message_allocator;
   configuration_in.peerStreamConfiguration.initialize (module_configuration,
                                                        peer_modulehandler_configuration,
                                                        allocator_configuration,
                                                        peer_stream_configuration);
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
-  tracker_modulehandler_configuration.concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+  tracker_modulehandler_configuration.concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   tracker_modulehandler_configuration.parserConfiguration =
       &configuration_in.parserConfiguration;
   tracker_modulehandler_configuration.statisticReportingInterval =
@@ -576,9 +576,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   tracker_modulehandler_configuration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
 
-  configuration_in.trackerStreamConfiguration.configuration_.messageAllocator =
-    &tracker_message_allocator;
   struct BitTorrent_Client_TrackerStreamConfiguration tracker_stream_configuration;
+  tracker_stream_configuration.messageAllocator = &tracker_message_allocator;
   configuration_in.trackerStreamConfiguration.initialize (module_configuration,
                                                           tracker_modulehandler_configuration,
                                                           allocator_configuration,

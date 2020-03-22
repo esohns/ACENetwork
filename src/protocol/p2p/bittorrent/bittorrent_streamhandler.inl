@@ -586,8 +586,8 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #else
                                   >::notify (Stream_SessionId_t sessionId_in,
 #endif // GUI_SUPPORT
-                                                        const BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
-                                                                                          UserDataType>& message_in)
+                                             const BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
+                                                                               UserDataType>& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 

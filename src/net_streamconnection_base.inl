@@ -277,7 +277,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // update session data
   // *TODO*: remove type inferences
-  session_data_container_p = &stream_.getR ();
+  session_data_container_p = &stream_.getR_2 ();
   ACE_ASSERT (session_data_container_p);
   session_data_p =
     &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
@@ -1705,7 +1705,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
     // step2b: update session data
     // *TODO*: remove type inferences
-    session_data_container_p = &stream_.getR ();
+    session_data_container_p = &stream_.getR_2 ();
     session_data_p =
       &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
     ACE_ASSERT (session_data_p->lock);

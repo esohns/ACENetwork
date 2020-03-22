@@ -34,7 +34,6 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
-          typename PeerStreamType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
@@ -51,7 +50,6 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
-                           PeerStreamType,
                            ConnectionConfigurationType,
                            ConnectionStateType,
                            HandlerConfigurationType,
@@ -74,7 +72,6 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
-          typename PeerStreamType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
@@ -92,13 +89,12 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
-                           PeerStreamType,
                            ConnectionConfigurationType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
                            ConnectionManagerType,
-                           UserDataType>::load (Stream_ILayout* layout_out,
+                           UserDataType>::load (Stream_ILayout* layout_inout,
                                                 bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::load"));
@@ -106,15 +102,15 @@ BitTorrent_TrackerStream_T<StreamStateType,
   // initialize return value(s)
   deleteModules_out = true;
 
-  inherited::load (layout_out,
+  inherited::load (layout_inout,
                    deleteModules_out);
 
-  Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  MODULE_PARSER_T (this,
-                                   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_TRACKER_PARSER_MODULE_NAME)),
-                  false);
-  layout_out->append (module_p, NULL, 0);
+  //Stream_Module_t* module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                MODULE_PARSER_T (this,
+  //                                 ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_TRACKER_PARSER_MODULE_NAME)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
 
   return true;
 }
@@ -129,7 +125,6 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
-          typename PeerStreamType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
@@ -147,7 +142,6 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
-                           PeerStreamType,
                            ConnectionConfigurationType,
                            ConnectionStateType,
                            HandlerConfigurationType,
@@ -315,57 +309,3 @@ error:
 
   return false;
 }
-
-//template <typename StreamStateType,
-//          typename ConfigurationType,
-//          typename StatisticContainerType,
-//          typename ModuleHandlerConfigurationType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType,
-//          typename ConnectionConfigurationType,
-//          typename ConnectionStateType,
-//          typename HandlerConfigurationType,
-//          typename SessionStateType>
-//bool
-//BitTorrent_TrackerStream_T<StreamStateType,
-//                           ConfigurationType,
-//                           StatisticContainerType,
-//                           ModuleHandlerConfigurationType,
-//                           SessionDataType,
-//                           SessionDataContainerType,
-//                           ControlMessageType,
-//                           DataMessageType,
-//                           SessionMessageType,
-//                           ConnectionConfigurationType,
-//                           ConnectionStateType,
-//                           HandlerConfigurationType,
-//                           SessionStateType>::collect (StatisticContainerType& data_out)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::collect"));
-
-//  typename inherited::MODULE_T* module_p = NULL;
-//  module_p =
-//      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
-//  if (!module_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("%s: module \"%s\" not found, aborting\n"),
-//                inherited::name (),
-//                ACE_TEXT ("StatisticReport")));
-//    return false;
-//  } // end IF
-//  STATISTIC_WRITER_T* statisticReport_impl_p = NULL;
-//  statisticReport_impl_p =
-//      dynamic_cast<STATISTIC_WRITER_T*> (module_p->writer ());
-//  if (!statisticReport_impl_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
-//    return false;
-//  } // end IF
-
-//  return statisticReport_impl_p->collect (data_out);
-//}

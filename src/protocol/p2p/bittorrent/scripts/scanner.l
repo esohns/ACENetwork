@@ -38,6 +38,7 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
 #include "ace/ace_wchar.h"
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
+#include "ace/OS.h"
 #include "ace/OS_Memory.h"
 
 #include "net_macros.h"
@@ -129,7 +130,7 @@ TRACKER_SCRAPE_KEY                (failure reason|files|flags)
 
 /* version 1.0 of the BitTorrent protocol */
 PEER_HANDSHAKE_PREFIX             \x13BitTorrent\ protocol
-PEER_HANDSHAKE_RESERVED           \x00{8}
+PEER_HANDSHAKE_RESERVED           {OCTET}{8}
 /* "...sha1 hash of the bencoded form of the info value from the metainfo file.
  * (This is the same value which is announced as info_hash to the tracker, only
  *  here it's raw instead of quoted here). ..." */
@@ -190,13 +191,13 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 %}
 
 <INITIAL>{
-{PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 19);
+{PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 1 + 19);
                             iparser_p->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,
                                               struct BitTorrent_PeerHandShake ());
                             ACE_ASSERT (yylval->handshake);
-                            yylval->handshake->pstr.append (yytext, 19);
+                            yylval->handshake->pstr.append (yytext + 1, 19);
                             BEGIN (state_reserved); }
 } // end <INITIAL>
 <state_reserved>{

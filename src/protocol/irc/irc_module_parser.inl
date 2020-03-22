@@ -162,7 +162,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
     } // end FOR
 
     // step3: append the "\0\0"-sequence, as required by flex
-    ACE_ASSERT (message_p->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+    ACE_ASSERT ((message_p->capacity () - message_p->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
     //ACE_ASSERT (IRC_FLEX_BUFFER_BOUNDARY_SIZE == 2);
     *(message_p->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
     *(message_p->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;

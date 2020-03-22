@@ -283,7 +283,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 BitTorrent_Client_PeerStream_t,
                                 enum Stream_StateMachine_ControlState> BitTorrent_Client_IPeerStreamConnection_t;
 
-struct BitTorrent_Client_TrackerSessionData;
+//struct BitTorrent_Client_TrackerSessionData;
 typedef Stream_SessionData_T<struct BitTorrent_Client_TrackerSessionData> BitTorrent_Client_TrackerSessionData_t;
 typedef BitTorrent_TrackerMessage_T<BitTorrent_Client_TrackerSessionData_t,
                                     struct Net_UserData> BitTorrent_Client_TrackerMessage_t;
@@ -299,7 +299,6 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
-          typename PeerStreamType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename HandlerConfigurationType, // socket-
@@ -317,7 +316,6 @@ typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_TrackerStreamState,
                                    BitTorrent_Client_ControlMessage_t,
                                    BitTorrent_Client_TrackerMessage_t,
                                    BitTorrent_Client_TrackerSessionMessage_t,
-                                   BitTorrent_Client_PeerStream_t,
                                    BitTorrent_Client_TrackerConnectionConfiguration,
                                    struct BitTorrent_Client_TrackerConnectionState,
                                    Net_TCPSocketConfiguration_t,

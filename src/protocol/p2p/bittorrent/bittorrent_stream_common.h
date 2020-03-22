@@ -172,11 +172,11 @@ struct BitTorrent_PeerStreamConfiguration
   BitTorrent_PeerStreamConfiguration ()
    : Stream_Configuration ()
    , filename ()
-   , metaInfo (NULL)
+   , metainfo (NULL)
   {}
 
   std::string             filename; // .torrent file
-  Bencoding_Dictionary_t* metaInfo;
+  Bencoding_Dictionary_t* metainfo;
 };
 struct BitTorrent_TrackerModuleHandlerConfiguration;
 struct BitTorrent_TrackerStreamConfiguration
@@ -185,11 +185,11 @@ struct BitTorrent_TrackerStreamConfiguration
   BitTorrent_TrackerStreamConfiguration ()
    : Stream_Configuration ()
    , filename ()
-   , metaInfo (NULL)
+   , metainfo (NULL)
   {}
 
   std::string             filename; // .torrent file
-  Bencoding_Dictionary_t* metaInfo;
+  Bencoding_Dictionary_t* metainfo;
 };
 
 struct BitTorrent_ConnectionState;
@@ -201,7 +201,7 @@ struct BitTorrent_PeerSessionData
    , connectionState (NULL)
 //   , currentStatistic ()
    , filename ()
-   , handShake (NULL)
+   , handshake (NULL)
   {}
 
   struct BitTorrent_PeerSessionData& operator+= (const struct BitTorrent_PeerSessionData& rhs_in)
@@ -219,7 +219,7 @@ struct BitTorrent_PeerSessionData
   struct BitTorrent_ConnectionState* connectionState;
 //  BitTorrent_Statistic_t      currentStatistic;
   std::string                        filename; // .torrent file
-  struct BitTorrent_PeerHandShake*   handShake;
+  struct BitTorrent_PeerHandShake*   handshake;
 };
 
 struct BitTorrent_TrackerSessionData

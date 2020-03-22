@@ -183,7 +183,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 %}
 
 <INITIAL>{
-{PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 19);
+{PEER_HANDSHAKE_PREFIX}   { //ACE_ASSERT (yyleng == 19);
                             parser_->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,

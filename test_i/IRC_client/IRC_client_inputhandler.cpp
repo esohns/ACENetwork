@@ -126,18 +126,14 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
   ACE_ASSERT (configuration_->connectionConfiguration->allocatorConfiguration);
   ACE_ASSERT (configuration_->controller);
 
-  size_t pdu_size_i =
-    configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize +
-    configuration_->connectionConfiguration->allocatorConfiguration->paddingBytes;
-
   if (!currentReadBuffer_)
   { // allocate a message buffer
-    currentReadBuffer_ = allocateMessage (pdu_size_i);
+    currentReadBuffer_ = allocateMessage (configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize);
     if (!currentReadBuffer_)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  pdu_size_i));
+                  configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize));
       return -1;
     } // end IF
   } // end IF
@@ -147,7 +143,7 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
   ssize_t bytes_received =
     ACE_OS::read (handle_in,
                   currentReadBuffer_->wr_ptr (),
-                  pdu_size_i - 1); // \0
+                  configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize - 1); // \0
   switch (bytes_received)
   {
     case -1:

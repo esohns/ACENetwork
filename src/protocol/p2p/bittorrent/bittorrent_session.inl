@@ -460,7 +460,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_Message_Block* message_block_p = NULL;
   ICONNECTION_T* iconnection_p = NULL;
   ISTREAM_CONNECTION_T* istream_connection_p = NULL;
-  size_t pdu_size_i = 0;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
 
@@ -477,6 +476,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     goto error;
   } // end IF
 
+  ACE_OS::memset (record_p->reserved, 0, BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     // sanity check(s)
     ACE_ASSERT (inherited::state_.metaInfo);
@@ -513,13 +513,9 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_ASSERT (inherited::configuration_->connectionConfiguration);
   ACE_ASSERT (inherited::configuration_->connectionConfiguration->allocatorConfiguration);
 
-  pdu_size_i =
-    inherited::configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize;// +
-//    inherited::configuration_->connectionConfiguration->allocatorConfiguration->paddingBytes;
-
 allocate:
   message_p =
-    static_cast<typename PeerStreamType::MESSAGE_T*> (inherited::configuration_->connectionConfiguration->messageAllocator->malloc (pdu_size_i));
+    static_cast<typename PeerStreamType::MESSAGE_T*> (inherited::configuration_->connectionConfiguration->messageAllocator->malloc (inherited::configuration_->connectionConfiguration->allocatorConfiguration->defaultBufferSize));
   // keep retrying ?
   if (!message_p &&
       !inherited::configuration_->connectionConfiguration->messageAllocator->block ())
@@ -743,7 +739,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       NULL;
   ACE_Message_Block* message_block_p = NULL;
   bool use_SSL = false;
-//  size_t pdu_size_i = 0;
 
   ACE_NEW_NORETURN (data_p,
                     typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T ());
@@ -781,7 +776,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   data_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                                   HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*inherited::configuration_->metaInfo))));
+                                       HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*inherited::configuration_->metaInfo))));
 
 #ifdef HAVE_CONFIG_H
   user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
@@ -790,14 +785,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 #endif
   if (!user_agent.empty ())
     data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
-                                                        user_agent));
+                                            user_agent));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
-                                                      host_name_string));
+                                          host_name_string));
 //                                            HTTP_Tools::IPAddress2HostName (tracker_address).c_str ()));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
-                                                      ACE_TEXT_ALWAYS_CHAR ("*/*")));
+                                          ACE_TEXT_ALWAYS_CHAR ("*/*")));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
-                                                      ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
+                                          ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
 
   // *IMPORTANT NOTE*: fire-and-forget API (record_p)
   ACE_NEW_NORETURN (data_container_p,
@@ -814,11 +809,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration);
   ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration->allocatorConfiguration);
-
-//  pdu_size_i =
-//    inherited::configuration_->trackerConnectionConfiguration->allocatorConfiguration->defaultBufferSize;// +
-//    inherited::configuration_->trackerConnectionConfiguration->allocatorConfiguration->paddingBytes;
-
 allocate:
   message_p =
     static_cast<typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->trackerConnectionConfiguration->messageAllocator->malloc (sizeof (typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T)));
@@ -829,11 +819,8 @@ allocate:
   if (!message_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate request message: \"%m\", returning\n")));
-
-    // clean up
-    data_container_p->decrease ();
-
+                ACE_TEXT ("failed to allocate scrape message: \"%m\", returning\n")));
+    data_container_p->decrease (); data_container_p = NULL;
     goto error;
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
@@ -1381,13 +1368,16 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   else
   { ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
     const char* char_p = (*iterator).second->string->c_str ();
+
+    // *IMPORTANT NOTE*: the 'compact' 'peers' representation is assumed here
+    //                   (see also: http://www.bittorrent.org/beps/bep_0023.html)
     for (unsigned int i = 0;
          i < ((*iterator).second->string->size () / 6);
          ++i)
     {
       result = inet_address.set (*reinterpret_cast<const u_short*> (char_p + 4),
                                  *reinterpret_cast<const ACE_UINT32*> (char_p),
-                                 0,
+                                 0, // already in network byte order
                                  0);
       if (result == -1)
       {
@@ -1403,16 +1393,16 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
               ACE_TEXT ("connecting to %u peer(s)...\n"),
               peer_addresses.size ()));
 
-  std::uniform_int_distribution<int> random_distribution (1, peer_addresses.size ());
-  std::default_random_engine         random_engine;
-  std::function<int ()>              random_generator =
-      std::bind (random_distribution, random_engine);
-  int random_number = random_generator ();
-  BitTorrent_PeerAddressesIterator_t iterator_2 = peer_addresses.begin ();
-  iterator_2 += random_number;
-  inet_address = *iterator_2;
-  peer_addresses.clear ();
-  peer_addresses.push_back (inet_address);
+  //std::uniform_int_distribution<int> random_distribution (1, peer_addresses.size ());
+  //std::default_random_engine         random_engine;
+  //std::function<int ()>              random_generator =
+  //    std::bind (random_distribution, random_engine);
+  //int random_number = random_generator ();
+  //BitTorrent_PeerAddressesIterator_t iterator_2 = peer_addresses.begin ();
+  //iterator_2 += random_number;
+  //inet_address = *iterator_2;
+  //peer_addresses.clear ();
+  //peer_addresses.push_back (inet_address);
 
   struct BitTorrent_SessionInitiationThreadData thread_data;
   thread_data.addresses = &peer_addresses;
@@ -1657,7 +1647,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 #else
                      >::notify (const struct BitTorrent_PeerRecord& record_in,
 #endif // GUI_SUPPORT
-                                           ACE_Message_Block* messageBlock_in)
+                                ACE_Message_Block* messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 

@@ -125,8 +125,8 @@ class BitTorrent_PeerStream_T
   inline virtual ~BitTorrent_PeerStream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete modules ?
 
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -176,20 +176,13 @@ class BitTorrent_PeerStream_T
   //                                     SessionDataType,
   //                                     SessionDataContainerType,
   //                                     StatisticContainerType> BISECTOR_T;
-  typedef BitTorrent_Module_PeerParserH_T<ACE_MT_SYNCH,
-                                          Common_TimePolicy_t,
-                                          ControlMessageType,
-                                          DataMessageType,
-                                          SessionMessageType,
-                                          ModuleHandlerConfigurationType,
-                                          enum Stream_ControlType,
-                                          enum Stream_SessionMessageType,
-                                          StreamStateType,
-                                          SessionDataType,
-                                          SessionDataContainerType,
-                                          StatisticContainerType,
-                                          TimerManagerType,
-                                          UserDataType> PARSER_T;
+  typedef BitTorrent_Module_PeerParser_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         ModuleHandlerConfigurationType,
+                                         ControlMessageType,
+                                         DataMessageType,
+                                         SessionMessageType,
+                                         UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,             // session id type

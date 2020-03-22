@@ -2063,7 +2063,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-{ ACE_ASSERT (string_length != 0);
+{ //ACE_ASSERT (string_length != 0);
 //                         yylloc->columns (string_length);
                          ACE_NEW_NORETURN (yylval->sval,
                                            std::string ());

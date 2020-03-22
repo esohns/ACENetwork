@@ -40,181 +40,58 @@ class ACE_Message_Block;
 //extern const char libacenetwork_protocol_bittorrent_default_peer_parser_module_name_string[];
 extern const char libacenetwork_protocol_bittorrent_default_tracker_parser_module_name_string[];
 
-//template <ACE_SYNCH_DECL,
-//          typename TimePolicyType,
-//          ////////////////////////////////
-//          typename ConfigurationType,
-//          ////////////////////////////////
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType,
-//          ////////////////////////////////
-//          typename UserDataType>
-//class BitTorrent_Module_PeerParser_T
-// : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
-//                                  TimePolicyType,
-//                                  ConfigurationType,
-//                                  ControlMessageType,
-//                                  DataMessageType,
-//                                  SessionMessageType,
-//                                  Stream_SessionId_t,
-//                                  enum Stream_ControlType,
-//                                  enum Stream_SessionMessageType,
-//                                  UserDataType>
-// , public BitTorrent_ParserDriver_T<DataMessageType,
-//                                    SessionMessageType>
-//{
-//  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
-//                                  TimePolicyType,
-//                                  ConfigurationType,
-//                                  ControlMessageType,
-//                                  DataMessageType,
-//                                  SessionMessageType,
-//                                  Stream_SessionId_t,
-//                                  enum Stream_ControlType,
-//                                  enum Stream_SessionMessageType,
-//                                  UserDataType> inherited;
-
-// public:
-//  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  BitTorrent_Module_PeerParser_T (ISTREAM_T*);                     // stream handle
-//#else
-//  BitTorrent_Module_PeerParser_T (typename inherited::ISTREAM_T*); // stream handle
-//#endif
-//  virtual ~BitTorrent_Module_PeerParser_T ();
-
-//  virtual bool initialize (const ConfigurationType&,
-//                           Stream_IAllocator* = NULL);
-
-//  // implement (part of) Stream_ITaskBase
-//  virtual void handleDataMessage (DataMessageType*&, // data message handle
-//                                  bool&);                // return value: pass message downstream ?
-//  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
-//                                     bool&);               // return value: pass message downstream ?
-
-// protected:
-//  DataMessageType* headFragment_;
-
-// private:
-//  typedef BitTorrent_ParserDriver_T<DataMessageType,
-//                                    SessionMessageType> inherited2;
-
-//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T ())
-//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T (const BitTorrent_Module_PeerParser_T&))
-//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T& operator= (const BitTorrent_Module_PeerParser_T&))
-
-//  // convenient types
-//  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-
-//  // implement (part of) BitTorrent_IParser_T
-//  ////////////////////////////////////////
-//  // callbacks
-//  // *IMPORTANT NOTE*: fire-and-forget API
-//  virtual void record (struct BitTorrent_PeerRecord*&); // data record
-//  virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
-
-//  // *NOTE*: strips the protocol data from the message buffer, leaving the
-//  //         'piece' content. This data is then available only from the message
-//  //         record (i.e. DATA_T)
-//  bool             crunch_;
-//};
-
-////////////////////////////////////////////////////////////////////////////////
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
+          ////////////////////////////////
+          typename ConfigurationType,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
           ////////////////////////////////
-          typename ConfigurationType,
-          ////////////////////////////////
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
-          ////////////////////////////////
-          typename StatisticContainerType,
-          typename TimerManagerType, // implements Common_ITimer
-          ////////////////////////////////
           typename UserDataType>
-class BitTorrent_Module_PeerParserH_T
- : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      TimerManagerType,
-                                      UserDataType>
+class BitTorrent_Module_PeerParser_T
+ : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
+                                  TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  UserDataType>
  , public BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType>
 {
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      TimerManagerType,
-                                      UserDataType> inherited;
+  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
+                                  TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  UserDataType> inherited;
 
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  BitTorrent_Module_PeerParserH_T (ISTREAM_T*);                     // stream handle
+  BitTorrent_Module_PeerParser_T (ISTREAM_T*);                     // stream handle
 #else
-  BitTorrent_Module_PeerParserH_T (typename inherited::ISTREAM_T*); // stream handle
+  BitTorrent_Module_PeerParser_T (typename inherited::ISTREAM_T*); // stream handle
 #endif
-  virtual ~BitTorrent_Module_PeerParserH_T ();
+  virtual ~BitTorrent_Module_PeerParser_T ();
 
-  // *NOTE*: disambiguate Common_ISet_T::set()
-  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                    TimePolicyType,
-                                    ControlMessageType,
-                                    DataMessageType,
-                                    SessionMessageType,
-                                    ConfigurationType,
-                                    StreamControlType,
-                                    StreamNotificationType,
-                                    StreamStateType,
-                                    SessionDataType,
-                                    SessionDataContainerType,
-                                    StatisticContainerType,
-                                    TimerManagerType,
-                                    UserDataType>::setP;
-
-  // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,
                            Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);            // return value: pass message downstream ?
+                                  bool&);                // return value: pass message downstream ?
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
-
-  // implement Common_IStatistic
-  // *NOTE*: this reuses the interface to implement timer-based data collection
-  virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
-  //virtual void report () const;
 
  protected:
   DataMessageType* headFragment_;
@@ -223,9 +100,9 @@ class BitTorrent_Module_PeerParserH_T
   typedef BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType> inherited2;
 
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParserH_T ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParserH_T (const BitTorrent_Module_PeerParserH_T&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParserH_T& operator= (const BitTorrent_Module_PeerParserH_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T (const BitTorrent_Module_PeerParser_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T& operator= (const BitTorrent_Module_PeerParser_T&))
 
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
@@ -243,6 +120,129 @@ class BitTorrent_Module_PeerParserH_T
   //         record (i.e. DATA_T)
   bool             crunch_;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          ////////////////////////////////
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          ////////////////////////////////
+//          typename ConfigurationType,
+//          ////////////////////////////////
+//          typename StreamControlType,
+//          typename StreamNotificationType,
+//          typename StreamStateType,
+//          ////////////////////////////////
+//          typename SessionDataType,          // session data
+//          typename SessionDataContainerType, // session message payload (reference counted)
+//          ////////////////////////////////
+//          typename StatisticContainerType,
+//          typename TimerManagerType, // implements Common_ITimer
+//          ////////////////////////////////
+//          typename UserDataType>
+//class BitTorrent_Module_PeerParserH_T
+// : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+//                                      TimePolicyType,
+//                                      ControlMessageType,
+//                                      DataMessageType,
+//                                      SessionMessageType,
+//                                      ConfigurationType,
+//                                      StreamControlType,
+//                                      StreamNotificationType,
+//                                      StreamStateType,
+//                                      SessionDataType,
+//                                      SessionDataContainerType,
+//                                      StatisticContainerType,
+//                                      TimerManagerType,
+//                                      UserDataType>
+// , public BitTorrent_ParserDriver_T<DataMessageType,
+//                                    SessionMessageType>
+//{
+//  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+//                                      TimePolicyType,
+//                                      ControlMessageType,
+//                                      DataMessageType,
+//                                      SessionMessageType,
+//                                      ConfigurationType,
+//                                      StreamControlType,
+//                                      StreamNotificationType,
+//                                      StreamStateType,
+//                                      SessionDataType,
+//                                      SessionDataContainerType,
+//                                      StatisticContainerType,
+//                                      TimerManagerType,
+//                                      UserDataType> inherited;
+//
+// public:
+//  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  BitTorrent_Module_PeerParserH_T (ISTREAM_T*);                     // stream handle
+//#else
+//  BitTorrent_Module_PeerParserH_T (typename inherited::ISTREAM_T*); // stream handle
+//#endif
+//  virtual ~BitTorrent_Module_PeerParserH_T ();
+//
+//  // *NOTE*: disambiguate Common_ISet_T::set()
+//  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+//                                    TimePolicyType,
+//                                    ControlMessageType,
+//                                    DataMessageType,
+//                                    SessionMessageType,
+//                                    ConfigurationType,
+//                                    StreamControlType,
+//                                    StreamNotificationType,
+//                                    StreamStateType,
+//                                    SessionDataType,
+//                                    SessionDataContainerType,
+//                                    StatisticContainerType,
+//                                    TimerManagerType,
+//                                    UserDataType>::setP;
+//
+//  // override (part of) Stream_IModuleHandler_T
+//  virtual bool initialize (const ConfigurationType&,
+//                           Stream_IAllocator* = NULL);
+//
+//  // implement (part of) Stream_ITaskBase
+//  virtual void handleDataMessage (DataMessageType*&, // data message handle
+//                                  bool&);            // return value: pass message downstream ?
+//  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
+//                                     bool&);               // return value: pass message downstream ?
+//
+//  // implement Common_IStatistic
+//  // *NOTE*: this reuses the interface to implement timer-based data collection
+//  virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
+//  //virtual void report () const;
+//
+// protected:
+//  DataMessageType* headFragment_;
+//
+// private:
+//  typedef BitTorrent_ParserDriver_T<DataMessageType,
+//                                    SessionMessageType> inherited2;
+//
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParserH_T ())
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParserH_T (const BitTorrent_Module_PeerParserH_T&))
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParserH_T& operator= (const BitTorrent_Module_PeerParserH_T&))
+//
+//  // convenient types
+//  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
+//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
+//
+//  // implement (part of) BitTorrent_IParser_T
+//  ////////////////////////////////////////
+//  // callbacks
+//  // *IMPORTANT NOTE*: fire-and-forget API
+//  virtual void record (struct BitTorrent_PeerRecord*&); // data record
+//  virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
+//
+//  // *NOTE*: strips the protocol data from the message buffer, leaving the
+//  //         'piece' content. This data is then available only from the message
+//  //         record (i.e. DATA_T)
+//  bool             crunch_;
+//};
 
 ////////////////////////////////////////////////////////////////////////////////
 
