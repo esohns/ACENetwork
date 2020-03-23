@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "bittorrent_tools.h"
 
 #include <regex>
@@ -216,8 +216,8 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   ACE_ASSERT (!metaInfo_out);
 
   bool block_in_parse = configuration_in.block;
-  BitTorrent_Bencoding_ParserDriver_T<BitTorrent_TrackerSessionMessage_t> parser (configuration_in.debugScanner,
-                                                                                  configuration_in.debugParser);
+  BitTorrent_Bencoding_ParserDriver parser (configuration_in.debugScanner,
+                                            configuration_in.debugParser);
 
   const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
     false;
@@ -480,111 +480,6 @@ BitTorrent_Tools::AnnounceURLToScrapeURL (const std::string& announceURL_in)
   result.replace (position,
                   ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY)),
                   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_SCRAPE_URI_PREFIX));
-
-  return result;
-}
-
-std::string
-BitTorrent_Tools::DictionaryToString (const Bencoding_Dictionary_t& dictionary_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::DictionaryToString"));
-
-  std::string result (ACE_TEXT_ALWAYS_CHAR ("dictionary:\n"));
-
-  for (Bencoding_DictionaryIterator_t iterator = dictionary_in.begin ();
-       iterator != dictionary_in.end ();
-       ++iterator)
-  {
-    result += ACE_TEXT_ALWAYS_CHAR ("\"");
-    result += *(*iterator).first;
-    result += ACE_TEXT_ALWAYS_CHAR ("\": ");
-
-    switch ((*iterator).second->type)
-    {
-      case Bencoding_Element::BENCODING_TYPE_INTEGER:
-      {
-        std::ostringstream converter;
-        converter << (*iterator).second->integer;
-        result += converter.str ();
-        result += ACE_TEXT_ALWAYS_CHAR ("\n");
-        break;
-      }
-      case Bencoding_Element::BENCODING_TYPE_STRING:
-      {
-        result += ACE_TEXT_ALWAYS_CHAR ("\"");
-        result += *(*iterator).second->string;
-        result += ACE_TEXT_ALWAYS_CHAR ("\"\n");
-        break;
-      }
-      case Bencoding_Element::BENCODING_TYPE_LIST:
-      {
-        result += BitTorrent_Tools::ListToString (*(*iterator).second->list);
-        break;
-      }
-      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
-      {
-        result += BitTorrent_Tools::DictionaryToString (*(*iterator).second->dictionary);
-        break;
-      }
-      default:
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
-                    ACE_TEXT ((*iterator).second->type)));
-        break;
-      }
-    } // end SWITCH
-  } // end FOR
-
-  return result;
-}
-std::string
-BitTorrent_Tools::ListToString (const Bencoding_List_t& list_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::ListToString"));
-
-  std::string result (ACE_TEXT_ALWAYS_CHAR ("list:\n"));
-
-  for (Bencoding_ListIterator_t iterator = list_in.begin ();
-       iterator != list_in.end ();
-       ++iterator)
-  {
-    switch ((*iterator)->type)
-    {
-      case Bencoding_Element::BENCODING_TYPE_INTEGER:
-      {
-        std::ostringstream converter;
-        converter << (*iterator)->integer;
-        result += converter.str ();
-        result += ACE_TEXT_ALWAYS_CHAR ("\n");
-        break;
-      }
-      case Bencoding_Element::BENCODING_TYPE_STRING:
-      {
-        result += ACE_TEXT_ALWAYS_CHAR ("\"");
-        result += *(*iterator)->string;
-        result += ACE_TEXT_ALWAYS_CHAR ("\"\n");
-        break;
-      }
-      case Bencoding_Element::BENCODING_TYPE_LIST:
-      {
-        result += BitTorrent_Tools::ListToString (*(*iterator)->list);
-        break;
-      }
-      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
-      {
-        result += BitTorrent_Tools::DictionaryToString (*(*iterator)->dictionary);
-        break;
-      }
-      default:
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
-                    ACE_TEXT ((*iterator)->type)));
-        break;
-      }
-    } // end SWITCH
-  } // end FOR
 
   return result;
 }

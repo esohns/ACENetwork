@@ -41,8 +41,7 @@ class BitTorrent_Message_T;
 template <typename SessionDataType,
           typename UserDataType>
 class BitTorrent_SessionMessage_T;
-template <typename SessionMessageType>
-class BitTorrent_Bencoding_ParserDriver_T;
+class BitTorrent_Bencoding_ParserDriver;
 
 template <typename SessionDataType,     // not (!) reference-counted
           typename UserDataType,
@@ -155,7 +154,7 @@ class BitTorrent_TrackerStreamHandler_T
                                       UserDataType> MESSAGE_T;
   typedef BitTorrent_SessionMessage_T<SessionDataType,
                                       UserDataType> SESSION_MESSAGE_T;
-  typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;
+  typedef BitTorrent_Bencoding_ParserDriver PARSER_T;
 
   struct Common_ParserConfiguration* configuration_;
 #if defined (GUI_SUPPORT)

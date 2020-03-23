@@ -61,8 +61,7 @@ class BitTorrent_Module_PeerParser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType>
- , public BitTorrent_ParserDriver_T<DataMessageType,
-                                    SessionMessageType>
+ , public BitTorrent_ParserDriver
 {
   typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -74,6 +73,7 @@ class BitTorrent_Module_PeerParser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType> inherited;
+  typedef BitTorrent_ParserDriver inherited2;
 
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
@@ -97,9 +97,6 @@ class BitTorrent_Module_PeerParser_T
   DataMessageType* headFragment_;
 
  private:
-  typedef BitTorrent_ParserDriver_T<DataMessageType,
-                                    SessionMessageType> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T (const BitTorrent_Module_PeerParser_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T& operator= (const BitTorrent_Module_PeerParser_T&))
@@ -267,7 +264,7 @@ class BitTorrent_Module_TrackerParser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType>
- , public BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>
+ , public BitTorrent_Bencoding_ParserDriver
 {
   typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -279,6 +276,7 @@ class BitTorrent_Module_TrackerParser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType> inherited;
+  typedef BitTorrent_Bencoding_ParserDriver inherited2;
 
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
@@ -302,8 +300,6 @@ class BitTorrent_Module_TrackerParser_T
   DataMessageType* headFragment_;
 
  private:
-  typedef BitTorrent_Bencoding_ParserDriver_T<SessionMessageType> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_TrackerParser_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_TrackerParser_T (const BitTorrent_Module_TrackerParser_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_TrackerParser_T& operator= (const BitTorrent_Module_TrackerParser_T&))

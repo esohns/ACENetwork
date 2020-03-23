@@ -196,7 +196,6 @@ set (source_files
      net_iconnectionmanager.h
      net_iconnector.h
      net_ilistener.h
-     net_iparser.h
      net_ipconnection.cpp
      net_ipconnection.h
      net_itransportlayer.h
@@ -207,9 +206,6 @@ set (source_files
      net_os_tools.cpp
      net_os_tools.h
      net_packet_headers.h
-     net_parser_base.cpp
-     net_parser_base.h
-     net_parser_base.inl
      net_protocol_layer.cpp
      net_protocol_layer.h
      net_remote_comm.h
@@ -385,7 +381,6 @@ install (FILES
          net_iconnectionmanager.h
          net_iconnector.h
          net_ilistener.h
-         net_iparser.h
          net_ipconnection.h
          net_itransportlayer.h
          net_macros.h

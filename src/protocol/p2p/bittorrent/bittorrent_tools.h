@@ -32,13 +32,7 @@
 class BitTorrent_Tools
 {
  public:
-  inline virtual ~BitTorrent_Tools () {};
-
   // debug info
-  static std::string DictionaryToString (const Bencoding_Dictionary_t&);
-  static std::string ListToString (const Bencoding_List_t&);
-  inline static std::string MetaInfoToString (const Bencoding_Dictionary_t& metaInfo_in) { return BitTorrent_Tools::DictionaryToString (metaInfo_in); }
-
   static std::string HandShakeToString (const struct BitTorrent_PeerHandShake&);
   static std::string RecordToString (const struct BitTorrent_PeerRecord&);
 

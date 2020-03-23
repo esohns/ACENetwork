@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_PARSER_DRIVER_T_H
-#define BITTORRENT_PARSER_DRIVER_T_H
+#ifndef BITTORRENT_PARSER_DRIVER_H
+#define BITTORRENT_PARSER_DRIVER_H
 
 #include <stack>
 #include <string>
@@ -28,33 +28,33 @@
 
 #include "location.hh"
 
-#include "common.h"
-
-#include "net_parser_base.h"
+#include "common_configuration.h"
+#include "common_parser_base.h"
 
 #include "bittorrent_parser.h"
 #include "bittorrent_scanner.h"
 
-template <typename MessageType,
-          typename SessionMessageType>
-class BitTorrent_ParserDriver_T
- : public Net_ParserBase_T<struct Common_ParserConfiguration,
-                           yy::BitTorrent_Parser,
-                           BitTorrent_IParser_t,
-                           std::string,
-                           SessionMessageType>
+class BitTorrent_ParserDriver
+ : public Common_ParserBase_T<struct Common_ParserConfiguration,
+                              yy::BitTorrent_Parser,
+                              BitTorrent_IParser_t,
+                              std::string>
 {
+  typedef Common_ParserBase_T<struct Common_ParserConfiguration,
+                              yy::BitTorrent_Parser,
+                              BitTorrent_IParser_t,
+                              std::string> inherited;
+
  public:
-  BitTorrent_ParserDriver_T (bool,  // debug scanning ?
-                             bool); // debug parsing ?
-  inline virtual ~BitTorrent_ParserDriver_T () {};
+  BitTorrent_ParserDriver (bool,  // debug scanning ?
+                           bool); // debug parsing ?
+  inline virtual ~BitTorrent_ParserDriver () {}
 
   // convenient types
-  typedef Net_ParserBase_T<struct Common_ParserConfiguration,
-                           yy::BitTorrent_Parser,
-                           BitTorrent_IParser_t,
-                           std::string,
-                           SessionMessageType> PARSER_BASE_T;
+  typedef Common_ParserBase_T<struct Common_ParserConfiguration,
+                              yy::BitTorrent_Parser,
+                              BitTorrent_IParser_t,
+                              std::string> PARSER_BASE_T;
 
   // implement (part of) BitTorrent_IParser
   using PARSER_BASE_T::initialize;
@@ -84,15 +84,9 @@ class BitTorrent_ParserDriver_T
   struct BitTorrent_PeerRecord*    record_;
 
  private:
-  typedef Net_ParserBase_T<struct Common_ParserConfiguration,
-                           yy::BitTorrent_Parser,
-                           BitTorrent_IParser_t,
-                           std::string,
-                           SessionMessageType> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T (const BitTorrent_ParserDriver_T&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T& operator= (const BitTorrent_ParserDriver_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver (const BitTorrent_ParserDriver&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver& operator= (const BitTorrent_ParserDriver&))
 
   // implement Common_ILexScanner_T
   inline virtual const Common_ScannerState& getR_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (Common_ScannerState ()); ACE_NOTREACHED (return Common_ScannerState ();) }
@@ -109,6 +103,6 @@ class BitTorrent_ParserDriver_T
 };
 
 // include template definition
-#include "bittorrent_parser_driver.inl"
+//#include "bittorrent_parser_driver.inl"
 
 #endif

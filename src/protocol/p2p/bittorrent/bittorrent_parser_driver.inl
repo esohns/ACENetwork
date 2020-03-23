@@ -31,11 +31,9 @@
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
 
-template <typename MessageType,
-          typename SessionMessageType>
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::BitTorrent_ParserDriver_T (bool traceScanning_in,
-                                                                          bool traceParsing_in)
+template <typename MessageType>
+BitTorrent_ParserDriver_T<MessageType>::BitTorrent_ParserDriver_T (bool traceScanning_in,
+                                                                   bool traceParsing_in)
  : inherited (traceScanning_in,
               traceParsing_in)
  , handShake_ (NULL)
@@ -46,12 +44,10 @@ BitTorrent_ParserDriver_T<MessageType,
 //  inherited::parser_.set (this);
 }
 
-template <typename MessageType,
-          typename SessionMessageType>
+template <typename MessageType>
 void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::error (const yy::location& location_in,
-                                                      const std::string& message_in)
+BitTorrent_ParserDriver_T<MessageType>::error (const yy::location& location_in,
+                                               const std::string& message_in)
 //BitTorrent_ParserDriver_T<MessageType,
 //                          SessionMessageType>::error (const std::string& message_in)
 {
@@ -107,11 +103,9 @@ BitTorrent_ParserDriver_T<MessageType,
 ////   std::clog << message_in << std::endl;
 //}
 
-template <typename MessageType,
-          typename SessionMessageType>
+template <typename MessageType>
 void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::record (struct BitTorrent_PeerRecord*& record_inout)
+BitTorrent_ParserDriver_T<MessageType>::record (struct BitTorrent_PeerRecord*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::record"));
 
@@ -122,11 +116,9 @@ BitTorrent_ParserDriver_T<MessageType,
 
   record_inout = NULL;
 }
-template <typename MessageType,
-          typename SessionMessageType>
+template <typename MessageType>
 void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
+BitTorrent_ParserDriver_T<MessageType>::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::handshake"));
 
@@ -138,13 +130,11 @@ BitTorrent_ParserDriver_T<MessageType,
   handShake_inout = NULL;
 }
 
-template <typename MessageType,
-          typename SessionMessageType>
+template <typename MessageType>
 yy_buffer_state*
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::create (yyscan_t state_in,
-                                                       char* buffer_in,
-                                                       size_t size_in)
+BitTorrent_ParserDriver_T<MessageType>::create (yyscan_t state_in,
+                                                char* buffer_in,
+                                                size_t size_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::create"));
 

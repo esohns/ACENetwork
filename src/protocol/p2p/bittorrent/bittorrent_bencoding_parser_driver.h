@@ -28,43 +28,39 @@
 
 #include "location.hh"
 
-#include "net_parser_base.h"
+#include "common_parser_cpp_base.h"
 
 #include "bittorrent_bencoding_parser.h"
 #include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_iparser.h"
 
-template <typename SessionMessageType>
-class BitTorrent_Bencoding_ParserDriver_T
- : public Net_CppParserBase_T<struct Common_ParserConfiguration,
-                              BitTorrent_Bencoding_Scanner,
-                              struct Common_ScannerState,
-                              yy::BitTorrent_Bencoding_Parser,
-                              BitTorrent_Bencoding_IParser,
-                              std::string,
-                              SessionMessageType>
+class BitTorrent_Bencoding_ParserDriver
+ : public Common_CppParserBase_T<struct Common_ParserConfiguration,
+                                 BitTorrent_Bencoding_Scanner,
+                                 struct Common_ScannerState,
+                                 yy::BitTorrent_Bencoding_Parser,
+                                 BitTorrent_Bencoding_IParser,
+                                 std::string>
 {
-  typedef Net_CppParserBase_T<struct Common_ParserConfiguration,
-                              BitTorrent_Bencoding_Scanner,
-                              struct Common_ScannerState,
-                              yy::BitTorrent_Bencoding_Parser,
-                              BitTorrent_Bencoding_IParser,
-                              std::string,
-                              SessionMessageType> inherited;
+  typedef Common_CppParserBase_T<struct Common_ParserConfiguration,
+                                 BitTorrent_Bencoding_Scanner,
+                                 struct Common_ScannerState,
+                                 yy::BitTorrent_Bencoding_Parser,
+                                 BitTorrent_Bencoding_IParser,
+                                 std::string> inherited;
 
  public:
-  BitTorrent_Bencoding_ParserDriver_T (bool,  // debug scanning ?
-                                       bool); // debug parsing ?
-  virtual ~BitTorrent_Bencoding_ParserDriver_T ();
+  BitTorrent_Bencoding_ParserDriver (bool,  // debug scanning ?
+                                     bool); // debug parsing ?
+  virtual ~BitTorrent_Bencoding_ParserDriver ();
 
   // convenient types
-  typedef Net_CppParserBase_T<struct Common_ParserConfiguration,
-                              BitTorrent_Bencoding_Scanner,
-                              struct Common_ScannerState,
-                              yy::BitTorrent_Bencoding_Parser,
-                              BitTorrent_Bencoding_IParser,
-                              std::string,
-                              SessionMessageType> PARSER_BASE_T;
+  typedef Common_CppParserBase_T<struct Common_ParserConfiguration,
+                                 BitTorrent_Bencoding_Scanner,
+                                 struct Common_ScannerState,
+                                 yy::BitTorrent_Bencoding_Parser,
+                                 BitTorrent_Bencoding_IParser,
+                                 std::string> PARSER_BASE_T;
 
   // implement (part of) BitTorrent_Bencoding_IParser
   using PARSER_BASE_T::buffer;
@@ -100,9 +96,9 @@ class BitTorrent_Bencoding_ParserDriver_T
   Bencoding_Dictionary_t*             bencoding_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T (const BitTorrent_Bencoding_ParserDriver_T&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T& operator= (const BitTorrent_Bencoding_ParserDriver_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver (const BitTorrent_Bencoding_ParserDriver&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver& operator= (const BitTorrent_Bencoding_ParserDriver&))
 
   std::stack<Bencoding_Dictionary_t*> dictionaries_;
   std::stack<std::string*>            keys_;
@@ -110,6 +106,6 @@ class BitTorrent_Bencoding_ParserDriver_T
 };
 
 // include template definition
-#include "bittorrent_bencoding_parser_driver.inl"
+//#include "bittorrent_bencoding_parser_driver.inl"
 
 #endif

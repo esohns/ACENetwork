@@ -24,16 +24,15 @@
 #include <string>
 
 #include "common.h"
-#include "common_iscanner.h"
 //#include "common_iget.h"
-
-#include "net_iparser.h"
+#include "common_iscanner.h"
+#include "common_iparser.h"
 
 #include "bittorrent_common.h"
 
 class BitTorrent_Bencoding_IParser
- : public Net_IYaccRecordParser_T<struct Common_ParserConfiguration,
-                                  Bencoding_Dictionary_t>
+ : public Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+                                     Bencoding_Dictionary_t>
  , virtual public Common_ILexScanner_T<struct Common_ScannerState,
                                        BitTorrent_Bencoding_IParser>
 // , public Common_IGet_T<Bencoding_Dictionary_t>
@@ -41,8 +40,8 @@ class BitTorrent_Bencoding_IParser
 {
  public:
   // convenient types
-  typedef Net_IYaccRecordParser_T<struct Common_ParserConfiguration,
-                                  Bencoding_Dictionary_t> IPARSER_T;
+  typedef Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+                                     Bencoding_Dictionary_t> IPARSER_T;
   typedef Common_ILexScanner_T<struct Common_ScannerState,
                                BitTorrent_Bencoding_IParser> ISCANNER_T;
 
@@ -62,15 +61,15 @@ class BitTorrent_Bencoding_IParser
 
 template <typename RecordType>
 class BitTorrent_IParser_T
- : public Net_IYaccStreamParser_T<struct Common_ParserConfiguration,
-                                  RecordType>
+ : public Common_IYaccStreamParser_T<struct Common_ParserConfiguration,
+                                     RecordType>
  , virtual public Common_ILexScanner_T<struct Common_ScannerState,
                                        BitTorrent_IParser_T<RecordType> >
 {
  public:
   // convenient types
-  typedef Net_IYaccStreamParser_T<struct Common_ParserConfiguration,
-                                  RecordType> IPARSER_T;
+  typedef Common_IYaccStreamParser_T<struct Common_ParserConfiguration,
+                                     RecordType> IPARSER_T;
   typedef Common_ILexScanner_T<struct Common_ScannerState,
                                BitTorrent_IParser_T<RecordType> > ISCANNER_T;
 

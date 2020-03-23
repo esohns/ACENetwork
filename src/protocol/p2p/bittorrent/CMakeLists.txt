@@ -118,7 +118,7 @@ set (source_files
      bittorrent_bencoding_parser.h
      bittorrent_bencoding_parser_driver.cpp
      bittorrent_bencoding_parser_driver.h
-     bittorrent_bencoding_parser_driver.inl
+#     bittorrent_bencoding_parser_driver.inl
      bittorrent_bencoding_scanner.cpp
      bittorrent_bencoding_scanner.h
      bittorrent_common.h
@@ -126,7 +126,6 @@ set (source_files
      bittorrent_control.h
      bittorrent_control.inl
      bittorrent_defines.h
-#     bittorrent_exports.h
      bittorrent_iparser.h
      bittorrent_message.cpp
      bittorrent_message.h
@@ -142,7 +141,7 @@ set (source_files
      bittorrent_parser.h
      bittorrent_parser_driver.cpp
      bittorrent_parser_driver.h
-     bittorrent_parser_driver.inl
+#     bittorrent_parser_driver.inl
      bittorrent_scanner.cpp
      bittorrent_scanner.h
      bittorrent_session.cpp
@@ -249,13 +248,12 @@ export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
 install (FILES
          bittorrent_bencoding_parser.h
          bittorrent_bencoding_parser_driver.h
-         bittorrent_bencoding_parser_driver.inl
+#         bittorrent_bencoding_parser_driver.inl
          bittorrent_bencoding_scanner.h
          bittorrent_common.h
          bittorrent_control.h
          bittorrent_control.inl
          bittorrent_defines.h
-#         bittorrent_exports.h
          bittorrent_iparser.h
          bittorrent_message.h
          bittorrent_message.inl
@@ -266,7 +264,7 @@ install (FILES
          bittorrent_network.h
          bittorrent_parser.h
          bittorrent_parser_driver.h
-         bittorrent_parser_driver.inl
+ #        bittorrent_parser_driver.inl
          bittorrent_scanner.h
          bittorrent_session.h
          bittorrent_session.inl
