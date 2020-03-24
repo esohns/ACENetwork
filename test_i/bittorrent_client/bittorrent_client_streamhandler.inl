@@ -22,6 +22,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_parser_bencoding_tools.h"
+
 #include "common_ui_common.h"
 
 #include "net_macros.h"
@@ -29,7 +31,6 @@
 #include "bittorrent_message.h"
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_sessionmessage.h"
-#include "bittorrent_tools.h"
 
 template <typename SessionDataType,
           typename UserDataType,
@@ -546,7 +547,7 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
+              ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
 #endif
 
   try {

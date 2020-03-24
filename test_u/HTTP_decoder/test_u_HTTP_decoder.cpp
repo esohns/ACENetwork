@@ -50,6 +50,8 @@
 #include "common_logger.h"
 #include "common_log_tools.h"
 
+#include "common_parser_common.h"
+
 #include "common_signal_tools.h"
 
 #include "common_timer_tools.h"

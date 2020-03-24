@@ -233,6 +233,7 @@ elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
 endif ()
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent CommonParser)
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
 # target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PROJECT_NAME}_Protocol_HTTP)
 

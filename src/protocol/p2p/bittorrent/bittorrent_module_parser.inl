@@ -49,8 +49,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
                            UserDataType>::BitTorrent_Module_PeerParser_T (typename inherited::ISTREAM_T* stream_in)
 #endif
  : inherited (stream_in)
- , inherited2 (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
-               COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+ , inherited2 ()
  , headFragment_ (NULL)
  , crunch_ (true) // strip protocol data ?
 {
