@@ -1332,7 +1332,7 @@ ACE_TMAIN (int argc_in,
   // step6: initialize configuration objects
 
   // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<struct Common_FlexParserAllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+  Stream_CachedAllocatorHeap_T<struct Common_Parser_FlexAllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                                                BITTORRENT_BUFFER_SIZE);
   if (!heap_allocator.initialize (configuration.peerStreamConfiguration.allocatorConfiguration_))
   {

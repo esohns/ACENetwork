@@ -608,6 +608,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if (error != ENOTSOCK) // 10038: local close
 #else
+    ACE_UNUSED_ARG (error);
     if (true) // *TODO*
 #endif
       ACE_DEBUG ((LM_ERROR,

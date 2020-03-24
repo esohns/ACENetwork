@@ -35,6 +35,8 @@
 
 #include "common_configuration.h"
 
+#include "common_parser_common.h"
+
 #include "common_timer_common.h"
 
 #include "stream_common.h"
@@ -81,26 +83,26 @@ struct Net_SocketConfigurationBase
   }
   inline virtual ~Net_SocketConfigurationBase () {}
 
-  struct Common_FlexParserAllocatorConfiguration* allocatorConfiguration;
-  int                                bufferSize; // socket buffer size (I/O)
+  struct Common_Parser_FlexAllocatorConfiguration* allocatorConfiguration;
+  int                                              bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID                       interfaceIdentifier; // NIC-
+  struct _GUID                                     interfaceIdentifier; // NIC-
 #else
-  std::string                        interfaceIdentifier; // NIC-
+  std::string                                      interfaceIdentifier; // NIC-
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-  std::string                        interfaceIdentifier; // NIC-
+  std::string                                      interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64
   // *NOTE*: win32 udp sockets do not linger
-  bool                               linger;
-  bool                               useLoopBackDevice;   // (if any)
+  bool                                             linger;
+  bool                                             useLoopBackDevice;   // (if any)
 
   // *TODO*: move these into Net_SocketConfiguration_T ASAP
   //unsigned int   PDUSize; // package data unit size
-  ACE_Time_Value                     statisticCollectionInterval; // [ACE_Time_Value::zero: off]
-  ACE_Time_Value                     statisticReportingInterval; // [ACE_Time_Value::zero: off]
-  bool                               useThreadPerConnection;
+  ACE_Time_Value                                   statisticCollectionInterval; // [ACE_Time_Value::zero: off]
+  ACE_Time_Value                                   statisticReportingInterval; // [ACE_Time_Value::zero: off]
+  bool                                             useThreadPerConnection;
 };
 
 template <enum Net_TransportLayerType TransportLayerType_e>

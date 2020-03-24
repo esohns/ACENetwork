@@ -479,13 +479,13 @@ do_work (unsigned int bufferSize_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
-  struct Common_FlexParserAllocatorConfiguration allocator_configuration;
+  struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   struct Test_U_HTTPDecoder_Configuration configuration;
   configuration.dispatch = (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                                           : COMMON_EVENT_DISPATCH_PROACTOR);
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_FlexParserAllocatorConfiguration> heap_allocator;
+                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,

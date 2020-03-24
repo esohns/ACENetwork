@@ -68,7 +68,7 @@ struct BitTorrent_Client_PeerStreamConfiguration
 };
 struct BitTorrent_Client_PeerModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_FlexParserAllocatorConfiguration,
+                               struct Common_Parser_FlexAllocatorConfiguration,
                                struct BitTorrent_Client_PeerStreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct BitTorrent_Client_PeerModuleHandlerConfiguration> BitTorrent_Client_PeerStreamConfiguration_t;
@@ -80,7 +80,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 //                                 struct Net_StreamStatistic,
 //                                 struct Net_UserData> BitTorrent_Client_PeerIConnection_Manager_t;
 class BitTorrent_Client_PeerConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
                                         BitTorrent_Client_PeerStreamConfiguration_t,
                                         NET_TRANSPORTLAYER_TCP>
 {
@@ -110,7 +110,7 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
 struct BitTorrent_Client_TrackerStreamConfiguration;
 struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_FlexParserAllocatorConfiguration,
+                               struct Common_Parser_FlexAllocatorConfiguration,
                                struct BitTorrent_Client_TrackerStreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct BitTorrent_Client_TrackerModuleHandlerConfiguration> BitTorrent_Client_TrackerStreamConfiguration_t;
@@ -122,7 +122,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 //                                 struct Net_StreamStatistic,
 //                                 struct Net_UserData> BitTorrent_Client_TrackerIConnection_Manager_t;
 class BitTorrent_Client_TrackerConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
+ : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
                                         BitTorrent_Client_TrackerStreamConfiguration_t,
                                         NET_TRANSPORTLAYER_TCP>
 {
@@ -162,7 +162,7 @@ class Stream_SessionData_T;
 typedef Stream_SessionData_T<struct BitTorrent_Client_PeerSessionData> BitTorrent_Client_PeerSessionData_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Common_FlexParserAllocatorConfiguration> BitTorrent_Client_ControlMessage_t;
+                                struct Common_Parser_FlexAllocatorConfiguration> BitTorrent_Client_ControlMessage_t;
 template <typename SessionDataType,
           typename UserDataType>
 class BitTorrent_Message_T;

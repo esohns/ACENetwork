@@ -42,10 +42,10 @@ struct HTTP_ModuleHandlerConfiguration;
 struct HTTP_StreamConfiguration;
 
 //struct HTTP_AllocatorConfiguration
-// : Common_FlexParserAllocatorConfiguration
+// : Common_Parser_FlexAllocatorConfiguration
 //{
 //  HTTP_AllocatorConfiguration ()
-//   : Common_FlexParserAllocatorConfiguration ()
+//   : Common_Parser_FlexAllocatorConfiguration ()
 //  {
 //    // *NOTE*: this facilitates (message block) data buffers to be scanned with
 //    //         'flex's yy_scan_buffer() method
@@ -53,10 +53,10 @@ struct HTTP_StreamConfiguration;
 //  };
 //};
 
-typedef HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
+typedef HTTP_Message_T<struct Common_Parser_FlexAllocatorConfiguration,
                        HTTP_MessageData_t> HTTP_Message_t;
 //typedef Stream_ControlMessage_T<enum Stream_ControlType,
-//                                struct Common_FlexParserAllocatorConfiguration,
+//                                struct Common_Parser_FlexAllocatorConfiguration,
 //                                HTTP_Message_t,
 //                                HTTP_SessionMessage> HTTP_ControlMessage_t;
 
@@ -101,7 +101,7 @@ struct HTTP_ModuleHandlerConfiguration
     printFinalReport = true;
   };
 
-  struct Common_FlexParserAllocatorConfiguration* allocatorConfiguration;
+  struct Common_Parser_FlexAllocatorConfiguration* allocatorConfiguration;
   bool                               crunchMessages; // http parser module
   bool                               printProgressDot; // file writer module
   std::string                        URL;

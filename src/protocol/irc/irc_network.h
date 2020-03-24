@@ -34,10 +34,10 @@
 class IRC_IControl;
 
 struct IRC_AllocatorConfiguration
- : Common_FlexParserAllocatorConfiguration
+ : Common_Parser_FlexAllocatorConfiguration
 {
   IRC_AllocatorConfiguration ()
-   : Common_FlexParserAllocatorConfiguration ()
+   : Common_Parser_FlexAllocatorConfiguration ()
   {
     defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
   }

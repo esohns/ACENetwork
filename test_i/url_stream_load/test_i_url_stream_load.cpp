@@ -543,7 +543,7 @@ do_work (bool debugParser_in,
                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_FlexParserAllocatorConfiguration> heap_allocator;
+                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -579,7 +579,7 @@ do_work (bool debugParser_in,
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
   // ********************** module configuration data **************************
-  struct Common_FlexParserAllocatorConfiguration allocator_configuration;
+  struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;

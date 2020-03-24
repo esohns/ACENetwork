@@ -97,7 +97,7 @@ typedef BitTorrent_SessionMessage_T<struct BitTorrent_TrackerSessionData,
                                     struct Stream_UserData> BitTorrent_TrackerSessionMessage_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Common_FlexParserAllocatorConfiguration> BitTorrent_ControlMessage_t;
+                                struct Common_Parser_FlexAllocatorConfiguration> BitTorrent_ControlMessage_t;
 
 struct BitTorrent_Configuration;
 struct BitTorrent_ConnectionState;

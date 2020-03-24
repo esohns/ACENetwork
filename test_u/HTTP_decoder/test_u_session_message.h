@@ -40,7 +40,7 @@ struct Test_U_HTTPDecoder_SessionData;
 typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
+                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -49,19 +49,19 @@ template <ACE_SYNCH_DECL,
 class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_HTTPDecoder_SessionData_t,
                                       struct Stream_UserData>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_FlexParserAllocatorConfiguration,
+                                                 struct Common_Parser_FlexAllocatorConfiguration,
                                                  Test_U_HTTPDecoder_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
-  typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_HTTPDecoder_SessionData_t,
                                       struct Stream_UserData> inherited;

@@ -52,7 +52,7 @@
 //struct HTTP_StreamConfiguration;
 
 //class HTTP_ConnectionConfiguration
-// : public Net_ConnectionConfiguration_T<struct Common_FlexParserAllocatorConfiguration,
+// : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
 //                                        struct HTTP_StreamConfiguration,
 //                                        NET_TRANSPORTLAYER_TCP>
 //{

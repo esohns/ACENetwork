@@ -57,7 +57,7 @@ struct Test_U_HTTPDecoder_SessionData;
 typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
+                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 
 // declare module(s)
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,

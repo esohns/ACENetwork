@@ -54,26 +54,26 @@ class HTTP_ParserDriver_T
 
   // implement (part of) HTTP_IParser
   virtual bool initialize (const struct Common_ParserConfiguration&);
-  inline virtual ACE_Message_Block* buffer () { return fragment_; };
-  inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); };
-  inline virtual bool isBlocking () const { return blockInParse_; };
+  inline virtual ACE_Message_Block* buffer () { return fragment_; }
+  inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); }
+  inline virtual bool isBlocking () const { return blockInParse_; }
 //  virtual void error (const struct YYLTYPE&, // location
   virtual void error (const yy::location&, // location
                       const std::string&); // message
   virtual void error (const std::string&); // message
-  inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
-  inline virtual unsigned int offset () const { return offset_; };
+  inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; } // offset (increment)
+  inline virtual unsigned int offset () const { return offset_; }
   virtual bool begin (const char*,   // buffer handle
                       unsigned int); // buffer size
   virtual void end ();
-  inline virtual const HTTP_IParser* const getP_2 () const { return this; };
+  inline virtual const HTTP_IParser* const getP () const { return this; }
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer ();
-  inline virtual struct HTTP_Record& current () { ACE_ASSERT (record_); return *record_; };
+  inline virtual struct HTTP_Record& current () { ACE_ASSERT (record_); return *record_; }
 //  inline virtual void finished () { finished_ = true; };
-  inline virtual bool hasFinished () const { return finished_; };
+  inline virtual bool hasFinished () const { return finished_; }
 
   virtual void dump_state () const;
 
@@ -90,14 +90,14 @@ class HTTP_ParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T (const HTTP_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T& operator= (const HTTP_ParserDriver_T&))
 
-  inline virtual const Common_ScannerState& getR_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (Common_ScannerState ()); ACE_NOTREACHED (return Common_ScannerState ();) };
-  inline virtual void setP (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  inline virtual void debug (yyscan_t state_in, bool toggle_in) { HTTP_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); };
-  inline virtual bool initialize (yyscan_t&, struct Common_ScannerState*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
-  virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  inline virtual YY_BUFFER_STATE create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) };
-  inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  inline virtual bool lex () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual const Common_ScannerState& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (Common_ScannerState ()); ACE_NOTREACHED (return Common_ScannerState ();) }
+  inline virtual void setP (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void debug (yyscan_t state_in, bool toggle_in) { HTTP_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); }
+  inline virtual bool initialize (yyscan_t&, struct Common_ScannerState*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual YY_BUFFER_STATE create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+  inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+//  inline virtual bool lex () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
 
   bool                               blockInParse_;
   bool                               isFirst_;

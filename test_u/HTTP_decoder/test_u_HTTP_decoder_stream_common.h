@@ -55,10 +55,10 @@ typedef Stream_DataBase_T<struct HTTP_Record> Test_U_MessageData_t;
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
+                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Common_FlexParserAllocatorConfiguration,
+                                          struct Common_Parser_FlexAllocatorConfiguration,
                                           Test_U_HTTPDecoder_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_HTTPDecoder_MessageAllocator_t;
@@ -101,7 +101,7 @@ struct Test_U_Configuration;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_FlexParserAllocatorConfiguration,
+                               struct Common_Parser_FlexAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;

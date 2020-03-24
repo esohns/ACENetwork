@@ -61,10 +61,10 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> DHCP_IConnection_Manager_t;
 
 struct DHCP_AllocatorConfiguration
-  : Common_FlexParserAllocatorConfiguration
+  : Common_Parser_FlexAllocatorConfiguration
 {
   DHCP_AllocatorConfiguration ()
-    : Common_FlexParserAllocatorConfiguration ()
+    : Common_Parser_FlexAllocatorConfiguration ()
   {
     defaultBufferSize = DHCP_MESSAGE_SIZE;
   }

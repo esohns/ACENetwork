@@ -123,7 +123,7 @@ struct FileServer_Configuration
    , userData ()
   {}
 
-  struct Common_FlexParserAllocatorConfiguration            allocatorConfiguration;
+  struct Common_Parser_FlexAllocatorConfiguration            allocatorConfiguration;
   Net_ConnectionConfigurations_t               connectionConfigurations;
   ACE_HANDLE                                   handle;
   Test_U_IListener_t*                          listener;
