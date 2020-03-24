@@ -27,6 +27,7 @@
 
 #include "common_parser_common.h"
 #include "common_parser_bencoding_common.h"
+#include "common_parser_bencoding_tools.h"
 
 #include "bittorrent_common.h"
 
@@ -34,6 +35,8 @@ class BitTorrent_Tools
 {
  public:
   // debug info
+  inline static std::string MetaInfoToString (const Bencoding_Dictionary_t& metaInfo_in) { return Common_Parser_Bencoding_Tools::DictionaryToString (metaInfo_in); }
+
   static std::string HandShakeToString (const struct BitTorrent_PeerHandShake&);
   static std::string RecordToString (const struct BitTorrent_PeerRecord&);
 
@@ -47,7 +50,6 @@ class BitTorrent_Tools
   static bool parseMetaInfoFile (const struct Common_ParserConfiguration&, // parser configuration
                                  const std::string&,                       // metainfo (aka .bittorrent) file
                                  Bencoding_Dictionary_t*&);                // return value: metainfo
-  static void free (Bencoding_Dictionary_t*&);
 
   // *NOTE*: this follows the Azureus style (encode client and version
   //         information)
@@ -65,11 +67,6 @@ class BitTorrent_Tools
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools (const BitTorrent_Tools&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools& operator= (const BitTorrent_Tools&))
-
-  // helper methods
-  static std::string bencode (const Bencoding_Dictionary_t&);
-  static std::string bencode (const Bencoding_List_t&);
-  static void free (Bencoding_List_t*&); // bencoded list
 };
 
 #endif

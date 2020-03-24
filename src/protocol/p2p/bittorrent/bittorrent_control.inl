@@ -159,7 +159,7 @@ BitTorrent_Control_T<SessionAsynchType,
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (Common_Parser_Bencoding_Tools::MetaInfoToString (*configuration_->metaInfo).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::MetaInfoToString (*configuration_->metaInfo).c_str ())));
 #endif // _DEBUG
 
   // step2: create/initialize session

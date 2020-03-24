@@ -1329,7 +1329,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   if (iterator != record_in.end ())
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     if (inherited::state_.trackerScrapeResponse)
-      BitTorrent_Tools::free (inherited::state_.trackerScrapeResponse);
+      Common_Parser_Bencoding_Tools::free (inherited::state_.trackerScrapeResponse);
     inherited::state_.trackerScrapeResponse =
         &const_cast<Bencoding_Dictionary_t&> (record_in);
 
@@ -1340,7 +1340,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     if (inherited::state_.trackerRequestResponse)
-      BitTorrent_Tools::free (inherited::state_.trackerRequestResponse);
+      Common_Parser_Bencoding_Tools::free (inherited::state_.trackerRequestResponse);
     inherited::state_.trackerRequestResponse =
         &const_cast<Bencoding_Dictionary_t&> (record_in);
   } // end lock scope

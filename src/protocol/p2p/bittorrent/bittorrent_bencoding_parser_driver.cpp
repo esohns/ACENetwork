@@ -146,5 +146,5 @@ BitTorrent_Bencoding_ParserDriver::dump_state () const
 
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (Common_Parser_Bencoding_Tools::MetaInfoToString (*bencoding_).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::MetaInfoToString (*bencoding_).c_str ())));
 }

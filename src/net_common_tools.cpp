@@ -1270,7 +1270,8 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   unsigned int file_size_i = 0;
   if (unlikely (!Common_File_Tools::load (filename_string,
                                           data_p,
-                                          file_size_i)))
+                                          file_size_i,
+                                          0)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
