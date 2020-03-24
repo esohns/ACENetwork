@@ -52,6 +52,8 @@
 #  endif
 # endif
 
+#include "common_parser_bencoding_tools.h"
+
 #include "bittorrent_bencoding_parser.h"
 
 // User implementation prologue.
@@ -87,7 +89,7 @@
 #include "bittorrent_defines.h"
 //#include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_bencoding_scanner.h"
-#include "bittorrent_tools.h"
+#include "common_parser_bencoding_common.h"
 
 // *TODO*: this shouldn't be necessary
 /*#define yylex bencoding_lex*/
@@ -429,35 +431,35 @@ namespace yy {
       case 8: // "list"
 
 
-        { debug_stream () << BitTorrent_Tools::ListToString (*(yysym.value.lval)); }
+        { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*(yysym.value.lval)); }
 
         break;
 
       case 9: // "dictionary"
 
 
-        { debug_stream () << BitTorrent_Tools::DictionaryToString (*(yysym.value.dval)); }
+        { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
 
         break;
 
       case 11: // bencoding
 
 
-        { debug_stream () << BitTorrent_Tools::DictionaryToString (*(yysym.value.dval)); }
+        { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
 
         break;
 
       case 13: // list_items
 
 
-        { debug_stream () << BitTorrent_Tools::ListToString (*(yysym.value.lval)); }
+        { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*(yysym.value.lval)); }
 
         break;
 
       case 17: // dictionary_items
 
 
-        { debug_stream () << BitTorrent_Tools::DictionaryToString (*(yysym.value.dval)); }
+        { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
 
         break;
 

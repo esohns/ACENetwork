@@ -23,6 +23,8 @@
 #include "ace/OS_Memory.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_parser_defines.h"
+
 #include "common_timer_manager_common.h"
 
 #include "stream_iallocator.h"

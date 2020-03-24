@@ -46,8 +46,7 @@ class BitTorrent_ParserDriver
                               std::string> inherited;
 
  public:
-  BitTorrent_ParserDriver (bool,  // debug scanning ?
-                           bool); // debug parsing ?
+  BitTorrent_ParserDriver ();
   inline virtual ~BitTorrent_ParserDriver () {}
 
   // convenient types
@@ -84,7 +83,6 @@ class BitTorrent_ParserDriver
   struct BitTorrent_PeerRecord*    record_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver (const BitTorrent_ParserDriver&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver& operator= (const BitTorrent_ParserDriver&))
 

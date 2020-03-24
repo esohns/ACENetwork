@@ -25,7 +25,8 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common.h"
+#include "common_parser_common.h"
+#include "common_parser_bencoding_common.h"
 
 #include "bittorrent_common.h"
 

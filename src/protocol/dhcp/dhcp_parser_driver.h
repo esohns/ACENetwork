@@ -28,7 +28,7 @@
 
 #include "location.hh"
 
-#include "common.h"
+#include "common_parser_common.h"
 
 #include "net_defines.h"
 

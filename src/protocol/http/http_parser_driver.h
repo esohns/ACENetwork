@@ -25,9 +25,9 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common.h"
+#include "common_parser_common.h"
+#include "common_parser_defines.h"
 
-#include "http_exports.h"
 #include "http_iparser.h"
 #include "http_parser.h"
 #include "http_scanner.h"

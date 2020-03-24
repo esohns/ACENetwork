@@ -20,6 +20,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_parser_bencoding_tools.h"
+
 #include "common_timer_manager_common.h"
 
 #include "net_macros.h"
@@ -332,7 +334,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   record_inout = NULL;
 
   // debug info
-  if (inherited2::trace_)
+  if (inherited2::configuration_->debugParser)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (BitTorrent_Tools::RecordToString (*data_r.peerRecord).c_str ())));
@@ -404,7 +406,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::sessionData_);
 
   // debug info
-  if (inherited2::trace_)
+  if (inherited2::configuration_->debugParser)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (BitTorrent_Tools::HandShakeToString (*handshake_inout).c_str ())));
@@ -1417,7 +1419,7 @@ BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::DictionaryToString (*bencoding_inout).c_str ())));
+                ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*bencoding_inout).c_str ())));
 
   // set new head fragment ?
   ACE_Message_Block* message_block_p = headFragment_;

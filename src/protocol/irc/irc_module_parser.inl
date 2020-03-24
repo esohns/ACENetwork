@@ -20,7 +20,7 @@
 
 #include "ace/Log_Msg.h"
 
-#include "common_defines.h"
+#include "common_parser_defines.h"
 
 #include "net_defines.h"
 #include "net_macros.h"

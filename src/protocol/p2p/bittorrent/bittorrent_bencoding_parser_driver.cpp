@@ -24,12 +24,13 @@
 #include "ace/Log_Msg.h"
 #include "ace/Synch.h"
 
+#include "common_parser_bencoding_tools.h"
+
 #include "net_macros.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 #include "bittorrent_message.h"
-#include "bittorrent_tools.h"
 
 BitTorrent_Bencoding_ParserDriver::BitTorrent_Bencoding_ParserDriver (bool traceScanning_in,
                                                                       bool traceParsing_in)
@@ -145,5 +146,5 @@ BitTorrent_Bencoding_ParserDriver::dump_state () const
 
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::MetaInfoToString (*bencoding_).c_str ())));
+              ACE_TEXT (Common_Parser_Bencoding_Tools::MetaInfoToString (*bencoding_).c_str ())));
 }

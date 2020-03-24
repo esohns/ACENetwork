@@ -35,10 +35,8 @@
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
 
-BitTorrent_ParserDriver::BitTorrent_ParserDriver (bool traceScanning_in,
-                                                  bool traceParsing_in)
- : inherited (traceScanning_in,
-              traceParsing_in)
+BitTorrent_ParserDriver::BitTorrent_ParserDriver ()
+ : inherited ()
  , handShake_ (NULL)
  , record_ (NULL)
 {
@@ -139,11 +137,12 @@ BitTorrent_ParserDriver::create (yyscan_t state_in,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::create"));
 
   // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (state_in);
 
   struct yy_buffer_state* result_p = NULL;
 
-  if (inherited::useYYScanBuffer_)
+  if (inherited::configuration_->useYYScanBuffer)
     result_p =
       BitTorrent_Scanner__scan_buffer (buffer_in,
                                        size_in + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,

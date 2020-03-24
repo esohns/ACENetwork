@@ -28,6 +28,7 @@
 
 #include "location.hh"
 
+#include "common_parser_common.h"
 #include "common_parser_cpp_base.h"
 
 #include "bittorrent_bencoding_parser.h"

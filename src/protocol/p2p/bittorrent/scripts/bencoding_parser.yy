@@ -165,7 +165,7 @@ typedef union YYSTYPE
 /*#include "ace/Synch.h"*/
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_bencoding_scanner.h"
-#include "bittorrent_tools.h"
+#include "common_parser_bencoding_common.h"
 
 // *TODO*: this shouldn't be necessary
 /*#define yylex bencoding_lex*/
@@ -214,8 +214,8 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 %printer    { debug_stream () << $$; } <ival>
 %printer    { debug_stream () << *$$; } <sval>
 /*%printer    { yyoutput << BitTorrent_Tools::ListToString (*$$); } <eval>*/
-%printer    { debug_stream () << BitTorrent_Tools::ListToString (*$$); } <lval>
-%printer    { debug_stream () << BitTorrent_Tools::DictionaryToString (*$$); } <dval>
+%printer    { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*$$); } <lval>
+%printer    { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*$$); } <dval>
 
 %%
 %start            bencoding;

@@ -24,6 +24,8 @@
 #include "net_common.h"
 #include "net_iconnection.h"
 
+#include "common_parser_bencoding_common.h"
+
 #include "bittorrent_common.h"
 
 // forward declarations

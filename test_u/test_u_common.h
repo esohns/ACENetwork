@@ -25,9 +25,12 @@
 #include "ace/OS.h"
 #endif // GUI_SUPPORT
 
-#include "common_configuration.h"
 #include "common_istatistic.h"
 #include "common_statistic_handler.h"
+
+#include "common_parser_common.h"
+
+#include "common_signal_common.h"
 
 #if defined (GUI_SUPPORT)
 #include "common_ui_common.h"

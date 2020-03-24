@@ -52,46 +52,6 @@
 //  }
 //};
 
-// *NOTE*: the bencoding format is not really type-safe, so 'strict' languages
-//         like C/C++ need to jump through a few hoops here
-struct Bencoding_Element;
-typedef std::vector<Bencoding_Element*> Bencoding_List_t;
-typedef Bencoding_List_t::const_iterator Bencoding_ListIterator_t;
-//typedef std::unordered_map<std::string*,
-//                           Bencoding_Element*,
-//                           string_p_hash,
-//                           string_p_equal> Bencoding_Dictionary_t;
-typedef std::vector<std::pair<std::string*,
-                              Bencoding_Element*> > Bencoding_Dictionary_t;
-typedef Bencoding_Dictionary_t::const_iterator Bencoding_DictionaryIterator_t;
-
-struct Bencoding_Element
-{
-  Bencoding_Element ()
-   : type (BENCODING_TYPE_INVALID)
-  {}
-
-  enum Bencoding_ElementType
-  {
-    BENCODING_TYPE_INTEGER = 0,
-    BENCODING_TYPE_STRING,
-    BENCODING_TYPE_LIST,
-    BENCODING_TYPE_DICTIONARY,
-    //////////////////////////////////////
-    BENCODING_TYPE_MAX,
-    BENCODING_TYPE_INVALID
-  };
-
-  enum Bencoding_ElementType type;
-  union
-  {
-    ACE_INT64               integer;
-    std::string*            string;
-    Bencoding_List_t*       list;
-    Bencoding_Dictionary_t* dictionary;
-  };
-};
-
 //////////////////////////////////////////
 
 enum BitTorrent_MessageType

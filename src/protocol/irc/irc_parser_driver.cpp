@@ -27,6 +27,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
 
+#include "common_parser_defines.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
