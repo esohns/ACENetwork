@@ -68,6 +68,10 @@ elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/error>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser>)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal>)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer>)
 
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
@@ -76,6 +80,8 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log>)
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer>)
 

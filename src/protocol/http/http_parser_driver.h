@@ -66,7 +66,7 @@ class HTTP_ParserDriver_T
   virtual bool begin (const char*,   // buffer handle
                       unsigned int); // buffer size
   virtual void end ();
-  inline virtual const HTTP_IParser* const getP () const { return this; }
+  inline virtual const HTTP_IParser* const getP_2 () const { return this; }
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;

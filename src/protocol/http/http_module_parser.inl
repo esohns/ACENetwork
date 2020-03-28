@@ -731,9 +731,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       } // end IF
 
       // *TODO*: remove type inference
-      if (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT)
-        this->inherited::TASK_BASE_T::stop (false,  // wait for completion ?
-                                            false); // N/A
+      //if (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT)
+      this->inherited::TASK_BASE_T::stop (false,  // wait for completion ?
+                                          false); // N/A
 
       break;
     }
