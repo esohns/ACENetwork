@@ -36,8 +36,8 @@ class Net_TransportLayer_TCP
   inline virtual ~Net_TransportLayer_TCP () {}
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP (const Net_TransportLayer_TCP&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP& operator= (const Net_TransportLayer_TCP&));
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP (const Net_TransportLayer_TCP&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP& operator= (const Net_TransportLayer_TCP&))
 };
 
 #endif
