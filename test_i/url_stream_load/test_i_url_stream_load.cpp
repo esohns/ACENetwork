@@ -156,10 +156,6 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r        : use reactor [")
-            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: statistic reporting interval (second(s)) [")
             << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] [0: off]")
@@ -193,7 +189,6 @@ do_process_arguments (int argc_in,
                       std::string& hostName_out,
                       bool& logToFile_out,
                       unsigned short& port_out,
-                      bool& useReactor_out,
                       ACE_Time_Value& statisticReportingInterval_out,
                       bool& traceInformation_out,
                       std::string& URL_out,
@@ -233,8 +228,6 @@ do_process_arguments (int argc_in,
   hostName_out.clear ();
   logToFile_out = false;
   port_out = 0;
-  useReactor_out =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
                                                  : ACE_Time_Value::zero);
@@ -256,9 +249,9 @@ do_process_arguments (int argc_in,
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:lrs:tu:v"),
+                               ACE_TEXT ("cde:f:g:ls:tu:v"),
 #else
-                               ACE_TEXT ("de:f:g:lrs:tu:v"),
+                               ACE_TEXT ("de:f:g:ls:tu:v"),
 #endif
                                1,                         // skip command name
                                1,                         // report parsing errors
@@ -306,11 +299,6 @@ do_process_arguments (int argc_in,
       case 'l':
       {
         logToFile_out = true;
-        break;
-      }
-      case 'r':
-      {
-        useReactor_out = true;
         break;
       }
       case 's':
@@ -515,7 +503,6 @@ void
 do_work (bool debugParser_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
-         bool useReactor_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const std::string& URL_in,
          const ACE_INET_Addr& remoteHost_in,
@@ -639,10 +626,6 @@ do_work (bool debugParser_in,
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  if (useReactor_in)
-    configuration_in.dispatchConfiguration.numberOfReactorThreads = 1;
-  else
-    configuration_in.dispatchConfiguration.numberOfProactorThreads = 3;
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
@@ -699,8 +682,7 @@ do_work (bool debugParser_in,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
     goto clean;
   } // end IF
-  if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                       : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  if (!Common_Signal_Tools::initialize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -834,9 +816,9 @@ do_work (bool debugParser_in,
   return;
 
 clean:
-  Common_Tools::finalizeEventDispatch (useReactor_in,
-                                       !useReactor_in,
-                                       group_id);
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                       event_dispatch_state_s.reactorGroupId,
+                                       true);
   timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())
@@ -915,7 +897,6 @@ ACE_TMAIN (int argc_in,
   std::string ui_definition_file;
   bool log_to_file;
   unsigned short port;
-  bool use_reactor;
   ACE_Time_Value statistic_reporting_interval;
   bool trace_information;
   std::string url;
@@ -1016,8 +997,6 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
   log_to_file = false;
   port = HTTP_DEFAULT_SERVER_PORT;
-  use_reactor =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statistic_reporting_interval =
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
                                                  : ACE_Time_Value::zero);
@@ -1042,7 +1021,6 @@ ACE_TMAIN (int argc_in,
                              hostname,
                              log_to_file,
                              port,
-                             use_reactor,
                              statistic_reporting_interval,
                              trace_information,
                              url,
@@ -1130,7 +1108,7 @@ ACE_TMAIN (int argc_in,
     goto error;
   } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
-                                           use_reactor,
+                                           false,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
@@ -1145,8 +1123,7 @@ ACE_TMAIN (int argc_in,
     do_print_version (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                         ACE_DIRECTORY_SEPARATOR_CHAR))));
 
-    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -1205,7 +1182,6 @@ ACE_TMAIN (int argc_in,
   do_work (debug_parser,
            output_file,
            ui_definition_file,
-           use_reactor,
            statistic_reporting_interval,
            url,
            address,
@@ -1281,8 +1257,7 @@ ACE_TMAIN (int argc_in,
               elapsed_rusage.ru_nivcsw));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
@@ -1298,8 +1273,7 @@ ACE_TMAIN (int argc_in,
   return EXIT_SUCCESS;
 
 error:
-  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
