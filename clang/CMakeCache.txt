@@ -21,10 +21,10 @@ ACENetwork_BINARY_DIR:STATIC=/mnt/win_d/projects/ACENetwork/clang
 ACENetwork_DIR:PATH=/mnt/win_d/projects/ACENetwork/clang
 
 //Dependencies for the target
-ACENetwork_LIB_DEPENDS:STATIC=general;ACENetwork_WLAN;general;/media/erik/USB_BLACK/lib/ACE_TAO/ACE/lib/libACE.so;general;/media/erik/USB_BLACK/lib/ACE_TAO/ACE/lib/libACE_SSL.so;
+ACENetwork_LIB_DEPENDS:STATIC=general;/usr/lib/libdhcpctl.a;general;/usr/lib/libomapi.a;general;/usr/lib/x86_64-linux-gnu/libirs-export.so.161;general;/usr/lib/x86_64-linux-gnu/libisccfg-export.so.163;general;/usr/lib/x86_64-linux-gnu/libdns-export.so.1104;general;/usr/lib/x86_64-linux-gnu/libGeoIP.so.1;general;ssl;general;crypto;general;gssapi_krb5;general;/usr/lib/x86_64-linux-gnu/libisc-export.so.1100;general;json-c;general;xml2;general;ACENetwork_WLAN;general;/media/erik/USB_BLACK/lib/ACE_TAO/ACE/lib/libACE.so;general;/media/erik/USB_BLACK/lib/ACE_TAO/ACE/lib/libACE_SSL.so;
 
 //Dependencies for the target
-ACENetwork_Protocol_BitTorrent_LIB_DEPENDS:STATIC=general;Common;general;ACEStream;
+ACENetwork_Protocol_BitTorrent_LIB_DEPENDS:STATIC=general;Common;general;CommonParser;general;ACEStream;
 
 //Dependencies for the target
 ACENetwork_Protocol_DHCP_LIB_DEPENDS:STATIC=general;Common;general;CommonTimer;general;ACEStream;general;ACENetwork;
@@ -39,7 +39,7 @@ ACENetwork_Protocol_IRC_LIB_DEPENDS:STATIC=general;Common;general;ACEStream;
 ACENetwork_SOURCE_DIR:STATIC=/mnt/win_d/projects/ACENetwork
 
 //Dependencies for the target
-ACENetwork_Test_I_LIB_DEPENDS:STATIC=general;gmodule-2.0;general;gthread-2.0;general;gtk-x11-2.0;general;gdk-x11-2.0;general;pangocairo-1.0;general;atk-1.0;general;cairo;general;gdk_pixbuf-2.0;general;gio-2.0;general;pangoft2-1.0;general;pango-1.0;general;gobject-2.0;general;glib-2.0;general;fontconfig;general;freetype;general;CommonOpenGL;general;CommonUI_GTK;general;CommonUI;
+ACENetwork_Test_I_LIB_DEPENDS:STATIC=general;gtk-3;general;gdk-3;general;pangocairo-1.0;general;pango-1.0;general;atk-1.0;general;cairo-gobject;general;cairo;general;gdk_pixbuf-2.0;general;gio-2.0;general;gobject-2.0;general;glib-2.0;general;CommonOpenGL;general;CommonUI_GTK;general;CommonUI;
 
 //Dependencies for the target
 ACENetwork_Test_U_LIB_DEPENDS:STATIC=general;CommonUI;general;CommonOpenGL;general;GL;general;X11;general;CommonUI_GTK;general;Common;
@@ -47,8 +47,8 @@ ACENetwork_Test_U_LIB_DEPENDS:STATIC=general;CommonUI;general;CommonOpenGL;gener
 //Dependencies for the target
 ACENetwork_WLAN_LIB_DEPENDS:STATIC=general;iw;general;nl-genl-3;general;nl-3;general;dbus-1;general;nm;general;gio-2.0;general;gobject-2.0;general;glib-2.0;general;CommonDBus;general;ACENetwork;general;ACENetwork_Protocol_DHCP;
 
-//The directory containing a CMake configuration file for ACEStream.
-ACEStream_DIR:PATH=/mnt/win_d/projects/ACEStream/cmake
+//No help, variable specified on the command line.
+ACEStream_DIR:PATH=/mnt/win_d/projects/ACEStream/clang
 
 //searching for libACE.so (system paths)
 ACE_LIBRARY:FILEPATH=/media/erik/USB_BLACK/lib/ACE_TAO/ACE/lib/libACE.so
@@ -419,8 +419,8 @@ CURSES_NCURSES_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libncurses.so
 //curses support
 CURSES_SUPPORT:BOOL=ON
 
-//The directory containing a CMake configuration file for Common.
-Common_DIR:PATH=/mnt/win_d/projects/Common/cmake
+//No help, variable specified on the command line.
+Common_DIR:PATH=/mnt/win_d/projects/Common/clang
 
 //enable DBus/NetworkManager support
 DBUS_SUPPORT:BOOL=ON
@@ -456,7 +456,7 @@ FLEX_EXECUTABLE:FILEPATH=/usr/bin/flex
 FLEX_INCLUDE_DIR:PATH=/usr/include
 
 //searching for libfl.so (system paths)
-FLEX_LIBRARY:FILEPATH=FLEX_LIBRARY-NOTFOUND
+FLEX_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libfl.so
 
 //Path to the fl library
 FL_LIBRARY:FILEPATH=/usr/lib/libfl.a
@@ -488,7 +488,10 @@ GTK2_USE:STRING=ON
 //enable Gtk3 support
 GTK3_SUPPORT:BOOL=ON
 
-//enable GTK GL support
+//use GTK3
+GTK3_USE:STRING=ON
+
+//enable GtkGLArea support
 GTKGLAREA_SUPPORT:BOOL=ON
 
 //enable GTK OpenGL support
@@ -606,7 +609,7 @@ NL80211_USE:STRING=ON
 OMAPI_LIBRARY:FILEPATH=/usr/lib/libomapi.a
 
 //Path to a file.
-OPENGL_EGL_INCLUDE_DIR:PATH=OPENGL_EGL_INCLUDE_DIR-NOTFOUND
+OPENGL_EGL_INCLUDE_DIR:PATH=/usr/include
 
 //Path to a file.
 OPENGL_GLX_INCLUDE_DIR:PATH=/usr/include
@@ -769,6 +772,39 @@ pkgcfg_lib_PKG_GTK_2_pangocairo-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libpangoc
 
 //Path to a library.
 pkgcfg_lib_PKG_GTK_2_pangoft2-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_atk-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libatk-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_cairo:FILEPATH=/usr/lib/x86_64-linux-gnu/libcairo.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_cairo-gobject:FILEPATH=/usr/lib/x86_64-linux-gnu/libcairo-gobject.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_gdk-3:FILEPATH=/usr/lib/x86_64-linux-gnu/libgdk-3.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_gdk_pixbuf-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_gio-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgio-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_glib-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libglib-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_gobject-2.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libgobject-2.0.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_gtk-3:FILEPATH=/usr/lib/x86_64-linux-gnu/libgtk-3.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_pango-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libpango-1.0.so
+
+//Path to a library.
+pkgcfg_lib_PKG_GTK_3_pangocairo-1.0:FILEPATH=/usr/lib/x86_64-linux-gnu/libpangocairo-1.0.so
 
 //Path to a library.
 pkgcfg_lib_PKG_JSON_json-c:FILEPATH=/usr/lib/x86_64-linux-gnu/libjson-c.so
@@ -1088,7 +1124,7 @@ DHCP_CLIENT_IMPLEMENTATION_LAST-ADVANCED:INTERNAL=1
 //Details about finding Curses
 FIND_PACKAGE_MESSAGE_DETAILS_Curses:INTERNAL=[/usr/lib/x86_64-linux-gnu/libcurses.so][/usr/include][v()]
 //Details about finding FLEX
-FIND_PACKAGE_MESSAGE_DETAILS_FLEX:INTERNAL=[/usr/bin/flex][v2.5.4()]
+FIND_PACKAGE_MESSAGE_DETAILS_FLEX:INTERNAL=[/usr/bin/flex][v2.6.4()]
 //Details about finding LibXml2
 FIND_PACKAGE_MESSAGE_DETAILS_LibXml2:INTERNAL=[/usr/lib/x86_64-linux-gnu/libxml2.so][/usr/include/libxml2][v2.9.4()]
 //Details about finding OpenGL
@@ -1113,6 +1149,8 @@ GDB_COMMAND-ADVANCED:INTERNAL=1
 GDB_ROOT_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: GTK2_USE
 GTK2_USE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: GTK3_USE
+GTK3_USE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: GTK_USE
 GTK_USE-ADVANCED:INTERNAL=1
 //STRINGS property for variable: GTK_VERSION
@@ -1421,26 +1459,36 @@ PKG_GTK_2_gtk+-2.0_INCLUDEDIR:INTERNAL=/usr/include
 PKG_GTK_2_gtk+-2.0_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
 PKG_GTK_2_gtk+-2.0_PREFIX:INTERNAL=/usr
 PKG_GTK_2_gtk+-2.0_VERSION:INTERNAL=2.24.32
-PKG_GTK_3_CFLAGS:INTERNAL=
+PKG_GTK_3_CFLAGS:INTERNAL=-pthread;-I/usr/include/gtk-3.0;-I/usr/include/at-spi2-atk/2.0;-I/usr/include/at-spi-2.0;-I/usr/include/dbus-1.0;-I/usr/lib/x86_64-linux-gnu/dbus-1.0/include;-I/usr/include/gtk-3.0;-I/usr/include/gio-unix-2.0;-I/usr/include/cairo;-I/usr/include/libdrm;-I/usr/include/pango-1.0;-I/usr/include/harfbuzz;-I/usr/include/pango-1.0;-I/usr/include/fribidi;-I/usr/include/atk-1.0;-I/usr/include/cairo;-I/usr/include/pixman-1;-I/usr/include/uuid;-I/usr/include/freetype2;-I/usr/include/libpng16;-I/usr/include/gdk-pixbuf-2.0;-I/usr/include/libmount;-I/usr/include/blkid;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 PKG_GTK_3_CFLAGS_I:INTERNAL=
-PKG_GTK_3_CFLAGS_OTHER:INTERNAL=
-PKG_GTK_3_FOUND:INTERNAL=
-PKG_GTK_3_INCLUDEDIR:INTERNAL=
-PKG_GTK_3_LIBDIR:INTERNAL=
+PKG_GTK_3_CFLAGS_OTHER:INTERNAL=-pthread
+PKG_GTK_3_FOUND:INTERNAL=1
+PKG_GTK_3_INCLUDEDIR:INTERNAL=/usr/include
+PKG_GTK_3_INCLUDE_DIRS:INTERNAL=/usr/include/gtk-3.0;/usr/include/at-spi2-atk/2.0;/usr/include/at-spi-2.0;/usr/include/dbus-1.0;/usr/lib/x86_64-linux-gnu/dbus-1.0/include;/usr/include/gtk-3.0;/usr/include/gio-unix-2.0;/usr/include/cairo;/usr/include/libdrm;/usr/include/pango-1.0;/usr/include/harfbuzz;/usr/include/pango-1.0;/usr/include/fribidi;/usr/include/atk-1.0;/usr/include/cairo;/usr/include/pixman-1;/usr/include/uuid;/usr/include/freetype2;/usr/include/libpng16;/usr/include/gdk-pixbuf-2.0;/usr/include/libmount;/usr/include/blkid;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PKG_GTK_3_LDFLAGS:INTERNAL=-lgtk-3;-lgdk-3;-lpangocairo-1.0;-lpango-1.0;-latk-1.0;-lcairo-gobject;-lcairo;-lgdk_pixbuf-2.0;-lgio-2.0;-lgobject-2.0;-lglib-2.0
+PKG_GTK_3_LDFLAGS_OTHER:INTERNAL=
+PKG_GTK_3_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+PKG_GTK_3_LIBRARIES:INTERNAL=gtk-3;gdk-3;pangocairo-1.0;pango-1.0;atk-1.0;cairo-gobject;cairo;gdk_pixbuf-2.0;gio-2.0;gobject-2.0;glib-2.0
+PKG_GTK_3_LIBRARY_DIRS:INTERNAL=
 PKG_GTK_3_LIBS:INTERNAL=
 PKG_GTK_3_LIBS_L:INTERNAL=
 PKG_GTK_3_LIBS_OTHER:INTERNAL=
 PKG_GTK_3_LIBS_PATHS:INTERNAL=
-PKG_GTK_3_PREFIX:INTERNAL=
-PKG_GTK_3_STATIC_CFLAGS:INTERNAL=
+PKG_GTK_3_PREFIX:INTERNAL=/usr
+PKG_GTK_3_STATIC_CFLAGS:INTERNAL=-pthread;-I/usr/include/gtk-3.0;-I/usr/include/at-spi2-atk/2.0;-I/usr/include/at-spi-2.0;-I/usr/include/dbus-1.0;-I/usr/lib/x86_64-linux-gnu/dbus-1.0/include;-I/usr/include/gtk-3.0;-I/usr/include/gio-unix-2.0;-I/usr/include/cairo;-I/usr/include/libdrm;-I/usr/include/pango-1.0;-I/usr/include/harfbuzz;-I/usr/include/pango-1.0;-I/usr/include/fribidi;-I/usr/include/atk-1.0;-I/usr/include/cairo;-I/usr/include/pixman-1;-I/usr/include/uuid;-I/usr/include/freetype2;-I/usr/include/libpng16;-I/usr/include/gdk-pixbuf-2.0;-I/usr/include/libmount;-I/usr/include/blkid;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 PKG_GTK_3_STATIC_CFLAGS_I:INTERNAL=
-PKG_GTK_3_STATIC_CFLAGS_OTHER:INTERNAL=
+PKG_GTK_3_STATIC_CFLAGS_OTHER:INTERNAL=-pthread
+PKG_GTK_3_STATIC_INCLUDE_DIRS:INTERNAL=/usr/include/gtk-3.0;/usr/include/at-spi2-atk/2.0;/usr/include/at-spi-2.0;/usr/include/dbus-1.0;/usr/lib/x86_64-linux-gnu/dbus-1.0/include;/usr/include/gtk-3.0;/usr/include/gio-unix-2.0;/usr/include/cairo;/usr/include/libdrm;/usr/include/pango-1.0;/usr/include/harfbuzz;/usr/include/pango-1.0;/usr/include/fribidi;/usr/include/atk-1.0;/usr/include/cairo;/usr/include/pixman-1;/usr/include/uuid;/usr/include/freetype2;/usr/include/libpng16;/usr/include/gdk-pixbuf-2.0;/usr/include/libmount;/usr/include/blkid;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+PKG_GTK_3_STATIC_LDFLAGS:INTERNAL=-lgtk-3;-latk-bridge-2.0;-latspi;-lXtst;-ldbus-1;-lpthread;-lsystemd;-lgdk-3;-lXinerama;-lXi;-lXrandr;-lXcursor;-lXcomposite;-lxkbcommon;-lwayland-cursor;-lwayland-egl;-lwayland-client;-lepoxy;-ldl;-lGL;-lpthread;-pthread;-lm;-ldl;-lEGL;-lpthread;-pthread;-lm;-ldl;-lXdamage;-lXfixes;-lX11-xcb;-lxcb-glx;-lxcb-dri2;-lXxf86vm;-ldrm;-lpangocairo-1.0;-lpangoft2-1.0;-lharfbuzz;-lm;-lgraphite2;-lpango-1.0;-lm;-lfribidi;-latk-1.0;-lcairo-gobject;-lcairo;-lz;-lpixman-1;-lfontconfig;-luuid;-lexpat;-lfreetype;-lpng16;-lm;-lz;-lm;-lxcb-shm;-lxcb-render;-lXrender;-lXext;-lX11;-lpthread;-lxcb;-lXau;-lXdmcp;-lgdk_pixbuf-2.0;-lm;-lgio-2.0;-ldl;-pthread;-lresolv;-pthread;-lgmodule-2.0;-ldl;-lz;-lmount;-lblkid;-lselinux;-lsepol;-lpcre2-8;-pthread;-lgobject-2.0;-pthread;-lffi;-lglib-2.0;-pthread;-lpcre;-pthread
+PKG_GTK_3_STATIC_LDFLAGS_OTHER:INTERNAL=-pthread
 PKG_GTK_3_STATIC_LIBDIR:INTERNAL=
+PKG_GTK_3_STATIC_LIBRARIES:INTERNAL=gtk-3;atk-bridge-2.0;atspi;Xtst;dbus-1;pthread;systemd;gdk-3;Xinerama;Xi;Xrandr;Xcursor;Xcomposite;xkbcommon;wayland-cursor;wayland-egl;wayland-client;epoxy;dl;GL;pthread;m;dl;EGL;pthread;m;dl;Xdamage;Xfixes;X11-xcb;xcb-glx;xcb-dri2;Xxf86vm;drm;pangocairo-1.0;pangoft2-1.0;harfbuzz;m;graphite2;pango-1.0;m;fribidi;atk-1.0;cairo-gobject;cairo;z;pixman-1;fontconfig;uuid;expat;freetype;png16;m;z;m;xcb-shm;xcb-render;Xrender;Xext;X11;pthread;xcb;Xau;Xdmcp;gdk_pixbuf-2.0;m;gio-2.0;dl;resolv;gmodule-2.0;dl;z;mount;blkid;selinux;sepol;pcre2-8;gobject-2.0;ffi;glib-2.0;pcre
+PKG_GTK_3_STATIC_LIBRARY_DIRS:INTERNAL=
 PKG_GTK_3_STATIC_LIBS:INTERNAL=
 PKG_GTK_3_STATIC_LIBS_L:INTERNAL=
 PKG_GTK_3_STATIC_LIBS_OTHER:INTERNAL=
 PKG_GTK_3_STATIC_LIBS_PATHS:INTERNAL=
-PKG_GTK_3_VERSION:INTERNAL=
+PKG_GTK_3_VERSION:INTERNAL=3.24.12
 PKG_GTK_3_gmodule-2.0_INCLUDEDIR:INTERNAL=
 PKG_GTK_3_gmodule-2.0_LIBDIR:INTERNAL=
 PKG_GTK_3_gmodule-2.0_PREFIX:INTERNAL=
@@ -1822,6 +1870,7 @@ __pkg_config_arguments_PKG_CAP:INTERNAL=REQUIRED;libcap
 __pkg_config_arguments_PKG_DBUS:INTERNAL=dbus-1;libnm
 __pkg_config_arguments_PKG_FFMPEG:INTERNAL=REQUIRED;libavcodec;libavutil;libavformat;libswscale
 __pkg_config_arguments_PKG_GTK_2:INTERNAL=gmodule-2.0;gthread-2.0;gtk+-2.0
+__pkg_config_arguments_PKG_GTK_3:INTERNAL=gtk+-3.0
 __pkg_config_arguments_PKG_JSON:INTERNAL=json-c
 __pkg_config_arguments_PKG_KRB5_GSSAPI:INTERNAL=krb5-gssapi
 __pkg_config_arguments_PKG_LIBNL:INTERNAL=REQUIRED;libnl-3.0

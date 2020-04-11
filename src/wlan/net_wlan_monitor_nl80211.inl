@@ -605,7 +605,7 @@ Net_WLAN_Monitor_T<AddressType,
     isRegistered_ = false;
   } // end IF
 
-  nl_close (inherited::socketHandle_); nl_socket_free (inherited::socketHandle_); inherited::socketHandle_ = NULL;
+  /*nl_close (inherited::socketHandle_);*/ nl_socket_free (inherited::socketHandle_); inherited::socketHandle_ = NULL;
   inherited::stop (waitForCompletion_in,
                    lockedAccess_in);
   inherited::isActive_ = false;

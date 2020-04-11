@@ -488,7 +488,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       ConnectionManagerType* connection_manager_p =
         ConnectionManagerType::SINGLETON_T::instance ();
       ACE_ASSERT (connection_manager_p);
-      bool clone_module = false, delete_module = false;
+      bool clone_module = false;//, delete_module = false;
       typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
       bool reset_configuration = false;
       ACE_Time_Value deadline = ACE_Time_Value::zero;
@@ -496,7 +496,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //      bool use_reactor = false;
       //Net_ConnectionConfigurationsIterator_t iterator;
-      bool write_only = false;
+//      bool write_only = false;
 //      struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
       // sanity check(s)
