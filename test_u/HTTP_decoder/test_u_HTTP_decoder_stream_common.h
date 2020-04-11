@@ -21,6 +21,8 @@
 #ifndef TEST_U_HTTP_DECODER_STREAM_COMMON_H
 #define TEST_U_HTTP_DECODER_STREAM_COMMON_H
 
+#include <string>
+
 #include "ace/Synch_Traits.h"
 
 #include "common_configuration.h"
@@ -105,6 +107,26 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+class Test_U_ConnectionConfiguration
+ : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
+                                        Test_U_StreamConfiguration_t,
+                                        NET_TRANSPORTLAYER_TCP>
+{
+ public:
+  Test_U_ConnectionConfiguration ()
+   : Net_ConnectionConfiguration_T ()
+  {}
+};
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          Test_U_ConnectionConfiguration,
+                          struct Net_StreamConnectionState,
+                          HTTP_Statistic_t> Test_U_IConnection_t;
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 Test_U_ConnectionConfiguration,
+                                 struct Net_StreamConnectionState,
+                                 HTTP_Statistic_t,
+                                 struct Net_UserData> Test_U_IConnectionManager_t;
 struct Test_U_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {

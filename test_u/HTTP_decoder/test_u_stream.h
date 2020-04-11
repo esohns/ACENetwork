@@ -48,14 +48,14 @@
 #include "test_u_common.h"
 
 //#include "test_u_connection_common.h"
-//#include "test_u_HTTP_decoder_common.h"
+#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declarations
 struct Test_U_HTTPDecoder_StreamState;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
-struct Test_U_HTTPDecoder_SessionData;
-typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
+//struct Test_U_HTTPDecoder_SessionData;
+//typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
                                 struct Common_Parser_FlexAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
@@ -68,16 +68,16 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
-class Test_U_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-                                        Test_U_StreamConfiguration_t,
-                                        NET_TRANSPORTLAYER_TCP>
-{
- public:
-  Test_U_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
-  {}
-};
+//class Test_U_ConnectionConfiguration
+// : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
+//                                        Test_U_StreamConfiguration_t,
+//                                        NET_TRANSPORTLAYER_TCP>
+//{
+// public:
+//  Test_U_ConnectionConfiguration ()
+//   : Net_ConnectionConfiguration_T ()
+//  {}
+//};
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_U_ConnectionConfiguration,
