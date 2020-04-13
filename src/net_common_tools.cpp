@@ -3652,6 +3652,28 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
   return true;
 }
 
+ACE_UINT32
+Net_Common_Tools::getAddress (std::string& hostName_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getAddress"));
+
+  ACE_INET_Addr inet_address;
+
+  int result = inet_address.set (0,
+                                 hostName_in.c_str (),
+                                 1,
+                                 AF_INET);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (hostName_in.c_str ())));
+    return 0;
+  } // end IF
+
+  return inet_address.get_ip_address ();
+}
+
 bool
 Net_Common_Tools::getHostname (std::string& hostname_out)
 {

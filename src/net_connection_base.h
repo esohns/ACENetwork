@@ -85,7 +85,7 @@ class Net_ConnectionBase_T
 
  protected:
   // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_ConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline Net_ConnectionBase_T () : inherited (1, true) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   Net_ConnectionBase_T (bool); // managed ?
 
   // implement Common_IRegister

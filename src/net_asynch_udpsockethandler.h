@@ -28,7 +28,7 @@
 #include "ace/Notification_Strategy.h"
 
 #include "common_iinitialize.h"
-#include "common_referencecounter_base.h"
+#include "common_counter.h"
 
 #include "net_sockethandler_base.h"
 
@@ -81,17 +81,17 @@ class Net_AsynchUDPSocketHandler_T
   // implement (part of) Net_IAsynchSocketHandler
   virtual bool initiate_read ();
 
-  ACE_INET_Addr               address_;
+  ACE_INET_Addr          address_;
   // the number of open write (i.e. send) requests
-  Common_ReferenceCounterBase counter_;
+  mutable Common_Counter counter_;
 #if defined (ACE_LINUX)
-  bool                        errorQueue_;
+  bool                   errorQueue_;
 #endif // ACE_LINUX
-  ACE_Asynch_Read_Dgram       inputStream_;
-  ACE_Asynch_Write_Dgram      outputStream_;
-  unsigned int                PDUSize_;
+  ACE_Asynch_Read_Dgram  inputStream_;
+  ACE_Asynch_Write_Dgram outputStream_;
+  unsigned int           PDUSize_; // --> MTU
   // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
-  ACE_HANDLE                  writeHandle_;
+  ACE_HANDLE             writeHandle_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T (const Net_AsynchUDPSocketHandler_T&))

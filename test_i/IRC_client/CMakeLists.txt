@@ -236,6 +236,9 @@ endif (UNIX)
 
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 
+if (WIN32)
+ target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
+endif (WIN32)
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
 target_link_libraries (${EXECUTABLE} CommonSignal)
@@ -349,6 +352,9 @@ endif (UNIX)
 
 target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 
+if (WIN32)
+ target_link_options (${EXECUTABLE_GUI} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
+endif (WIN32)
 target_link_libraries (${EXECUTABLE_GUI} Common)
 target_link_libraries (${EXECUTABLE_GUI} CommonLog)
 target_link_libraries (${EXECUTABLE_GUI} CommonSignal)

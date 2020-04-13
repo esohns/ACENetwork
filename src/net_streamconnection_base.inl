@@ -254,8 +254,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration_);
   //if (!inherited2::configuration_->useThreadPerConnection)
-  //  inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
-  //    &(inherited::notificationStrategy_);
+  inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
+    &(inherited::notificationStrategy_);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration_),
                                      inherited2::state_.handle)))
   {

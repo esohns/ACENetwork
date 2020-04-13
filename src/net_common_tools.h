@@ -173,6 +173,8 @@ class Net_Common_Tools
 //  static ACE_INET_Addr getLocalAddress (std::string&); // interface
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
+  // *IMPORTANT NOTE*: return value is in host byte order
+  static ACE_UINT32 getAddress (std::string&);  // host name
 
   // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
   //         policy (e.g. routing table entry metric/priority/...).

@@ -27,7 +27,7 @@
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
 
-#include "common_referencecounter_base.h"
+#include "common_counter.h"
 
 #include "net_sockethandler_base.h"
 
@@ -73,16 +73,15 @@ class Net_AsynchTCPSocketHandler_T
   virtual bool initiate_read ();
 
   // the number of open write (i.e. send) requests
-  mutable Common_ReferenceCounterBase counter_;
-  ACE_Asynch_Read_Stream              inputStream_;
-  ACE_Asynch_Write_Stream             outputStream_;
-  bool                                partialWrite_;
-  //unsigned int                        PDUSize_;
-  ACE_INET_Addr                       localSAP_;
-  ACE_INET_Addr                       peerSAP_;
+  mutable Common_Counter  counter_;
+  ACE_Asynch_Read_Stream  inputStream_;
+  ACE_Asynch_Write_Stream outputStream_;
+  bool                    partialWrite_;
+  ACE_INET_Addr           localSAP_;
+  ACE_INET_Addr           peerSAP_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  ACE_HANDLE                          writeHandle_;
+  ACE_HANDLE              writeHandle_;
 #endif
 
  private:

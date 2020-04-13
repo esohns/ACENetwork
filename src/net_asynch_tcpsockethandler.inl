@@ -38,7 +38,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                                                         // event handler handle
                ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) // mask
- , counter_ (0) // initial count
+ , counter_ (0)
  , inputStream_ ()
  , outputStream_ ()
  , partialWrite_ (false)
