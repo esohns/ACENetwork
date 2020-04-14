@@ -33,7 +33,7 @@
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN32
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -572,7 +572,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
+                         struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -589,19 +589,22 @@ do_work (unsigned int maximumNumberOfConnections_in,
     UIDefinitionFile_in.empty ();
   configuration_in.protocolConfiguration.transportLayer = protocol_in;
   // ********************** stream configuration data **************************
-  configuration_in.streamConfiguration.configuration_.cloneModule =
-    !(UIDefinitionFile_in.empty ());
-  configuration_in.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
-  configuration_in.streamConfiguration.configuration_.module =
+  struct Stream_ModuleConfiguration module_configuration;
+  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_U_StreamConfiguration stream_configuration;
+  stream_configuration.cloneModule = !(UIDefinitionFile_in.empty ());
+  stream_configuration.messageAllocator = &message_allocator;
+  stream_configuration.module =
 #if defined (GUI_SUPPORT)
       (!UIDefinitionFile_in.empty () ? &event_handler
                                      : NULL);
 #else
       NULL;
 #endif // GUI_SUPPORT
-  struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  // *TODO*: is this correct ?
+  stream_configuration.serializeOutput =
+    (useReactor_in && (numberOfDispatchThreads_in > 1));
+
   modulehandler_configuration.computeThroughput = true;
   modulehandler_configuration.printFinalReport = true;
   modulehandler_configuration.protocolConfiguration =
@@ -618,12 +621,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GUI_SUPPORT
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
-                                                   configuration_in.streamConfiguration.allocatorConfiguration_,
-                                                   configuration_in.streamConfiguration.configuration_);
-
-  // *TODO*: is this correct ?
-  configuration_in.streamConfiguration.configuration_.serializeOutput =
-    (useReactor_in && (numberOfDispatchThreads_in > 1));
+                                                   stream_configuration);
 
   // ********************** connection configuration data **********************
   Test_U_TCPConnectionConfiguration connection_configuration;
@@ -637,8 +635,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //  &connection_configuration;
 
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.initialize (configuration_in.allocatorConfiguration,
-                                       configuration_in.streamConfiguration);
+  connection_configuration.initialize (configuration_in.streamConfiguration);
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                     &connection_configuration));
   iterator =
@@ -648,8 +645,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     dynamic_cast<Test_U_TCPConnectionConfiguration*> ((*iterator).second);
   ACE_ASSERT (connection_configuration_p);
   connection_configuration_2.messageAllocator = &message_allocator;
-  connection_configuration_2.initialize (configuration_in.allocatorConfiguration,
-    configuration_in.streamConfiguration);
+  connection_configuration_2.initialize (configuration_in.streamConfiguration);
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
                                                                     &connection_configuration_2));
   iterator_2 =
@@ -1502,7 +1498,7 @@ ACE_TMAIN (int argc_in,
   // step1g: set process resource limits
   // *NOTE*: settings will be inherited by any child processes
   // *TODO*: the reasoning here is incomplete
-  bool use_fd_based_reactor = use_reactor;
+  bool use_fd_based_reactor = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
     (use_reactor && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));

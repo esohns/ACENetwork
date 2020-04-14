@@ -254,9 +254,11 @@ endif (GUI_SUPPORT)
 
 set (source_files
      test_u_common.h
+     test_u_common_tools.cpp
+     test_u_common_tools.h
      test_u_connection_common.h
      test_u_defines.h
-     test_u_socket_common.h
+     test_u_network_common.h
      test_u_stream_common.h)
 if (GUI_SUPPORT)
  if (CURSES_USE)

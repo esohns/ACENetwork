@@ -96,12 +96,12 @@ template <typename SessionDataType, // *NOTE*: this implements Common_IReference
           typename UserDataType>
 class BitTorrent_Message_T
  : public Stream_DataMessageBase_2<Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
-                                   struct Common_Parser_FlexAllocatorConfiguration,
+//                                   struct Common_Parser_FlexAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    enum BitTorrent_MessageType>
 {
   typedef Stream_DataMessageBase_2<Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
-                                   struct Common_Parser_FlexAllocatorConfiguration,
+//                                   struct Common_Parser_FlexAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    enum BitTorrent_MessageType> inherited;
 
@@ -173,18 +173,18 @@ template <typename SessionDataType, // *NOTE*: this implements Common_IReference
           typename UserDataType>
 class BitTorrent_TrackerMessage_T
  : public Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
-                                   struct Common_Parser_FlexAllocatorConfiguration,
+//                                   struct Common_Parser_FlexAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    HTTP_Method_t>
 {
   typedef Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
-                                   struct Common_Parser_FlexAllocatorConfiguration,
+//                                   struct Common_Parser_FlexAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    HTTP_Method_t> inherited;
 
   // grant access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-  //                                               struct Common_Parser_FlexAllocatorConfiguration,
+  //                                               struct Common_AllocatorConfiguration,
   //                                               Stream_ControlMessage_T<enum Stream_ControlMessageType,
   //                                                                       struct Common_Parser_FlexAllocatorConfiguration,
   //                                                                       BitTorrent_TrackerMessage_T<SessionDataType,
@@ -196,11 +196,8 @@ class BitTorrent_TrackerMessage_T
   //                                               BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
   //                                                                           UserDataType> >;
   friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               struct Common_Parser_FlexAllocatorConfiguration,
-                                               Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                                                       BitTorrent_TrackerMessage_T<SessionDataType,
-                                                                                                   UserDataType>,
-                                                                       struct Common_Parser_FlexAllocatorConfiguration>,
+                                               struct Common_AllocatorConfiguration,
+                                               Stream_ControlMessage_t,
                                                BitTorrent_TrackerMessage_T<SessionDataType,
                                                                            UserDataType>,
                                                BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,

@@ -1506,7 +1506,7 @@ ACE_TMAIN (int argc_in,
   // step1g: set process resource limits
   // *NOTE*: settings will be inherited by any child processes
   // *TODO*: the reasoning here is incomplete
-  bool use_fd_based_reactor = use_reactor;
+  bool use_fd_based_reactor = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
     (use_reactor && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));

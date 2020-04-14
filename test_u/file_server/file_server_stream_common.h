@@ -132,4 +132,12 @@ struct FileServer_StreamConfiguration
   //struct Net_UserData*   userData;   // user data
 };
 
+//////////////////////////////////////////
+
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Common_Parser_FlexAllocatorConfiguration,
+                                          Test_U_ControlMessage_t,
+                                          Test_U_Message,
+                                          Test_U_SessionMessage> Test_U_MessageAllocator_t;
+
 #endif

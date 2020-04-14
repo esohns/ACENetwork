@@ -19,8 +19,8 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
-#include "test_u_HTTP_decoder_stream_common.h"
+//#include "ace/Synch.h"
+//#include "test_u_HTTP_decoder_stream_common.h"
 #include "test_u_message.h"
 
 #include "ace/Log_Msg.h"

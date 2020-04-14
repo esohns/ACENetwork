@@ -58,7 +58,7 @@
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
-#include "test_u_stream_common.h"
+#include "net_client_stream_common.h"
 
 // forward declarations
 class Test_U_SessionMessage;

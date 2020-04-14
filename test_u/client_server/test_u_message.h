@@ -40,20 +40,20 @@ class ACE_Message_Block;
 class Test_U_SessionMessage;
 
 class Test_U_Message
- : public Stream_MessageBase_2<struct Common_Parser_FlexAllocatorConfiguration,
+ : public Stream_MessageBase_2<//struct Common_Parser_FlexAllocatorConfiguration,
                                enum Stream_MessageType,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t>
 {
-  typedef Stream_MessageBase_2<struct Common_Parser_FlexAllocatorConfiguration,
+  typedef Stream_MessageBase_2<//struct Common_Parser_FlexAllocatorConfiguration,
                                enum Stream_MessageType,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t> inherited;
 
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_Parser_FlexAllocatorConfiguration,
-                                                 Test_U_ControlMessage_t,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 

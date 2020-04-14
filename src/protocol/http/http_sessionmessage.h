@@ -49,11 +49,16 @@ template <typename AllocatorType,
           ////////////////////////////////
           typename UserDataType>
 class HTTP_SessionMessage_T
- : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<//struct Stream_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       SessionDataType,
                                       UserDataType>
 {
+  typedef Stream_SessionMessageBase_T<//struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      SessionDataType,
+                                      UserDataType> inherited;
+
   // enable access to specific private ctors
   friend AllocatorType;
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -90,11 +95,6 @@ class HTTP_SessionMessage_T
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
-                                      SessionDataType,
-                                      UserDataType> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (HTTP_SessionMessage_T ())
   // copy ctor (to be used by duplicate())
   HTTP_SessionMessage_T (const HTTP_SessionMessage_T&);

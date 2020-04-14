@@ -24,8 +24,10 @@
 #include <map>
 #include <string>
 
+#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
+//#include "ace/Synch_Traits.h"
+#include "ace/Thread_Mutex.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_icontrol.h"
@@ -62,10 +64,10 @@ class BitTorrent_Control_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T (const BitTorrent_Control_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T& operator= (const BitTorrent_Control_T&))
 
-  ACE_SYNCH_CONDITION       condition_;
-  SessionConfigurationType* configuration_;
-  ACE_SYNCH_MUTEX           lock_;
-  SESSIONS_T                sessions_;
+  ACE_Condition_Thread_Mutex condition_;
+  SessionConfigurationType*  configuration_;
+  ACE_Thread_Mutex           lock_;
+  SESSIONS_T                 sessions_;
 };
 
 // include template definition

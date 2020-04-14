@@ -19,9 +19,9 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
-#include "test_u_message.h"
-#include "test_u_stream.h"
+//#include "ace/Synch.h"
+//#include "test_u_message.h"
+//#include "test_u_stream.h"
 #include "test_u_tcpconnection.h"
 
 #include "ace/Log_Msg.h"
@@ -47,11 +47,11 @@ Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (bool managed_in)
 
 //////////////////////////////////////////
 
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 Test_U_SSLConnection::Test_U_SSLConnection (bool managed_in)
  : inherited (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SSLConnection::Test_U_SSLConnection"));
 
 }
-#endif // SSL_USE
+#endif // SSL_SUPPORT

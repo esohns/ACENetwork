@@ -173,9 +173,16 @@ Net_Client_AsynchConnector_T<HandlerType,
              static_cast<ICONNECTOR_T*> (this)); // asynchronous completion token
   if (unlikely (result == -1))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if ((error != EBADF) &&  // 9: happens on Linux
+        (error != EFAULT) && // 14: happens on Linux
+        (error != EINVAL))   // 22: happens on Linux
+#endif // ACE_WIN32 || ACE_WIN64
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
 
@@ -284,9 +291,14 @@ Net_Client_AsynchConnector_T<HandlerType,
                               COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   if (unlikely (result == -1))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Connect_Impl::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteAddress_in).c_str ())));
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != EINVAL) // 22: happens on Linux
+#endif // ACE_WIN32 || ACE_WIN64
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Connect_Impl::connect(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteAddress_in).c_str ())));
     goto error;
   } // end IF
 
@@ -428,6 +440,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   //if (error_in != ECONNREFUSED) // happens intermittently on Win32
   if (unlikely (error_in))
+  {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("0x%@: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
@@ -435,12 +448,15 @@ Net_Client_AsynchConnector_T<HandlerType,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
                 ACE::sock_error (static_cast<int> (error_in))));
 #else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%d: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                connectHandle_in,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
-                ACE_TEXT (ACE_OS::strerror (error_in))));
+    if ((error_in != EBADF) && // 9: happens on Linux
+        (error_in != EFAULT))  // 14: happens on Linux
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%d: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
+                  connectHandle_in,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
+                  ACE_TEXT (ACE_OS::strerror (error_in))));
 #endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
 }
 
 template <typename HandlerType,
@@ -482,9 +498,9 @@ Net_Client_AsynchConnector_T<HandlerType,
   // prevent race condition in wait()
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, -1);
     iterator = handles_.find (result_in.connect_handle ());
-    ACE_ASSERT (iterator != handles_.end ());
-    (*iterator).second =
-      ((result_in.success () == 0) ? static_cast<int> (result_in.error ()) : 0);
+    if (iterator != handles_.end ()) // *TODO*: when does this fail ?
+      (*iterator).second =
+        ((result_in.success () == 0) ? static_cast<int> (result_in.error ()) : 0);
   } // end lock scope
   // signal completion
   result = condition_.broadcast ();

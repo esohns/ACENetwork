@@ -19,11 +19,11 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
 #include "irc_statemachine_registration.h"
 
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
+#include "ace/Synch.h"
 
 #include "net_macros.h"
 

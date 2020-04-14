@@ -19,9 +19,9 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
-#include "test_u_message.h"
-#include "test_u_stream.h"
+//#include "ace/Synch.h"
+//#include "test_u_message.h"
+//#include "test_u_stream.h"
 #include "test_u_sessionmessage.h"
 
 #include "ace/Log_Msg.h"
@@ -32,7 +32,7 @@
 Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
                                               enum Stream_SessionMessageType messageType_in,
                                               Test_U_StreamSessionData_t*& sessionData_inout,
-                                              struct Net_UserData* userData_in)
+                                              struct Stream_UserData* userData_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_inout,

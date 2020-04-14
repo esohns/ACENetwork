@@ -30,23 +30,22 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Time_Value.h"
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Acceptor.h"
 #include "ace/SSL/SSL_SOCK_Connector.h"
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 #include "common_timer_manager_common.h"
 
 #include "net_tcpconnection_base.h"
 
-#include "net_client_common.h"
+#include "test_u_network_common.h"
 
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
-#include "test_u_socket_common.h"
+#include "test_u_stream.h"
 
-// forward declarations
-class Test_U_Stream;
+#include "net_client_common.h"
 
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
@@ -122,7 +121,7 @@ class Test_U_AsynchTCPConnection
 
 //////////////////////////////////////////
 
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 class Test_U_SSLConnection
  : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                   Net_SSLSocketHandler_t,
@@ -159,6 +158,6 @@ class Test_U_SSLConnection
   ACE_UNIMPLEMENTED_FUNC (Test_U_SSLConnection (const Test_U_SSLConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SSLConnection& operator= (const Test_U_SSLConnection&))
 };
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 #endif

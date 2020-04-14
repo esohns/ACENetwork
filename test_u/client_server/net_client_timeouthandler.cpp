@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "net_client_timeouthandler.h"
 
 #include "ace/Log_Msg.h"
@@ -55,9 +55,9 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
  , AsynchUDPConnector_ (true)
  , TCPConnector_ (true)
  , UDPConnector_ (true)
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
  , SSLConnector_ (true)
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
  , randomStateInitializationBuffer_ ()
@@ -200,7 +200,7 @@ Client_TimeoutHandler::handle (const void* arg_in)
                number_of_connections_i);
 #else
             result = ::random_r (&randomState_, &index_i);
-            if (result == -1)
+            if (unlikely (result == -1))
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));

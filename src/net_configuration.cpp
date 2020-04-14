@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "net_configuration.h"
 
 #if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)

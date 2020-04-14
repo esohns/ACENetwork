@@ -47,12 +47,12 @@ class ACE_Message_Block;
 
 class IRC_Message
  : public Stream_DataMessageBase_T<IRC_Record,
-                                   struct IRC_AllocatorConfiguration,
+//                                   struct IRC_AllocatorConfiguration,
                                    enum Stream_MessageType,
                                    IRC_CommandType_t>
 {
   typedef Stream_DataMessageBase_T<IRC_Record,
-                                   struct IRC_AllocatorConfiguration,
+//                                   struct IRC_AllocatorConfiguration,
                                    enum Stream_MessageType,
                                    IRC_CommandType_t> inherited;
 

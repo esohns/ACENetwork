@@ -22,40 +22,30 @@
 
 #include "ace/Log_Msg.h"
 
-template <typename AllocatorConfigurationType,
-          typename StreamConfigurationType,
+template <typename StreamConfigurationType,
           enum Net_TransportLayerType TransportLayerType>
-Net_ConnectionConfiguration_T<AllocatorConfigurationType,
-                              StreamConfigurationType,
-                              TransportLayerType>::Net_ConnectionConfiguration_T ()
+Net_StreamConnectionConfiguration_T<StreamConfigurationType,
+                                    TransportLayerType>::Net_StreamConnectionConfiguration_T ()
  : inherited ()
- , allocatorConfiguration_ ()
- , streamConfiguration_ (NULL)
+ , streamConfiguration (NULL)
  , isInitialized_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionConfiguration_T::Net_ConnectionConfiguration_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::Net_StreamConnectionConfiguration_T"));
 
-  inherited::allocatorConfiguration = &allocatorConfiguration_;
 }
 
-template <typename AllocatorConfigurationType,
-          typename StreamConfigurationType,
+template <typename StreamConfigurationType,
           enum Net_TransportLayerType TransportLayerType>
 bool
-Net_ConnectionConfiguration_T<AllocatorConfigurationType,
-                              StreamConfigurationType,
-                              TransportLayerType>::initialize (const AllocatorConfigurationType& allocatorConfiguration_in,
-                                                               const StreamConfigurationType& streamConfiguration_in)
+Net_StreamConnectionConfiguration_T<StreamConfigurationType,
+                                    TransportLayerType>::initialize (const StreamConfigurationType& streamConfiguration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionConfiguration_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::initialize"));
 
-  if (isInitialized_)
-  {
-    isInitialized_ = false;
-  } // end IF
+  // sanity check(s)
+  ACE_ASSERT (!isInitialized_);
 
-  allocatorConfiguration_ = allocatorConfiguration_in;
-  streamConfiguration_ =
+  streamConfiguration =
     &const_cast<StreamConfigurationType&> (streamConfiguration_in);
   isInitialized_ = true;
 

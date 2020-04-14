@@ -19,9 +19,9 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 
-#include "http_scanner.h"
+//#include "http_scanner.h"
 
 #include "bittorrent_client_signalhandler.h"
 

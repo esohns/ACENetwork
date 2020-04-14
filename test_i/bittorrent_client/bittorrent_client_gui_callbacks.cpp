@@ -24,7 +24,7 @@
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_defines.h"

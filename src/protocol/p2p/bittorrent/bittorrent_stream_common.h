@@ -95,9 +95,9 @@ typedef BitTorrent_TrackerMessage_T<BitTorrent_TrackerSessionData_t,
                                     struct Stream_UserData> BitTorrent_TrackerMessage_t;
 typedef BitTorrent_SessionMessage_T<struct BitTorrent_TrackerSessionData,
                                     struct Stream_UserData> BitTorrent_TrackerSessionMessage_t;
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Common_Parser_FlexAllocatorConfiguration> BitTorrent_ControlMessage_t;
+//typedef Stream_ControlMessage_T<enum Stream_ControlType,
+//                                enum Stream_ControlMessageType,
+//                                struct Common_Parser_FlexAllocatorConfiguration> Stream_ControlMessage_t;
 
 struct BitTorrent_Configuration;
 struct BitTorrent_ConnectionState;
@@ -281,7 +281,7 @@ struct BitTorrent_ProtocolConfiguration
 typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
                                        struct BitTorrent_PeerModuleHandlerConfiguration,
-                                       BitTorrent_ControlMessage_t,
+                                       Stream_ControlMessage_t,
                                        BitTorrent_Message_t,
                                        BitTorrent_PeerSessionMessage_t,
                                        Stream_SessionId_t,
@@ -301,7 +301,7 @@ DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_PeerSessionData,              
 typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
                                        struct BitTorrent_TrackerModuleHandlerConfiguration,
-                                       BitTorrent_ControlMessage_t,
+                                       Stream_ControlMessage_t,
                                        BitTorrent_TrackerMessage_t,
                                        BitTorrent_TrackerSessionMessage_t,
                                        Stream_SessionId_t,

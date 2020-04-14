@@ -116,6 +116,7 @@ set (${EXECUTABLE_SOURCE}_SRCS
      net_client_server_defines.h
      net_client_signalhandler.cpp
      net_client_signalhandler.h
+     net_client_stream_common.h
      net_client_timeouthandler.cpp
      net_client_timeouthandler.h
      stdafx.cpp
@@ -139,7 +140,6 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_sessionmessage.h
      test_u_stream.cpp
      test_u_stream.h
-     test_u_stream_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
      test_u_udpconnection.cpp
@@ -241,6 +241,7 @@ set (${EXECUTABLE_TARGET}_SRCS
      net_server_listener_common.h
      net_server_signalhandler.cpp
      net_server_signalhandler.h
+     net_server_stream_common.h
      stdafx.cpp
      stdafx.h
      test_u_common_modules.h
@@ -262,7 +263,6 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_sessionmessage.h
      test_u_stream.cpp
      test_u_stream.h
-     test_u_stream_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
      test_u_udpconnection.cpp

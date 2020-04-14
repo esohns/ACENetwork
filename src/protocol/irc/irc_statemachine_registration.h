@@ -24,12 +24,11 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+#include "ace/Null_Mutex.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_istatemachine.h"
 #include "common_statemachine_base.h"
-
-//#include "irc_exports.h"
 
 enum IRC_RegistrationStateType
 {
@@ -41,6 +40,8 @@ enum IRC_RegistrationStateType
   ////////////////////////////////////////
   IRC_REGISTRATION_STATE_MAX
 };
+
+//////////////////////////////////////////
 
 extern const char network_irc_statemachine_registration_name_string_[];
 
@@ -71,7 +72,7 @@ class IRC_StateMachine_Registration
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration (const IRC_StateMachine_Registration&))
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration& operator= (const IRC_StateMachine_Registration&))
 
-  ACE_SYNCH_NULL_MUTEX lock_;
+  ACE_Null_Mutex lock_;
 };
 
 //////////////////////////////////////////

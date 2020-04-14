@@ -47,16 +47,16 @@ class ACE_Message_Block;
 //          typename DataMessageType,
 //          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType,
+template <//typename AllocatorConfigurationType,
           typename MessageType>
 class HTTP_Message_T
  : public Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
-                                   AllocatorConfigurationType,
+//                                   AllocatorConfigurationType,
                                    MessageType,
                                    HTTP_Method_t>
 {
   typedef Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
-                                   AllocatorConfigurationType,
+//                                   AllocatorConfigurationType,
                                    MessageType,
                                    HTTP_Method_t> inherited;
 
@@ -127,7 +127,7 @@ class HTTP_Message_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T& operator= (const HTTP_Message_T&))
 
   // convenient types
-  typedef HTTP_Message_T<AllocatorConfigurationType,
+  typedef HTTP_Message_T<//AllocatorConfigurationType,
                          MessageType> OWN_TYPE_T;
 };
 

@@ -19,5 +19,5 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "net_tcpconnection_base.h"

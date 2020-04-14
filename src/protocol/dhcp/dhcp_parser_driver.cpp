@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "dhcp_parser_driver.h"
 
 #include "ace/Log_Msg.h"

@@ -252,11 +252,11 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   // step2a: connect the stream head message queue with the reactor notification
   //         pipe ?
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
   //if (!inherited2::configuration_->useThreadPerConnection)
-  inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
+  inherited2::configuration_->streamConfiguration->configuration->notificationStrategy =
     &(inherited::notificationStrategy_);
-  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration_),
+  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
                                      inherited2::state_.handle)))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -299,7 +299,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   handle_stream = true;
 
 //  // step2: start a worker ?
-//  if (inherited::configuration_.streamConfiguration.useThreadPerConnection)
+//  if (inherited::configuration->streamConfiguration.useThreadPerConnection)
 //  {
 //    ACE_thread_t thread_ids[1];
 //    thread_ids[0] = 0;
@@ -487,13 +487,13 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 //  // read some data from the socket
 //  // *TODO*: remove type inference
 //  message_block_p =
-//    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize);
+//    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorconfiguration->defaultBufferSize);
 //  if (unlikely (!message_block_p))
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("%u: failed to allocateMessage(%u), aborting\n"),
 //                id (),
-//                inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
+//                inherited2::configuration_->streamConfiguration->allocatorconfiguration->defaultBufferSize));
 //    return -1; // <-- remove 'this' from dispatch
 //  } // end IF
 //
@@ -1246,14 +1246,14 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   // sanity check(s)
   SocketConfigurationType socket_configuration;
   //// *TODO*: remove type inference
-  //if (configuration_.socketConfiguration)
-  //  socket_configuration = *configuration_.socketConfiguration;
+  //if (configuration->socketConfiguration)
+  //  socket_configuration = *configuration->socketConfiguration;
 
   try {
     result = initialize (this->dispatch (),
                          role_in,
                          socket_configuration);
-                         //*configuration_.socketConfiguration);
+                         //*configuration->socketConfiguration);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: caught exception in Net_ITransportLayer_T::initialize(), continuing\n"),
@@ -1417,17 +1417,17 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator)
+  if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
@@ -1438,7 +1438,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator->block ())
+        !inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -1456,9 +1456,9 @@ allocate:
                                          NULL));
   if (unlikely (!message_block_p))
   {
-    if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator)
+    if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
     {
-      if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator->block ())
+      if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("%u: failed to allocate memory: \"%m\", aborting\n"),
                     id ()));
@@ -1678,13 +1678,13 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // step2: initialize/start stream
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
   // step2a: connect the stream head message queue with this handler; the queue
   //         will forward outbound data to handle_output ()
-  //inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
+  //inherited2::configuration_->streamConfiguration->configuration->notificationStrategy =
   //  this;
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock ());
-    if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration_),
+    if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
                                        inherited2::state_.handle)))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -2137,14 +2137,14 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // sanity check(s)
   SocketConfigurationType socket_configuration;
   //// *TODO*: remove type inference
-  //if (configuration_.socketConfiguration)
-  //  socket_configuration = *configuration_.socketConfiguration;
+  //if (configuration->socketConfiguration)
+  //  socket_configuration = *configuration->socketConfiguration;
 
   try {
     result = initialize (this->dispatch (),
                          role_in,
                          socket_configuration);
-                         //*configuration_.socketConfiguration);
+                         //*configuration->socketConfiguration);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: caught exception in Net_ITransportLayer_T::initialize(), continuing\n"),
@@ -2337,17 +2337,17 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator)
+  if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
@@ -2358,7 +2358,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator->block ())
+        !inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -2376,9 +2376,9 @@ allocate:
                                          NULL));
   if (unlikely (!message_block_p))
   {
-    if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator)
+    if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
     {
-      if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator->block ())
+      if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("%u: failed to allocate memory: \"%m\", aborting\n"),
                     id ()));

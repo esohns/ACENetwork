@@ -22,7 +22,7 @@
 #include "bittorrent_bencoding_parser_driver.h"
 
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 
 #include "common_parser_bencoding_tools.h"
 

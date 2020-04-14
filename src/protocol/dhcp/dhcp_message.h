@@ -47,16 +47,16 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType,
+template <//typename AllocatorConfigurationType,
           typename MessageType>
 class DHCP_Message_T
  : public Stream_DataMessageBase_T<struct DHCP_Record,
-                                   AllocatorConfigurationType,
+                                   //AllocatorConfigurationType,
                                    MessageType,
                                    DHCP_MessageType_t>
 {
   typedef Stream_DataMessageBase_T<struct DHCP_Record,
-                                   AllocatorConfigurationType,
+//                                   AllocatorConfigurationType,
                                    MessageType,
                                    DHCP_MessageType_t> inherited;
 
@@ -76,11 +76,11 @@ class DHCP_Message_T
 
  public:
   // convenient types
-  typedef DHCP_Message_T<AllocatorConfigurationType,
+  typedef DHCP_Message_T<//AllocatorConfigurationType,
                          MessageType> OWN_TYPE_T;
 
   DHCP_Message_T (unsigned int); // size
-  inline virtual ~DHCP_Message_T () {};
+  inline virtual ~DHCP_Message_T () {}
 
   virtual DHCP_MessageType_t command () const; // return value: message type
   static std::string CommandToString (DHCP_MessageType_t);

@@ -21,7 +21,7 @@
 
 #include "stream_dec_common.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "http_tools.h"
 
 #include <algorithm>

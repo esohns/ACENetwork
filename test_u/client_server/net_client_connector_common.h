@@ -22,18 +22,18 @@
 #define NET_CLIENT_CONNECTOR_COMMON_H
 
 #include "ace/INET_Addr.h"
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Connector.h"
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 #include "net_connection_configuration.h"
 #include "net_iconnector.h"
 
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 #include "net_client_ssl_connector.h"
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
@@ -68,7 +68,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Net_TCPSocketConfiguration_t,
                                Test_U_Stream,
                                struct Net_UserData> Client_TCP_Connector_t;
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 typedef Net_Client_SSL_Connector_T<Test_U_SSLConnection,
                                    ACE_SSL_SOCK_Connector,
                                    ACE_INET_Addr,
@@ -77,7 +77,7 @@ typedef Net_Client_SSL_Connector_T<Test_U_SSLConnection,
                                    Net_StreamStatistic_t,
                                    Test_U_Stream,
                                    struct Net_UserData> Client_SSL_Connector_t;
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
                                      ACE_INET_Addr,

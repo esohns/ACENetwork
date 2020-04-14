@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "net_client_signalhandler.h"
 
 #include "ace/Log_Msg.h"
@@ -53,9 +53,9 @@ Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispa
  , TCPConnector_ (true)
  , AsynchUDPConnector_ (true)
  , UDPConnector_ (true)
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
  , SSLConnector_ (true)
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::Client_SignalHandler"));
 
@@ -239,9 +239,9 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
     case NET_TRANSPORTLAYER_SSL:
     {
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
       ssl_tcp_connector_p = &SSLConnector_;
-#endif // SSL_USE
+#endif // SSL_SUPPORT
       break;
     }
     default:
@@ -324,9 +324,13 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
                                               &act_p);
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
-      if (result <= 0)
+      if (unlikely (result <= 0))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_ITimer_T::cancel_timer(%d): \"%m\", continuing\n"),
+                    timerId_));
+      else
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("cancelled action timer (id was: %d)\n"),
                     timerId_));
       timerId_ = -1;
     } // end IF

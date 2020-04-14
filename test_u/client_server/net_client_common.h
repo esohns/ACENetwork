@@ -54,11 +54,12 @@
 #include "test_u_wxwidgets_common.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-#include "test_u_stream_common.h"
+#include "net_client_stream_common.h"
 
 #include "test_u_common.h"
-#include "test_u_configuration.h"
 #include "test_u_connection_common.h"
+
+#include "test_u_configuration.h"
 
 // forward declaration(s)
 class Stream_IAllocator;

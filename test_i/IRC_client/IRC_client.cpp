@@ -40,7 +40,7 @@ using namespace std;
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN32
 #include "ace/POSIX_Proactor.h"
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"

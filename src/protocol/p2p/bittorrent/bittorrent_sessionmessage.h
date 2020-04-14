@@ -53,12 +53,12 @@ class ACE_Message_Block;
 template <typename SessionDataType, // not (!) reference-counted
           typename UserDataType>
 class BitTorrent_SessionMessage_T
- : public Stream_SessionMessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Stream_SessionData_T<SessionDataType>,
                                       UserDataType>
 {
-  typedef Stream_SessionMessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Stream_SessionData_T<SessionDataType>,
                                       UserDataType> inherited;

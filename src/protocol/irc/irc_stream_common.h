@@ -51,9 +51,9 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType>
 class Stream_MessageAllocatorHeapBase_T;
 struct IRC_AllocatorConfiguration;
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct IRC_AllocatorConfiguration> IRC_ControlMessage_t;
+//typedef Stream_ControlMessage_T<enum Stream_ControlType,
+//                                enum Stream_ControlMessageType,
+//                                struct IRC_AllocatorConfiguration> IRC_ControlMessage_t;
 
 typedef IRC_SessionMessage_T<IRC_Stream_SessionData_t,
                              struct Stream_UserData> IRC_SessionMessage_t;

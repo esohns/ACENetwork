@@ -24,7 +24,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
 #include "ace/Message_Queue.h"
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 
 #include "net_macros.h"
 

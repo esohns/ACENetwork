@@ -34,7 +34,7 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
-#include "test_u_stream_common.h"
+#include "net_client_stream_common.h"
 
 // forward declaration(s)
 class Stream_IAllocator;
@@ -47,8 +47,8 @@ class Test_U_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Common_ILock_T<ACE_MT_SYNCH>,
-                                 struct Test_U_ModuleHandlerConfiguration,
-                                 Test_U_ControlMessage_t,
+                                 struct ClientServer_ModuleHandlerConfiguration,
+                                 Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
@@ -60,8 +60,8 @@ class Test_U_Module_ProtocolHandler
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Common_ILock_T<ACE_MT_SYNCH>,
-                                 struct Test_U_ModuleHandlerConfiguration,
-                                 Test_U_ControlMessage_t,
+                                 struct ClientServer_ModuleHandlerConfiguration,
+                                 Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
@@ -74,7 +74,7 @@ class Test_U_Module_ProtocolHandler
   virtual ~Test_U_Module_ProtocolHandler ();
 
   // initialization
-  virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&, // configuration
+  virtual bool initialize (const struct ClientServer_ModuleHandlerConfiguration&, // configuration
                            Stream_IAllocator* = NULL);                            // allocator
 
   // implement (part of) Stream_ITaskBase
@@ -109,7 +109,7 @@ class Test_U_Module_ProtocolHandler
 // declare module
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,                 // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_default_test_u_protocolhandler_module_name_string,
                               Stream_INotify_t,                               // stream notification interface type
                               Test_U_Module_ProtocolHandler);           // writer type

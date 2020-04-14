@@ -41,12 +41,12 @@
 #include "test_u_configuration.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_message.h"
-#include "test_u_stream_common.h"
+#include "net_client_stream_common.h"
 
 // forward declarations
 //typedef Stream_ControlMessage_T<enum Stream_ControlType,
 //                                enum Stream_ControlMessageType,
-//                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_ControlMessage_t;
+//                                struct Common_Parser_FlexAllocatorConfiguration> Stream_ControlMessage_t;
 class Test_U_SessionMessage;
 
 extern const char stream_name_string_[];
@@ -62,12 +62,10 @@ class Test_U_Stream
                                         struct Test_U_StreamConfiguration,
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
-                                        struct Common_Parser_FlexAllocatorConfiguration,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct ClientServer_ModuleHandlerConfiguration,
                                         struct Test_U_StreamSessionData, // session data
                                         Test_U_StreamSessionData_t,      // session data container (reference counted)
-                                        Test_U_ControlMessage_t,
+                                        Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
@@ -84,12 +82,10 @@ class Test_U_Stream
                                         struct Test_U_StreamConfiguration,
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
-                                        struct Common_Parser_FlexAllocatorConfiguration,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct ClientServer_ModuleHandlerConfiguration,
                                         struct Test_U_StreamSessionData,
                                         Test_U_StreamSessionData_t,
-                                        Test_U_ControlMessage_t,
+                                        Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,

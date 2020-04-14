@@ -763,7 +763,7 @@ idle_update_progress_server_cb (gpointer userData_in)
   unsigned int interval_ms = 0;
 
   // synch access
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+//  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1454,7 +1454,7 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+//  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
     data_p->progressData.eventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
@@ -1473,7 +1473,7 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
                   ACE_TEXT ("failed to g_timeout_add_full(%s): \"%m\", continuing\n"),
                   ACE_TEXT ("idle_update_client_progress_cb")));
     } // end IF
-  } // end lock scope
+//  } // end lock scope
 
 continue_:
   widget_p =
@@ -1533,7 +1533,7 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+//  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
     data_p->progressData.eventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
@@ -1552,7 +1552,7 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
                   ACE_TEXT ("failed to g_timeout_add_full(%s): \"%m\", continuing\n"),
                   ACE_TEXT ("idle_update_server_progress_cb")));
     } // end IF
-  } // end lock scope
+//  } // end lock scope
 
 continue_:
   widget_p =

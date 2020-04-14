@@ -38,7 +38,7 @@
 
 #include "test_u_connection_common.h"
 #include "test_u_stream.h"
-#include "test_u_stream_common.h"
+#include "net_client_stream_common.h"
 #include "test_u_tcpconnection.h"
 #include "test_u_udpconnection.h"
 

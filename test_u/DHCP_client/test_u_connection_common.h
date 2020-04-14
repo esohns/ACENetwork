@@ -65,18 +65,15 @@ class DHCPClient_ConnectionConfiguration;
 struct DHCPClient_StreamConfiguration;
 struct DHCPClient_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct DHCP_AllocatorConfiguration,
                                struct DHCPClient_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
                                struct DHCPClient_ModuleHandlerConfiguration> DHCPClient_StreamConfiguration_t;
 class DHCPClient_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct DHCP_AllocatorConfiguration,
-                                        DHCPClient_StreamConfiguration_t,
-                                        NET_TRANSPORTLAYER_UDP>
+ : public Net_StreamConnectionConfiguration_T<DHCPClient_StreamConfiguration_t,
+                                              NET_TRANSPORTLAYER_UDP>
 {
  public:
   DHCPClient_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
+   : Net_StreamConnectionConfiguration_T ()
   {}
 };
 //typedef std::map<std::string,

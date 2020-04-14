@@ -56,7 +56,6 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename AllocatorConfigurationType,
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
           typename SessionDataType,
@@ -79,8 +78,6 @@ class HTTP_Stream_T
                                         ConfigurationType,
                                         StatisticContainerType,
                                         TimerManagerType,
-                                        AllocatorConfigurationType,
-                                        struct Stream_ModuleConfiguration,
                                         ModuleHandlerConfigurationType,
                                         SessionDataType,
                                         SessionDataContainerType,
@@ -101,8 +98,6 @@ class HTTP_Stream_T
                                         ConfigurationType,
                                         StatisticContainerType,
                                         TimerManagerType,
-                                        AllocatorConfigurationType,
-                                        struct Stream_ModuleConfiguration,
                                         ModuleHandlerConfigurationType,
                                         SessionDataType,
                                         SessionDataContainerType,

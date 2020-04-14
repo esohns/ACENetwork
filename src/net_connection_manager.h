@@ -21,7 +21,9 @@
 #ifndef NET_CONNECTION_MANAGER_T_H
 #define NET_CONNECTION_MANAGER_T_H
 
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "ace/Containers_T.h"
+#include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
@@ -166,12 +168,12 @@ class Net_Connection_Manager_T
   ACE_Time_Value                        resetTimeoutInterval_;
 
   // implement blocking wait
-  mutable ACE_SYNCH_RECURSIVE_CONDITION condition_;
+  mutable ACE_Condition_Recursive_Thread_Mutex condition_;
   CONNECTION_CONTAINER_T                connections_;
   bool                                  isActive_;
   bool                                  isInitialized_;
   // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
-  mutable ACE_SYNCH_RECURSIVE_MUTEX     lock_;
+  mutable ACE_Recursive_Thread_Mutex    lock_;
   unsigned int                          maximumNumberOfConnections_;
 
   ConfigurationType*                    configuration_; // default-

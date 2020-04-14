@@ -49,11 +49,16 @@ template <typename SessionDataType, // reference-counted
           ////////////////////////////////
           typename UserDataType>
 class IRC_SessionMessage_T
- : public Stream_SessionMessageBase_T<struct IRC_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<//struct IRC_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       SessionDataType,
                                       UserDataType>
 {
+  typedef Stream_SessionMessageBase_T<//struct IRC_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      SessionDataType,
+                                      UserDataType> inherited;
+
   // convenient types
   typedef IRC_SessionMessage_T<SessionDataType,
                                UserDataType> OWN_TYPE_T;
@@ -82,7 +87,7 @@ class IRC_SessionMessage_T
   IRC_SessionMessage_T (Stream_SessionId_t,
                         ACE_Data_Block*, // data block to use
                         ACE_Allocator*); // message allocator
-  inline virtual ~IRC_SessionMessage_T () {};
+  inline virtual ~IRC_SessionMessage_T () {}
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well
@@ -93,11 +98,6 @@ class IRC_SessionMessage_T
   IRC_SessionMessage_T (const IRC_SessionMessage_T&);
 
  private:
-  typedef Stream_SessionMessageBase_T<struct IRC_AllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
-                                      SessionDataType,
-                                      UserDataType> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage_T& operator= (const IRC_SessionMessage_T&))
 };

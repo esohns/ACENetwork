@@ -223,8 +223,6 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
 
 //////////////////////////////////////////
 
-//struct Stream_Configuration;
-class Common_ITimer;
 template <enum Net_TransportLayerType TransportLayerType_e>
 class Net_ConnectionConfigurationBase_T
  : public Net_SocketConfiguration_T<TransportLayerType_e>
@@ -238,30 +236,29 @@ class Net_ConnectionConfigurationBase_T
    , timerManager (NULL)
   {}
 
-  enum Common_EventDispatchType      dispatch;
-  bool                               generateUniqueIOModuleNames; // stream
-  Stream_IAllocator*                 messageAllocator;
-  Common_ITimerCB_t*                 timerManager;
+  enum Common_EventDispatchType dispatch;
+  bool                          generateUniqueIOModuleNames; // stream-
+  Stream_IAllocator*            messageAllocator;
+  Common_ITimerCB_t*            timerManager;
 };
 
-template <typename AllocatorConfigurationType,
-          typename StreamConfigurationType, // *NOTE*: connection-
+//////////////////////////////////////////
+
+template <typename StreamConfigurationType, // *NOTE*: connection-
           enum Net_TransportLayerType TransportLayerType_e>
-class Net_ConnectionConfiguration_T
+class Net_StreamConnectionConfiguration_T
  : public Net_ConnectionConfigurationBase_T<TransportLayerType_e>
 {
   typedef Net_ConnectionConfigurationBase_T<TransportLayerType_e> inherited;
 
  public:
-  Net_ConnectionConfiguration_T ();
-  inline virtual ~Net_ConnectionConfiguration_T () {}
+  Net_StreamConnectionConfiguration_T ();
+  inline virtual ~Net_StreamConnectionConfiguration_T () {}
 
-  bool initialize (const AllocatorConfigurationType&,
-                   const StreamConfigurationType&);
+  bool initialize (const StreamConfigurationType&);
 
-  AllocatorConfigurationType allocatorConfiguration_;
-  StreamConfigurationType*   streamConfiguration_;
-  bool                       isInitialized_;
+  StreamConfigurationType* streamConfiguration;
+  bool                     isInitialized_;
 };
 
 //////////////////////////////////////////
@@ -276,17 +273,20 @@ typedef std::map<std::string,
                  struct Net_SocketConfigurationBase*> Net_ConnectionConfigurations_t;
 typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationsIterator_t;
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkConnectionConfigurationBase_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_TCP> Net_TCPConnectionConfigurationBase_t;
-typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_UDP> Net_UDPConnectionConfigurationBase_t;
-
 //#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-//typedef Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t> Net_INetlinkTransportLayer_t;
+//typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkConnectionConfigurationBase_t;
 //#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-//typedef Net_ITransportLayer_T<Net_TCPSocketConfiguration_t> Net_ITCPTransportLayer_t;
-//typedef Net_ITransportLayer_T<Net_UDPSocketConfiguration_t> Net_IUDPTransportLayer_t;
+//typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_TCP> Net_TCPConnectionConfigurationBase_t;
+//typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_UDP> Net_UDPConnectionConfigurationBase_t;
+
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
+                                            NET_TRANSPORTLAYER_NETLINK> Net_NetlinkStreamConnectionConfiguration_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
+                                            NET_TRANSPORTLAYER_TCP> Net_TCPStreamConnectionConfiguration_t;
+typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
+                                            NET_TRANSPORTLAYER_UDP> Net_UDPStreamConnectionConfiguration_t;
 
 // include template definition
 #include "net_connection_configuration.inl"

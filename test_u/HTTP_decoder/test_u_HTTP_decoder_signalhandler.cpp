@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "test_u_HTTP_decoder_signalhandler.h"
 
 #include "ace/Log_Msg.h"

@@ -23,6 +23,7 @@
 
 #include <list>
 
+#include "ace/config-lite.h"
 #include "ace/INET_Addr.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -43,7 +44,7 @@
 
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
-#include "test_u_stream_common.h"
+#include "net_client_stream_common.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -83,17 +84,15 @@ typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
 //extern const char stream_name_string_[];
 struct Test_U_StreamConfiguration;
-struct Test_U_ModuleHandlerConfiguration;
+struct ClientServer_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
-struct Test_U_ModuleHandlerConfiguration
- : Stream_ModuleHandlerConfiguration
+                               struct ClientServer_ModuleHandlerConfiguration> ClientServer_StreamConfiguration_t;
+struct ClientServer_ModuleHandlerConfiguration
+ : Test_U_ModuleHandlerConfiguration
 {
-  Test_U_ModuleHandlerConfiguration ()
-   : Stream_ModuleHandlerConfiguration ()
+  ClientServer_ModuleHandlerConfiguration ()
+   : Test_U_ModuleHandlerConfiguration ()
    //, printProgressDot (false)
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
@@ -104,24 +103,10 @@ struct Test_U_ModuleHandlerConfiguration
     concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   }
 
-  //bool                             printProgressDot; // file writer module
   struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
-  Test_U_StreamConfiguration_t*        streamConfiguration;
-  //// *TODO*: remove this (--> session message data)
-  //struct Test_U_StreamSessionData*     sessionData;
+  ClientServer_StreamConfiguration_t*  streamConfiguration;
   Test_U_ISessionNotify_t*             subscriber;
   Test_U_Subscribers_t*                subscribers;
-};
-
-struct Test_U_StreamConfiguration
- : Stream_Configuration
-{
-  Test_U_StreamConfiguration ()
-   : Stream_Configuration ()
-   , userData (NULL)
-  {}
-
-  struct Net_UserData* userData; // user data
 };
 
 struct ClientServer_Configuration
@@ -151,13 +136,13 @@ struct ClientServer_Configuration
    , protocolConfiguration ()
   {}
 
-  struct Common_Parser_FlexAllocatorConfiguration   allocatorConfiguration;
+  struct Common_Parser_FlexAllocatorConfiguration allocatorConfiguration;
   // **************************** socket data **********************************
-  Net_ConnectionConfigurations_t      connectionConfigurations;
+  Net_ConnectionConfigurations_t                  connectionConfigurations;
   // **************************** stream data **********************************
-  Test_U_StreamConfiguration_t        streamConfiguration;
+  ClientServer_StreamConfiguration_t              streamConfiguration;
   // *************************** protocol data *********************************
-  struct Test_U_ProtocolConfiguration protocolConfiguration;
+  struct Test_U_ProtocolConfiguration             protocolConfiguration;
 };
 
 //////////////////////////////////////////

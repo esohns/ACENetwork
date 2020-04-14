@@ -53,7 +53,7 @@ using namespace std;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN32
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "ace/POSIX_Proactor.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"

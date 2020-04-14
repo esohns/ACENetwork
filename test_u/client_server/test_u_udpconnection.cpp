@@ -19,9 +19,9 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
-#include "test_u_message.h"
-#include "test_u_stream.h"
+//#include "ace/Synch.h"
+//#include "test_u_message.h"
+//#include "test_u_stream.h"
 #include "test_u_udpconnection.h"
 
 #include "ace/Log_Msg.h"

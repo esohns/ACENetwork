@@ -86,13 +86,12 @@ struct BitTorrent_TrackerConnectionState
 //struct BitTorrent_AllocatorConfiguration;
 struct BitTorrent_PeerStreamConfiguration;
 class BitTorrent_PeerConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-                                        struct BitTorrent_PeerStreamConfiguration,
-                                        NET_TRANSPORTLAYER_TCP>
+ : public Net_StreamConnectionConfiguration_T<struct BitTorrent_PeerStreamConfiguration,
+                                              NET_TRANSPORTLAYER_TCP>
 {
  public:
   BitTorrent_PeerConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
+   : Net_StreamConnectionConfiguration_T ()
   {
     //PDUSize = BITTORRENT_BUFFER_SIZE;
   }
@@ -100,13 +99,12 @@ class BitTorrent_PeerConnectionConfiguration
 
 struct BitTorrent_TrackerStreamConfiguration;
 class BitTorrent_TrackerConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-                                        struct BitTorrent_TrackerStreamConfiguration,
-                                        NET_TRANSPORTLAYER_TCP>
+ : public Net_StreamConnectionConfiguration_T<struct BitTorrent_TrackerStreamConfiguration,
+                                              NET_TRANSPORTLAYER_TCP>
 {
  public:
   BitTorrent_TrackerConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
+   : Net_StreamConnectionConfiguration_T ()
    ///////////////////////////////////////
   {
     //PDUSize = BITTORRENT_BUFFER_SIZE;

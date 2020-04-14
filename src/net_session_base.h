@@ -21,14 +21,10 @@
 #ifndef NET_SESSION_BASE_H
 #define NET_SESSION_BASE_H
 
-//#include "ace/Asynch_Connector.h"
-//#include "ace/config-macros.h"
-//#include "ace/Connector.h"
+#include "ace/Condition_Thread_Mutex.h"
 #include "ace/Global_Macros.h"
-//#include "ace/SOCK_Connector.h"
-#include "ace/Synch_Traits.h"
-
-//#include "common_iget.h"
+//#include "ace/Synch_Traits.h"
+#include "ace/Thread_Mutex.h"
 
 #include "net_common.h"
 #include "net_defines.h"
@@ -88,8 +84,8 @@ class Net_SessionBase_T
   ConnectionManagerType*       connectionManager_;
   bool                         isAsynch_;
 
-  ACE_SYNCH_MUTEX              lock_;
-  ACE_SYNCH_CONDITION          condition_;
+  ACE_Thread_Mutex             lock_;
+  ACE_Condition_Thread_Mutex   condition_;
   StateType                    state_;
 
  private:

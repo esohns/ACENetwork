@@ -53,7 +53,7 @@ struct HTTP_StreamConfiguration;
 //  };
 //};
 
-typedef HTTP_Message_T<struct Common_Parser_FlexAllocatorConfiguration,
+typedef HTTP_Message_T<//struct Common_Parser_FlexAllocatorConfiguration,
                        HTTP_MessageData_t> HTTP_Message_t;
 //typedef Stream_ControlMessage_T<enum Stream_ControlType,
 //                                struct Common_Parser_FlexAllocatorConfiguration,

@@ -371,6 +371,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::cancel ()
       result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  : *TODO*
         (error != EBADF)      && // 9  : Linux [client: local close()]
+        (error != EINVAL)     && // 22 : *TODO*
         (error != EPIPE)      && // 32 : Linux [client: remote close()]
         (error != EINPROGRESS))  // 115: happens on Linux
 #endif // ACE_WIN32 || ACE_WIN64

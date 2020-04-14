@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "net_sock_acceptor.h"
 
 #include "ace/Log_Msg.h"
