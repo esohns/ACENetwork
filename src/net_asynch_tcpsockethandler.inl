@@ -298,15 +298,19 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     result = ACE_OS::closesocket (handle_h);
     if (unlikely (result == -1))
+    {
+      int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                  handle_h));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                    handle_h));
 #else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle_h));
+      if (error != EBADF) // 9: Linux: local close() *TODO*
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                    handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
+     } // end IF
   } // end IF
   // *NOTE*: 'this' has been delete'd
   //inherited2::handle (ACE_INVALID_HANDLE);

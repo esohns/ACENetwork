@@ -256,6 +256,7 @@ set (source_files
      test_u_common.h
      test_u_common_tools.cpp
      test_u_common_tools.h
+     test_u_common_tools.inl
      test_u_connection_common.h
      test_u_defines.h
      test_u_network_common.h

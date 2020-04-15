@@ -2059,6 +2059,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // step1: cancel i/o operation(s), release (write) socket handle, ...
   inherited::cancel ();
+  inherited::handle_close (inherited2::state_.handle,
+                           ACE_Event_Handler::ALL_EVENTS_MASK);
 }
 
 template <typename HandlerType,
@@ -2531,23 +2533,21 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     ACE_Event_Handler::ALL_EVENTS_MASK);
   if (unlikely (result == -1))
   {
-//    error = ACE_OS::last_error ();
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    if ((error != ENOENT)                  && // 2   :
 //        (error != ENOMEM)                  && // 12  : [server: local close()], [client: peer reset ()]
 //        (error != ERROR_IO_PENDING)        && // 997 :
 //        (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
-//#else
-//    if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
-//    if ((error != ENOENT)     && // 2  :
-//        (error != EPIPE)      && // 32 : Linux [client: remote close()]
-//        (error != EINPROGRESS))  // 115: happens on Linux
-//#endif
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n"),
-                id));
+#else
+    if (error != EBADF) // 9: local close (Linux)
+#endif // ACE_WIN32 || ACE_WIN64
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n"),
+                  id));
   } // end IF
 }
+
 
 template <typename HandlerType,
           typename AddressType,

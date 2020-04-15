@@ -82,6 +82,7 @@
 #include "net_iconnector.h"
 #include "net_macros.h"
 
+#include "test_u_common_tools.h"
 #include "test_u_defines.h"
 
 #include "net_client_server_defines.h"
@@ -527,6 +528,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // step0a: initialize random number generator
   Common_Tools::initialize ();
+  Test_U_Common_Tools::initialize ();
 
   // step0a: initialize configuration
 #if defined (GUI_SUPPORT)
@@ -579,6 +581,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
 #endif // GUI_SUPPORT
 
+  stream_configuration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   stream_configuration.cloneModule = true;
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module =
@@ -601,6 +605,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // ********************** connection configuration data **********************
   Test_U_TCPConnectionConfiguration tcp_connection_configuration;
   Test_U_UDPConnectionConfiguration udp_connection_configuration;
+  tcp_connection_configuration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   tcp_connection_configuration.messageAllocator = &message_allocator;
   tcp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;

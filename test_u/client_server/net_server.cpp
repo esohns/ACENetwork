@@ -592,6 +592,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   struct Stream_ModuleConfiguration module_configuration;
   struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_U_StreamConfiguration stream_configuration;
+  stream_configuration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   stream_configuration.cloneModule = !(UIDefinitionFile_in.empty ());
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module =
@@ -634,6 +636,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //configuration_in.listenerConfiguration.connectionConfiguration =
   //  &connection_configuration;
 
+  connection_configuration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.initialize (configuration_in.streamConfiguration);
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),

@@ -21,17 +21,68 @@
 #ifndef TEST_U_COMMON_TOOLS_H
 #define TEST_U_COMMON_TOOLS_H
 
+#include <stdlib.h>
+
+#include <functional>
+#include <random>
+
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
+
+#include "net_common.h"
+//#include "net_connection_configuration.h"
+#include "net_iconnection.h"
+#include "net_iconnectionmanager.h"
 
 class Test_U_Common_Tools
+ : public Common_SInitializeFinalize_T<Test_U_Common_Tools>
 {
  public:
-  static void getRandomConnection ();
+  // convenient types
+//  typedef Net_IConnection_T<ACE_INET_Addr,
+//                            Net_TCPStreamConnectionConfiguration_t,
+//                            struct Net_StreamConnectionState,
+//                            struct Net_StreamStatistic> CONNECTION_T;
+//  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+//                                   ACE_INET_Addr,
+//                                   Net_TCPStreamConnectionConfiguration_t,
+//                                   struct Net_StreamConnectionState,
+//                                   struct Net_StreamStatistic,
+//                                   struct Net_UserData> IMANAGER_T;
+
+  static bool initialize ();
+  inline static bool finalize () { return true; }
+
+  template <typename ConnectionConfigurationType>
+  static Net_IConnection_T<ACE_INET_Addr,
+                           ConnectionConfigurationType,
+                           struct Net_StreamConnectionState,
+                           struct Net_StreamStatistic>* getRandomConnection (Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                                                                                      ACE_INET_Addr,
+                                                                                                      ConnectionConfigurationType,
+                                                                                                      struct Net_StreamConnectionState,
+                                                                                                      struct Net_StreamStatistic,
+                                                                                                      struct Net_UserData>*);
+
+  static std::function<int ()>              randomGenerator_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Common_Tools (const Test_U_Common_Tools&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Common_Tools& operator= (const Test_U_Common_Tools&))
+
+  // probability
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  static char                               randomStateInitializationBuffer_[BUFSIZ];
+  static struct random_data                 randomState_;
+#endif // ACE_WIN32 || ACE_WIN64
+  static std::uniform_int_distribution<int> randomDistribution_;
+  static std::default_random_engine         randomEngine_;
 };
+
+// include template definition
+#include "test_u_common_tools.inl"
 
 #endif

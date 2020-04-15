@@ -21,19 +21,13 @@
 #ifndef CLIENT_TIMEOUTHANDLER_H
 #define CLIENT_TIMEOUTHANDLER_H
 
-#include <functional>
-#include <random>
-#include <string>
-
 #include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
 
-#include "common_itimerhandler.h"
+//#include "common_itimerhandler.h"
 #include "common_timer_handler.h"
 
-#include "test_u_stream.h"
+//#include "test_u_stream.h"
 
 #include "net_client_connector_common.h"
 
@@ -98,16 +92,6 @@ class Client_TimeoutHandler
 #if defined (SSL_SUPPORT)
   Client_SSL_Connector_t               SSLConnector_;
 #endif // SSL_USE
-
-  // probability
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  char                                 randomStateInitializationBuffer_[BUFSIZ];
-  struct random_data                   randomState_;
-#endif // ACE_WIN32 || ACE_WIN64
-  std::uniform_int_distribution<int>   randomDistribution_;
-  std::default_random_engine           randomEngine_;
-  std::function<int ()>                randomGenerator_;
 };
 
 #endif

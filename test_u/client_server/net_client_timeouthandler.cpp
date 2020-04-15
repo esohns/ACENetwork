@@ -32,6 +32,8 @@
 #include "net_client_defines.h"
 #include "net_client_server_defines.h"
 
+#include "test_u_common_tools.h"
+
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_message.h"
@@ -58,14 +60,6 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
 #if defined (SSL_SUPPORT)
  , SSLConnector_ (true)
 #endif // SSL_SUPPORT
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
- , randomStateInitializationBuffer_ ()
- , randomState_ ()
-#endif // ACE_WIN32 || ACE_WIN64
- , randomDistribution_ (1, 100)
- , randomEngine_ ()
- , randomGenerator_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::Client_TimeoutHandler"));
 
@@ -73,28 +67,9 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
   TCPConnector_.initialize (TCPConnectionConfiguration_in);
   AsynchUDPConnector_.initialize (UDPConnectionConfiguration_in);
   UDPConnector_.initialize (UDPConnectionConfiguration_in);
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   SSLConnector_.initialize (TCPConnectionConfiguration_in);
-#endif // SSL_USE
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  ACE_OS::memset (randomStateInitializationBuffer_,
-                  0,
-                  sizeof (char[BUFSIZ]));
-  int result =
-    ::initstate_r (Common_Tools::randomSeed,
-                   randomStateInitializationBuffer_, sizeof (char[BUFSIZ]),
-                   &randomState_);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::initstate_r(): \"%m\", continuing\n")));
-  result = ::srandom_r (Common_Tools::randomSeed, &randomState_);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::srandom_r(): \"%m\", continuing\n")));
-#endif // ACE_WIN32 || ACE_WIN64
-  randomGenerator_ = std::bind (randomDistribution_, randomEngine_);
+#endif // SSL_SUPPORT
 }
 
 void
@@ -129,9 +104,9 @@ Client_TimeoutHandler::handle (const void* arg_in)
     UDPConnector_.getR ();
   unsigned int number_of_connections_i = 0;
 
-  connection_manager_p->lock ();
+//  connection_manager_p->lock ();
   number_of_connections_i = connection_manager_p->count ();
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+//  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     switch (mode_)
     {
       case ACTION_NORMAL:
@@ -139,29 +114,12 @@ Client_TimeoutHandler::handle (const void* arg_in)
         if (!number_of_connections_i)
           goto continue_;
 
-        // grab a (random) connection handler
-        // *PORTABILITY*: outside glibc, this is not very portable
-        // *TODO*: use STL random funcionality instead
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index_i =
-          (ACE_OS::rand_r (&Common_Tools::randomSeed) %
-           number_of_connections_i);
-#else
-        result = ::random_r (&randomState_, &index_i);
-        if (result == -1)
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
-          goto continue_;
-        } // end IF
-        index_i = (index_i % number_of_connections_i);
-#endif // ACE_WIN32 || ACE_WIN64
-        connection_2 = connection_manager_p->operator[] (index_i);
+        connection_2 = Test_U_Common_Tools::getRandomConnection (connection_manager_p);
         if (!connection_2)
         {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
-                      index_i, number_of_connections_i));
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
+//                      index_i, number_of_connections_i));
           goto continue_;
         } // end IF
 
@@ -191,29 +149,12 @@ Client_TimeoutHandler::handle (const void* arg_in)
             if (number_of_connections_i == 0)
               break; // nothing to do...
 
-            // grab a (random) connection handler
-            // *PORTABILITY*: outside glibc, this is not very portable
-            // *TODO*: use STL funcionality instead
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-            index_i =
-              (ACE_OS::rand_r (&Common_Tools::randomSeed) %
-               number_of_connections_i);
-#else
-            result = ::random_r (&randomState_, &index_i);
-            if (unlikely (result == -1))
-            {
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
-              goto continue_;
-            } // end IF
-            index_i = (index_i % number_of_connections_i);
-#endif // ACE_WIN32 || ACE_WIN64
-            connection_p = connection_manager_p->operator[] (index_i);
+            connection_p = Test_U_Common_Tools::getRandomConnection (connection_manager_p);
             if (!connection_p)
             {
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
-                          index_i, number_of_connections_i));
+//              ACE_DEBUG ((LM_ERROR,
+//                          ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
+//                          index_i, number_of_connections_i));
               goto continue_;
             } // end IF
 
@@ -241,14 +182,14 @@ Client_TimeoutHandler::handle (const void* arg_in)
       case ACTION_STRESS:
       {
         // allow some probability_f for closing connections in between
-        float probability_f = static_cast<float> (randomGenerator_ ()) / 100.0F;
-
+        float probability_f =
+            static_cast<float> (Test_U_Common_Tools::randomGenerator_ ()) / 100.0F;
         if ((number_of_connections_i > 0) &&
             (probability_f <= NET_CLIENT_DEFAULT_ABORT_PROBABILITY))
           do_abort_youngest = true;
 
         // allow some probability_f for opening connections in between
-        probability_f = static_cast<float> (randomGenerator_ ()) / 100.0F;
+        probability_f = static_cast<float> (Test_U_Common_Tools::randomGenerator_ ()) / 100.0F;
         if (probability_f <= NET_CLIENT_DEFAULT_CONNECT_PROBABILITY)
           do_connect = true;
 
@@ -259,31 +200,12 @@ Client_TimeoutHandler::handle (const void* arg_in)
             ((number_of_connections_i == 1) && do_abort_youngest))
           break;
 
-        // grab a (random) connection handler
-        // *PORTABILITY*: outside glibc, this is not very portable...
-        // *TODO*: use STL funcionality instead
-        //        std::uniform_int_distribution<int> distribution (0, number_of_connections_i - 1);
-        //        index_i = distribution (randomGenerator_);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index_i =
-          (ACE_OS::rand_r (&Common_Tools::randomSeed) %
-           number_of_connections_i);
-#else
-        result = ::random_r (&randomState_, &index_i);
-        if (result == -1)
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
-          goto continue_;
-        } // end IF
-        index_i = (index_i % number_of_connections_i);
-#endif // ACE_WIN32 || ACE_WIN64
-        connection_2 = connection_manager_p->operator[] (index_i);
+        connection_2 = Test_U_Common_Tools::getRandomConnection (connection_manager_p);
         if (!connection_2)
         {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
-                      index_i, number_of_connections_i));
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
+//                      index_i, number_of_connections_i));
           goto continue_;
         } // end IF
 
@@ -299,10 +221,10 @@ Client_TimeoutHandler::handle (const void* arg_in)
         goto continue_;
       }
     } // end SWITCH
-  } // end lock scope
+//  } // end lock scope
 
 continue_:
-  connection_manager_p->unlock ();
+//  connection_manager_p->unlock ();
 
   // -------------------------------------
 
@@ -467,116 +389,116 @@ continue_:
       } // end IF
       return;
     } // end IF
-    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p =
-      NULL;
-    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_2 =
-      NULL;
-    if (eventDispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
-    {
-      switch (protocolConfiguration_->transportLayer)
-      {
-        case NET_TRANSPORTLAYER_TCP:
-        case NET_TRANSPORTLAYER_SSL:
-        {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-          iconnection_p =
-            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
-#else
-          iconnection_p =
-            connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
-#endif // ACE_WIN32 || ACE_WIN64
-          break;
-        }
-        case NET_TRANSPORTLAYER_UDP:
-        {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-          iconnection_2 =
-            connection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
-#else
-          iconnection_2 =
-            connection_manager_2->get (static_cast<Net_ConnectionId_t> (handle_h));
-#endif // ACE_WIN32 || ACE_WIN64
-          break;
-        }
-        default:
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                      protocolConfiguration_->transportLayer));
-          if (connection_2)
-          {
-            connection_2->decrease (); connection_2 = NULL;
-          } // end IF
-          return;
-        }
-      } // end SWITCH
-    } // end IF
-    else
-    {
-      // step1: wait for the connection to register with the manager
-      // *TODO*: avoid these tight loops
-      ACE_Time_Value deadline =
-        (COMMON_TIME_NOW +
-         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
-      // *TODO*: this may not be accurate/applicable for/to all protocols
-      bool done_b = false;
-      do
-      {
-        // *TODO*: avoid these tight loops
-        switch (protocolConfiguration_->transportLayer)
-        {
-          case NET_TRANSPORTLAYER_TCP:
-          case NET_TRANSPORTLAYER_SSL:
-          {
-            iconnection_p = connection_manager_p->get (peer_address,
-                                                       true);
-            if (iconnection_p)
-              done_b = true;
-            break;
-          }
-          case NET_TRANSPORTLAYER_UDP:
-          {
-            iconnection_2 = connection_manager_2->get (peer_address,
-                                                       true);
-            if (iconnection_2)
-              done_b = true;
-            break;
-          }
-          default:
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                        protocolConfiguration_->transportLayer));
-            if (connection_2)
-            {
-              connection_2->decrease (); connection_2 = NULL;
-            } // end IF
-            return;
-          }
-        } // end SWITCH
-        if (done_b)
-          break;
-      } while (COMMON_TIME_NOW < deadline);
-    } // end ELSE
-    if (!iconnection_p && !iconnection_2)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-      if (connection_2)
-      {
-        connection_2->decrease (); connection_2 = NULL;
-      } // end IF
-      return;
-    } // end IF
-    if (iconnection_p)
-    {
-      iconnection_p->decrease (); iconnection_p = NULL;
-    } // end IF
-    if (iconnection_2)
-    {
-      iconnection_2->decrease (); iconnection_2 = NULL;
-    } // end IF
+//    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p =
+//      NULL;
+//    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_2 =
+//      NULL;
+//    if (eventDispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
+//    {
+//      switch (protocolConfiguration_->transportLayer)
+//      {
+//        case NET_TRANSPORTLAYER_TCP:
+//        case NET_TRANSPORTLAYER_SSL:
+//        {
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//          iconnection_p =
+//            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+//#else
+//          iconnection_p =
+//            connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+//#endif // ACE_WIN32 || ACE_WIN64
+//          break;
+//        }
+//        case NET_TRANSPORTLAYER_UDP:
+//        {
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//          iconnection_2 =
+//            connection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+//#else
+//          iconnection_2 =
+//            connection_manager_2->get (static_cast<Net_ConnectionId_t> (handle_h));
+//#endif // ACE_WIN32 || ACE_WIN64
+//          break;
+//        }
+//        default:
+//        {
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+//                      protocolConfiguration_->transportLayer));
+//          if (connection_2)
+//          {
+//            connection_2->decrease (); connection_2 = NULL;
+//          } // end IF
+//          return;
+//        }
+//      } // end SWITCH
+//    } // end IF
+//    else
+//    {
+//      // step1: wait for the connection to register with the manager
+//      // *TODO*: avoid these tight loops
+//      ACE_Time_Value deadline =
+//        (COMMON_TIME_NOW +
+//         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
+//      // *TODO*: this may not be accurate/applicable for/to all protocols
+//      bool done_b = false;
+//      do
+//      {
+//        // *TODO*: avoid these tight loops
+//        switch (protocolConfiguration_->transportLayer)
+//        {
+//          case NET_TRANSPORTLAYER_TCP:
+//          case NET_TRANSPORTLAYER_SSL:
+//          {
+//            iconnection_p = connection_manager_p->get (peer_address,
+//                                                       true);
+//            if (iconnection_p)
+//              done_b = true;
+//            break;
+//          }
+//          case NET_TRANSPORTLAYER_UDP:
+//          {
+//            iconnection_2 = connection_manager_2->get (peer_address,
+//                                                       true);
+//            if (iconnection_2)
+//              done_b = true;
+//            break;
+//          }
+//          default:
+//          {
+//            ACE_DEBUG ((LM_ERROR,
+//                        ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+//                        protocolConfiguration_->transportLayer));
+//            if (connection_2)
+//            {
+//              connection_2->decrease (); connection_2 = NULL;
+//            } // end IF
+//            return;
+//          }
+//        } // end SWITCH
+//        if (done_b)
+//          break;
+//      } while (COMMON_TIME_NOW < deadline);
+//    } // end ELSE
+//    if (!iconnection_p && !iconnection_2)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to connect to %s, returning\n"),
+//                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+//      if (connection_2)
+//      {
+//        connection_2->decrease (); connection_2 = NULL;
+//      } // end IF
+//      return;
+//    } // end IF
+//    if (iconnection_p)
+//    {
+//      iconnection_p->decrease (); iconnection_p = NULL;
+//    } // end IF
+//    if (iconnection_2)
+//    {
+//      iconnection_2->decrease (); iconnection_2 = NULL;
+//    } // end IF
   } // end IF
 
   if (do_ping)

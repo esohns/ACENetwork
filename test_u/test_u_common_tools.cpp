@@ -21,13 +21,51 @@
 
 #include "test_u_common_tools.h"
 
-#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
-#include "net_macros.h"
+#include "common_tools.h"
 
-void
-Test_U_Common_Tools::getRandomConnection ()
+// initialize statics
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+char Test_U_Common_Tools::randomStateInitializationBuffer_[BUFSIZ];
+struct random_data Test_U_Common_Tools::randomState_;
+#endif // ACE_WIN32 || ACE_WIN64
+std::uniform_int_distribution<int> Test_U_Common_Tools::randomDistribution_;
+std::default_random_engine Test_U_Common_Tools::randomEngine_;
+std::function<int ()> Test_U_Common_Tools::randomGenerator_;
+
+bool
+Test_U_Common_Tools::initialize ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Common_Tools::getRandomConnection"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Common_Tools::initialize"));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  ACE_OS::memset (Test_U_Common_Tools::randomStateInitializationBuffer_,
+                  0,
+                  sizeof (char[BUFSIZ]));
+  int result =
+    ::initstate_r (Common_Tools::randomSeed,
+                   Test_U_Common_Tools::randomStateInitializationBuffer_, sizeof (char[BUFSIZ]),
+                   &Test_U_Common_Tools::randomState_);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::initstate_r(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  result = ::srandom_r (Common_Tools::randomSeed, &randomState_);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::srandom_r(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
+  Test_U_Common_Tools::randomGenerator_ =
+      std::bind (Test_U_Common_Tools::randomDistribution_,
+                 Test_U_Common_Tools::randomEngine_);
+
+  return true;
 }

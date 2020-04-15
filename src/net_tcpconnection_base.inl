@@ -512,6 +512,7 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
+  int retries_i = 0;
   // *TODO*: always retrieve data from inherited::stream_
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
       inherited::stream_.upstream (true);
@@ -566,16 +567,20 @@ send:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
     // *WARNING*: this could fail on multi-threaded proactors
-    if (error == EAGAIN) // 11   : happens on Linux
-      goto send;
-#endif
+    if (error == EAGAIN) // 11   : happens on Linux (e.g. no free aio slot ATM)
+    {
+      ++retries_i;
+      if (retries_i <= NET_CONNECTION_DEFAULT_SEND_RETRIES)
+        goto send;
+    } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ENOTSOCK)     &&  // 10038: happens on Win32
         (error != ECONNABORTED) &&  // 10053: happens on Win32
         (error != ECONNRESET)   &&  // 10054: happens on Win32
         (error != ENOTCONN))        // 10057: happens on Win32
 #else
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
                   this->id (),
