@@ -37,9 +37,6 @@
 // forward declaration(s)
 class ACE_Allocator;
 class Test_U_SessionMessage;
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -52,23 +49,23 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class Test_U_Message
- : public HTTP_Message_T<struct Common_Parser_FlexAllocatorConfiguration,
+ : public HTTP_Message_T<//struct Common_Parser_FlexAllocatorConfiguration,
                          enum Stream_MessageType>
 {
+  typedef HTTP_Message_T<//struct Common_Parser_FlexAllocatorConfiguration,
+                         enum Stream_MessageType> inherited;
+
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_Parser_FlexAllocatorConfiguration,
-                                                 Test_U_HTTPDecoder_ControlMessage_t,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
   friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               struct Common_Parser_FlexAllocatorConfiguration,
-                                               Test_U_HTTPDecoder_ControlMessage_t,
+                                               struct Common_AllocatorConfiguration,
+                                               Stream_ControlMessage_t,
                                                Test_U_Message,
                                                Test_U_SessionMessage>;
-
-  typedef HTTP_Message_T<struct Common_Parser_FlexAllocatorConfiguration,
-                         enum Stream_MessageType> inherited;
 
  public:
   Test_U_Message (unsigned int); // size

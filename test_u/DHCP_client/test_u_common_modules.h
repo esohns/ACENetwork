@@ -49,6 +49,8 @@
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
 
+#include "test_u_dhcp_client_common.h"
+
 // forward declarations
 class Test_U_SessionMessage;
 class Test_U_Message;
@@ -61,7 +63,7 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
 
 // declare module(s)
 typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                     DHCPClient_ControlMessage_t,
+                                     Stream_ControlMessage_t,
                                      Test_U_Message,
                                      Test_U_SessionMessage,
                                      struct DHCPClient_ModuleHandlerConfiguration,
@@ -76,7 +78,7 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      DHCPClient_ConnectionManager_t,
                                      struct Stream_UserData> DHCPClient_Module_Net_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                     DHCPClient_ControlMessage_t,
+                                     Stream_ControlMessage_t,
                                      Test_U_Message,
                                      Test_U_SessionMessage,
                                      struct DHCPClient_ModuleHandlerConfiguration,
@@ -93,7 +95,7 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
 
 typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               DHCPClient_ControlMessage_t,
+                               Stream_ControlMessage_t,
                                Test_U_Message,
                                Test_U_SessionMessage,
                                struct DHCPClient_ModuleHandlerConfiguration,
@@ -102,7 +104,7 @@ typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                DHCPClient_OutboundConnector_t> DHCPClient_Module_DHCPDiscover;
 typedef DHCP_Module_DiscoverH_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                DHCPClient_ControlMessage_t,
+                                Stream_ControlMessage_t,
                                 Test_U_Message,
                                 Test_U_SessionMessage,
                                 struct DHCPClient_ModuleHandlerConfiguration,
@@ -117,21 +119,21 @@ typedef DHCP_Module_DiscoverH_T<ACE_MT_SYNCH,
 typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct DHCPClient_ModuleHandlerConfiguration,
-                               DHCPClient_ControlMessage_t,
+                               Stream_ControlMessage_t,
                                Test_U_Message,
                                Test_U_SessionMessage> DHCPClient_Module_Streamer;
 
 typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct DHCPClient_ModuleHandlerConfiguration,
-                             DHCPClient_ControlMessage_t,
+                             Stream_ControlMessage_t,
                              Test_U_Message,
                              Test_U_SessionMessage> DHCPClient_Module_Parser;
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct DHCPClient_ModuleHandlerConfiguration,
-                                                      DHCPClient_ControlMessage_t,
+                                                      Stream_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       DHCP_MessageType_t,
@@ -142,7 +144,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct DHCPClient_ModuleHandlerConfiguration,
-                                                      DHCPClient_ControlMessage_t,
+                                                      Stream_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       DHCP_MessageType_t,
@@ -154,7 +156,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
 typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct DHCPClient_ModuleHandlerConfiguration,
-                             DHCPClient_ControlMessage_t,
+                             Stream_ControlMessage_t,
                              Test_U_Message,
                              Test_U_SessionMessage,
                              struct Stream_UserData> DHCPClient_Module_Dump;

@@ -31,6 +31,7 @@
 
 #include "stream_misc_messagehandler.h"
 
+#include "test_u_configuration.h"
 #include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 #include "net_client_stream_common.h"

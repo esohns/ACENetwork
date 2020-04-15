@@ -47,7 +47,7 @@ Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_
 }
 
 bool
-Test_U_Module_ProtocolHandler::initialize (const struct Stream_ModuleHandlerConfiguration& configuration_in,
+Test_U_Module_ProtocolHandler::initialize (const struct FileServer_ModuleHandlerConfiguration& configuration_in,
                                            Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::initialize"));

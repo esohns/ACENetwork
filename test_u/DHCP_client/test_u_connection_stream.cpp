@@ -108,7 +108,7 @@ Test_U_InboundConnectionStream::initialize (const inherited::CONFIGURATION_T& co
   ACE_ASSERT (!isRunning ());
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration->setupPipeline;
   bool reset_setup_pipeline = false;
   struct DHCPClient_SessionData* session_data_p = NULL;
   inherited::CONFIGURATION_T::ITERATOR_T iterator;
@@ -116,7 +116,7 @@ Test_U_InboundConnectionStream::initialize (const inherited::CONFIGURATION_T& co
 //  DHCPClient_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -127,7 +127,7 @@ Test_U_InboundConnectionStream::initialize (const inherited::CONFIGURATION_T& co
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -170,7 +170,7 @@ Test_U_InboundConnectionStream::initialize (const inherited::CONFIGURATION_T& co
 //  //             handle to the session data)
 //  module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.configuration_.setupPipeline)
+  if (configuration_in.configuration->setupPipeline)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -190,7 +190,7 @@ Test_U_InboundConnectionStream::initialize (const inherited::CONFIGURATION_T& co
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
       setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
@@ -258,7 +258,7 @@ Test_U_OutboundConnectionStream::initialize (const inherited::CONFIGURATION_T& c
   ACE_ASSERT (!isRunning ());
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration->setupPipeline;
   bool reset_setup_pipeline = false;
   struct DHCPClient_SessionData* session_data_p = NULL;
   inherited::CONFIGURATION_T::ITERATOR_T iterator;
@@ -266,7 +266,7 @@ Test_U_OutboundConnectionStream::initialize (const inherited::CONFIGURATION_T& c
 //  DHCPClient_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -277,7 +277,7 @@ Test_U_OutboundConnectionStream::initialize (const inherited::CONFIGURATION_T& c
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -317,8 +317,8 @@ Test_U_OutboundConnectionStream::initialize (const inherited::CONFIGURATION_T& c
 //  //             handle to the session data)
 //  module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.configuration_.setupPipeline)
-    if (!inherited::setup (configuration_in.configuration_.notificationStrategy))
+  if (configuration_in.configuration->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration->notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
@@ -338,7 +338,7 @@ Test_U_OutboundConnectionStream::initialize (const inherited::CONFIGURATION_T& c
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
       setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,

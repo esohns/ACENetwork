@@ -37,23 +37,23 @@ class ACE_Message_Block;
 class Test_U_Message;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       FileServer_SessionData_t,
                                       struct Stream_UserData>
 {
-//  // enable access to private ctor(s)
-//  friend class Net_StreamMessageAllocator;
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_Parser_FlexAllocatorConfiguration,
-                                                 Test_U_ControlMessage_t,
-                                                 Test_U_Message,
-                                                 Test_U_SessionMessage>;
-
-  typedef Stream_SessionMessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       FileServer_SessionData_t,
                                       struct Stream_UserData> inherited;
+
+  //  // enable access to private ctor(s)
+//  friend class Net_StreamMessageAllocator;
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_U_Message,
+                                                 Test_U_SessionMessage>;
 
  public:
   // *NOTE*: assumes responsibility for the third argument !

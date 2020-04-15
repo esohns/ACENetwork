@@ -21,33 +21,4 @@
 #ifndef TEST_U_CONFIGURATION_H
 #define TEST_U_CONFIGURATION_H
 
-//#include <list>
-
-//#include "ace/INET_Addr.h"
-//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//#include "ace/Netlink_Addr.h"
-//#endif
-//#include "ace/Time_Value.h"
-
-#include "stream_common.h"
-#include "stream_configuration.h"
-//#include "stream_iallocator.h"
-//#include "stream_imessagequeue.h"
-
-#include "net_configuration.h"
-//#include "net_defines.h"
-//#include "net_iconnectionmanager.h"
-
-//#include "net_server_defines.h"
-
-#include "test_u_common.h"
-//#include "test_u_stream_common.h"
-
-//#include "test_u_connection_common.h"
-
-//#include "file_server_common.h"
-//#include "file_server_connection_common.h"
-//#include "file_server_defines.h"
-//#include "file_server_stream_common.h"
-
 #endif

@@ -182,11 +182,11 @@ BitTorrent_PeerStream_T<StreamStateType,
   typename inherited::WRITER_T* writer_impl_p = NULL;
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration->setupPipeline;
   bool reset_setup_pipeline = false;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -197,7 +197,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                 ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
 
@@ -228,7 +228,7 @@ BitTorrent_PeerStream_T<StreamStateType,
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.configuration_.setupPipeline)
+  if (configuration_in.configuration->setupPipeline)
     if (!inherited::setup (NULL))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -243,7 +243,7 @@ BitTorrent_PeerStream_T<StreamStateType,
 
 error:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
       setup_pipeline;
 
   return false;

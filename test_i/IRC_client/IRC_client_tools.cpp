@@ -250,7 +250,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_p);
   ACE_ASSERT (configuration_p->protocolConfiguration);
-  ACE_ASSERT (configuration_p->streamConfiguration_);
+  ACE_ASSERT (configuration_p->streamConfiguration);
 
   // step1: set up configuration
   configuration_p->protocolConfiguration->loginOptions =
@@ -258,11 +258,11 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   configuration_p->address = peerAddress_in;
   if (finalModule_inout)
   {
-    configuration_p->streamConfiguration_->configuration_.cloneModule =
+    configuration_p->streamConfiguration->configuration->cloneModule =
       cloneModule_in;
-    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //configuration_p->streamConfiguration->configuration->deleteModule =
     //  deleteModule_in;
-    configuration_p->streamConfiguration_->configuration_.module =
+    configuration_p->streamConfiguration->configuration->module =
       finalModule_inout;
     if (deleteModule_in)
       finalModule_inout = NULL;

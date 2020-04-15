@@ -51,30 +51,28 @@
 
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
+#include "test_u_stream.h"
 #include "test_u_stream_common.h"
 
 #include "file_server_defines.h"
 
 // forward declarations
-class Test_U_Stream;
-class Test_U_UDPStream;
+//class Test_U_Stream;
+//class Test_U_UDPStream;
 
 //extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
-struct Test_U_ModuleHandlerConfiguration;
+struct FileServer_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
                                struct FileServer_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct Test_U_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
+                               struct FileServer_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
 class FileServer_TCPConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-                                        FileServer_StreamConfiguration_t,
-                                        NET_TRANSPORTLAYER_TCP>
+ : public Net_StreamConnectionConfiguration_T<FileServer_StreamConfiguration_t,
+                                              NET_TRANSPORTLAYER_TCP>
 {
  public:
   FileServer_TCPConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
+   : Net_StreamConnectionConfiguration_T ()
   {
     //PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
   }
@@ -84,13 +82,12 @@ class FileServer_TCPConnectionConfiguration
 //typedef FileServer_TCPConnectionConfigurations_t::iterator FileServer_TCPConnectionConfigurationIterator_t;
 
 class FileServer_UDPConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-                                        FileServer_StreamConfiguration_t,
-                                        NET_TRANSPORTLAYER_UDP>
+ : public Net_StreamConnectionConfiguration_T<FileServer_StreamConfiguration_t,
+                                              NET_TRANSPORTLAYER_UDP>
 {
  public:
   FileServer_UDPConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
+   : Net_StreamConnectionConfiguration_T ()
   {
     //PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
   }
@@ -157,12 +154,10 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct FileServer_StreamConfiguration,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
-                                      struct Common_Parser_FlexAllocatorConfiguration,
-                                      struct Stream_ModuleConfiguration,
-                                      struct Test_U_ModuleHandlerConfiguration,
+                                      struct FileServer_ModuleHandlerConfiguration,
                                       struct FileServer_SessionData,
                                       FileServer_SessionData_t,
-                                      Test_U_ControlMessage_t,
+                                      Stream_ControlMessage_t,
                                       Test_U_Message,
                                       Test_U_SessionMessage,
                                       ACE_INET_Addr,
@@ -178,12 +173,10 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct FileServer_StreamConfiguration,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
-                                      struct Common_Parser_FlexAllocatorConfiguration,
-                                      struct Stream_ModuleConfiguration,
-                                      struct Test_U_ModuleHandlerConfiguration,
+                                      struct FileServer_ModuleHandlerConfiguration,
                                       struct FileServer_SessionData,
                                       FileServer_SessionData_t,
-                                      Test_U_ControlMessage_t,
+                                      Stream_ControlMessage_t,
                                       Test_U_Message,
                                       Test_U_SessionMessage,
                                       ACE_INET_Addr,

@@ -39,7 +39,7 @@ Test_U_Module_EventHandler::Test_U_Module_EventHandler (ISTREAM_T* stream_in)
 }
 
 bool
-Test_U_Module_EventHandler::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
+Test_U_Module_EventHandler::initialize (const struct FileServer_ModuleHandlerConfiguration& configuration_in,
                                         Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::initialize"));
@@ -52,7 +52,7 @@ Test_U_Module_EventHandler::initialize (const struct Test_U_ModuleHandlerConfigu
 }
 
 void
-Test_U_Module_EventHandler::handleControlMessage (Test_U_ControlMessage_t& controlMessage_in)
+Test_U_Module_EventHandler::handleControlMessage (Stream_ControlMessage_t& controlMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::handleControlMessage"));
 

@@ -451,12 +451,43 @@ do_work (unsigned int numberOfDispatchThreads_in,
   ACE_ASSERT (CBData_in.configuration);
 
   // step1: initialize configuration
+
+  // initialize protocol configuration
+  struct IRC_AllocatorConfiguration allocator_configuration;
+  Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                     IRC_MAXIMUM_FRAME_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  if (!heap_allocator.initialize (allocator_configuration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator: \"%m\", aborting\n")));
+    return;
+  } // end IF
+  IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                   &heap_allocator);
+
+  //user_data.connectionConfiguration = &configuration.connectionConfiguration;
+
+  CBData_in.configuration->parserConfiguration.debugParser = true;
+  if (true)
+    CBData_in.configuration->parserConfiguration.debugScanner = true;
+  ////////////////////// socket handler configuration //////////////////////////
+  IRC_Client_ConnectionConfiguration connection_configuration;
+//  connection_configuration.statisticReportingInterval =
+//    ACE_Time_Value (reporting_interval, 0);
+  connection_configuration.messageAllocator = &message_allocator;
+
+  connection_configuration.initialize (CBData_in.configuration->streamConfiguration);
+
+  CBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                            &connection_configuration));
   Net_ConnectionConfigurationsIterator_t iterator =
     CBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != CBData_in.configuration->connectionConfigurations.end ());
 
-  struct Stream_ModuleConfiguration module_configuration;
+  ////////////////////////// stream configuration //////////////////////////////
+    struct Stream_ModuleConfiguration module_configuration;
   struct IRC_Client_ModuleHandlerConfiguration modulehandler_configuration;
+  struct IRC_Client_StreamConfiguration stream_configuration;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
   modulehandler_configuration.parserConfiguration =
@@ -467,11 +498,11 @@ do_work (unsigned int numberOfDispatchThreads_in,
     statisticReportingInterval_in;
   modulehandler_configuration.streamConfiguration =
     &CBData_in.configuration->streamConfiguration;
-  struct IRC_AllocatorConfiguration allocator_configuration;
-  struct IRC_Client_StreamConfiguration stream_configuration;
+
+  stream_configuration.messageAllocator = &message_allocator;
+
   CBData_in.configuration->streamConfiguration.initialize (module_configuration,
                                                            modulehandler_configuration,
-                                                           allocator_configuration,
                                                            stream_configuration);
 
   //IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
@@ -1337,54 +1368,6 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_SUCCESS;
   } // end IF
-
-  // step6: initialize configuration objects
-
-  // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                  IRC_MAXIMUM_FRAME_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
-  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize allocator: \"%m\", aborting\n")));
-
-    Common_Log_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    result = ACE::fini ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif // ACE_WIN32 || ACE_WIN64
-
-    return EXIT_FAILURE;
-  } // end IF
-  IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                   &heap_allocator);
-
-  //user_data.connectionConfiguration = &configuration.connectionConfiguration;
-
-  configuration.parserConfiguration.debugParser = debug;
-  if (debug)
-    configuration.parserConfiguration.debugScanner = debug;
-  ////////////////////// socket handler configuration //////////////////////////
-  IRC_Client_ConnectionConfiguration connection_configuration;
-  connection_configuration.statisticReportingInterval =
-    ACE_Time_Value (reporting_interval, 0);
-  connection_configuration.messageAllocator = &message_allocator;
-
-  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
-                                       configuration.streamConfiguration);
-
-  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 &connection_configuration));
-  Net_ConnectionConfigurationsIterator_t iterator =
-    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
-
-  ////////////////////////// stream configuration //////////////////////////////
-  configuration.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
 
   ui_cb_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;

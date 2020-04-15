@@ -29,24 +29,25 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
-#include "net_exports.h"
+//#include "net_exports.h"
 
 #include "test_u_defines.h"
 #include "test_u_stream_common.h"
+#include "test_u_sessionmessage.h"
 
 //extern Net_Export const char libacenetwork_default_test_u_headerparser_module_name_string[];
 extern const char libacenetwork_default_test_u_headerparser_module_name_string[];
 
 // forward declaration(s)
 class Test_U_Message;
-class Test_U_SessionMessage;
+//class Test_U_SessionMessage;
 
 class Test_U_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Common_ILock_T<ACE_MT_SYNCH>,
-                                 struct Stream_ModuleHandlerConfiguration,
-                                 ACE_Message_Block,
+                                 struct FileServer_ModuleHandlerConfiguration,
+                                 Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
@@ -57,8 +58,8 @@ class Test_U_Module_HeaderParser
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Common_ILock_T<ACE_MT_SYNCH>,
-                                 struct Stream_ModuleHandlerConfiguration,
-                                 ACE_Message_Block,
+                                 struct FileServer_ModuleHandlerConfiguration,
+                                 Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
@@ -86,7 +87,7 @@ class Test_U_Module_HeaderParser
 // declare module
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,           // session event type
-                              struct Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              struct FileServer_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_default_test_u_headerparser_module_name_string,
                               Stream_INotify_t,                         // stream notification interface type
                               Test_U_Module_HeaderParser);              // writer type

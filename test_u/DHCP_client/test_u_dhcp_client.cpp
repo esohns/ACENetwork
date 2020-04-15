@@ -613,8 +613,8 @@ do_work (bool requestBroadcastReplies_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct DHCP_AllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
+                         struct Common_AllocatorConfiguration> heap_allocator;
+  if (!heap_allocator.initialize (configuration_in.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -683,8 +683,7 @@ do_work (bool requestBroadcastReplies_in,
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
-                                       configuration_in.streamConfiguration);
+  connection_configuration.initialize (configuration_in.streamConfiguration);
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Out"),
                                                                     &connection_configuration));
@@ -693,17 +692,17 @@ do_work (bool requestBroadcastReplies_in,
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
 
   // ********************** stream configuration data **************************
-  configuration_in.streamConfiguration.configuration_.cloneModule = true;
-  configuration_in.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
-  configuration_in.streamConfiguration.configuration_.module =
-    (!UIDefinitionFileName_in.empty () ? &event_handler
-                                       : NULL);
-  configuration_in.streamConfiguration.configuration_.printFinalReport = true;
-
-  // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct DHCPClient_ModuleHandlerConfiguration modulehandler_configuration;
+  struct DHCPClient_StreamConfiguration stream_configuration;
+  stream_configuration.cloneModule = true;
+  stream_configuration.messageAllocator = &message_allocator;
+  stream_configuration.module =
+    (!UIDefinitionFileName_in.empty () ? &event_handler
+                                       : NULL);
+  stream_configuration.printFinalReport = true;
+
+  // ********************** module configuration data **************************
 //  struct DHCPClient_StreamConfiguration stream_configuration;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
@@ -727,8 +726,7 @@ do_work (bool requestBroadcastReplies_in,
   modulehandler_configuration.targetFileName = fileName_in;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
-                                                   configuration_in.streamConfiguration.allocatorConfiguration_,
-                                                   configuration_in.streamConfiguration.configuration_);
+                                                   stream_configuration);
 
   DHCPClient_StreamConfiguration_t::ITERATOR_T iterator_2 =
     configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -937,7 +935,7 @@ do_work (bool requestBroadcastReplies_in,
   // *NOTE*: the DHCP server address may not be known at this stage, so
   //         connection to the unicast address is handled by the discovery
   //         module
-  configuration_in.streamConfiguration.configuration_.module = NULL;
+//  configuration_in.streamConfiguration.configuration_.module = NULL;
   connection_manager_p->set (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
                              &configuration_in.userData);
 
@@ -1045,9 +1043,6 @@ do_work (bool requestBroadcastReplies_in,
   else
     NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->connect = false;
   NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->writeOnly = false;
-  configuration_in.streamConfiguration.configuration_.module =
-    (!UIDefinitionFileName_in.empty () ? &event_handler
-                                       : NULL);
   //connection_manager_p->set (configuration,
   //                           &configuration_in.userData);
 

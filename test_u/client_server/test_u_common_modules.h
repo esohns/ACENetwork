@@ -45,10 +45,10 @@ class Test_U_SessionMessage;
 
 // declare module(s)
 //typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
-//                                      Test_U_ControlMessage_t,
+//                                      Stream_ControlMessage_t,
 //                                      Test_U_Message,
 //                                      Test_U_SessionMessage,
-//                                      struct Test_U_ModuleHandlerConfiguration,
+//                                      struct ClientServer_ModuleHandlerConfiguration,
 //                                      enum Stream_ControlType,
 //                                      enum Stream_SessionMessageType,
 //                                      struct Test_U_StreamState,
@@ -60,15 +60,15 @@ class Test_U_SessionMessage;
 //                                      struct Test_U_UserData> Test_U_Module_SocketHandler;
 //DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
 //                              enum Stream_SessionMessageType,                 // session event type
-//                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+//                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
 //                              libacenetwork_default_tcp_sockethandler_module_name_string,
 //                              Stream_INotify_t,                               // stream notification interface type
 //                              Test_U_Module_SocketHandler);             // writer type
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
+                                                      struct ClientServer_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       Net_MessageType_t,
@@ -78,8 +78,8 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
+                                                      struct ClientServer_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       Net_MessageType_t,
@@ -89,7 +89,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
 DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session data type
                           enum Stream_SessionMessageType,                   // session event type
-                          struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
+                          struct ClientServer_ModuleHandlerConfiguration,   // module handler configuration type
                           libacestream_default_stat_report_module_name_string,
                           Stream_INotify_t,                                 // stream notification interface type
                           Test_U_Module_StatisticReport_ReaderTask_t, // reader type

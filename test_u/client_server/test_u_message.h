@@ -31,7 +31,7 @@
 
 #include "net_remote_comm.h"
 
-#include "net_client_common.h"
+//#include "net_client_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;

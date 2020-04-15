@@ -53,13 +53,11 @@ struct Test_U_HTTPDecoder_SignalHandlerConfiguration
 };
 
 //extern const char stream_name_string_[];
-struct Test_U_StreamConfiguration;
-struct Test_U_ModuleHandlerConfiguration;
+struct Test_U_HTTPDecoder_StreamConfiguration;
+struct Test_U_HTTPDecoder_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
-                               struct Test_U_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+                               struct Test_U_HTTPDecoder_StreamConfiguration,
+                               struct Test_U_HTTPDecoder_ModuleHandlerConfiguration> Test_U_HTTPDecoder_StreamConfiguration_t;
 struct Test_U_HTTPDecoder_Configuration
  : Test_U_Configuration
 {
@@ -79,7 +77,7 @@ struct Test_U_HTTPDecoder_Configuration
   // **************************** signal data **********************************
   struct Test_U_HTTPDecoder_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** stream data **********************************
-  Test_U_StreamConfiguration_t                         streamConfiguration;
+  Test_U_HTTPDecoder_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
 
   enum Common_EventDispatchType                        dispatch;

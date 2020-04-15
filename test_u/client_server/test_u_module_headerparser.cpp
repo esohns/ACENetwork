@@ -39,8 +39,8 @@ Test_U_Module_HeaderParser::Test_U_Module_HeaderParser (ISTREAM_T* stream_in)
 }
 
 bool
-Test_U_Module_HeaderParser::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
-                                              Stream_IAllocator* allocator_in)
+Test_U_Module_HeaderParser::initialize (const struct ClientServer_ModuleHandlerConfiguration& configuration_in,
+                                        Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::initialize"));
 
@@ -55,7 +55,7 @@ Test_U_Module_HeaderParser::initialize (const struct Test_U_ModuleHandlerConfigu
 
 void
 Test_U_Module_HeaderParser::handleDataMessage (Test_U_Message*& message_inout,
-                                                     bool& passMessageDownstream_out)
+                                               bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::handleDataMessage"));
 

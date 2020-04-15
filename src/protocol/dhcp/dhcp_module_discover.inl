@@ -290,12 +290,12 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       ConnectionManagerType::SINGLETON_T::instance ();
     ACE_ASSERT (connection_manager_p);
     clone_module =
-      inherited::configuration_->streamConfiguration->configuration_.cloneModule;
+      inherited::configuration_->streamConfiguration->configuration->cloneModule;
     module_p =
-      inherited::configuration_->streamConfiguration->configuration_.module;
-    inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+      inherited::configuration_->streamConfiguration->configuration->module;
+    inherited::configuration_->streamConfiguration->configuration->cloneModule =
       false;
-    inherited::configuration_->streamConfiguration->configuration_.module =
+    inherited::configuration_->streamConfiguration->configuration->module =
       NULL;
     reset_configuration = true;
     //connection_manager_p->set ((*iterator_2).second,
@@ -333,9 +333,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     // step2e: reset the connection configuration
     NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
     NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
-    inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+    inherited::configuration_->streamConfiguration->configuration->cloneModule =
       clone_module;
-    inherited::configuration_->streamConfiguration->configuration_.module =
+    inherited::configuration_->streamConfiguration->configuration->module =
       module_p;
   } // end IF
 
@@ -346,9 +346,9 @@ error:
   {
     NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
     NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
-    inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+    inherited::configuration_->streamConfiguration->configuration->cloneModule =
       clone_module;
-    inherited::configuration_->streamConfiguration->configuration_.module =
+    inherited::configuration_->streamConfiguration->configuration->module =
       module_p;
     //connection_manager_p->set ((*iterator_2).second,
     //                           configuration_->userData);
@@ -537,7 +537,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
         //         when a connection handles several consecutive sessions,
         //         and/or each session needs a reference to its' own specific
         //         and/or 'unique' ID...)
-        if (inherited::configuration_->streamConfiguration->configuration_.sessionId)
+        if (inherited::configuration_->streamConfiguration->configuration->sessionId)
         {
           // *NOTE*: this may have to wait for the connection to finish
           //         initializing
@@ -547,7 +547,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
           {
             if (!session_data_r.connection)
               session_data_r.connection =
-                connection_manager_p->get (static_cast<Net_ConnectionId_t> (inherited::configuration_->streamConfiguration->configuration_.sessionId));
+                connection_manager_p->get (static_cast<Net_ConnectionId_t> (inherited::configuration_->streamConfiguration->configuration->sessionId));
             if (!session_data_r.connection)
               continue;
 
@@ -560,7 +560,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("%s: failed to retrieve connection handle (handle was: %u), aborting\n"),
                         ACE_TEXT (inherited::mod_->name ()),
-                        inherited::configuration_->streamConfiguration->configuration_.sessionId));
+                        inherited::configuration_->streamConfiguration->configuration->sessionId));
             goto error;
           } // end IF
 
@@ -600,16 +600,16 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 
 //      // *TODO*: remove type inferences
 //      clone_module =
-//          inherited::configuration_->streamConfiguration->configuration_.cloneModule;
+//          inherited::configuration_->streamConfiguration->configuration->cloneModule;
 //      delete_module =
-//          inherited::configuration_->streamConfiguration->configuration_.deleteModule;
+//          inherited::configuration_->streamConfiguration->configuration->deleteModule;
 //      module_p =
-//        inherited::configuration_->streamConfiguration->configuration_.module;
-//      inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+//        inherited::configuration_->streamConfiguration->configuration->module;
+//      inherited::configuration_->streamConfiguration->configuration->cloneModule =
 //        false;
-//      inherited::configuration_->streamConfiguration->configuration_.deleteModule =
+//      inherited::configuration_->streamConfiguration->configuration->deleteModule =
 //        false;
-//      inherited::configuration_->streamConfiguration->configuration_.module =
+//      inherited::configuration_->streamConfiguration->configuration->module =
 //        NULL;
 //      reset_configuration = true;
 
@@ -648,11 +648,11 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 
 //      // step2e: reset the connection configuration
 //      socket_configuration_p->writeOnly = write_only;
-//      inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+//      inherited::configuration_->streamConfiguration->configuration->cloneModule =
 //        clone_module;
-//      inherited::configuration_->streamConfiguration->configuration_.deleteModule =
+//      inherited::configuration_->streamConfiguration->configuration->deleteModule =
 //        delete_module;
-//      inherited::configuration_->streamConfiguration->configuration_.module =
+//      inherited::configuration_->streamConfiguration->configuration->module =
 //        module_p;
 
       //connection_manager_p->set (*inherited::configuration_,
@@ -665,9 +665,9 @@ error:
       if (reset_configuration)
       {
 //        (*iterator_2).second->writeOnly = write_only;
-        inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+        inherited::configuration_->streamConfiguration->configuration->cloneModule =
           clone_module;
-        inherited::configuration_->streamConfiguration->configuration_.module =
+        inherited::configuration_->streamConfiguration->configuration->module =
           module_p;
 
         //connection_manager_p->set (*configuration_,

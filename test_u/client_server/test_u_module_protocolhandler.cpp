@@ -81,8 +81,8 @@ Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler ()
 }
 
 bool
-Test_U_Module_ProtocolHandler::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
-                                                 Stream_IAllocator* allocator_in)
+Test_U_Module_ProtocolHandler::initialize (const struct ClientServer_ModuleHandlerConfiguration& configuration_in,
+                                           Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::initialize"));
 

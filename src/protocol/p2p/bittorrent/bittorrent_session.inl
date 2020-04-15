@@ -341,29 +341,29 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                         user_data_p);
     ACE_ASSERT (configuration_p);
     // *TODO*: remove type inferences
-    ACE_ASSERT (configuration_p->streamConfiguration_);
+    ACE_ASSERT (configuration_p->streamConfiguration);
 
     // step1: set up configuration
     configuration_p->address = address_in;
 
     iterator =
-        configuration_p->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != configuration_p->streamConfiguration_->end ());
+        configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
     subscriber_p = (*iterator).second.second.subscriber;
     (*iterator).second.second.subscriber = &peerStreamHandler_;
 
     clone_module =
-      configuration_p->streamConfiguration_->configuration_.cloneModule;
+      configuration_p->streamConfiguration->configuration->cloneModule;
     //delete_module =
-    //  configuration_p->streamConfiguration_->configuration_.deleteModule;
+    //  configuration_p->streamConfiguration->configuration->deleteModule;
     module_p =
-      configuration_p->streamConfiguration_->configuration_.module;
+      configuration_p->streamConfiguration->configuration->module;
 
-    configuration_p->streamConfiguration_->configuration_.cloneModule =
+    configuration_p->streamConfiguration->configuration->cloneModule =
       false;
-    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //configuration_p->streamConfiguration->configuration->deleteModule =
     //  false;
-    configuration_p->streamConfiguration_->configuration_.module =
+    configuration_p->streamConfiguration->configuration->module =
       peerHandlerModule_;
   } // end IF
 
@@ -375,16 +375,16 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   {
     ACE_ASSERT (configuration_p);
     // *TODO*: remove type inferences
-    ACE_ASSERT (configuration_p->streamConfiguration_);
+    ACE_ASSERT (configuration_p->streamConfiguration);
 
-    ACE_ASSERT (iterator != configuration_p->streamConfiguration_->end ());
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
     (*iterator).second.second.subscriber = subscriber_p;
 
-    configuration_p->streamConfiguration_->configuration_.cloneModule =
+    configuration_p->streamConfiguration->configuration->cloneModule =
       clone_module;
-    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //configuration_p->streamConfiguration->configuration->deleteModule =
     //  delete_module;
-    configuration_p->streamConfiguration_->configuration_.module = module_p;
+    configuration_p->streamConfiguration->configuration->module = module_p;
   } // end IF
 };
 
@@ -950,31 +950,31 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                     user_data_p);
     ACE_ASSERT (configuration_p);
     // *TODO*: remove type inferences
-    ACE_ASSERT (configuration_p->streamConfiguration_);
+    ACE_ASSERT (configuration_p->streamConfiguration);
 
     // step1: set up configuration
     configuration_p->address = address_in;
 
     iterator =
-        configuration_p->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != configuration_p->streamConfiguration_->end ());
+        configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
     subscriber_p = (*iterator).second.second.subscriber;
     ACE_ASSERT (!subscriber_p);
     (*iterator).second.second.subscriber = &trackerStreamHandler_;
 
     clone_module =
-      configuration_p->streamConfiguration_->configuration_.cloneModule;
+      configuration_p->streamConfiguration->configuration->cloneModule;
     //delete_module =
-    //  configuration_p->streamConfiguration_->configuration_.deleteModule;
+    //  configuration_p->streamConfiguration->configuration->deleteModule;
     module_p =
-      configuration_p->streamConfiguration_->configuration_.module;
+      configuration_p->streamConfiguration->configuration->module;
     ACE_ASSERT (!module_p);
 
-    configuration_p->streamConfiguration_->configuration_.cloneModule =
+    configuration_p->streamConfiguration->configuration->cloneModule =
       false;
-    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //configuration_p->streamConfiguration->configuration->deleteModule =
     //  false;
-    configuration_p->streamConfiguration_->configuration_.module =
+    configuration_p->streamConfiguration->configuration->module =
       trackerHandlerModule_;
   } // end IF
 
@@ -1087,16 +1087,16 @@ error:
   if (trackerConnectionManager_)
   {
     ACE_ASSERT (configuration_p);
-    ACE_ASSERT (configuration_p->streamConfiguration_);
+    ACE_ASSERT (configuration_p->streamConfiguration);
 
-    ACE_ASSERT (iterator != configuration_p->streamConfiguration_->end ());
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
     (*iterator).second.second.subscriber = subscriber_p;
 
-    configuration_p->streamConfiguration_->configuration_.cloneModule =
+    configuration_p->streamConfiguration->configuration->cloneModule =
       clone_module;
-    //configuration_p->streamConfiguration_->configuration_.deleteModule =
+    //configuration_p->streamConfiguration->configuration->deleteModule =
     //  delete_module;
-    configuration_p->streamConfiguration_->configuration_.module =
+    configuration_p->streamConfiguration->configuration->module =
       module_p;
   } // end IF
 };

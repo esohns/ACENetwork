@@ -562,7 +562,7 @@ do_work (
   } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
+                         struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -578,7 +578,8 @@ do_work (
 //  configuration.allocatorConfiguration.defaultBufferSize =
 //    bufferSize_in;
   struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  struct FileServer_ModuleHandlerConfiguration modulehandler_configuration;
+  struct FileServer_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &configuration.allocatorConfiguration;
   modulehandler_configuration.connectionConfigurations =
@@ -605,23 +606,21 @@ do_work (
 #endif // GUI_SUPPORT
   } // end IF
 
-  configuration.streamConfiguration.configuration_.cloneModule =
+  stream_configuration.cloneModule =
     !(UIDefinitionFile_in.empty ());
-  configuration.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
-  configuration.streamConfiguration.configuration_.module = &event_handler;
-  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            std::make_pair (module_configuration,
-                                                                            modulehandler_configuration)));
-
+  stream_configuration.messageAllocator = &message_allocator;
+  stream_configuration.module = &event_handler;
   //configuration.streamConfiguration.protocolConfiguration =
   //  &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
-  configuration.streamConfiguration.configuration_.dispatch =
+  stream_configuration.dispatch =
     (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                    : COMMON_EVENT_DISPATCH_PROACTOR);
-  configuration.streamConfiguration.configuration_.serializeOutput =
+  stream_configuration.serializeOutput =
     (useReactor_in && (numberOfDispatchThreads_in > 1));
+  configuration.streamConfiguration.initialize (module_configuration,
+                                                modulehandler_configuration,
+                                                stream_configuration);
 
   // ********************** socket configuration data **************************
   FileServer_TCPConnectionConfiguration tcp_connection_configuration;
@@ -650,8 +649,7 @@ do_work (
   if (useUDP_in)
   {
     udp_connection_configuration.messageAllocator = &message_allocator;
-    udp_connection_configuration.initialize (configuration.allocatorConfiguration,
-                                             configuration.streamConfiguration);
+    udp_connection_configuration.initialize (configuration.streamConfiguration);
     configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                    &udp_connection_configuration));
   } // end IF
@@ -663,8 +661,7 @@ do_work (
     //    &tcp_connection_configuration;
 
     tcp_connection_configuration.messageAllocator = &message_allocator;
-    tcp_connection_configuration.initialize (configuration.allocatorConfiguration,
-                                             configuration.streamConfiguration);
+    tcp_connection_configuration.initialize (configuration.streamConfiguration);
     configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                    &tcp_connection_configuration));
   } // end ELSE

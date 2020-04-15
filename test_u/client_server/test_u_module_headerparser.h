@@ -31,6 +31,8 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
+#include "test_u_configuration.h"
+
 #include "net_client_stream_common.h"
 
 extern const char libacenetwork_default_test_u_headerparser_module_name_string[];

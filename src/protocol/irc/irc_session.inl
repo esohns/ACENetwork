@@ -1063,18 +1063,18 @@ IRC_Session_T<ConnectionType,
   ModuleHandlerConfigurationIteratorType iterator;
   if (!inherited::isManaged_)
   { // *TODO*: remove type inference
-    ACE_ASSERT (connection_configuration_p->streamConfiguration_);
+    ACE_ASSERT (connection_configuration_p->streamConfiguration);
     iterator =
-      connection_configuration_p->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration_->end ());
+      connection_configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->end ());
   } // end IF
   else
   { // *TODO*: remove type inference
     ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_);
+    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
     iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->end ());
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
   } // end ELSE
   (*iterator).second.second.subscriber = this;
 
@@ -1122,13 +1122,13 @@ IRC_Session_T<ConnectionType,
   // sanity checK(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
   // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_);
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
 
   // step0: intialize configuration object
   ModuleHandlerConfigurationIteratorType iterator;
   iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->end ());
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
   (*iterator).second.second.subscriber = this;
 //  ACE_ASSERT (module_handler_configuration_p->userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();

@@ -70,7 +70,7 @@ class Test_U_Stream
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         Test_U_TCPConnectionManager_t,
-                                        struct Net_UserData>
+                                        struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -90,7 +90,7 @@ class Test_U_Stream
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
                                         Test_U_TCPConnectionManager_t,
-                                        struct Net_UserData> inherited;
+                                        struct Stream_UserData> inherited;
 
  public:
   Test_U_Stream ();

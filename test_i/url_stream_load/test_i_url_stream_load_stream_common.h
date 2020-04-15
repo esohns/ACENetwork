@@ -205,9 +205,7 @@ struct Test_I_URLStreamLoad_StreamConfiguration
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
                                struct Test_I_URLStreamLoad_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
                                struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_StreamConfiguration_t;
 
 struct Test_I_URLStreamLoad_StreamState

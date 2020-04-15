@@ -47,9 +47,6 @@ struct IRC_Client_StreamConfiguration;
 struct IRC_Client_ModuleHandlerConfiguration;
 struct IRC_Client_SessionData;
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct IRC_AllocatorConfiguration> IRC_Client_ControlMessage_t;
 //class IRC_Client_SessionMessage;
 struct Net_UserData;
 
@@ -57,18 +54,15 @@ struct Net_UserData;
 struct IRC_Client_StreamConfiguration;
 struct IRC_Client_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct IRC_AllocatorConfiguration,
                                struct IRC_Client_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
 class IRC_Client_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
-                                        IRC_Client_StreamConfiguration_t,
-                                        NET_TRANSPORTLAYER_TCP>
+ : public Net_StreamConnectionConfiguration_T<IRC_Client_StreamConfiguration_t,
+                                              NET_TRANSPORTLAYER_TCP>
 {
  public:
   IRC_Client_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
+   : Net_StreamConnectionConfiguration_T ()
    ///////////////////////////////////////
    , cursesState (NULL)
    , protocolConfiguration (NULL)
@@ -97,7 +91,7 @@ class IRC_Client_Stream_T
                        struct IRC_Client_ModuleHandlerConfiguration,
                        struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
-                       IRC_Client_ControlMessage_t,
+                       Stream_ControlMessage_t,
                        IRC_Message,
                        IRC_Client_SessionMessage,
                        IRC_Client_Connection_Manager_t,
@@ -110,7 +104,7 @@ class IRC_Client_Stream_T
                        struct IRC_Client_ModuleHandlerConfiguration,
                        struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
-                       IRC_Client_ControlMessage_t,
+                       Stream_ControlMessage_t,
                        IRC_Message,
                        IRC_Client_SessionMessage,
                        IRC_Client_Connection_Manager_t,

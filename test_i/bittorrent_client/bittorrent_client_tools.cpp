@@ -70,9 +70,9 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   ACE_ASSERT (tracker_user_data_p);
   // *TODO*: remove type inferences
   ACE_ASSERT (peer_configuration_p);
-  ACE_ASSERT (peer_configuration_p->streamConfiguration_);
+  ACE_ASSERT (peer_configuration_p->streamConfiguration);
   ACE_ASSERT (tracker_configuration_p);
-  ACE_ASSERT (tracker_configuration_p->streamConfiguration_);
+  ACE_ASSERT (tracker_configuration_p->streamConfiguration);
 
   // step1: set up configuration
   if (isPeer_in)
@@ -83,20 +83,20 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   {
     if (isPeer_in)
     {
-      peer_configuration_p->streamConfiguration_->configuration_.cloneModule =
+      peer_configuration_p->streamConfiguration->configuration->cloneModule =
         cloneModule_in;
-      //peer_configuration_p->streamConfiguration_->configuration_.deleteModule =
+      //peer_configuration_p->streamConfiguration->configuration->deleteModule =
       //  deleteModule_in;
-      peer_configuration_p->streamConfiguration_->configuration_.module =
+      peer_configuration_p->streamConfiguration->configuration->module =
         finalModule_inout;
     } // end IF
     else
     {
-      tracker_configuration_p->streamConfiguration_->configuration_.cloneModule =
+      tracker_configuration_p->streamConfiguration->configuration->cloneModule =
         cloneModule_in;
-      //tracker_configuration_p->streamConfiguration_->configuration_.deleteModule =
+      //tracker_configuration_p->streamConfiguration->configuration->deleteModule =
       //  deleteModule_in;
-      tracker_configuration_p->streamConfiguration_->configuration_.module =
+      tracker_configuration_p->streamConfiguration->configuration->module =
         finalModule_inout;
     } // end ELSE
     if (deleteModule_in)

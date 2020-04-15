@@ -546,8 +546,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
+                         struct Common_AllocatorConfiguration> heap_allocator;
+  if (!heap_allocator.initialize (configuration_in.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -565,7 +565,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   configuration_in.protocolConfiguration.transportLayer = protocol_in;
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_U_StreamConfiguration stream_configuration;
   modulehandler_configuration.computeThroughput = true;
   modulehandler_configuration.printFinalReport = true;
   modulehandler_configuration.protocolConfiguration =
@@ -578,26 +579,24 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
 #endif // GUI_SUPPORT
 
-  configuration_in.streamConfiguration.configuration_.cloneModule = true;
-  configuration_in.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
-  configuration_in.streamConfiguration.configuration_.module =
+  stream_configuration.cloneModule = true;
+  stream_configuration.messageAllocator = &message_allocator;
+  stream_configuration.module =
 #if defined (GUI_SUPPORT)
       (!UIDefinitionFile_in.empty () ? &event_handler
                                      : NULL);
 #else
       NULL;
 #endif // GUI_SUPPORT
-  configuration_in.streamConfiguration.configuration_.printFinalReport = true;
+  stream_configuration.printFinalReport = true;
   // *TODO*: is this correct ?
-  configuration_in.streamConfiguration.configuration_.serializeOutput =
+  stream_configuration.serializeOutput =
     (useReactor_in && (numberOfDispatchThreads_in > 1)); // <-- using 'threadpool' reactor
   //configuration_in.streamConfiguration.configuration_.userData =
   //  &configuration_in.userData;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
-                                                   configuration_in.streamConfiguration.allocatorConfiguration_,
-                                                   configuration_in.streamConfiguration.configuration_);
+                                                   stream_configuration);
 
   // ********************** connection configuration data **********************
   Test_U_TCPConnectionConfiguration tcp_connection_configuration;
@@ -605,14 +604,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   tcp_connection_configuration.messageAllocator = &message_allocator;
   tcp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  tcp_connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
-                                           configuration_in.streamConfiguration);
+  tcp_connection_configuration.initialize (configuration_in.streamConfiguration);
   udp_connection_configuration.messageAllocator = &message_allocator;
   udp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   //udp_connection_configuration.writeOnly = true;
-  udp_connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
-                                           configuration_in.streamConfiguration);
+  udp_connection_configuration.initialize (configuration_in.streamConfiguration);
   Net_ConnectionConfigurationsIterator_t iterator, iterator_2;
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),

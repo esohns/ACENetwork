@@ -102,7 +102,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
   ACE_ASSERT (!inherited::isRunning ());
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration->setupPipeline;
   bool reset_setup_pipeline = false;
   struct IRC_Client_SessionData* session_data_p = NULL;
   typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
@@ -111,7 +111,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
   IRC_Client_IConnection_t* iconnection_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration_.setupPipeline =
+  const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -122,7 +122,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
                 ACE_TEXT (libacenetwork_default_irc_stream_name_string)));
     goto error;
   } // end IF
-  const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration_.setupPipeline =
+  const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -177,7 +177,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
 
   // ---------------------------------------------------------------------------
 
-  if (configuration_in.configuration_.setupPipeline)
+  if (configuration_in.configuration->setupPipeline)
     if (!inherited::setup (NULL))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -193,7 +193,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
 
 error:
   if (reset_setup_pipeline)
-    const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration_.setupPipeline =
+    const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration->setupPipeline =
       setup_pipeline;
 
   return false;

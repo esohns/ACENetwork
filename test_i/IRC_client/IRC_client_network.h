@@ -55,9 +55,7 @@ class IRC_Client_ConnectionConfiguration;
 struct IRC_Client_StreamConfiguration;
 struct IRC_Client_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct IRC_AllocatorConfiguration,
                                struct IRC_Client_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
 //class IRC_Client_ConnectionConfiguration
 // : public Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,

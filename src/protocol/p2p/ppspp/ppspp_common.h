@@ -47,11 +47,6 @@ struct HTTP_Stream_UserData;
 //          typename DataType>
 //class HTTP_Message_T;
 
-//typedef Stream_ControlMessage_T<Stream_ControlType,
-//                                Stream_AllocatorConfiguration,
-//                                HTTP_Message_t,
-//                                HTTP_SessionMessage> HTTP_ControlMessage_t;
-
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     HTTP_Stream_SessionData,
                                     Stream_SessionMessageType,

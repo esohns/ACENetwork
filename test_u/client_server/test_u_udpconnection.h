@@ -34,14 +34,13 @@
 #include "net_sock_dgram.h"
 #include "net_udpconnection_base.h"
 
-#include "net_client_common.h"
+#include "test_u_network_common.h"
 
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
-#include "test_u_network_common.h"
+#include "test_u_stream.h"
 
-// forward declarations
-class Test_U_Stream;
+#include "net_client_common.h"
 
 class Test_U_UDPConnection
  : public Net_UDPConnectionBase_T<ACE_NULL_SYNCH,

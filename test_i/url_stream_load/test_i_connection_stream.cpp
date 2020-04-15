@@ -89,7 +89,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   ACE_ASSERT (!inherited::isRunning ());
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration->setupPipeline;
   bool reset_setup_pipeline = false;
   struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
   inherited::CONFIGURATION_T::ITERATOR_T iterator;
@@ -98,7 +98,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   Test_I_HTTPParser* parser_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -109,7 +109,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -152,8 +152,8 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.configuration_.setupPipeline)
-    if (!inherited::setup (configuration_in.configuration_.notificationStrategy))
+  if (configuration_in.configuration->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration->notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
@@ -172,7 +172,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
       setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,

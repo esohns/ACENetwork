@@ -34,12 +34,9 @@ struct Test_U_StreamSessionData
   Test_U_StreamSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
-   , userData (NULL)
   {}
 
   struct Net_StreamConnectionState* connectionState;
-
-  struct Net_UserData*              userData;
 };
 typedef Stream_SessionData_T<struct Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 
@@ -82,10 +79,7 @@ struct Test_U_StreamConfiguration
 {
   Test_U_StreamConfiguration ()
    : Stream_Configuration ()
-   , userData (NULL)
   {}
-
-  struct Net_UserData* userData; // user data
 };
 
 #endif

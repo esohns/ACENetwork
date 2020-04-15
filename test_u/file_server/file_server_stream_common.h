@@ -36,17 +36,17 @@
 
 #include "test_u_stream_common.h"
 
-#include "file_server_connection_common.h"
+//#include "file_server_connection_common.h"
 #include "file_server_defines.h"
 
 // forward declarations
 class Test_U_Message;
 class Test_U_SessionMessage;
-//struct FileServer_ConnectionState;
-//typedef Net_IConnection_T<ACE_INET_Addr,
-//                          FileServer_ConnectionConfiguration_t,
-//                          struct FileServer_ConnectionState,
-//                          Net_Statistic_t> FileServer_IConnection_t;
+class FileServer_TCPConnectionConfiguration;
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          FileServer_TCPConnectionConfiguration,
+                          struct Net_StreamConnectionState,
+                          Net_StreamStatistic_t> FileServer_TCPIConnection_t;
 
 struct FileServer_SessionData
  : Test_U_StreamSessionData
@@ -81,18 +81,16 @@ typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_
 
 //extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
-struct Test_U_ModuleHandlerConfiguration;
+struct FileServer_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
                                struct FileServer_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct Test_U_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
-struct Test_U_ModuleHandlerConfiguration
- : Stream_ModuleHandlerConfiguration
+                               struct FileServer_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
+struct FileServer_ModuleHandlerConfiguration
+ : Test_U_ModuleHandlerConfiguration
 {
-  Test_U_ModuleHandlerConfiguration ()
-   : Stream_ModuleHandlerConfiguration ()
-   , allocatorConfiguration (NULL)
+  FileServer_ModuleHandlerConfiguration ()
+   : Test_U_ModuleHandlerConfiguration ()
+//   , allocatorConfiguration (NULL)
    , connection (NULL)
    , connectionConfigurations (NULL)
    , fileIdentifier ()
@@ -106,16 +104,16 @@ struct Test_U_ModuleHandlerConfiguration
     inbound = true;
   }
 
-  struct Common_Parser_FlexAllocatorConfiguration* allocatorConfiguration;
-  FileServer_UDPIStreamConnection_t* connection;               // net target module
-  Net_ConnectionConfigurations_t*    connectionConfigurations; // net target module
-  Common_File_Identifier             fileIdentifier;           // file reader module
-  Stream_IMessageQueue*              outboundQueue;            // event handler module
-  unsigned int                       program;                  // MPEG TS decoder module
-  FileServer_StreamConfiguration_t*  streamConfiguration;      // net target module
-  unsigned int                       streamType;               // MPEG TS decoder module
-  FileServer_ISessionNotify_t*       subscriber;               // event handler module
-  FileServer_Subscribers_t*          subscribers;              // event handler module
+//  struct Common_Parser_FlexAllocatorConfiguration* allocatorConfiguration;
+  FileServer_TCPIConnection_t*      connection;               // net target module
+  Net_ConnectionConfigurations_t*   connectionConfigurations; // net target module
+  Common_File_Identifier            fileIdentifier;           // file reader module
+  Stream_IMessageQueue*             outboundQueue;            // event handler module
+  unsigned int                      program;                  // MPEG TS decoder module
+  FileServer_StreamConfiguration_t* streamConfiguration;      // net target module
+  unsigned int                      streamType;               // MPEG TS decoder module
+  FileServer_ISessionNotify_t*      subscriber;               // event handler module
+  FileServer_Subscribers_t*         subscribers;              // event handler module
 };
 
 struct FileServer_StreamConfiguration
@@ -135,8 +133,8 @@ struct FileServer_StreamConfiguration
 //////////////////////////////////////////
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Common_Parser_FlexAllocatorConfiguration,
-                                          Test_U_ControlMessage_t,
+                                          struct Common_AllocatorConfiguration,
+                                          Stream_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;
 

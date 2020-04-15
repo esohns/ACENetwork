@@ -34,6 +34,8 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
+#include "test_u_configuration.h"
+
 #include "net_client_stream_common.h"
 
 // forward declaration(s)

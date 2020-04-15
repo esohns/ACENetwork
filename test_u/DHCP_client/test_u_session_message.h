@@ -39,22 +39,22 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<struct DHCP_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<//struct DHCP_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       DHCPClient_SessionData_t,
                                       struct Stream_UserData>
 {
-  // grant access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct DHCP_AllocatorConfiguration,
-                                                 DHCPClient_ControlMessage_t,
-                                                 Test_U_Message,
-                                                 Test_U_SessionMessage>;
-
-  typedef Stream_SessionMessageBase_T<struct DHCP_AllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<//struct DHCP_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       DHCPClient_SessionData_t,
                                       struct Stream_UserData> inherited;
+
+  // grant access to specific private ctors
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_U_Message,
+                                                 Test_U_SessionMessage>;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !

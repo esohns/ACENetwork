@@ -38,20 +38,20 @@ class ACE_Message_Block;
 class Test_U_SessionMessage;
 
 class Test_U_Message
- : public Stream_MessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
+ : public Stream_MessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                enum Stream_MessageType,
                                int>
 {
-  // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_Parser_FlexAllocatorConfiguration,
-                                                 Test_U_ControlMessage_t,
-                                                 Test_U_Message,
-                                                 Test_U_SessionMessage>;
-
-  typedef Stream_MessageBase_T<struct Common_Parser_FlexAllocatorConfiguration,
+  typedef Stream_MessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                enum Stream_MessageType,
                                int> inherited;
+
+  // enable access to specific private ctors
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_U_Message,
+                                                 Test_U_SessionMessage>;
 
  public:
   Test_U_Message (unsigned int); // size

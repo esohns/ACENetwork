@@ -765,14 +765,14 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("no .torrent file selected, returning\n")));
     return;
   } // end IF
-  data_p->configuration->trackerStreamConfiguration.configuration_.filename =
+  data_p->configuration->trackerStreamConfiguration.configuration->filename =
     filename_p;
   g_free (filename_p);
-  if (!Common_File_Tools::isReadable (data_p->configuration->trackerStreamConfiguration.configuration_.filename))
+  if (!Common_File_Tools::isReadable (data_p->configuration->trackerStreamConfiguration.configuration->filename))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT (".torrent file (was: \"%s\") not readable, returning\n"),
-                ACE_TEXT (data_p->configuration->trackerStreamConfiguration.configuration_.filename.c_str ())));
+                ACE_TEXT (data_p->configuration->trackerStreamConfiguration.configuration->filename.c_str ())));
     return;
   } // end IF
 

@@ -38,22 +38,22 @@ class Test_U_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct DHCPClient_ModuleHandlerConfiguration,
-                                         Test_U_ControlMessage_t,
+                                         Stream_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
                                          struct DHCPClient_SessionData,
-                                         struct Net_UserData>
+                                         struct Stream_UserData>
 {
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct DHCPClient_ModuleHandlerConfiguration,
-                                         Test_U_ControlMessage_t,
+                                         Stream_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
                                          struct DHCPClient_SessionData,
-                                         struct Net_UserData> inherited;
+                                         struct Stream_UserData> inherited;
 
  public:
   Test_U_Module_EventHandler (ISTREAM_T*); // stream handle

@@ -120,11 +120,11 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   } // end IF
 
   bool result = false;
-  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration->setupPipeline;
   bool reset_setup_pipeline = false;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -135,7 +135,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
                 ACE_TEXT (stream_name_string_)));
     return false;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -221,7 +221,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.configuration_.setupPipeline)
+  if (configuration_in.configuration->setupPipeline)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -239,7 +239,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
 
 error:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
       setup_pipeline;
 //  if (reset_configuration)
 //  {

@@ -444,6 +444,58 @@ do_work (unsigned int numberOfDispatchThreads_in,
   // sanity check(s)
   ACE_ASSERT (CBData_in.configuration);
 
+  // initialize configuration objects
+
+  // initialize protocol configuration
+  struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
+
+  Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                     BITTORRENT_BUFFER_SIZE);
+  if (!heap_allocator.initialize (allocator_configuration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator, aborting\n")));
+    return;
+  } // end IF
+  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                   &heap_allocator);
+  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                         &heap_allocator);
+
+  ////////////////////////// stream configuration //////////////////////////////
+  struct BitTorrent_Client_PeerStreamConfiguration peer_stream_configuration;
+  struct BitTorrent_Client_TrackerStreamConfiguration tracker_stream_configuration;
+
+  CBData_in.configuration->parserConfiguration.debugScanner = true;
+  peer_stream_configuration.messageAllocator = &peer_message_allocator;
+  tracker_stream_configuration.messageAllocator =
+    &tracker_message_allocator;
+
+  CBData_in.configuration->sessionConfiguration.parserConfiguration =
+      &CBData_in.configuration->parserConfiguration;
+
+  ////////////////////// socket handler configuration //////////////////////////
+  BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
+//  peer_connection_configuration.statisticReportingInterval =
+//    ACE_Time_Value (reporting_interval, 0);
+  peer_connection_configuration.messageAllocator = &peer_message_allocator;
+
+  peer_connection_configuration.initialize (CBData_in.configuration->peerStreamConfiguration);
+
+  CBData_in.configuration->peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                &peer_connection_configuration));
+
+  BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
+//  tracker_connection_configuration.statisticReportingInterval =
+//    ACE_Time_Value (reporting_interval, 0);
+  tracker_connection_configuration.messageAllocator =
+    &tracker_message_allocator;
+
+  tracker_connection_configuration.initialize (CBData_in.configuration->trackerStreamConfiguration);
+
+  CBData_in.configuration->trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                   &tracker_connection_configuration));
+
   // step1: initialize configuration
   Net_ConnectionConfigurationsIterator_t iterator =
     CBData_in.configuration->peerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -462,9 +514,9 @@ do_work (unsigned int numberOfDispatchThreads_in,
     &CBData_in.configuration->parserConfiguration;
 //  peer_modulehandler_configuration.protocolConfiguration =
 //      &CBData_in.configuration->protocolConfiguration;
-  CBData_in.configuration->peerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                           std::make_pair (module_configuration,
-                                                                                           peer_modulehandler_configuration)));
+  CBData_in.configuration->peerStreamConfiguration.initialize (module_configuration,
+                                                               peer_modulehandler_configuration,
+                                                               peer_stream_configuration);
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
   tracker_modulehandler_configuration.statisticReportingInterval =
@@ -473,9 +525,9 @@ do_work (unsigned int numberOfDispatchThreads_in,
       &CBData_in.configuration->trackerStreamConfiguration;
   tracker_modulehandler_configuration.parserConfiguration =
     &CBData_in.configuration->parserConfiguration;
-  CBData_in.configuration->trackerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                              std::make_pair (module_configuration,
-                                                                                              tracker_modulehandler_configuration)));
+  CBData_in.configuration->trackerStreamConfiguration.initialize (module_configuration,
+                                                                  tracker_modulehandler_configuration,
+                                                                  tracker_stream_configuration);
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -1328,75 +1380,6 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_SUCCESS;
   } // end IF
-
-  // step6: initialize configuration objects
-
-  // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<struct Common_Parser_FlexAllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                               BITTORRENT_BUFFER_SIZE);
-  if (!heap_allocator.initialize (configuration.peerStreamConfiguration.allocatorConfiguration_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize allocator, aborting\n")));
-
-    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                    : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                   signal_set,
-                                   previous_signal_actions,
-                                   previous_signal_mask);
-    Common_Log_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    result = ACE::fini ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
-    return EXIT_SUCCESS;
-  } // end IF
-  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                   &heap_allocator);
-  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                         &heap_allocator);
-
-  ////////////////////////// stream configuration //////////////////////////////
-  configuration.parserConfiguration.debugScanner = debug;
-  if (debug)
-    configuration.parserConfiguration.debugScanner = true;
-
-  configuration.peerStreamConfiguration.configuration_.messageAllocator =
-    &peer_message_allocator;
-
-  configuration.trackerStreamConfiguration.configuration_.messageAllocator =
-    &tracker_message_allocator;
-
-  configuration.sessionConfiguration.parserConfiguration =
-      &configuration.parserConfiguration;
-
-  ////////////////////// socket handler configuration //////////////////////////
-  BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
-  peer_connection_configuration.statisticReportingInterval =
-    ACE_Time_Value (reporting_interval, 0);
-  peer_connection_configuration.messageAllocator = &peer_message_allocator;
-
-  peer_connection_configuration.initialize (configuration.peerStreamConfiguration.allocatorConfiguration_,
-                                            configuration.peerStreamConfiguration);
-
-  configuration.peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                     &peer_connection_configuration));
-
-  BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
-  tracker_connection_configuration.statisticReportingInterval =
-    ACE_Time_Value (reporting_interval, 0);
-  tracker_connection_configuration.messageAllocator =
-    &tracker_message_allocator;
-
-  tracker_connection_configuration.initialize (configuration.trackerStreamConfiguration.allocatorConfiguration_,
-                                               configuration.trackerStreamConfiguration);
-
-  configuration.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                        &tracker_connection_configuration));
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)

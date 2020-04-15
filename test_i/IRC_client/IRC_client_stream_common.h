@@ -101,9 +101,7 @@ typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterato
 struct IRC_Client_StreamConfiguration;
 struct IRC_Client_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct IRC_AllocatorConfiguration,
                                struct IRC_Client_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
 //typedef Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
 //                                      IRC_Client_StreamConfiguration_t,
@@ -136,13 +134,9 @@ struct IRC_Client_StreamConfiguration
   {}
 };
 
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct IRC_AllocatorConfiguration> IRC_Client_ControlMessage_t;
-
 typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                        struct IRC_AllocatorConfiguration,
-                                        IRC_Client_ControlMessage_t,
+                                        struct Common_AllocatorConfiguration,
+                                        Stream_ControlMessage_t,
                                         IRC_Message,
                                         IRC_Client_SessionMessage> IRC_Client_MessageAllocator_t;
 

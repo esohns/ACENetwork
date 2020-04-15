@@ -56,18 +56,13 @@ struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 //struct Test_U_HTTPDecoder_SessionData;
 //typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 class Test_U_Message;
 class Test_U_SessionMessage;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
-                               struct Test_U_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+                               struct Test_U_HTTPDecoder_StreamConfiguration,
+                               struct Test_U_HTTPDecoder_ModuleHandlerConfiguration> Test_U_HTTPDecoder_StreamConfiguration_t;
 //class Test_U_ConnectionConfiguration
 // : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
 //                                        Test_U_StreamConfiguration_t,
@@ -96,15 +91,13 @@ class Test_U_Stream_T
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_HTTPDecoder_StreamState,
-                                        struct Test_U_StreamConfiguration,
+                                        struct Test_U_HTTPDecoder_StreamConfiguration,
                                         struct Stream_Statistic,
                                         TimerManagerType,
-                                        struct Common_Parser_FlexAllocatorConfiguration,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
                                         struct Test_U_HTTPDecoder_SessionData,
                                         Test_U_HTTPDecoder_SessionData_t,
-                                        Test_U_HTTPDecoder_ControlMessage_t,
+                                        Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
@@ -118,15 +111,13 @@ class Test_U_Stream_T
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_HTTPDecoder_StreamState,
-                                        struct Test_U_StreamConfiguration,
+                                        struct Test_U_HTTPDecoder_StreamConfiguration,
                                         struct Stream_Statistic,
                                         TimerManagerType,
-                                        struct Common_Parser_FlexAllocatorConfiguration,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
                                         struct Test_U_HTTPDecoder_SessionData,
                                         Test_U_HTTPDecoder_SessionData_t,
-                                        Test_U_HTTPDecoder_ControlMessage_t,
+                                        Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
@@ -154,10 +145,10 @@ class Test_U_Stream_T
 
  private:
   typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                       Test_U_HTTPDecoder_ControlMessage_t,
+                                       Stream_ControlMessage_t,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
-                                       struct Test_U_ModuleHandlerConfiguration,
+                                       struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
                                        enum Stream_ControlType,
                                        enum Stream_SessionMessageType,
                                        struct Test_U_HTTPDecoder_StreamState,
@@ -169,10 +160,10 @@ class Test_U_Stream_T
                                        Test_U_ConnectionManager_t,
                                        struct Stream_UserData> WRITER_T;
   typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                       Test_U_HTTPDecoder_ControlMessage_t,
+                                       Stream_ControlMessage_t,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
-                                       struct Test_U_ModuleHandlerConfiguration,
+                                       struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
                                        enum Stream_ControlType,
                                        enum Stream_SessionMessageType,
                                        struct Test_U_HTTPDecoder_StreamState,
@@ -189,7 +180,7 @@ class Test_U_Stream_T
                                 struct Test_U_HTTPDecoder_SessionData,    // session data type
                                 enum Stream_SessionMessageType,           // session event type
                                 struct Stream_ModuleConfiguration,        // module configuration type
-                                struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                                struct Test_U_HTTPDecoder_ModuleHandlerConfiguration, // module handler configuration type
                                 libacestream_default_net_io_module_name_string,
                                 Stream_INotify_t,                         // stream notification interface type
                                 READER_T,                                 // reader type

@@ -1070,7 +1070,7 @@ action_discover_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
       static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1225,7 +1225,7 @@ action_inform_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
     static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -1368,7 +1368,7 @@ action_request_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
     static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -1488,7 +1488,7 @@ action_release_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
     static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());

@@ -74,10 +74,8 @@ class Test_U_SessionMessage;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
-                               struct Test_U_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+                               struct Test_U_HTTPDecoder_StreamConfiguration,
+                               struct Test_U_HTTPDecoder_ModuleHandlerConfiguration> Test_U_HTTPDecoder_StreamConfiguration_t;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,

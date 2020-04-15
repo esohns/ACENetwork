@@ -55,13 +55,9 @@ class Test_U_SessionMessage;
 
 typedef Stream_DataBase_T<struct HTTP_Record> Test_U_MessageData_t;
 
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
-
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Common_Parser_FlexAllocatorConfiguration,
-                                          Test_U_HTTPDecoder_ControlMessage_t,
+                                          struct Common_AllocatorConfiguration,
+                                          Stream_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_HTTPDecoder_MessageAllocator_t;
 
@@ -100,21 +96,18 @@ typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPD
 
 struct Test_U_Configuration;
 //extern const char stream_name_string_[];
-struct Test_U_StreamConfiguration;
-struct Test_U_ModuleHandlerConfiguration;
+struct Test_U_HTTPDecoder_StreamConfiguration;
+struct Test_U_HTTPDecoder_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Common_Parser_FlexAllocatorConfiguration,
-                               struct Test_U_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+                               struct Test_U_HTTPDecoder_StreamConfiguration,
+                               struct Test_U_HTTPDecoder_ModuleHandlerConfiguration> Test_U_HTTPDecoder_StreamConfiguration_t;
 class Test_U_ConnectionConfiguration
- : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-                                        Test_U_StreamConfiguration_t,
-                                        NET_TRANSPORTLAYER_TCP>
+ : public Net_StreamConnectionConfiguration_T<Test_U_HTTPDecoder_StreamConfiguration_t,
+                                              NET_TRANSPORTLAYER_TCP>
 {
  public:
   Test_U_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration_T ()
+   : Net_StreamConnectionConfiguration_T ()
   {}
 };
 typedef Net_IConnection_T<ACE_INET_Addr,
@@ -127,10 +120,10 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  struct Net_StreamConnectionState,
                                  HTTP_Statistic_t,
                                  struct Net_UserData> Test_U_IConnectionManager_t;
-struct Test_U_ModuleHandlerConfiguration
+struct Test_U_HTTPDecoder_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {
-  Test_U_ModuleHandlerConfiguration ()
+  Test_U_HTTPDecoder_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , configuration (NULL)
    , connection (NULL)
@@ -144,27 +137,27 @@ struct Test_U_ModuleHandlerConfiguration
    , URL ()
   {
     inbound = true;
-  };
+  }
 
-  struct Test_U_Configuration*    configuration;
-  Test_U_IConnection_t*           connection; // TCP target/IO module
-  Net_ConnectionConfigurations_t* connectionConfigurations;
-  Test_U_IConnectionManager_t*    connectionManager; // TCP IO module
-  std::string                     dumpFileName; // file writer module (HTTP)
-  std::string                     hostName; // net source module
-  bool                            printProgressDot; // file writer module
-  Test_U_StreamConfiguration_t*   streamConfiguration;
-  std::string                     targetFileName; // file writer module (HTML)
-  std::string                     URL;
+  struct Test_U_Configuration*              configuration;
+  Test_U_IConnection_t*                     connection; // TCP target/IO module
+  Net_ConnectionConfigurations_t*           connectionConfigurations;
+  Test_U_IConnectionManager_t*              connectionManager; // TCP IO module
+  std::string                               dumpFileName; // file writer module (HTTP)
+  std::string                               hostName; // net source module
+  bool                                      printProgressDot; // file writer module
+  Test_U_HTTPDecoder_StreamConfiguration_t* streamConfiguration;
+  std::string                               targetFileName; // file writer module (HTML)
+  std::string                               URL;
 };
 
-struct Test_U_StreamConfiguration
+struct Test_U_HTTPDecoder_StreamConfiguration
  : HTTP_StreamConfiguration
 {
-  Test_U_StreamConfiguration ()
+  Test_U_HTTPDecoder_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
    //, userData (NULL)
-  {};
+  {}
 
   //struct Net_UserData* userData;
 };
@@ -175,7 +168,7 @@ struct Test_U_HTTPDecoder_StreamState
   Test_U_HTTPDecoder_StreamState ()
    : Test_U_StreamState ()
    , sessionData (NULL)
-  {};
+  {}
 
   struct Test_U_HTTPDecoder_SessionData* sessionData;
 };

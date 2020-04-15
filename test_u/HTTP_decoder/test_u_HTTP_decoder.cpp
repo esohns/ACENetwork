@@ -487,7 +487,7 @@ do_work (unsigned int bufferSize_in,
                                           : COMMON_EVENT_DISPATCH_PROACTOR);
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
+                         struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -521,15 +521,15 @@ do_work (unsigned int bufferSize_in,
                 port_in));
     return;
   } // end IF
+  connection_configuration.allocatorConfiguration = &allocator_configuration;
+  connection_configuration.allocatorConfiguration->defaultBufferSize = bufferSize_in;
   connection_configuration.useLoopBackDevice =
     connection_configuration.address.is_loopback ();
 //  connection_configuration.writeOnly = true;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.allocatorConfiguration_.defaultBufferSize = bufferSize_in;
-  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
-                                       configuration.streamConfiguration);
+  connection_configuration.initialize (configuration.streamConfiguration);
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  &connection_configuration));
@@ -540,8 +540,8 @@ do_work (unsigned int bufferSize_in,
   // ********************** stream configuration data **************************
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
-  struct Test_U_StreamConfiguration stream_configuration;
+  struct Test_U_HTTPDecoder_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_U_HTTPDecoder_StreamConfiguration stream_configuration;
   //configuration.moduleHandlerConfiguration.allocatorConfiguration =
   //  &configuration.allocatorConfiguration;
   // *NOTE*: yyparse() does not currently return until the whole entity has been
@@ -570,12 +570,11 @@ do_work (unsigned int bufferSize_in,
   // ******************** (sub-)stream configuration data **********************
   //if (bufferSize_in)
   //  configuration.streamConfiguration.bufferSize = bufferSize_in;
+  stream_configuration.messageAllocator = &message_allocator;
+  stream_configuration.printFinalReport = true;
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
-                                                allocator_configuration,
                                                 stream_configuration);
-  configuration.streamConfiguration.configuration_.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.configuration_.printFinalReport = true;
 
   // step0b: initialize event dispatch
   if (useReactor_in)

@@ -98,13 +98,9 @@ struct Test_I_URLStreamLoad_Configuration
 //  struct HTTP_Stream_UserData                            userData;
 };
 
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Common_Parser_FlexAllocatorConfiguration> Test_I_ControlMessage_t;
-
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Common_Parser_FlexAllocatorConfiguration,
-                                          Test_I_ControlMessage_t,
+                                          struct Common_AllocatorConfiguration,
+                                          Stream_ControlMessage_t,
                                           Test_I_Message,
                                           Test_I_SessionMessage> Test_I_MessageAllocator_t;
 

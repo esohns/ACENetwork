@@ -529,9 +529,10 @@ do_work (bool debugParser_in,
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
+  struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
+                         struct Common_AllocatorConfiguration> heap_allocator;
+  if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -551,8 +552,7 @@ do_work (bool debugParser_in,
   connection_configuration.messageAllocator = &message_allocator;
   //connection_configuration.PDUSize = bufferSize_in;
   //connection_configuration.userData = &CBData_in.configuration->userData;
-  connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
-                                       configuration_in.streamConfiguration);
+  connection_configuration.initialize (configuration_in.streamConfiguration);
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
@@ -566,12 +566,11 @@ do_work (bool debugParser_in,
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
   // ********************** module configuration data **************************
-  struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
-    &configuration_in.streamConfiguration.allocatorConfiguration_;
+    &allocator_configuration;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   //modulehandler_configuration.connectionManager = connection_manager_p;
@@ -588,21 +587,15 @@ do_work (bool debugParser_in,
   //if (bufferSize_in)
   //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
   //    bufferSize_in;
-  configuration_in.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
-  configuration_in.streamConfiguration.configuration_.module =
-    &event_handler_module;
+  stream_configuration.messageAllocator = &message_allocator;
+  stream_configuration.module = &event_handler_module;
+  stream_configuration.printFinalReport = true;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
-                                                   allocator_configuration,
                                                    stream_configuration);
   //configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
   //                                                             std::make_pair (module_configuration,
   //                                                                             modulehandler_configuration)));
-  configuration_in.streamConfiguration.configuration_.printFinalReport =
-    true;
-  //configuration_in.streamConfiguration.configuration_.userData =
-  //  &configuration_in.userData;
 
   //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
 

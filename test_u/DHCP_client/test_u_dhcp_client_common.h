@@ -148,13 +148,13 @@ typedef DHCPClient_Subscribers_t::const_iterator DHCPClient_SubscribersIterator_
 //                                 DHCP_Statistic_t,
 //                                 Test_U_UserData> DHCPClient_IConnectionManager_t;
 
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct DHCP_AllocatorConfiguration> DHCPClient_ControlMessage_t;
+//typedef Stream_ControlMessage_T<enum Stream_ControlType,
+//                                enum Stream_ControlMessageType,
+//                                struct DHCP_AllocatorConfiguration> DHCPClient_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct DHCP_AllocatorConfiguration,
-                                          DHCPClient_ControlMessage_t,
+                                          struct Common_AllocatorConfiguration,
+                                          Stream_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> DHCPClient_MessageAllocator_t;
 
@@ -162,9 +162,7 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
 struct DHCPClient_StreamConfiguration;
 struct DHCPClient_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct DHCP_AllocatorConfiguration,
                                struct DHCPClient_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
                                struct DHCPClient_ModuleHandlerConfiguration> DHCPClient_StreamConfiguration_t;
 struct DHCPClient_ModuleHandlerConfiguration
  : DHCP_ModuleHandlerConfiguration

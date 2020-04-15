@@ -42,8 +42,8 @@ class Stream_IMessageQueue;
 class Test_U_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         struct Test_U_ModuleHandlerConfiguration,
-                                         Test_U_ControlMessage_t,
+                                         struct FileServer_ModuleHandlerConfiguration,
+                                         Stream_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
@@ -52,8 +52,8 @@ class Test_U_Module_EventHandler
 {
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         struct Test_U_ModuleHandlerConfiguration,
-                                         Test_U_ControlMessage_t,
+                                         struct FileServer_ModuleHandlerConfiguration,
+                                         Stream_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
@@ -65,11 +65,11 @@ class Test_U_Module_EventHandler
   inline virtual ~Test_U_Module_EventHandler () {}
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&,
+  virtual bool initialize (const struct FileServer_ModuleHandlerConfiguration&,
                            Stream_IAllocator* = NULL); // report cache usage ?
 
   // implement (part of) Stream_ITaskBase_T
-  virtual void handleControlMessage (Test_U_ControlMessage_t&);
+  virtual void handleControlMessage (Stream_ControlMessage_t&);
   //virtual void handleSessionMessage (Test_U_SessionMessage*&, // session message handle
   //                                   bool&);                  // return value: pass message downstream ?
 
@@ -89,7 +89,7 @@ class Test_U_Module_EventHandler
 // declare module
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
                               enum Stream_SessionMessageType,           // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              struct FileServer_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
                               Stream_INotify_t,                         // stream notification interface type
                               Test_U_Module_EventHandler);              // writer type
