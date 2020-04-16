@@ -267,14 +267,14 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
 
 #if defined (SSL_SUPPORT)
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 #else
   radiobutton_p =
       GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME)));
     ACE_ASSERT (radiobutton_p);
     gtk_widget_set_sensitive (GTK_WIDGET (radiobutton_p), FALSE);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 #endif // SSL_SUPPORT
 
   switch (configuration_p->timeoutHandler->protocol ())
@@ -623,14 +623,14 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 
   GtkRadioButton* radiobutton_p = NULL;
 #if defined (SSL_SUPPORT)
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 #else
   radiobutton_p =
       GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME)));
     ACE_ASSERT (radiobutton_p);
     gtk_widget_set_sensitive (GTK_WIDGET (radiobutton_p), FALSE);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 #endif // SSL_SUPPORT
 
   std::string radio_button_name;
@@ -1304,10 +1304,10 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
       }
       case NET_TRANSPORTLAYER_SSL:
       {
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
         ACE_ASSERT (configuration_p->SSLListener);
         configuration_p->SSLListener->start (thread_id);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
         break;
       }
       default:
@@ -1352,10 +1352,10 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
       }
       case NET_TRANSPORTLAYER_SSL:
       {
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
         ACE_ASSERT (configuration_p->SSLListener);
         configuration_p->SSLListener->stop ();
-#endif // SSL_USE
+#endif // SSL_SUPPORT
         break;
       }
       default:
@@ -1685,7 +1685,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   //} // end lock scope
 
   // step2: initiate shutdown sequence
-  result = ACE_OS::raise (SIGINT);
+  result = ACE_OS::raise (SIGTERM);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::raise(%S): \"%m\", continuing\n"),

@@ -66,7 +66,8 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
   {
 // *PORTABILITY*: on Windows SIGHUP/SIGQUIT are not defined
 // --> use SIGINT (2) and/or SIGTERM (15) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGHUP:
     case SIGQUIT:
 #endif
@@ -83,10 +84,10 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR1:
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     case SIGBREAK:
+#else
+    case SIGUSR1:
 #endif
     {
       // dump statistic
@@ -154,7 +155,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
         return;
       }
     } // end IF
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
     if (inherited::configuration_->SSLListener)
     {
       try {
@@ -165,7 +166,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
         return;
       }
     } // end IF
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
     // step3: stop timer
     if (inherited::configuration_->statisticReportingTimerId >= 0)
@@ -179,11 +180,6 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", returning\n"),
                     inherited::configuration_->statisticReportingTimerId));
-
-        // clean up
-        inherited::configuration_->statisticReportingTimerId = -1;
-
-        return;
       } // end IF
       inherited::configuration_->statisticReportingTimerId = -1;
     } // end IF

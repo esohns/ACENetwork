@@ -502,7 +502,7 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 void
@@ -648,6 +648,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   connection_configuration_p =
     dynamic_cast<Test_U_TCPConnectionConfiguration*> ((*iterator).second);
   ACE_ASSERT (connection_configuration_p);
+  connection_configuration_2.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   connection_configuration_2.messageAllocator = &message_allocator;
   connection_configuration_2.initialize (configuration_in.streamConfiguration);
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
@@ -677,12 +679,21 @@ do_work (unsigned int maximumNumberOfConnections_in,
     configuration_in.dispatchConfiguration.numberOfReactorThreads =
       numberOfDispatchThreads_in;
     configuration_in.dispatchConfiguration.reactorType =
-      ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_THREAD_POOL
-                                        : COMMON_REACTOR_ACE_DEFAULT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_THREAD_POOL
+                                          : COMMON_REACTOR_ACE_DEFAULT);
+#else
+        ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_DEV_POLL
+                                          : COMMON_REACTOR_ACE_DEFAULT);
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   else
+  {
     configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
+    configuration_in.dispatchConfiguration.proactorType =
+      COMMON_PROACTOR_POSIX_CB;
+  } // end ELSE
   if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -727,14 +738,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
   else
     configuration_in.TCPListener =
       SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   configuration_in.SSLListener =
     SERVER_SSL_LISTENER_SINGLETON::instance ();
-#endif // SSL_USE
+#endif // SSL_SUPPORT
   signal_handler_configuration.TCPListener = configuration_in.TCPListener;
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   signal_handler_configuration.SSLListener = configuration_in.SSLListener;
-#endif // SSL_USE
+#endif // SSL_SUPPORT
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
   signal_handler_configuration.statisticReportingTimerId = timer_id;
@@ -810,7 +821,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GTK_USE)
-    ACE_thread_t thread_id = 0;
     gtk_manager_p->start (thread_id);
     ACE_UNUSED_ARG (thread_id);
     ACE_Time_Value timeout (0,
@@ -937,7 +947,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   ACE_ASSERT (configuration_in.SSLListener);
   if (!configuration_in.SSLListener->initialize (*connection_configuration_p))
   {
@@ -959,7 +969,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
   Server_UDP_AsynchConnector_t udp_asynch_connector (true);
   Server_UDP_Connector_t udp_connector (true);
@@ -969,7 +979,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     case NET_TRANSPORTLAYER_TCP:
       listener_p = configuration_in.TCPListener;
       break;
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
     case NET_TRANSPORTLAYER_SSL:
     {
       listener_p = configuration_in.SSLListener;
@@ -999,7 +1009,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       } // end IF
       break;
     }
-#endif // SSL_USE
+#endif // SSL_SUPPORT
     default:
       break;
   } // end SWITCH
@@ -1130,6 +1140,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   Common_Timer_Tools::finalize ();
+  timer_manager_p->stop ();
 
   //// wait for connection processing to complete
   //NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();

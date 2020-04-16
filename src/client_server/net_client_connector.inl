@@ -167,6 +167,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   HandlerType* handler_p = NULL;
   ACE_Synch_Options synch_options = ACE_Synch_Options::defaults;
+//  synch_options.set (ACE_Synch_Options::USE_REACTOR, ACE_Time_Value::zero);
   AddressType local_address = ACE_sap_any_cast (AddressType&);
   int reuse_addr_i = 1; // set SO_REUSEADDR ?
   int flags_i = O_RDWR;

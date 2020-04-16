@@ -1152,17 +1152,21 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   {
     result = ACE_OS::closesocket (handle);
     if (unlikely (result == -1))
+    {
+      int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
                   id (),
                   handle));
 #else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  id (),
-                  handle));
-#endif
+      if (error != EBADF) // 9: happens on Linux
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                    id (),
+                    handle));
+#endif // ACE_WIN32 || ACE_WIN64
+    } // end IF
   } // end IF
 }
 

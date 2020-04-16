@@ -437,13 +437,13 @@ elseif (WIN32)
                            ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
                            ${PROJECT_SOURCE_DIR}/cmake/src/Debug)
  create_target_launcher (${EXECUTABLE_SOURCE}
-                         ARGS "-l -t"
+                         ARGS "-l -r -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_TARGET}
-                         ARGS "-l -t -u"
+                         ARGS "-l -r -t -u"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server

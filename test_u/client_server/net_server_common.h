@@ -77,18 +77,18 @@ struct Server_SignalHandlerConfiguration
 {
   Server_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
    , SSLListener (NULL)
-#endif // SSL_USE
+#endif // SSL_SUPPORT
    , TCPListener (NULL)
    , UDPConnector (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
   {}
 
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   Test_U_ITCPListener_t*         SSLListener;
-#endif // SSL_USE
+#endif // SSL_SUPPORT
   Test_U_ITCPListener_t*         TCPListener;
   Test_U_IUDPConnector_t*        UDPConnector;
 
@@ -101,18 +101,18 @@ struct Server_Configuration
 {
   Server_Configuration ()
    : ClientServer_Configuration ()
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
    , SSLListener (NULL)
-#endif // SSL_USE
+#endif // SSL_SUPPORT
    , TCPListener (NULL)
    , UDPConnector (NULL)
    //, listenerConfiguration ()
    , signalHandlerConfiguration ()
   {}
 
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   Test_U_ITCPListener_t*                   SSLListener;
-#endif // SSL_USE
+#endif // SSL_SUPPORT
   Test_U_ITCPListener_t*                   TCPListener;
   Test_U_IUDPConnector_t*                  UDPConnector;
   //Server_ListenerConfiguration_t           listenerConfiguration;

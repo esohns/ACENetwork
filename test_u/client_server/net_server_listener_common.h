@@ -55,7 +55,7 @@ typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               struct Net_StreamConnectionState,
                               Test_U_Stream,
                               struct Net_UserData> Server_TCP_Listener_t;
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 typedef Net_Server_Listener_T<Test_U_SSLConnection,
                               ACE_SSL_SOCK_Acceptor,
                               ACE_INET_Addr,
@@ -63,7 +63,7 @@ typedef Net_Server_Listener_T<Test_U_SSLConnection,
                               struct Net_StreamConnectionState,
                               Test_U_Stream,
                               struct Net_UserData> Server_SSL_Listener_t;
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
                                      ACE_INET_Addr,
@@ -90,9 +90,9 @@ typedef ACE_Singleton<Server_Asynch_TCP_Listener_t,
                       ACE_SYNCH_MUTEX> SERVER_ASYNCH_TCP_LISTENER_SINGLETON;
 typedef ACE_Singleton<Server_TCP_Listener_t,
                       ACE_SYNCH_MUTEX> SERVER_TCP_LISTENER_SINGLETON;
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 typedef ACE_Singleton<Server_SSL_Listener_t,
                       ACE_SYNCH_MUTEX> SERVER_SSL_LISTENER_SINGLETON;
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 #endif

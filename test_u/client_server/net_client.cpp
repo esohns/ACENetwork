@@ -785,12 +785,15 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                          udp_connection_configuration,
                                          (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR));
   configuration_in.timeoutHandler = &timeout_handler;
-  Common_Timer_Tools::configuration_.dispatch =
-    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
-  Common_Timer_Tools::initialize (true); // publish seconds ?
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
+  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+  timer_manager_p->initialize (Common_Timer_Tools::configuration_);
+  ACE_thread_t thread_id = 0;
+  timer_manager_p->start (thread_id);
+  //    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
+  Common_Timer_Tools::initialize (false); // publish seconds ?
   if (
 #if defined (GUI_SUPPORT)
       UIDefinitionFile_in.empty () &&
@@ -812,6 +815,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", returning\n")));
       Common_Timer_Tools::finalize ();
+      timer_manager_p->stop ();
       return;
     } // end IF
   } // end IF
@@ -832,6 +836,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
     Common_Timer_Tools::finalize ();
+    timer_manager_p->stop ();
     return;
   } // end IF
   if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -844,6 +849,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
     Common_Timer_Tools::finalize ();
+    timer_manager_p->stop ();
     return;
   } // end IF
 
@@ -883,6 +889,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
       Common_Timer_Tools::finalize ();
+      timer_manager_p->stop ();
       return;
     } // end IF
 #endif // GTK_USE
@@ -894,6 +901,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
       Common_Timer_Tools::finalize ();
+      timer_manager_p->stop ();
 #if defined (GTK_USE)
       gtk_manager_p->stop (true,
                            true);
@@ -921,6 +929,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //				g_source_remove(*iterator);
 //		} // end lock scope
     Common_Timer_Tools::finalize ();
+    timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -961,6 +970,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       //				g_source_remove(*iterator);
       //		} // end lock scope
       Common_Timer_Tools::finalize ();
+      timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1019,6 +1029,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       //				g_source_remove(*iterator);
       //		} // end lock scope
       Common_Timer_Tools::finalize ();
+      timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1057,6 +1068,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   //					 iterator++)
   //				g_source_remove(*iterator);
   //		} // end lock scope
+  timer_manager_p->stop ();
   timer_manager_p->wait ();
   Common_Timer_Tools::finalize ();
 
@@ -1429,8 +1441,13 @@ ACE_TMAIN (int argc_in,
     configuration.dispatchConfiguration.numberOfReactorThreads =
       number_of_dispatch_threads;
     configuration.dispatchConfiguration.reactorType =
-      ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_THREAD_POOL
-                                        : COMMON_REACTOR_ACE_DEFAULT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_THREAD_POOL
+                                          : COMMON_REACTOR_ACE_DEFAULT);
+#else
+        ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_DEV_POLL
+                                          : COMMON_REACTOR_ACE_DEFAULT);
+#endif
   } // end IF
   else
     configuration.dispatchConfiguration.numberOfProactorThreads =
