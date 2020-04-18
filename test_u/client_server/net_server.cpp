@@ -691,8 +691,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     configuration_in.dispatchConfiguration.proactorType =
       COMMON_PROACTOR_POSIX_CB;
+#endif // ACE_WIN32 || ACE_WIN64
   } // end ELSE
   if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {

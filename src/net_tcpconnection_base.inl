@@ -482,15 +482,19 @@ error:
   result = inherited::handle_close (handle_in,
                                     ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
+  {
+    int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
-                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
+    if (error != ENOTSOCK) // 10038: local close
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                  handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
 #else
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
 #endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
 }
 
 template <typename SocketHandlerType,

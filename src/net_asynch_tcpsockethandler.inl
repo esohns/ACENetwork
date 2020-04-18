@@ -301,6 +301,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (error != ENOTSOCK) // 10038: local close
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
                     handle_h));

@@ -656,9 +656,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   Client_TCP_AsynchConnector_t asynch_tcp_connector (true);
   Client_TCP_Connector_t tcp_connector (true);
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   Client_SSL_Connector_t ssl_connector (true);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
   Client_UDP_AsynchConnector_t asynch_udp_connector (true);
   Client_UDP_Connector_t udp_connector (true);
   Test_U_ITCPConnector_t* connector_p = NULL;
@@ -673,13 +673,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
         connector_p = &asynch_tcp_connector;
       break;
     }
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
     case NET_TRANSPORTLAYER_SSL:
     {
       if (useReactor_in)
         connector_p = &ssl_connector;
 //      else
-//        connector_p = &asynch_connector;
+//        connector_p = &asynch_ssl_connector;
       if (!Net_Common_Tools::setCertificates (certificateFile_in,
                                               privateKeyFile_in,
                                               NULL))
@@ -692,7 +692,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       } // end IF
       break;
     }
-#endif // SSL_USE
+#endif // SSL_SUPPORT
     case NET_TRANSPORTLAYER_UDP:
     {
       if (useReactor_in)
@@ -1450,8 +1450,12 @@ ACE_TMAIN (int argc_in,
 #endif
   } // end IF
   else
+  {
+    configuration.dispatchConfiguration.numberOfReactorThreads =
+      1;
     configuration.dispatchConfiguration.numberOfProactorThreads =
-    number_of_dispatch_threads;
+      number_of_dispatch_threads;
+  } // end ELSE
   if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,

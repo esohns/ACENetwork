@@ -188,11 +188,11 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE_SOURCE} X11)
 endif ()
 target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
-if (SSL_USE)
+if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE_SOURCE} ${SSL_LIBRARIES})
 
  target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_SSL_LIBRARY})
-endif (SSL_USE)
+endif (SSL_SUPPORT)
 
 target_link_libraries (${EXECUTABLE_SOURCE} Common)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonLog)
@@ -313,11 +313,11 @@ endif (UNIX)
 
 target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
 
-if (SSL_USE)
+if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE_TARGET} ${SSL_LIBRARIES})
 
  target_link_libraries (${EXECUTABLE_TARGET} ${ACE_SSL_LIBRARY})
-endif (SSL_USE)
+endif (SSL_SUPPORT)
 
 target_link_libraries (${EXECUTABLE_TARGET} Common)
 target_link_libraries (${EXECUTABLE_TARGET} CommonLog)
@@ -443,7 +443,7 @@ elseif (WIN32)
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_TARGET}
-                         ARGS "-l -r -t -u"
+                         ARGS "-l -r -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server

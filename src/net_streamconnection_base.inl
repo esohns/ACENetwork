@@ -1155,12 +1155,13 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                  id (),
-                  handle));
+      if (error != ENOTSOCK) // 10038: local close
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                    id (),
+                    handle));
 #else
-      if (error != EBADF) // 9: happens on Linux
+      if (error != EBADF) // 9: local close: happens on Linux
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     id (),
@@ -2539,10 +2540,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if ((error != ENOENT)                  && // 2   :
-//        (error != ENOMEM)                  && // 12  : [server: local close()], [client: peer reset ()]
-//        (error != ERROR_IO_PENDING)        && // 997 :
-//        (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
+    if (error != ENOTSOCK) // 10038: local close
 #else
     if (error != EBADF) // 9: local close (Linux)
 #endif // ACE_WIN32 || ACE_WIN64

@@ -87,9 +87,9 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   TCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
   AsynchUDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
   UDPConnector_.initialize (*configuration_in.UDPConnectionConfiguration);
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
   SSLConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
   return inherited::initialize (configuration_in);
 }

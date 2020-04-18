@@ -79,19 +79,13 @@ class Client_TimeoutHandler
   ACE_UNIMPLEMENTED_FUNC (Client_TimeoutHandler& operator= (const Client_TimeoutHandler&))
 
   enum AlternatingModeStateType        alternatingModeState_;
+  Test_U_TCPConnectionConfiguration*   connectionConfiguration_;
+  Test_U_UDPConnectionConfiguration*   UDPConnectionConfiguration_;
   enum Common_EventDispatchType        eventDispatch_;
   mutable ACE_SYNCH_MUTEX              lock_;
   unsigned int                         maximumNumberOfConnections_;
   enum ActionModeType                  mode_;
   struct Test_U_ProtocolConfiguration* protocolConfiguration_;
-
-  Client_TCP_AsynchConnector_t         AsynchTCPConnector_;
-  Client_UDP_AsynchConnector_t         AsynchUDPConnector_;
-  Client_TCP_Connector_t               TCPConnector_;
-  Client_UDP_Connector_t               UDPConnector_;
-#if defined (SSL_SUPPORT)
-  Client_SSL_Connector_t               SSLConnector_;
-#endif // SSL_USE
 };
 
 #endif

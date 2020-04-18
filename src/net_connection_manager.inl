@@ -336,15 +336,15 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
       connection_p->increase (); // increase reference count
     else
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection not found (handle was: 0x%@), aborting\n"),
-                  handle_in));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection not found (handle was: %d), aborting\n"),
-                  handle_in));
-#endif
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("connection not found (handle was: 0x%@), aborting\n"),
+//                  handle_in));
+//#else
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("connection not found (handle was: %d), aborting\n"),
+//                  handle_in));
+//#endif
     } // end ELSE
   } // end lock scope
 

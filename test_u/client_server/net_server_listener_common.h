@@ -24,9 +24,9 @@
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Acceptor.h"
-#endif // SSL_USE
+#endif // SSL_SUPPORT
 
 #include "net_common.h"
 

@@ -48,28 +48,16 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
  : inherited (this,  // dispatch interface
               false) // invoke only once ?
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
+ , connectionConfiguration_ (&const_cast<Test_U_TCPConnectionConfiguration&> (TCPConnectionConfiguration_in))
+ , UDPConnectionConfiguration_ (&const_cast<Test_U_UDPConnectionConfiguration&> (UDPConnectionConfiguration_in))
  , eventDispatch_ (eventDispatch_in)
  , lock_ ()
  , maximumNumberOfConnections_ (maximumNumberOfConnections_in)
  , mode_ (mode_in)
  , protocolConfiguration_ (&const_cast<struct Test_U_ProtocolConfiguration&> (protocolConfiguration_in))
- , AsynchTCPConnector_ (true)
- , AsynchUDPConnector_ (true)
- , TCPConnector_ (true)
- , UDPConnector_ (true)
-#if defined (SSL_SUPPORT)
- , SSLConnector_ (true)
-#endif // SSL_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::Client_TimeoutHandler"));
 
-  AsynchTCPConnector_.initialize (TCPConnectionConfiguration_in);
-  TCPConnector_.initialize (TCPConnectionConfiguration_in);
-  AsynchUDPConnector_.initialize (UDPConnectionConfiguration_in);
-  UDPConnector_.initialize (UDPConnectionConfiguration_in);
-#if defined (SSL_SUPPORT)
-  SSLConnector_.initialize (TCPConnectionConfiguration_in);
-#endif // SSL_SUPPORT
 }
 
 void
@@ -98,10 +86,6 @@ Client_TimeoutHandler::handle (const void* arg_in)
   // sanity check(s)
   ACE_ASSERT (connection_manager_p);
 
-  const Test_U_ITCPConnector_t::CONFIGURATION_T& configuration_r =
-    TCPConnector_.getR ();
-  const Test_U_IUDPConnector_t::CONFIGURATION_T& configuration_2 =
-    UDPConnector_.getR ();
   unsigned int number_of_connections_i = 0;
 
 //  connection_manager_p->lock ();
@@ -255,23 +239,33 @@ continue_:
   if (do_connect)
   {
     ACE_INET_Addr peer_address;
+    Client_TCP_AsynchConnector_t         asynch_TCP_connector (true);
+    Client_UDP_AsynchConnector_t         asynch_UDP_connector (true);
+    Client_TCP_Connector_t               TCP_connector (true);
+    Client_UDP_Connector_t               UDP_connector (true);
+#if defined (SSL_SUPPORT)
+    Client_SSL_Connector_t               SSL_connector (true);
+#endif // SSL_SUPPORT
+
     Test_U_ITCPConnector_t* ssl_tcp_connector_p = NULL;
     Test_U_IUDPConnector_t* udp_connector_p = NULL;
     switch (protocolConfiguration_->transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
       {
-        peer_address = configuration_r.address;
+        peer_address = connectionConfiguration_->address;
         switch (eventDispatch_)
         {
           case COMMON_EVENT_DISPATCH_PROACTOR:
           {
-            ssl_tcp_connector_p = &AsynchTCPConnector_;
+            ssl_tcp_connector_p = &asynch_TCP_connector;
+            asynch_TCP_connector.initialize (*connectionConfiguration_);
             break;
           }
           case COMMON_EVENT_DISPATCH_REACTOR:
           {
-            ssl_tcp_connector_p = &TCPConnector_;
+            ssl_tcp_connector_p = &TCP_connector;
+            TCP_connector.initialize (*connectionConfiguration_);
             break;
           }
           default:
@@ -286,17 +280,19 @@ continue_:
       }
       case NET_TRANSPORTLAYER_UDP:
       {
-        peer_address = configuration_2.peerAddress;
+        peer_address = UDPConnectionConfiguration_->peerAddress;
         switch (eventDispatch_)
         {
           case COMMON_EVENT_DISPATCH_PROACTOR:
           {
-            udp_connector_p = &AsynchUDPConnector_;
+            udp_connector_p = &asynch_UDP_connector;
+            asynch_UDP_connector.initialize (*UDPConnectionConfiguration_);
             break;
           }
           case COMMON_EVENT_DISPATCH_REACTOR:
           {
-            udp_connector_p = &UDPConnector_;
+            udp_connector_p = &UDP_connector;
+            UDP_connector.initialize (*UDPConnectionConfiguration_);
             break;
           }
           default:
@@ -311,10 +307,11 @@ continue_:
       }
       case NET_TRANSPORTLAYER_SSL:
       {
-        peer_address = configuration_r.address;
-#if defined (SSL_USE)
-        ssl_tcp_connector_p = &SSLConnector_;
-#endif // SSL_USE
+        peer_address = connectionConfiguration_->address;
+#if defined (SSL_SUPPORT)
+        ssl_tcp_connector_p = &SSL_connector;
+        SSL_connector.initialize (*connectionConfiguration_);
+#endif // SSL_SUPPORT
         break;
       }
       default:
@@ -389,116 +386,117 @@ continue_:
       } // end IF
       return;
     } // end IF
-//    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p =
-//      NULL;
-//    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_2 =
-//      NULL;
-//    if (eventDispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
-//    {
-//      switch (protocolConfiguration_->transportLayer)
-//      {
-//        case NET_TRANSPORTLAYER_TCP:
-//        case NET_TRANSPORTLAYER_SSL:
-//        {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//          iconnection_p =
-//            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
-//#else
-//          iconnection_p =
-//            connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
-//#endif // ACE_WIN32 || ACE_WIN64
-//          break;
-//        }
-//        case NET_TRANSPORTLAYER_UDP:
-//        {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//          iconnection_2 =
-//            connection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
-//#else
-//          iconnection_2 =
-//            connection_manager_2->get (static_cast<Net_ConnectionId_t> (handle_h));
-//#endif // ACE_WIN32 || ACE_WIN64
-//          break;
-//        }
-//        default:
-//        {
-//          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-//                      protocolConfiguration_->transportLayer));
-//          if (connection_2)
-//          {
-//            connection_2->decrease (); connection_2 = NULL;
-//          } // end IF
-//          return;
-//        }
-//      } // end SWITCH
-//    } // end IF
-//    else
-//    {
-//      // step1: wait for the connection to register with the manager
-//      // *TODO*: avoid these tight loops
-//      ACE_Time_Value deadline =
-//        (COMMON_TIME_NOW +
-//         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
-//      // *TODO*: this may not be accurate/applicable for/to all protocols
-//      bool done_b = false;
-//      do
-//      {
-//        // *TODO*: avoid these tight loops
-//        switch (protocolConfiguration_->transportLayer)
-//        {
-//          case NET_TRANSPORTLAYER_TCP:
-//          case NET_TRANSPORTLAYER_SSL:
-//          {
-//            iconnection_p = connection_manager_p->get (peer_address,
-//                                                       true);
-//            if (iconnection_p)
-//              done_b = true;
-//            break;
-//          }
-//          case NET_TRANSPORTLAYER_UDP:
-//          {
-//            iconnection_2 = connection_manager_2->get (peer_address,
-//                                                       true);
-//            if (iconnection_2)
-//              done_b = true;
-//            break;
-//          }
-//          default:
-//          {
-//            ACE_DEBUG ((LM_ERROR,
-//                        ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-//                        protocolConfiguration_->transportLayer));
-//            if (connection_2)
-//            {
-//              connection_2->decrease (); connection_2 = NULL;
-//            } // end IF
-//            return;
-//          }
-//        } // end SWITCH
-//        if (done_b)
-//          break;
-//      } while (COMMON_TIME_NOW < deadline);
-//    } // end ELSE
-//    if (!iconnection_p && !iconnection_2)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to connect to %s, returning\n"),
-//                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-//      if (connection_2)
-//      {
-//        connection_2->decrease (); connection_2 = NULL;
-//      } // end IF
-//      return;
-//    } // end IF
-//    if (iconnection_p)
-//    {
-//      iconnection_p->decrease (); iconnection_p = NULL;
-//    } // end IF
-//    if (iconnection_2)
-//    {
-//      iconnection_2->decrease (); iconnection_2 = NULL;
-//    } // end IF
+    Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p =
+      NULL;
+    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_2 =
+      NULL;
+    if (eventDispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
+    {
+      switch (protocolConfiguration_->transportLayer)
+      {
+        case NET_TRANSPORTLAYER_TCP:
+        case NET_TRANSPORTLAYER_SSL:
+        {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          iconnection_p =
+            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+#else
+          iconnection_p =
+            connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
+          break;
+        }
+        case NET_TRANSPORTLAYER_UDP:
+        {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          iconnection_2 =
+            connection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+#else
+          iconnection_2 =
+            connection_manager_2->get (static_cast<Net_ConnectionId_t> (handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                      protocolConfiguration_->transportLayer));
+          if (connection_2)
+          {
+            connection_2->decrease (); connection_2 = NULL;
+          } // end IF
+          return;
+        }
+      } // end SWITCH
+    } // end IF
+    else
+    {
+      // step1: wait for the connection to register with the manager
+      // *TODO*: avoid these tight loops
+      ACE_Time_Value deadline =
+        (COMMON_TIME_NOW +
+         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
+      // *TODO*: this may not be accurate/applicable for/to all protocols
+      bool done_b = false;
+      do
+      {
+        // *TODO*: avoid these tight loops
+        switch (protocolConfiguration_->transportLayer)
+        {
+          case NET_TRANSPORTLAYER_TCP:
+          case NET_TRANSPORTLAYER_SSL:
+          {
+            //iconnection_p = connection_manager_p->get (peer_address,
+            //                                           true);
+            iconnection_p = connection_manager_p->get (handle_h);
+            if (iconnection_p)
+              done_b = true;
+            break;
+          }
+          case NET_TRANSPORTLAYER_UDP:
+          {
+            iconnection_2 = connection_manager_2->get (peer_address,
+                                                       true);
+            if (iconnection_2)
+              done_b = true;
+            break;
+          }
+          default:
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                        protocolConfiguration_->transportLayer));
+            if (connection_2)
+            {
+              connection_2->decrease (); connection_2 = NULL;
+            } // end IF
+            return;
+          }
+        } // end SWITCH
+        if (done_b)
+          break;
+      } while (COMMON_TIME_NOW < deadline);
+    } // end ELSE
+    if (!iconnection_p && !iconnection_2)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to connect to %s, returning\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+      if (connection_2)
+      {
+        connection_2->decrease (); connection_2 = NULL;
+      } // end IF
+      return;
+    } // end IF
+    if (iconnection_p)
+    {
+      iconnection_p->decrease (); iconnection_p = NULL;
+    } // end IF
+    if (iconnection_2)
+    {
+      iconnection_2->decrease (); iconnection_2 = NULL;
+    } // end IF
   } // end IF
 
   if (do_ping)

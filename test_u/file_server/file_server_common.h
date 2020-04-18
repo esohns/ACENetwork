@@ -56,6 +56,8 @@
 #endif
 #endif // GUI_SUPPORT
 
+#include "test_u_message.h"
+#include "test_u_sessionmessage.h"
 #include "file_server_connection_common.h"
 #include "file_server_stream_common.h"
 
@@ -68,8 +70,6 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  struct FileServer_ConnectionState,
                                  Net_Statistic_t,
                                  struct Net_UserData> FileServer_ITCPConnectionManager_t;
-class Test_U_SessionMessage;
-class Test_U_Message;
 
 //typedef Net_ListenerConfiguration_T<FileServer_TCPConnectionConfiguration,
 //                                    NET_TRANSPORTLAYER_TCP> FileServer_TCPListenerConfiguration_t;
@@ -134,10 +134,6 @@ struct FileServer_Configuration
   struct Net_UserData                          userData;
 };
 
-//typedef Stream_ControlMessage_T<enum Stream_ControlType,
-//                                enum Stream_ControlMessageType,
-//                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
-//
 //typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
 //                                          struct Stream_AllocatorConfiguration,
 //                                          Test_U_ControlMessage_t,

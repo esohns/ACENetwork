@@ -951,7 +951,8 @@ button_ping_clicked_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
   // sanity check
-  ACE_ASSERT (number_of_connections > 0);
+  if (!number_of_connections)
+    return FALSE;
 
   // grab a (random) connection handler
   int index = 0;
@@ -975,7 +976,6 @@ button_ping_clicked_cb (GtkWidget* widget_in,
     {
       connection_base_p =
         TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
-      ACE_ASSERT (connection_base_p);
       iping_p = dynamic_cast<Net_IPing*> (connection_base_p);
       break;
     }
@@ -983,7 +983,6 @@ button_ping_clicked_cb (GtkWidget* widget_in,
     {
       connection_base_2 =
         TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
-      ACE_ASSERT (connection_base_2);
       iping_p = dynamic_cast<Net_IPing*> (connection_base_2);
       break;
     }
@@ -995,26 +994,28 @@ button_ping_clicked_cb (GtkWidget* widget_in,
       return FALSE;
     }
   } // end SWITCH
-  ACE_ASSERT (iping_p);
-  try {
-    iping_p->ping ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
-    return FALSE;
-  }
+  if (iping_p)
+    try {
+      iping_p->ping ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
+      return FALSE;
+    }
 
   switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
     case NET_TRANSPORTLAYER_TCP:
     case NET_TRANSPORTLAYER_SSL:
-    { ACE_ASSERT (connection_base_p);
-      connection_base_p->decrease ();
+    {
+      if (connection_base_p)
+          connection_base_p->decrease ();
       break;
     }
     case NET_TRANSPORTLAYER_UDP:
-    { ACE_ASSERT (connection_base_2);
-      connection_base_2->decrease ();
+    { 
+      if (connection_base_2)
+        connection_base_2->decrease ();
       break;
     }
     default:

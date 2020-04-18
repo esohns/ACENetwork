@@ -710,21 +710,21 @@ do_work (unsigned int bufferSize_in,
 
   if (useReactor_in)
   {
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
     if (useSSL_in)
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_SSLConnector_t (true));
     else
-#endif // SSL_USE
+#endif // SSL_SUPPORT
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_TCPConnector_t (true));
   } // end IF
   else
   {
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
     // *TODO*: add SSL support to the proactor framework
     ACE_ASSERT (port_in != HTTPS_DEFAULT_SERVER_PORT);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
     ACE_NEW_NORETURN (iconnector_p,
                       Test_U_TCPAsynchConnector_t (true));
   } // end ELSE

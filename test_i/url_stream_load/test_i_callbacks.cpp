@@ -944,9 +944,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
     Test_I_TCPConnector_t connector (true);
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
     Test_I_SSLConnector_t ssl_connector (true);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
     Test_I_AsynchTCPConnector_t asynch_connector (true);
     Test_I_IConnector_t* iconnector_p = NULL;
     Test_I_IStreamConnection_t* istream_connection_p = NULL;
@@ -1064,19 +1064,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
     {
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
       if (use_SSL)
         iconnector_p = &ssl_connector;
       else
-#endif // SSL_USE
+#endif // SSL_SUPPORT
         iconnector_p = &connector;
     } // end IF
     else
     {
-#if defined (SSL_USE)
+#if defined (SSL_SUPPORT)
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
-#endif // SSL_USE
+#endif // SSL_SUPPORT
       iconnector_p = &asynch_connector;
     } // end ELSE
     if (!iconnector_p->initialize (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)))

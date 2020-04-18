@@ -229,6 +229,11 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   // - accept failed (e.g. too many connections)
   // - ... ?
 
+  result = inherited2::peer_.close ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK_Stream::close(): \"%m\", continuing\n")));
+
   switch (mask_in)
   {
     // *NOTE*: 'this' is already being removed from the reactor
@@ -248,8 +253,8 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
       //         --> server side: too many open connections
       int error = ACE_OS::last_error ();
       if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
-          ((error == ETIMEDOUT) ||   // 110: failed to connect: timed out
-           (error == ECONNREFUSED))) // 111: failed to connect: connection refused
+          ((error == ETIMEDOUT) ||   // 110/10060: failed to connect: timed out
+           (error == ECONNREFUSED))) // 111/10061: failed to connect: connection refused
       {
         // *IMPORTANT NOTE*: the connection hasn't been open()ed / registered
         //                   --> remove the (final) reference manually
@@ -306,11 +311,6 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
       break;
     }
   } // end SWITCH
-
-  result = inherited2::peer_.close ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Stream::close(): \"%m\", continuing\n")));
 
   return result;
 }
