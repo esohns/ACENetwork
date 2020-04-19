@@ -689,6 +689,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
   else
   {
+    configuration_in.dispatchConfiguration.numberOfReactorThreads =
+        1;
     configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -4,24 +4,26 @@ include (FeatureSummary)
 if (UNIX)
 #  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
  set (DHCLIENT_SUPPORT_ENABLE ON)
- pkg_check_modules (PKG_JSON json-c)
- if (NOT PKG_JSON_FOUND)
-  message (WARNING "could not find json-c, continuing")
-  set (DHCLIENT_SUPPORT_ENABLE OFF)
- endif (NOT PKG_JSON_FOUND)
+# pkg_check_modules (PKG_JSON json-c)
+# if (NOT PKG_JSON_FOUND)
+#  message (WARNING "could not find json-c, continuing")
+#  set (DHCLIENT_SUPPORT_ENABLE OFF)
+# endif (NOT PKG_JSON_FOUND)
 #  set (JSON_LIB_FILE libjson-c.so.3)
-#  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
-#                HINTS /usr/lib
-#                PATH_SUFFIXES x86_64-linux-gnu
-#                DOC "searching for ${JSON_LIB_FILE} (system paths)")
-#  if (JSON_LIBRARY)
-#   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
-#  else ()
-#   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
-#  endif (JSON_LIBRARY)
+  set (JSON_LIB_FILE libjson-c.so.4)
+  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+  if (JSON_LIBRARY)
+   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+  else ()
+   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+  endif (JSON_LIBRARY)
 
 #  set (ISC_LIB_FILE libisc-export.so)
- set (ISC_LIB_FILE libisc-export.so.1100)
+# set (ISC_LIB_FILE libisc-export.so.1100)
+ set (ISC_LIB_FILE libisc.so.1104)
  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -72,7 +74,8 @@ if (UNIX)
 #   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
 #  endif (NOT GSS_KRB5_LIBRARY)
 
- set (GEOIP_LIB_FILE libGeoIP.so.1)
+# set (GEOIP_LIB_FILE libGeoIP.so.1)
+ set (GEOIP_LIB_FILE libGeoIP.so)
  find_library (GEOIP_LIBRARY ${GEOIP_LIB_FILE}
                HINTS /usr/lib
                PATH_SUFFIXES x86_64-linux-gnu
@@ -84,8 +87,9 @@ if (UNIX)
   message (STATUS "Found GeoIP library \"${GEOIP_LIBRARY}\"")
  endif ()
 
-  set (DNS_LIB_FILE libdns-export.so.1104)
 # set (DNS_LIB_FILE libdns-export.so)
+#  set (DNS_LIB_FILE libdns-export.so.1104)
+set (DNS_LIB_FILE libdns.so.1107)
  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -97,8 +101,9 @@ if (UNIX)
   message (STATUS "Found dns library \"${DNS_LIBRARY}\"")
  endif (NOT DNS_LIBRARY)
 
-  set (ISC_CFG_LIB_FILE libisccfg-export.so.163)
 # set (ISC_CFG_LIB_FILE libisccfg-export.so)
+#  set (ISC_CFG_LIB_FILE libisccfg-export.so.163)
+ set (ISC_CFG_LIB_FILE libisccfg.so.163)
  find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -111,7 +116,8 @@ if (UNIX)
  endif (NOT ISC_CFG_LIBRARY)
 
 #  set (IRS_LIB_FILE libirs.a)
- set (IRS_LIB_FILE libirs-export.so.161)
+# set (IRS_LIB_FILE libirs-export.so.161)
+ set (IRS_LIB_FILE libirs.so.161)
  find_library (IRS_LIBRARY ${IRS_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu

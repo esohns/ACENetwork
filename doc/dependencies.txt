@@ -13,6 +13,11 @@ src:           json-c-devel bind-export-devel dhcp-devel krb5-devel
 src/protocols: flex-devel bison-devel
 src/wlan:      NetworkManager-libnm-devel
 
+* Fedora 31 ('sudo dnf install')
+src:           json-c-devel bind-devel bind-libs-lite dhcp-devel krb5-devel
+src/protocols: flex-devel bison-devel
+src/wlan:      NetworkManager-libnm-devel
+
 test_u:
 test_i:
 
