@@ -544,6 +544,24 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
                     bytes_transferred,
                     bytes_transferred + message_block_r.length ()));
 #endif // ACE_WIN32 || ACE_WIN64
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    inherited::outputStream_.writev (*inherited::buffer_,                   // data
+//                                     inherited::buffer_->length (),         // bytes to write
+        outputStream_.writev (message_block_r,                      // data
+                              message_block_r.length (),            // bytes to write
+                              NULL,                                 // ACT
+                              0,                                    // priority
+                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+#else
+//    inherited::outputStream_.write (*inherited::buffer_,                  // data
+//                                    inherited::buffer_->length (),        // bytes to write
+        outputStream_.write (message_block_r,                      // data
+                             message_block_r.length (),            // bytes to write
+                             NULL,                                 // ACT
+                             0,                                    // priority
+                             COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+#endif
         partialWrite_ = true;
 
         goto continue_; // done
