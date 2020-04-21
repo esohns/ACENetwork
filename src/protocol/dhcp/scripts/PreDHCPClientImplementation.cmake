@@ -23,7 +23,7 @@ if (UNIX)
 
 #  set (ISC_LIB_FILE libisc-export.so)
 # set (ISC_LIB_FILE libisc-export.so.1100)
- set (ISC_LIB_FILE libisc.so.1104)
+ set (ISC_LIB_FILE libisc.so)
  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -89,7 +89,7 @@ if (UNIX)
 
 # set (DNS_LIB_FILE libdns-export.so)
 #  set (DNS_LIB_FILE libdns-export.so.1104)
-set (DNS_LIB_FILE libdns.so.1107)
+set (DNS_LIB_FILE libdns.so)
  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -171,4 +171,3 @@ endif ()
 option (FRAMEWORK_DHCP_SUPPORT "enable framework DHCP support" ON)
 add_feature_info (framework_dhcp FRAMEWORK_DHCP_SUPPORT "support framework DHCP (ACENetwork)")
 add_definitions (-DFRAMEWORK_DHCP_SUPPORT)
-
