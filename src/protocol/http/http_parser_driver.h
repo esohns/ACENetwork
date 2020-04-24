@@ -57,7 +57,8 @@ class HTTP_ParserDriver_T
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
   inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); }
   inline virtual bool isBlocking () const { return blockInParse_; }
-//  virtual void error (const struct YYLTYPE&, // location
+  virtual void error (const struct YYLTYPE&, // location
+                      const std::string&); // message
   virtual void error (const yy::location&, // location
                       const std::string&); // message
   virtual void error (const std::string&); // message
@@ -103,7 +104,7 @@ class HTTP_ParserDriver_T
   bool                               isFirst_;
 
   //// parser
-  yy::HTTP_Parser                    parser_;
+  //yy::HTTP_Parser                    parser_;
 
   // scanner
   yyscan_t                           scannerState_;

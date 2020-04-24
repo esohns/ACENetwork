@@ -75,7 +75,8 @@ class BitTorrent_Bencoding_ParserDriver
   using PARSER_BASE_T::initialize;
   virtual void dump_state () const;
   using PARSER_BASE_T::parse;
-//  virtual void error (const YYLTYPE&,      // location
+  virtual void error (const struct YYLTYPE&, // location
+                      const std::string&);   // message
   virtual void error (const yy::location&, // location
                       const std::string&); // message
   inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (bencoding_); return *bencoding_; }

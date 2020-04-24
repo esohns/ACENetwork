@@ -73,6 +73,9 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src/modules/stat>)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/antlr4/runtime/Cpp/runtime/src>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
@@ -110,12 +113,11 @@ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
 
 ########### next target ###############
 set (source_files
-     http_bisector.cpp
-     http_bisector.h
+#     http_bisector.cpp
+#     http_bisector.h
      http_codes.h
      http_common.h
      http_defines.h
-#     http_exports.h
      http_iparser.h
      http_message.cpp
      http_message.h
@@ -147,9 +149,22 @@ set (source_files
      http_stream.inl
      http_stream_common.h
      http_tools.cpp
-     http_tools.h)
+     http_tools.h
+#     HTTPParser.cpp
+#     HTTPParser.h
+#     HTTPParserBaseListener.cpp
+#     HTTPParserBaseListener.h
+#     HTTPParserBaseVisitor.cpp
+#     HTTPParserBaseVisitor.h
+#     HTTPParserListener.cpp
+#     HTTPParserListener.h
+#     HTTPParserVisitor.cpp
+#     HTTPParserVisitor.h
+#     HTTPScanner.cpp
+#     HTTPScanner.h
+     )
 set (script_files
-     scripts/bisector.l
+#     scripts/bisector.l
      scripts/scanner.l
      scripts/parser.y)
 set (table_files
@@ -229,11 +244,10 @@ export (TARGETS ${PROJECT_NAME}_Protocol_HTTP
 
 ############### install files ################
 install (FILES
-         http_bisector.h
+#         http_bisector.h
          http_codes.h
          http_common.h
          http_defines.h
-#         http_exports.h
          http_iparser.h
          http_message.h
          http_parser.h

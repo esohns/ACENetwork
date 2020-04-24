@@ -58,16 +58,16 @@ TARGET_DIRECTORY=${SCRIPTS_DIRECTORY}/..
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/http_parser_patched.h
 TARGET_FILE=${TARGET_DIRECTORY}/http_parser.h
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
-cp -f ${SOURCE_FILE} ${TARGET_FILE}
-[ $? -ne 0 ] && echo "ERROR: failed to cp \"${SOURCE_FILE}\", aborting" && exit 1
-echo "copied \"$SOURCE_FILE\"..."
+#cp -f ${SOURCE_FILE} ${TARGET_FILE}
+#[ $? -ne 0 ] && echo "ERROR: failed to cp \"${SOURCE_FILE}\", aborting" && exit 1
+#echo "copied \"$SOURCE_FILE\"..."
 # clean up
 SOURCE_FILE=http_parser.h
-rm -f ${SOURCE_FILE}
+#rm -f ${SOURCE_FILE}
 [ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
-#FILES="http_parser.h http_parser.cpp"
-FILES="http_parser.cpp"
+FILES="http_parser.h http_parser.cpp"
+#FILES="http_parser.cpp"
 for FILE in $FILES
 do
  mv -f $FILE ${SCRIPTS_DIRECTORY}/..

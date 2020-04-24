@@ -108,3 +108,5 @@ ipch/
 *.opensdf
 *.vcxproj.user
 core
+
+generated/

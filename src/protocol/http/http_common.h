@@ -51,7 +51,26 @@ typedef Net_StreamStatistic_t HTTP_Statistic_t;
 typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
 //typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticHandler_t;
 
-typedef std::map<std::string, std::string> HTTP_Headers_t;
+  /************************************************************************/
+  /* Comparator for case-insensitive comparison in STL assos. containers  */
+  /************************************************************************/
+struct ci_less : std::binary_function<std::string, std::string, bool>
+{
+  // case-independent (ci) compare_less binary function
+  struct nocase_compare : public std::binary_function<unsigned char, unsigned char, bool>
+  {
+    bool operator() (const unsigned char& c1, const unsigned char& c2) const {
+      return tolower (c1) < tolower (c2);
+    }
+  };
+  bool operator() (const std::string& s1, const std::string& s2) const {
+    return std::lexicographical_compare
+    (s1.begin (), s1.end (),   // source range
+      s2.begin (), s2.end (),   // dest range
+      nocase_compare ());  // comparison
+  }
+};
+typedef std::map<std::string, std::string, ci_less> HTTP_Headers_t;
 typedef HTTP_Headers_t::const_iterator HTTP_HeadersConstIterator_t;
 typedef HTTP_Headers_t::iterator HTTP_HeadersIterator_t;
 typedef std::map<std::string, std::string> HTTP_Form_t;

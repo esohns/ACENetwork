@@ -1,0 +1,347 @@
+Terminals unused in grammar
+
+   "end_of_fragment"
+
+
+Grammar
+
+    0 $accept: message "end"
+
+    1 message: head "delimiter" body
+
+    2 head: "method" head_rest1
+    3     | "version" head_rest2
+
+    4 head_rest1: request_line_rest1 headers
+
+    5 request_line_rest1: "uri" request_line_rest2
+
+    6 request_line_rest2: "version"
+
+    7 head_rest2: status_line_rest1 headers
+
+    8 status_line_rest1: "status" status_line_rest2
+
+    9 status_line_rest2: "reason"
+
+   10 headers: headers "header"
+   11        | %empty
+
+   12 body: "body"
+   13     | "chunk" chunked_body
+
+   14 chunked_body: chunks headers "delimiter"
+
+   15 chunks: "chunk" chunks
+   16       | %empty
+
+
+Terminals, with rules where they appear
+
+"end" (0) 0
+error (256)
+"method" (258) 2
+"uri" (259) 5
+"version" (260) 3 6
+"header" (261) 10
+"delimiter" (262) 1 14
+"status" (263) 8
+"reason" (264) 9
+"body" (265) 12
+"chunk" (266) 13 15
+"end_of_fragment" (267)
+
+
+Nonterminals, with rules where they appear
+
+$accept (13)
+    on left: 0
+message (14)
+    on left: 1, on right: 0
+head (15)
+    on left: 2 3, on right: 1
+head_rest1 (16)
+    on left: 4, on right: 2
+request_line_rest1 (17)
+    on left: 5, on right: 4
+request_line_rest2 (18)
+    on left: 6, on right: 5
+head_rest2 (19)
+    on left: 7, on right: 3
+status_line_rest1 (20)
+    on left: 8, on right: 7
+status_line_rest2 (21)
+    on left: 9, on right: 8
+headers (22)
+    on left: 10 11, on right: 4 7 10 14
+body (23)
+    on left: 12 13, on right: 1
+chunked_body (24)
+    on left: 14, on right: 13
+chunks (25)
+    on left: 15 16, on right: 14 15
+
+
+State 0
+
+    0 $accept: . message "end"
+    1 message: . head "delimiter" body
+    2 head: . "method" head_rest1
+    3     | . "version" head_rest2
+
+    "method"   shift, and go to state 1
+    "version"  shift, and go to state 2
+
+    message  go to state 3
+    head     go to state 4
+
+
+State 1
+
+    2 head: "method" . head_rest1
+    4 head_rest1: . request_line_rest1 headers
+    5 request_line_rest1: . "uri" request_line_rest2
+
+    "uri"  shift, and go to state 5
+
+    head_rest1          go to state 6
+    request_line_rest1  go to state 7
+
+
+State 2
+
+    3 head: "version" . head_rest2
+    7 head_rest2: . status_line_rest1 headers
+    8 status_line_rest1: . "status" status_line_rest2
+
+    "status"  shift, and go to state 8
+
+    head_rest2         go to state 9
+    status_line_rest1  go to state 10
+
+
+State 3
+
+    0 $accept: message . "end"
+
+    "end"  shift, and go to state 11
+
+
+State 4
+
+    1 message: head . "delimiter" body
+
+    "delimiter"  shift, and go to state 12
+
+
+State 5
+
+    5 request_line_rest1: "uri" . request_line_rest2
+    6 request_line_rest2: . "version"
+
+    "version"  shift, and go to state 13
+
+    request_line_rest2  go to state 14
+
+
+State 6
+
+    2 head: "method" head_rest1 .
+
+    $default  reduce using rule 2 (head)
+
+
+State 7
+
+    4 head_rest1: request_line_rest1 . headers
+   10 headers: . headers "header"
+   11        | . %empty
+
+    $default  reduce using rule 11 (headers)
+
+    headers  go to state 15
+
+
+State 8
+
+    8 status_line_rest1: "status" . status_line_rest2
+    9 status_line_rest2: . "reason"
+
+    "reason"  shift, and go to state 16
+
+    status_line_rest2  go to state 17
+
+
+State 9
+
+    3 head: "version" head_rest2 .
+
+    $default  reduce using rule 3 (head)
+
+
+State 10
+
+    7 head_rest2: status_line_rest1 . headers
+   10 headers: . headers "header"
+   11        | . %empty
+
+    $default  reduce using rule 11 (headers)
+
+    headers  go to state 18
+
+
+State 11
+
+    0 $accept: message "end" .
+
+    $default  accept
+
+
+State 12
+
+    1 message: head "delimiter" . body
+   12 body: . "body"
+   13     | . "chunk" chunked_body
+
+    "body"   shift, and go to state 19
+    "chunk"  shift, and go to state 20
+
+    body  go to state 21
+
+
+State 13
+
+    6 request_line_rest2: "version" .
+
+    $default  reduce using rule 6 (request_line_rest2)
+
+
+State 14
+
+    5 request_line_rest1: "uri" request_line_rest2 .
+
+    $default  reduce using rule 5 (request_line_rest1)
+
+
+State 15
+
+    4 head_rest1: request_line_rest1 headers .  ["delimiter"]
+   10 headers: headers . "header"
+
+    "header"  shift, and go to state 22
+
+    $default  reduce using rule 4 (head_rest1)
+
+
+State 16
+
+    9 status_line_rest2: "reason" .
+
+    $default  reduce using rule 9 (status_line_rest2)
+
+
+State 17
+
+    8 status_line_rest1: "status" status_line_rest2 .
+
+    $default  reduce using rule 8 (status_line_rest1)
+
+
+State 18
+
+    7 head_rest2: status_line_rest1 headers .  ["delimiter"]
+   10 headers: headers . "header"
+
+    "header"  shift, and go to state 22
+
+    $default  reduce using rule 7 (head_rest2)
+
+
+State 19
+
+   12 body: "body" .
+
+    $default  reduce using rule 12 (body)
+
+
+State 20
+
+   13 body: "chunk" . chunked_body
+   14 chunked_body: . chunks headers "delimiter"
+   15 chunks: . "chunk" chunks
+   16       | . %empty  ["header", "delimiter"]
+
+    "chunk"  shift, and go to state 23
+
+    $default  reduce using rule 16 (chunks)
+
+    chunked_body  go to state 24
+    chunks        go to state 25
+
+
+State 21
+
+    1 message: head "delimiter" body .
+
+    $default  reduce using rule 1 (message)
+
+
+State 22
+
+   10 headers: headers "header" .
+
+    $default  reduce using rule 10 (headers)
+
+
+State 23
+
+   15 chunks: . "chunk" chunks
+   15       | "chunk" . chunks
+   16       | . %empty  ["header", "delimiter"]
+
+    "chunk"  shift, and go to state 23
+
+    $default  reduce using rule 16 (chunks)
+
+    chunks  go to state 26
+
+
+State 24
+
+   13 body: "chunk" chunked_body .
+
+    $default  reduce using rule 13 (body)
+
+
+State 25
+
+   10 headers: . headers "header"
+   11        | . %empty
+   14 chunked_body: chunks . headers "delimiter"
+
+    $default  reduce using rule 11 (headers)
+
+    headers  go to state 27
+
+
+State 26
+
+   15 chunks: "chunk" chunks .
+
+    $default  reduce using rule 15 (chunks)
+
+
+State 27
+
+   10 headers: headers . "header"
+   14 chunked_body: chunks headers . "delimiter"
+
+    "header"     shift, and go to state 22
+    "delimiter"  shift, and go to state 28
+
+
+State 28
+
+   14 chunked_body: chunks headers "delimiter" .
+
+    $default  reduce using rule 14 (chunked_body)
