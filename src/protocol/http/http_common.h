@@ -54,20 +54,34 @@ typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
   /************************************************************************/
   /* Comparator for case-insensitive comparison in STL assos. containers  */
   /************************************************************************/
-struct ci_less : std::binary_function<std::string, std::string, bool>
+//struct ci_less : std::binary_function<std::string, std::string, bool>
+//{
+//  // case-independent (ci) compare_less binary function
+//  struct nocase_compare : public std::binary_function<unsigned char, unsigned char, bool>
+//  {
+//    bool operator() (const unsigned char& c1, const unsigned char& c2) const {
+//      return tolower (c1) < tolower (c2);
+//    }
+//  };
+//  bool operator() (const std::string& s1, const std::string& s2) const {
+//    return std::lexicographical_compare
+//    (s1.begin (), s1.end (),   // source range
+//      s2.begin (), s2.end (),   // dest range
+//      nocase_compare ());  // comparison
+//  }
+//};
+//struct ciLessLibC : public std::binary_function<std::string, std::string, bool>
+//{
+//  bool operator ()(const std::string &lhs, const std::string &rhs) const
+//  {
+//    return strcasecmp (lhs.c_str (), rhs.c_str ()) < 0 ;
+//  }
+//};
+struct ci_less : public std::binary_function<std::string, std::string, bool>
 {
-  // case-independent (ci) compare_less binary function
-  struct nocase_compare : public std::binary_function<unsigned char, unsigned char, bool>
+  bool operator() (const std::string& s1, const std::string& s2) const
   {
-    bool operator() (const unsigned char& c1, const unsigned char& c2) const {
-      return tolower (c1) < tolower (c2);
-    }
-  };
-  bool operator() (const std::string& s1, const std::string& s2) const {
-    return std::lexicographical_compare
-    (s1.begin (), s1.end (),   // source range
-      s2.begin (), s2.end (),   // dest range
-      nocase_compare ());  // comparison
+    return strcasecmp (s1.c_str (), s2.c_str ()) < 0;
   }
 };
 typedef std::map<std::string, std::string, ci_less> HTTP_Headers_t;

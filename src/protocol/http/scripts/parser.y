@@ -155,6 +155,8 @@ using namespace std;
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
+#include "common_string_tools.h"
+
 #include "stream_dec_common.h"
 
 #include "net_macros.h"
@@ -327,7 +329,7 @@ body:               "body"                           { $$ = $1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        HTTP_HeadersIterator_t iterator =
-                                                         record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                                                        ACE_ASSERT (iterator != record_r.headers.end ());
                                                        std::istringstream converter;
                                                        converter.str ((*iterator).second);

@@ -507,9 +507,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
   } // end IF
   ACE_ASSERT (writeBuffer_);
   result = 0;
-
-  // finished ?
-  if (writeBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+  if (unlikely (writeBuffer_->msg_type () == ACE_Message_Block::MB_STOP))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
@@ -520,11 +518,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                 ACE_TEXT ("[%d]: finished sending\n"),
                 handle_in));
 #endif
-
-    // clean up
-    writeBuffer_->release ();
-    writeBuffer_ = NULL;
-
+    writeBuffer_->release (); writeBuffer_ = NULL;
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 
@@ -579,11 +573,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
       if (inherited::errorQueue_)
         this->processErrorQueue ();
 #endif
-
-      // clean up
-      writeBuffer_->release ();
-      writeBuffer_ = NULL;
-
+      writeBuffer_->release (); writeBuffer_ = NULL;
       return -1; // <-- remove 'this' from dispatch
     }
     // *** GOOD CASES ***
@@ -598,11 +588,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                   ACE_TEXT ("%d: socket was closed by the peer\n"),
                   handle_in));
 #endif
-
-      // clean up
-      writeBuffer_->release ();
-      writeBuffer_ = NULL;
-
+      writeBuffer_->release (); writeBuffer_ = NULL;
       return -1; // <-- remove 'this' from dispatch
     }
     default:
@@ -624,9 +610,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
       if (unlikely (writeBuffer_->length () > 0))
         break; // there's more data
 
-      // clean up
-      writeBuffer_->release ();
-      writeBuffer_ = NULL;
+      writeBuffer_->release (); writeBuffer_ = NULL;
 
       break;
     }
