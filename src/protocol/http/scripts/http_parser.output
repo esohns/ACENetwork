@@ -97,9 +97,6 @@ Nonterminals, with rules where they appear
 State 0
 
     0 $accept: . message "end"
-    1 message: . head "delimiter" body
-    2 head: . "method" head_rest1
-    3     | . "version" head_rest2
 
     "method"   shift, and go to state 1
     "version"  shift, and go to state 2
@@ -111,8 +108,6 @@ State 0
 State 1
 
     2 head: "method" . head_rest1
-    4 head_rest1: . request_line_rest1 headers
-    5 request_line_rest1: . "uri" request_line_rest2
 
     "uri"  shift, and go to state 5
 
@@ -123,8 +118,6 @@ State 1
 State 2
 
     3 head: "version" . head_rest2
-    7 head_rest2: . status_line_rest1 headers
-    8 status_line_rest1: . "status" status_line_rest2
 
     "status"  shift, and go to state 8
 
@@ -149,7 +142,6 @@ State 4
 State 5
 
     5 request_line_rest1: "uri" . request_line_rest2
-    6 request_line_rest2: . "version"
 
     "version"  shift, and go to state 13
 
@@ -166,8 +158,6 @@ State 6
 State 7
 
     4 head_rest1: request_line_rest1 . headers
-   10 headers: . headers "header"
-   11        | . %empty
 
     $default  reduce using rule 11 (headers)
 
@@ -177,7 +167,6 @@ State 7
 State 8
 
     8 status_line_rest1: "status" . status_line_rest2
-    9 status_line_rest2: . "reason"
 
     "reason"  shift, and go to state 16
 
@@ -194,8 +183,6 @@ State 9
 State 10
 
     7 head_rest2: status_line_rest1 . headers
-   10 headers: . headers "header"
-   11        | . %empty
 
     $default  reduce using rule 11 (headers)
 
@@ -212,8 +199,6 @@ State 11
 State 12
 
     1 message: head "delimiter" . body
-   12 body: . "body"
-   13     | . "chunk" chunked_body
 
     "body"   shift, and go to state 19
     "chunk"  shift, and go to state 20
@@ -237,7 +222,7 @@ State 14
 
 State 15
 
-    4 head_rest1: request_line_rest1 headers .  ["delimiter"]
+    4 head_rest1: request_line_rest1 headers .
    10 headers: headers . "header"
 
     "header"  shift, and go to state 22
@@ -261,7 +246,7 @@ State 17
 
 State 18
 
-    7 head_rest2: status_line_rest1 headers .  ["delimiter"]
+    7 head_rest2: status_line_rest1 headers .
    10 headers: headers . "header"
 
     "header"  shift, and go to state 22
@@ -279,9 +264,6 @@ State 19
 State 20
 
    13 body: "chunk" . chunked_body
-   14 chunked_body: . chunks headers "delimiter"
-   15 chunks: . "chunk" chunks
-   16       | . %empty  ["header", "delimiter"]
 
     "chunk"  shift, and go to state 23
 
@@ -307,9 +289,7 @@ State 22
 
 State 23
 
-   15 chunks: . "chunk" chunks
-   15       | "chunk" . chunks
-   16       | . %empty  ["header", "delimiter"]
+   15 chunks: "chunk" . chunks
 
     "chunk"  shift, and go to state 23
 
@@ -327,8 +307,6 @@ State 24
 
 State 25
 
-   10 headers: . headers "header"
-   11        | . %empty
    14 chunked_body: chunks . headers "delimiter"
 
     $default  reduce using rule 11 (headers)

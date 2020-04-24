@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.5.  */
 
 /* Skeleton interface for Bison GLR parsers in C
 
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015, 2018-2019 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -41,11 +41,10 @@ extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
 
-
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
-#ifndef HTTP_PARSER_H
-#define HTTP_PARSER_H
+//#ifndef HTTP_PARSER_H
+//#define HTTP_PARSER_H
 
 #include <cstdio>
 #include <string>
@@ -93,9 +92,8 @@ extern int yydebug;
 #define YYLTYPE_IS_DECLARED 1
 
 
-
 /* Token type.  */
-#ifndef YYTOKENTYPE
+//#ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
@@ -111,21 +109,18 @@ extern int yydebug;
     CHUNK = 266,
     END_OF_FRAGMENT = 267
   };
-#endif
+//#endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-
 
   int          ival;
   std::string* sval;
 
 
 };
-
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -146,22 +141,19 @@ struct YYLTYPE
 #endif
 
 
-extern YYSTYPE yylval;
-extern YYLTYPE yylloc;
+
 int yyparse (HTTP_IParser* iparser_p, yyscan_t yyscanner);
 /* "%code provides" blocks.  */
 
-
 /*void yysetdebug (int);*/
-/*void yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);*/
-void yyerror (HTTP_IParser*, yyscan_t, const char*);
+void yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);
+//void yyerror (HTTP_IParser*, yyscan_t, const char*);
 /*int yyparse (HTTP_IParser*, yyscan_t);*/
-void yyprint (FILE*, enum yytokentype, YYSTYPE);
+/*void yyprint (FILE*, enum yytokentype, YYSTYPE);*/
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
-#endif // HTTP_PARSER_H
-
+//#endif // HTTP_PARSER_H
 
 
 #endif /* !YY_YY_HTTP_PARSER_H_INCLUDED  */

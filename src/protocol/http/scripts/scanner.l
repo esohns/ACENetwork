@@ -3,7 +3,7 @@
 #include "http_common.h"
 #include "http_exports.h"
 #include "http_iparser.h"
-#undef YYTOKENTYPE
+//#undef YYTOKENTYPE
 #include "http_parser.h"
 
 #if !defined (YY_DECL)

@@ -21,10 +21,10 @@
 /* %define namespace                 {yy} */
 /* %define api.namespace             {yy} */
 /* *IMPORTANT NOTE*: do NOT mess with this (it's broken)
-%name-prefix                      "yy"
-/* %define api.prefix                {yy} */
+/*%name-prefix                         "http_"*/
+/*%define api.prefix                   {http_}*/
 /*%pure-parser*/
-/*%define api.pure                  full*/
+%define api.pure                     true
 /* *TODO*: implement a push parser */
 /* %define api.push-pull             push */
 /* %define api.token.constructor */
@@ -38,8 +38,8 @@
 /* %define lr.type                   lalr */
 
 /* %define parse.assert              {true} */
-%error-verbose
-/* %define parse.error               verbose */
+/*%error-verbose*/
+%define parse.error                  verbose
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
 /* %define parser_class_name         {HTTP_Parser} */
@@ -53,8 +53,8 @@
 %code requires {
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
-#ifndef HTTP_PARSER_H
-#define HTTP_PARSER_H
+//#ifndef HTTP_PARSER_H
+//#define HTTP_PARSER_H
 
 #include <cstdio>
 #include <string>
@@ -195,14 +195,14 @@ using namespace std;
 
 %code provides {
 /*void yysetdebug (int);*/
-/*void yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);*/
-void yyerror (HTTP_IParser*, yyscan_t, const char*);
+void yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);
+//void yyerror (HTTP_IParser*, yyscan_t, const char*);
 /*int yyparse (HTTP_IParser*, yyscan_t);*/
-void yyprint (FILE*, enum yytokentype, YYSTYPE);
+/*void yyprint (FILE*, enum yytokentype, YYSTYPE);*/
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
-#endif // HTTP_PARSER_H
+//#endif // HTTP_PARSER_H
 }
 
 /*%printer                  { yyoutput << $$; } <*>;*/
@@ -393,7 +393,7 @@ yysetdebug (int debug_in)
 }*/
 
 void
-yyerror (/*YYLTYPE* location_in,*/
+yyerror (YYLTYPE* location_in,
          HTTP_IParser* iparser_in,
          yyscan_t context_in,
          const char* message_in)
@@ -403,12 +403,11 @@ yyerror (/*YYLTYPE* location_in,*/
   ACE_UNUSED_ARG (context_in);
 
   // sanity check(s)
-//  ACE_ASSERT (location_in);
+  ACE_ASSERT (location_in);
   ACE_ASSERT (iparser_in);
 
-  YYLTYPE location_s;
   try {
-    iparser_in->error (/**location_in*/location_s,
+    iparser_in->error (*location_in,
                        std::string (message_in));
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
@@ -416,7 +415,7 @@ yyerror (/*YYLTYPE* location_in,*/
   }
 }
 
-void
+/*void
 yyprint (FILE* file_in,
          yytokentype type_in,
          YYSTYPE value_in)
@@ -460,4 +459,4 @@ yyprint (FILE* file_in,
   if (result < 0)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
-}
+}*/
