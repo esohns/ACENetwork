@@ -130,11 +130,15 @@ Net_Common_Tools::isInterfaceEnabled (const std::string& interfaceIdentifier_in)
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isInterfaceEnabled"));
 
   // sanity check(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
 #else
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
 #endif // // _WIN32_WINNT_VISTA
+#else
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+#endif // ACE_WIN32 || ACE_WIN64
 
     bool result = false;
 
