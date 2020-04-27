@@ -196,7 +196,7 @@ class Net_Common_Tools
   static bool interfaceToExternalIPAddress (REFGUID,            // interface identifier
 #else
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier ('FriendlyName')
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
 #endif // ACE_WIN32 || ACE_WIN64

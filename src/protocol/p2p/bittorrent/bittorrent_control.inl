@@ -257,7 +257,15 @@ BitTorrent_Control_T<SessionAsynchType,
                                                    converter.str ()));
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  interface_identifier = Net_Common_Tools::getDefaultInterface_2 (link_layers);
+#else
   interface_identifier = Net_Common_Tools::getDefaultInterface (link_layers);
+#endif // 
+#else
+  interface_identifier = Net_Common_Tools::getDefaultInterface (link_layers);
+#endif // 
   if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
                                                        external_ip_address))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

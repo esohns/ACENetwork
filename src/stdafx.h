@@ -2,17 +2,17 @@
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
 //
-#if defined _MSC_VER
+#if defined (_MSC_VER)
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
 // *NOTE*: work around quirky MSVC...
 #define NOMINMAX
 
-#define _WIN32_WINNT 0x0602 // _WIN32_WINNT_WIN8
+#include "targetver.h"
 
 // Windows Header Files
 #include <windows.h>
-#endif
+#endif // _MSC_VER
 
 // C RunTime Header Files
 #include <string>

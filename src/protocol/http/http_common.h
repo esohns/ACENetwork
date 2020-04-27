@@ -24,8 +24,9 @@
 #include <map>
 #include <string>
 
+#include "ace/OS.h"
+
 #include "common_istatistic.h"
-//#include "common_statistic_handler.h"
 
 #include "stream_common.h"
 #include "stream_data_base.h"
@@ -81,7 +82,7 @@ struct ci_less : public std::binary_function<std::string, std::string, bool>
 {
   bool operator() (const std::string& s1, const std::string& s2) const
   {
-    return strcasecmp (s1.c_str (), s2.c_str ()) < 0;
+    return ACE_OS::strcasecmp (s1.c_str (), s2.c_str ()) < 0;
   }
 };
 typedef std::map<std::string, std::string, ci_less> HTTP_Headers_t;

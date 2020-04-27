@@ -158,11 +158,11 @@ do_printUsage (const std::string& programName_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [GUID]    : network interface [\"")
-            << Net_Common_Tools::interfaceToString (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)).c_str ()
+            << Net_Common_Tools::interfaceToString (Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_11)).c_str ()
 #else
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
             << Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11).c_str ()
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
             << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN)
@@ -224,11 +224,14 @@ do_processArguments (const int& argc_in,
   UIDefinitionFilePath_out += ACE_DIRECTORY_SEPARATOR_STR;
   UIDefinitionFilePath_out +=
       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_DEFINITION_FILE);
+  interfaceIdentifier_out =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  interfaceIdentifier_out =
-      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_11);
 #else
-  interfaceIdentifier_out =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+#endif // _WIN32_WINNT_VISTA
+#else
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
 #endif // ACE_WIN32 || ACE_WIN64
   logToFile_out = false;
@@ -831,10 +834,10 @@ ACE_TMAIN (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier =
-      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+      Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_11);
 #else
   std::string interface_identifier =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   std::string interface_identifier =

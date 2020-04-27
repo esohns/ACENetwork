@@ -704,17 +704,25 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     struct _GUID interface_identifier =
 #else
     std::string interface_identifier =
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
     std::string interface_identifier =
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+      Net_Common_Tools::IPAddressToInterface_2 (configuration_p->peerAddress);
+#else
       Net_Common_Tools::IPAddressToInterface (configuration_p->peerAddress);
+#endif // _WIN32_WINNT_VISTA
+#else
+      Net_Common_Tools::IPAddressToInterface (configuration_p->peerAddress);
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
 #else
     if (unlikely (interface_identifier.empty ()))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
     if (unlikely (interface_identifier.empty ()))
 #endif // ACE_WIN32 || ACE_WIN64
@@ -725,14 +733,26 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       goto error;
     } // end IF
     ACE_INET_Addr gateway_address;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
+                                                             source_SAP,
+                                                             gateway_address)))
+#else
     if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
                                                            source_SAP,
                                                            gateway_address)))
+#endif // _WIN32_WINNT_VISTA
+#else
+    if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                                           source_SAP,
+                                                           gateway_address)))
+#endif // ACE_WIN32 || ACE_WIN64
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(%s): \"%m\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,

@@ -130,7 +130,11 @@ Net_Common_Tools::isInterfaceEnabled (const std::string& interfaceIdentifier_in)
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isInterfaceEnabled"));
 
   // sanity check(s)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+#else
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
+#endif // // _WIN32_WINNT_VISTA
 
     bool result = false;
 
@@ -1206,24 +1210,44 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 #else
   std::string interface_identifier = interfaceIdentifier_in;
   if (interface_identifier.empty ())
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
   std::string interface_identifier = interfaceIdentifier_in;
   if (interface_identifier.empty ())
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    interface_identifier =
+      Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::getDefaultInterface ()));
+#else
     interface_identifier = Net_Common_Tools::getDefaultInterface ();
+#endif // _WIN32_WINNT_VISTA
+#else
+    interface_identifier = Net_Common_Tools::getDefaultInterface ();
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step1: determine the 'internal' IP address
   ACE_INET_Addr internal_ip_address, gateway_ip_address;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
+                                                           internal_ip_address,
+                                                           gateway_ip_address)))
+#else
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
                                                          internal_ip_address,
                                                          gateway_ip_address)))
-
+#endif // _WIN32_WINNT_VISTA
+#else
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                                         internal_ip_address,
+                                                         gateway_ip_address)))
+#endif // ACE_WIN32 || ACE_WIN64
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(\"%s\"), aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
 #else
     ACE_DEBUG ((LM_ERROR,
@@ -2383,7 +2407,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in)
   ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in , GUID_NULL));
 #else
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -2396,7 +2420,11 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in)
   std::string ip_address_string;
 
   NET_IFINDEX interface_index =
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in);
+#else
     Net_Common_Tools::interfaceToIndex (Net_Common_Tools::adapterName (interfaceIdentifier_in));
+#endif // _WIN32_WINNT_VISTA
   if (unlikely (!interface_index))
   {
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -2744,10 +2772,24 @@ continue_:
   } while (!converter.fail ());
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
+#else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
+#endif // _WIN32_WINNT_VISTA
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG
 
   return result;
@@ -2765,13 +2807,8 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
   gatewayIPAddress_out.reset ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID interface_identifier = interfaceIdentifier_in;
-  if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
-#else
   std::string interface_identifier = interfaceIdentifier_in;
   if (unlikely (interface_identifier.empty ()))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   std::string interface_identifier = interfaceIdentifier_in;
   if (unlikely (interface_identifier.empty ()))
@@ -2780,11 +2817,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
 
   // sanity check(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  ACE_ASSERT (!InlineIsEqualGUID (interface_identifier, GUID_NULL));
-#else
   ACE_ASSERT (!interface_identifier.empty ());
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   ACE_ASSERT (!interface_identifier.empty ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -2794,15 +2827,9 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
     Net_Common_Tools::interfaceToIndex (interface_identifier);
   if (unlikely (!interface_index))
   {
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (interface_identifier).c_str ())));
-#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
                 ACE_TEXT (interface_identifier.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
     return false;
   } // end IF
 
@@ -2853,7 +2880,11 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
 
   IP_ADAPTER_ADDRESSES* ip_adapter_addresses_2 = ip_adapter_addresses_p;
   IP_ADAPTER_UNICAST_ADDRESS* unicast_address_p = NULL;
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  IP_ADAPTER_GATEWAY_ADDRESS_LH* gateway_address_p = NULL;
+#else
   IP_ADAPTER_UNICAST_ADDRESS* gateway_address_p = NULL;
+#endif // _WIN32_WINNT_VISTA
   struct _SOCKET_ADDRESS* socket_address_p = NULL;
   struct sockaddr_in* sockaddr_in_p = NULL;
   do
@@ -3236,7 +3267,10 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       ULONG result_2 = 0;
       std::map<ULONG, std::string> connected_interfaces;
       ACE_INET_Addr inet_address, gateway_address;
-
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#else
+      ULONG index_i = 0;
+#endif // _WIN32_WINNT_VISTA
       result_2 =
         GetAdaptersAddresses (AF_UNSPEC,              // Family
                               0,                      // Flags
@@ -3289,11 +3323,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
           goto continue_;
 
         interface_identifier =
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-          Net_Common_Tools::indexToInterface_2 (ip_adapter_addresses_2->IfIndex);
-#else
           Net_Common_Tools::indexToInterface (ip_adapter_addresses_2->IfIndex);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
         if (unlikely (interface_identifier.empty ()))
         {
           ACE_DEBUG ((LM_ERROR,
@@ -3306,9 +3336,8 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
         connected_interfaces.insert (std::make_pair (ip_adapter_addresses_2->Ipv4Metric,
                                                      interface_identifier));
 #else
-        ACE_ASSERT (false);
-        ACE_NOTSUP_RETURN (result);
-        ACE_NOTREACHED (return result;)
+        connected_interfaces.insert (std::make_pair (index_i++,
+                                                     interface_identifier));
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 
         //// debug info
@@ -3516,8 +3545,16 @@ clean:
 #endif /* ACE_HAS_GETIFADDRS */
 #endif // ACE_WIN32 || ACE_WIN64
       if (likely (!interface_identifiers_a.empty ()))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+        return Net_Common_Tools::interfaceToString (interface_identifiers_a.front ());
+#else
         return interface_identifiers_a.front ();
-      break;
+#endif // _WIN32_WINNT_VISTA
+#else
+        return interface_identifiers_a.front ();
+#endif // ACE_WIN32 || ACE_WIN64
+    break;
     }
     case NET_LINKLAYER_ATM:
     case NET_LINKLAYER_FDDI:
@@ -3571,7 +3608,15 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
     } // end IF
 
   if (likely (!interfaces_a.empty ()))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    return Net_Common_Tools::interfaceToString (interfaces_a.front ());
+#else
     return interfaces_a.front ();
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    return interfaces_a.front ();
+#endif // ACE_WIN32 || ACE_WIN64
 
   return ACE_TEXT_ALWAYS_CHAR ("");
 }

@@ -104,7 +104,7 @@ load_wlan_interfaces (GtkListStore* listStore_in
 #else
                         0, (*iterator).c_str (),
                         1, Common_Tools::GUIDToString (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator))).c_str (),
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
                         0, (*iterator).c_str (),
                         1, (*iterator).c_str (),

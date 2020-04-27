@@ -600,7 +600,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    if (InlineIsEqualGUID ((*iterator_2).second.interfaceIdentifier, GUID_NULL))
+    if (InlineIsEqualGUID ((*iterator_2).second->interfaceIdentifier, GUID_NULL))
 #else
     if ((*iterator_2).second->interfaceIdentifier.empty ())
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
@@ -1131,8 +1131,16 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   struct ether_addr ether_addrs_s =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+#else
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
-  ACE_ASSERT (DHCP_CHADDR_SIZE >= ETH_ALEN);
+#endif // _WIN32_WINNT_VISTA
+#else
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+#endif // ACE_WIN32 || ACE_WIN64
+    ACE_ASSERT (DHCP_CHADDR_SIZE >= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
                   ETH_ALEN);
@@ -1307,7 +1315,15 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   ACE_INET_Addr IP_address, gateway_address;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  if (!Net_Common_Tools::interfaceToIPAddress_2 ((*iterator_2).second->interfaceIdentifier,
+#else
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+#endif // _WIN32_WINNT_VISTA
+#else
+  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+#endif // ACE_WIN32 || ACE_WIN64
                                                IP_address,
                                                gateway_address))
   {
@@ -1321,7 +1337,7 @@ allocate:
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
                 ACE_TEXT ((*iterator_2).second->interfaceIdentifier.c_str ()),
                 NULL));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // _WIN32_WINNT_VISTA
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
@@ -1332,7 +1348,15 @@ allocate:
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
   struct ether_addr ether_addrs_s =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+#else
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+#endif // _WIN32_WINNT_VISTA
+#else
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (DHCP_CHADDR_SIZE > ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -1450,7 +1474,15 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   struct ether_addr ether_addrs_s =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+#else
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+#endif // _WIN32_WINNT_VISTA
+#else
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
@@ -1568,7 +1600,15 @@ allocate:
     session_data_r.xid = DHCP_record.xid;
   } // end IF
   ACE_INET_Addr IP_address, gateway_address;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  if (!Net_Common_Tools::interfaceToIPAddress_2 ((*iterator_2).second->interfaceIdentifier,
+#else
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+#endif // _WIN32_WINNT_VISTA
+#else
+  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+#endif // ACE_WIN32 || ACE_WIN64
                                                IP_address,
                                                gateway_address))
   {
@@ -1593,7 +1633,15 @@ allocate:
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
   struct ether_addr ether_addrs_s =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+#else
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+#endif // _WIN32_WINNT_VISTA
+#else
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (DHCP_CHADDR_SIZE > ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),

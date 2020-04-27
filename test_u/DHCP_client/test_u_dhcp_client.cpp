@@ -268,11 +268,15 @@ do_processArguments (int argc_in,
   logToFile_out = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   interfaceIdentifier_out =
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_3);
+#else
     Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+#endif // _WIN32_WINNT_VISTA
 #else
   interfaceIdentifier_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   sendRequestOnOffer_out = TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
   useReactor_out =
@@ -758,14 +762,22 @@ do_work (bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
   {
     ACE_INET_Addr gateway_address;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (!Net_Common_Tools::interfaceToIPAddress_2 (interfaceIdentifier_in,
+#else
     if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+#endif // _WIN32_WINNT_VISTA
+#else
+    if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+#endif // ACE_WIN32 || ACE_WIN64
                                                  connection_configuration.listenAddress,
                                                  gateway_address))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(\"%s\"), continuing\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
@@ -1187,7 +1199,15 @@ allocate:
     if (configuration_in.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
     struct ether_addr ether_addrs_s =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+      Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator).second->interfaceIdentifier);
+#else
       Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second->interfaceIdentifier);
+#endif // _WIN32_WINNT_VISTA
+#else
+      Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second->interfaceIdentifier);
+#endif // ACE_WIN32 || ACE_WIN64
     ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
     ACE_OS::memcpy (&(DHCP_record.chaddr),
                     &(ether_addrs_s.ether_addr_octet),

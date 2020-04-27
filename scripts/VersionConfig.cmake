@@ -36,7 +36,7 @@ set (${PROJECT_NAME}_PACKAGE_DESCRIPTION ${PACKAGE_DESCRIPTION})
 set (PACKAGE_DESCRIPTION_SUMMARY "(wrapper) library for network functionality, based on the ACE framework (see: http://www.cs.wustl.edu/~schmidt/ACE.html)")
 set (${PROJECT_NAME}_PACKAGE_DESCRIPTION_SUMMARY ${PACKAGE_DESCRIPTION_SUMMARY})
 
-set (PACKAGE_URL "https://github.com/esohns/lib${PROJECT_NAME}")
+set (PACKAGE_URL "https://github.com/esohns/${PROJECT_NAME}")
 set (${PROJECT_NAME}_PACKAGE_URL ${PACKAGE_URL})
 set (PACKAGE_MAINTAINER "Erik Sohns")
 set (${PROJECT_NAME}_PACKAGE_MAINTAINER ${PACKAGE_MAINTAINER})
