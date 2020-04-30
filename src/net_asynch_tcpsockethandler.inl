@@ -508,18 +508,15 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     } // *WARNING*: control falls through here
     case 0:
     {
-      if (bytes_transferred == 0)
-      {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("0x%@: socket was closed\n"),
-                    result_in.handle ()));
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: socket was closed\n"),
+                  result_in.handle ()));
 #else
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("%d: socket was closed\n"),
-                    result_in.handle ()));
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: socket was closed\n"),
+                  result_in.handle ()));
 #endif // ACE_WIN32 || ACE_WIN64
-      } // end IF
 
       close = true;
 
