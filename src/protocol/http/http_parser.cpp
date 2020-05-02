@@ -392,8 +392,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   221,   221,   222,   228,   256,   257,   262,   268,   269,
-     279,   284,   324,   326,   348,   349,   361,   362
+       0,   223,   223,   224,   230,   258,   259,   264,   270,   271,
+     281,   286,   326,   328,   350,   351,   363,   364
 };
 #endif
 
@@ -1281,7 +1281,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-                                                       record_r.headers[match_results[1]] =
+                                                       record_r.headers[Common_String_Tools::tolower (match_results[1])] =
                                                          match_results[2];
 
                                                        // upcall ?

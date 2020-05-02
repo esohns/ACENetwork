@@ -310,7 +310,7 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
 
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-                                                       record_r.headers[match_results[1]] =
+                                                       record_r.headers[Common_String_Tools::tolower (match_results[1])] =
                                                          match_results[2];
 
                                                        // upcall ?
