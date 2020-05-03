@@ -729,7 +729,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   Common_UI_GTK_BuildersIterator_t iterator =
       state_r.builders.find (CBData_.timeStamp);
   // sanity check(s)
@@ -2264,13 +2264,13 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
       state_r.builders.find (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN);
     // sanity check(s)
     ACE_ASSERT (iterator != state_r.builders.end ());
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     GtkHBox* hbox_p =
       GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_HBOX_SEND)));
     ACE_ASSERT (hbox_p);
     gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), FALSE);
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif // GTK_USE
   } // end IF
 

@@ -491,7 +491,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
   CBData_->builderLabel += ACE_TEXT_ALWAYS_CHAR ("::");
   CBData_->builderLabel += page_tab_label_string;
 
-  { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_r.lock);
+//  { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_r.lock);
     state_r.builders[CBData_->builderLabel] =
         std::make_pair (ui_definition_filename, builder_p);
 
@@ -508,7 +508,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Con
     } // end IF
     // *TODO*: this id is never removed from the list again...
     state_r.eventSourceIds.insert (CBData_->eventSourceId);
-  } // end lock scope
+//  } // end lock scope
 #endif // GTK_USE
 }
 
@@ -728,7 +728,7 @@ IRC_Client_GUI_MessageHandler::getTopLevelPageChild (bool lockedAccess_in) const
     Common_UI_GTK_BuildersIterator_t iterator =
       state_r.builders.find (CBData_->builderLabel);
     // sanity check(s)
-    ACE_ASSERT (iterator != state_r.builders.end ());
+//    ACE_ASSERT (iterator != state_r.builders.end ());
 
     widget_p =
         GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,

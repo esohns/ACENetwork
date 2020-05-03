@@ -439,6 +439,7 @@ void
 do_work (unsigned int numberOfDispatchThreads_in,
          struct IRC_Client_UI_CBData& CBData_in,
          const std::string& UIDefinitionFile_in,
+         bool debug_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -467,11 +468,11 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   //user_data.connectionConfiguration = &configuration.connectionConfiguration;
 
-  CBData_in.configuration->parserConfiguration.debugParser = true;
-  if (true)
-    CBData_in.configuration->parserConfiguration.debugScanner = true;
+  CBData_in.configuration->parserConfiguration.debugParser = debug_in;
+  CBData_in.configuration->parserConfiguration.debugScanner = debug_in;
   ////////////////////// socket handler configuration //////////////////////////
   IRC_Client_ConnectionConfiguration connection_configuration;
+  connection_configuration.allocatorConfiguration = &allocator_configuration;
 //  connection_configuration.statisticReportingInterval =
 //    ACE_Time_Value (reporting_interval, 0);
   connection_configuration.messageAllocator = &message_allocator;
@@ -499,6 +500,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   modulehandler_configuration.streamConfiguration =
     &CBData_in.configuration->streamConfiguration;
 
+  stream_configuration.allocatorConfiguration = &allocator_configuration;
   stream_configuration.messageAllocator = &message_allocator;
 
   CBData_in.configuration->streamConfiguration.initialize (module_configuration,
@@ -1475,6 +1477,7 @@ ACE_TMAIN (int argc_in,
   do_work (number_of_thread_pool_threads,
            ui_cb_data,
            ui_definition_file_name,
+           debug,
            ACE_Time_Value (reporting_interval, 0),
            signal_set,
            ignored_signal_set,

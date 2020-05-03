@@ -1428,10 +1428,10 @@ idle_update_progress_cb (gpointer userData_in)
            ++iterator_3)
         if ((*iterator_3).second.id () == *iterator_2)
           break;
-      //iterator_3 = data_p->pendingActions.find (*iterator_2);
-      ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
-      data_p->state->eventSourceIds.erase ((*iterator_3).first);
-      data_p->pendingActions.erase (iterator_3);
+//      iterator_3 = data_p->pendingActions.find (*iterator_2);
+//      ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
+//      data_p->state->eventSourceIds.erase ((*iterator_3).first);
+//      data_p->pendingActions.erase (iterator_3);
     } // end FOR
     data_p->completedActions.clear ();
 
