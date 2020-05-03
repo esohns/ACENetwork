@@ -10,9 +10,10 @@
 #command -v gksudo >/dev/null 2>&1 || { echo "gksudo is not installed, aborting" >&2; exit 1; }
 #command -v kdesudo >/dev/null 2>&1 || { echo "kdesudo is not installed, aborting" >&2; exit 1; }
 #command -v pkexec >/dev/null 2>&1 || { echo "pkexec is not installed, aborting" >&2; exit 1; }
+command -v readlink >/dev/null 2>&1 || { echo "readlink is not installed, aborting" >&2; exit 1; }
 
 #[ "root" != "$USER" ] && exec gksudo $0 "$@"
-#[ "root" != "$USER" ] && exec pkexec $0 "$@"
+[ "root" != "$USER" ] && exec pkexec $(readlink -f $0) "$@"
 
 echo "starting..."
 
@@ -22,7 +23,6 @@ command -v chmod >/dev/null 2>&1 || { echo "chmod is not installed, aborting" >&
 command -v chown >/dev/null 2>&1 || { echo "chown is not installed, aborting" >&2; exit 1; }
 command -v dirname >/dev/null 2>&1 || { echo "dirname is not installed, aborting" >&2; exit 1; }
 command -v echo >/dev/null 2>&1 || { echo "echo is not supported, aborting" >&2; exit 1; }
-command -v readlink >/dev/null 2>&1 || { echo "readlink is not installed, aborting" >&2; exit 1; }
 command -v /sbin/setcap >/dev/null 2>&1 || { echo "setcap is not installed, aborting" >&2; exit 1; }
 
 DEFAULT_PROJECT_DIR="$(dirname $(readlink -f $0))/.."
@@ -58,7 +58,7 @@ echo "using project build directory \"$BUILD_DIR\"..."
 TEST_U_DIR="test_u"
 SUB_DIRS="DHCP_client"
 #declare -a LIBS=("libACE.so")
-BINS="DHCP_client"
+BINS="dhcp_client"
 i=0
 for DIR in $SUB_DIRS
 do
@@ -84,7 +84,7 @@ do
 
 # /sbin/setcap 'cap_net_bind_service=eip' ${BIN_TMP}
  /sbin/setcap 'cap_net_bind_service=eip' ${BIN}
- [ $? -ne 0 ] && echo "ERROR: failed to /sbin/setcap ${BIN_TMP}: \"$?\", aborting" && exit 1
+ [ $? -ne 0 ] && echo "ERROR: failed to /sbin/setcap ${BIN}: \"$?\", aborting" && exit 1
 
  echo "modified \"$BINS\"..."
 
@@ -93,7 +93,7 @@ done
 
 SUB_DIRS="WLAN_monitor"
 #declare -a LIBS=("libACE.so")
-BINS="WLAN_monitor"
+BINS="wlan_monitor"
 i=0
 for DIR in $SUB_DIRS
 do

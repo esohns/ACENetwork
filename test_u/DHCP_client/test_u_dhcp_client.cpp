@@ -648,6 +648,7 @@ do_work (bool requestBroadcastReplies_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  CBData_in.progressData.state = &state_r;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -665,6 +666,7 @@ do_work (bool requestBroadcastReplies_in,
   //               (global) broadcast route entries) to ensure that broadcast
   //               packets are (at least) sent out on the correct subnet
   DHCPClient_ConnectionConfiguration connection_configuration;
+  connection_configuration.allocatorConfiguration = &configuration_in.allocatorConfiguration;
   result =
     connection_configuration.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
                                               static_cast<ACE_UINT32> (INADDR_BROADCAST),
@@ -708,6 +710,8 @@ do_work (bool requestBroadcastReplies_in,
 
   // ********************** module configuration data **************************
 //  struct DHCPClient_StreamConfiguration stream_configuration;
+  modulehandler_configuration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
   modulehandler_configuration.parserConfiguration =
@@ -728,10 +732,12 @@ do_work (bool requestBroadcastReplies_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   modulehandler_configuration.targetFileName = fileName_in;
+
+  stream_configuration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
-
   DHCPClient_StreamConfiguration_t::ITERATOR_T iterator_2 =
     configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != configuration_in.streamConfiguration.end ());
@@ -811,22 +817,19 @@ do_work (bool requestBroadcastReplies_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In"),
                                                                     &connection_configuration));
 
-  if (requestBroadcastReplies_in)
+  result =
+    connection_configuration.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                static_cast<ACE_UINT32> (INADDR_NONE),
+                                                1,
+                                                0);
+  if (result == -1)
   {
-    result =
-      connection_configuration.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                  static_cast<ACE_UINT32> (INADDR_NONE),
-                                                  1,
-                                                  0);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
-      return;
-    } // end IF
-    configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In_2"),
-                                                                      &connection_configuration));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
+    return;
   } // end IF
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In_2"),
+                                                                    &connection_configuration));
 
   // step0b: initialize event dispatch
   if (useReactor_in)

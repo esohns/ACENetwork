@@ -623,6 +623,7 @@ idle_initialize_UI_cb (gpointer userData_in)
       GValue value = G_VALUE_INIT;
 #else
       GValue value;
+      ACE_OS::memset (&value, 0, sizeof (GValue));
       g_value_init (&value, G_TYPE_STRING);
 #endif // GTK_CHECK_VERSION (2,30,0)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1684,11 +1685,11 @@ action_report_activate_cb (GtkAction* action_in,
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) instead...
   int signal = 0;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  signal = SIGUSR1;
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   signal = SIGBREAK;
-#endif
+#else
+  signal = SIGUSR1;
+#endif // ACE_WIN32 || ACE_WIN64
   result = ACE_OS::raise (signal);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
