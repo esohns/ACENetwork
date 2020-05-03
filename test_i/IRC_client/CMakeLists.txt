@@ -313,7 +313,7 @@ if (GUI_SUPPORT)
    #       test_u_wxwidgets_ui.inl
    #       test_u_wxwidgets_ui_base.cpp
    #       test_u_wxwidgets_ui_base.h)
- endif (WXWIDGETS_USE)
+ endif ()
 endif (GUI_SUPPORT)
 
 #set_source_files_properties (${IRC_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")

@@ -490,6 +490,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
   ACE_ASSERT (message_inout);
   ACE_ASSERT (inherited::isInitialized_);
 
+  int result = -1;
+
   switch (message_inout->type ())
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
@@ -510,6 +512,38 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
 
       //// start profile timer
       //profile_.start ();
+
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_END:
+    {
+      // *NOTE*: only process the first 'session end' message (see above: 2566)
+      { ACE_GUARD (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_);
+        if (unlikely (inherited::sessionEndProcessed_))
+          break; // done
+        inherited::sessionEndProcessed_ = true;
+      } // end lock scope
+
+      if (inherited::timerId_ != -1)
+      {
+        typename TimerManagerType::INTERFACE_T* itimer_manager_p =
+            (inherited::configuration_->timerManager ? inherited::configuration_->timerManager
+                                                     : inherited::TIMER_MANAGER_SINGLETON_T::instance ());
+        ACE_ASSERT (itimer_manager_p);
+        const void* act_p = NULL;
+        result = itimer_manager_p->cancel_timer (inherited::timerId_,
+                                                 &act_p);
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("%s: failed to Common_ITimer::cancel_timer() (id was: %d): \"%m\", continuing\n"),
+                      inherited::mod_->name (),
+                      inherited::timerId_));
+        inherited::timerId_ = -1;
+      } // end IF
+
+      if (likely (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT))
+        inherited::stop (false, // wait for completion ?
+                         true); // N/A
 
       break;
     }

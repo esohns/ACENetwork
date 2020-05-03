@@ -377,7 +377,6 @@ install (FILES
          net_connection_manager.inl
          net_controller_base.h
          net_defines.h
-#         net_exports.h
          net_iconnection.h
          net_iconnectionmanager.h
          net_iconnector.h
@@ -385,16 +384,12 @@ install (FILES
          net_ipconnection.h
          net_itransportlayer.h
          net_macros.h
-#         net_module_sockethandler.h
-#         net_module_sockethandler.inl
          net_netlinkconnection.h
          net_netlinkconnection.inl
          net_netlinksockethandler.h
          net_netlinksockethandler.inl
          net_os_tools.h
          net_packet_headers.h
-         net_parser_base.h
-         net_parser_base.inl
          net_protocol_layer.h
          net_remote_comm.h
          net_session_base.h

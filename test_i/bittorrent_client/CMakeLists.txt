@@ -368,11 +368,11 @@ install (TARGETS ${EXECUTABLE_GUI}
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
 install (FILES
-         bittorrent_client.ini
-         bittorrent_client.rc
-         bittorrent_client_main.glade
-         bittorrent_client_session.glade
-         DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
+         etc/bittorrent_client.ini
+         etc/bittorrent_client.rc
+         etc/bittorrent_client_main.glade
+         etc/bittorrent_client_session.glade
+         DESTINATION share/${PROJECT_NAME}/${EXECUTABLE_GUI} COMPONENT config)
 
 ##########################################
 

@@ -309,11 +309,11 @@ if (WIN32)
                 ${ACENetwork_DIR}/src/Debug/ACENetwork.dll
                 ${ACENetwork_DIR}/src/protocol/http/Debug/ACENetwork_Protocol_HTTP.dll
           DESTINATION bin COMPONENT bin)
- install (FILES ${PROJECT_NAME}_URLStreamLoad_EXE_CFG
-          DESTINATION share/lib${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
+ install (FILES
+          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 elseif (UNIX)
- install (FILES ${PROJECT_NAME}_URLStreamLoad_EXE_CFG
-          DESTINATION $ENV{APPDATA}/lib${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
+  install (FILES
+           DESTINATION share/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 endif ()
 
 ##########################################

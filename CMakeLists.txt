@@ -73,7 +73,7 @@ set (INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header f
 if (WIN32 AND NOT CYGWIN)
  set (DEF_INSTALL_CMAKE_DIR CMake)
 else ()
- set (DEF_INSTALL_CMAKE_DIR lib/CMake/FooBar)
+ set (DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
 endif ()
 set (INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
 
@@ -223,7 +223,7 @@ install (FILES
 install (EXPORT ${PROJECT_NAME}Targets
          DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-install (FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h"
+install (FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h"
          DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
          COMPONENT dev)
 
@@ -260,7 +260,7 @@ elseif (WIN32)
  endif (MSVC)
 endif ()
 
-#set (NSIS_PROJECT_FILE "lib${PROJECT_NAME}.nsi")
+#set (NSIS_PROJECT_FILE "${PROJECT_NAME}.nsi")
 #add_custom_command (TARGET ${PROJECT_NAME}
 #                    POST_BUILD
 #                    COMMAND make_installer.bat ${NSIS_PROJECT_FILE}

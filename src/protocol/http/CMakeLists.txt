@@ -113,8 +113,6 @@ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
 
 ########### next target ###############
 set (source_files
-#     http_bisector.cpp
-#     http_bisector.h
      http_codes.h
      http_common.h
      http_defines.h
@@ -167,8 +165,8 @@ set (script_files
 #     scripts/bisector.l
      scripts/scanner.l
      scripts/parser.y)
-set (table_files
-     etc/http_scanner.tab)
+set (table_files)
+#     etc/http_scanner.tab)
 
 #set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -244,7 +242,6 @@ export (TARGETS ${PROJECT_NAME}_Protocol_HTTP
 
 ############### install files ################
 install (FILES
-#         http_bisector.h
          http_codes.h
          http_common.h
          http_defines.h
@@ -254,7 +251,7 @@ install (FILES
          http_parser_driver.h
          http_parser_driver.inl
          http_scanner.h
-         http_scanner.tab
+#         http_scanner.tab
          http_message.h
          http_message.inl
          http_module_bisector.h
