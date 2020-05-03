@@ -197,7 +197,7 @@ set (${EXECUTABLE}_INI
 
 if (UNIX)
  add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif ()
+endif (UNIX)
 
 set (LLVM_COMPILER_ID_STRING "Clang")
 string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
@@ -206,7 +206,7 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_compile_options (-std=c++11)
 #add_compile_options (-fPIC)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
-endif ()
+endif (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
 
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -215,7 +215,7 @@ add_executable (${EXECUTABLE}
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 if (WIN32 AND NOT BUILD_TEST_I)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
-endif ()
+endif (WIN32 AND NOT BUILD_TEST_I)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -286,8 +286,6 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      IRC_client_gui_messagehandler.h
      IRC_client_gui_tools.cpp
      IRC_client_gui_tools.h
-#     IRC_client_messageallocator.cpp
-#     IRC_client_messageallocator.h
      IRC_client_module_IRChandler.cpp
      IRC_client_module_IRChandler.h
      IRC_client_network.h
@@ -315,7 +313,7 @@ if (GUI_SUPPORT)
    #       test_u_wxwidgets_ui.inl
    #       test_u_wxwidgets_ui_base.cpp
    #       test_u_wxwidgets_ui_base.h)
- endif ()
+ endif (WXWIDGETS_USE)
 endif (GUI_SUPPORT)
 
 #set_source_files_properties (${IRC_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
