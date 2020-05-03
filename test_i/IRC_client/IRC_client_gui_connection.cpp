@@ -1789,22 +1789,22 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
   server_log_active = (widget_p == server_log_p);
 
   { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-    for (MESSAGE_HANDLERSCONSTITERATOR_T iterator = messageHandlers_.begin ();
-         iterator != messageHandlers_.end ();
-         iterator++)
-    { ACE_ASSERT ((*iterator).second);
+    for (MESSAGE_HANDLERSCONSTITERATOR_T iterator_2 = messageHandlers_.begin ();
+         iterator_2 != messageHandlers_.end ();
+         iterator_2++)
+    { ACE_ASSERT ((*iterator_2).second);
       // server log ?
       if (server_log_active &&
-          (*iterator).second->isServerLog ())
+          (*iterator_2).second->isServerLog ())
       {
-        return_value = (*iterator).second;
+        return_value = (*iterator_2).second;
         break;
       } // end IF
 
-      widget_2 = (*iterator).second->getTopLevelPageChild (false);
+      widget_2 = (*iterator_2).second->getTopLevelPageChild (false);
       if (widget_2 == widget_p)
       {
-        return_value = (*iterator).second;
+        return_value = (*iterator_2).second;
         break;
       } // end IF
     } // end FOR
@@ -2109,6 +2109,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
 #if defined (GTK_USE)
   int result = -1;
 #endif // GTK_USE
+  struct IRC_Client_UI_HandlerCBData* cb_data_p = NULL;
   IRC_Client_GUI_MessageHandler* message_handler_p = NULL;
 
   if (lockedAccess_in)
@@ -2135,7 +2136,17 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
 #endif // GTK_USE
 
   // create new IRC_Client_GUI_MessageHandler
-//  gdk_threads_enter ();
+  ACE_NEW_NORETURN (cb_data_p,
+                    struct IRC_Client_UI_HandlerCBData ());
+  if (!cb_data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+//    gdk_threads_leave ();
+    goto clean_up;
+  } // end IF
+  *cb_data_p = *CBData_.CBData;
+  //  gdk_threads_enter ();
 #if defined (GTK_USE)
   ACE_NEW_NORETURN (message_handler_p,
                     IRC_Client_GUI_MessageHandler (this,
@@ -2143,7 +2154,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
                                                    id_in,
                                                    UIFileDirectory_,
                                                    CBData_.timeStamp,
-                                                   CBData_.CBData,
+                                                   cb_data_p,
                                                    gdkLockedAccess_in));
 #else
   ACE_NEW_NORETURN (message_handler_p,
@@ -2152,7 +2163,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
                                                    id_in,
                                                    UIFileDirectory_,
                                                    CBData_.timeStamp,
-                                                   CBData_.CBData));
+                                                   cb_data_p));
 #endif // GTK_USE
   if (!message_handler_p)
   {

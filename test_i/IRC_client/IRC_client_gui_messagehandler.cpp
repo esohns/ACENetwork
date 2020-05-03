@@ -728,7 +728,7 @@ IRC_Client_GUI_MessageHandler::getTopLevelPageChild (bool lockedAccess_in) const
     Common_UI_GTK_BuildersIterator_t iterator =
       state_r.builders.find (CBData_->builderLabel);
     // sanity check(s)
-//    ACE_ASSERT (iterator != state_r.builders.end ());
+    ACE_ASSERT (iterator != state_r.builders.end ());
 
     widget_p =
         GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,

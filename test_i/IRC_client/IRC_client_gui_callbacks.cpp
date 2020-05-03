@@ -141,7 +141,7 @@ connection_setup_function (void* arg_in)
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
     delete data_p;
 
@@ -1111,6 +1111,7 @@ done:
 clean_up:
   state_r.eventSourceIds.erase (data_p->eventSourceId);
   delete data_p->handler; data_p->handler = NULL;
+  delete data_p; data_p = NULL;
 
   return G_SOURCE_REMOVE;
 }
