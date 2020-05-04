@@ -1609,7 +1609,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                   ACE_TEXT ("failed to ACE_OS::shutdown(0x%@): \"%m\", continuing\n"),
                   inherited2::state_.handle));
 #else
-    if (error != EBADF) // 9: Linux: local close() *TODO*
+    if ((error != EBADF) &&  // 9  : Linux: local close()
+        (error != ENOTCONN)) // 107: Linux: local close()
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
                   inherited2::state_.handle));
@@ -1623,7 +1624,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     if (unlikely (result == -1))
     {
       int error = ACE_OS::last_error ();
-      if ((error != EBADF) ||  // 9  : Linux: local close() *TODO*
+      if ((error != EBADF) &&  // 9  : Linux: local close() *TODO*
           (error != ENOTCONN)) // 107: Linux: local close ()
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
