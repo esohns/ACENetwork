@@ -1517,7 +1517,9 @@ ACE_TMAIN (int argc_in,
   } // end IF
   configuration.signalHandlerConfiguration.dispatchState =
     &event_dispatch_state_s;
-  Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Client_SignalHandler signal_handler ((use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
+                                                    : COMMON_EVENT_DISPATCH_PROACTOR),
+                                       (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)

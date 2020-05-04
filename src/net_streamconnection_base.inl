@@ -389,12 +389,11 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //        behavior of a ACE_Svc_Handler, which would call handle_close() AGAIN
   // - by the connector when connect() fails (e.g. connection refused)
   // - by the connector/acceptor when open() fails (e.g. too many connections !)
-  inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
 
   switch (arg_in)
   {
     // called by:
-    // - any worker from ACE_Task_Base on clean-up
+    // [- any worker from ACE_Task_Base on clean-up]
     // - connector when connect() fails (e.g. connection refused)
     // - acceptor/connector when initialization fails (i.e. open() returned -1
     //   due to e.g. too many connections)
@@ -405,14 +404,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                                   inherited::last_thread ());
       if (result)
       {
-        // --> worker thread --> NOP
-//       if (inherited::module ())
-//         ACE_DEBUG ((LM_DEBUG,
-//                     ACE_TEXT ("\"%s\" worker thread (id: %t) joining...\n"),
-//                     ACE_TEXT (inherited::name ())));
-//       else
-//         ACE_DEBUG ((LM_DEBUG,
-//                     ACE_TEXT ("worker thread (id: %t) joining...\n")));
         result = 0;
 
         break;
@@ -575,7 +566,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                   id (),
                   handle_in,
                   mask_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
   } // end SWITCH
@@ -590,6 +581,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                                     mask_in);
   if (unlikely (result == -1))
   {
+    int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to HandlerType::handle_close(0x%@,%d): \"%m\", aborting\n"),
@@ -597,14 +589,15 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                 handle_in,
                 mask_in));
 #else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to HandlerType::handle_close(%d,%d): \"%m\", aborting\n"),
-                id (),
-                handle_in,
-                mask_in));
-#endif
+    if (error != EBADF) // 9: local close
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to HandlerType::handle_close(%d,%d): \"%m\", aborting\n"),
+                  id (),
+                  handle_in,
+                  mask_in));
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
-  inherited::set_handle (handle_in); // reset for debugging purposes
+//  inherited::set_handle (handle_in); // reset for debugging purposes
 
   // step4: deregister with the connection manager (if any)
   if (likely (deregister))
@@ -782,12 +775,33 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   int result = -1;
 
-  inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+    if (likely (inherited2::state_.status == NET_CONNECTION_STATUS_OK))
+      inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
+  } // end lock scope
 
   // wake up any open read operation; it will release the connection
   ACE_HANDLE handle = inherited::get_handle ();
   if (likely (handle != ACE_INVALID_HANDLE))
   {
+    result = ACE_OS::shutdown (handle, ACE_SHUTDOWN_BOTH);
+    if (unlikely (result == -1))
+    {
+      int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to ACE_OS::shutdown(0x%@): \"%m\", continuing\n"),
+                    id (),
+                    handle));
+#else
+      if (error != EBADF) // 9: local close
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
+                    id (),
+                    handle));
+#endif // ACE_WIN32 || ACE_WIN64
+    } // end IF
+
     result = ACE_OS::closesocket (handle);
     if (unlikely (result == -1))
     {
@@ -1387,126 +1401,6 @@ error:
     inherited2::deregister ();
 }
 
-//template <typename HandlerType,
-//          typename AddressType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename SocketConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename StreamStatusType,
-//          typename TimerManagerType,
-//          typename UserDataType>
-//int
-//Net_AsynchStreamConnectionBase_T<HandlerType,
-//                                 AddressType,
-//                                 ConfigurationType,
-//                                 StateType,
-//                                 StatisticContainerType,
-//                                 SocketConfigurationType,
-//                                 HandlerConfigurationType,
-//                                 StreamType,
-//                                 StreamStatusType,
-//                                 TimerManagerType,
-//                                 UserDataType>::handle_output (ACE_HANDLE handle_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_output"));
-//
-//  ACE_UNUSED_ARG (handle_in);
-//
-//  int result = -1;
-//  int error = 0;
-//  Common_IReferenceCount* ireference_count_p = this;
-//  Stream_Base_t* stream_p = stream_.upStream ();
-//  ACE_Message_Block* message_block_p = NULL;
-//
-//  // sanity check(s)
-//  if (likely (!stream_p))
-//    stream_p = &stream_;
-//  ACE_ASSERT (stream_p);
-//
-////  if (!inherited::buffer_)
-////  {
-//    // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
-//    //                   been notified
-////    result = stream_p->get (inherited::buffer_, NULL);
-//    result = stream_p->get (message_block_p, NULL);
-//    if (unlikely (result == -1))
-//    { // *NOTE*: most probable reason: socket has been closed by the peer, which
-//      //         close()s the processing stream (see: handle_close()),
-//      //         shutting down the message queue
-//      error = ACE_OS::last_error ();
-//      if (error != ESHUTDOWN) // 108: happens on Linux
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n"),
-//                    id ()));
-//      return -1;
-//    } // end IF
-////  } // end IF
-////  ACE_ASSERT (inherited::buffer_);
-//    ACE_ASSERT (message_block_p);
-//
-//  // start (asynchronous) write
-//  inherited2::increase ();
-//  inherited::counter_.increase ();
-//send:
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  result =
-////    inherited::outputStream_.writev (*inherited::buffer_,                  // data
-////                                     inherited::buffer_->length (),        // bytes to write
-//      inherited::outputStream_.writev (*message_block_p,                     // data
-//                                       message_block_p->length (),           // bytes to write
-//                                       NULL,                                 // ACT
-//                                       0,                                    // priority
-//                                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
-//#else
-//  result =
-////    inherited::outputStream_.write (*inherited::buffer_,                  // data
-////                                    inherited::buffer_->length (),        // bytes to write
-//      inherited::outputStream_.write (*message_block_p,                     // data
-//                                      message_block_p->length (),           // bytes to write
-//                                      NULL,                                 // ACT
-//                                      0,                                    // priority
-//                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
-//#endif
-//  if (unlikely (result == -1))
-//  {
-//    error = ACE_OS::last_error ();
-//    // *WARNING*: this could fail on multi-threaded proactors
-//    if (error == EAGAIN) goto send; // 11   : happens on Linux
-//    if ((error != ENOTSOCK)     &&  // 10038: happens on Win32
-//        (error != ECONNABORTED) &&  // 10053: happens on Win32
-//        (error != ECONNRESET)   &&  // 10054: happens on Win32
-//        (error != ENOTCONN))        // 10057: happens on Win32
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("%u: failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
-//                  id (),
-//                  message_block_p->length ()));
-//
-//    // clean up
-////    inherited::buffer_->release ();
-////    inherited::buffer_ = NULL;
-//    message_block_p->release ();
-//    inherited2::decrease ();
-//    inherited::counter_.decrease ();
-//  } // end IF
-////  else if (result == 0)
-////  {
-////#if defined (ACE_WIN32) || defined (ACE_WIN64)
-////    ACE_DEBUG ((LM_DEBUG,
-////                ACE_TEXT ("0x%@: socket was closed\n"),
-////                handle_in));
-////#else
-////    ACE_DEBUG ((LM_DEBUG,
-////                ACE_TEXT ("%d: socket was closed\n"),
-////                handle_in));
-////#endif
-////  } // end IF
-//
-//  return result;
-//}
-
 template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
@@ -1585,7 +1479,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited::cancel ();
 
   // step2b: deregister with the connection manager (if any) ?
-  // *WARNING*: most likely 'delete's 'this'
   close_socket_b = (inherited2::count () <= 2);
   if (likely (inherited2::isRegistered_))
     inherited2::deregister ();
@@ -1698,10 +1591,42 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::close"));
 
-  inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+    if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+      inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
+  } // end lock scope
 
-  // step1: cancel i/o operation(s), release (write) socket handle, ...
+  // step1: cancel (pending) i/o operation(s)
   inherited::cancel ();
+
+  int result = ACE_OS::shutdown (inherited2::state_.handle, ACE_SHUTDOWN_BOTH);
+  if (unlikely (result == -1))
+  {
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (error != ENOTSOCK) // 10038: local close
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::shutdown(0x%@): \"%m\", continuing\n"),
+                  inherited2::state_.handle));
+#else
+    if (error != EBADF) // 9: Linux: local close() *TODO*
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
+                  inherited2::state_.handle));
+#endif // ACE_WIN32 || ACE_WIN64
+   } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  if (likely (inherited::writeHandle_ != ACE_INVALID_HANDLE))
+  {
+    result = ACE_OS::shutdown (inherited::writeHandle_, ACE_SHUTDOWN_BOTH);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
+                  inherited::writeHandle_));
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
+
   inherited::handle_close (inherited2::state_.handle,
                            ACE_Event_Handler::ALL_EVENTS_MASK);
 }
@@ -2120,15 +2045,15 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     // *** GOOD CASES ***
     case 0:
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%u: socket (handle was: 0x%@) has been closed\n"),
-                  id (), result_in.handle ()));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%u: socket (handle was: %d) has been closed\n"),
-                  id (), result_in.handle ()));
-#endif
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%u: socket (handle was: 0x%@) has been closed\n"),
+//                  id (), result_in.handle ()));
+//#else
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%u: socket (handle was: %d) has been closed\n"),
+//                  id (), result_in.handle ()));
+//#endif
       break;
     }
     default:
@@ -2170,7 +2095,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     result_in.message_block ().release ();
 
   Net_ConnectionId_t id = this->id ();
-  // *WARNING*: most likely 'delete''s 'this'
   result =
       handle_close (result_in.handle (),
                     ACE_Event_Handler::ALL_EVENTS_MASK);
@@ -2186,8 +2110,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                   ACE_TEXT ("%u: failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n"),
                   id));
   } // end IF
-}
 
+  this->decrease ();
+}
 
 template <typename HandlerType,
           typename AddressType,

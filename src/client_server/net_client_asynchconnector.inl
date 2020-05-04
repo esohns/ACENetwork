@@ -637,8 +637,6 @@ Net_Client_AsynchConnector_T<HandlerType,
 
     // Initiate the handler with empty message block;
     new_handler->open (result_in.connect_handle (), mb);
-
-    new_handler->decrease ();
   }
 
   // On failure, no choice but to close the socket

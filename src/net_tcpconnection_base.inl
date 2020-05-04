@@ -126,46 +126,30 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                     handle_in));
 #endif
 
-      // clean up
-      message_block_p->release ();
-
       // *TODO*: remove type inference
-      if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
-        inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+      { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock, -1);
+        if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
+          inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+      } // end lock scope
+
+      message_block_p->release ();
 
       return -1; // <-- remove 'this' from dispatch
     }
     // *** GOOD CASES ***
     case 0:
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%u: socket (handle was: 0x%@) has been closed by the peer\n"),
-                  id (),
-                  handle_in));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%u: socket (handle was: %d) has been closed by the peer\n"),
-                  this->id (),
-                  handle_in));
-#endif
+      { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock, -1);
+        if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
+          inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+      } // end lock scope
 
-      // clean up
       message_block_p->release ();
-
-      // *TODO*: remove type inference
-      if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
-        inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
       return -1; // <-- remove 'this' from dispatch
     }
     default:
     {
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%d]: received %u bytes\n"),
-//                   handle_in,
-//                   bytes_received));
-
       // adjust write pointer
       message_block_p->wr_ptr (static_cast<size_t> (bytes_received));
 
@@ -309,29 +293,22 @@ continue_:
         if (likely (inherited::state_.status == NET_CONNECTION_STATUS_OK))
           inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
       } // end lock scope
+
       inherited::writeBuffer_->release (); inherited::writeBuffer_ = NULL;
+
       return -1; // <-- remove 'this' from dispatch
     }
     // *** GOOD CASES ***
     case 0:
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%u: socket (handle was: 0x%@) has been closed by the peer\n"),
-                  id (),
-                  handle_in));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%u: socket (handle was: %d) has been closed by the peer\n"),
-                  this->id (),
-                  handle_in));
-#endif
       // *TODO*: remove type inference
       { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock, -1);
         if (likely (inherited::state_.status == NET_CONNECTION_STATUS_OK))
           inherited::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
       } // end lock scope
+
       inherited::writeBuffer_->release (); inherited::writeBuffer_ = NULL;
+
       return -1; // <-- remove 'this' from dispatch
     }
     default:
@@ -473,8 +450,8 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
     // clean up
     delete fake_result_p;
   } // end ELSE
-  //ACE_ASSERT (this->count () == 2); // connection manager, read operation
-  //                                     (+ stream module(s))
+  ACE_ASSERT (this->count () >= 2); // connection manager, read operation
+                                    //  (+ stream module(s))
 
   return;
 

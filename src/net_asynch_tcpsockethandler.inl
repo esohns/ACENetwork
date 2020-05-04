@@ -295,7 +295,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   ACE_HANDLE handle_h = handle_in;
 
   if (handle_h != ACE_INVALID_HANDLE)
-  {
+  { ACE_ASSERT (handle_h == inherited2::handle_);
     result = ACE_OS::closesocket (handle_h);
     if (unlikely (result == -1))
     {
@@ -313,8 +313,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 #endif // ACE_WIN32 || ACE_WIN64
      } // end IF
   } // end IF
-  // *NOTE*: 'this' has been delete'd
-  //inherited2::handle (ACE_INVALID_HANDLE);
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (writeHandle_ != ACE_INVALID_HANDLE)
@@ -384,19 +383,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::cancel ()
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::cancel(): \"%m\" (result was: %d), continuing\n"),
                   result));
   } // end IF
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  if (likely (writeHandle_ != ACE_INVALID_HANDLE))
-  {
-    result = ACE_OS::close (writeHandle_);
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
-                  writeHandle_));
-    writeHandle_ = ACE_INVALID_HANDLE;
-  } // end IF
-#endif // ACE_WIN32 || ACE_WIN64
 }
 
 template <typename ConfigurationType>

@@ -63,6 +63,7 @@ class Net_AsynchTCPSocketHandler_T
  protected:
   // convenient types
   typedef Net_AsynchSocketHandlerBase_T<ConfigurationType> SOCKETHANDLER_BASE_T;
+  typedef ACE_Service_Handler SERVICEHANDLER_T;
 
   Net_AsynchTCPSocketHandler_T ();
 

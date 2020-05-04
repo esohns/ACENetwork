@@ -229,11 +229,6 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   // - accept failed (e.g. too many connections)
   // - ... ?
 
-  result = inherited2::peer_.close ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Stream::close(): \"%m\", continuing\n")));
-
   switch (mask_in)
   {
     // *NOTE*: 'this' is already being removed from the reactor
@@ -285,7 +280,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
             result = 0;
           else
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@, %d): \"%m\", aborting\n"),
+                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d): \"%m\", aborting\n"),
                         this,
                         mask_in));
         } // end IF
@@ -312,6 +307,18 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
     }
   } // end SWITCH
 
+  result = inherited2::peer_.close ();
+  if (result == -1)
+  {
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != EBADF)
+#endif // ACE_WIN32 || ACE_WIN64
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Stream::close(): \"%m\", continuing\n")));
+  } // end IF
+
   return result;
 }
 
@@ -334,30 +341,6 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::Net_TCPSocketHandler_T"));
 
 }
-
-//ACE_Event_Handler::Reference_Count
-//Net_TCPSocketHandler_T::add_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::add_reference"));
-
-//  inherited::increase ();
-
-//  //return inherited::add_reference ();
-//  return 0;
-//}
-
-//ACE_Event_Handler::Reference_Count
-//Net_TCPSocketHandler_T::remove_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::remove_reference"));
-
-//  // *NOTE*: may "delete this"
-//  inherited2::decrease ();
-
-//  //// *NOTE*: may "delete this"
-//  //return inherited::remove_reference ();
-//  return 0;
-//}
 
 template <ACE_SYNCH_DECL,
           typename ConfigurationType>

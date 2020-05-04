@@ -41,13 +41,14 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_sessionmessage.h"
 
-Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+Client_SignalHandler::Client_SignalHandler (enum Common_EventDispatchType eventDispatchMode_in,
+                                            enum Common_SignalDispatchType signalDispatchMode_in,
                                             ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
- : inherited (dispatchMode_in,
+ : inherited (signalDispatchMode_in,
               lock_in,
               this) // event handler handle
  , address_ ()
- , eventDispatch_ (NET_EVENT_DEFAULT_DISPATCH)
+ , eventDispatch_ (eventDispatchMode_in)
  , timerId_ (-1)
  , AsynchTCPConnector_ (true)
  , TCPConnector_ (true)
@@ -75,12 +76,6 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
 
   // *TODO*: remove type inference
   address_ = configuration_in.address;
-  if (configuration_in.dispatchState->configuration->numberOfReactorThreads > 0)
-    eventDispatch_ = COMMON_EVENT_DISPATCH_REACTOR;
-  else
-  { ACE_ASSERT (configuration_in.dispatchState->configuration->numberOfProactorThreads > 0);
-    eventDispatch_ = COMMON_EVENT_DISPATCH_PROACTOR;
-  } // end ELSE
   timerId_ = configuration_in.actionTimerId;
 
   AsynchTCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);

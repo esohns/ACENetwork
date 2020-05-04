@@ -221,12 +221,9 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::notify (void)
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler_T::notify"));
 
   int result = -1;
-  try
-  {
+  try {
     result = handle_output (inherited2::handle ());
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_AsynchNetlinkSocketHandler_T::handle_output(): \"%m\", continuing\n")));
     result = -1;

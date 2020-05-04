@@ -434,6 +434,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", aborting\n")));
+      connection_in->decrease ();
       return false;
     } // end IF
   } // end lock scope

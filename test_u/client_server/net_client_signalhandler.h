@@ -39,7 +39,8 @@ class Client_SignalHandler
   typedef Common_SignalHandler_T<struct Client_SignalHandlerConfiguration> inherited;
 
  public:
-  Client_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+  Client_SignalHandler (enum Common_EventDispatchType,  // event dispatch mode
+                        enum Common_SignalDispatchType, // signal dispatch mode
                         ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~Client_SignalHandler () {}
 
