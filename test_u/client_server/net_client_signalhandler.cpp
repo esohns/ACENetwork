@@ -150,7 +150,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal: \"%S\", returning\n"),
-                  signal_in));
+                  signal_in.signal));
       return;
     }
   } // end SWITCH

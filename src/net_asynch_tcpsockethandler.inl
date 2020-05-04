@@ -424,7 +424,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
                   ACE_TEXT ("failed to ACE_Event_Handler::handle_output(0x%@): \"%m\", continuing\n"),
                   inherited2::handle ()));
 #else
-    if (error != ESHUTDOWN) // 108: happens on Linux
+    if ((error != EAGAIN) &&  // 11 : Linux: local close
+        (error != ESHUTDOWN)) // 108: happens on Linux *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Event_Handler::handle_output(%d): \"%m\", continuing\n"),
                   inherited2::handle ()));

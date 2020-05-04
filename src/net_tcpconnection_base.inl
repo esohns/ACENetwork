@@ -564,6 +564,7 @@ send:
         (error != ECONNRESET)   &&  // 10054: happens on Win32
         (error != ENOTCONN))        // 10057: happens on Win32
 #else
+    if (error != EAGAIN) // 11: Linux: local close
 #endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),

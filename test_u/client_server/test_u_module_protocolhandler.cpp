@@ -338,9 +338,11 @@ Test_U_Module_ProtocolHandler::handle (const void* arg_in)
   int result = inherited::reply (message_p, NULL);
   if (unlikely (result == -1))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to ACE_Task::reply(): \"%m\", returning\n"),
-                inherited::mod_->name ()));
+    int error = ACE_OS::last_error ();
+    if (error != EINPROGRESS) // 115: local close
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to ACE_Task::reply(): \"%m\", returning\n"),
+                  inherited::mod_->name ()));
     message_p->release (); message_p = NULL;
     return;
   } // end IF
