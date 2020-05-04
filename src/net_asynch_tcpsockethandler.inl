@@ -320,9 +320,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     result = ACE_OS::closesocket (writeHandle_);
     if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  writeHandle_));
+    {
+      int error = ACE_OS::last_error ();
+      if (error != EBADF) // 9: Linux: local close() *TODO*
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                    writeHandle_));
+    } // end IF
   } // end IF
   writeHandle_ = ACE_INVALID_HANDLE;
 #endif // ACE_WIN32 || ACE_WIN64

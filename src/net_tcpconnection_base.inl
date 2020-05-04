@@ -467,11 +467,14 @@ error:
                   ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
                   handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
 #else
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
+    if (error != EBADF) // 9: local close
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                  handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
+
+  this->decrease ();
 }
 
 template <typename SocketHandlerType,

@@ -1374,8 +1374,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     // step2c: start stream
     stream_.start ();
     if (unlikely (!stream_.isRunning ()))
-    {
-      ACE_DEBUG ((LM_ERROR,
+    { // already closed ?
+      ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
                   id ()));
       goto error;
@@ -1621,9 +1621,13 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   {
     result = ACE_OS::shutdown (inherited::writeHandle_, ACE_SHUTDOWN_BOTH);
     if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
-                  inherited::writeHandle_));
+    {
+      int error = ACE_OS::last_error ();
+      if (error != EBADF) // 9: Linux: local close() *TODO*
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
+                    inherited::writeHandle_));
+    } // end IF
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 

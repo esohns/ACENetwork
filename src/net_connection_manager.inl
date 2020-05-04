@@ -890,7 +890,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   // *WARNING*: this assumes the caller is holding the lock !
   ICONNECTION_T* connection_p = NULL;
   // *NOTE*: called from report () only !
-  //{ ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);
          iterator.advance ())
@@ -906,7 +906,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
       data_out += statistic_s;
       connection_p = NULL;
     } // end FOR
-  //} // end lock scope
+  } // end lock scope
 
   return true;
 }

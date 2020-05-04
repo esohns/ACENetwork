@@ -31,7 +31,7 @@
 char Test_U_Common_Tools::randomStateInitializationBuffer_[BUFSIZ];
 struct random_data Test_U_Common_Tools::randomState_;
 #endif // ACE_WIN32 || ACE_WIN64
-std::uniform_int_distribution<int> Test_U_Common_Tools::randomDistribution_;
+std::uniform_int_distribution<int> Test_U_Common_Tools::randomDistribution_ (1, 100);
 std::default_random_engine Test_U_Common_Tools::randomEngine_;
 std::function<int ()> Test_U_Common_Tools::randomGenerator_;
 
