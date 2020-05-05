@@ -497,15 +497,13 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
 
   int result = -1;
   int retries_i = 0;
-  // *TODO*: always retrieve data from inherited::stream_
+  ACE_Message_Block* message_block_p = NULL;
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
       inherited::stream_.upstream (true);
-  ACE_Message_Block* message_block_p = NULL;
-
-  // *TODO*: this is obviously flaky; remove ASAP
-  // sanity check(s)
   if (likely (!stream_p))
     stream_p = &(inherited::stream_);
+
+  // sanity check(s)
   ACE_ASSERT (stream_p);
 
   // dequeue message from the stream

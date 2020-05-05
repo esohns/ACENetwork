@@ -192,7 +192,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   // *IMPORTANT NOTE*: iff -r is set and this is <= 1, use the 'select' reactor
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]   : #dispatch threads [")
-            << NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS
+            << NET_CLIENT_DEFAULT_NUMBER_OF_PROACTOR_DISPATCH_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-y           : run stress-test [")
@@ -269,7 +269,7 @@ do_processArguments (int argc_in,
   traceInformation_out = false;
   protocol_out = NET_TRANSPORTLAYER_TCP;
   printVersionAndExit_out = false;
-  numDispatchThreads_out = NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS;
+  numDispatchThreads_out = NET_CLIENT_DEFAULT_NUMBER_OF_PROACTOR_DISPATCH_THREADS;
   runStressTest_out = false;
 
   ACE_Get_Opt argumentParser (argc_in,
@@ -611,6 +611,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   tcp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   tcp_connection_configuration.initialize (configuration_in.streamConfiguration);
+
+  udp_connection_configuration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   udp_connection_configuration.messageAllocator = &message_allocator;
   udp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
@@ -1260,7 +1263,7 @@ ACE_TMAIN (int argc_in,
   enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_TCP;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
-   NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS;
+   NET_CLIENT_DEFAULT_NUMBER_OF_PROACTOR_DISPATCH_THREADS;
   bool run_stress_test = false;
 
   // step1b: parse/process/validate configuration
