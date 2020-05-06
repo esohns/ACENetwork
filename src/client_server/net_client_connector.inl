@@ -32,7 +32,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
@@ -43,7 +42,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       SocketConfigurationType,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (bool managed_in)
@@ -67,7 +65,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
@@ -78,7 +75,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       SocketConfigurationType,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::~Net_Client_Connector_T ()
@@ -98,7 +94,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
@@ -110,7 +105,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       SocketConfigurationType,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::transportLayer () const
@@ -144,7 +138,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
@@ -156,7 +149,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       SocketConfigurationType,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::connect (const AddressType& address_in)
@@ -166,24 +158,19 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   int result = -1;
 
   HandlerType* handler_p = NULL;
-  ACE_Synch_Options synch_options = ACE_Synch_Options::defaults;
 //  synch_options.set (ACE_Synch_Options::USE_REACTOR, ACE_Time_Value::zero);
-  AddressType local_address = ACE_sap_any_cast (AddressType&);
-  int reuse_addr_i = 1; // set SO_REUSEADDR ?
-  int flags_i = O_RDWR;
-  int permissions_i = 0;
   // *NOTE*: to enforce ACE_NONBLOCK, set ACE_Synch_Options::USE_REACTOR or
   //         ACE_Synch_Options::USE_TIMEOUT in the synch options (see:
   //         Connector.cpp:409 and net_sock_connector.cpp:219 and/or
   //         SOCK_Connector.cpp:94)
   result =
       inherited::connect (handler_p,      // service handler
-                          address_in,     // remote SAP
-                          synch_options,  // synch options
-                          local_address,  // local SAP
-                          reuse_addr_i,   // re-use address ?
-                          flags_i,        // flags
-                          permissions_i); // permissions
+                          address_in,                      // remote SAP
+                          ACE_Synch_Options::defaults,     // synch options
+                          ACE_sap_any_cast (AddressType&), // local SAP
+                          1,                               // set SO_REUSEADDR ?
+                          O_RDWR,                          // flags
+                          0);                              // permissions
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -196,65 +183,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   return handler_p->get_handle ();
 }
 
-//template <ACE_SYNCH_DECL,
-//          typename HandlerType,
-//          typename ConnectorType,
-//          typename AddressType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename SocketConfigurationType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename UserDataType>
-//void
-//Net_Client_Connector_T<ACE_SYNCH_USE,
-//                       HandlerType,
-//                       ConnectorType,
-//                       AddressType,
-//                       ConfigurationType,
-//                       StateType,
-//                       StatisticContainerType,
-//                       SocketConfigurationType,
-//                       HandlerConfigurationType,
-//                       StreamType,
-//                       UserDataType>::initialize_svc_handler (ACE_HANDLE handle_in,
-//                                                              HandlerType* handler_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize_svc_handler"));
-//
-//  // Try to find out if the reactor uses event associations for the
-//  // handles it waits on. If so we need to reset it.
-//  bool reset_new_handle =
-//    this->reactor ()->uses_event_associations ();
-//
-//  if (reset_new_handle)
-//    this->connector_.reset_new_handle (handle);
-//
-//  // Transfer ownership of the ACE_HANDLE to the SVC_HANDLER.
-//  svc_handler->set_handle (handle);
-//
-//  typename PEER_CONNECTOR::PEER_ADDR raddr;
-//
-//  // Check to see if we're connected.
-//  if (svc_handler->peer ().get_remote_addr (raddr) != -1)
-//    this->activate_svc_handler (svc_handler);
-//  else // Somethings gone wrong, so close down...
-//    {
-//#if defined (ACE_WIN32)
-//      // Win32 (at least prior to Windows 2000) has a timing problem.
-//      // If you check to see if the connection has completed too fast,
-//      // it will fail - so wait 35 milliseconds to let it catch up.
-//      ACE_Time_Value tv (0, ACE_NON_BLOCKING_BUG_DELAY);
-//      ACE_OS::sleep (tv);
-//      if (svc_handler->peer ().get_remote_addr (raddr) != -1)
-//        this->activate_svc_handler (svc_handler);
-//      else // do the svc handler close below...
-//#endif /* ACE_WIN32 */
-//        svc_handler->close (NORMAL_CLOSE_OPERATION);
-//    }
-//}
-
 template <ACE_SYNCH_DECL,
           typename HandlerType,
           typename ConnectorType,
@@ -262,7 +190,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
@@ -274,7 +201,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       SocketConfigurationType,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::activate_svc_handler (HandlerType* handler_in)
@@ -321,7 +247,6 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
@@ -333,7 +258,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       SocketConfigurationType,
                        HandlerConfigurationType,
                        StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)
@@ -371,7 +295,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_UDPSocketConfiguration_t,
-                       Net_UDPSocketConfiguration_t,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (bool managed_in)
  : configuration_ (NULL)
@@ -397,7 +320,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       Net_UDPSocketConfiguration_t,
                        Net_UDPSocketConfiguration_t,
                        StreamType,
                        UserDataType>::connect (const ACE_INET_Addr& address_in)
@@ -450,7 +372,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_UDPSocketConfiguration_t,
-                       Net_UDPSocketConfiguration_t,
                        StreamType,
                        UserDataType>::initialize_svc_handler (ACE_HANDLE handle_in,
                                                               HandlerType* handler_in)
@@ -479,7 +400,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       Net_UDPSocketConfiguration_t,
                        Net_UDPSocketConfiguration_t,
                        StreamType,
                        UserDataType>::activate_svc_handler (HandlerType* handler_in)
@@ -520,7 +440,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_UDPSocketConfiguration_t,
-                       Net_UDPSocketConfiguration_t,
                        StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {
@@ -555,7 +474,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       Net_UDPSocketConfiguration_t,
                        Net_UDPSocketConfiguration_t,
                        StreamType,
                        UserDataType>::connect_svc_handler (CONNECTION_T*& handler_inout,
@@ -608,7 +526,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_UDPSocketConfiguration_t,
-                       Net_UDPSocketConfiguration_t,
                        StreamType,
                        UserDataType>::connect_svc_handler (CONNECTION_T*& handler_inout,
                                                            CONNECTION_T*& handlerCopy_inout,
@@ -654,7 +571,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StateType,
                        StatisticContainerType,
                        Net_NetlinkSocketConfiguration_t,
-                       Net_NetlinkSocketConfiguration_t,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (bool managed_in)
  : configuration_ (NULL)
@@ -680,7 +596,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       Net_NetlinkSocketConfiguration_t,
                        Net_NetlinkSocketConfiguration_t,
                        StreamType,
                        UserDataType>::connect (const Net_Netlink_Addr& address_in)
@@ -729,7 +644,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        StateType,
                        StatisticContainerType,
-                       Net_NetlinkSocketConfiguration_t,
                        Net_NetlinkSocketConfiguration_t,
                        StreamType,
                        UserDataType>::make_svc_handler (HandlerType*& handler_out)

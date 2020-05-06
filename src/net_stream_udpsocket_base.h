@@ -46,7 +46,6 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           ////////////////////////////////
           typename UserDataType>
@@ -56,7 +55,6 @@ class Net_StreamUDPSocketBase_T
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
 {
   typedef HandlerType inherited;
@@ -67,7 +65,6 @@ class Net_StreamUDPSocketBase_T
                                                        StateType,
                                                        StatisticContainerType,
                                                        TimerManagerType,
-                                                       SocketConfigurationType,
                                                        HandlerConfigurationType,
                                                        UserDataType>,
                              ACE_SOCK_CONNECTOR>;
@@ -130,7 +127,6 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           ////////////////////////////////
           typename UserDataType>
@@ -142,7 +138,6 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>
  : public Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
@@ -152,7 +147,6 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
 {
   typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
@@ -167,7 +161,6 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
                                                        StateType,
                                                        StatisticContainerType,
                                                        TimerManagerType,
-                                                       SocketConfigurationType,
                                                        HandlerConfigurationType,
                                                        UserDataType>,
                              ACE_SOCK_CONNECTOR>;
@@ -230,7 +223,6 @@ template <typename ConfigurationType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           ////////////////////////////////
           typename UserDataType>
@@ -240,7 +232,6 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>
  : public Net_NetlinkSocketHandler_T<HandlerConfigurationType>
@@ -248,7 +239,6 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
 {
   typedef Net_NetlinkSocketHandler_T<HandlerConfigurationType> inherited;
@@ -259,7 +249,6 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                                        StateType,
                                                        StatisticContainerType,
                                                        TimerManagerType,
-                                                       SocketConfigurationType,
                                                        HandlerConfigurationType,
                                                        UserDataType>,
                              ACE_SOCK_CONNECTOR>;

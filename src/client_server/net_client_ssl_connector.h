@@ -37,7 +37,6 @@
 template <typename HandlerType,
           typename ConnectorType, // ACE_SSL_SOCK_Connector
           ////////////////////////////////
-          typename AddressType,
           typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
@@ -48,31 +47,30 @@ template <typename HandlerType,
 class Net_Client_SSL_Connector_T
  : public ACE_Connector<HandlerType,
                         ConnectorType>
- , public Net_IConnector_T<AddressType,
+ , public Net_IConnector_T<ACE_INET_Addr,
                            ConfigurationType>
 {
   typedef ACE_Connector<HandlerType,
                         ConnectorType> inherited;
 
  public:
-  typedef AddressType ADDRESS_T;
+  typedef ACE_INET_Addr ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
 
-  typedef Net_IConnection_T<AddressType,
+  typedef Net_IConnection_T<ACE_INET_Addr,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_IStreamConnection_T<AddressType,
+  typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
                                   Net_TCPSocketConfiguration_t,
-                                  Net_TCPSocketConfiguration_t,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_IConnector_T<AddressType,
+  typedef Net_IConnector_T<ACE_INET_Addr,
                            ConfigurationType> ICONNECTOR_T;
 
   Net_Client_SSL_Connector_T (bool = true); // managed ?
@@ -87,7 +85,7 @@ class Net_Client_SSL_Connector_T
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
 
   virtual void abort ();
-  virtual ACE_HANDLE connect (const AddressType&);
+  virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 
  protected:
   // override default activation strategy
@@ -103,7 +101,6 @@ class Net_Client_SSL_Connector_T
   // convenient types
   typedef Net_Client_SSL_Connector_T<HandlerType,
                                      ConnectorType,
-                                     AddressType,
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,

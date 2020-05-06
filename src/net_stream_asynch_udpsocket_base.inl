@@ -38,7 +38,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamAsynchUDPSocketBase_T<HandlerType,
@@ -47,7 +46,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::Net_StreamAsynchUDPSocketBase_T ()
  : inherited ()
@@ -63,7 +61,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -73,7 +70,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::open (ACE_HANDLE handle_in,
                                                      ACE_Message_Block& messageBlock_in)
@@ -204,7 +200,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -214,7 +209,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
@@ -325,7 +319,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -335,7 +328,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                              ACE_Reactor_Mask mask_in)
@@ -382,7 +374,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -392,7 +383,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::info (ACE_HANDLE& handle_out,
                                                      AddressType& localSAP_out,
@@ -446,7 +436,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_ConnectionId_t
@@ -456,7 +445,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::id () const
 {
@@ -475,7 +463,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -485,7 +472,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::close (u_long arg_in)
 {
@@ -510,7 +496,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -520,7 +505,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::close ()
 {
@@ -566,7 +550,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -576,7 +559,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::waitForCompletion (bool waitForThreads_in)
 {
@@ -623,7 +605,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -633,7 +614,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::dump_state () const
 {
@@ -666,7 +646,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -676,7 +655,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
 {
@@ -808,7 +786,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -818,7 +795,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_write_dgram (const ACE_Asynch_Write_Dgram::Result& result_in)
 {
@@ -835,7 +811,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
@@ -844,7 +819,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::Net_StreamAsynchUDPSocketBase_T ()
  : inherited ()
@@ -859,7 +833,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -869,7 +842,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::open (ACE_HANDLE handle_in,
                                                      ACE_Message_Block& messageBlock_in)
@@ -1018,7 +990,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -1028,7 +999,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
@@ -1085,7 +1055,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -1095,7 +1064,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                              ACE_Reactor_Mask mask_in)
@@ -1135,7 +1103,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -1145,7 +1112,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::info (ACE_HANDLE& handle_out,
                                                      Net_Netlink_Addr& localSAP_out,
@@ -1185,7 +1151,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -1195,7 +1160,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::close (u_long arg_in)
 {
@@ -1218,7 +1182,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -1228,7 +1191,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::close ()
 {
@@ -1266,7 +1228,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -1276,7 +1237,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::waitForCompletion (bool waitForThreads_in)
 {
@@ -1321,7 +1281,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -1331,7 +1290,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::dump_state () const
 {
@@ -1374,7 +1332,6 @@ template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -1384,7 +1341,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_read_dgram (const ACE_Asynch_Read_Dgram::Result& result_in)
 {

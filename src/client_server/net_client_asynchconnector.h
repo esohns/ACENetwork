@@ -46,7 +46,6 @@ template <typename HandlerType,
           typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType, // *NOTE*: ATM these two are the same type
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
@@ -72,7 +71,6 @@ class Net_Client_AsynchConnector_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -124,11 +122,10 @@ class Net_Client_AsynchConnector_T
                                        ConfigurationType,
                                        StateType,
                                        StatisticContainerType,
-                                       SocketConfigurationType,
                                        HandlerConfigurationType,
                                        StreamType,
                                        UserDataType> OWN_TYPE_T;
-  typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<HandlerConfigurationType> ITRANSPORTLAYER_T;
 
   // override default connect strategy
   // *TODO*: currently tailored for TCP only (see implementation)
@@ -154,7 +151,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -165,7 +161,6 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    StateType,
                                    StatisticContainerType,
                                    Net_UDPSocketConfiguration_t,
-                                   HandlerConfigurationType,
                                    StreamType,
                                    UserDataType>
  : public ACE_Asynch_Connector<HandlerType>
@@ -189,7 +184,6 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   StateType,
                                   StatisticContainerType,
                                   Net_UDPSocketConfiguration_t,
-                                  HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
@@ -258,7 +252,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -269,7 +262,6 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    StateType,
                                    StatisticContainerType,
                                    Net_NetlinkSocketConfiguration_t,
-                                   HandlerConfigurationType,
                                    StreamType,
                                    UserDataType>
  : public ACE_Asynch_Connector<HandlerType>
@@ -292,7 +284,6 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   StateType,
                                   StatisticContainerType,
                                   Net_NetlinkSocketConfiguration_t,
-                                  HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 

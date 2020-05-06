@@ -41,7 +41,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename UserDataType>
@@ -51,7 +50,6 @@ class Net_StreamTCPSocketBase_T
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
 {
   typedef HandlerType inherited;

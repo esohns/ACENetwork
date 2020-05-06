@@ -124,14 +124,13 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,  // inherits Net_SocketConfiguration
           typename HandlerConfigurationType> // socket-
 class Net_ISocketConnection_T
  : public virtual Net_IConnection_T<AddressType,
                                     ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
- , public virtual Net_ITransportLayer_T<SocketConfigurationType>
+ , public virtual Net_ITransportLayer_T<HandlerConfigurationType>
  , public virtual Common_IInitialize_T<HandlerConfigurationType>
  , public Common_IGetR_2_T<HandlerConfigurationType>
 {
@@ -141,7 +140,7 @@ class Net_ISocketConnection_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORT_LAYER_T;
+  typedef Net_ITransportLayer_T<HandlerConfigurationType> ITRANSPORT_LAYER_T;
 
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&) = 0;
@@ -154,7 +153,6 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,  // *NOTE*: ATM these two are the same type
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
@@ -164,7 +162,6 @@ class Net_IStreamConnection_T
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
  , public Stream_IMessageQueue
 {
@@ -175,7 +172,6 @@ class Net_IStreamConnection_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
   virtual const StreamType& stream () const = 0;

@@ -34,7 +34,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
@@ -44,7 +43,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::Net_StreamTCPSocketBase_T ()
  : inherited ()
@@ -63,7 +61,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
@@ -73,7 +70,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::~Net_StreamTCPSocketBase_T ()
 {
@@ -92,7 +88,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -103,7 +98,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::open (void* arg_in)
 {
@@ -197,7 +191,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -208,7 +201,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::close (u_long arg_in)
 {
@@ -305,7 +297,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -316,7 +307,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::handle_input (ACE_HANDLE handle_in)
 {
@@ -452,7 +442,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -463,7 +452,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
@@ -642,7 +630,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -653,7 +640,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                        ACE_Reactor_Mask mask_in)
@@ -757,7 +743,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 unsigned int
@@ -768,7 +753,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::increase ()
 {
@@ -788,7 +772,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 unsigned int
@@ -799,7 +782,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::decrease ()
 {
@@ -823,7 +805,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -834,7 +815,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::info (ACE_HANDLE& handle_out,
                                                AddressType& localSAP_out,
@@ -883,7 +863,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -894,7 +873,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::close ()
 {
@@ -915,7 +893,6 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -926,7 +903,6 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                           StateType,
                           StatisticContainerType,
                           TimerManagerType,
-                          SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::waitForCompletion (bool waitForThreads_in)
 {

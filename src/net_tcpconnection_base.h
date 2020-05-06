@@ -62,7 +62,6 @@ class Net_TCPConnectionBase_T
                                      StateType,
                                      StatisticContainerType,
                                      Net_TCPSocketConfiguration_t,
-                                     Net_TCPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType>
@@ -74,7 +73,6 @@ class Net_TCPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     Net_TCPSocketConfiguration_t,
                                      Net_TCPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
@@ -133,7 +131,6 @@ class Net_TCPConnectionBase_T
                                      StateType,
                                      StatisticContainerType,
                                      Net_TCPSocketConfiguration_t,
-                                     Net_TCPSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
@@ -183,7 +180,6 @@ class Net_AsynchTCPConnectionBase_T
                                            StateType,
                                            StatisticContainerType,
                                            Net_TCPSocketConfiguration_t,
-                                           Net_TCPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType>
@@ -194,7 +190,6 @@ class Net_AsynchTCPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           Net_TCPSocketConfiguration_t,
                                            Net_TCPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
@@ -221,7 +216,6 @@ class Net_AsynchTCPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           Net_TCPSocketConfiguration_t,
                                            Net_TCPSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,

@@ -34,7 +34,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
@@ -43,7 +42,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::Net_StreamAsynchTCPSocketBase_T ()
  : inherited ()
@@ -59,7 +57,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -69,7 +66,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::open (ACE_HANDLE handle_in,
                                                      ACE_Message_Block& messageBlock_in)
@@ -176,7 +172,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -186,7 +181,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_output (ACE_HANDLE handle_in)
 {
@@ -284,7 +278,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 int
@@ -294,7 +287,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_close (ACE_HANDLE handle_in,
                                                              ACE_Reactor_Mask mask_in)
@@ -339,7 +331,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -349,7 +340,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::close ()
 {
@@ -413,7 +403,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -423,7 +412,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::waitForCompletion (bool waitForThreads_in)
 {
@@ -468,7 +456,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -478,7 +465,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::dump_state () const
 {
@@ -512,7 +498,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -522,7 +507,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result_in)
 {
@@ -670,7 +654,6 @@ template <typename HandlerType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
 void
@@ -680,7 +663,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 StateType,
                                 StatisticContainerType,
                                 TimerManagerType,
-                                SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::handle_write_stream (const ACE_Asynch_Write_Stream::Result& result_in)
 {

@@ -47,7 +47,6 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           ////////////////////////////////
           typename UserDataType>
@@ -58,7 +57,6 @@ class Net_StreamAsynchUDPSocketBase_T
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
 {
   typedef HandlerType inherited;
@@ -103,7 +101,6 @@ class Net_StreamAsynchUDPSocketBase_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
@@ -123,7 +120,6 @@ template <typename ConfigurationType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           ////////////////////////////////
           typename UserDataType>
@@ -133,7 +129,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                       StateType,
                                       StatisticContainerType,
                                       TimerManagerType,
-                                      SocketConfigurationType,
                                       HandlerConfigurationType,
                                       UserDataType>
  : public Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>
@@ -143,7 +138,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
 {
   typedef Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType> inherited;
@@ -187,7 +181,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))

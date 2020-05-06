@@ -55,7 +55,6 @@ class Net_NetlinkConnection_T
                                      StateType,
                                      StatisticContainerType,
                                      Net_NetlinkSocketConfiguration_t,
-                                     Net_NetlinkSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType>
@@ -67,7 +66,6 @@ class Net_NetlinkConnection_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     Net_NetlinkSocketConfiguration_t,
                                      Net_NetlinkSocketConfiguration_t,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
@@ -135,7 +133,6 @@ class Net_AsynchNetlinkConnection_T
                                            StateType,
                                            StatisticContainerType,
                                            Net_NetlinkSocketConfiguration_t,
-                                           Net_NetlinkSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType>
@@ -146,7 +143,6 @@ class Net_AsynchNetlinkConnection_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           Net_NetlinkSocketConfiguration_t,
                                            Net_NetlinkSocketConfiguration_t,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,

@@ -44,7 +44,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
@@ -63,7 +62,6 @@ class Net_StreamConnectionBase_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
                                   StreamStatusType>
@@ -90,7 +88,6 @@ class Net_StreamConnectionBase_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
                                   StreamStatusType> ISTREAM_CONNECTION_T;
@@ -186,7 +183,6 @@ template <typename HandlerType, // implements ACE_Service_Handler
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
@@ -205,7 +201,6 @@ class Net_AsynchStreamConnectionBase_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
                                   StreamStatusType>
@@ -230,7 +225,6 @@ class Net_AsynchStreamConnectionBase_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
                                   StreamStatusType> ISTREAM_CONNECTION_T;

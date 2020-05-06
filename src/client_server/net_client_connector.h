@@ -45,7 +45,6 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType, // *NOTE*: ATM these two are the same type
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
@@ -76,7 +75,6 @@ class Net_Client_Connector_T
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -113,11 +111,10 @@ class Net_Client_Connector_T
                                  ConfigurationType,
                                  StateType,
                                  StatisticContainerType,
-                                 SocketConfigurationType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  UserDataType> OWN_TYPE_T;
-  typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<HandlerConfigurationType> ITRANSPORTLAYER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
@@ -149,7 +146,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                              StateType,
                              StatisticContainerType,
                              Net_UDPSocketConfiguration_t,
-                             Net_UDPSocketConfiguration_t,
                              StreamType,
                              UserDataType>
  : public Net_IConnector_T<ACE_INET_Addr,
@@ -169,7 +165,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  Net_UDPSocketConfiguration_t,
                                   Net_UDPSocketConfiguration_t,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -226,7 +221,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                  StateType,
                                  StatisticContainerType,
                                  Net_UDPSocketConfiguration_t,
-                                 Net_UDPSocketConfiguration_t,
                                  StreamType,
                                  UserDataType> OWN_TYPE_T;
 
@@ -264,7 +258,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                              StateType,
                              StatisticContainerType,
                              Net_NetlinkSocketConfiguration_t,
-                             Net_NetlinkSocketConfiguration_t,
                              StreamType,
                              UserDataType>
  : public Net_IConnector_T<Net_Netlink_Addr,
@@ -283,7 +276,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  Net_NetlinkSocketConfiguration_t,
                                   Net_NetlinkSocketConfiguration_t,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;

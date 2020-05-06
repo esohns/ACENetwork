@@ -42,7 +42,6 @@ template <typename HandlerType, // implements ACE_Service_Handler
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename SocketConfigurationType,
           typename HandlerConfigurationType,
           ////////////////////////////////
           typename UserDataType>
@@ -53,7 +52,6 @@ class Net_StreamAsynchTCPSocketBase_T
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
-                                          SocketConfigurationType,
                                           HandlerConfigurationType>
 {
   typedef HandlerType inherited;

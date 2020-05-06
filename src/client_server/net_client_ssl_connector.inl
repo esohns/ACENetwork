@@ -28,7 +28,6 @@
 
 template <typename HandlerType,
           typename ConnectorType,
-          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -36,7 +35,6 @@ template <typename HandlerType,
           typename UserDataType>
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,
-                           AddressType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
@@ -57,7 +55,6 @@ Net_Client_SSL_Connector_T<HandlerType,
 
 template <typename HandlerType,
           typename ConnectorType,
-          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -66,7 +63,6 @@ template <typename HandlerType,
 Net_TransportLayerType
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,
-                           AddressType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
@@ -99,7 +95,6 @@ Net_Client_SSL_Connector_T<HandlerType,
 
 template <typename HandlerType,
           typename ConnectorType,
-          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -108,7 +103,6 @@ template <typename HandlerType,
 void
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,
-                           AddressType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
@@ -125,7 +119,6 @@ Net_Client_SSL_Connector_T<HandlerType,
 
 template <typename HandlerType,
           typename ConnectorType,
-          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -134,12 +127,11 @@ template <typename HandlerType,
 ACE_HANDLE
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,
-                           AddressType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
                            StreamType,
-                           UserDataType>::connect (const AddressType& address_in)
+                           UserDataType>::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::connect"));
 
@@ -147,7 +139,7 @@ Net_Client_SSL_Connector_T<HandlerType,
 
   HandlerType* handler_p = NULL;
   ACE_Synch_Options synch_options = ACE_Synch_Options::defaults;
-  AddressType local_address = ACE_sap_any_cast (AddressType&);
+  ACE_INET_Addr local_address = ACE_sap_any_cast (ACE_INET_Addr&);
   int reuse_addr_i = 1; // set SO_REUSEADDR ?
   int flags_i = O_RDWR;
   int permissions_i = 0;
@@ -177,7 +169,6 @@ Net_Client_SSL_Connector_T<HandlerType,
 
 template <typename HandlerType,
           typename ConnectorType,
-          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -186,7 +177,6 @@ template <typename HandlerType,
 int
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,
-                           AddressType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
@@ -229,9 +219,9 @@ Net_Client_SSL_Connector_T<HandlerType,
   else
     return 0;
 }
+
 template <typename HandlerType,
           typename ConnectorType,
-          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -240,7 +230,6 @@ template <typename HandlerType,
 int
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,
-                           AddressType,
                            ConfigurationType,
                            StateType,
                            StatisticContainerType,
