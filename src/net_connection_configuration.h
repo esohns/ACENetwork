@@ -69,7 +69,9 @@ struct Net_SocketConfigurationBase
 #endif // ACE_WIN32 || ACE_WIN64
    , linger (NET_SOCKET_DEFAULT_LINGER)
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-   //, PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   , domain (PF_INET)
+   , type (SOCK_STREAM)
+   , protocol (0)
    , statisticCollectionInterval (0,
                                   NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL_MS * 1000)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S,
@@ -94,12 +96,14 @@ struct Net_SocketConfigurationBase
 #else
   std::string                           interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64
-  // *NOTE*: win32 udp sockets do not linger
+  // *TODO*: win32 udp sockets do not linger
   bool                                  linger;
   bool                                  useLoopBackDevice;   // (if any)
 
+  int                                   domain;   // socket(3) parameter
+  int                                   type;     // socket(3) parameter
+  int                                   protocol; // socket(3) parameter
   // *TODO*: move these into Net_SocketConfiguration_T ASAP
-  //unsigned int   PDUSize; // package data unit size
   ACE_Time_Value                        statisticCollectionInterval; // [ACE_Time_Value::zero: off]
   ACE_Time_Value                        statisticReportingInterval; // [ACE_Time_Value::zero: off]
   bool                                  useThreadPerConnection;

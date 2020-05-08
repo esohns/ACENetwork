@@ -182,9 +182,9 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
     return -1;
   } // end IF
   // *NOTE*: let the reactor manage this handler
-  if (likely (inherited2::reference_counting_policy ().value () ==
-              ACE_Event_Handler::Reference_Counting_Policy::ENABLED))
-    inherited2::remove_reference ();
+//  if (likely (inherited2::reference_counting_policy ().value () ==
+//              ACE_Event_Handler::Reference_Counting_Policy::ENABLED))
+//    inherited2::remove_reference ();
 
   // *NOTE*: registered with the reactor (READ_MASK) at this point
 
@@ -247,9 +247,8 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
       //                          the reactor
       //         --> server side: too many open connections
       int error = ACE_OS::last_error ();
-      if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
-          ((error == ETIMEDOUT) ||   // 110/10060: failed to connect: timed out
-           (error == ECONNREFUSED))) // 111/10061: failed to connect: connection refused
+      if ((error == ETIMEDOUT) ||  // 110/10060: failed to connect: timed out
+          (error == ECONNREFUSED)) // 111/10061: failed to connect: connection refused
       {
         // *IMPORTANT NOTE*: the connection hasn't been open()ed / registered
         //                   --> remove the (final) reference manually
@@ -274,11 +273,10 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
         if (result == -1)
         {
           error = ACE_OS::last_error ();
-          if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
-              (error == ENOENT)) // <-- user abort during initialization
-                                 //     (prior to registration)
+          if (error == ENOENT) // <-- user abort during initialization
+                               //     (prior to registration)
             result = 0;
-          else
+          else if (error != EPERM) // Local close
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d): \"%m\", aborting\n"),
                         this,
@@ -313,7 +311,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-    if (error != EBADF)
+    if (error != EBADF) // 9: Linux local close
 #endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Stream::close(): \"%m\", continuing\n")));

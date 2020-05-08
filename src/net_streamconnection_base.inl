@@ -131,6 +131,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::open"));
 
   int result = -1;
+  bool handle_reactor = false;
   bool handle_manager = false;
   bool handle_stream = false;
   AddressType local_SAP;
@@ -227,20 +228,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     //            ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
+  handle_reactor = true;
   inherited2::state_.handle = inherited::get_handle ();
-
-  // step2: register with the connection manager ?
-  if (likely (inherited2::isManaged_))
-  {
-    if (unlikely (!inherited2::register_ ()))
-    {
-      // *NOTE*: (most probably) maximum number of connections has been reached
-      //ACE_DEBUG ((LM_ERROR,
-      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-      goto error;
-    } // end IF
-    handle_manager = true;
-  } // end IF
 
   // step2: initialize/start stream
   // step2a: connect the stream head message queue with the reactor notification
@@ -292,45 +281,38 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
   handle_stream = true;
 
-//  // step2: start a worker ?
-//  if (inherited::configuration->streamConfiguration.useThreadPerConnection)
-//  {
-//    ACE_thread_t thread_ids[1];
-//    thread_ids[0] = 0;
-//    ACE_hthread_t thread_handles[1];
-//    thread_handles[0] = 0;
-//    char thread_name[BUFSIZ];
-//    ACE_OS::memset (thread_name, 0, sizeof (thread_name));
-//    ACE_OS::strcpy (thread_name,
-//                    ACE_TEXT_ALWAYS_CHAR (NET_CONNECTION_HANDLER_THREAD_NAME));
-//    const char* thread_names[1];
-//    thread_names[0] = thread_name;
-//    result = inherited::activate ((THR_NEW_LWP      |
-//                                   THR_JOINABLE     |
-//                                   THR_INHERIT_SCHED),                    // flags
-//                                  1,                                      // # threads
-//                                  0,                                      // force spawning
-//                                  ACE_DEFAULT_THREAD_PRIORITY,            // priority
-//                                  NET_CONNECTION_HANDLER_THREAD_GROUP_ID, // group id
-//                                  NULL,                                   // corresp. task --> use 'this'
-//                                  thread_handles,                         // thread handle(s)
-//                                  NULL,                                   // thread stack(s)
-//                                  NULL,                                   // thread stack size(s)
-//                                  thread_ids,                             // thread id(s)
-//                                  thread_names);                          // thread name(s)
-//    if (result == -1)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Task_Base::activate(): \"%m\", aborting\n")));
-//      return -1;
-//    } // end IF
-//  } // end IF
-
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+
+  // step3: register with the connection manager ?
+  if (likely (inherited2::isManaged_))
+  {
+    if (unlikely (!inherited2::register_ ()))
+    {
+      // *NOTE*: (most probably) maximum number of connections has been reached
+      //ACE_DEBUG ((LM_ERROR,
+      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+      goto error;
+    } // end IF
+    handle_manager = true;
+  } // end IF
 
   return 0;
 
 error:
+  if (handle_reactor)
+  {
+    ACE_Reactor* reactor_p = inherited::reactor ();
+    ACE_ASSERT (reactor_p);
+    result = reactor_p->remove_handler (this,
+                                        (ACE_Event_Handler::READ_MASK |
+                                         ACE_Event_Handler::DONT_CALL));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d): \"%m\", continuing\n"),
+                  this,
+                  ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL));
+  } // end IF
+
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
                   false, // wait for upstream (if any) ?
@@ -342,6 +324,8 @@ error:
   inherited2::state_.handle = ACE_INVALID_HANDLE;
   inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 
+  // *IMPORTANT NOTE*: the connector invokes close(NORMAL_CLOSE_OPERATION)
+  //                   --> release the final reference there
   return -1;
 }
 
@@ -468,7 +452,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
   // step0b: notify stream ?
-  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
+//  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
     if (likely (notify_ &&
                 (inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED)))
     {
@@ -485,7 +469,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     stream_.stop (true,  // wait for worker(s) (if any)
                   false, // wait for upstream (if any)
                   true); // locked access ?
-  } // end lock scope
+//  } // end lock scope
 
   switch (mask_in)
   {
@@ -592,6 +576,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   // step4: deregister with the connection manager (if any)
   if (likely (deregister))
     inherited2::deregister ();
+
+  this->decrease ();
 
   return result;
 }
@@ -1414,7 +1400,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end IF
 
   // step0b: notify stream ?
-  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
+//  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
     if (likely (notify_ &&
                 (inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED)))
     {
@@ -1431,7 +1417,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     stream_.stop (true,  // wait for worker(s) (if any)
                   false, // wait for upstream (if any) ?
                   true); // locked access ?
-  } // end lock scope
+//  } // end lock scope
 
   // *NOTE*: pending socket operations are notified by the kernel and will
   //         return automatically
