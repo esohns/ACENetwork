@@ -209,26 +209,16 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     goto error;
   } // end IF
 
-  // step1: initialize/tweak socket, register reading data with reactor, ...
-  // *TODO*: remove type inference
+  // step1: initialize/tweak socket
   result = inherited::open (configuration_p);
   if (unlikely (result == -1))
   {
-    // *NOTE*: this can happen when the connection handle is still registered
-    //         with the reactor (i.e. the reactor is still processing events on
-    //         a file descriptor that has been closed and is now being reused by
-    //         the system)
-    // *NOTE*: more likely, this happened because the (select) reactor is out of
-    //         "free" (read) slots
     int error = ACE_OS::last_error ();
     ACE_UNUSED_ARG (error);
-
-    // *NOTE*: perhaps max# connections has been reached
     //ACE_DEBUG ((LM_ERROR,
     //            ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  handle_reactor = true;
   inherited2::state_.handle = inherited::get_handle ();
 
   // step2: initialize/start stream
@@ -238,7 +228,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
   //if (!inherited2::configuration_->useThreadPerConnection)
   inherited2::configuration_->streamConfiguration->configuration->notificationStrategy =
-    &(inherited::notificationStrategy_);
+    static_cast<HandlerType*> (this);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
                                      inherited2::state_.handle)))
   {
@@ -248,7 +238,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                 ACE_TEXT (stream_.name ().c_str ())));
     goto error;
   } // end IF
-  if (unlikely (!stream_.initialize_2 (&(inherited::notificationStrategy_),
+  if (unlikely (!stream_.initialize_2 (static_cast<HandlerType*> (this),
                                        ACE_TEXT_ALWAYS_CHAR ("ACE_Stream_Head"))))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -281,7 +271,14 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
   handle_stream = true;
 
-  inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+  if (unlikely (!inherited::registerWithReactor ()))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to register with the reactor, aborting\n"),
+                id ()));
+    goto error;
+  } // end IF
+  handle_reactor = true;
 
   // step3: register with the connection manager ?
   if (likely (inherited2::isManaged_))
@@ -296,22 +293,13 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     handle_manager = true;
   } // end IF
 
+  inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+
   return 0;
 
 error:
   if (handle_reactor)
-  {
-    ACE_Reactor* reactor_p = inherited::reactor ();
-    ACE_ASSERT (reactor_p);
-    result = reactor_p->remove_handler (this,
-                                        (ACE_Event_Handler::READ_MASK |
-                                         ACE_Event_Handler::DONT_CALL));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d): \"%m\", continuing\n"),
-                  this,
-                  ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL));
-  } // end IF
+    inherited::deregisterFromReactor ();
 
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
@@ -394,12 +382,16 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
     case NET_CONNECTION_CLOSE_REASON_USER_ABORT:
     {
+      Net_ConnectionId_t id_i = this->id ();
       result = inherited::close (arg_in);
       if (unlikely (result == -1))
+      {
+        int error = ACE_OS::last_error ();
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to HandlerType::close(%u): \"%m\", continuing\n"),
-                    id (),
+                    id_i,
                     arg_in));
+      } // end IF
       break;
     } // end IF
     default:
@@ -467,7 +459,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                    false); // flush upstream (if any)
     stream_.idle ();
     stream_.stop (true,  // wait for worker(s) (if any)
-                  false, // wait for upstream (if any)
+                  false, // recurse upstream (if any)
                   true); // locked access ?
 //  } // end lock scope
 
@@ -506,7 +498,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
         //                   handler resources "manually", use reference
         //                   counting instead
         //                   --> this just speeds things up a little
-        ACE_Reactor* reactor_p = inherited::reactor ();
+        ACE_Reactor* reactor_p = inherited::SVC_HANDLER_T::reactor ();
         ACE_ASSERT (reactor_p);
         result =
             reactor_p->purge_pending_notifications (this,
@@ -546,6 +538,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end SWITCH
 
   // step3: invoke base class maintenance
+  unsigned int count = inherited2::count ();
   bool deregister = inherited2::isRegistered_;
   // *IMPORTANT NOTE*: retain the socket handle:
   //                   - otherwise this fails for the usecase "accept failed"
@@ -577,7 +570,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   if (likely (deregister))
     inherited2::deregister ();
 
-  this->decrease ();
+  if (count)
+    this->decrease ();
 
   return result;
 }

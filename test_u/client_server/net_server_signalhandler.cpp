@@ -70,7 +70,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
 #else
     case SIGHUP:
     case SIGQUIT:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     case SIGINT:
     case SIGTERM:
     {
@@ -88,7 +88,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     case SIGBREAK:
 #else
     case SIGUSR1:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     {
       // dump statistic
       report = true;

@@ -153,6 +153,9 @@ class Net_TCPConnectionBase_T
   // *NOTE*: send stream data to the peer
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
 
+  // connector complains
+  using inherited::SVC_HANDLER_T::reactor;
+
  protected:
   // *NOTE*: if there is no default ctor, this will not compile
   inline Net_TCPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

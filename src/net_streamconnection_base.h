@@ -99,14 +99,16 @@ class Net_StreamConnectionBase_T
   virtual int close (u_long = 0); // reason
 
   // override some ACE_Event_Handler methods
-  // *NOTE*: stream any received data for further processing
-  //virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-  //// *NOTE*: send stream data to the peer
-  //virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() (see above) returns -1
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+
+  // override (part of) ACE_Reactor_Notification_Strategy
+  // increase the reference count when this is invoked; this prevents the
+  // connection from going away when still registered with the reactor for
+  // writing
+  inline virtual int notify (void) { inherited2::increase (); return inherited::notify (); }
 
   using inherited2::initialize;
 
@@ -125,7 +127,7 @@ class Net_StreamConnectionBase_T
 #else
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::get_handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
+  inline virtual ACE_Notification_Strategy* notification () { return static_cast<HandlerType*> (this); }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
   // -------------------------------------

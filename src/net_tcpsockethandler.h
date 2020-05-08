@@ -41,12 +41,18 @@ class Net_TCPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<StreamType,
                           ACE_SYNCH_USE>
+ , public ACE_Reactor_Notification_Strategy // *NOTE*: the 'write'-strategy
 {
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<StreamType,
                           ACE_SYNCH_USE> inherited2;
+  typedef ACE_Reactor_Notification_Strategy inherited3;
 
  public:
+  // convenient types
+  typedef ACE_Svc_Handler<StreamType,
+                          ACE_SYNCH_USE> SVC_HANDLER_T;
+
   // override some task-based members
   virtual int open (void* = NULL); // args
 
@@ -54,11 +60,15 @@ class Net_TCPSocketHandler_T
   virtual int handle_close (ACE_HANDLE,        // handle
                             ACE_Reactor_Mask); // event mask
 
+  // the connector complains
+  using SVC_HANDLER_T::reactor;
+
  protected:
   Net_TCPSocketHandler_T ();
   inline virtual ~Net_TCPSocketHandler_T () {}
 
-  ACE_Reactor_Notification_Strategy notificationStrategy_;
+  inline bool registerWithReactor () { return (inherited2::open (NULL) == 0); }
+  inline void deregisterFromReactor () { inherited2::shutdown (); }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
@@ -77,12 +87,18 @@ class Net_TCPSocketHandler_T<ACE_SYNCH_USE,
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
                           ACE_SYNCH_USE>
+ , public ACE_Reactor_Notification_Strategy // *NOTE*: the 'write'-strategy
 {
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
                           ACE_SYNCH_USE> inherited2;
+  typedef ACE_Reactor_Notification_Strategy inherited3;
 
  public:
+  // convenient types
+  typedef ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
+                          ACE_SYNCH_USE> SVC_HANDLER_T;
+
   // override some task-based members
   virtual int open (void* = NULL); // args
 
@@ -94,7 +110,8 @@ class Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   Net_TCPSocketHandler_T ();
   inline virtual ~Net_TCPSocketHandler_T () {}
 
-  ACE_Reactor_Notification_Strategy notificationStrategy_;
+  inline bool registerWithReactor () { return (inherited2::open (NULL) == 0); }
+  inline void deregisterFromReactor () { inherited2::shutdown (); }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))

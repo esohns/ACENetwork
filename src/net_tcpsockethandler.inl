@@ -41,9 +41,9 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
  , inherited2 (NULL,                     // thread manager
                NULL,                     // message queue
                ACE_Reactor::instance ()) // reactor
- , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
-                          this,                          // event handler
-                          ACE_Event_Handler::WRITE_MASK) // handle output only
+ , inherited3 (ACE_Reactor::instance (),      // reactor
+               this,                          // event handler
+               ACE_Event_Handler::WRITE_MASK) // handle output only
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::Net_TCPSocketHandler_T"));
 
@@ -63,9 +63,6 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   ConfigurationType* configuration_p =
     reinterpret_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
-
-  // initialize return value
-  int result = -1;
 
   // step1: tweak socket
   ACE_HANDLE handle = inherited2::get_handle ();
@@ -157,47 +154,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
     return -1;
   } // end IF
 
-  // step3: register with the reactor
-  result = inherited2::open (arg_in);
-  if (unlikely (result == -1))
-  {
-    // *NOTE*: this can happen when the connection handle is still registered
-    //         with the reactor (i.e. the reactor is still processing events on
-    //         a file descriptor that has been closed and is now being reused by
-    //         the system)
-    // *NOTE*: more likely, this happened because the (select) reactor is out of
-    //         "free" (read) slots
-    int error = ACE_OS::last_error ();
-    ACE_UNUSED_ARG (error);
-    //if (error)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: 0x%@): \"%m\", aborting\n"),
-                  arg_in, handle));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: %d): \"%m\", aborting\n"),
-                  arg_in, handle));
-#endif
-    return -1;
-  } // end IF
-  // *NOTE*: let the reactor manage this handler
-//  if (likely (inherited2::reference_counting_policy ().value () ==
-//              ACE_Event_Handler::Reference_Counting_Policy::ENABLED))
-//    inherited2::remove_reference ();
-
-  // *NOTE*: registered with the reactor (READ_MASK) at this point
-
-//   // ...register for writes (WRITE_MASK) as well
-//   if (reactor ()->register_handler (this,
-//                                     ACE_Event_Handler::WRITE_MASK) == -1)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to ACE_Reactor::register_handler(WRITE_MASK): \"%m\", aborting\n")));
-//     return -1;
-//   } // end IF
-
-  return result;
+  return 0;
 }
 
 template <ACE_SYNCH_DECL,
@@ -254,10 +211,10 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
         //                   --> remove the (final) reference manually
         // *NOTE*: the dtor (deregisters from the reactor and) close()s the
         //         stream handle
-        inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-        result = inherited2::remove_reference ();
-        ACE_ASSERT (result == 0);
-        break;
+//        inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+//        result = inherited2::remove_reference ();
+//        ACE_ASSERT (result == 0);
+//        break;
       } // end IF
 
       if (handle_in != ACE_INVALID_HANDLE)
@@ -305,17 +262,9 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
     }
   } // end SWITCH
 
-  result = inherited2::peer_.close ();
-  if (result == -1)
-  {
-    int error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-    if (error != EBADF) // 9: Linux local close
-#endif // ACE_WIN32 || ACE_WIN64
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Stream::close(): \"%m\", continuing\n")));
-  } // end IF
+  // *IMPORTANT NOTE*: ensure dtor does not ACE_Svc_Handler::shutdown() again
+  inherited2::closing_ = true;
+  inherited2::shutdown ();
 
   return result;
 }
@@ -332,9 +281,9 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
  , inherited2 (NULL,                     // thread manager
                NULL,                     // message queue
                ACE_Reactor::instance ()) // reactor
- , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
-                          this,                          // event handler
-                          ACE_Event_Handler::WRITE_MASK) // handle output only
+ , inherited3 (ACE_Reactor::instance (),      // reactor
+               this,                          // event handler
+               ACE_Event_Handler::WRITE_MASK) // handle output only
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::Net_TCPSocketHandler_T"));
 

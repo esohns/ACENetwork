@@ -173,9 +173,14 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                           0);                              // permissions
   if (unlikely (result == -1))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+    int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != ETIME) // 62: local close
+#endif // ACE_WIN32 || ACE_WIN64
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);

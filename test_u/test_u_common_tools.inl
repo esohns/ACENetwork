@@ -49,6 +49,8 @@ Test_U_Common_Tools::getRandomConnection (Net_IConnectionManager_T<ACE_MT_SYNCH,
 
 retry:
   number_of_connections_i = imanager_in->count ();
+  if (unlikely (!number_of_connections_i)) // sanity check (see below)
+    return NULL;
   // *PORTABILITY*: outside glibc, this is not very portable
   // *TODO*: use STL random funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -66,11 +68,11 @@ retry:
 #endif // ACE_WIN32 || ACE_WIN64
 
   connection_p = imanager_in->operator[] (index_i);
-  if (!connection_p)
+  if (unlikely (!connection_p))
   {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to retrieve connection #%d/%d, retrying\n"),
-                index_i, number_of_connections_i));
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("failed to retrieve connection #%d/%d, retrying\n"),
+//                index_i, number_of_connections_i));
     goto retry;
   } // end IF
 

@@ -340,6 +340,9 @@ continue_:
   if (unlikely (inherited::writeBuffer_))
     result = 1; // <-- reschedule 'this' immediately
 
+  // *NOTE*: relinquish a reference (see: Net_StreamConnectionBase_T::notify ())
+  inherited::decrease ();
+
   return result;
 }
 

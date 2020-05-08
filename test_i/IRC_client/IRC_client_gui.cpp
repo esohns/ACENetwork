@@ -746,7 +746,7 @@ do_parsePhonebookFile (const std::string& phonebookFilename_in,
       if (current_fwd_slash == -1)
 #else
       if (current_fwd_slash == std::string::npos)
-#endif
+#endif // _MSC_VER >= 1600
       {
         ACE_ERROR ((LM_ERROR,
                     ACE_TEXT ("\"%s\": failed to parse timestamp (was: \"%s\"), returning\n"),

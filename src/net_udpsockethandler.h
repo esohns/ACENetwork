@@ -40,12 +40,14 @@ class Net_UDPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<SocketType,
                           ACE_SYNCH_USE>
- // *NOTE*: use this to modify the source/target address after initialization
+ , public ACE_Reactor_Notification_Strategy // *NOTE*: the 'write'-strategy
+// *NOTE*: use this to modify the source/target address after initialization
  , public Common_IReset
 {
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<SocketType,
                           ACE_SYNCH_USE> inherited2;
+  typedef ACE_Reactor_Notification_Strategy inherited3;
 
  public:
   // convenient types
@@ -73,11 +75,13 @@ class Net_UDPSocketHandler_T
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
+  inline bool registerWithReactor () { return (inherited2::open (NULL) == 0); }
+  inline void deregisterFromReactor () { inherited2::shutdown (); }
+
   ACE_INET_Addr                     address_;
 #if defined (ACE_LINUX)
   bool                              errorQueue_;
-#endif
-  ACE_Reactor_Notification_Strategy notificationStrategy_;
+#endif // ACE_LINUX
   // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
   ACE_HANDLE                        writeHandle_;
 
@@ -128,10 +132,13 @@ class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
+  inline bool registerWithReactor () { return (inherited2::open (NULL) == 0); }
+  inline void deregisterFromReactor () { inherited2::shutdown (); }
+
   ACE_INET_Addr                     address_;
 #if defined (ACE_LINUX)
   bool                              errorQueue_;
-#endif
+#endif // ACE_LINUX
   ACE_Reactor_Notification_Strategy notificationStrategy_;
   // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
   ACE_HANDLE                        writeHandle_;
