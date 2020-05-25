@@ -490,31 +490,30 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (likely (!inherited2::configuration_->useThreadPerConnection))
-      { // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
+//      if (likely (!inherited2::configuration_->useThreadPerConnection))
+//      { // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
         //                   in-flight notifications being dispatched at this
         //                   stage. In that case, do not rely on releasing all
         //                   handler resources "manually", use reference
         //                   counting instead
-        //                   --> this just speeds things up a little
-        ACE_Reactor* reactor_p = inherited::SVC_HANDLER_T::reactor ();
-        ACE_ASSERT (reactor_p);
-        result =
-            reactor_p->purge_pending_notifications (this,
-                                                    ACE_Event_Handler::ALL_EVENTS_MASK);
-        if (unlikely (result == -1))
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("%u: failed to ACE_Reactor::purge_pending_notifications(0x%@,%d): \"%m\", continuing\n"),
-                      id (),
-                      this,
-                      ACE_Event_Handler::ALL_EVENTS_MASK));
+//        ACE_Reactor* reactor_p = inherited::SVC_HANDLER_T::reactor ();
+//        ACE_ASSERT (reactor_p);
+//        result =
+//            reactor_p->purge_pending_notifications (this,
+//                                                    ACE_Event_Handler::ALL_EVENTS_MASK);
+//        if (unlikely (result == -1))
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("%u: failed to ACE_Reactor::purge_pending_notifications(0x%@,%d): \"%m\", continuing\n"),
+//                      id (),
+//                      this,
+//                      ACE_Event_Handler::ALL_EVENTS_MASK));
         //else if (result > 0)
         //  ACE_DEBUG ((LM_DEBUG,
         //              ACE_TEXT ("flushed %d notifications (handle was: %d)\n"),
         //              result,
         //              handle_in));
-      } // end IF
+//      } // end IF
 
       break;
     }

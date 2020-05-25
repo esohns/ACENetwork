@@ -632,13 +632,13 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
  , inherited2 (NULL,                     // no specific thread manager
                NULL,                     // no specific message queue
                ACE_Reactor::instance ()) // default reactor
+ , inherited3 (ACE_Reactor::instance (),      // reactor
+               this,                          // event handler
+               ACE_Event_Handler::WRITE_MASK) // handle output only
  , address_ ()
 #if defined (ACE_LINUX)
  , errorQueue_ (NET_SOCKET_DEFAULT_ERRORQUEUE)
 #endif // ACE_LINUX
- , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
-                          this,                          // event handler
-                          ACE_Event_Handler::WRITE_MASK) // handle output only
  , writeHandle_ (ACE_INVALID_HANDLE)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::Net_UDPSocketHandler_T"));

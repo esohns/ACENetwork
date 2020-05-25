@@ -101,10 +101,13 @@ class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<Net_SOCK_CODgram,
                           ACE_SYNCH_USE>
+ , public ACE_Reactor_Notification_Strategy // *NOTE*: the 'write'-strategy
+ // *NOTE*: use this to modify the source/target address after initialization
 {
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Svc_Handler<Net_SOCK_CODgram,
                           ACE_SYNCH_USE> inherited2;
+  typedef ACE_Reactor_Notification_Strategy inherited3;
 
  public:
   // convenient types
@@ -139,7 +142,6 @@ class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_LINUX)
   bool                              errorQueue_;
 #endif // ACE_LINUX
-  ACE_Reactor_Notification_Strategy notificationStrategy_;
   // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
   ACE_HANDLE                        writeHandle_;
 
