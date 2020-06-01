@@ -175,7 +175,6 @@ set (HTTP_decoder_SRCS
      test_u_common_modules.h
      test_u_connection_common.h
      test_u_connection_manager_common.h
-     test_u_defines.h
      test_u_message.cpp
      test_u_message.h
      test_u_session_message.cpp
@@ -185,6 +184,7 @@ set (HTTP_decoder_SRCS
      test_u_stream.inl
      test_u_HTTP_decoder.cpp
      test_u_HTTP_decoder_common.h
+     test_u_HTTP_decoder_defines.h
      test_u_HTTP_decoder_signalhandler.cpp
      test_u_HTTP_decoder_signalhandler.h
      test_u_HTTP_decoder_stream_common.h)

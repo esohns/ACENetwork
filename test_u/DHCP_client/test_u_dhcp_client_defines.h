@@ -18,8 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef TEST_U_DEFINES_H
-#define TEST_U_DEFINES_H
+#ifndef TEST_U_DHCP_CLIENT_DEFINES_H
+#define TEST_U_DHCP_CLIENT_DEFINES_H
 
 #define TEST_U_DEFAULT_GTK_RC_FILE                        "resources.rc"
 #define TEST_U_DEFAULT_GLADE_FILE                         "test_u.glade"
@@ -27,18 +27,6 @@
 #define TEST_U_THREAD_NAME                                "stream processor"
 
 #define TEST_U_DEFAULT_BUFFER_SIZE                        DHCP_BUFFER_SIZE
-#define TEST_U_MAX_MESSAGES                               0 // 0 --> no limits
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#define TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS      1
-#else
-// *IMPORTANT NOTE*: on Linux, specifying 1 will not work correctly for proactor
-//                   scenarios using the default (rt signal) proactor
-//                   implementation. The thread blocked in sigwaitinfo (see man
-//                   pages) will not awaken when the dispatch set is changed
-//                   (*TODO*: to be verified)
-#define TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS      2
-#endif
 
 //---------------------------------------
 

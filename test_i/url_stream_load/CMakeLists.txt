@@ -97,6 +97,7 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net/protocols/http)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
  if (SSL_SUPPORT)
@@ -142,6 +143,11 @@ set (EXECUTABLE url_stream_load)
 set (${EXECUTABLE}_EXE_SRCS
      stdafx.cpp
      stdafx.h
+     m3u_iparser.h
+     m3u_parser.cpp
+     m3u_parser.h
+     m3u_scanner.cpp
+     m3u_scanner.h
      test_i_common_modules.h
      test_i_connection_common.h
      test_i_connection_manager_common.h
@@ -153,8 +159,12 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_message.h
      test_i_module_eventhandler.cpp
      test_i_module_eventhandler.h
-     test_i_module_htmlparser.cpp
-     test_i_module_htmlparser.h
+     test_i_m3u_module_parser.cpp
+     test_i_m3u_module_parser.h
+     test_i_m3u_parser_driver.cpp
+     test_i_m3u_parser_driver.h
+     test_i_m3u_tools.cpp
+     test_i_m3u_tools.h
      test_i_session_message.cpp
      test_i_session_message.h
      test_i_signalhandler.cpp
@@ -206,6 +216,7 @@ add_dependencies (${EXECUTABLE} CommonSignal)
 add_dependencies (${EXECUTABLE} CommonTimer)
 
 add_dependencies (${EXECUTABLE} ACEStream)
+add_dependencies (${EXECUTABLE} ACEStream_Network_Protocol_HTTPGet)
 
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
@@ -258,6 +269,7 @@ if (WIN32)
 endif (WIN32)
 target_link_libraries (${EXECUTABLE} ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE} ACEStream_Network)
+target_link_libraries (${EXECUTABLE} ACEStream_Network_Protocol_HTTPGet)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})

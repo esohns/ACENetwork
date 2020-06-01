@@ -92,11 +92,13 @@
 #include "test_u_callbacks.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
 #include "test_u_common.h"
+#include "test_u_defines.h"
+
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_connection_stream.h"
-#include "test_u_defines.h"
 #include "test_u_eventhandler.h"
 #include "test_u_message.h"
 #include "test_u_module_eventhandler.h"
@@ -104,6 +106,7 @@
 #include "test_u_signalhandler.h"
 
 #include "test_u_dhcp_client_common.h"
+#include "test_u_dhcp_client_defines.h"
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("DHCPClientStream");
 

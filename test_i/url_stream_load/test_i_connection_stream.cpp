@@ -19,18 +19,18 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_i_connection_stream.h"
 
 #include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
+//#include "test_i_common.h"
+
 #include "test_i_message.h"
 #include "test_i_session_message.h"
-#include "test_i_common.h"
+#include "test_i_m3u_module_parser.h"
 #include "test_i_common_modules.h"
-#include "test_i_module_htmlparser.h"
 
 Test_I_ConnectionStream::Test_I_ConnectionStream ()
  : inherited ()
@@ -63,8 +63,14 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
   //layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_Module_HTMLParser_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR ("HTMLParser")),
+                  Test_I_HTTPGet_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR ("HTTPGet")),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_M3U_Module_Parser_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR ("M3UParser")),
                   false);
   layout_in->append (module_p, NULL, 0);
   //module_p = NULL;
@@ -145,7 +151,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
                 ACE_TEXT (module_p->name ())));
     goto failed;
   } // end IF
-  parser_impl_p->setP (&(inherited::state_));
+//  parser_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

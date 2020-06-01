@@ -88,19 +88,23 @@ struct HTTP_ModuleHandlerConfiguration
 {
   HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   //////////////////////////////////////
-   , allocatorConfiguration (NULL)
+  ////////////////////////////////////////
    , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
+   , HTTPForm ()
+   , HTTPHeaders ()
    , printProgressDot (false)
    , URL ()
+   , waitForConnect (true)
   {
     printFinalReport = true;
   };
 
-  struct Common_Parser_FlexAllocatorConfiguration* allocatorConfiguration;
-  bool                               crunchMessages; // http parser module
-  bool                               printProgressDot; // file writer module
-  std::string                        URL;
+  bool           crunchMessages; // http parser module
+  HTTP_Form_t    HTTPForm; // HTTP get module
+  HTTP_Headers_t HTTPHeaders; // HTTP get module
+  bool           printProgressDot; // file writer module
+  std::string    URL;
+  bool           waitForConnect;
 };
 
 //struct HTTP_ProtocolConfiguration;

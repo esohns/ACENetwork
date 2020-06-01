@@ -1,0 +1,367 @@
+<?xml version="1.0"?>
+
+<bison-xml-report version="3.5" bug-report="bug-bison@gnu.org" url="http://www.gnu.org/software/bison/">
+
+  <filename>./../scripts/m3u.y</filename>
+
+  <grammar>
+    <rules>
+      <rule number="0" usefulness="useful">
+        <lhs>$accept</lhs>
+        <rhs>
+          <symbol>playlist</symbol>
+          <symbol>&quot;end&quot;</symbol>
+        </rhs>
+      </rule>
+      <rule number="1" usefulness="useful">
+        <lhs>$@1</lhs>
+        <rhs>
+          <empty/>
+        </rhs>
+      </rule>
+      <rule number="2" usefulness="useful">
+        <lhs>playlist</lhs>
+        <rhs>
+          <symbol>&quot;begin_elements&quot;</symbol>
+          <symbol>$@1</symbol>
+          <symbol>elements</symbol>
+        </rhs>
+      </rule>
+      <rule number="3" usefulness="useful">
+        <lhs>elements</lhs>
+        <rhs>
+          <symbol>elements</symbol>
+          <symbol>element</symbol>
+        </rhs>
+      </rule>
+      <rule number="4" usefulness="useful">
+        <lhs>elements</lhs>
+        <rhs>
+          <empty/>
+        </rhs>
+      </rule>
+      <rule number="5" usefulness="useful">
+        <lhs>element</lhs>
+        <rhs>
+          <symbol>&quot;begin_element_inf&quot;</symbol>
+          <symbol>inf_rest_1</symbol>
+        </rhs>
+      </rule>
+      <rule number="6" usefulness="useful">
+        <lhs>inf_rest_1</lhs>
+        <rhs>
+          <symbol>&quot;length&quot;</symbol>
+          <symbol>inf_rest_2</symbol>
+        </rhs>
+      </rule>
+      <rule number="7" usefulness="useful">
+        <lhs>inf_rest_2</lhs>
+        <rhs>
+          <symbol>&quot;title&quot;</symbol>
+          <symbol>inf_rest_3</symbol>
+        </rhs>
+      </rule>
+      <rule number="8" usefulness="useful">
+        <lhs>inf_rest_3</lhs>
+        <rhs>
+          <symbol>&quot;URL&quot;</symbol>
+          <symbol>inf_rest_4</symbol>
+        </rhs>
+      </rule>
+      <rule number="9" usefulness="useful">
+        <lhs>inf_rest_4</lhs>
+        <rhs>
+          <symbol>&quot;element_end&quot;</symbol>
+        </rhs>
+      </rule>
+      <rule number="10" usefulness="useful">
+        <lhs>inf_rest_4</lhs>
+        <rhs>
+          <empty/>
+        </rhs>
+      </rule>
+    </rules>
+    <terminals>
+      <terminal symbol-number="0" token-number="0" name="&quot;end&quot;" usefulness="useful"/>
+      <terminal symbol-number="1" token-number="256" name="error" usefulness="useful"/>
+      <terminal symbol-number="3" token-number="258" name="&quot;element_end&quot;" usefulness="useful"/>
+      <terminal symbol-number="4" token-number="259" name="&quot;length&quot;" usefulness="useful"/>
+      <terminal symbol-number="5" token-number="260" name="&quot;title&quot;" usefulness="useful"/>
+      <terminal symbol-number="6" token-number="261" name="&quot;URL&quot;" usefulness="useful"/>
+      <terminal symbol-number="7" token-number="262" name="&quot;begin_element_inf&quot;" usefulness="useful"/>
+      <terminal symbol-number="8" token-number="263" name="&quot;begin_elements&quot;" usefulness="useful"/>
+    </terminals>
+    <nonterminals>
+      <nonterminal symbol-number="9" name="$accept" usefulness="useful"/>
+      <nonterminal symbol-number="10" name="element" usefulness="useful"/>
+      <nonterminal symbol-number="11" name="inf_rest_1" usefulness="useful"/>
+      <nonterminal symbol-number="12" name="inf_rest_2" usefulness="useful"/>
+      <nonterminal symbol-number="13" name="inf_rest_3" usefulness="useful"/>
+      <nonterminal symbol-number="14" name="inf_rest_4" usefulness="useful"/>
+      <nonterminal symbol-number="15" name="playlist" usefulness="useful"/>
+      <nonterminal symbol-number="16" name="elements" usefulness="useful"/>
+      <nonterminal symbol-number="17" name="$@1" usefulness="useful"/>
+    </nonterminals>
+  </grammar>
+
+  <automaton>
+
+    <state number="0">
+      <itemset>
+        <item rule-number="0" point="0"/>
+        <item rule-number="2" point="0"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="shift" symbol="&quot;begin_elements&quot;" state="1"/>
+          <transition type="goto" symbol="playlist" state="2"/>
+        </transitions>
+        <errors/>
+        <reductions/>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="1">
+      <itemset>
+        <item rule-number="1" point="0"/>
+        <item rule-number="2" point="1"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="goto" symbol="$@1" state="3"/>
+        </transitions>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="1" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="2">
+      <itemset>
+        <item rule-number="0" point="1"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="shift" symbol="&quot;end&quot;" state="4"/>
+        </transitions>
+        <errors/>
+        <reductions/>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="3">
+      <itemset>
+        <item rule-number="2" point="2"/>
+        <item rule-number="3" point="0"/>
+        <item rule-number="4" point="0"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="goto" symbol="elements" state="5"/>
+        </transitions>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="4" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="4">
+      <itemset>
+        <item rule-number="0" point="2"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="accept" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="5">
+      <itemset>
+        <item rule-number="2" point="3">
+          <lookaheads>
+            <symbol>&quot;end&quot;</symbol>
+          </lookaheads>
+        </item>
+        <item rule-number="3" point="1"/>
+        <item rule-number="5" point="0"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="shift" symbol="&quot;begin_element_inf&quot;" state="6"/>
+          <transition type="goto" symbol="element" state="7"/>
+        </transitions>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="2" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="6">
+      <itemset>
+        <item rule-number="5" point="1"/>
+        <item rule-number="6" point="0"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="shift" symbol="&quot;length&quot;" state="8"/>
+          <transition type="goto" symbol="inf_rest_1" state="9"/>
+        </transitions>
+        <errors/>
+        <reductions/>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="7">
+      <itemset>
+        <item rule-number="3" point="2"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="3" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="8">
+      <itemset>
+        <item rule-number="6" point="1"/>
+        <item rule-number="7" point="0"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="shift" symbol="&quot;title&quot;" state="10"/>
+          <transition type="goto" symbol="inf_rest_2" state="11"/>
+        </transitions>
+        <errors/>
+        <reductions/>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="9">
+      <itemset>
+        <item rule-number="5" point="2"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="5" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="10">
+      <itemset>
+        <item rule-number="7" point="1"/>
+        <item rule-number="8" point="0"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="shift" symbol="&quot;URL&quot;" state="12"/>
+          <transition type="goto" symbol="inf_rest_3" state="13"/>
+        </transitions>
+        <errors/>
+        <reductions/>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="11">
+      <itemset>
+        <item rule-number="6" point="2"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="6" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="12">
+      <itemset>
+        <item rule-number="8" point="1"/>
+        <item rule-number="9" point="0"/>
+        <item rule-number="10" point="0">
+          <lookaheads>
+            <symbol>&quot;end&quot;</symbol>
+            <symbol>&quot;begin_element_inf&quot;</symbol>
+          </lookaheads>
+        </item>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="shift" symbol="&quot;element_end&quot;" state="14"/>
+          <transition type="goto" symbol="inf_rest_4" state="15"/>
+        </transitions>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="10" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="13">
+      <itemset>
+        <item rule-number="7" point="2"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="7" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="14">
+      <itemset>
+        <item rule-number="9" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="9" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="15">
+      <itemset>
+        <item rule-number="8" point="2"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="8" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+  </automaton>
+</bison-xml-report>

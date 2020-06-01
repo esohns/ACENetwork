@@ -521,13 +521,13 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: Net_StreamTCPSocketBase_T::handle_close(0x%@,%d) called for unknown reasons --> check implementation !, continuing\n"),
+                  ACE_TEXT ("%u: Net_StreamConnectionBase_T::handle_close(0x%@,%d) called for unknown reasons --> check implementation !, continuing\n"),
                   id (),
                   handle_in,
                   mask_in));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: Net_StreamTCPSocketBase_T::handle_close(%d,%d) called for unknown reasons --> check implementation !, continuing\n"),
+                  ACE_TEXT ("%u: Net_StreamConnectionBase_T::handle_close(%d,%d) called for unknown reasons --> check implementation !, continuing\n"),
                   id (),
                   handle_in,
                   mask_in));

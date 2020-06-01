@@ -55,6 +55,7 @@
 #include "test_u_session_message.h"
 
 #include "test_u_dhcp_client_common.h"
+#include "test_u_dhcp_client_defines.h"
 
 // initialize statics
 static bool un_toggling_listen = false;

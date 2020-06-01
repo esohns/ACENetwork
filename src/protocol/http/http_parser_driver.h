@@ -30,7 +30,7 @@
 
 #include "http_iparser.h"
 #include "http_parser.h"
-#include "http_scanner.h"
+//#include "http_scanner.h"
 
 #include "location.hh"
 
@@ -41,6 +41,7 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 //struct YYLTYPE;
 int HTTP_Scanner_get_debug  (yyscan_t);
+void HTTP_Scanner_set_debug (int  _bdebug , yyscan_t);
 
 template <typename SessionMessageType>
 class HTTP_ParserDriver_T

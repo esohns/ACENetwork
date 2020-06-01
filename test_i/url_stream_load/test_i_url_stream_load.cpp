@@ -164,7 +164,9 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [URL]  : stream URL")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [URL]  : stream URL [")
+            << ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL)
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v        : print version information and exit [")
             << false
@@ -232,7 +234,7 @@ do_process_arguments (int argc_in,
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
                                                  : ACE_Time_Value::zero);
   traceInformation_out = false;
-  URL_out.clear ();
+  URL_out = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   printVersionAndExit_out = false;
   int result =
     remoteHost_out.set (static_cast<u_short> (HTTP_DEFAULT_SERVER_PORT),
@@ -545,6 +547,7 @@ do_work (bool debugParser_in,
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
   connection_configuration.address = remoteHost_in;
+  connection_configuration.allocatorConfiguration = &allocator_configuration;
   connection_configuration.useLoopBackDevice =
     connection_configuration.address.is_loopback ();
   connection_configuration.statisticReportingInterval =
@@ -571,6 +574,8 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
+  modulehandler_configuration.concurrency =
+      STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   //modulehandler_configuration.connectionManager = connection_manager_p;
@@ -583,6 +588,7 @@ do_work (bool debugParser_in,
   modulehandler_configuration.subscriber = &message_handler;
   modulehandler_configuration.targetFileName = fileName_in;
   modulehandler_configuration.URL = URL_in;
+  modulehandler_configuration.waitForConnect = false;
   // ******************** (sub-)stream configuration data *********************
   //if (bufferSize_in)
   //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
@@ -624,6 +630,9 @@ do_work (bool debugParser_in,
     &configuration_in.dispatchConfiguration;
 
   // step0b: initialize event dispatch
+  configuration_in.dispatchConfiguration.numberOfReactorThreads = 1; // support SSL
+  configuration_in.dispatchConfiguration.numberOfProactorThreads =
+      TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
   if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -994,6 +1003,7 @@ ACE_TMAIN (int argc_in,
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
                                                  : ACE_Time_Value::zero);
   trace_information = false;
+  url = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   print_version_and_exit = false;
   ACE_OS::memset (&elapsed_rusage, 0, sizeof (elapsed_rusage));
 

@@ -121,9 +121,9 @@ set (${EXECUTABLE}_EXE_SRCS
      test_u_connection_manager_common.h
      test_u_connection_stream.cpp
      test_u_connection_stream.h
-     test_u_defines.h
      test_u_dhcp_client.cpp
      test_u_dhcp_client_common.h
+     test_u_dhcp_client_defines.h
      test_u_eventhandler.cpp
      test_u_eventhandler.h
      test_u_listener_common.h

@@ -34,7 +34,7 @@
 
 #include "stream_stat_statistic_report.h"
 
-//#include "net_connection_manager.h"
+#include "stream_module_source_http_get.h"
 
 #include "http_common.h"
 #include "http_module_parser.h"
@@ -62,20 +62,26 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Stream_ControlMessage_t,
                                Test_I_Message,
                                Test_I_SessionMessage> Test_I_HTTPStreamer;
-typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
-                              Common_TimePolicy_t,
-                              Stream_ControlMessage_t,
-                              Test_I_Message,
-                              Test_I_SessionMessage,
-                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                              enum Stream_ControlType,
-                              enum Stream_SessionMessageType,
-                              struct Test_I_URLStreamLoad_StreamState,
-                              struct Test_I_URLStreamLoad_SessionData,
-                              Test_I_URLStreamLoad_SessionData_t,
-                              struct Stream_Statistic,
-                              Common_Timer_Manager_t,
-                              struct Stream_UserData> Test_I_HTTPParser;
+//typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
+//                              Common_TimePolicy_t,
+//                              Stream_ControlMessage_t,
+//                              Test_I_Message,
+//                              Test_I_SessionMessage,
+//                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+//                              enum Stream_ControlType,
+//                              enum Stream_SessionMessageType,
+//                              struct Test_I_URLStreamLoad_StreamState,
+//                              struct Test_I_URLStreamLoad_SessionData,
+//                              Test_I_URLStreamLoad_SessionData_t,
+//                              struct Stream_Statistic,
+//                              Common_Timer_Manager_t,
+//                              struct Stream_UserData> Test_I_HTTPParser;
+typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
+                             Common_TimePolicy_t,
+                             struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                             Stream_ControlMessage_t,
+                             Test_I_Message,
+                             Test_I_SessionMessage> Test_I_HTTPParser;
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
@@ -116,5 +122,18 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           Test_I_StatisticReport_ReaderTask_t,                    // reader type
                           Test_I_StatisticReport_WriterTask_t,                    // writer type
                           Test_I_StatisticReport);                                // name
+
+typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
+                                            Common_TimePolicy_t,
+                                            struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                            Stream_ControlMessage_t,
+                                            Test_I_Message,
+                                            Test_I_SessionMessage> Test_I_HTTPGet;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,   // session data type
+                              enum Stream_SessionMessageType,            // session event type
+                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_net_http_get_module_name_string,
+                              Stream_INotify_t,                          // stream notification interface type
+                              Test_I_HTTPGet);                           // writer type
 
 #endif

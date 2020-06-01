@@ -82,6 +82,7 @@
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_HTTP_decoder_common.h"
+#include "test_u_HTTP_decoder_defines.h"
 #include "test_u_HTTP_decoder_signalhandler.h"
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("HTTPDecoderStream");

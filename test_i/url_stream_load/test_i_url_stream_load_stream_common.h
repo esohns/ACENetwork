@@ -74,6 +74,7 @@
 #include "test_i_defines.h"
 #include "test_i_stream_common.h"
 
+#include "m3u_iparser.h"
 #include "test_i_connection_common.h"
 
 // forward declarations
@@ -91,45 +92,20 @@ struct Test_I_MessageData
 {
   Test_I_MessageData ()
    : HTTPRecord (NULL)
-   , HTMLDocument (NULL)
+   , M3UPlaylist (NULL)
   {};
   ~Test_I_MessageData ()
   {
     if (HTTPRecord)
       delete HTTPRecord;
-    if (HTMLDocument)
-      xmlFreeDoc (HTMLDocument);
+    if (M3UPlaylist)
+      delete M3UPlaylist;
   };
   inline void operator+= (Test_I_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
   inline operator struct HTTP_Record&() const { ACE_ASSERT (HTTPRecord); return *HTTPRecord; }
 
   struct HTTP_Record* HTTPRecord;
-  xmlDocPtr           HTMLDocument;
-};
-
-struct Test_I_URLStreamLoad_SessionData;
-enum Test_I_URLStreamLoad_SAXParserState
-{
-  TEST_I_SAXPARSER_STATE_INVALID = -1,
-  ////////////////////////////////////////
-  TEST_I_SAXPARSER_STATE_IN_HEAD = 0,
-  TEST_I_SAXPARSER_STATE_IN_HTML,
-  TEST_I_SAXPARSER_STATE_IN_BODY
-  ////////////////////////////////////////
-};
-struct Test_I_URLStreamLoad_SAXParserContext
- : Stream_Module_HTMLParser_SAXParserContextBase
-{
-  Test_I_URLStreamLoad_SAXParserContext ()
-   : Stream_Module_HTMLParser_SAXParserContextBase ()
-   , sessionData (NULL)
-   , state (TEST_I_SAXPARSER_STATE_INVALID)
-   , URL ()
-  {};
-
-  struct Test_I_URLStreamLoad_SessionData* sessionData;
-  enum Test_I_URLStreamLoad_SAXParserState state;
-  std::string                              URL;
+  M3U_Playlist_t*     M3UPlaylist;
 };
 
 struct Test_I_URLStreamLoad_SessionData
@@ -141,7 +117,6 @@ struct Test_I_URLStreamLoad_SessionData
               static_cast<ACE_UINT32> (INADDR_ANY))
    , connection (NULL)
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
-   , parserContext ()
    , targetFileName ()
   {}
 
@@ -159,7 +134,6 @@ struct Test_I_URLStreamLoad_SessionData
   ACE_INET_Addr                                address;
   Test_I_IConnection_t*                        connection;
   enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
-  struct Test_I_URLStreamLoad_SAXParserContext parserContext; // HTML parser module
   std::string                                  targetFileName; // file writer module
 };
 typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData> Test_I_URLStreamLoad_SessionData_t;
@@ -178,8 +152,6 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
-   //, contextId (0)
-   , mode (STREAM_MODULE_HTMLPARSER_MODE_SAX)
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
@@ -188,12 +160,10 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
     inbound = true;
   }
 
-  Net_ConnectionConfigurations_t*    connectionConfigurations;
-  //guint                                   contextId;
-  enum Stream_Module_HTMLParser_Mode mode; // HTML parser module
-  Test_I_ISessionNotify_t*           subscriber;
-  Test_I_Subscribers_t*              subscribers;
-  std::string                        targetFileName; // dump module
+  Net_ConnectionConfigurations_t* connectionConfigurations;
+  Test_I_ISessionNotify_t*        subscriber;
+  Test_I_Subscribers_t*           subscribers;
+  std::string                     targetFileName; // dump module
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration

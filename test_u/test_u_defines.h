@@ -21,8 +21,20 @@
 #ifndef TEST_U_DEFINES_H
 #define TEST_U_DEFINES_H
 
+#include "ace/config-lite.h"
+
 // event dispatch
 #define TEST_U_DEFAULT_NUMBER_OF_TP_THREADS         3
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#define TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS 1
+#else
+// *IMPORTANT NOTE*: on Linux, specifying 1 will not work correctly for proactor
+//                   scenarios using the default (rt signal) proactor
+//                   implementation. The thread blocked in sigwaitinfo (see man
+//                   pages) will not awaken when the dispatch set is changed
+//                   (*TODO*: to be verified)
+#define TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS 2
+#endif // ACE_WIN32 || ACE_WIN64
 
 // stream
 #define TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME   "ProtocolHandler"

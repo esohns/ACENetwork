@@ -119,6 +119,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   crunch_ = configuration_in.crunchMessages;
 
+  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
       inherited::msg_queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))
@@ -126,8 +127,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to HTTP_ParserDriver_T::initialize(), aborting\n"),
                 inherited::mod_->name ()));
+    const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+        NULL;
     return false;
   } // end IF
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      NULL;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -504,6 +509,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   } // end IF
 
   crunch_ = configuration_in.crunchMessages;
+  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
       inherited::msg_queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))
@@ -511,8 +517,12 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to initialize parser driver: \"%m\", aborting\n"),
                 inherited::mod_->name ()));
+    const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+        NULL;
     return false;
   } // end IF
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      NULL;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
