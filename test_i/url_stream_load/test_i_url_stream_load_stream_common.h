@@ -59,6 +59,8 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#include "stream_lib_ffmpeg_common.h"
+
 #include "stream_module_htmlparser.h"
 
 #include "net_defines.h"
@@ -81,6 +83,7 @@
 class Stream_IAllocator;
 class Test_I_Message;
 class Test_I_SessionMessage;
+class Test_I_SessionMessage_2;
 //struct Test_I_URLStreamLoad_ConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           Test_I_URLStreamLoad_ConnectionConfiguration_t,
@@ -155,6 +158,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
+   , window (NULL)
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
     inbound = true;
@@ -164,6 +168,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Test_I_ISessionNotify_t*        subscriber;
   Test_I_Subscribers_t*           subscribers;
   std::string                     targetFileName; // dump module
+  GdkWindow*                      window;
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration
@@ -187,6 +192,112 @@ struct Test_I_URLStreamLoad_StreamState
   {}
 
   struct Test_I_URLStreamLoad_SessionData* sessionData;
+};
+
+//////////////////////////////////////////
+
+struct Test_I_URLStreamLoad_StreamState_2;
+struct Test_I_URLStreamLoad_SessionData_2
+ : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                 struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                 struct Test_I_URLStreamLoad_StreamState_2,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData>
+{
+  Test_I_URLStreamLoad_SessionData_2 ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                   struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                   struct Test_I_URLStreamLoad_StreamState_2,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+   , address (static_cast<u_short> (0),
+              static_cast<ACE_UINT32> (INADDR_ANY))
+   , connection (NULL)
+   , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   , targetFileName ()
+  {}
+
+  struct Test_I_URLStreamLoad_SessionData_2& operator= (struct Test_I_URLStreamLoad_SessionData_2& rhs_in)
+  {
+    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                  struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                  struct Test_I_URLStreamLoad_StreamState_2,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator= (rhs_in);
+
+    connection = (connection ? connection : rhs_in.connection);
+    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
+                                              : targetFileName);
+
+    return *this;
+  }
+
+  ACE_INET_Addr                                address;
+  Test_I_IConnection_t*                        connection;
+  enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
+  std::string                                  targetFileName; // file writer module
+};
+typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData_2> Test_I_URLStreamLoad_SessionData_2_t;
+
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    struct Test_I_URLStreamLoad_SessionData_2,
+                                    enum Stream_SessionMessageType,
+                                    Test_I_Message,
+                                    Test_I_SessionMessage_2> Test_I_ISessionNotify_2_t;
+typedef std::list<Test_I_ISessionNotify_2_t*> Test_I_Subscribers_2_t;
+typedef Test_I_Subscribers_2_t::const_iterator Test_I_SubscribersIterator_2_t;
+
+struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
+ : HTTP_ModuleHandlerConfiguration
+{
+  Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 ()
+   : HTTP_ModuleHandlerConfiguration ()
+   , codecId (AV_CODEC_ID_NONE)
+   , connectionConfigurations (NULL)
+   , program (1)
+   , streamType (27)
+   , subscriber (NULL)
+   , subscribers (NULL)
+   , targetFileName ()
+   , outputFormat ()
+   , window (NULL)
+  {
+    concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
+    inbound = true;
+  }
+
+  enum AVCodecID                  codecId;
+  Net_ConnectionConfigurations_t* connectionConfigurations;
+  unsigned int                    program;                  // MPEG TS decoder module
+  unsigned int                    streamType;               // MPEG TS decoder module
+  Test_I_ISessionNotify_2_t*      subscriber;
+  Test_I_Subscribers_2_t*         subscribers;
+  std::string                     targetFileName; // dump module
+  struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat;
+  GdkWindow*                      window;
+};
+
+struct Test_I_URLStreamLoad_StreamConfiguration_2
+ : HTTP_StreamConfiguration
+{
+  Test_I_URLStreamLoad_StreamConfiguration_2 ()
+   : HTTP_StreamConfiguration ()
+  {}
+};
+//extern const char stream_name_string_[];
+typedef Stream_Configuration_T<//stream_name_string_,
+                               struct Test_I_URLStreamLoad_StreamConfiguration_2,
+                               struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2> Test_I_URLStreamLoad_StreamConfiguration_2_t;
+
+struct Test_I_URLStreamLoad_StreamState_2
+ : Test_I_StreamState
+{
+  Test_I_URLStreamLoad_StreamState_2 ()
+   : Test_I_StreamState ()
+   , sessionData (NULL)
+  {}
+
+  struct Test_I_URLStreamLoad_SessionData_2* sessionData;
 };
 
 #endif

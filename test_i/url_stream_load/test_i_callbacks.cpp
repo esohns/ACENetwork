@@ -126,6 +126,251 @@ idle_end_session_cb (gpointer userData_in)
 }
 
 gboolean
+idle_load_segment_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_load_segment_cb"));
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  // select connector
+  std::string hostname_string, hostname_string_2, URI_string;
+  bool use_SSL = false;
+  size_t position = std::string::npos;
+  int result = -1;
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+  if (!HTTP_Tools::parseURL (data_p->URL,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT (data_p->URL.c_str ())));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  hostname_string_2 = hostname_string;
+  position =
+    hostname_string_2.find_last_of (':', std::string::npos);
+  if (position == std::string::npos)
+  {
+    hostname_string_2 += ':';
+    std::ostringstream converter;
+    converter << (use_SSL ? HTTPS_DEFAULT_SERVER_PORT
+                          : HTTP_DEFAULT_SERVER_PORT);
+    hostname_string_2 += converter.str ();
+  } // end IF
+  result =
+    dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address.set (hostname_string_2.c_str (),
+                                                                                                         AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (hostname_string_2.c_str ())));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  (*iterator_2).second->useLoopBackDevice =
+    dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address.is_loopback ();
+
+  // update configuration
+  Test_I_URLStreamLoad_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+  (*iterator_3).second.second.URL = data_p->URL;
+
+  Test_I_TCPConnector_2_t connector (true);
+#if defined (SSL_SUPPORT)
+  Test_I_SSLConnector_2_t ssl_connector (true);
+#endif // SSL_SUPPORT
+  Test_I_AsynchTCPConnector_2_t asynch_connector (true);
+  Test_I_IConnector_2_t* iconnector_p = NULL;
+  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
+    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_p);
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
+
+  // step3: connect to peer
+  if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
+  {
+#if defined (SSL_SUPPORT)
+    if (use_SSL)
+      iconnector_p = &ssl_connector;
+    else
+#endif // SSL_SUPPORT
+      iconnector_p = &connector;
+  } // end IF
+  else
+  {
+#if defined (SSL_SUPPORT)
+    // *TODO*: add SSL support to the proactor framework
+    ACE_ASSERT (!use_SSL);
+#endif // SSL_SUPPORT
+    iconnector_p = &asynch_connector;
+  } // end ELSE
+  if (!iconnector_p->initialize (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+
+  // step3b: connect
+  data_p->handle =
+      iconnector_p->connect (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address);
+  // *TODO*: support one-thread operation by scheduling a signal and manually
+  //         running the dispatch loop for a limited time...
+  if (data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0)
+  {
+    data_p->handle = ACE_INVALID_HANDLE;
+
+    // *TODO*: avoid tight loop here
+    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
+    //result = ACE_OS::sleep (timeout);
+    //if (result == -1)
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+    //              &timeout));
+    ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+    do
+    {
+      iconnection_p =
+          iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address,
+                                      true);
+      if (iconnection_p)
+      {
+        data_p->handle =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+            reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
+#else
+            static_cast<ACE_HANDLE> (iconnection_p->id ());
+#endif
+        iconnection_p->decrease ();
+        break;
+      } // end IF
+    } while (COMMON_TIME_NOW < deadline);
+    if (!iconnection_p)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to connect to %s (timed out after: %#T), continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ()),
+                  &timeout));
+  } // end IF
+  else
+    iconnection_p =
+      iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address,
+                                  true);
+  if ((data_p->handle == ACE_INVALID_HANDLE) ||
+      !iconnection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to %s, aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
+    return G_SOURCE_REMOVE;
+  } // end IF
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
+//                data_p->handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: opened TCP socket to %s\n"),
+//                data_p->handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
+//#endif
+
+//  // step4: send HTTP request
+//  ACE_ASSERT (iconnection_p);
+//  istream_connection_p =
+//    dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
+//  ACE_ASSERT (istream_connection_p);
+
+//  ACE_NEW_NORETURN (HTTP_record_p,
+//                    struct HTTP_Record ());
+//  if (!HTTP_record_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+//    goto error;
+//  } // end IF
+//  HTTP_record_p->form = HTTP_form;
+//  HTTP_record_p->headers = HTTP_headers;
+//  HTTP_record_p->method =
+//    (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
+//                        : HTTP_Codes::HTTP_METHOD_POST);
+//  HTTP_record_p->URI = (*iterator_3).second.second.URL;
+//  HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
+
+//  ACE_NEW_NORETURN (message_data_p,
+//                    Test_I_Message::DATA_T ());
+//  if (!message_data_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+//    delete HTTP_record_p; HTTP_record_p = NULL;
+//    goto error;
+//  } // end IF
+//  // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
+//  message_data_p->setPR (HTTP_record_p);
+
+//  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
+//  pdu_size_i =
+//    (*iterator_2).second->allocatorConfiguration->defaultBufferSize;// +
+////      (*iterator_2).second->allocatorConfiguration->paddingBytes;
+
+//  ACE_ASSERT (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->messageAllocator);
+//allocate:
+//  message_p =
+//    static_cast<Test_I_Message*> (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
+//  // keep retrying ?
+//  if (!message_p &&
+//      !dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->messageAllocator->block ())
+//    goto allocate;
+//  if (!message_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
+//    delete message_data_p; message_data_p = NULL;
+//    goto error;
+//  } // end IF
+//  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
+//  message_p->initialize (message_data_p,
+//                         message_p->sessionId (),
+//                         NULL);
+
+//  //Test_I_ConnectionStream_2& stream_r =
+//  //    const_cast<Test_I_ConnectionStream_2&> (istream_connection_p->stream ());
+//  //const Test_I_URLStreamLoad_SessionData_2_t* session_data_container_p =
+//  //  &stream_r.get ();
+//  //ACE_ASSERT (session_data_container_p);
+//  //struct Test_I_URLStreamLoad_SessionData_2& session_data_r =
+//  //    const_cast<struct Test_I_URLStreamLoad_SessionData_2&> (session_data_container_p->get ());
+
+//  message_block_p = message_p;
+//    istream_connection_p->send (message_block_p);
+
+  // clean up
+  iconnection_p->decrease (); iconnection_p = NULL;
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
 idle_finalize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
@@ -240,7 +485,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
     (*iterator_2).second->allocatorConfiguration->paddingBytes;
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> (pdu_size_i));
+                             static_cast<double> ((*iterator_2).second->allocatorConfiguration->defaultBufferSize));
 
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
@@ -400,6 +645,11 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
                                 dynamic_cast<Net_TCPSocketConfiguration_t*> ((*iterator_2).second)->address.is_loopback ());
 
+  GtkDrawingArea* drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+  ACE_ASSERT (drawing_area_p);
+
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
@@ -495,6 +745,10 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   // step9: draw main dialog
   gtk_widget_show_all (GTK_WIDGET (dialog_p));
+
+  GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+  ACE_ASSERT (window_p);
+  (*iterator_3).second.second.window = window_p;
 
   return G_SOURCE_REMOVE;
 }
@@ -1147,17 +1401,17 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
       goto error;
     } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
-                data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened TCP socket to %s\n"),
-                data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
-#endif
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
+//                data_p->handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: opened TCP socket to %s\n"),
+//                data_p->handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
+//#endif
 
     // step4: send HTTP request
     ACE_ASSERT (iconnection_p);
@@ -1229,7 +1483,8 @@ allocate:
     //    const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_data_container_p->get ());
 
     message_block_p = message_p;
-    istream_connection_p->send (message_block_p);
+//    istream_connection_p->send (message_block_p);
+    message_p->release ();
 
     // clean up
     iconnection_p->decrease (); iconnection_p = NULL;

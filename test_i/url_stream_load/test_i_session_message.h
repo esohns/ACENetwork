@@ -83,4 +83,51 @@ class Test_I_SessionMessage
   ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage& operator= (const Test_I_SessionMessage&))
 };
 
+//////////////////////////////////////////
+
+class Test_I_SessionMessage_2
+ : public Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      Test_I_URLStreamLoad_SessionData_2_t,
+                                      struct Stream_UserData>
+{
+  typedef Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      Test_I_URLStreamLoad_SessionData_2_t,
+                                      struct Stream_UserData> inherited;
+
+  // grant access to specific private ctors
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_I_Message,
+                                                 Test_I_SessionMessage_2>;
+
+ public:
+  // *NOTE*: assumes responsibility for the second argument !
+  // *TODO*: (using gcc) cannot pass reference to pointer for some reason
+  Test_I_SessionMessage_2 (Stream_SessionId_t,
+                           enum Stream_SessionMessageType,
+                           Test_I_URLStreamLoad_SessionData_2_t*&, // session data container handle
+                           struct Stream_UserData*);
+  // copy ctor to be used by duplicate()
+  Test_I_SessionMessage_2 (const Test_I_SessionMessage_2&);
+  inline virtual ~Test_I_SessionMessage_2 () {}
+
+  // overloaded from ACE_Message_Block
+  virtual ACE_Message_Block* duplicate (void) const;
+
+ private:
+  // *NOTE*: these may be used by message allocators
+  // *WARNING*: these ctors are NOT threadsafe
+  Test_I_SessionMessage_2 (Stream_SessionId_t,
+                           ACE_Allocator*); // message allocator
+  Test_I_SessionMessage_2 (Stream_SessionId_t,
+                           ACE_Data_Block*, // data block to use
+                           ACE_Allocator*); // message allocator
+
+  ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage_2 ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage_2& operator= (const Test_I_SessionMessage_2&))
+};
+
 #endif

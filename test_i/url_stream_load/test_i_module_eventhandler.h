@@ -43,7 +43,7 @@ class Test_I_Module_EventHandler
                                          Test_I_SessionMessage,
                                          Stream_SessionId_t,
                                          struct Test_I_URLStreamLoad_SessionData,
-                                         struct HTTP_Stream_UserData>
+                                         struct Stream_UserData>
 {
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
@@ -53,7 +53,7 @@ class Test_I_Module_EventHandler
                                          Test_I_SessionMessage,
                                          Stream_SessionId_t,
                                          struct Test_I_URLStreamLoad_SessionData,
-                                         struct HTTP_Stream_UserData> inherited;
+                                         struct Stream_UserData> inherited;
 
  public:
   Test_I_Module_EventHandler (ISTREAM_T*); // stream handle
@@ -76,5 +76,49 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,          
                               libacestream_default_misc_messagehandler_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
                               Test_I_Module_EventHandler);                            // writer type
+
+//////////////////////////////////////////
+
+class Test_I_Module_EventHandler_2
+ : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
+                                         Stream_ControlMessage_t,
+                                         Test_I_Message,
+                                         Test_I_SessionMessage_2,
+                                         Stream_SessionId_t,
+                                         struct Test_I_URLStreamLoad_SessionData_2,
+                                         struct Stream_UserData>
+{
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
+                                         Stream_ControlMessage_t,
+                                         Test_I_Message,
+                                         Test_I_SessionMessage_2,
+                                         Stream_SessionId_t,
+                                         struct Test_I_URLStreamLoad_SessionData_2,
+                                         struct Stream_UserData> inherited;
+
+ public:
+  Test_I_Module_EventHandler_2 (ISTREAM_T*); // stream handle
+  inline virtual ~Test_I_Module_EventHandler_2 () {}
+
+  // implement Common_IClone_T
+  virtual ACE_Task<ACE_MT_SYNCH,
+                   Common_TimePolicy_t>* clone ();
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler_2 ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler_2 (const Test_I_Module_EventHandler_2&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler_2& operator= (const Test_I_Module_EventHandler_2&))
+};
+
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                         // session event type
+                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_misc_messagehandler_module_name_string,
+                              Stream_INotify_t,                                       // stream notification interface type
+                              Test_I_Module_EventHandler_2);                          // writer type
 
 #endif

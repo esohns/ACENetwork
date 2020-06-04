@@ -107,3 +107,87 @@ Test_I_SessionMessage::duplicate (void) const
 
   return message_p;
 }
+
+//////////////////////////////////////////
+
+Test_I_SessionMessage_2::Test_I_SessionMessage_2 (Stream_SessionId_t sessionId_in,
+                                                  enum Stream_SessionMessageType messageType_in,
+                                                  Test_I_URLStreamLoad_SessionData_2_t*& sessionData_in,
+                                                  struct Stream_UserData* userData_in)
+ : inherited (sessionId_in,
+              messageType_in,
+              sessionData_in,
+              userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::Test_I_SessionMessage_2"));
+
+}
+
+Test_I_SessionMessage_2::Test_I_SessionMessage_2 (const Test_I_SessionMessage_2& message_in)
+ : inherited (message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::Test_I_SessionMessage_2"));
+
+}
+
+Test_I_SessionMessage_2::Test_I_SessionMessage_2 (Stream_SessionId_t sessionId_in,
+                                                  ACE_Allocator* messageAllocator_in)
+ : inherited (sessionId_in,
+              messageAllocator_in) // message block allocator
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::Test_I_SessionMessage_2"));
+
+}
+
+Test_I_SessionMessage_2::Test_I_SessionMessage_2 (Stream_SessionId_t sessionId_in,
+                                                  ACE_Data_Block* dataBlock_in,
+                                                  ACE_Allocator* messageAllocator_in)
+ : inherited (sessionId_in,
+              dataBlock_in,        // use (don't own (!) memory of-) this data block
+              messageAllocator_in) // message block allocator
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::Test_I_SessionMessage_2"));
+
+}
+
+ACE_Message_Block*
+Test_I_SessionMessage_2::duplicate (void) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::duplicate"));
+
+  Test_I_SessionMessage_2* message_p = NULL;
+
+  // create a new <Test_I_SessionMessage> that contains unique copies of
+  // the message block fields, but a reference counted duplicate of
+  // the <ACE_Data_Block>.
+
+  // if there is no allocator, use the standard new and delete calls.
+  if (inherited::message_block_allocator_ == NULL)
+    ACE_NEW_RETURN (message_p,
+                    Test_I_SessionMessage_2 (*this),
+                    NULL);
+
+  // *WARNING*: the allocator returns a Test_I_SessionMessageBase<ConfigurationType>
+  //            when passing 0 as argument to malloc()...
+  ACE_NEW_MALLOC_RETURN (message_p,
+                         static_cast<Test_I_SessionMessage_2*> (inherited::message_block_allocator_->malloc (0)),
+                         Test_I_SessionMessage_2 (*this),
+                         NULL);
+
+  // increment the reference counts of all the continuation messages
+  if (inherited::cont_)
+  {
+    message_p->cont_ = inherited::cont_->duplicate ();
+
+    // when things go wrong, release all resources and return
+    if (message_p->cont_ == 0)
+    {
+      message_p->release ();
+      message_p = NULL;
+    } // end IF
+  } // end IF
+
+  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
+
+  return message_p;
+}

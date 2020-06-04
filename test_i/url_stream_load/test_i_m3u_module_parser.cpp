@@ -23,6 +23,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_string_tools.h"
+
 #include "stream_macros.h"
 
 Test_I_M3U_Module_Parser::Test_I_M3U_Module_Parser (ISTREAM_T* stream_in)
@@ -73,6 +75,58 @@ Test_I_M3U_Module_Parser:: clone ()
   } // end ELSE
 
   return task_p;
+}
+
+void
+Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
+                                             bool& passMessageDownstream_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::handleDataMessage"));
+
+  int result = -1;
+
+  const Test_I_MessageDataContainer& data_container_r = message_inout->getR ();
+  const Test_I_MessageData& data_r = data_container_r.getR ();
+  ACE_ASSERT (data_r.HTTPRecord);
+  HTTP_HeadersIterator_t iterator =
+    data_r.HTTPRecord->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+  ACE_ASSERT (iterator != data_r.HTTPRecord->headers.end ());
+  std::istringstream converter;
+  converter.str ((*iterator).second);
+  unsigned int content_length = 0;
+  converter >> content_length;
+  unsigned int missing_bytes =
+      content_length - inherited::headFragment_->total_length ()
+                     - message_inout->total_length ();
+  if (!missing_bytes)
+    inherited::finished_ = true;
+
+  // initialize return value(s)
+  // *NOTE*: the default behavior is to pass all messages along
+  //         --> in this case, the individual frames are extracted and passed
+  //             as such
+  passMessageDownstream_out = false;
+
+  // append the "\0\0"-sequence, as required by flex
+  //ACE_ASSERT (message_inout->capacity () - message_inout->length () >= STREAM_MISC_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  //*(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
+  //*(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
+  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
+
+  //message_inout->finalize (); // reset any data it might already have
+  result = inherited::parserQueue_.enqueue_tail (message_inout,
+                                                 NULL);
+  if (unlikely (result == -1))
+  {
+    int error = ACE_OS::last_error ();
+    if (error != ESHUTDOWN)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to ACE_Message_Queue::enqueue_tail(): \"%m\", returning\n"),
+                  inherited::mod_->name ()));
+    message_inout->release (); message_inout = NULL;
+    return;
+  } // end IF
+  message_inout = NULL;
 }
 
 void

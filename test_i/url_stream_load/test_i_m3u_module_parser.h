@@ -64,6 +64,10 @@ class Test_I_M3U_Module_Parser
   Test_I_M3U_Module_Parser (ISTREAM_T*); // stream handle
   inline virtual ~Test_I_M3U_Module_Parser () {}
 
+  // override (part of) Stream_ITaskBase_T
+  virtual void handleDataMessage (Test_I_Message*&, // data message handle
+                                  bool&);           // return value: pass message downstream ?
+
   // implement Common_IClone_T
   virtual ACE_Task<ACE_MT_SYNCH,
                    Common_TimePolicy_t>* clone ();

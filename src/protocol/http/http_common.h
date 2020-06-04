@@ -40,7 +40,7 @@
 struct HTTP_Record;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
-struct HTTP_Stream_UserData;
+//struct HTTP_Stream_UserData;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     struct HTTP_Stream_SessionData,

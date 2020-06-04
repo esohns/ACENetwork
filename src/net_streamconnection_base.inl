@@ -569,7 +569,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   if (likely (deregister))
     inherited2::deregister ();
 
-  if (count)
+  if ((count > 1) ||
+      ((count == 1) && !deregister))
     this->decrease ();
 
   return result;

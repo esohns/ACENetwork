@@ -43,6 +43,7 @@
 // forward declarations
 class Test_I_Message;
 class Test_I_SessionMessage;
+class Test_I_SessionMessage_2;
 
 //typedef HTTP_Statistic_t Test_I_URLStreamLoad_Statistic_t;
 //typedef Common_IStatistic_T<Test_I_URLStreamLoad_Statistic_t> Test_I_URLStreamLoad_StatisticReportingHandler_t;
@@ -82,6 +83,7 @@ struct Test_I_URLStreamLoad_Configuration
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
+   , streamConfiguration_2 ()
    //, protocolConfiguration ()
 //   , userData ()
   {}
@@ -92,6 +94,7 @@ struct Test_I_URLStreamLoad_Configuration
   Net_ConnectionConfigurations_t                         connectionConfigurations;
   // **************************** stream data **********************************
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration;
+  Test_I_URLStreamLoad_StreamConfiguration_2_t           streamConfiguration_2;
   // *************************** protocol data *********************************
   //struct HTTP_ProtocolConfiguration                      protocolConfiguration;
 
@@ -103,6 +106,11 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           Stream_ControlMessage_t,
                                           Test_I_Message,
                                           Test_I_SessionMessage> Test_I_MessageAllocator_t;
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Common_AllocatorConfiguration,
+                                          Stream_ControlMessage_t,
+                                          Test_I_Message,
+                                          Test_I_SessionMessage_2> Test_I_MessageAllocator_2_t;
 
 typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 
@@ -147,6 +155,7 @@ struct Test_I_URLStreamLoad_UI_CBData
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , subscribers ()
+   , URL ()
   {}
 
   struct Test_I_URLStreamLoad_Configuration*  configuration;
@@ -154,6 +163,7 @@ struct Test_I_URLStreamLoad_UI_CBData
   ACE_HANDLE                                  handle;
   struct Test_I_URLStreamLoad_UI_ProgressData progressData;
   Test_I_Subscribers_t                        subscribers;
+  std::string                                 URL;
 };
 
 //struct Test_I_URLStreamLoad_ThreadData

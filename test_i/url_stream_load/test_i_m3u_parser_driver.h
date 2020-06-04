@@ -87,7 +87,7 @@ class M3U_ParserDriver
   ACE_UNIMPLEMENTED_FUNC (M3U_ParserDriver& operator= (const M3U_ParserDriver&))
 
   inline virtual void setP (M3U_Playlist_t* playlist_in) { ACE_ASSERT (!playlist_); playlist_ = playlist_in; }
-  inline virtual void setP_2 (struct M3U_Element* element_in) { ACE_ASSERT (!element_); element_ = element_in; }
+  inline virtual void setP_2 (struct M3U_Element* element_in) { /*ACE_ASSERT (!element_);*/ element_ = element_in; }
 
   // implement Common_ILexScanner_T
   inline virtual const M3U_IParser_t* const getP_2 () const { return this; }

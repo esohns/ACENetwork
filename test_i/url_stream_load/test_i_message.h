@@ -34,6 +34,7 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_I_SessionMessage;
+class Test_I_SessionMessage_2;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -65,12 +66,10 @@ class Test_I_MessageDataContainer
 
 class Test_I_Message
  : public Stream_DataMessageBase_2<Test_I_MessageDataContainer,
-//                                   struct Common_Parser_FlexAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    HTTP_Method_t>
 {
   typedef Stream_DataMessageBase_2<Test_I_MessageDataContainer,
-//                                   struct Common_Parser_FlexAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    HTTP_Method_t> inherited;
 
@@ -80,14 +79,21 @@ class Test_I_Message
                                                  Stream_ControlMessage_t,
                                                  Test_I_Message,
                                                  Test_I_SessionMessage>;
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_I_Message,
+                                                 Test_I_SessionMessage_2>;
 
  public:
   Test_I_Message (unsigned int); // size
   inline virtual ~Test_I_Message () {}
 
   // overrides from ACE_Message_Block
-  // --> create a "shallow" copy of ourselves that references the same packet
-  // *NOTE*: this uses our allocator (if any) to create a new message
+  // *NOTE*: these use the allocator (if any)
+  // create a "deep" copy
+  virtual ACE_Message_Block* clone (ACE_Message_Block::Message_Flags = 0) const;
+  // create a "shallow" copy that references the current block(s) of data
   virtual ACE_Message_Block* duplicate (void) const;
 
  protected:

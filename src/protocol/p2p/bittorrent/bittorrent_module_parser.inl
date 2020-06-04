@@ -367,6 +367,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     data_container_r.increase ();
     DATA_CONTAINER_T* data_container_2 = &data_container_r;
     message_p->initialize (data_container_2,
+                           message_p->sessionId (),
                            NULL);
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE

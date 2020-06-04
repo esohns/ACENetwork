@@ -58,3 +58,40 @@ Test_I_Module_EventHandler::clone ()
 
   return task_p;
 }
+
+//////////////////////////////////////////
+
+Test_I_Module_EventHandler_2::Test_I_Module_EventHandler_2 (ISTREAM_T* stream_in)
+ : inherited (stream_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_EventHandler_2::Test_I_Module_EventHandler_2"));
+
+}
+
+ACE_Task<ACE_MT_SYNCH,
+         Common_TimePolicy_t>*
+Test_I_Module_EventHandler_2::clone ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_EventHandler_2::clone"));
+
+  // initialize return value(s)
+  ACE_Task<ACE_MT_SYNCH,
+           Common_TimePolicy_t>* task_p = NULL;
+
+  ACE_NEW_NORETURN (task_p,
+                    Test_I_Module_EventHandler_2 (NULL));
+  if (!task_p)
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("%s: failed to allocate memory: \"%m\", aborting\n"),
+                inherited::mod_->name ()));
+  else
+  {
+    inherited* inherited_p = dynamic_cast<inherited*> (task_p);
+    ACE_ASSERT (inherited_p);
+    ACE_ASSERT (inherited::configuration_);
+    inherited_p->initialize (*inherited::configuration_,
+                             inherited::allocator_);
+  } // end ELSE
+
+  return task_p;
+}

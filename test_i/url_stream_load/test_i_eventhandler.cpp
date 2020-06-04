@@ -60,6 +60,7 @@ Test_I_EventHandler::Test_I_EventHandler (
 #else
  : sessionDataMap_ ()
 #endif // GUI_SUPPORT
+ , sessionDataMap2_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::Test_I_EventHandler"));
 
@@ -203,7 +204,34 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
+  Test_I_MessageDataContainer& data_container_r =
+    const_cast<Test_I_MessageDataContainer&> (message_in.getR ());
+  struct Test_I_MessageData& data_r =
+    const_cast<struct Test_I_MessageData&> (data_container_r.getR ());
+  if (data_r.M3UPlaylist)
+  {
+    const struct M3U_Element& element_r = data_r.M3UPlaylist->back ();
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("loading \"%s\"...\n"),
+                ACE_TEXT (element_r.URL.c_str ())));
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+    CBData_->URL = element_r.URL;
+    guint event_source_id = g_idle_add (idle_load_segment_cb,
+                                        CBData_);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_load_segment_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
+    state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+  } // end IF
 }
+
 void
 Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                              const Test_I_SessionMessage& sessionMessage_in)
@@ -218,6 +246,138 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #endif // GUI_SUPPORT
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   ACE_ASSERT (iterator != sessionDataMap_.end ());
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+  enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
+  switch (sessionMessage_in.type ())
+  {
+    case STREAM_SESSION_MESSAGE_CONNECT:
+    {
+      event_e = COMMON_UI_EVENT_CONNECT;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_DISCONNECT:
+    {
+      event_e = COMMON_UI_EVENT_DISCONNECT;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_STATISTIC:
+    {
+      if ((*iterator).second->lock)
+      {
+        result = (*iterator).second->lock->acquire ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
+      } // end IF
+
+#if defined (GUI_SUPPORT)
+      CBData_->progressData.statistic = (*iterator).second->statistic;
+#endif // GUI_SUPPORT
+
+      if ((*iterator).second->lock)
+      {
+        result = (*iterator).second->lock->release ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+      } // end IF
+
+      event_e = COMMON_UI_EVENT_STATISTIC;
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown session message type (was: %d), returning\n"),
+                  sessionMessage_in.type ()));
+      return;
+    }
+  } // end SWITCH
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  state_r.eventStack.push (event_e);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+}
+
+//////////////////////////////////////////
+
+void
+Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
+                            const struct Test_I_URLStreamLoad_SessionData_2& sessionData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::start"));
+
+  // sanity check(s)
+#if defined (GUI_SUPPORT)
+  ACE_ASSERT (CBData_);
+#endif // GUI_SUPPORT
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+  SESSION_DATA_MAP_ITERATOR_2_T iterator = sessionDataMap2_.find (sessionId_in);
+  ACE_ASSERT (iterator == sessionDataMap2_.end ());
+
+  sessionDataMap2_.insert (std::make_pair (sessionId_in,
+                                           &const_cast<struct Test_I_URLStreamLoad_SessionData_2&> (sessionData_in)));
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+//  CBData_->progressData.transferred = 0;
+  state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
+
+  guint event_source_id = g_idle_add (idle_start_session_cb,
+                                      CBData_);
+  if (event_source_id == 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
+    return;
+  } // end IF
+  state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+}
+
+void
+Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
+                             const Test_I_SessionMessage_2& sessionMessage_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::notify"));
+
+  int result = -1;
+
+  // sanity check(s)
+#if defined (GUI_SUPPORT)
+  ACE_ASSERT (CBData_);
+#endif // GUI_SUPPORT
+  SESSION_DATA_MAP_ITERATOR_2_T iterator = sessionDataMap2_.find (sessionId_in);
+  ACE_ASSERT (iterator != sessionDataMap2_.end ());
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)

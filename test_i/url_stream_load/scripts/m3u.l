@@ -89,12 +89,10 @@ extern YY_DECL;
            - http://bittorrent.org/beps/bep_0003.html
            - https://wiki.theory.org/BitTorrentSpecification */
 
-CRLF                              \x0D\x0A /* \r\n */
-DELIMITER                         [, ]
 DIGIT                             [[:digit:]]
-NUMBER                            [[:digit:]]+|[[:digit:]]+.[[:digit:]]+
 OCTET                             [\x00-\xFF]
-TO_END_OF_LINE                    [^\x0D\x0A]
+TO_COMMA                          [^,]
+TO_END_OF_LINE                    [^\x0A]
 
 %s state_x
 %s state_inf
@@ -130,7 +128,7 @@ TO_END_OF_LINE                    [^\x0D\x0A]
 %}
 
 <INITIAL>{
-"#EXTM3U\x0D\x0A"      { parser->offset (yyleng);
+"#EXTM3U\x0A"          { parser->offset (yyleng);
                          ACE_NEW_NORETURN (yylval->lval,
                                            M3U_Playlist_t);
                          ACE_ASSERT (yylval->eval);
@@ -149,17 +147,15 @@ TO_END_OF_LINE                    [^\x0D\x0A]
                                            struct M3U_Element);
                          ACE_ASSERT (yylval->eval);
                          return yy::parser::token::BEGIN_INF; }
-\x0D\x0A               { ACE_ASSERT (yyleng == 2);
-                         parser->offset (2); }
+\x0A                   { parser->offset (yyleng); }
 } // end <INITIAL>
 <state_x>{
-{TO_END_OF_LINE}+     { parser->offset (yyleng); }
-\x0D\x0A              { ACE_ASSERT (yyleng == 2);
-                        parser->offset (2);
+{TO_END_OF_LINE}+/\x0A { parser->offset (yyleng); }
+\x0A                  { parser->offset (yyleng);
                         BEGIN (INITIAL); }
 } // end <state_x>
 <state_inf>{
-{NUMBER}               { parser->offset (yyleng);
+{TO_COMMA}+/,          { parser->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
@@ -170,41 +166,39 @@ TO_END_OF_LINE                    [^\x0D\x0A]
                          BEGIN (state_inf_title); }
 } // end <state_inf>
 <state_inf_title>{
-{TO_END_OF_LINE}+      { parser->offset (yyleng);
+{TO_END_OF_LINE}+/\x0A { parser->offset (yyleng);
                          ACE_NEW_NORETURN (yylval->sval,
                                            std::string);
                          ACE_ASSERT (yylval->sval);
                          yylval->sval->push_back (yytext[0]);
                          return yy::parser::token::TITLE; }
-\x0D\x0A               { ACE_ASSERT (yyleng == 2);
-                         parser->offset (2);
+\x0A                   { parser->offset (yyleng);
                          BEGIN (state_inf_url); }
 } // end <state_inf_title>
 <state_inf_url>{
-{TO_END_OF_LINE}+     { parser->offset (yyleng);
+{TO_END_OF_LINE}+/\x0A { parser->offset (yyleng);
                         ACE_NEW_NORETURN (yylval->sval,
                                           std::string);
                         ACE_ASSERT (yylval->sval);
-                        yylval->sval->push_back (yytext[0]);
+                        yylval->sval->append (yytext);
                         return yy::parser::token::URL; }
-\x0D\x0A              { ACE_ASSERT (yyleng == 2);
-                        parser->offset (2);
+\x0A                  { parser->offset (yyleng);
                         BEGIN (INITIAL);
                         return yy::parser::token::END_OF_ELEMENT; }
 } // end <state_inf_url>
-<<EOF>>                { return yy::parser::token::END; }
-<*>{OCTET}             { /* *TODO*: use (?s:.) ? */
-                         if (!parser->isBlocking ())
-                           return yy::parser::token::END;
-                         // wait for more data fragment(s)
-                         if (!parser->switchBuffer ())
-                         { // *NOTE*: most probable reason: connection
-                           //         has been closed --> session end
-                           ACE_DEBUG ((LM_DEBUG,
-                                       ACE_TEXT ("failed to Common_IParser::switchBuffer(), returning\n")));
-                           yyterminate(); // not enough data, cannot proceed
-                         } // end IF
-                         yyless (0); }
+<<EOF>>               { return yy::parser::token::END; }
+<*>{OCTET}            { /* *TODO*: use (?s:.) ? */
+                        if (!parser->isBlocking ())
+                          return yy::parser::token::END;
+                        // wait for more data fragment(s)
+                        if (!parser->switchBuffer ())
+                        { // *NOTE*: most probable reason: connection
+                          //         has been closed --> session end
+                          ACE_DEBUG ((LM_DEBUG,
+                                      ACE_TEXT ("failed to Common_IParser::switchBuffer(), returning\n")));
+                          yyterminate(); // not enough data, cannot proceed
+                        } // end IF
+                        yyless (0); }
 %% /* end of rules */
 
 #include "stream_macros.h"

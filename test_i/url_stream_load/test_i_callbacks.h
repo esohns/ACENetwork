@@ -30,6 +30,7 @@
 
 // idle routines
 gboolean idle_end_session_cb (gpointer);
+gboolean idle_load_segment_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
 gboolean idle_reset_UI_cb (gpointer);

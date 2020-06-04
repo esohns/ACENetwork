@@ -530,8 +530,11 @@ do_work (bool debugParser_in,
 #endif // GUI_SUPPORT
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_Module_EventHandler_2_Module event_handler_module_2 (NULL,
+                                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
+  allocator_configuration.defaultBufferSize =16384;
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (allocator_configuration))
@@ -543,6 +546,9 @@ do_work (bool debugParser_in,
   Test_I_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                &heap_allocator,         // heap allocator handle
                                                true);                   // block ?
+  Test_I_MessageAllocator_2_t message_allocator_2 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+                                                   &heap_allocator,         // heap allocator handle
+                                                   true);                   // block ?
 
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
@@ -550,8 +556,8 @@ do_work (bool debugParser_in,
   connection_configuration.allocatorConfiguration = &allocator_configuration;
   connection_configuration.useLoopBackDevice =
     connection_configuration.address.is_loopback ();
-  connection_configuration.statisticReportingInterval =
-    statisticReportingInterval_in;
+//  connection_configuration.statisticReportingInterval =
+//    statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
   //connection_configuration.PDUSize = bufferSize_in;
   //connection_configuration.userData = &CBData_in.configuration->userData;
@@ -562,6 +568,19 @@ do_work (bool debugParser_in,
   Net_ConnectionConfigurationsIterator_t iterator =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
+
+  Test_I_URLStreamLoad_ConnectionConfiguration_2_t connection_configuration_2;
+  connection_configuration_2.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_2.useLoopBackDevice = false;
+//  connection_configuration_2.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  connection_configuration_2.messageAllocator = &message_allocator_2;
+  connection_configuration_2.initialize (configuration_in.streamConfiguration_2);
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2"),
+                                                                    &connection_configuration_2));
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
+  ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
@@ -581,10 +600,8 @@ do_work (bool debugParser_in,
   //modulehandler_configuration.connectionManager = connection_manager_p;
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
-  modulehandler_configuration.statisticReportingInterval =
-    statisticReportingInterval_in;
-//  modulehandler_configuration.streamConfiguration =
-//    &configuration_in.streamConfiguration;
+//  modulehandler_configuration.statisticReportingInterval =
+//    statisticReportingInterval_in;
   modulehandler_configuration.subscriber = &message_handler;
   modulehandler_configuration.targetFileName = fileName_in;
   modulehandler_configuration.URL = URL_in;
@@ -605,6 +622,31 @@ do_work (bool debugParser_in,
 
   //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
 
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
+  modulehandler_configuration_2.allocatorConfiguration =
+    &allocator_configuration;
+  modulehandler_configuration_2.codecId = AV_CODEC_ID_H264;
+  modulehandler_configuration_2.concurrency =
+      STREAM_HEADMODULECONCURRENCY_ACTIVE;
+  modulehandler_configuration_2.connectionConfigurations =
+    &configuration_in.connectionConfigurations;
+  modulehandler_configuration_2.outputFormat.format = AV_PIX_FMT_RGB24;
+  modulehandler_configuration_2.parserConfiguration =
+    &configuration_in.parserConfiguration;
+//  modulehandler_configuration_2.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  modulehandler_configuration_2.subscriber = &message_handler;
+  modulehandler_configuration_2.targetFileName = fileName_in;
+  modulehandler_configuration_2.URL = URL_in;
+  modulehandler_configuration_2.waitForConnect = false;
+  struct Test_I_URLStreamLoad_StreamConfiguration_2 stream_configuration_2;
+  stream_configuration_2.messageAllocator = &message_allocator_2;
+  stream_configuration_2.module = &event_handler_module_2;
+  stream_configuration_2.printFinalReport = true;
+  configuration_in.streamConfiguration_2.initialize (module_configuration,
+                                                     modulehandler_configuration_2,
+                                                     stream_configuration_2);
+
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -612,6 +654,13 @@ do_work (bool debugParser_in,
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator).second),
+                             NULL);
+  Test_I_ConnectionManager_2_t* connection_manager_2 =
+    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (connection_manager_2);
+  connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
+  connection_manager_2->set (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second),
                              NULL);
 
   Common_Timer_Manager_t* timer_manager_p =

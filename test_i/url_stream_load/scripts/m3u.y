@@ -145,8 +145,8 @@
 %nterm  <eval> element inf_rest_1 inf_rest_2 inf_rest_3 inf_rest_4
 %nterm  <lval> playlist elements
 
-/*%precedence "integer" "string"
-%precedence "element" "playlist"*/
+/*%precedence element inf_rest_1 inf_rest_2 inf_rest_3 inf_rest_4
+%precedence playlist elements*/
 
 %code provides {
 /*void BitTorrent_Export yysetdebug (int);
@@ -163,6 +163,8 @@ void yyprint (FILE*, yytokentype, YYSTYPE);*/
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); } <ival>
 %destructor { delete $$; $$ = NULL; } <sval>
 %destructor { $$ = 0; } <ival>*/
+/*%destructor { $$ = 0; } <eval>
+%destructor { $$ = 0; } <lval>*/
 /* %destructor               { ACE_DEBUG ((LM_DEBUG,
                                         ACE_TEXT ("discarding tagless symbol...\n"))); } <> */
 /*%printer    { yyoutput << $$; } <*>;*/
@@ -174,7 +176,7 @@ void yyprint (FILE*, yytokentype, YYSTYPE);*/
 
 %%
 %start            playlist;
-playlist:         "begin_elements" {
+playlist:         BEGIN_ELEMS {
                     iparser->setP ($1);
                   } elements {
                     M3U_Playlist_t& playlist_r = iparser->current ();
@@ -184,22 +186,25 @@ playlist:         "begin_elements" {
                     } catch (...) {
                       ACE_DEBUG ((LM_ERROR,
                                   ACE_TEXT ("caught exception in M3U_IParser::record(), continuing\n")));
-                    } }
+                    }
+                    YYACCEPT;
+                  }
 elements:         elements element
 /*                  |                    { }*/
                   | %empty             { }
-element:          "begin_element_inf" inf_rest_1 {
+element:          "begin_element_inf" {
                     iparser->setP_2 ($1);
-                  }
-inf_rest_1:       "length" inf_rest_2 {
+                  } inf_rest_1 { }
+inf_rest_1:       "length" {
                     struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.Length = $1; };
-inf_rest_2:       "title" inf_rest_3 {
+                    element_r.Length = $1; } inf_rest_2 { }
+inf_rest_2:       "title" {
                     struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.Title = *$1; }
-inf_rest_3:       "URL" inf_rest_4 {
+                    element_r.Title = *$1; } inf_rest_3 { }
+                  | inf_rest_3 { }
+inf_rest_3:       "URL" {
                     struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.URL = *$1; }
+                    element_r.URL = *$1; } inf_rest_4 { }
 inf_rest_4:       "element_end" {
                     M3U_Playlist_t& playlist_r = iparser->current ();
                     struct M3U_Element& element_r = iparser->current_2 ();

@@ -30,6 +30,9 @@ Test_I_M3U_Tools::ElementToString (const struct M3U_Element& element_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Tools::ElementToString"));
 
+  std::string result;
+
+  return result;
 }
 
 std::string
@@ -37,4 +40,7 @@ Test_I_M3U_Tools::PlaylistToString (const M3U_Playlist_t& playlist_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Tools::PlaylistToString"));
 
+  std::string result;
+
+  return result;
 }

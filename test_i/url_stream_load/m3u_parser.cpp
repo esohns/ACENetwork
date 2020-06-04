@@ -724,7 +724,7 @@ namespace yy {
           switch (yyn)
             {
   case 2:
-                                   {
+                              {
                     iparser->setP ((yystack_[0].value.lval));
                   }
     break;
@@ -738,7 +738,9 @@ namespace yy {
                     } catch (...) {
                       ACE_DEBUG ((LM_ERROR,
                                   ACE_TEXT ("caught exception in M3U_IParser::record(), continuing\n")));
-                    } }
+                    }
+                    YYACCEPT;
+                  }
     break;
 
   case 4:
@@ -750,37 +752,57 @@ namespace yy {
     break;
 
   case 6:
-                                                 {
-                    iparser->setP_2 ((yystack_[1].value.eval));
+                                      {
+                    iparser->setP_2 ((yystack_[0].value.eval));
                   }
     break;
 
   case 7:
-                                      {
-                    struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.Length = (yystack_[1].value.ival); }
+                               { }
     break;
 
   case 8:
-                                     {
+                           {
                     struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.Title = *(yystack_[1].value.sval); }
+                    element_r.Length = (yystack_[0].value.ival); }
     break;
 
   case 9:
-                                   {
-                    struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.URL = *(yystack_[1].value.sval); }
+                                                        { }
     break;
 
   case 10:
+                          {
+                    struct M3U_Element& element_r = iparser->current_2 ();
+                    element_r.Title = *(yystack_[0].value.sval); }
+    break;
+
+  case 11:
+                                                        { }
+    break;
+
+  case 12:
+                               { }
+    break;
+
+  case 13:
+                        {
+                    struct M3U_Element& element_r = iparser->current_2 ();
+                    element_r.URL = *(yystack_[0].value.sval); }
+    break;
+
+  case 14:
+                                                      { }
+    break;
+
+  case 15:
                                 {
                     M3U_Playlist_t& playlist_r = iparser->current ();
                     struct M3U_Element& element_r = iparser->current_2 ();
                     playlist_r.push_back (element_r); }
     break;
 
-  case 11:
+  case 16:
                                        { }
     break;
 
@@ -1062,60 +1084,65 @@ namespace yy {
   const signed char
   parser::yypact_[] =
   {
-      -8,    -9,     1,    -9,    -9,    -5,    -1,    -9,     0,    -9,
-      -2,    -9,     3,    -9,    -9,    -9
+      -6,    -9,     3,    -9,    -9,    -3,    -9,    -9,     1,    -9,
+      -9,    -5,    -9,    -9,    -9,    -9,     0,     4,    -9,    -9,
+      -9
   };
 
   const signed char
   parser::yydefact_[] =
   {
-       0,     2,     0,     5,     1,     3,     0,     4,     0,     6,
-       0,     7,    11,     8,    10,     9
+       0,     2,     0,     5,     1,     3,     6,     4,     0,     8,
+       7,     0,    10,    13,     9,    12,     0,    16,    11,    15,
+      14
   };
 
   const signed char
   parser::yypgoto_[] =
   {
-      -9,    -9,    -9,    -9,    -9,    -9,    -9,    -9,    -9
+      -9,    -9,    -9,    -9,    -8,    -9,    -9,    -9,    -9,    -9,
+      -9,    -9,    -9
   };
 
   const signed char
   parser::yydefgoto_[] =
   {
-      -1,     7,     9,    11,    13,    15,     2,     5,     3
+      -1,     7,    10,    14,    15,    20,     2,     5,     3,     8,
+      11,    16,    17
   };
 
   const signed char
   parser::yytable_[] =
   {
-       1,     4,     6,     8,    12,    10,    14
+      12,    13,     1,     4,     6,     9,    13,    19,    18
   };
 
   const signed char
   parser::yycheck_[] =
   {
-       8,     0,     7,     4,     6,     5,     3
+       5,     6,     8,     0,     7,     4,     6,     3,    16
   };
 
   const signed char
   parser::yystos_[] =
   {
-       0,     8,    15,    17,     0,    16,     7,    10,     4,    11,
-       5,    12,     6,    13,     3,    14
+       0,     8,    15,    17,     0,    16,     7,    10,    18,     4,
+      11,    19,     5,     6,    12,    13,    20,    21,    13,     3,
+      14
   };
 
   const signed char
   parser::yyr1_[] =
   {
-       0,     9,    17,    15,    16,    16,    10,    11,    12,    13,
-      14,    14
+       0,     9,    17,    15,    16,    16,    18,    10,    19,    11,
+      20,    12,    12,    21,    13,    14,    14
   };
 
   const signed char
   parser::yyr2_[] =
   {
-       0,     2,     0,     3,     2,     0,     2,     2,     2,     2,
-       1,     0
+       0,     2,     0,     3,     2,     0,     0,     3,     0,     3,
+       0,     3,     1,     0,     3,     1,     0
   };
 
 
@@ -1128,15 +1155,15 @@ namespace yy {
   "\"end\"", "error", "$undefined", "\"element_end\"", "\"length\"",
   "\"title\"", "\"URL\"", "\"begin_element_inf\"", "\"begin_elements\"",
   "$accept", "element", "inf_rest_1", "inf_rest_2", "inf_rest_3",
-  "inf_rest_4", "playlist", "elements", "$@1", YY_NULLPTR
+  "inf_rest_4", "playlist", "elements", "$@1", "$@2", "$@3", "$@4", "$@5", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned char
   parser::yyrline_[] =
   {
-       0,   177,   177,   177,   188,   190,   191,   194,   197,   200,
-     203,   208
+       0,   179,   179,   179,   192,   194,   195,   195,   198,   198,
+     201,   201,   204,   205,   205,   208,   213
   };
 
   // Print the state stack on the debug stream.
