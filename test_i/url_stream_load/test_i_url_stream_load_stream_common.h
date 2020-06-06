@@ -255,7 +255,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
    , codecId (AV_CODEC_ID_NONE)
    , connectionConfigurations (NULL)
    , program (1)
-   , streamType (27)
+   , streamType (27) // H264
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
