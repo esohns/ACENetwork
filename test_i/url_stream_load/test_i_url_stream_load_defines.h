@@ -21,7 +21,7 @@
 #ifndef TEST_I_URLSTREAMLOAD_DEFINES_H
 #define TEST_I_URLSTREAMLOAD_DEFINES_H
 
-#define TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE          "output.avi"
+#define TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE          "output.mp4"
 #define TEST_I_URLSTREAMLOAD_DEFAULT_URL                  "https://tagesschau-lh.akamaihd.net/i/tagesschau_3@66339/index_320_av-p.m3u8"
 
 #define TEST_I_URLSTREAMLOAD_DEFAULT_BUFFER_SIZE          HTTP_BUFFER_SIZE

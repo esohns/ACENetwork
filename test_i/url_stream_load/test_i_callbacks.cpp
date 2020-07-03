@@ -1162,6 +1162,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
+  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
+    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_2);
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   bool success = false;
   GtkBox* box_p = NULL;
@@ -1541,13 +1544,13 @@ continue_:
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
 #else
     iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   if (iconnection_p)
   {
-    iconnection_p->close ();
-    iconnection_p->decrease ();
+    iconnection_p->close (); iconnection_p->decrease ();
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;
+  iconnection_manager_2->abort ();
 
   return;
 

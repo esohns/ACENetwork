@@ -35,6 +35,8 @@
 #include "stream_dec_libav_decoder.h"
 #include "stream_dec_mpeg_ts_decoder.h"
 
+#include "stream_file_sink.h"
+
 #include "stream_lib_ffmpeg_common.h"
 
 #include "stream_stat_statistic_report.h"
@@ -202,34 +204,46 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData_2, // sess
                               libacestream_default_net_http_get_module_name_string,
                               Stream_INotify_t,                          // stream notification interface type
                               Test_I_MPEGTSDecoder);                     // writer type
-typedef Stream_Decoder_LibAVDecoder_T<ACE_MT_SYNCH,
-                                      Common_TimePolicy_t,
-                                      struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
-                                      Stream_ControlMessage_t,
-                                      Test_I_Message,
-                                      Test_I_SessionMessage_2,
-                                      Test_I_URLStreamLoad_SessionData_2_t,
-                                      struct Stream_MediaFramework_FFMPEG_VideoMediaType> Test_I_MPEG2Decoder;
+//typedef Stream_Decoder_LibAVDecoder_T<ACE_MT_SYNCH,
+//                                      Common_TimePolicy_t,
+//                                      struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
+//                                      Stream_ControlMessage_t,
+//                                      Test_I_Message,
+//                                      Test_I_SessionMessage_2,
+//                                      Test_I_URLStreamLoad_SessionData_2_t,
+//                                      struct Stream_MediaFramework_FFMPEG_VideoMediaType> Test_I_MPEG2Decoder;
+//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData_2, // session data type
+//                              enum Stream_SessionMessageType,            // session event type
+//                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2, // module handler configuration type
+//                              libacestream_default_net_http_get_module_name_string,
+//                              Stream_INotify_t,                          // stream notification interface type
+//                              Test_I_MPEG2Decoder);                     // writer type
+typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
+                                   Stream_ControlMessage_t,
+                                   Test_I_Message,
+                                   Test_I_SessionMessage_2> Test_I_FileSink;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData_2, // session data type
                               enum Stream_SessionMessageType,            // session event type
                               struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2, // module handler configuration type
                               libacestream_default_net_http_get_module_name_string,
                               Stream_INotify_t,                          // stream notification interface type
-                              Test_I_MPEG2Decoder);                     // writer type
+                              Test_I_FileSink);                          // writer type
 
-typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
-                                       Common_TimePolicy_t,
-                                       struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
-                                       Stream_ControlMessage_t,
-                                       Test_I_Message,
-                                       Test_I_SessionMessage_2,
-                                       Test_I_URLStreamLoad_SessionData_2_t,
-                                       struct Stream_MediaFramework_FFMPEG_VideoMediaType> Test_I_Display;
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData_2, // session data type
-                              enum Stream_SessionMessageType,            // session event type
-                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2, // module handler configuration type
-                              libacestream_default_net_http_get_module_name_string,
-                              Stream_INotify_t,                          // stream notification interface type
-                              Test_I_Display);                           // writer type
+//typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
+//                                       Common_TimePolicy_t,
+//                                       struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
+//                                       Stream_ControlMessage_t,
+//                                       Test_I_Message,
+//                                       Test_I_SessionMessage_2,
+//                                       Test_I_URLStreamLoad_SessionData_2_t,
+//                                       struct Stream_MediaFramework_FFMPEG_VideoMediaType> Test_I_Display;
+//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData_2, // session data type
+//                              enum Stream_SessionMessageType,            // session event type
+//                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2, // module handler configuration type
+//                              libacestream_default_net_http_get_module_name_string,
+//                              Stream_INotify_t,                          // stream notification interface type
+//                              Test_I_Display);                           // writer type
 
 #endif

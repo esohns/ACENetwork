@@ -625,7 +625,7 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
   modulehandler_configuration_2.allocatorConfiguration =
     &allocator_configuration;
-  modulehandler_configuration_2.codecId = AV_CODEC_ID_H264;
+  modulehandler_configuration_2.codecId = AV_CODEC_ID_H263;
   modulehandler_configuration_2.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_2.connectionConfigurations =

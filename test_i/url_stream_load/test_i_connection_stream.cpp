@@ -231,24 +231,24 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                               ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
                   false);
   layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_MPEG2Decoder_Module (this,
+//                                              ACE_TEXT_ALWAYS_CHAR ("MPEG2Decoder")),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_Display_Module (this,
+//                                         ACE_TEXT_ALWAYS_CHAR ("Display")),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_MPEG2Decoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR ("MPEG2Decoder")),
+                  Test_I_FileSink_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR ("FileSink")),
                   false);
   layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Display_Module (this,
-                                         ACE_TEXT_ALWAYS_CHAR ("Display")),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Module_Dump_Module (this,
-  //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
 
   deleteModules_out = true;
 
@@ -298,8 +298,13 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
   session_data_p->targetFileName = (*iterator).second.second.targetFileName;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  media_type_s.resolution.cx = 320;
+  media_type_s.resolution.cy = 240;
+#else
   media_type_s.resolution.width = 320;
   media_type_s.resolution.height = 240;
+#endif // ACE_WIN32 || ACE_WIN64
   session_data_p->formats.push_front (media_type_s);
 
   // ---------------------------------------------------------------------------
