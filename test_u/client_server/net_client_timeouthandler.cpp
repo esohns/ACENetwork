@@ -81,8 +81,8 @@ Client_TimeoutHandler::handle (const void* arg_in)
 
   ACE_UNUSED_ARG (arg_in);
 
-  int result = -1;
-  int index_i = 0;
+//  int result = -1;
+//  int index_i = 0;
   Test_U_TCPConnectionManager_t::CONNECTION_T* connection_p = NULL;
   Test_U_TCPConnectionManager_t::CONNECTION_T* connection_2 = NULL;
   Test_U_UDPConnectionManager_t::CONNECTION_T* connection_2_p = NULL;

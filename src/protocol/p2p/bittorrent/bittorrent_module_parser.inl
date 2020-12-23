@@ -143,18 +143,18 @@ template <ACE_SYNCH_DECL,
           typename UserDataType>
 void
 BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
-                           TimePolicyType,
-                           ConfigurationType,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           UserDataType>::handleDataMessage (DataMessageType*& message_inout,
-                                                             bool& passMessageDownstream_out)
+                              TimePolicyType,
+                              ConfigurationType,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              UserDataType>::handleDataMessage (DataMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::handleDataMessage"));
 
   DataMessageType* message_p = NULL;
-  int result = -1;
+//  int result = -1;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
 

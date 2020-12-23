@@ -183,6 +183,9 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
 {
   //NETWORK_TRACE (ACE_TEXT ("::is_entry_sensitive"));
 
+  ACE_UNUSED_ARG (layout_in);
+  ACE_UNUSED_ARG (data_in);
+
   gboolean sensitive = !gtk_tree_model_iter_has_child (model_in, iter_in);
   // set corresponding property
   g_object_set (renderer_in,
@@ -1028,6 +1031,7 @@ switch_session_cb (GtkNotebook* notebook_in,
 
   ACE_UNUSED_ARG (notebook_in);
   ACE_UNUSED_ARG (page_in);
+  ACE_UNUSED_ARG (pageNum_in);
 
   // sanity check(s)
   struct BitTorrent_Client_UI_SessionCBData* data_p =
@@ -1148,7 +1152,7 @@ combobox_connections_changed_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR_2 ();
+//  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR_2 ();
 
   // step1: retrieve active connection entry
   // retrieve session tab connections combobox handle
@@ -1180,7 +1184,7 @@ combobox_connections_changed_cb (GtkWidget* widget_in,
 //   channel_string = g_value_get_string(&active_value);
   std::string connection_string =
     Common_UI_GTK_Tools::UTF8ToLocale (connection_value,
-                                   g_utf8_strlen (connection_value, -1));
+                                       g_utf8_strlen (connection_value, -1));
   g_free (connection_value);
   if (connection_string.empty ())
   {
