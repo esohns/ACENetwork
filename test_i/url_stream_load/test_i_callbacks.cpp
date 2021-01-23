@@ -206,7 +206,7 @@ idle_load_segment_cb (gpointer userData_in)
   Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
 
   // step3: connect to peer
-  if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
+  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
   {
 #if defined (SSL_SUPPORT)
     if (use_SSL)
@@ -235,7 +235,7 @@ idle_load_segment_cb (gpointer userData_in)
       iconnector_p->connect (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address);
   // *TODO*: support one-thread operation by scheduling a signal and manually
   //         running the dispatch loop for a limited time...
-  if (data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0)
+  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
   {
     data_p->handle = ACE_INVALID_HANDLE;
 
@@ -272,7 +272,7 @@ idle_load_segment_cb (gpointer userData_in)
   } // end IF
   else
     iconnection_p =
-      iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address,
+      iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address,
                                   true);
   if ((data_p->handle == ACE_INVALID_HANDLE) ||
       !iconnection_p)

@@ -102,7 +102,6 @@ struct IRC_Client_Configuration
    , cursesState (NULL)
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
-   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , encoding (IRC_PRT_DEFAULT_ENCODING)
    , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
@@ -125,7 +124,6 @@ struct IRC_Client_Configuration
   struct IRC_Client_CursesState*    cursesState;
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
-  enum Common_EventDispatchType      dispatch;
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)

@@ -333,7 +333,7 @@ endif ()
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t -u https://www.youtube.com/watch?v=fvq5uhqGCWM&list=RDfvq5uhqGCWM"
+                         ARGS "-l -r -t -u https://www.youtube.com/watch?v=fvq5uhqGCWM&list=RDfvq5uhqGCWM"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
@@ -343,25 +343,26 @@ if (UNIX)
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/url_stream_load
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
- if (SSL_USE)
+ if (SSL_SUPPORT)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
- endif (SSL_USE)
+ endif (SSL_SUPPORT)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK2_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_PATH}
                            ${FFMPEG_PATH}
                            ${GTK2_PATH}
                            ${ICONV_PATH}
-                           ${LIBXML2_PATH})
+                           ${LIBXML2_PATH}
+                           ${ACE_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -r -t"
+                         ARGS "-l -r -t -u https://tagesschau-lh.akamaihd.net/i/tagesschau_3@66339/index_320_av-p.m3u8"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                                               G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug

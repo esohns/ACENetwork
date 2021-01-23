@@ -142,7 +142,7 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
   ACE_ASSERT (CBData_);
 #endif // GUI_SUPPORT
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  ACE_ASSERT (iterator != sessionDataMap_.end ());
+  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -171,7 +171,7 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  sessionDataMap_.erase (iterator);
+  //sessionDataMap_.erase (iterator);
 }
 
 void
@@ -211,7 +211,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     const_cast<struct Test_I_MessageData&> (data_container_r.getR ());
   if (data_r.M3UPlaylist)
   {
-    const struct M3U_Element& element_r = data_r.M3UPlaylist->back ();
+    const struct M3U_Element& element_r = data_r.M3UPlaylist->front ();
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("loading \"%s\"...\n"),
                 ACE_TEXT (element_r.URL.c_str ())));

@@ -532,7 +532,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
     &CBData_in.configuration->dispatchConfiguration;
-  if (CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+  if (CBData_in.configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     CBData_in.configuration->dispatchConfiguration.numberOfReactorThreads =
       numberOfDispatchThreads_in;
   else
@@ -574,8 +574,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
     timer_manager_p->stop ();
     return;
   } // end IF
-  if (!Common_Signal_Tools::initialize (((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  if (!Common_Signal_Tools::initialize (((CBData_in.configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                                                                                    : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -642,7 +642,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  Common_Tools::dispatchEvents ((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+  Common_Tools::dispatchEvents ((CBData_in.configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                 group_id);
 
   // step8: clean up
@@ -1447,9 +1447,9 @@ ACE_TMAIN (int argc_in,
                                                              *iterator));
   } // end IF
 
-  configuration.dispatch =
+  configuration.dispatchConfiguration.dispatch =
       (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
-                   : COMMON_EVENT_DISPATCH_PROACTOR);
+                   : COMMON_EVENT_DEFAULT_DISPATCH);
 
 #if defined (GTK_USE)
   ui_cb_data.progressData.state =

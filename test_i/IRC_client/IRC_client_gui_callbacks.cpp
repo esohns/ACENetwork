@@ -203,7 +203,7 @@ connection_setup_function (void* arg_in)
   IRC_Client_Connector_t connector (true);
   IRC_Client_AsynchConnector_t asynch_connector (true);
   IRC_Client_IConnector_t* connector_p = &connector;
-  if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
+  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
     connector_p = &asynch_connector;
 
   // step2b: set up configuration passed to processing stream
@@ -312,7 +312,7 @@ connection_failed:
 
     goto remove_page;
   } // end IF
-  if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
+  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
   {
     ACE_Time_Value deadline =
       (COMMON_TIME_NOW +

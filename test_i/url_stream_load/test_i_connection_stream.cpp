@@ -25,8 +25,6 @@
 
 #include "net_macros.h"
 
-//#include "test_i_common.h"
-
 #include "test_i_message.h"
 #include "test_i_session_message.h"
 #include "test_i_m3u_module_parser.h"
@@ -225,12 +223,12 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                            ACE_TEXT_ALWAYS_CHAR ("HTTPGet")),
                   false);
   layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_MPEGTSDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
-                  false);
-  layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_MPEGTSDecoder_Module (this,
+  //                                            ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
 //  module_p = NULL;
 //  ACE_NEW_RETURN (module_p,
 //                  Test_I_MPEG2Decoder_Module (this,

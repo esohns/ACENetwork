@@ -422,8 +422,7 @@ elseif (WIN32)
  create_target_launcher (${EXECUTABLE}
                          ARGS "-l -t"
 #                        FORWARD_ARGS
-                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../pdcurses/win32
                                               G:/software/Development/dll
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug

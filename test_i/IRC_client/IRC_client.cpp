@@ -765,11 +765,11 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // step2: initialize event dispatch
   struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
   event_dispatch_configuration_s.numberOfReactorThreads =
-      ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
-                                                                    : 0);
+      ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
+                                                                                          : 0);
   event_dispatch_configuration_s.numberOfProactorThreads =
-      ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
-                                                                     : 0);
+      ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
+                                                                                           : 0);
   if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -807,7 +807,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   IRC_Client_SessionConnector_t connector (true);
   IRC_Client_AsynchSessionConnector_t asynch_connector (true);
   IRC_Client_IConnector_t* connector_p = NULL;
-  if (configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+  if (configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
@@ -834,8 +834,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to IRC_Client_SignalHandler::initialize(), returning\n")));
     return;
   } // end IF
-  if (!Common_Signal_Tools::initialize (((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                                                      : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  if (!Common_Signal_Tools::initialize (((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                                                                            : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -943,7 +943,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+  Common_Tools::dispatchEvents ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                 configuration_in.groupId);
   // *NOTE*: awoken by the worker thread (see above)...
   if (connection_manager_p->count () < 1)
@@ -990,7 +990,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+  Common_Tools::dispatchEvents ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                 configuration_in.groupId);
 
   // step7: clean up
@@ -1371,7 +1371,7 @@ ACE_TMAIN (int argc_in,
     } // end IF
   } // end IF
   ///////////////////////////////////////
-  configuration.dispatch =
+  configuration.dispatchConfiguration.dispatch =
       (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
                    : COMMON_EVENT_DISPATCH_PROACTOR);
 

@@ -156,6 +156,10 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r              : use reactor [")
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: statistic reporting interval (second(s)) [")
             << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] [0: off]")
@@ -191,11 +195,13 @@ do_process_arguments (int argc_in,
                       std::string& hostName_out,
                       bool& logToFile_out,
                       unsigned short& port_out,
+                      bool& useReactor_out,
                       ACE_Time_Value& statisticReportingInterval_out,
                       bool& traceInformation_out,
                       std::string& URL_out,
                       bool& printVersionAndExit_out,
-                      ACE_INET_Addr& remoteHost_out)
+                      ACE_INET_Addr& remoteHost_out,
+                      bool& useSSL_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
 
@@ -230,6 +236,7 @@ do_process_arguments (int argc_in,
   hostName_out.clear ();
   logToFile_out = false;
   port_out = 0;
+  useReactor_out = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
                                                  : ACE_Time_Value::zero);
@@ -247,13 +254,14 @@ do_process_arguments (int argc_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set (): \"%m\", aborting\n")));
     return false;
   } // end IF
+  useSSL_out = false;
 
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:ls:tu:v"),
+                               ACE_TEXT ("cde:f:g:lrs:tu:v"),
 #else
-                               ACE_TEXT ("de:f:g:ls:tu:v"),
+                               ACE_TEXT ("de:f:g:lrs:tu:v"),
 #endif
                                1,                         // skip command name
                                1,                         // report parsing errors
@@ -303,6 +311,11 @@ do_process_arguments (int argc_in,
         logToFile_out = true;
         break;
       }
+      case 'r':
+      {
+        useReactor_out = true;
+        break;
+      }
       case 's':
       {
         unsigned int value = 0;
@@ -325,11 +338,10 @@ do_process_arguments (int argc_in,
 
         // step1: parse URL
         std::string URI_s;
-        bool use_ssl = false;
         if (!HTTP_Tools::parseURL (URL_out,
                                    hostName_out,
                                    URI_s,
-                                   use_ssl))
+                                   useSSL_out))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
@@ -342,8 +354,8 @@ do_process_arguments (int argc_in,
           hostname_string.find_last_of (':', std::string::npos);
         if (position == std::string::npos)
         {
-          port_out = (use_ssl ? HTTPS_DEFAULT_SERVER_PORT
-                              : HTTP_DEFAULT_SERVER_PORT);
+          port_out = (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT
+                                 : HTTP_DEFAULT_SERVER_PORT);
           hostname_string += ':';
           std::ostringstream converter;
           converter << port_out;
@@ -505,6 +517,7 @@ void
 do_work (bool debugParser_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
+         bool useReactor_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const std::string& URL_in,
          const ACE_INET_Addr& remoteHost_in,
@@ -679,9 +692,10 @@ do_work (bool debugParser_in,
     &configuration_in.dispatchConfiguration;
 
   // step0b: initialize event dispatch
-  configuration_in.dispatchConfiguration.numberOfReactorThreads = 1; // support SSL
+  configuration_in.dispatchConfiguration.numberOfReactorThreads =
+    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS : 0);
   configuration_in.dispatchConfiguration.numberOfProactorThreads =
-      TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
+    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS : 0);
   if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -948,11 +962,13 @@ ACE_TMAIN (int argc_in,
   std::string ui_definition_file;
   bool log_to_file;
   unsigned short port;
+  bool use_reactor;
   ACE_Time_Value statistic_reporting_interval;
   bool trace_information;
   std::string url;
   bool print_version_and_exit;
   ACE_INET_Addr address;
+  bool use_ssl;
   struct Test_I_URLStreamLoad_Configuration configuration;
   Common_MessageStack_t* logstack_p = NULL;
   ACE_SYNCH_MUTEX* lock_p = NULL;
@@ -1048,12 +1064,14 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
   log_to_file = false;
   port = HTTP_DEFAULT_SERVER_PORT;
+  use_reactor = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statistic_reporting_interval =
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0)
                                                  : ACE_Time_Value::zero);
   trace_information = false;
   url = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   print_version_and_exit = false;
+  use_ssl = false;
   ACE_OS::memset (&elapsed_rusage, 0, sizeof (elapsed_rusage));
 
   // step1b: parse/process/validate configuration
@@ -1073,11 +1091,13 @@ ACE_TMAIN (int argc_in,
                              hostname,
                              log_to_file,
                              port,
+                             use_reactor,
                              statistic_reporting_interval,
                              trace_information,
                              url,
                              print_version_and_exit,
-                             address))
+                             address,
+                             use_ssl))
   {
     do_print_usage (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                       ACE_DIRECTORY_SEPARATOR_CHAR))));
@@ -1229,11 +1249,16 @@ ACE_TMAIN (int argc_in,
 #endif // GUI_SUPPORT
   } // end IF
 
+  configuration.dispatchConfiguration.dispatch =
+    (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
+                 : COMMON_EVENT_DEFAULT_DISPATCH);
+
   timer.start ();
   // step2: do actual work
   do_work (debug_parser,
            output_file,
            ui_definition_file,
+           use_reactor,
            statistic_reporting_interval,
            url,
            address,
