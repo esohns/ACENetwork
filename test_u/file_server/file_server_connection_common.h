@@ -112,7 +112,7 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
 //////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          FileServer_TCPConnectionConfiguration,
+                          //FileServer_TCPConnectionConfiguration,
                           struct Net_StreamConnectionState,
                           Net_StreamStatistic_t> FileServer_TCPIConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
@@ -123,7 +123,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 Test_U_Stream,
                                 enum Stream_StateMachine_ControlState> FileServer_TCPIStreamConnection_t;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          FileServer_UDPConnectionConfiguration,
+                          //FileServer_UDPConnectionConfiguration,
                           struct Net_StreamConnectionState,
                           Net_StreamStatistic_t> FileServer_UDPIConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,

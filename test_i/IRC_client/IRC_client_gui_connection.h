@@ -61,8 +61,8 @@ class IRC_Client_GUI_Connection
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   virtual ~IRC_Client_GUI_Connection ();
 
-  void initialize (struct IRC_Client_SessionState*, // session state handle
-                   IRC_IControl*);                  // controller handle
+  void initialize (struct IRC_SessionState*, // session state handle
+                   IRC_IControl*);           // controller handle
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
   void finalize (bool = true); // locked access ?
   void close ();
@@ -93,7 +93,7 @@ class IRC_Client_GUI_Connection
   //            - the event dispatch thread(s) (reactor/proactor)
   //void current (std::string&,        // return value: nickname
   //              std::string&) const; // return value: channel / nickname
-  const struct IRC_Client_SessionState& state () const;
+  const struct IRC_SessionState& state () const;
   IRC_Client_GUI_MessageHandler* getActiveHandler (bool = true,        // locked access ?
                                                    bool = true) const; // locked access (GDK) ?
   void createMessageHandler (const std::string&, // channel/nickname
@@ -129,7 +129,7 @@ class IRC_Client_GUI_Connection
   guint                                 contextId_;
 #endif // GTK_USE
   bool                                  isFirstUsersMsg_;
-  struct IRC_Client_SessionState*       sessionState_;
+  struct IRC_SessionState*              sessionState_;
   std::string                           UIFileDirectory_;
 
   mutable ACE_SYNCH_MUTEX               lock_;

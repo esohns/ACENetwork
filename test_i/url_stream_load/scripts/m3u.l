@@ -151,8 +151,8 @@ TO_END_OF_LINE                    [^\x0A]
 } // end <INITIAL>
 <state_x>{
 {TO_END_OF_LINE}+/\x0A { parser->offset (yyleng); }
-\x0A                  { parser->offset (yyleng);
-                        BEGIN (INITIAL); }
+\x0A                   { parser->offset (yyleng);
+                         BEGIN (INITIAL); }
 } // end <state_x>
 <state_inf>{
 {TO_COMMA}+/,          { parser->offset (yyleng);
@@ -177,16 +177,16 @@ TO_END_OF_LINE                    [^\x0A]
 } // end <state_inf_title>
 <state_inf_url>{
 {TO_END_OF_LINE}+/\x0A { parser->offset (yyleng);
-                        ACE_NEW_NORETURN (yylval->sval,
-                                          std::string);
-                        ACE_ASSERT (yylval->sval);
-                        yylval->sval->append (yytext);
-                        return yy::parser::token::URL; }
-\x0A                  { parser->offset (yyleng);
-                        BEGIN (INITIAL);
-                        return yy::parser::token::END_OF_ELEMENT; }
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string);
+                         ACE_ASSERT (yylval->sval);
+                         yylval->sval->append (yytext);
+                         return yy::parser::token::URL; }
+\x0A                   { parser->offset (yyleng);
+                         BEGIN (INITIAL);
+                         return yy::parser::token::END_OF_ELEMENT; }
 } // end <state_inf_url>
-<<EOF>>               { return yy::parser::token::END; }
+<<EOF>>                { return yy::parser::token::END; }
 <*>{OCTET}            { /* *TODO*: use (?s:.) ? */
                         if (!parser->isBlocking ())
                           return yy::parser::token::END;

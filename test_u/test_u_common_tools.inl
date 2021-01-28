@@ -24,7 +24,7 @@
 
 template <typename ConnectionConfigurationType>
 Net_IConnection_T<ACE_INET_Addr,
-                  ConnectionConfigurationType,
+                  //ConnectionConfigurationType,
                   struct Net_StreamConnectionState,
                   struct Net_StreamStatistic>*
 Test_U_Common_Tools::getRandomConnection (Net_IConnectionManager_T<ACE_MT_SYNCH,
@@ -40,7 +40,7 @@ Test_U_Common_Tools::getRandomConnection (Net_IConnectionManager_T<ACE_MT_SYNCH,
   ACE_ASSERT (imanager_in);
 
   Net_IConnection_T<ACE_INET_Addr,
-                    ConnectionConfigurationType,
+                    //ConnectionConfigurationType,
                     struct Net_StreamConnectionState,
                     struct Net_StreamStatistic>* connection_p = NULL;
   int number_of_connections_i = 0;

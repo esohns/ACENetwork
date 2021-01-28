@@ -21,9 +21,6 @@
 #ifndef IRC_NETWORK_H
 #define IRC_NETWORK_H
 
-//#include <map>
-//#include <string>
-
 #include "net_common.h"
 #include "net_connection_configuration.h"
 
@@ -42,26 +39,6 @@ struct IRC_AllocatorConfiguration
     defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
   }
 };
-
-//struct IRC_StreamConfiguration;
-//class IRC_ConnectionConfiguration
-// : public Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
-//                                        struct IRC_StreamConfiguration,
-//                                        NET_TRANSPORTLAYER_TCP>
-//{
-//  IRC_ConnectionConfiguration ()
-//   : Net_ConnectionConfiguration_T ()
-//   ///////////////////////////////////////
-//   , protocolConfiguration (NULL)
-//  {
-//    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
-//  }
-
-//  struct IRC_ProtocolConfiguration* protocolConfiguration;
-//};
-//typedef std::map<std::string,
-//                 struct IRC_ConnectionConfiguration> IRC_ConnectionConfigurations_t;
-//typedef IRC_ConnectionConfigurations_t::iterator IRC_ConnectionConfigurationIterator_t;
 
 struct IRC_ConnectionState
  : Net_ConnectionState
@@ -97,5 +74,9 @@ struct IRC_SessionState
   std::string        nickName;
   IRC_UserModes_t    userModes;
 };
+
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          struct IRC_SessionState,
+                          IRC_Statistic_t> IRC_IConnection_t;
 
 #endif

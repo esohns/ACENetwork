@@ -68,7 +68,7 @@ class Net_Client_Connector_T
                         ConnectorType> CONNECTOR_T;
 
   typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<AddressType,
@@ -157,7 +157,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef HandlerType CONNECTION_T;

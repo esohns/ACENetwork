@@ -41,7 +41,7 @@ using namespace std;
 
 #include "IRC_client_network.h"
 
-IRC_Client_InputHandler::IRC_Client_InputHandler (struct IRC_Client_SessionState* state_in,
+IRC_Client_InputHandler::IRC_Client_InputHandler (struct IRC_SessionState* state_in,
                                                   bool useReactor_in)
  : inherited (NULL,                           // reactor
               ACE_Event_Handler::LO_PRIORITY) // priority

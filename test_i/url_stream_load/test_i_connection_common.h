@@ -89,7 +89,7 @@ typedef Net_StreamConnectionConfiguration_T<Test_I_URLStreamLoad_StreamConfigura
 //////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          Test_I_URLStreamLoad_ConnectionConfiguration_t,
+                          //Test_I_URLStreamLoad_ConnectionConfiguration_t,
                           struct HTTP_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
@@ -103,7 +103,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 //////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          Test_I_URLStreamLoad_ConnectionConfiguration_2_t,
+                          //Test_I_URLStreamLoad_ConnectionConfiguration_2_t,
                           struct HTTP_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_2_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,

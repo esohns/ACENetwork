@@ -45,6 +45,11 @@
 #include "stream_common.h"
 
 // forward declarations
+template <typename AddressType,
+          //typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType>
+class Net_IConnection_T;
 template <ACE_SYNCH_DECL>
 class Net_IConnectionManagerBase_T;
 template <typename ConfigurationType>
@@ -323,5 +328,9 @@ typedef std::set<Net_ConnectionId_t> Net_ConnectionIds_t;
 typedef Net_ConnectionIds_t::iterator Net_ConnectionIdsIterator_t;
 
 typedef Net_IConnectionManagerBase_T<ACE_MT_SYNCH> Net_IConnectionManagerBase_t;
+
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          struct Net_StreamConnectionState,
+                          struct Net_StreamStatistic> Net_IINETConnection_t;
 
 #endif

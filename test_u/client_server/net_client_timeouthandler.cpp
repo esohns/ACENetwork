@@ -233,7 +233,7 @@ continue_:
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnection_T::close(), returning\n")));
-      connection_p->decrease ();
+      connection_p->decrease (); connection_p = NULL;
       if (connection_2)
       {
         connection_2->decrease (); connection_2 = NULL;

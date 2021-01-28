@@ -44,7 +44,7 @@ class Test_U_Message;
 class Test_U_SessionMessage;
 class FileServer_TCPConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          FileServer_TCPConnectionConfiguration,
+                          //FileServer_TCPConnectionConfiguration,
                           struct Net_StreamConnectionState,
                           Net_StreamStatistic_t> FileServer_TCPIConnection_t;
 

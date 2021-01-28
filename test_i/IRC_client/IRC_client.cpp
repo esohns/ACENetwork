@@ -639,10 +639,10 @@ connection_setup_curses_function (void* arg_in)
     //  goto clean_up;
     //} // end IF
     //const IRC_Client_ConnectionState& connection_state_r = session_p->state ();
-    const struct IRC_Client_SessionState& session_state_r =
+    const struct IRC_SessionState& session_state_r =
       connection_p->state ();
     thread_data_p->cursesState->sessionState =
-      &const_cast<struct IRC_Client_SessionState&> (session_state_r);
+      &const_cast<struct IRC_SessionState&> (session_state_r);
 
     // step6: clean up
     connection_p->decrease ();

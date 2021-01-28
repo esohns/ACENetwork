@@ -19,12 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_i_signalhandler.h"
 
 #include "ace/Log_Msg.h"
 
-//#include "common_timer_manager.h"
 #include "common_tools.h"
 
 #include "net_macros.h"
@@ -150,13 +148,18 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
     Test_I_IConnectionManager_t* iconnection_manager_p =
         TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
-    iconnection_manager_p->stop ();
+    iconnection_manager_p->stop (false, true);
     iconnection_manager_p->abort ();
+    Test_I_IConnectionManager_2_t* iconnection_manager_2 =
+      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+    ACE_ASSERT (iconnection_manager_2);
+    iconnection_manager_2->stop (false, true);
+    iconnection_manager_2->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-                                         inherited::configuration_->dispatchState->reactorGroupId,
-                                         false);                                                    // don't block
+    //Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
+    //                                     inherited::configuration_->dispatchState->reactorGroupId,
+    //                                     false);                                                    // don't block
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF

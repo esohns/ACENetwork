@@ -41,8 +41,8 @@ class IRC_Client_InputHandler
  , public Common_IInitialize_T<IRC_Client_InputHandlerConfiguration>
 {
  public:
-  IRC_Client_InputHandler (struct IRC_Client_SessionState*, // state handle
-                           bool = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR));   // use reactor ?
+  IRC_Client_InputHandler (struct IRC_SessionState*,                                                 // state handle
+                           bool = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)); // use reactor ?
   virtual ~IRC_Client_InputHandler ();
 
   // implement Common_IInitialize_T
@@ -67,7 +67,7 @@ class IRC_Client_InputHandler
   struct IRC_Client_InputHandlerConfiguration* configuration_;
   ACE_Message_Block*                           currentReadBuffer_;
   bool                                         registered_;
-  struct IRC_Client_SessionState*              state_;
+  struct IRC_SessionState*                     state_;
   bool                                         useReactor_;
 };
 

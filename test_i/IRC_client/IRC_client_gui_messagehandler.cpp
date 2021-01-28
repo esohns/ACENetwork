@@ -927,9 +927,9 @@ IRC_Client_GUI_MessageHandler::update (const std::string& currentNickName_in)
   std::string new_nick_name;//, channel;
   //CBData_->connection->current (new_nick_name,
   //                             channel);
-  const struct IRC_Client_SessionState& connection_state_r =
+  const struct IRC_SessionState& session_state_r =
     CBData_->connection->state ();
-  new_nick_name = connection_state_r.nickName;
+  new_nick_name = session_state_r.nickName;
   if (CBData_->channelModes.test (CHANNELMODE_OPERATOR))
     new_nick_name.insert (new_nick_name.begin (), '@');
 

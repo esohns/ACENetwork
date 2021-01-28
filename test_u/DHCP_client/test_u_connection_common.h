@@ -83,7 +83,7 @@ class DHCPClient_ConnectionConfiguration
 //////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          DHCPClient_ConnectionConfiguration,
+                          //DHCPClient_ConnectionConfiguration,
                           struct DHCP_ConnectionState,
                           DHCP_Statistic_t> DHCPClient_IConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,

@@ -73,7 +73,7 @@ class Net_Connection_Manager_T
                                    StatisticContainerType,
                                    UserDataType> INTERFACE_T;
   typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef ACE_Singleton<Net_Connection_Manager_T<ACE_SYNCH_USE,

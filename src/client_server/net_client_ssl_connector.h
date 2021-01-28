@@ -59,7 +59,7 @@ class Net_Client_SSL_Connector_T
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<ACE_INET_Addr,

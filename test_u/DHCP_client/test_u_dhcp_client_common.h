@@ -93,7 +93,7 @@ typedef Stream_DataBase_T<struct DHCPClient_MessageData> DHCPClient_MessageData_
 
 struct DHCP_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          DHCPClient_ConnectionConfiguration,
+                          //DHCPClient_ConnectionConfiguration,
                           struct DHCP_ConnectionState,
                           DHCP_Statistic_t> DHCPClient_IConnection_t;
 struct DHCPClient_SessionData

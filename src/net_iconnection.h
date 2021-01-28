@@ -67,14 +67,14 @@ class Net_IAsynchSocketHandler
 //////////////////////////////////////////
 
 template <typename AddressType,
-          typename ConfigurationType,
+          //typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType>
 class Net_IConnection_T
  : public virtual Common_IReferenceCount
  , public virtual Common_IStatistic_T<StatisticContainerType>
- , public Common_IInitialize_T<ConfigurationType>
- , public Common_IGetR_T<ConfigurationType>
+ //, public Common_IInitialize_T<ConfigurationType>
+ //, public Common_IGetR_T<ConfigurationType>
  , public virtual Common_IDumpState
 {
  public:
@@ -94,8 +94,10 @@ class Net_IConnection_T
   //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
 //  virtual int close (u_long = 0) = 0; // reason
   virtual void close () = 0;
-  //// *IMPORTANT NOTE*: fire-and-forget API
-  //virtual bool send (ACE_Message_Block*&) = 0;
+
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void send (ACE_Message_Block*&) = 0;
+
   // *NOTE*: waits for any (queued) data to be dispatched to the kernel.
   //         Depending on OS (and protocol) specifics, this could mean that it
   //         has been successfully transmitted (YMMV). As current OS kernel(s)
@@ -127,7 +129,7 @@ template <typename AddressType,
           typename HandlerConfigurationType> // socket-
 class Net_ISocketConnection_T
  : public virtual Net_IConnection_T<AddressType,
-                                    ConfigurationType,
+                                    //ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
  , public virtual Net_ITransportLayer_T<HandlerConfigurationType>
@@ -137,13 +139,10 @@ class Net_ISocketConnection_T
  public:
   // convenient types
   typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_ITransportLayer_T<HandlerConfigurationType> ITRANSPORT_LAYER_T;
-
-  // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void send (ACE_Message_Block*&) = 0;
 };
 
 //////////////////////////////////////////

@@ -96,10 +96,17 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   unsigned int content_length = 0;
   converter >> content_length;
   unsigned int missing_bytes =
-      content_length - inherited::headFragment_->total_length ()
+      content_length - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
                      - message_inout->total_length ();
   if (!missing_bytes)
-    inherited::finished_ = true;
+  {
+    // append \n to final fragment, if not present
+    ACE_Message_Block* message_block_p = message_inout;
+    while (message_block_p->cont ())
+      message_block_p = message_block_p->cont ();
+    if (*(message_block_p->rd_ptr () + (message_block_p->length () - 1)) != '\n')
+      message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
+  } // end IF
 
   // initialize return value(s)
   // *NOTE*: the default behavior is to pass all messages along
@@ -127,6 +134,9 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
     return;
   } // end IF
   message_inout = NULL;
+
+  if (!missing_bytes)
+    inherited::finished_ = true;
 }
 
 void
@@ -161,10 +171,10 @@ Test_I_M3U_Module_Parser::record (M3U_Playlist_t*& record_inout)
     message_2 = static_cast<Test_I_Message*> (message_2->cont ());
   } // end WHILE
 
-  int result = put_next (inherited::headFragment_, NULL);
+  int result = inherited::put_next (inherited::headFragment_, NULL);
   if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT("%s: failed to ACE_Module::put_next(): \"%m\", continuing\n"),
+                ACE_TEXT("%s: failed to ACE_Task::put_next(): \"%m\", continuing\n"),
                 inherited::mod_->name ()));
 
   inherited::headFragment_ = NULL;

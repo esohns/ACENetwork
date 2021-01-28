@@ -449,9 +449,9 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
           message_inout->getR ();
       const struct IRC_Client_SessionData& session_data_r =
           session_data_container_r.getR ();
-      ACE_ASSERT (session_data_r.connectionState);
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, session_data_r.connectionState->lock);
-        session_data_r.connectionState->nickName =
+      ACE_ASSERT (session_data_r.sessionState);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, session_data_r.sessionState->lock);
+        session_data_r.sessionState->nickName =
             inherited::configuration_->protocolConfiguration->loginOptions.nickname;
       } // end lock scope
 

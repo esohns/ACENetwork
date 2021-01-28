@@ -58,7 +58,7 @@ struct BitTorrent_Client_PeerSessionData
 {
   BitTorrent_Client_PeerSessionData ()
    : BitTorrent_PeerSessionData ()
-   , connectionState (NULL)
+   , connection (NULL)
    , userData (NULL)
   {}
   struct BitTorrent_Client_PeerSessionData& operator+= (const struct BitTorrent_Client_PeerSessionData& rhs_in)
@@ -69,9 +69,9 @@ struct BitTorrent_Client_PeerSessionData
     return *this;
   }
 
-  struct BitTorrent_Client_PeerConnectionState* connectionState;
+  BitTorrent_Client_IPeerConnection_t* connection;
 
-  struct Net_UserData*        userData;
+  struct Net_UserData*                 userData;
 };
 
 struct BitTorrent_Client_TrackerConnectionState;
@@ -81,7 +81,7 @@ struct BitTorrent_Client_TrackerSessionData
 {
   BitTorrent_Client_TrackerSessionData ()
    : BitTorrent_TrackerSessionData ()
-   , connectionState (NULL)
+   , connection (NULL)
    , userData (NULL)
   {}
   
@@ -93,9 +93,9 @@ struct BitTorrent_Client_TrackerSessionData
     return *this;
   }
 
-  struct BitTorrent_Client_TrackerConnectionState* connectionState;
+  BitTorrent_Client_ITrackerConnection_t* connection;
 
-  struct Net_UserData*        userData;
+  struct Net_UserData*                    userData;
 };
 
 typedef Stream_SessionData_T<struct BitTorrent_Client_PeerSessionData> BitTorrent_Client_PeerSessionData_t;

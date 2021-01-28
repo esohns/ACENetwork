@@ -606,6 +606,7 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
+  modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
@@ -638,6 +639,7 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
   modulehandler_configuration_2.allocatorConfiguration =
     &allocator_configuration;
+  modulehandler_configuration_2.closeAfterReception = true;
   modulehandler_configuration_2.codecId = AV_CODEC_ID_H263;
   modulehandler_configuration_2.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
@@ -839,11 +841,16 @@ do_work (bool debugParser_in,
 #endif // GUI_SUPPORT
 
   // step3: clean up
-  connection_manager_p->stop ();
-  //Common_Tools::finalizeEventDispatch (useReactor_in,
-  //                                     !useReactor_in,
-  //                                     group_id);
+  connection_manager_p->stop (false, true);
+  connection_manager_p->abort (false);
   connection_manager_p->wait ();
+  connection_manager_2->stop (false, true);
+  connection_manager_2->abort ();
+  connection_manager_2->wait (false);
+
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                       event_dispatch_state_s.reactorGroupId,
+                                       true);
 
   timer_manager_p->stop ();
 

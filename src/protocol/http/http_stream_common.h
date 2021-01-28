@@ -89,6 +89,7 @@ struct HTTP_ModuleHandlerConfiguration
   HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
   ////////////////////////////////////////
+   , closeAfterReception (HTTP_DEFAULT_CLOSE_AFTER_RECEPTION)
    , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
    , HTTPForm ()
    , HTTPHeaders ()
@@ -99,12 +100,13 @@ struct HTTP_ModuleHandlerConfiguration
     printFinalReport = true;
   };
 
-  bool           crunchMessages; // http parser module
+  bool           closeAfterReception; // HTTP get module
+  bool           crunchMessages; // HTTP parser module
   HTTP_Form_t    HTTPForm; // HTTP get module
   HTTP_Headers_t HTTPHeaders; // HTTP get module
   bool           printProgressDot; // file writer module
   std::string    URL;
-  bool           waitForConnect;
+  bool           waitForConnect; // HTTP get module
 };
 
 //struct HTTP_ProtocolConfiguration;

@@ -349,7 +349,7 @@ connection_failed:
                 ACE_TEXT ("failed to dynamic_cast<IRC_Client_IStreamConnection_t>(%@): \"%m\", aborting\n"),
                 connection_2));
     connection_2->close ();
-    connection_2->decrease ();
+    connection_2->decrease (); connection_2 = NULL;
 
     goto remove_page;
   } // end IF
@@ -372,13 +372,13 @@ connection_failed:
                 ACE_TEXT ("dynamic_cast<IRC_IControl>(0x%@) failed, returning\n"),
                 const_cast<Stream_Module_t*> (module_p)->writer ()));
     connection_2->close ();
-    connection_2->decrease ();
+    connection_2->decrease (); connection_2 = NULL;
 
     goto remove_page;
   } // end IF
 
   // step3: initialize new connection handler
-  connection_p->initialize (&const_cast<struct IRC_Client_SessionState&> (connection_2->state ()),
+  connection_p->initialize (&const_cast<struct IRC_SessionState&> (connection_2->state ()),
                             icontrol_p);
   { // synch access
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -407,7 +407,7 @@ connection_failed:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_IControl::registerc(), returning\n")));
     connection_2->close ();
-    connection_2->decrease ();
+    connection_2->decrease (); connection_2 = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
@@ -1487,7 +1487,7 @@ idle_update_user_modes_cb (gpointer userData_in)
   GtkToggleButton* toggle_button_p = NULL;
   Common_UI_GTK_BuildersIterator_t iterator;
   IRC_Client_GUI_ConnectionsConstIterator_t iterator_2;
-  const IRC_Client_SessionState* connection_state_p = NULL;
+  const IRC_SessionState* session_state_p = NULL;
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
 
@@ -1511,7 +1511,7 @@ idle_update_user_modes_cb (gpointer userData_in)
     goto clean_up;
   } // end IF
   ACE_ASSERT ((*iterator_2).second);
-  connection_state_p = &(*iterator_2).second->state ();
+  session_state_p = &(*iterator_2).second->state ();
 
   // display (changed) user modes
   toggle_button_p =
@@ -1519,43 +1519,43 @@ idle_update_user_modes_cb (gpointer userData_in)
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                connection_state_p->userModes[USERMODE_AWAY]);
+                                session_state_p->userModes[USERMODE_AWAY]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                connection_state_p->userModes[USERMODE_INVISIBLE]);
+                                session_state_p->userModes[USERMODE_INVISIBLE]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                connection_state_p->userModes[USERMODE_RECVNOTICES]);
+                                session_state_p->userModes[USERMODE_RECVNOTICES]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                connection_state_p->userModes[USERMODE_OPERATOR]);
+                                session_state_p->userModes[USERMODE_OPERATOR]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                connection_state_p->userModes[USERMODE_RESTRICTEDCONN]);
+                                session_state_p->userModes[USERMODE_RESTRICTEDCONN]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                connection_state_p->userModes[USERMODE_LOCALOPERATOR]);
+                                session_state_p->userModes[USERMODE_LOCALOPERATOR]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                connection_state_p->userModes[USERMODE_RECVWALLOPS]);
+                                session_state_p->userModes[USERMODE_RECVWALLOPS]);
 
 clean_up:
   state_r.eventSourceIds.erase (data_p->eventSourceId);
@@ -1795,12 +1795,12 @@ button_connect_clicked_cb (GtkWidget* widget_in,
       {
         const struct IRC_Client_UI_ConnectionCBData& connection_data_r =
           (*iterator_2).second->getR ();
-        const struct IRC_Client_SessionState& connection_state_r =
+        const struct IRC_SessionState& session_state_r =
           (*iterator_2).second->state ();
         // *TODO*: the structure of the tab (label) is an implementation detail
         //         and should be encapsulated by the connection...
         if ((connection_data_r.label == server_name_string) &&
-            (connection_state_r.nickName == login_options.nickname))
+            (session_state_r.nickName == login_options.nickname))
         {
           nick_name_taken = true;
           break;
@@ -2856,21 +2856,21 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     return;
   } // end IF
   ACE_ASSERT ((*iterator).second);
-  const IRC_Client_SessionState& connection_state_r =
+  const IRC_SessionState& session_state_r =
     (*iterator).second->state ();
 
   // re-toggle button (until acknowledgement from the server arrives...)
   data_p->pending = true;
   gtk_toggle_button_set_active (toggleButton_in,
-                                connection_state_r.userModes.test (mode));
+                                session_state_r.userModes.test (mode));
   gtk_toggle_button_set_inconsistent (toggleButton_in, TRUE);
 
   string_list_t parameters;
   try {
-    data_p->controller->mode (connection_state_r.nickName,               // user mode
-                              IRC_Tools::UserModeToChar (mode),          // corresponding mode char
-                              !connection_state_r.userModes.test (mode), // enable ?
-                              parameters);                               // parameters
+    data_p->controller->mode (session_state_r.nickName,               // user mode
+                              IRC_Tools::UserModeToChar (mode),       // corresponding mode char
+                              !session_state_r.userModes.test (mode), // enable ?
+                              parameters);                            // parameters
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::mode(\"%s\"), continuing\n"),
@@ -2960,15 +2960,15 @@ action_away_cb (GtkAction* action_in,
     return;
   } // end IF
   ACE_ASSERT ((*iterator_2).second);
-  const IRC_Client_SessionState& connection_state_r =
+  const IRC_SessionState& session_state_r =
     (*iterator_2).second->state ();
   // *NOTE*: avoid recursion
-  if (connection_state_r.away == activating)
+  if (session_state_r.away == activating)
     return;
   // re-toggle button for now...
   // *NOTE*: will be auto-toggled according to the outcome of the change request
   gtk_toggle_button_set_active (togglebutton_p,
-                                connection_state_r.away);
+                                session_state_r.away);
 
   // activating ? --> retrieve away message
   std::string away_message;
@@ -3571,7 +3571,7 @@ members_clicked_cb (GtkWidget* widget_in,
   // remove current nickname from any selection...
   string_list_iterator_t iterator_2 = data_p->parameters.begin ();
   string_list_iterator_t self = data_p->parameters.end ();
-  const IRC_Client_SessionState& connection_state_r =
+  const IRC_SessionState& session_state_r =
     data_p->connection->state ();
   //const IRC_Client_UI_ConnectionCBData& connection_data_r =
   //  data_p->connection->get ();
@@ -3579,15 +3579,15 @@ members_clicked_cb (GtkWidget* widget_in,
        iterator_2 != data_p->parameters.end ();
        iterator_2++)
   {
-    if (*iterator_2 == connection_state_r.nickName)
+    if (*iterator_2 == session_state_r.nickName)
     {
       self = iterator_2;
       continue;
     } // end IF
     // *NOTE*: ignore leading '@'
     if ((*iterator_2).find ('@', 0) == 0)
-      if (((*iterator_2).find (connection_state_r.nickName, 1) == 1) &&
-          ((*iterator_2).size () == (connection_state_r.nickName.size () + 1)))
+      if (((*iterator_2).find (session_state_r.nickName, 1) == 1) &&
+          ((*iterator_2).size () == (session_state_r.nickName.size () + 1)))
       {
         self = iterator_2;
         continue;

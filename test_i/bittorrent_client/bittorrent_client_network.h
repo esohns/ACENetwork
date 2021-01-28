@@ -142,11 +142,11 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> BitTorrent_Client_TrackerConnection_Manager_t;
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          BitTorrent_Client_PeerConnectionConfiguration,
+                          //BitTorrent_Client_PeerConnectionConfiguration,
                           struct BitTorrent_Client_PeerConnectionState,
                           struct Net_StreamStatistic> BitTorrent_Client_IPeerConnection_t;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          BitTorrent_Client_TrackerConnectionConfiguration,
+                          //BitTorrent_Client_TrackerConnectionConfiguration,
                           struct BitTorrent_Client_TrackerConnectionState,
                           struct Net_StreamStatistic> BitTorrent_Client_ITrackerConnection_t;
 

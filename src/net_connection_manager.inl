@@ -235,7 +235,7 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename UserDataType>
 Net_IConnection_T<AddressType,
-                  ConfigurationType,
+                  //ConfigurationType,
                   StateType,
                   StatisticContainerType>*
 Net_Connection_Manager_T<ACE_SYNCH_USE,
@@ -271,7 +271,7 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename UserDataType>
 Net_IConnection_T<AddressType,
-                  ConfigurationType,
+                  //ConfigurationType,
                   StateType,
                   StatisticContainerType>*
 Net_Connection_Manager_T<ACE_SYNCH_USE,
@@ -297,7 +297,7 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename UserDataType>
 Net_IConnection_T<AddressType,
-                  ConfigurationType,
+                  //ConfigurationType,
                   StateType,
                   StatisticContainerType>*
 Net_Connection_Manager_T<ACE_SYNCH_USE,
@@ -339,7 +339,7 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename UserDataType>
 Net_IConnection_T<AddressType,
-                  ConfigurationType,
+                  //ConfigurationType,
                   StateType,
                   StatisticContainerType>*
 Net_Connection_Manager_T<ACE_SYNCH_USE,

@@ -64,7 +64,7 @@ class Net_Client_AsynchConnector_T
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<AddressType,
@@ -175,7 +175,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef HandlerType CONNECTION_T;

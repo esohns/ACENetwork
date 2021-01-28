@@ -102,7 +102,7 @@ idle_end_session_cb (gpointer userData_in)
   gtk_spinner_stop (spinner_p);
   gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), false);
 
-  ACE_ASSERT (data_p->progressData.eventSourceId);
+  //ACE_ASSERT (data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     if (!g_source_remove (data_p->progressData.eventSourceId))
       ACE_DEBUG ((LM_ERROR,
@@ -293,76 +293,6 @@ idle_load_segment_cb (gpointer userData_in)
 //                data_p->handle,
 //                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
 //#endif
-
-//  // step4: send HTTP request
-//  ACE_ASSERT (iconnection_p);
-//  istream_connection_p =
-//    dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
-//  ACE_ASSERT (istream_connection_p);
-
-//  ACE_NEW_NORETURN (HTTP_record_p,
-//                    struct HTTP_Record ());
-//  if (!HTTP_record_p)
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//    goto error;
-//  } // end IF
-//  HTTP_record_p->form = HTTP_form;
-//  HTTP_record_p->headers = HTTP_headers;
-//  HTTP_record_p->method =
-//    (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
-//                        : HTTP_Codes::HTTP_METHOD_POST);
-//  HTTP_record_p->URI = (*iterator_3).second.second.URL;
-//  HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
-
-//  ACE_NEW_NORETURN (message_data_p,
-//                    Test_I_Message::DATA_T ());
-//  if (!message_data_p)
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//    delete HTTP_record_p; HTTP_record_p = NULL;
-//    goto error;
-//  } // end IF
-//  // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
-//  message_data_p->setPR (HTTP_record_p);
-
-//  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
-//  pdu_size_i =
-//    (*iterator_2).second->allocatorConfiguration->defaultBufferSize;// +
-////      (*iterator_2).second->allocatorConfiguration->paddingBytes;
-
-//  ACE_ASSERT (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->messageAllocator);
-//allocate:
-//  message_p =
-//    static_cast<Test_I_Message*> (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
-//  // keep retrying ?
-//  if (!message_p &&
-//      !dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->messageAllocator->block ())
-//    goto allocate;
-//  if (!message_p)
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
-//    delete message_data_p; message_data_p = NULL;
-//    goto error;
-//  } // end IF
-//  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-//  message_p->initialize (message_data_p,
-//                         message_p->sessionId (),
-//                         NULL);
-
-//  //Test_I_ConnectionStream_2& stream_r =
-//  //    const_cast<Test_I_ConnectionStream_2&> (istream_connection_p->stream ());
-//  //const Test_I_URLStreamLoad_SessionData_2_t* session_data_container_p =
-//  //  &stream_r.get ();
-//  //ACE_ASSERT (session_data_container_p);
-//  //struct Test_I_URLStreamLoad_SessionData_2& session_data_r =
-//  //    const_cast<struct Test_I_URLStreamLoad_SessionData_2&> (session_data_container_p->get ());
-
-//  message_block_p = message_p;
-//    istream_connection_p->send (message_block_p);
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;
@@ -1547,7 +1477,8 @@ continue_:
 #endif // ACE_WIN32 || ACE_WIN64
   if (iconnection_p)
   {
-    iconnection_p->close (); iconnection_p->decrease ();
+    iconnection_p->close ();
+    iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;
   iconnection_manager_2->abort ();

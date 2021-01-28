@@ -564,7 +564,7 @@ allocate:
   message_p = NULL;
 
   // step5: clean up
-  iconnection_p->decrease ();
+  iconnection_p->decrease (); iconnection_p = NULL;
 
   return;
 
@@ -578,7 +578,7 @@ error:
   if (iconnection_p)
   {
     iconnection_p->close ();
-    iconnection_p->decrease ();
+    iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
 }
 template <typename PeerHandlerConfigurationType,

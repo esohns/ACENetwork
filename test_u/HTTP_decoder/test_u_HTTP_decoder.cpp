@@ -817,7 +817,7 @@ do_work (unsigned int bufferSize_in,
 
     // clean up
     connection_p->close ();
-    connection_p->decrease ();
+    connection_p->decrease (); connection_p = NULL;
 
     goto clean_up;
   } // end IF
@@ -854,7 +854,7 @@ do_work (unsigned int bufferSize_in,
 
     // clean up
     connection_p->close ();
-    connection_p->decrease ();
+    connection_p->decrease (); connection_p = NULL;
 //    delete message_data_p;
     delete record_p;
 
@@ -875,7 +875,7 @@ do_work (unsigned int bufferSize_in,
 
     // clean up
     connection_p->close ();
-    connection_p->decrease ();
+    connection_p->decrease (); connection_p = NULL;
 //    delete message_data_p;
     delete record_p;
 
@@ -900,8 +900,8 @@ allocate:
 
     // clean up
     connection_p->close ();
-    connection_p->decrease ();
-    message_data_container_p->decrease ();
+    connection_p->decrease (); connection_p = NULL;
+    message_data_container_p->decrease (); message_data_container_p = NULL;
 
     goto clean_up;
   } // end IF

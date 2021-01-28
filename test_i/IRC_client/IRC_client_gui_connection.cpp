@@ -549,7 +549,7 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
 }
 
 void
-IRC_Client_GUI_Connection::initialize (IRC_Client_SessionState* sessionState_in,
+IRC_Client_GUI_Connection::initialize (struct IRC_SessionState* sessionState_in,
                                        IRC_IControl* controller_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::initialize"));
@@ -1701,7 +1701,7 @@ IRC_Client_GUI_Connection::getHandler (const std::string& id_in)
 //  // *TODO*: keep this information synchronized
 //  channel_out = sessionState_->channel;
 //}
-const IRC_Client_SessionState&
+const struct IRC_SessionState&
 IRC_Client_GUI_Connection::state () const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::state"));

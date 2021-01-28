@@ -30,8 +30,6 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
-//#include "stream_misc_dump.h"
-
 #include "stream_dec_libav_decoder.h"
 #include "stream_dec_mpeg_ts_decoder.h"
 

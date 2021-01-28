@@ -33,10 +33,10 @@ struct Test_U_StreamSessionData
 {
   Test_U_StreamSessionData ()
    : Stream_SessionData ()
-   , connectionState (NULL)
+   , connection (NULL)
   {}
 
-  struct Net_StreamConnectionState* connectionState;
+  Net_IINETConnection_t* connection;
 };
 typedef Stream_SessionData_T<struct Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 

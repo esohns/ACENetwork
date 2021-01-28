@@ -176,7 +176,7 @@ void yyprint (FILE*, yytokentype, YYSTYPE);*/
 
 %%
 %start            playlist;
-playlist:         BEGIN_ELEMS {
+playlist:         "begin_elements" {
                     iparser->setP ($1);
                   } elements {
                     M3U_Playlist_t& playlist_r = iparser->current ();

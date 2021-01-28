@@ -25,6 +25,8 @@
 #include "stream_inotify.h"
 #include "stream_session_data.h"
 
+#include "test_i_common.h"
+
 // forward declarations
 struct Net_ConnectionState;
 
@@ -33,13 +35,13 @@ struct Test_I_StreamSessionData
 {
   Test_I_StreamSessionData ()
    : Stream_SessionData ()
-   , connectionState (NULL)
+   , connection (NULL)
    , statistic ()
   {};
 
-  struct Net_ConnectionState* connectionState;
+  Net_IINETConnection_t* connection;
 
-  Test_I_Statistic_t          statistic;
+  Test_I_Statistic_t     statistic;
 };
 typedef Stream_SessionData_T<struct Test_I_StreamSessionData> Test_I_StreamSessionData_t;
 

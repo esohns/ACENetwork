@@ -35,16 +35,8 @@
 #include "irc_module_parser.h"
 #include "irc_module_streamer.h"
 #include "irc_record.h"
-//#include "irc_stream_common.h"
 
-//#include "IRC_client_configuration.h"
-//#include "IRC_client_sessionmessage.h"
-//#include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
-
-// forward declarations
-//class IRC_Message;
-//class IRC_Client_SessionMessage;
 
 typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,

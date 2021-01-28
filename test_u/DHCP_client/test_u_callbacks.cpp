@@ -1839,7 +1839,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       if (iconnection_p)
       {
         iconnection_p->close ();
-        iconnection_p->decrease ();
+        iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
     } // end IF
@@ -1854,7 +1854,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       if (iconnection_p)
       {
         iconnection_p->close ();
-        iconnection_p->decrease ();
+        iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->handle = ACE_INVALID_HANDLE;
     } // end IF
@@ -1952,7 +1952,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
         } // end IF
       } while (COMMON_TIME_NOW < deadline);
       if (iconnection_p)
-        iconnection_p->decrease ();
+      {
+        iconnection_p->decrease (); iconnection_p = NULL;
+      } // end IF
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s (timed out at: %#T), continuing\n"),
@@ -2071,12 +2073,14 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 #else
               static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif
-          iconnection_p->decrease ();
+          iconnection_p->decrease (); iconnection_p = NULL;
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);
       if (iconnection_p)
-        iconnection_p->decrease ();
+      {
+        iconnection_p->decrease (); iconnection_p = NULL;
+      } // end IF
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to \"%s\" (timed out at: %#T), continuing\n"),
@@ -2159,7 +2163,7 @@ continue_:
       if (iconnection_p)
       {
         iconnection_p->close ();
-        iconnection_p->decrease ();
+        iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
     } // end IF
@@ -2174,7 +2178,7 @@ continue_:
       if (iconnection_p)
       {
         iconnection_p->close ();
-        iconnection_p->decrease ();
+        iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->handle = ACE_INVALID_HANDLE;
     } // end IF

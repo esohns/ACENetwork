@@ -143,8 +143,8 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   iconnection_p = connection_manager_p->get (handle_in);
   ACE_ASSERT (iconnection_p);
-  session_data_p->connectionState =
-    &const_cast<struct IRC_Client_SessionState&> (iconnection_p->state ());
+  session_data_p->sessionState =
+    &const_cast<struct IRC_SessionState&> (iconnection_p->state ());
 
   // ---------------------------------------------------------------------------
   // ******************* Marshal ************************

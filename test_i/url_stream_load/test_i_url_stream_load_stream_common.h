@@ -86,7 +86,7 @@ class Test_I_SessionMessage;
 class Test_I_SessionMessage_2;
 //struct Test_I_URLStreamLoad_ConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          Test_I_URLStreamLoad_ConnectionConfiguration_t,
+                          //Test_I_URLStreamLoad_ConnectionConfiguration_t,
                           struct HTTP_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 
@@ -101,8 +101,8 @@ struct Test_I_MessageData
   {
     if (HTTPRecord)
       delete HTTPRecord;
-    if (M3UPlaylist)
-      delete M3UPlaylist;
+    //if (M3UPlaylist)
+    //  delete M3UPlaylist;
   };
   inline void operator+= (Test_I_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
   inline operator struct HTTP_Record&() const { ACE_ASSERT (HTTPRecord); return *HTTPRecord; }

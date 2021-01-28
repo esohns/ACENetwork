@@ -393,16 +393,12 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
   switch (sessionMessage_in.type ())
   {
+    case STREAM_SESSION_MESSAGE_ABORT:
+      event_e = COMMON_UI_EVENT_FINISHED; break;
     case STREAM_SESSION_MESSAGE_CONNECT:
-    {
-      event_e = COMMON_UI_EVENT_CONNECT;
-      break;
-    }
+      event_e = COMMON_UI_EVENT_CONNECT; break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
-    {
-      event_e = COMMON_UI_EVENT_DISCONNECT;
-      break;
-    }
+      event_e = COMMON_UI_EVENT_DISCONNECT; break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)

@@ -397,8 +397,7 @@ Net_SessionBase_T<AddressType,
       iconnection_p->close ();
 
       // clean up
-      iconnection_p->decrease ();
-      iconnection_p = NULL;
+      iconnection_p->decrease (); iconnection_p = NULL;
     } // end FOR
 
     if (waitForCompletion_in)

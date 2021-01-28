@@ -78,7 +78,7 @@ class IRC_Client_ConnectionConfiguration
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  IRC_Client_ConnectionConfiguration,
-                                 struct IRC_Client_SessionState,
+                                 struct IRC_SessionState,
                                  IRC_Statistic_t,
                                  struct Net_UserData> IRC_Client_Connection_Manager_t;
 

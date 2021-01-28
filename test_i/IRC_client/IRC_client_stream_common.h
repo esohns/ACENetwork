@@ -46,8 +46,9 @@
 #include "irc_configuration.h"
 #include "irc_record.h"
 #include "irc_stream_common.h"
+#include "irc_network.h"
 
-//#include "IRC_client_stream.h"
+#include "test_i_stream_common.h"
 
 // forward declaration(s)
 struct IRC_Client_SessionData;
@@ -61,16 +62,18 @@ class IRC_Message;
 //                         struct Stream_ModuleConfiguration,
 //                         struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModule_t;
 
-struct IRC_Client_SessionState;
+//struct IRC_Client_SessionState;
 struct IRC_Client_SessionData
- : IRC_Stream_SessionData
+ : Test_I_StreamSessionData
 {
   IRC_Client_SessionData ()
-   : IRC_Stream_SessionData ()
-   , connectionState (NULL)
+   : Test_I_StreamSessionData ()
+   , connection (NULL)
+   , sessionState (NULL)
   {}
 
-  struct IRC_Client_SessionState* connectionState;
+  IRC_IConnection_t*       connection;
+  struct IRC_SessionState* sessionState;
 };
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
 

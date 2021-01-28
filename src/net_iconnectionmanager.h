@@ -64,7 +64,7 @@ template <ACE_SYNCH_DECL,
 class Net_IConnectionManager_T
  : public Net_IConnectionManagerBase_T<ACE_SYNCH_USE>
  , public Common_IRegister_T<Net_IConnection_T<AddressType,
-                                               ConfigurationType,
+                                               //ConfigurationType,
                                                StateType,
                                                StatisticContainerType> >
  , public Common_IStatistic_T<StatisticContainerType>
@@ -74,7 +74,7 @@ class Net_IConnectionManager_T
   typedef Net_IConnectionManagerBase_T<ACE_SYNCH_USE> BASE_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
+                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> CONNECTION_T;
 

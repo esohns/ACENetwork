@@ -294,6 +294,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
 
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+  stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
+                  true);
 
   return 0;
 
@@ -1330,6 +1332,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   handle_stream = true;
 
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+  stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
+                  true);
 
   return;
 

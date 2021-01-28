@@ -45,7 +45,7 @@ template <ACE_SYNCH_DECL,
 class Net_ConnectionBase_T
  : public Common_ReferenceCounterBase
  , virtual public Net_IConnection_T<AddressType,
-                                    ConfigurationType,
+                                    //ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
  , public Common_IRegister

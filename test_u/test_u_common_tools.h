@@ -56,7 +56,7 @@ class Test_U_Common_Tools
 
   template <typename ConnectionConfigurationType>
   static Net_IConnection_T<ACE_INET_Addr,
-                           ConnectionConfigurationType,
+                           //ConnectionConfigurationType,
                            struct Net_StreamConnectionState,
                            struct Net_StreamStatistic>* getRandomConnection (Net_IConnectionManager_T<ACE_MT_SYNCH,
                                                                                                       ACE_INET_Addr,

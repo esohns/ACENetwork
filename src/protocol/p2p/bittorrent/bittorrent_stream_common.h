@@ -198,8 +198,6 @@ struct BitTorrent_PeerSessionData
 {
   BitTorrent_PeerSessionData ()
    : Stream_SessionData ()
-   , connectionState (NULL)
-//   , currentStatistic ()
    , filename ()
    , handshake (NULL)
   {}
@@ -209,17 +207,11 @@ struct BitTorrent_PeerSessionData
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionData::operator+= (rhs_in);
 
-//    currentStatistic =
-//        ((currentStatistic.timeStamp > rhs_in.currentStatistic.timeStamp) ? currentStatistic
-//                                                                          : rhs_in.currentStatistic);
-
     return *this;
   }
 
-  struct BitTorrent_ConnectionState* connectionState;
-//  BitTorrent_Statistic_t      currentStatistic;
-  std::string                        filename; // .torrent file
-  struct BitTorrent_PeerHandShake*   handshake;
+  std::string                          filename; // .torrent file
+  struct BitTorrent_PeerHandShake*     handshake;
 };
 
 struct BitTorrent_TrackerSessionData

@@ -60,10 +60,7 @@ struct IRC_Stream_SessionData
 {
   IRC_Stream_SessionData ()
    : Stream_SessionData ()
-   , connectionState (NULL)
   {};
-
-  struct IRC_ConnectionState* connectionState;
 };
 typedef Stream_SessionData_T<struct IRC_Stream_SessionData> IRC_Stream_SessionData_t;
 
