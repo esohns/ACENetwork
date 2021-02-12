@@ -40,6 +40,7 @@
 #include "common_file_tools.h"
 #include "common_string_tools.h"
 #include "common_tools.h"
+#include "common_process_tools.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -1106,7 +1107,7 @@ Net_OS_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIde
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  if (!Common_Tools::getProcessId (ACE_TEXT_ALWAYS_CHAR (NET_EXE_NETWORKMANAGER_STRING)))
+  if (!Common_Process_Tools::id (ACE_TEXT_ALWAYS_CHAR (NET_EXE_NETWORKMANAGER_STRING)))
     return false; // *TODO*: avoid false negatives
 
 #if defined (DBUS_SUPPORT)

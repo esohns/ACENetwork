@@ -60,6 +60,7 @@
 #include "common_defines.h"
 #include "common_file_tools.h"
 #include "common_tools.h"
+#include "common_process_tools.h"
 
 #if defined (ACE_LINUX)
 #if defined (DBUS_SUPPORT)
@@ -2730,12 +2731,12 @@ continue_:
   std::string command_line_string = ACE_TEXT_ALWAYS_CHAR ("ip route");
   std::string ip_route_records_string;
   int exit_status_i = 0;
-  if (unlikely (!Common_Tools::command (command_line_string,
-                                        exit_status_i,
-                                        ip_route_records_string)))
+  if (unlikely (!Common_Process_Tools::command (command_line_string,
+                                                exit_status_i,
+                                                ip_route_records_string)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::command(\"%s\"), aborting\n"),
+                ACE_TEXT ("failed to Common_Process_Tools::command(\"%s\"), aborting\n"),
                 ACE_TEXT (ip_route_records_string.c_str ())));
     return result;
   } // end IF
@@ -3403,12 +3404,12 @@ error:
       std::string command_line_string = ACE_TEXT_ALWAYS_CHAR ("ip route");
       std::string ip_route_records_string;
       int exit_status_i = 0;
-      if (unlikely (!Common_Tools::command (command_line_string,
-                                            exit_status_i,
-                                            ip_route_records_string)))
+      if (unlikely (!Common_Process_Tools::command (command_line_string,
+                                                    exit_status_i,
+                                                    ip_route_records_string)))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_Tools::command(\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Common_Process_Tools::command(\"%s\"), aborting\n"),
                     ACE_TEXT (ip_route_records_string.c_str ())));
         return ACE_TEXT_ALWAYS_CHAR ("");
       } // end IF

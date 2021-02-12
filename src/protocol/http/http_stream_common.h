@@ -84,7 +84,7 @@ struct HTTP_StreamState
 
 //struct HTTP_ProtocolConfiguration;
 struct HTTP_ModuleHandlerConfiguration
- : public Stream_ModuleHandlerConfiguration
+ : Stream_ModuleHandlerConfiguration
 {
   HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()

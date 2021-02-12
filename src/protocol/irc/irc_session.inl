@@ -1208,7 +1208,7 @@ IRC_Session_T<ConnectionType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
 
-  int result = -1;
+//  int result = -1;
 
   if (UIState_)
   {

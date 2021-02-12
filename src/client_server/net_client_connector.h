@@ -269,7 +269,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<Net_Netlink_Addr,
-                            ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<Net_Netlink_Addr,

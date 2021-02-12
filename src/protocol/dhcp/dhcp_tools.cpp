@@ -33,6 +33,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
+#include "common_process_tools.h"
 #include "common_tools.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -654,10 +655,10 @@ DHCP_Tools::connectDHClient (const ACE_INET_Addr& address_in,
 
   // sanity check(s)
   ACE_ASSERT (connection_out == dhcpctl_null_handle);
-  if (unlikely (!Common_Tools::getProcessId (ACE_TEXT_ALWAYS_CHAR (DHCP_DHCLIENT_STRING))))
+  if (unlikely (!Common_Process_Tools::id (ACE_TEXT_ALWAYS_CHAR (DHCP_DHCLIENT_STRING))))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::getProcessId(\"%s\"), aborting\n"),
+                ACE_TEXT ("failed to Common_Process_Tools::id(\"%s\"), aborting\n"),
                 ACE_TEXT (DHCP_DHCLIENT_STRING)));
     return false;
   } // end IF
