@@ -77,6 +77,7 @@ endif ()
 
 #add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
+add_definitions (-DFFMPEG_SUPPORT)
 
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
