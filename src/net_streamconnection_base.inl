@@ -2004,14 +2004,11 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     id (), ACE_TEXT (stream_.name ().c_str ())));
         break;
       } // end IF
+      release_message_block_b = false;
 
       // start next read ?
       if (close_b)
-      {
-        release_message_block_b = false;
         break;
-      } // end IF
-
       if (unlikely (!inherited::initiate_read ()))
       {
         ACE_DEBUG ((LM_ERROR,

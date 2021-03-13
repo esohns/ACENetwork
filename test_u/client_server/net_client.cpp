@@ -25,7 +25,6 @@
 #include <sstream>
 #include <string>
 
-//#include "ace/streams.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -792,11 +791,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+  Common_Timer_Tools::configuration_.publishSeconds = true;
   timer_manager_p->initialize (Common_Timer_Tools::configuration_);
   ACE_thread_t thread_id = 0;
   timer_manager_p->start (thread_id);
   //    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
-  Common_Timer_Tools::initialize (false); // publish seconds ?
+  Common_Timer_Tools::initialize ();
   if (
 #if defined (GUI_SUPPORT)
       UIDefinitionFile_in.empty () &&

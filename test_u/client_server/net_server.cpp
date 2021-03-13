@@ -709,7 +709,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // step1: initialize regular (global) statistics reporting
   Common_Timer_Tools::configuration_.dispatch =
     (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
-  Common_Timer_Tools::initialize (true); // publish seconds ?
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+  Common_Timer_Tools::initialize ();
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
