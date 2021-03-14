@@ -77,6 +77,7 @@ class Net_IConnectionManager_T
                             //ConfigurationType,
                             StateType,
                             StatisticContainerType> CONNECTION_T;
+  typedef Common_IStatistic_T<StatisticContainerType> ISTATISTIC_T;
 
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration

@@ -149,7 +149,9 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
       return -1; // <-- remove 'this' from dispatch
     }
     default:
-    {
+    { // update statistic
+      inherited::state_.statistic.receivedBytes += bytes_received;
+
       // adjust write pointer
       message_block_p->wr_ptr (static_cast<size_t> (bytes_received));
 
@@ -312,20 +314,9 @@ continue_:
       return -1; // <-- remove 'this' from dispatch
     }
     default:
-    {
-//#if defined (_DEBUG)
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("0x%@: sent %u bytes\n"),
-//                  handle_in,
-//                  bytes_sent));
-//#else
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("%d: sent %u bytes\n"),
-//                  handle_in,
-//                  bytes_sent));
-//#endif // ACE_WIN32 || ACE_WIN64
-//#endif // _DEBUG
+    { // update statistic
+      inherited::state_.statistic.sentBytes += bytes_sent;
+
       // finished with this buffer ?
       inherited::writeBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
       if (unlikely (inherited::writeBuffer_->length () > 0))

@@ -148,6 +148,19 @@ struct ClientServer_Configuration
 //////////////////////////////////////////
 
 #if defined (GUI_SUPPORT)
+struct ClientServer_ProgressData
+#if defined (GTK_USE)
+  : Test_U_GTK_ProgressData
+#endif
+{
+  ClientServer_ProgressData ()
+   : Test_U_GTK_ProgressData ()
+   , configuration (NULL)
+  {}
+
+  struct ClientServer_Configuration* configuration;
+};
+
 struct ClientServer_UI_CBData
 #if defined (GTK_USE)
  : Test_U_GTK_CBData
@@ -162,11 +175,12 @@ struct ClientServer_UI_CBData
    : Test_U_wxWidgets_CBData ()
 #endif
    , configuration (NULL)
+   , progressData ()
    , subscribers ()
   {}
 
   struct ClientServer_Configuration* configuration;
-
+  struct ClientServer_ProgressData   progressData;
   Test_U_Subscribers_t               subscribers;
 };
 #endif // GUI_SUPPORT

@@ -51,34 +51,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
 }
 
-//template <ACE_SYNCH_DECL,
-//          typename HandlerType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename TimerManagerType,
-//          typename UserDataType>
-//Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-//                        HandlerType,
-//                        ConfigurationType,
-//                        StateType,
-//                        StatisticContainerType,
-//                        HandlerConfigurationType,
-//                        StreamType,
-//                        TimerManagerType,
-//                        UserDataType>::Net_UDPConnectionBase_T ()
-// : inherited (true)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
-
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-
-//  ACE_NOTREACHED (return;)
-//}
-
 template <ACE_SYNCH_DECL,
           typename SocketHandlerType,
           typename ConfigurationType,
@@ -326,20 +298,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
       break;
     }
     default:
-    {
-#if defined (_DEBUG)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("0x%@: sent %d bytes\n"),
-                  handle_in,
-                  bytes_sent));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%d: sent %d bytes\n"),
-                  handle_in,
-                  bytes_sent));
-#endif
-#endif // _DEBUG
+    { // update statistic
+      inherited::state_.statistic.sentBytes += bytes_sent;
 
       // finished with this buffer ?
       message_block_p->rd_ptr (static_cast<size_t> (bytes_sent));

@@ -134,6 +134,7 @@ idle_update_info_display_cb (gpointer userData_in)
 
           break;
         }
+        case COMMON_UI_EVENT_SESSION:
         case COMMON_UI_EVENT_STATISTIC:
         {
           spin_button_p =
@@ -382,70 +383,9 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 }
 
 gboolean
-idle_update_progress_client_cb (gpointer userData_in)
+idle_start_session_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_client_cb"));
-
-  struct Test_U_GTK_ProgressData* data_p =
-    static_cast<struct Test_U_GTK_ProgressData*> (userData_in);
-
-  // sanity check(s)
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->state);
-
-  // synch access
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
-
-//  int result = -1;
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
-
-  GtkProgressBar* progress_bar_p =
-    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PROGRESSBAR_NAME)));
-  ACE_ASSERT (progress_bar_p);
-
-  // step1: done ?
-  bool done = false;
-  GtkSpinButton* spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-      ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gint number_of_connections =
-    gtk_spin_button_get_value_as_int (spin_button_p);
-  if (number_of_connections == 0)
-  {
-    gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), false);
-    done = true;
-  } // end IF
-
-  // step2: update progress bar text
-  std::ostringstream converter;
-  converter << data_p->statistic.streamStatistic.messagesPerSecond;
-  converter << ACE_TEXT_ALWAYS_CHAR (" mps @ ");
-  converter << data_p->statistic.streamStatistic.bytesPerSecond;
-  converter << ACE_TEXT_ALWAYS_CHAR (" Bps ");
-  gtk_progress_bar_set_text (progress_bar_p,
-                             (done ? ACE_TEXT_ALWAYS_CHAR ("")
-                                   : ACE_TEXT_ALWAYS_CHAR (converter.str ().c_str ())));
-  if (done)
-  {
-    gtk_progress_bar_set_fraction (progress_bar_p, 0.0);
-    gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), false);
-  } // end IF
-  else
-    gtk_progress_bar_pulse (progress_bar_p);
-
-  // --> reschedule ?
-  return (done ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE);
-}
-
-gboolean
-idle_start_session_client_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_start_session_client_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_start_session_cb"));
 
   struct Test_U_GTK_CBData* data_p =
     static_cast<struct Test_U_GTK_CBData*> (userData_in);
@@ -739,21 +679,20 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 }
 
 gboolean
-idle_update_progress_server_cb (gpointer userData_in)
+idle_update_progress_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_server_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
-  struct Test_U_GTK_ProgressData* data_p =
-    static_cast<struct Test_U_GTK_ProgressData*> (userData_in);
+  struct ClientServer_ProgressData* data_p =
+    static_cast<struct ClientServer_ProgressData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->state);
 
   bool done = false;
-  Test_U_TCPConnectionManager_t::INTERFACE_T* itcp_connection_manager_p = NULL;
-  Test_U_UDPConnectionManager_t::INTERFACE_T* iudp_connection_manager_p = NULL;
-  unsigned int number_of_connections_2 = 0;
+  Net_IStreamStatisticHandler_t* istatistic_p = NULL;
+  unsigned int number_of_connections = 0;
   Net_StreamStatistic_t statistic_s, statistic_2;
   int result = -1;
   float speed_f = 0.0F, factor_f = 0.0F;
@@ -780,9 +719,7 @@ idle_update_progress_server_cb (gpointer userData_in)
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
       ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
   ACE_ASSERT (spin_button_p);
-  gint number_of_connections =
-    gtk_spin_button_get_value_as_int (spin_button_p);
-  if (number_of_connections == 0)
+  if (gtk_spin_button_get_value_as_int (spin_button_p) == 0)
   {
     gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), false);
     done = true;
@@ -790,21 +727,39 @@ idle_update_progress_server_cb (gpointer userData_in)
   } // end IF
 
   // step2: update progress bar text
-  itcp_connection_manager_p =
-    TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
-  iudp_connection_manager_p =
-    TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
-  number_of_connections_2 += itcp_connection_manager_p->count ();
-  number_of_connections_2 += iudp_connection_manager_p->count ();
-  itcp_connection_manager_p->collect (statistic_s);
+  switch (data_p->configuration->protocolConfiguration.transportLayer)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+      istatistic_p =
+        TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+      number_of_connections = TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
+      break;
+    case NET_TRANSPORTLAYER_UDP:
+      istatistic_p =
+        TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+      number_of_connections = TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
+      break;
+    case NET_TRANSPORTLAYER_SSL:
+      istatistic_p =
+        TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+      number_of_connections = TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("unknown/invalid protocol (was: %d), aborting\n"),
+                  data_p->configuration->protocolConfiguration.transportLayer));
+      return G_SOURCE_REMOVE;
+    }
+  } // end SWITCH
+  istatistic_p->collect (statistic_s);
   interval = statistic_s.timeStamp - statistic_s.previousTimeStamp;
   interval_ms = interval.msec ();
   factor_f =
     1000.0F / (interval_ms ? static_cast<float> (interval_ms) : std::numeric_limits<float>::max ());
   speed_f =
     (((statistic_s.sentBytes + statistic_s.receivedBytes) - statistic_s.previousBytes) *
-    factor_f) / static_cast<float> (number_of_connections_2);
-  //iudp_connection_manager_p->collect (statistic_2);
+    factor_f)/* / static_cast<float> (number_of_connections)*/;
 
   ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   //speed_f = data_p->statistic.streamStatistic.bytesPerSecond;
@@ -1450,7 +1405,7 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
   } // end IF
 
   // step2: start progress reporting ?
-  if ((value != 1) || data_p->progressData.eventSourceId)
+  if (!value || data_p->progressData.eventSourceId)
     goto continue_;
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
@@ -1463,17 +1418,14 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
       //                 NULL);
       g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                // _LOW doesn't work (on Win32)
                           NET_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
-                          idle_update_progress_client_cb,
+                          idle_update_progress_cb,
                           &data_p->progressData,
                           NULL);
     if (data_p->progressData.eventSourceId > 0)
       data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
     else
-    {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_timeout_add_full(%s): \"%m\", continuing\n"),
-                  ACE_TEXT ("idle_update_client_progress_cb")));
-    } // end IF
+                  ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", continuing\n")));
 //  } // end lock scope
 
 continue_:
@@ -1542,17 +1494,14 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
       //                 NULL);
       g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                // _LOW doesn't work (on Win32)
                           NET_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
-                          idle_update_progress_server_cb,
+                          idle_update_progress_cb,
                           &data_p->progressData,
                           NULL);
     if (data_p->progressData.eventSourceId > 0)
       data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
     else
-    {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_timeout_add_full(%s): \"%m\", continuing\n"),
-                  ACE_TEXT ("idle_update_server_progress_cb")));
-    } // end IF
+                  ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", continuing\n")));
 //  } // end lock scope
 
 continue_:

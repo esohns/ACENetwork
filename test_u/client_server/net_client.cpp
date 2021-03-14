@@ -34,7 +34,8 @@
 #include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "ace/POSIX_Proactor.h"
 #endif // ACE_WIN32 || ACE_WIN32
 #include "ace/Reactor.h"
@@ -108,10 +109,11 @@
 
 // globals
 unsigned int random_seed;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 struct random_data random_data;
 char random_state_buffer[BUFSIZ];
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetClientStream");
 
@@ -531,12 +533,15 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // step0a: initialize configuration
 #if defined (GUI_SUPPORT)
+  CBData_in.configuration = &configuration_in;
+  CBData_in.progressData.configuration = &configuration_in;
+
   Test_U_EventHandler_t ui_event_handler (&CBData_in);
 #else
   Test_U_EventHandler_t ui_event_handler ();
 #endif // GUI_SUPPORT
   Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_U_Module_EventHandler* event_handler_p =
     dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -644,6 +649,17 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //	config.currentStatistics = {};
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
+  ACE_thread_t thread_id = 0;
+  Common_Timer_Manager_t* timer_manager_p =
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
+  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+  timer_manager_p->initialize (Common_Timer_Tools::configuration_);
+  timer_manager_p->start (thread_id);
+  //    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
+  Common_Timer_Tools::initialize ();
+
   // step0c: initialize connector
   Test_U_TCPConnectionManager_t* connection_manager_p =
     TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
@@ -660,6 +676,16 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Client_TCP_Connector_t tcp_connector (true);
 #if defined (SSL_SUPPORT)
   Client_SSL_Connector_t ssl_connector (true);
+  if (!Net_Common_Tools::setCertificates (certificateFile_in,
+                                          privateKeyFile_in,
+                                          NULL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
+                ACE_TEXT (certificateFile_in.c_str ()),
+                ACE_TEXT (privateKeyFile_in.c_str ())));
+    return;
+  } // end IF
 #endif // SSL_SUPPORT
   Client_UDP_AsynchConnector_t asynch_udp_connector (true);
   Client_UDP_Connector_t udp_connector (true);
@@ -682,16 +708,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
         connector_p = &ssl_connector;
 //      else
 //        connector_p = &asynch_ssl_connector;
-      if (!Net_Common_Tools::setCertificates (certificateFile_in,
-                                              privateKeyFile_in,
-                                              NULL))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
-                    ACE_TEXT (certificateFile_in.c_str ()),
-                    ACE_TEXT (privateKeyFile_in.c_str ())));
-        return;
-      } // end IF
       break;
     }
 #endif // SSL_SUPPORT
@@ -744,14 +760,17 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end SWITCH
 
   // step0d: initialize connection manager
+  struct Net_UserData user_data;
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (tcp_connection_configuration,
                              NULL);
+  connection_manager_p->start (thread_id);
   connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->set (udp_connection_configuration,
                              NULL);
+  connection_manager_2->start (thread_id);
 
   // step0e: initialize action timer
   ACE_INET_Addr peer_address (serverPortNumber_in,
@@ -787,16 +806,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                          udp_connection_configuration,
                                          (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR));
   configuration_in.timeoutHandler = &timeout_handler;
-  Common_Timer_Manager_t* timer_manager_p =
-      COMMON_TIMERMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (timer_manager_p);
-  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
-  Common_Timer_Tools::configuration_.publishSeconds = true;
-  timer_manager_p->initialize (Common_Timer_Tools::configuration_);
-  ACE_thread_t thread_id = 0;
-  timer_manager_p->start (thread_id);
-  //    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
-  Common_Timer_Tools::initialize ();
   if (
 #if defined (GUI_SUPPORT)
       UIDefinitionFile_in.empty () &&
@@ -1567,19 +1576,18 @@ ACE_TMAIN (int argc_in,
 
   // step1h: initialize UI framework
 #if defined (GUI_SUPPORT)
-  ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
-  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
-  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
-  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+  configuration.GTKConfiguration.argc = argc_in;
+  configuration.GTKConfiguration.argv = argv_in;
+  configuration.GTKConfiguration.CBData = &ui_cb_data;
+  configuration.GTKConfiguration.eventHooks.finiHook =
       idle_finalize_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+  configuration.GTKConfiguration.eventHooks.initHook =
       idle_initialize_client_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
+  configuration.GTKConfiguration.definition = &gtk_ui_definition;
   if (!UI_file_path.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (configuration.GTKConfiguration);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

@@ -54,5 +54,5 @@
 #endif // _MSC_VER
 
 // *TODO*: reference additional headers your program requires here
-//#include "net_client_common.h"
-//#include "net_server_common.h"
+#include "net_client_common.h"
+#include "net_server_common.h"

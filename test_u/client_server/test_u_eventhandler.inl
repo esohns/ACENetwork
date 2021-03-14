@@ -51,7 +51,6 @@ Test_U_EventHandler_T<CallbackDataType>::Test_U_EventHandler_T (
 #if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
 #endif // GUI_SUPPORT
- , sessionData_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler_T::Test_U_EventHandler_T"));
 
@@ -65,7 +64,7 @@ Test_U_EventHandler_T<CallbackDataType>::start (Stream_SessionId_t sessionId_in,
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler_T::start"));
 
   ACE_UNUSED_ARG (sessionId_in);
-  //ACE_ASSERT (!sessionData_);
+  ACE_UNUSED_ARG (sessionData_in);
 
   // sanity check(s)
 #if defined (GUI_SUPPORT)
@@ -76,16 +75,14 @@ Test_U_EventHandler_T<CallbackDataType>::start (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  sessionData_ = &const_cast<struct Test_U_StreamSessionData&> (sessionData_in);
-
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  guint event_source_id = g_idle_add (idle_start_session_client_cb,
+  guint event_source_id = g_idle_add (idle_start_session_cb,
                                       CBData_);
   if (!event_source_id)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_start_session_client_cb): \"%m\", returning\n")));
+                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
     return;
   } // end IF
 
@@ -196,15 +193,21 @@ Test_U_EventHandler_T<CallbackDataType>::notify (Stream_SessionId_t sessionId_in
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  ACE_ASSERT (sessionData_);
+  const Test_U_StreamSessionData_t& session_data_container_r =
+    sessionMessage_in.getR ();
+  const struct Test_U_StreamSessionData& session_data_r =
+    session_data_container_r.getR ();
 
 #if defined (GUI_SUPPORT)
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
 #endif // GUI_SUPPORT
   switch (sessionMessage_in.type ())
   {
-    //case STREAM_SESSION_MESSAGE_CONNECT:
-    //  return;
+    case STREAM_SESSION_MESSAGE_CONNECT:
+#if defined (GUI_SUPPORT)
+      //event_e = COMMON_UI_EVENT_CONNECT;
+#endif // GUI_SUPPORT
+      break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
 #if defined (GUI_SUPPORT)
       event_e = COMMON_UI_EVENT_DISCONNECT;
@@ -213,7 +216,7 @@ Test_U_EventHandler_T<CallbackDataType>::notify (Stream_SessionId_t sessionId_in
     case STREAM_SESSION_MESSAGE_STATISTIC:
 #if defined (GUI_SUPPORT)
       event_e = COMMON_UI_EVENT_STATISTIC;
-      CBData_->progressData.statistic.streamStatistic = sessionData_->statistic;
+      CBData_->progressData.statistic.streamStatistic = session_data_r.statistic;
 #endif // GUI_SUPPORT
       break;
     default:

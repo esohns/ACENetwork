@@ -66,10 +66,8 @@ class Test_U_EventHandler_T
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_T& operator=(const Test_U_EventHandler_T&))
 
 #if defined (GUI_SUPPORT)
-  CallbackDataType*                CBData_;
+  CallbackDataType* CBData_;
 #endif // GUI_SUPPORT
-
-  struct Test_U_StreamSessionData* sessionData_;
 };
 
 #include "test_u_eventhandler.inl"

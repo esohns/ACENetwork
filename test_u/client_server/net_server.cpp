@@ -26,17 +26,16 @@
 #include <string>
 #include <vector>
 
-//#include "ace/streams.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN32
 #include "ace/Log_Msg.h"
-//#include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "ace/POSIX_Proactor.h"
 #endif // ACE_WIN32 || ACE_WIN32
 #include "ace/Reactor.h"
@@ -106,10 +105,11 @@
 
 // globals
 unsigned int random_seed;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 struct random_data random_data;
 char random_state_buffer[BUFSIZ];
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetServerStream");
 
@@ -544,6 +544,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   ACE_ASSERT (CBData_in.UIState);
   CBData_in.progressData.state = CBData_in.UIState;
 #endif // GTK_USE
+  CBData_in.configuration = &configuration_in;
+  CBData_in.progressData.configuration = &configuration_in;
 #endif // GUI_SUPPORT
 
   int result = -1;
@@ -975,6 +977,31 @@ do_work (unsigned int maximumNumberOfConnections_in,
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
+
+  if (!Net_Common_Tools::setCertificates (certificateFile_in,
+                                          privateKeyFile_in,
+                                          NULL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
+                ACE_TEXT (certificateFile_in.c_str ()),
+                ACE_TEXT (privateKeyFile_in.c_str ())));
+
+    Common_Tools::finalizeEventDispatch (useReactor_in,
+                                          !useReactor_in,
+                                          (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                                        : event_dispatch_state_s.proactorGroupId));
+#if defined (GUI_SUPPORT)
+    if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
+      gtk_manager_p->stop ();
+#else
+      ;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+    Common_Timer_Tools::finalize ();
+    return;
+  } // end IF
 #endif // SSL_SUPPORT
 
   Server_UDP_AsynchConnector_t udp_asynch_connector (true);
@@ -989,30 +1016,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
     case NET_TRANSPORTLAYER_SSL:
     {
       listener_p = configuration_in.SSLListener;
-      if (!Net_Common_Tools::setCertificates (certificateFile_in,
-                                              privateKeyFile_in,
-                                              NULL))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
-                    ACE_TEXT (certificateFile_in.c_str ()),
-                    ACE_TEXT (privateKeyFile_in.c_str ())));
-
-        Common_Tools::finalizeEventDispatch (useReactor_in,
-                                             !useReactor_in,
-                                             (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                                            : event_dispatch_state_s.proactorGroupId));
-#if defined (GUI_SUPPORT)
-        if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-          gtk_manager_p->stop ();
-#else
-          ;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-        Common_Timer_Tools::finalize ();
-        return;
-      } // end IF
       break;
     }
 #endif // SSL_SUPPORT
@@ -1445,19 +1448,18 @@ ACE_TMAIN (int argc_in,
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
-  ui_cb_data.configuration = &configuration;
-  ui_cb_data.configuration->GTKConfiguration.argc = argc_in;
-  ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
-  ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
+  configuration.GTKConfiguration.argc = argc_in;
+  configuration.GTKConfiguration.argv = argv_in;
+  configuration.GTKConfiguration.CBData = &ui_cb_data;
+  configuration.GTKConfiguration.eventHooks.finiHook =
       idle_finalize_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
+  configuration.GTKConfiguration.eventHooks.initHook =
       idle_initialize_server_UI_cb;
-  ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
+  configuration.GTKConfiguration.definition = &gtk_ui_definition;
 //  if (!gtk_rc_file.empty ())
 //    ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
   if (!UI_file_path.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (configuration.GTKConfiguration);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

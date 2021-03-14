@@ -28,18 +28,17 @@
 // idle routines
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
-
-//////////////////////////////////////////
-
-gboolean idle_initialize_client_UI_cb (gpointer);
-gboolean idle_update_progress_client_cb (gpointer);
-gboolean idle_start_session_client_cb (gpointer);
+gboolean idle_update_progress_cb (gpointer);
+gboolean idle_start_session_cb (gpointer);
 gboolean idle_end_session_cb (gpointer);
 
 //////////////////////////////////////////
 
+gboolean idle_initialize_client_UI_cb (gpointer);
+
+//////////////////////////////////////////
+
 gboolean idle_initialize_server_UI_cb (gpointer);
-gboolean idle_update_progress_server_cb (gpointer);
 
 //------------------------------------------------------------------------------
 

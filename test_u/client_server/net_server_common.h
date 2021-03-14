@@ -136,10 +136,8 @@ struct Server_UI_CBData
 {
   Server_UI_CBData ()
    : ClientServer_UI_CBData ()
-   //, configuration (NULL)
   {}
 
-  //struct Server_Configuration* configuration;
 };
 #endif // GUI_SUPPORT
 
