@@ -6,11 +6,6 @@ include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/SetMonitorImplementation.cmake)
 add_library (${PROJECT_NAME}_WLAN STATIC "")
 
 if (UNIX)
-# # DHCP client
-# option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
-# option (DHCPD_SUPPORT "enable dhcpd support" OFF)
-# add_feature_info (ISC dhclient DHCLIENT_SUPPORT "support ISC dhclient")
-# add_feature_info (dhcpd DHCPD_SUPPORT "support dhcpd")
 elseif (WIN32)
 # include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/scripts/Macros.cmake)
  get_WIN32_Version (WINDOWS_VERSION_MAJOR WINDOWS_VERSION_MINOR WINDOWS_VERSION_MICRO)

@@ -1,10 +1,11 @@
 ﻿# *NOTE*: the first entry is the default option
 if (UNIX)
- set (DHCP_CLIENT_IMPLEMENTATION "dhclient" CACHE STRING "use ISC dhclient (default)")
+ set (DHCP_CLIENT_IMPLEMENTATION "none" CACHE STRING "none (default)")
+ set (DHCP_CLIENT_IMPLEMENTATION "dhclient" CACHE STRING "use ISC dhclient")
  set (DHCP_CLIENT_IMPLEMENTATION "dhcpd" CACHE STRING "use dhcpd")
  set (DHCP_CLIENT_IMPLEMENTATION "framework_dhcp" CACHE STRING "use framework DHCP (ACENetwork)")
 
- set_property (CACHE MONITOR_IMPLEMENTATION PROPERTY STRINGS "dhclient" "dhcpd" "framework_dhcp")
+ set_property (CACHE MONITOR_IMPLEMENTATION PROPERTY STRINGS "none dhclient" "dhcpd" "framework_dhcp")
 elseif (WIN32)
  set (DHCP_CLIENT_IMPLEMENTATION "wlanapi_dhcp" CACHE STRING "use wlanapi DHCP (default)")
 

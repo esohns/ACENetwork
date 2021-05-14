@@ -34,7 +34,6 @@
 #if defined (DHCLIENT_SUPPORT)
 extern "C"
 {
-#include "isc/boolean.h"
 #include "dhcpctl/dhcpctl.h"
 }
 #endif // DHCLIENT_SUPPORT

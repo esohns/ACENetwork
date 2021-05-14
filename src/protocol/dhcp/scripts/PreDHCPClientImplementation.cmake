@@ -9,8 +9,8 @@ if (UNIX)
 #  message (WARNING "could not find json-c, continuing")
 #  set (DHCLIENT_SUPPORT_ENABLE OFF)
 # endif (NOT PKG_JSON_FOUND)
-#  set (JSON_LIB_FILE libjson-c.so.3)
-  set (JSON_LIB_FILE libjson-c.so.4)
+#  set (JSON_LIB_FILE libjson-c.so.4)
+  set (JSON_LIB_FILE libjson-c.so.5)
   find_library (JSON_LIBRARY ${JSON_LIB_FILE}
                 HINTS /usr/lib
                 PATH_SUFFIXES x86_64-linux-gnu
@@ -103,7 +103,8 @@ set (DNS_LIB_FILE libdns.so)
 
 # set (ISC_CFG_LIB_FILE libisccfg-export.so)
 #  set (ISC_CFG_LIB_FILE libisccfg-export.so.163)
- set (ISC_CFG_LIB_FILE libisccfg.so.163)
+# set (ISC_CFG_LIB_FILE libisccfg.so.163)
+ set (ISC_CFG_LIB_FILE libisccfg.so)
  find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -117,7 +118,7 @@ set (DNS_LIB_FILE libdns.so)
 
 #  set (IRS_LIB_FILE libirs.a)
 # set (IRS_LIB_FILE libirs-export.so.161)
- set (IRS_LIB_FILE libirs.so.161)
+ set (IRS_LIB_FILE libirs.so)
  find_library (IRS_LIBRARY ${IRS_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
@@ -156,9 +157,9 @@ set (DNS_LIB_FILE libdns.so)
  endif (NOT DHCPCTL_LIBRARY)
  option (DHCLIENT_SUPPORT "enable ISC dhclient support" ${DHCLIENT_SUPPORT_ENABLE})
  add_feature_info (dhclient DHCLIENT_SUPPORT "support ISC dhclient")
- if (DHCLIENT_SUPPORT_ENABLE)
+ if (DHCLIENT_SUPPORT)
   add_definitions (-DDHCLIENT_SUPPORT)
- endif (DHCLIENT_SUPPORT_ENABLE)
+ endif (DHCLIENT_SUPPORT)
 
  option (DHCPD_SUPPORT "enable dhcpd support" OFF)
  add_feature_info (dhcpd DHCPD_SUPPORT "support dhcpd")

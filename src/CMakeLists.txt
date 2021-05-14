@@ -89,12 +89,13 @@ if (UNIX)
                    RESULT_VARIABLE BIND9_RESULT
                    OUTPUT_STRIP_TRAILING_WHITESPACE)
   if (NOT ${BIND9_RESULT} EQUAL 0)
-   message (FATAL_ERROR "Command \"${BIND9_CONFIG_EXECUTABLE} --cflags\" failed with output:\n${BIND9_CFLAGS}\n${BIND9_ERROR}, aborting")
+  # message (FATAL_ERROR "Command \"${BIND9_CONFIG_EXECUTABLE} --cflags\" failed with output:\n${BIND9_CFLAGS}\n${BIND9_ERROR}, aborting")
   endif (NOT ${BIND9_RESULT} EQUAL 0)
 #  message (STATUS "BIND9_CFLAGS: ${BIND9_CFLAGS}")
   string (REGEX REPLACE "^-I(.+)$" "\\1" BIND9_CFLAGS "${BIND9_CFLAGS}")
 #  message (STATUS "BIND9_CFLAGS: ${BIND9_CFLAGS}")
   target_include_directories (${PROJECT_NAME} PUBLIC ${BIND9_CFLAGS})
+  target_include_directories (${PROJECT_NAME} PUBLIC /usr/include/bind9)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
@@ -346,6 +347,8 @@ elseif (WIN32)
 endif ()
 target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
 if (SSL_SUPPORT)
+ target_link_libraries (${PROJECT_NAME} ${SSL_LIBRARIES})
+
  target_link_libraries (${PROJECT_NAME} ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
 

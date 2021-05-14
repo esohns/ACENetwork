@@ -1331,7 +1331,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   std::regex regex (regex_string);
   std::smatch match_results;
   converter.str (resolution_record_string);
-  bool is_first = true;
+//  bool is_first = true;
   std::string buffer_string;
   do
   {
