@@ -49,7 +49,7 @@
 #include "test_i_gtk_common.h"
 #elif defined (WXWIDGETS_USE)
 #include "test_i_wxwidgets_common.h"
-#endif
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #include "bittorrent_stream_common.h"
@@ -82,10 +82,13 @@ struct BitTorrent_Client_UI_ProgressData
   BitTorrent_Client_UI_ProgressData ()
 #if defined (GTK_USE)
    : Test_I_GTK_ProgressData ()
+   , transferred (0)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_ProgressData ()
-#endif
    , transferred (0)
+#else
+   : transferred (0)
+#endif // GTK_USE || WXWIDGETS_USE
   {}
 
   unsigned int transferred;
@@ -97,15 +100,18 @@ struct BitTorrent_Client_UI_CBData
  : Test_I_GTK_CBData
 #elif defined (WXWIDGETS_USE)
  : Test_I_wxWidgets_CBData
-#endif
+#endif // GTK_USE || WXWIDGETS_USE
 {
   BitTorrent_Client_UI_CBData ()
 #if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+   , configuration (NULL)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_CBData ()
-#endif
    , configuration (NULL)
+#else
+   : configuration (NULL)
+#endif // GTK_USE || WXWIDGETS_USE
 #if defined (GTK_USE)
    , contextId (0)
 #endif // GTK_USE

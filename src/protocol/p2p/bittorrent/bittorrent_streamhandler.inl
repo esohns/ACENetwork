@@ -351,7 +351,9 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
                           ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
           } // end IF
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
           CBData_->progressData.statistic = (*iterator).second->statistic;
+#endif // GTK_USE || WXWIDGETS_USE
 
           if ((*iterator).second->lock)
           {
@@ -709,7 +711,9 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
                           ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
           } // end IF
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
           CBData_->progressData.statistic = (*iterator).second->statistic;
+#endif // GTK_USE || WXWIDGETS_USE
 
           if ((*iterator).second->lock)
           {

@@ -582,7 +582,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   modulehandler_configuration.lock = &CBData_in.UIState->subscribersLock;
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
   stream_configuration.allocatorConfiguration =
@@ -1408,6 +1410,8 @@ ACE_TMAIN (int argc_in,
                                             (UI_file_path.empty () ? NULL
                                                                    : &logger))) // (ui) logger ?
 #elif defined (WXWIDGETS_USE)
+                                            NULL))                              // (ui) logger ?
+#else
                                             NULL))                              // (ui) logger ?
 #endif // XXX_USE
 #else

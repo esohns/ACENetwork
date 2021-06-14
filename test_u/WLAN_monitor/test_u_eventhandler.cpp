@@ -69,7 +69,9 @@ Test_U_EventHandler::onSignalQualityChange (const std::string& interfaceIdentifi
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -81,10 +83,12 @@ Test_U_EventHandler::onSignalQualityChange (const std::string& interfaceIdentifi
                 ACE_TEXT ("failed to g_idle_add(idle_update_signal_quality_cb): \"%m\", continuing\n")));
 #endif // GTK_USE
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     //CBData_->eventSourceIds.insert (event_source_id);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_SIGNAL_QUALITY_CHANGED);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -107,7 +111,9 @@ Test_U_EventHandler::onAssociate (const std::string& interfaceIdentifier_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -125,9 +131,11 @@ Test_U_EventHandler::onAssociate (const std::string& interfaceIdentifier_in,
   } // end IF
 #endif // GTK_USE
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_ASSOCIATE);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -150,7 +158,9 @@ Test_U_EventHandler::onDisassociate (const std::string& interfaceIdentifier_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -168,9 +178,11 @@ Test_U_EventHandler::onDisassociate (const std::string& interfaceIdentifier_in,
   } // end IF
 #endif // GTK_USE
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_DISASSOCIATE);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -193,7 +205,9 @@ Test_U_EventHandler::onConnect (const std::string& interfaceIdentifier_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -211,9 +225,11 @@ Test_U_EventHandler::onConnect (const std::string& interfaceIdentifier_in,
   } // end IF
 #endif // GTK_USE
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_CONNECT);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -236,7 +252,9 @@ Test_U_EventHandler::onDisconnect (const std::string& interfaceIdentifier_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -254,9 +272,11 @@ Test_U_EventHandler::onDisconnect (const std::string& interfaceIdentifier_in,
   } // end IF
 #endif // GTK_USE
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_DISCONNECT);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -277,13 +297,17 @@ Test_U_EventHandler::onHotPlug (const std::string& interfaceIdentifier_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -304,13 +328,17 @@ Test_U_EventHandler::onRemove (const std::string& interfaceIdentifier_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_INTERFACE_REMOVE);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -329,7 +357,9 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -343,8 +373,10 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
   //  CBData_->eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_SCAN_COMPLETE);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }

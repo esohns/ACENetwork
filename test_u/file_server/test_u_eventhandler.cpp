@@ -76,7 +76,9 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -93,10 +95,12 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     //CBData_->eventSourceIds.insert (event_source_id);
     CBData_->UIState->eventStack.push (COMMON_UI_EVENT_CONNECT);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -128,13 +132,17 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (COMMON_UI_EVENT_DISCONNECT);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 
@@ -150,14 +158,18 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     //CBData_->progressData.statistic.bytes += message_in.total_length ();
     CBData_->UIState->eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }
 void
@@ -172,7 +184,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_->UIState);
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
   int result = -1;
@@ -197,7 +211,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
       } // end IF
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
       CBData_->progressData.statistic.streamStatistic = sessionData_->statistic;
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
       if (sessionData_->lock)
@@ -222,8 +238,10 @@ continue_:
   } // end SWITCH
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     CBData_->UIState->eventStack.push (event_e);
   } // end lock scope
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 }

@@ -159,14 +159,18 @@ struct FileServer_UI_CBData
  : Test_U_GTK_CBData
 #elif defined (WXWIDGETS_USE)
  : Test_U_wxWidgets_CBData
-#endif
+#else
+ : Test_U_UI_CBData
+#endif // GTK_USE || WXWIDGETS_USE
 {
   FileServer_UI_CBData ()
 #if defined (GTK_USE)
    : Test_U_GTK_CBData ()
 #elif defined (WXWIDGETS_USE)
-  : Test_U_wxWidgets_CBData ()
-#endif
+   : Test_U_wxWidgets_CBData ()
+#else
+   : Test_U_UI_CBData ()
+#endif // GTK_USE || WXWIDGETS_USE
    , configuration (NULL)
    , subscribers ()
   {}

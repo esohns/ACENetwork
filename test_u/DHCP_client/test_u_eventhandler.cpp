@@ -183,7 +183,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 
+#if defined (GTK_USE)
   CBData_->progressData.transferred += message_in.total_length ();
+#endif // GTK_USE
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
 #endif // GTK_USE
@@ -228,8 +230,10 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
 
+#if defined (GTK_USE)
       CBData_->progressData.statistic.streamStatistic =
         (*iterator).second->statistic;
+#endif // GTK_USE
 
       if ((*iterator).second->lock)
       {

@@ -282,7 +282,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       } // end IF
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
       CBData_->progressData.statistic = (*iterator).second->statistic;
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
       if ((*iterator).second->lock)
@@ -410,7 +412,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       } // end IF
 
 #if defined (GUI_SUPPORT)
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
       CBData_->progressData.statistic = (*iterator).second->statistic;
+#endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 
       if ((*iterator).second->lock)

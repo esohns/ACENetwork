@@ -94,15 +94,18 @@ struct IRC_Client_UI_CBData
  : Test_I_GTK_CBData
 #elif defined (WXWIDGETS_USE)
  : Test_I_wxWidgets_CBData
-#endif
+#endif // GTK_USE || WXWIDGETS_USE
 {
   IRC_Client_UI_CBData ()
 #if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+   , configuration (NULL)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_CBData ()
-#endif
    , configuration (NULL)
+#else
+   : configuration (NULL)
+#endif // GTK_USE || WXWIDGETS_USE
    , connections ()
 #if defined (GTK_USE)
    , contextId (0)
@@ -111,7 +114,9 @@ struct IRC_Client_UI_CBData
    , progressData ()
    , UIFileDirectory ()
   {
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
     progressData.state = UIState;
+#endif // GTK_USE || WXWIDGETS_USE
   }
 
   struct IRC_Client_Configuration*  configuration;
@@ -202,4 +207,4 @@ struct IRC_Client_UI_HandlerCBData
   std::string                    timeStamp;
 };
 
-#endif
+#endif // IRC_CLIENT_GUI_COMMON_H

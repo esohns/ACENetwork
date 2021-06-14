@@ -216,7 +216,9 @@ Test_U_EventHandler_T<CallbackDataType>::notify (Stream_SessionId_t sessionId_in
     case STREAM_SESSION_MESSAGE_STATISTIC:
 #if defined (GUI_SUPPORT)
       event_e = COMMON_UI_EVENT_STATISTIC;
+#if defined (GTK_USE)
       CBData_->progressData.statistic.streamStatistic = session_data_r.statistic;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
       break;
     default:

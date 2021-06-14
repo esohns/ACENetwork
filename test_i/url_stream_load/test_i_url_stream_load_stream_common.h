@@ -158,7 +158,11 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
    , window (NULL)
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
     inbound = true;
@@ -168,7 +172,11 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Test_I_ISessionNotify_t*        subscriber;
   Test_I_Subscribers_t*           subscribers;
   std::string                     targetFileName; // dump module
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   GdkWindow*                      window;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration
@@ -260,7 +268,11 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
    , subscribers (NULL)
    , targetFileName ()
    , outputFormat ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
    , window (NULL)
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
     inbound = true;
@@ -274,7 +286,11 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
   Test_I_Subscribers_2_t*         subscribers;
   std::string                     targetFileName; // dump module
   struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   GdkWindow*                      window;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration_2

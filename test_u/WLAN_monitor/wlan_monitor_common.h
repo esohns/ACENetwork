@@ -137,21 +137,25 @@ struct WLANMonitor_UI_WxWidgets_State
 
   WLANMMMonitor_Events_t eventStack;
 };
-#endif
+#endif // GTK_USE
 
 struct WLANMonitor_UI_CBData
 #if defined (GTK_USE)
  : Test_U_GTK_CBData
 #elif defined (WXWIDGETS_USE)
  : Test_U_wxWidgets_CBData
-#endif
+#else
+ : Test_U_UI_CBData
+#endif // GTK_USE || WXWIDGETS_USE
 {
   WLANMonitor_UI_CBData ()
 #if defined (GTK_USE)
    : Test_U_GTK_CBData ()
 #elif defined (WXWIDGETS_USE)
    : Test_U_wxWidgets_CBData ()
-#endif
+#else
+   : Test_U_UI_CBData ()
+#endif // GTK_USE || WXWIDGETS_USE
    , configuration (NULL)
    , monitor (NULL)
 #if defined (GTK_USE)
@@ -159,9 +163,11 @@ struct WLANMonitor_UI_CBData
    , UIState (NULL)
 #elif defined (WXWIDGETS_USE)
    , UIState (NULL)
-#endif // GTK_USE
+#endif // GTK_USE || WXWIDGETS_USE
   {
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
     progressData.state = UIState;
+#endif // GTK_USE || WXWIDGETS_USE
   }
 
   struct WLANMonitor_Configuration*      configuration;
@@ -171,7 +177,7 @@ struct WLANMonitor_UI_CBData
   struct WLANMonitor_UI_GTK_State*       UIState;
 #elif defined (WXWIDGETS_USE)
   struct WLANMonitor_UI_WxWidgets_State* UIState;
-#endif
+#endif // GTK_USE || WXWIDGETS_USE
 };
 
 #if defined (GTK_USE)

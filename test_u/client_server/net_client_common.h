@@ -50,9 +50,9 @@
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "test_u_gtk_common.h"
-#else
+#elif defined (WXWIDGETS_USE)
 #include "test_u_wxwidgets_common.h"
-#endif // GTK_USE
+#endif
 #endif // GUI_SUPPORT
 #include "net_client_stream_common.h"
 

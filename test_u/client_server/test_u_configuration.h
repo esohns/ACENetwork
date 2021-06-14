@@ -154,8 +154,12 @@ struct ClientServer_ProgressData
 #endif
 {
   ClientServer_ProgressData ()
+#if defined (GTK_USE)
    : Test_U_GTK_ProgressData ()
    , configuration (NULL)
+#else
+   : configuration (NULL)
+#endif // GTK_USE
   {}
 
   struct ClientServer_Configuration* configuration;
@@ -171,10 +175,13 @@ struct ClientServer_UI_CBData
   ClientServer_UI_CBData ()
 #if defined (GTK_USE)
    : Test_U_GTK_CBData ()
+   , configuration (NULL)
 #elif defined (WXWIDGETS_USE)
    : Test_U_wxWidgets_CBData ()
-#endif
    , configuration (NULL)
+#else
+   : configuration (NULL)
+#endif
    , progressData ()
    , subscribers ()
   {}

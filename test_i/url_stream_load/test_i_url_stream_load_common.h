@@ -122,16 +122,19 @@ struct Test_I_URLStreamLoad_UI_ProgressData
  : Test_I_GTK_ProgressData
 #elif defined (WXWIDGETS_USE)
  : Test_I_wxWidgets_ProgressData
-#endif
+#endif // GTK_USE || WXWIDGETS_USE
 {
   Test_I_URLStreamLoad_UI_ProgressData ()
 #if defined (GTK_USE)
    : Test_I_GTK_ProgressData ()
+   , transferred (0)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_ProgressData ()
-#endif
-//   , statistic ()
    , transferred (0)
+#else
+   : transferred (0)
+#endif // GTK_USE || WXWIDGETS_USE
+//   , statistic ()
   {}
 
 //  HTTP_Statistic_t statistic;
@@ -143,15 +146,18 @@ struct Test_I_URLStreamLoad_UI_CBData
  : Test_I_GTK_CBData
 #elif defined (WXWIDGETS_USE)
  : Test_I_wxWidgets_CBData
-#endif
+#endif // GTK_USE || WXWIDGETS_USE
 {
   Test_I_URLStreamLoad_UI_CBData ()
 #if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+   , configuration (NULL)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_CBData ()
-#endif
    , configuration (NULL)
+#else
+   : configuration (NULL)
+#endif // GTK_USE || WXWIDGETS_USE
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , subscribers ()
