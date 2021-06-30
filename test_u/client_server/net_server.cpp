@@ -989,10 +989,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
                 ACE_TEXT (certificateFile_in.c_str ()),
                 ACE_TEXT (privateKeyFile_in.c_str ())));
 
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                          !useReactor_in,
-                                          (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                                        : event_dispatch_state_s.proactorGroupId));
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                         event_dispatch_state_s.reactorGroupId,
+                                         true);
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
