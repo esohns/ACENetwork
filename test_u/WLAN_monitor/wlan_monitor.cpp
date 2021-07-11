@@ -169,9 +169,13 @@ do_printUsage (const std::string& programName_in)
 #endif // ACE_WIN32 || ACE_WIN64
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r [VALUE]   : statistic reporting interval (second(s)) [")
-            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
-            << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
+//  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r [VALUE]   : statistic reporting interval (second(s)) [")
+//            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
+//            << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
+//            << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r          : use reactor [")
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [SSID]    : SSID")
             << std::endl;
@@ -200,7 +204,8 @@ do_processArguments (const int& argc_in,
 #else
                      std::string& interfaceIdentifier_out,
 #endif // ACE_WIN32 || ACE_WIN64
-                     unsigned int& statisticReportingInterval_out,
+//                     unsigned int& statisticReportingInterval_out,
+                     bool& useReactor_out,
                      std::string& SSID_out,
                      bool& traceInformation_out,
                      bool& printVersionAndExit_out)
@@ -235,8 +240,10 @@ do_processArguments (const int& argc_in,
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
 #endif // ACE_WIN32 || ACE_WIN64
   logToFile_out = false;
-  statisticReportingInterval_out =
-      STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+//  statisticReportingInterval_out =
+//      STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+  useReactor_out =
+          (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   SSID_out.clear ();
   traceInformation_out = false;
   printVersionAndExit_out = false;
@@ -321,10 +328,11 @@ do_processArguments (const int& argc_in,
       }
       case 'r':
       {
-        converter.clear ();
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
-        converter >> statisticReportingInterval_out;
+//        converter.clear ();
+//        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//        converter << argumentParser.opt_arg ();
+//        converter >> statisticReportingInterval_out;
+        useReactor_out = true;
         break;
       }
       case 's':
@@ -465,14 +473,15 @@ do_work (bool autoAssociate_in,
 #else
          const std::string& interfaceIdentifier_in,
 #endif // ACE_WIN32 || ACE_WIN64
-         unsigned int statisticReportingInterval_in,
+//         unsigned int statisticReportingInterval_in,
+         bool useReactor_in,
          const std::string& SSID_in,
 #if defined (GUI_SUPPORT)
          struct WLANMonitor_UI_CBData& CBData_in,
-#else
-         struct WLANMonitor_Configuration& configuration_in,
 #endif // GUI_SUPPORT
-           const ACE_Sig_Set& signalSet_in,
+         struct WLANMonitor_Configuration& configuration_in,
+         unsigned int numberOfDispatchThreads_in,
+         const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
          Test_U_SignalHandler& signalHandler_in)
@@ -495,20 +504,19 @@ do_work (bool autoAssociate_in,
   int result = -1;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+  struct Common_EventDispatchState event_dispatch_state_s;
 
-  // step0a: initialize configuration
-  struct WLANMonitor_Configuration* configuration_p =
-#if defined (GUI_SUPPORT)
-    CBData_in.configuration;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-    &configuration_in;
-#endif // GUI_SUPPORT
-  ACE_ASSERT (configuration_p);
+#if defined (_DEBUG)
+  Common_Tools::printCapabilities ();
+#endif // _DEBUG
+#endif // ACE_WIN32 || ACE_WIN64
 
   timer_manager_p = COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  configuration_p->WLANMonitorConfiguration.timerInterface =
+  configuration_in.WLANMonitorConfiguration.timerInterface =
     timer_manager_p;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -549,7 +557,7 @@ do_work (bool autoAssociate_in,
   } // end SWITCH
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iwlanmonitor_p && istatistic_handler_p);
-  iwlanmonitor_p->initialize (configuration_p->WLANMonitorConfiguration);
+  iwlanmonitor_p->initialize (configuration_in.WLANMonitorConfiguration);
 
   Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                             dynamic_cast<Net_IStatisticHandler_t*> (iwlanmonitor_p),
@@ -562,12 +570,12 @@ do_work (bool autoAssociate_in,
 #endif // GUI_SUPPORT
 
   // ********************** monitor configuration data *************************
-  configuration_p->signalHandlerConfiguration.monitor = iwlanmonitor_p;
-  configuration_p->signalHandlerConfiguration.statisticReportingHandler =
+  configuration_in.signalHandlerConfiguration.monitor = iwlanmonitor_p;
+  configuration_in.signalHandlerConfiguration.statisticReportingHandler =
       istatistic_handler_p;
-  configuration_p->WLANMonitorConfiguration.autoAssociate =
+  configuration_in.WLANMonitorConfiguration.autoAssociate =
       autoAssociate_in;
-  configuration_p->WLANMonitorConfiguration.interfaceIdentifier =
+  configuration_in.WLANMonitorConfiguration.interfaceIdentifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       interfaceIdentifier_in;
@@ -577,42 +585,42 @@ do_work (bool autoAssociate_in,
 #else
       interfaceIdentifier_in;
 #endif // ACE_WIN32 || ACE_WIN64
-  configuration_p->WLANMonitorConfiguration.SSID = SSID_in;
-  configuration_p->WLANMonitorConfiguration.subscriber = &ui_event_handler;
+  configuration_in.WLANMonitorConfiguration.SSID = SSID_in;
+  configuration_in.WLANMonitorConfiguration.subscriber = &ui_event_handler;
 
   // step1: initialize regular (global) statistic reporting ?
-  timer_manager_p->initialize (configuration_p->timerConfiguration);
+  timer_manager_p->initialize (configuration_in.timerConfiguration);
   ACE_thread_t thread_id = 0;
   timer_manager_p->start (thread_id);
   ACE_UNUSED_ARG (thread_id);
   ACE_ASSERT (timer_manager_p->isRunning ());
 
-  if (statisticReportingInterval_in)
-  {
-    ACE_Time_Value interval (statisticReportingInterval_in,
-                             0);
-    configuration_p->signalHandlerConfiguration.statisticReportingTimerId =
-      timer_manager_p->schedule_timer (&statistic_handler,         // event handler handle
-                                       NULL,                       // asynchronous completion token
-                                       COMMON_TIME_NOW + interval, // first wakeup time
-                                       interval);                  // interval
-    if (configuration_p->signalHandlerConfiguration.statisticReportingTimerId == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to schedule timer: \"%m\", aborting\n")));
-      goto error;
-    } // end IF
-  } // end IF
+//  if (statisticReportingInterval_in)
+//  {
+//    ACE_Time_Value interval (statisticReportingInterval_in,
+//                             0);
+//    configuration_in.signalHandlerConfiguration.statisticReportingTimerId =
+//      timer_manager_p->schedule_timer (&statistic_handler,         // event handler handle
+//                                       NULL,                       // asynchronous completion token
+//                                       COMMON_TIME_NOW + interval, // first wakeup time
+//                                       interval);                  // interval
+//    if (configuration_in.signalHandlerConfiguration.statisticReportingTimerId == -1)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to schedule timer: \"%m\", aborting\n")));
+//      goto error;
+//    } // end IF
+//  } // end IF
 
   // step2: signal handling
-  if (!signalHandler_in.initialize (configuration_p->signalHandlerConfiguration))
+  if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, aborting\n")));
     goto error;
   } // end IF
-  if (!Common_Signal_Tools::initialize (//COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
-                                        COMMON_SIGNAL_DISPATCH_REACTOR,
+  if (!Common_Signal_Tools::initialize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+                                        //COMMON_SIGNAL_DISPATCH_REACTOR,
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -624,6 +632,20 @@ do_work (bool autoAssociate_in,
   } // end IF
 
   // step5: handle events (signals, incoming connections/data, timers, ...)
+  if (useReactor_in)
+    configuration_in.dispatchConfiguration.numberOfReactorThreads =
+      numberOfDispatchThreads_in;
+  else
+    configuration_in.dispatchConfiguration.numberOfProactorThreads =
+      numberOfDispatchThreads_in;
+  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
+    return;
+  } // end IF
+  event_dispatch_state_s.configuration =
+      &configuration_in.dispatchConfiguration;
   // reactor/proactor event loop:
   // - dispatch connection attempts to acceptor
   // - dispatch socket events
@@ -676,13 +698,13 @@ do_work (bool autoAssociate_in,
                   ACE_TEXT ("failed to start GTK event dispatch, aborting\n")));
       goto error;
     } // end IF
-    gtk_manager_p->wait ();
+    gtk_manager_p->wait (false); // no message queue
 #endif // GTK_USE
   } // end IF
   else
   {
 #endif // GUI_SUPPORT
-    if (!iwlanmonitor_p->initialize (configuration_p->WLANMonitorConfiguration))
+    if (!iwlanmonitor_p->initialize (configuration_in.WLANMonitorConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize WLAN monitor, aborting\n")));
@@ -841,15 +863,19 @@ ACE_TMAIN (int argc_in,
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   std::string interface_identifier =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+//    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
 #endif // ACE_WIN32 || ACE_WIN64
   bool log_to_file = false;
-//  bool use_reactor = NET_EVENT_USE_REACTOR;
-  unsigned int statistic_reporting_interval =
-    NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
+//  unsigned int statistic_reporting_interval =
+//    NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
+  bool use_reactor =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   std::string SSID_string;
   bool trace_information = false;
   bool print_version_and_exit = false;
+  unsigned int number_of_dispatch_threads =
+      TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,
@@ -862,8 +888,8 @@ ACE_TMAIN (int argc_in,
                             UI_definition_file_path,
                             log_to_file,
                             interface_identifier,
-//                            use_reactor,
-                            statistic_reporting_interval,
+                            use_reactor,
+//                            statistic_reporting_interval,
                             SSID_string,
                             trace_information,
                             print_version_and_exit))
@@ -981,10 +1007,10 @@ ACE_TMAIN (int argc_in,
   struct WLANMonitor_Configuration configuration;
 #if defined (GUI_SUPPORT)
   struct WLANMonitor_UI_CBData ui_cb_data;
-  ui_cb_data.allowUserRuntimeStatistic =
-    (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
-                                         // iff regular reporting
-                                         // is off
+  ui_cb_data.allowUserRuntimeStatistic = true;
+//    (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
+//                                         // iff regular reporting
+//                                         // is off
   ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
   ui_cb_data.UIState = &state_r;
@@ -1008,11 +1034,12 @@ ACE_TMAIN (int argc_in,
   // step1e: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
-  do_initializeSignals (//use_reactor,
-                        (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR),
-                        (statistic_reporting_interval == 0), // handle SIGUSR1/SIGBREAK
-                                                             // iff regular reporting
-                                                             // is off
+  do_initializeSignals (use_reactor,
+//                        (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR),
+                        true,
+//                        (statistic_reporting_interval == 0), // handle SIGUSR1/SIGBREAK
+//                                                             // iff regular reporting
+//                                                             // is off
                         signal_set,
                         ignored_signal_set);
   Common_SignalActions_t previous_signal_actions;
@@ -1065,17 +1092,17 @@ ACE_TMAIN (int argc_in,
   // *NOTE*: settings will be inherited by any child processes
   // *TODO*: the reasoning here is incomplete
 //  bool use_fd_based_reactor = use_reactor;
-  bool use_fd_based_reactor =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+  bool use_fd_based_reactor = use_reactor;
+//      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
-    ((COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR) &&
+    (/*(COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)*/ use_reactor &&
      !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
 #endif // ACE_WIN32 || ACE_WIN64
   bool stack_traces = true;
-//  bool use_signal_based_proactor = !use_reactor;
-  bool use_signal_based_proactor =
-      (COMMON_EVENT_DEFAULT_DISPATCH != COMMON_EVENT_DISPATCH_REACTOR);
+  bool use_signal_based_proactor = !use_reactor;
+//  bool use_signal_based_proactor =
+//      (COMMON_EVENT_DEFAULT_DISPATCH != COMMON_EVENT_DISPATCH_REACTOR);
   if (!Common_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
                                         stack_traces,               // stack traces
                                         use_signal_based_proactor)) // pending signals
@@ -1107,14 +1134,14 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
            UI_definition_file_path,
            interface_identifier,
-//           use_reactor,
-           statistic_reporting_interval,
+           use_reactor,
+//           statistic_reporting_interval,
            SSID_string,
 #if defined (GUI_SUPPORT)
            ui_cb_data,
-#else
-           configuration,
 #endif // GUI_SUPPORT
+           configuration,
+           number_of_dispatch_threads,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,

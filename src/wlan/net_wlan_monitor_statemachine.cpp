@@ -446,13 +446,14 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_IDLE:
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
-        case NET_WLAN_MONITOR_STATE_SCAN:         // monitor link quality
-        case NET_WLAN_MONITOR_STATE_CONNECT:      // association succeeded, proceed
-        case NET_WLAN_MONITOR_STATE_DISASSOCIATE: // disassociate after disconnect completed
+        case NET_WLAN_MONITOR_STATE_SCAN:          // monitor link quality
+        case NET_WLAN_MONITOR_STATE_CONNECT:       // association succeeded, proceed
+        case NET_WLAN_MONITOR_STATE_DISASSOCIATE:  // disassociate after disconnect completed
         //////////////////////////////////
-        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
-        case NET_WLAN_MONITOR_STATE_SCANNED:      // (background) scan has completed
-        case NET_WLAN_MONITOR_STATE_CONNECTED:    // already associated (*NOTE*: automatic)
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:   // monitor stopped
+        case NET_WLAN_MONITOR_STATE_SCANNED:       // (background) scan has completed
+        case NET_WLAN_MONITOR_STATE_AUTHENTICATED: // deauthenticate after disassociation complete
+        case NET_WLAN_MONITOR_STATE_CONNECTED:     // already associated (*NOTE*: automatic)
         {
           inherited::change (newState_in);
           return true;

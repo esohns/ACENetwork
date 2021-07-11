@@ -79,11 +79,10 @@
 #define NET_WLAN_PROFILE_SSID_ELEMENT_STRING                              "SSID"
 #define NET_WLAN_PROFILE_NAME_ELEMENT_STRING                              "name"
 #else
-#define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_RESULT_POLL_INTERVAL         50 // ms
-#define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_TIMEOUT                      3 // s
+#define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_TIMEOUT_S                    3 // s
 // *TODO*: try to unify this setting (see above)
 #define NET_WLAN_MONITOR_UNIX_DEFAULT_BACKGROUNDSCANS                     false
-#define NET_WLAN_MONITOR_SCAN_DEFAULT_RESULT_POLL_INTERVAL                50 // ms
+#define NET_WLAN_MONITOR_DEFAULT_DATA_POLL_INTERVAL_MS                    50 // ms
 
 #if defined (NL80211_SUPPORT)
 // *TODO*: use official definitions from the standard as soon as they are

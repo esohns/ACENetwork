@@ -1950,12 +1950,12 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
   if (!Common_Tools::hasCapability (CAP_NET_ADMIN,
                                     CAP_EFFECTIVE))
   {
-    if (likely (!Common_Tools::setCapability (CAP_NET_ADMIN,
-                                              CAP_EFFECTIVE)))
+    if (likely (Common_Tools::setCapability (CAP_NET_ADMIN,
+                                             CAP_EFFECTIVE)))
       handle_capabilities_b = true;
     else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setCapability(%s): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to Common_Tools::setCapability(%s), continuing\n"),
                   ACE_TEXT (Common_Tools::capabilityToString (CAP_NET_ADMIN).c_str ())));
   } // end IF
 #endif // ACE_LINUX

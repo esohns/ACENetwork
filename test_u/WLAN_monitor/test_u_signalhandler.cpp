@@ -27,8 +27,6 @@
 
 #include "ace/Assert.h"
 #include "ace/Log_Msg.h"
-//#include "ace/Proactor.h"
-//#include "ace/Reactor.h"
 
 #include "common_icontrol.h"
 #include "common_timer_manager_common.h"
@@ -70,7 +68,7 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
 #else
     case SIGHUP:
     case SIGQUIT:
-#endif
+#endif // ACE_WIN32 || defined ACE_WIN64
     case SIGINT:
     case SIGTERM:
     {
@@ -83,22 +81,27 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
       shutdown = !(Common_Error_Tools::inDebugSession () &&
                    (signal_in.signal == SIGINT)    &&
                    (signal_in.siginfo.si_code == SI_USER));
-#endif
-#endif
+#endif // _DEBUG
+#endif // ACE_WIN32 || defined ACE_WIN64
       break;
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR1:
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     case SIGBREAK:
-#endif
+#else
+    case SIGUSR1:
+#endif // ACE_WIN32 || defined ACE_WIN64
     {
       // dump statistic
       report = true;
       break;
     }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    case SIGCHLD:
+      break;
+#endif // ACE_WIN32 || defined ACE_WIN64
     default:
     {
       ACE_DEBUG ((LM_ERROR,

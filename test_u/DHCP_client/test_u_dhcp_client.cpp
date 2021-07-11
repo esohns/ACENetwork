@@ -565,6 +565,7 @@ do_work (bool requestBroadcastReplies_in,
 #else
 #if defined (_DEBUG)
 //  Common_Tools::printCapabilities ();
+#endif // _DEBUG
   if (!Common_Tools::hasCapability (CAP_NET_BIND_SERVICE))
     if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
     {
@@ -588,7 +589,6 @@ do_work (bool requestBroadcastReplies_in,
     } // end IF
   ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
 //  Common_Tools::printPriviledges ();
-#endif // _DEBUG
 #endif // ACE_WIN32 || ACE_WIN64
 
   // step0b: initialize random number generator

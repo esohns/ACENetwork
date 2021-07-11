@@ -723,6 +723,11 @@ continue_:
 
   if (likely (restart_b))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    initialize (*configuration_);
+#endif // ACE_WIN32 || ACE_WIN64
+
     ACE_thread_t thread_id = 0;
     start (thread_id);
     ACE_UNUSED_ARG (thread_id);
@@ -1280,6 +1285,55 @@ authenticate:
 #endif // ACE_LINUX
       break;
     }
+    case NET_WLAN_MONITOR_STATE_DEAUTHENTICATE:
+    {
+      // *NOTE*: actually 'set' intermediate states to support atomic state
+      //         transition notifications
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+        inherited::state_ = NET_WLAN_MONITOR_STATE_DEAUTHENTICATE;
+      } // end lock scope
+
+      // sanity check(s)
+      ACE_ASSERT (!this->SSID ().empty ()); // associated
+      ACE_ASSERT (configuration_);
+
+      struct ether_addr ap_mac_address_s;
+      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+      try {
+        do_authenticate (configuration_->interfaceIdentifier,
+                         ap_mac_address_s,
+                         ACE_TEXT_ALWAYS_CHAR ("")); // <-- deauthenticate
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Net_WLAN_IManager::do_authenticate(\"%s\",%s,%s), continuing\n"),
+                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+                    ACE_TEXT ("")));
+      }
+
+#if defined (ACE_LINUX)
+#if defined (WEXT_USE)
+      bool essid_is_cached = false;
+      { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+        // check cache whether the configured ESSID (if any) is known
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
+            SSIDCache_.find (configuration_->SSID);
+        essid_is_cached = (iterator != SSIDCache_.end ());
+      } // end lock scope
+
+      if (configuration_->SSID.empty () || // not configured
+          !essid_is_cached)                // configured SSID unknown (i.e. not cached)
+      {
+        inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
+        break;
+      } // end IF
+      // --> configured && configured SSID known (i.e. cached)
+      inherited::change (NET_WLAN_MONITOR_STATE_SCANNED);
+#endif // WEXT_USE
+#endif // ACE_LINUX
+
+      break;
+    }
     case NET_WLAN_MONITOR_STATE_ASSOCIATE:
     {
       // *NOTE*: actually 'set' intermediate states to support atomic state
@@ -1775,7 +1829,7 @@ associate:
             inherited::state_ = previous_state_e;
           } // end lock scope
 
-          ACE_ASSERT (!SSID_string.empty ());
+//          ACE_ASSERT (!SSID_string.empty ());
           if (unlikely (!configuration_->SSID.empty () &&
                         ACE_OS::strcmp (configuration_->SSID.c_str (),
                                         SSID_string.c_str ()))) // configured, associated to different SSID
@@ -1840,14 +1894,12 @@ associate:
         inherited::change (NET_WLAN_MONITOR_STATE_DEAUTHENTICATE);
         break;
       } // end IF
+
       enum Net_WLAN_MonitorState next_state_e =
               ((configuration_->SSID.empty () || (SSID_string == configuration_->SSID)) ? NET_WLAN_MONITOR_STATE_ASSOCIATED
                                                                                         : NET_WLAN_MONITOR_STATE_ASSOCIATE);
       inherited::change (next_state_e);
-//reset_state:
-      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-        inherited::state_ = NET_WLAN_MONITOR_STATE_AUTHENTICATED;
-      } // end lock scope
+
       break;
     }
     case NET_WLAN_MONITOR_STATE_ASSOCIATED:
@@ -1888,18 +1940,13 @@ associate:
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
                     ACE_TEXT (SSID_string.c_str ())));
       }
-continue_2:
-#if defined (WEXT_USE)
-      inherited::change (NET_WLAN_MONITOR_STATE_CONNECT);
-//#elif defined (NL80211_USE)
-//#elif defined (DBUS_USE)
-//#else
-#endif // WEXT_USE || NL80211_USE || DBUS_USE
 
-//reset_state:
-      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-        inherited::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATED;
-      } // end lock scope
+continue_2:
+      enum Net_WLAN_MonitorState next_state_e =
+              ((configuration_->SSID.empty () || (SSID_string == configuration_->SSID)) ? NET_WLAN_MONITOR_STATE_CONNECTED
+                                                                                        : NET_WLAN_MONITOR_STATE_CONNECT);
+      inherited::change (next_state_e);
+
       break;
     }
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1978,16 +2025,11 @@ continue_3:
       if (unlikely (isFirstConnect_))
         isFirstConnect_ = false;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (WLANAPI_USE)
+      // start scanning ?
       ACE_ASSERT (configuration_);
 
       if (unlikely (configuration_->enableBackgroundScans))
         inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
-      else
-#endif // WLANAPI_USE
-#endif // ACE_WIN32 || ACE_WIN64
-        inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
 
       break;
     }

@@ -459,6 +459,9 @@ continue_3:
   isRegistered_ = true;
 
   // monitor the interface in a dedicated thread
+  result = nl_socket_set_nonblocking (inherited::socketHandle_);
+  ACE_ASSERT (result == 0);
+
   deadline =
       (COMMON_TIME_NOW +
        ACE_Time_Value (0, COMMON_TIMEOUT_DEFAULT_THREAD_SPAWN * 1000));
@@ -605,10 +608,9 @@ Net_WLAN_Monitor_T<AddressType,
     isRegistered_ = false;
   } // end IF
 
-  /*nl_close (inherited::socketHandle_);*/ nl_socket_free (inherited::socketHandle_); inherited::socketHandle_ = NULL;
+  inherited::isActive_ = false;
   inherited::stop (waitForCompletion_in,
                    lockedAccess_in);
-  inherited::isActive_ = false;
 }
 
 template <typename AddressType,
@@ -1268,11 +1270,18 @@ Net_WLAN_Monitor_T<AddressType,
     //                   - SIGINT might work, ugly
     //                   - flag-setting and sending a 'dummy request', ugly
     //                   --> use ACE event dispatch and circumvent nl_revmsgs()
+    // *TODO*: use non-blocking sockets
     result = nl_recvmsgs (inherited::socketHandle_, callbacks_);
     if (unlikely (result < 0))
     {
-      if (-result == NLE_BAD_SOCK)             // 3: shutdown (see below))
+      if (-result == NLE_BAD_SOCK)           // 3: shutdown (see below))
         break;
+      else if (-result == NLE_AGAIN)         // 4: non-blocking socket
+      {
+        ACE_Time_Value delay (0,
+                              NET_WLAN_MONITOR_DEFAULT_DATA_POLL_INTERVAL_MS * 1000);
+        ACE_OS::sleep (delay);
+      } // end ELSE IF
       else if ((-result != NLE_BUSY)      && // 25
                (-result != -NLE_DUMP_INTR))  // 33: state has changed, dump (see: NLM_F_DUMP) is inconsistent
                                              //     most probable reason: driver received new scan results
@@ -1283,10 +1292,10 @@ Net_WLAN_Monitor_T<AddressType,
                     ACE_TEXT (nl_geterror (result)), result));
         break;
       } // end IF
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", continuing\n"),
-                  inherited::socketHandle_,
-                  ACE_TEXT (nl_geterror (result))));
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", continuing\n"),
+//                  inherited::socketHandle_,
+//                  ACE_TEXT (nl_geterror (result))));
     } // end IF
     error = ACE_OS::last_error ();
     if (unlikely (error &&
@@ -1297,7 +1306,12 @@ Net_WLAN_Monitor_T<AddressType,
                   inherited::socketHandle_));
       break;
     } // end IF
+
+    if (!inherited::isActive_)
+      break;
   } while (true);
+
+  nl_close (inherited::socketHandle_); //nl_socket_free (inherited::socketHandle_); inherited::socketHandle_ = NULL;
 
   { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
     inherited::dispatchStarted_ = false;
@@ -1337,8 +1351,7 @@ state_machine:
 //                ACE_TEXT (nl_geterror (result_2))));
 
   int result_2 = inherited::flush (ACE_Task_Flags::ACE_FLUSHALL);
-//  if (unlikely (result_2 != 1))
-  if (unlikely (result_2 != 0))
+  if (unlikely (result_2 < 0))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
   result_2 = inherited::msg_queue_->activate ();
