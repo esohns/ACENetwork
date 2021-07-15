@@ -22,6 +22,8 @@
 
 #include "stream_file_defines.h"
 
+#include "stream_misc_defines.h"
+
 #include "stream_net_defines.h"
 
 #include "stream_stat_defines.h"
@@ -31,6 +33,7 @@
 #include "http_defines.h"
 
 #include "test_u_common_modules.h"
+#include "test_u_module_eventhandler.h"
 
 template <typename TimerManagerType>
 Test_U_Stream_T<TimerManagerType>::Test_U_Stream_T ()
@@ -72,7 +75,6 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_inout,
   //                                                 ACE_TEXT_ALWAYS_CHAR ("FileDump")),
   //                false);
   //modules_out.push_back (module_p);
-  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Marshal_Module (this,
                                                 ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
@@ -84,10 +86,15 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_inout,
   //                                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
   //                false);
   //modules_out.push_back (module_p);
-  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_FileWriter_Module (this,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Module_EventHandler_Module (this,
+                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;

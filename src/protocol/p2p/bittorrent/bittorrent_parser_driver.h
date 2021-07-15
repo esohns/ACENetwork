@@ -91,7 +91,7 @@ class BitTorrent_ParserDriver
   inline virtual const BitTorrent_IParser_t* const getP () const { return this; }
   inline virtual void setP (BitTorrent_IParser_t*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { BitTorrent_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); }
-  inline virtual bool initialize (yyscan_t& state_inout, struct Common_ScannerState* scannerState_in) { ACE_UNUSED_ARG (scannerState_in); return (BitTorrent_Scanner_lex_init_extra (this, &state_inout) == 0); }
+  virtual bool initialize (yyscan_t&, struct Common_ScannerState*);
   inline virtual void finalize (yyscan_t& state_inout) { int result = BitTorrent_Scanner_lex_destroy (state_inout); ACE_UNUSED_ARG (result); state_inout = NULL; }
   virtual struct yy_buffer_state* create (yyscan_t, // state handle
                                           char*,    // buffer handle

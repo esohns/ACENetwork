@@ -156,11 +156,11 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
     goto error;
   } // end IF
-#if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::MetaInfoToString (*configuration_->metaInfo).c_str ())));
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%s\n"),
+//              ACE_TEXT (BitTorrent_Tools::MetaInfoToString (*configuration_->metaInfo).c_str ())));
+//#endif // _DEBUG
 
   // step2: create/initialize session
   if (configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR)

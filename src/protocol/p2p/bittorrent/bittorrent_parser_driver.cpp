@@ -40,7 +40,7 @@ BitTorrent_ParserDriver::BitTorrent_ParserDriver ()
  , handShake_ (NULL)
  , record_ (NULL)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::BitTorrent_ParserDriver_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::BitTorrent_ParserDriver"));
 
 //  inherited::parser_.set (this);
 }
@@ -48,10 +48,10 @@ BitTorrent_ParserDriver::BitTorrent_ParserDriver ()
 void
 BitTorrent_ParserDriver::error (const yy::location& location_in,
                                 const std::string& message_in)
-//BitTorrent_ParserDriver_T<MessageType,
+//BitTorrent_ParserDriver<MessageType,
 //                          SessionMessageType>::error (const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::error"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::error"));
 
   std::ostringstream converter;
   converter << location_in;
@@ -87,9 +87,9 @@ BitTorrent_ParserDriver::error (const yy::location& location_in,
 }
 //template <typename SessionMessageType>
 //void
-//BitTorrent_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+//BitTorrent_ParserDriver<SessionMessageType>::error (const std::string& message_in)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::error"));
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::error"));
 
 //  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
 //  ACE_DEBUG ((LM_ERROR,
@@ -106,7 +106,7 @@ BitTorrent_ParserDriver::error (const yy::location& location_in,
 void
 BitTorrent_ParserDriver::record (struct BitTorrent_PeerRecord*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::record"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::record"));
 
   // sanity check(s)
   ACE_ASSERT (record_inout);
@@ -119,7 +119,7 @@ BitTorrent_ParserDriver::record (struct BitTorrent_PeerRecord*& record_inout)
 void
 BitTorrent_ParserDriver::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::handshake"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::handshake"));
 
   // sanity check(s)
   ACE_ASSERT (handShake_inout);
@@ -129,12 +129,26 @@ BitTorrent_ParserDriver::handshake (struct BitTorrent_PeerHandShake*& handShake_
   handShake_inout = NULL;
 }
 
+bool
+BitTorrent_ParserDriver::initialize (yyscan_t& state_inout, struct Common_ScannerState* scannerState_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::initialize"));
+
+  ACE_UNUSED_ARG (scannerState_in);
+
+  int result = BitTorrent_Scanner_lex_init_extra (this, &state_inout);
+
+  inherited::parser_.set (state_inout);
+
+  return (result == 0);
+}
+
 yy_buffer_state*
 BitTorrent_ParserDriver::create (yyscan_t state_in,
                                  char* buffer_in,
                                  size_t size_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::create"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::create"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);

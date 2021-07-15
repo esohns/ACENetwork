@@ -125,7 +125,7 @@ extern int BitTorrent_Export yydebug;
 %union
 {
   struct BitTorrent_PeerHandshake* handshake;
-  struct BitTorrent_PeerRecord*        record;
+  struct BitTorrent_PeerRecord*    record;
   unsigned int                     size;
 }
 
@@ -211,6 +211,7 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 %%
 %start    session              ;
+
 session:  "handshake" messages { $$ = 67 + $2; // 19 + 8 + 20 + 20
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerHandshake* handshake_p =

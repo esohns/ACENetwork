@@ -48,15 +48,15 @@ do
  [ $? -ne 0 ] && echo "ERROR: \"${FILE}\" failed (status was: $?), aborting" && exit 1
  DOT_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/.dot/')
  DOT_FILE="$(dirname ${DOT_FILE})/bittorrent_$(basename ${DOT_FILE})"
- [ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
- IMAGE_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/.png/')
- if [ ${HAS_GRAPHVIZ} -ne 0 ]; then
-  dot -Tpng ${DOT_FILE} >${IMAGE_FILE}
-  if [ $? -ne 0 ]; then
-   echo "ERROR: \"${DOT_FILE}\" failed (status was: $?), aborting"
-   exit 1
-  fi
- fi
+ #[ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
+ #IMAGE_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/.png/')
+ #if [ ${HAS_GRAPHVIZ} -ne 0 ]; then
+ # dot -Tpng ${DOT_FILE} >${IMAGE_FILE}
+ # if [ $? -ne 0 ]; then
+ #  echo "ERROR: \"${DOT_FILE}\" failed (status was: $?), aborting"
+ #  exit 1
+ # fi
+ #fi
 # *TODO*: xsltproc /usr/local/share/bison/xslt/xml2xhtml.xsl gr.xml >gr.html
 done
 
@@ -75,8 +75,8 @@ cp -f ${SOURCE_FILE} ${TARGET_FILE}
 echo "copied \"$SOURCE_FILE\"..."
 # clean up
 SOURCE_FILE=bittorrent_parser.h
-rm -f ${SOURCE_FILE}
-[ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
+#rm -f ${SOURCE_FILE}
+#[ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
 FILES="bittorrent_bencoding_parser.h bittorrent_bencoding_parser.cpp
 bittorrent_parser.cpp"

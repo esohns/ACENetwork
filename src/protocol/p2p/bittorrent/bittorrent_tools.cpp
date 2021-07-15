@@ -244,7 +244,8 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   unsigned int file_size_i = 0;
   if (unlikely (!Common_File_Tools::load (metaInfoFileName_in,
                                           data_p,
-                                          file_size_i)))
+                                          file_size_i,
+                                          COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
@@ -254,7 +255,7 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   ACE_ASSERT (data_p);
   unsigned int size = Common_File_Tools::size (metaInfoFileName_in);
   ACE_Message_Block message_block (reinterpret_cast<char*> (data_p),
-                                   size,
+                                   size + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                    ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY);
   message_block.wr_ptr (size);
 

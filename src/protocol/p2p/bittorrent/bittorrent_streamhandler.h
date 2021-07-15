@@ -98,6 +98,8 @@ class BitTorrent_PeerStreamHandler_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T (const BitTorrent_PeerStreamHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T& operator= (const BitTorrent_PeerStreamHandler_T&))
+
+  ACE_Thread_Mutex      lock_;
 };
 
 //////////////////////////////////////////

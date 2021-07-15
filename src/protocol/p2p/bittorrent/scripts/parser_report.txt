@@ -23,39 +23,42 @@ Grammar
 
 Terminals, with rules where they appear
 
-"end" (0) 0
-error (256)
-"handshake" (258) 1
-"bitfield" (259) 4
-"cancel" (260) 5
-"choke" (261) 6
-"have" (262) 7
-"interested" (263) 8
-"keep-alive" (264) 9
-"not_interested" (265) 10
-"piece" (266) 11
-"port" (267) 12
-"request" (268) 13
-"unchoke" (269) 14
-"end_of_fragment" (270) 15
+    "end" <size> (0) 0
+    error (256)
+    "handshake" <handshake> (258) 1
+    "bitfield" <record> (259) 4
+    "cancel" <record> (260) 5
+    "choke" <record> (261) 6
+    "have" <record> (262) 7
+    "interested" <record> (263) 8
+    "keep-alive" <record> (264) 9
+    "not_interested" <record> (265) 10
+    "piece" <record> (266) 11
+    "port" <record> (267) 12
+    "request" <record> (268) 13
+    "unchoke" <record> (269) 14
+    "end_of_fragment" <size> (270) 15
 
 
 Nonterminals, with rules where they appear
 
-$accept (16)
-    on left: 0
-session (17)
-    on left: 1, on right: 0
-messages (18)
-    on left: 2 3, on right: 1 2
-message (19)
-    on left: 4 5 6 7 8 9 10 11 12 13 14 15, on right: 2
+    $accept (16)
+        on left: 0
+    session <size> (17)
+        on left: 1
+        on right: 0
+    messages <size> (18)
+        on left: 2 3
+        on right: 1 2
+    message <size> (19)
+        on left: 4 5 6 7 8 9 10 11 12 13 14 15
+        on right: 2
 
 
 State 0
 
-    0 $accept: . session "end"
-    1 session: . "handshake" messages
+    0 $accept: • session "end"
+    1 session: • "handshake" messages
 
     "handshake"  shift, and go to state 1
 
@@ -64,9 +67,9 @@ State 0
 
 State 1
 
-    1 session: "handshake" . messages
-    2 messages: . messages message
-    3         | . %empty
+    1 session: "handshake" • messages
+    2 messages: • messages message
+    3         | • %empty
 
     $default  reduce using rule 3 (messages)
 
@@ -75,27 +78,27 @@ State 1
 
 State 2
 
-    0 $accept: session . "end"
+    0 $accept: session • "end"
 
     "end"  shift, and go to state 4
 
 
 State 3
 
-    1 session: "handshake" messages .  ["end"]
-    2 messages: messages . message
-    4 message: . "bitfield"
-    5        | . "cancel"
-    6        | . "choke"
-    7        | . "have"
-    8        | . "interested"
-    9        | . "keep-alive"
-   10        | . "not_interested"
-   11        | . "piece"
-   12        | . "port"
-   13        | . "request"
-   14        | . "unchoke"
-   15        | . "end_of_fragment"
+    1 session: "handshake" messages •  ["end"]
+    2 messages: messages • message
+    4 message: • "bitfield"
+    5        | • "cancel"
+    6        | • "choke"
+    7        | • "have"
+    8        | • "interested"
+    9        | • "keep-alive"
+   10        | • "not_interested"
+   11        | • "piece"
+   12        | • "port"
+   13        | • "request"
+   14        | • "unchoke"
+   15        | • "end_of_fragment"
 
     "bitfield"         shift, and go to state 5
     "cancel"           shift, and go to state 6
@@ -117,97 +120,97 @@ State 3
 
 State 4
 
-    0 $accept: session "end" .
+    0 $accept: session "end" •
 
     $default  accept
 
 
 State 5
 
-    4 message: "bitfield" .
+    4 message: "bitfield" •
 
     $default  reduce using rule 4 (message)
 
 
 State 6
 
-    5 message: "cancel" .
+    5 message: "cancel" •
 
     $default  reduce using rule 5 (message)
 
 
 State 7
 
-    6 message: "choke" .
+    6 message: "choke" •
 
     $default  reduce using rule 6 (message)
 
 
 State 8
 
-    7 message: "have" .
+    7 message: "have" •
 
     $default  reduce using rule 7 (message)
 
 
 State 9
 
-    8 message: "interested" .
+    8 message: "interested" •
 
     $default  reduce using rule 8 (message)
 
 
 State 10
 
-    9 message: "keep-alive" .
+    9 message: "keep-alive" •
 
     $default  reduce using rule 9 (message)
 
 
 State 11
 
-   10 message: "not_interested" .
+   10 message: "not_interested" •
 
     $default  reduce using rule 10 (message)
 
 
 State 12
 
-   11 message: "piece" .
+   11 message: "piece" •
 
     $default  reduce using rule 11 (message)
 
 
 State 13
 
-   12 message: "port" .
+   12 message: "port" •
 
     $default  reduce using rule 12 (message)
 
 
 State 14
 
-   13 message: "request" .
+   13 message: "request" •
 
     $default  reduce using rule 13 (message)
 
 
 State 15
 
-   14 message: "unchoke" .
+   14 message: "unchoke" •
 
     $default  reduce using rule 14 (message)
 
 
 State 16
 
-   15 message: "end_of_fragment" .
+   15 message: "end_of_fragment" •
 
     $default  reduce using rule 15 (message)
 
 
 State 17
 
-    2 messages: messages message .
+    2 messages: messages message •
 
     $default  reduce using rule 2 (messages)

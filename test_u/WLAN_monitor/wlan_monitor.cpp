@@ -682,7 +682,7 @@ do_work (bool autoAssociate_in,
 
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
-    ACE_thread_t thread_id = 0;
+    thread_id = 0;
     gtk_manager_p->start (thread_id);
     ACE_UNUSED_ARG (thread_id);
     ACE_Time_Value timeout (0,
@@ -711,7 +711,7 @@ do_work (bool autoAssociate_in,
       goto error;
     } // end IF
 
-    ACE_thread_t thread_id = 0;
+    thread_id = 0;
     iwlanmonitor_p->start (thread_id);
     ACE_UNUSED_ARG (thread_id);
     if (!iwlanmonitor_p->isRunning ())

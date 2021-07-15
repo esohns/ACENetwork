@@ -129,7 +129,7 @@ TRACKER_SCRAPE_FLAGS_KEY          (min_request_interval)
 TRACKER_SCRAPE_KEY                (failure reason|files|flags)
 
 /* version 1.0 of the BitTorrent protocol */
-PEER_HANDSHAKE_PREFIX             \x13BitTorrent\ protocol
+PEER_HANDSHAKE_PREFIX             "\x13BitTorrent\x20protocol"
 PEER_HANDSHAKE_RESERVED           {OCTET}{8}
 /* "...sha1 hash of the bencoded form of the info value from the metainfo file.
  * (This is the same value which is announced as info_hash to the tracker, only
@@ -191,7 +191,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 %}
 
 <INITIAL>{
-{PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 1 + 19);
+\x13BitTorrent\x20protocol { ACE_ASSERT (yyleng == 1 + 19);
                             iparser_p->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,

@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.0.2.
+// A Bison parser, made by GNU Bison 3.7.4.
 
 // Skeleton implementation for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2013 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,38 +29,26 @@
 
 // This special exception was added by the Free Software Foundation in
 // version 2.2 of Bison.
-// //                    "%code top" blocks.
 
+// DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+// especially those whose name start with YY_ or yy_.  They are
+// private implementation details that can be changed or removed.
+
+// "%code top" blocks.
 
 #include "stdafx.h"
 
-//#include "ace/OS.h"
+#include "ace/Synch.h"
 #include "bittorrent_bencoding_parser.h"
 
 
 
 
-// First part of user declarations.
-
-
-
-# ifndef YY_NULLPTR
-#  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULLPTR nullptr
-#  else
-#   define YY_NULLPTR 0
-#  endif
-# endif
-
-#include "common_parser_bencoding_tools.h"
 
 #include "bittorrent_bencoding_parser.h"
-
-// User implementation prologue.
 
 
 // Unqualified %code blocks.
-
 
 // *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
 /*#if defined (YYDEBUG)
@@ -79,24 +67,25 @@
 //                       prevent ace/iosfwd.h from causing any harm
 /*#define ACE_IOSFWD_H*/
 
-//#include "unistd.h"
 #include "ace/Log_Msg.h"
-#include "ace/OS_Memory.h"
+#include "ace/OS.h"
 
 #include "net_macros.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
-//#include "bittorrent_bencoding_parser_driver.h"
+/*#include "ace/Synch.h"*/
+#include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_bencoding_scanner.h"
+
 #include "common_parser_bencoding_common.h"
+#include "common_parser_bencoding_tools.h"
 
 // *TODO*: this shouldn't be necessary
 /*#define yylex bencoding_lex*/
 #define yylex scanner->yylex
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
-
 
 
 
@@ -109,6 +98,16 @@
 # endif
 # ifndef YY_
 #  define YY_(msgid) msgid
+# endif
+#endif
+
+
+// Whether we are compiled with exception support.
+#ifndef YY_EXCEPTIONS
+# if defined __GNUC__ && !defined __EXCEPTIONS
+#  define YY_EXCEPTIONS 0
+# else
+#  define YY_EXCEPTIONS 1
 # endif
 #endif
 
@@ -129,12 +128,9 @@
         {                                                               \
           (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
         }                                                               \
-    while (/*CONSTCOND*/ false)
+    while (false)
 # endif
 
-
-// Suppress unused-variable warnings by "using" E.
-#define YYUSE(E) ((void) (E))
 
 // Enable debugging if requested.
 #if YYDEBUG
@@ -148,7 +144,7 @@
     {                                           \
       *yycdebug_ << Title << ' ';               \
       yy_print_ (*yycdebug_, Symbol);           \
-      *yycdebug_ << std::endl;                  \
+      *yycdebug_ << '\n';                       \
     }                                           \
   } while (false)
 
@@ -161,74 +157,35 @@
 # define YY_STACK_PRINT()               \
   do {                                  \
     if (yydebug_)                       \
-      yystack_print_ ();                \
+      yy_stack_print_ ();                \
   } while (false)
 
 #else // !YYDEBUG
 
 # define YYCDEBUG if (false) std::cerr
-# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE(Symbol)
-# define YY_REDUCE_PRINT(Rule)           static_cast<void>(0)
-# define YY_STACK_PRINT()                static_cast<void>(0)
+# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE (Symbol)
+# define YY_REDUCE_PRINT(Rule)           static_cast<void> (0)
+# define YY_STACK_PRINT()                static_cast<void> (0)
 
 #endif // !YYDEBUG
 
 #define yyerrok         (yyerrstatus_ = 0)
-#define yyclearin       (yyempty = true)
+#define yyclearin       (yyla.clear ())
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-
 namespace yy {
-
-
-  /* Return YYSTR after stripping away unnecessary quotes and
-     backslashes, so that it's suitable for yyerror.  The heuristic is
-     that double-quoting is unnecessary unless the string contains an
-     apostrophe, a comma, or backslash (other than backslash-backslash).
-     YYSTR is taken from yytname.  */
-  std::string
-  BitTorrent_Bencoding_Parser::yytnamerr_ (const char *yystr)
-  {
-    if (*yystr == '"')
-      {
-        std::string yyr = "";
-        char const *yyp = yystr;
-
-        for (;;)
-          switch (*++yyp)
-            {
-            case '\'':
-            case ',':
-              goto do_not_strip_quotes;
-
-            case '\\':
-              if (*++yyp != '\\')
-                goto do_not_strip_quotes;
-              // Fall through.
-            default:
-              yyr += *yyp;
-              break;
-
-            case '"':
-              return yyr;
-            }
-      do_not_strip_quotes: ;
-      }
-
-    return yystr;
-  }
-
 
   /// Build a parser object.
   BitTorrent_Bencoding_Parser::BitTorrent_Bencoding_Parser (BitTorrent_Bencoding_IParser* parser_yyarg, BitTorrent_Bencoding_Scanner* scanner_yyarg)
-    :
 #if YYDEBUG
-      yydebug_ (false),
+    : yydebug_ (false),
       yycdebug_ (&std::cerr),
+#else
+    :
 #endif
       parser (parser_yyarg),
       scanner (scanner_yyarg)
@@ -237,147 +194,162 @@ namespace yy {
   BitTorrent_Bencoding_Parser::~BitTorrent_Bencoding_Parser ()
   {}
 
+  BitTorrent_Bencoding_Parser::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
+  {}
 
   /*---------------.
-  | Symbol types.  |
+  | symbol kinds.  |
   `---------------*/
-
-  inline
-  BitTorrent_Bencoding_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
-    : std::runtime_error (m)
-    , location (l)
-  {}
 
   // basic_symbol.
   template <typename Base>
-  inline
-  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol ()
-    : value ()
-  {}
-
-  template <typename Base>
-  inline
-  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
-    : Base (other)
-    , value ()
-    , location (other.location)
-  {
-    value = other.value;
-  }
-
-
-  template <typename Base>
-  inline
-  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& that)
+    : Base (that)
+    , value (that.value)
+    , location (that.location)
   {}
 
 
   /// Constructor for valueless symbols.
   template <typename Base>
-  inline
-  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_MOVE_REF (location_type) l)
     : Base (t)
     , value ()
     , location (l)
   {}
 
   template <typename Base>
-  inline
-  BitTorrent_Bencoding_Parser::basic_symbol<Base>::~basic_symbol ()
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_RVREF (semantic_type) v, YY_RVREF (location_type) l)
+    : Base (t)
+    , value (YY_MOVE (v))
+    , location (YY_MOVE (l))
+  {}
+
+  template <typename Base>
+  BitTorrent_Bencoding_Parser::symbol_kind_type
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::type_get () const YY_NOEXCEPT
   {
+    return this->kind ();
   }
 
   template <typename Base>
-  inline
+  bool
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::empty () const YY_NOEXCEPT
+  {
+    return this->kind () == symbol_kind::S_YYEMPTY;
+  }
+
+  template <typename Base>
   void
   BitTorrent_Bencoding_Parser::basic_symbol<Base>::move (basic_symbol& s)
   {
-    super_type::move(s);
-    value = s.value;
-    location = s.location;
+    super_type::move (s);
+    value = YY_MOVE (s.value);
+    location = YY_MOVE (s.location);
   }
 
-  // by_type.
-  inline
-  BitTorrent_Bencoding_Parser::by_type::by_type ()
-     : type (empty)
+  // by_kind.
+  BitTorrent_Bencoding_Parser::by_kind::by_kind ()
+    : kind_ (symbol_kind::S_YYEMPTY)
   {}
 
-  inline
-  BitTorrent_Bencoding_Parser::by_type::by_type (const by_type& other)
-    : type (other.type)
+#if 201103L <= YY_CPLUSPLUS
+  BitTorrent_Bencoding_Parser::by_kind::by_kind (by_kind&& that)
+    : kind_ (that.kind_)
+  {
+    that.clear ();
+  }
+#endif
+
+  BitTorrent_Bencoding_Parser::by_kind::by_kind (const by_kind& that)
+    : kind_ (that.kind_)
   {}
 
-  inline
-  BitTorrent_Bencoding_Parser::by_type::by_type (token_type t)
-    : type (yytranslate_ (t))
+  BitTorrent_Bencoding_Parser::by_kind::by_kind (token_kind_type t)
+    : kind_ (yytranslate_ (t))
   {}
 
-  inline
   void
-  BitTorrent_Bencoding_Parser::by_type::move (by_type& that)
+  BitTorrent_Bencoding_Parser::by_kind::clear ()
   {
-    type = that.type;
-    that.type = empty;
+    kind_ = symbol_kind::S_YYEMPTY;
   }
 
-  inline
-  int
-  BitTorrent_Bencoding_Parser::by_type::type_get () const
+  void
+  BitTorrent_Bencoding_Parser::by_kind::move (by_kind& that)
   {
-    return type;
+    kind_ = that.kind_;
+    that.clear ();
+  }
+
+  BitTorrent_Bencoding_Parser::symbol_kind_type
+  BitTorrent_Bencoding_Parser::by_kind::kind () const YY_NOEXCEPT
+  {
+    return kind_;
+  }
+
+  BitTorrent_Bencoding_Parser::symbol_kind_type
+  BitTorrent_Bencoding_Parser::by_kind::type_get () const YY_NOEXCEPT
+  {
+    return this->kind ();
   }
 
 
   // by_state.
-  inline
-  BitTorrent_Bencoding_Parser::by_state::by_state ()
-    : state (empty)
+  BitTorrent_Bencoding_Parser::by_state::by_state () YY_NOEXCEPT
+    : state (empty_state)
   {}
 
-  inline
-  BitTorrent_Bencoding_Parser::by_state::by_state (const by_state& other)
-    : state (other.state)
+  BitTorrent_Bencoding_Parser::by_state::by_state (const by_state& that) YY_NOEXCEPT
+    : state (that.state)
   {}
 
-  inline
+  void
+  BitTorrent_Bencoding_Parser::by_state::clear () YY_NOEXCEPT
+  {
+    state = empty_state;
+  }
+
   void
   BitTorrent_Bencoding_Parser::by_state::move (by_state& that)
   {
     state = that.state;
-    that.state = empty;
+    that.clear ();
   }
 
-  inline
-  BitTorrent_Bencoding_Parser::by_state::by_state (state_type s)
+  BitTorrent_Bencoding_Parser::by_state::by_state (state_type s) YY_NOEXCEPT
     : state (s)
   {}
 
-  inline
-  BitTorrent_Bencoding_Parser::symbol_number_type
-  BitTorrent_Bencoding_Parser::by_state::type_get () const
+  BitTorrent_Bencoding_Parser::symbol_kind_type
+  BitTorrent_Bencoding_Parser::by_state::kind () const YY_NOEXCEPT
   {
-    return state == empty ? 0 : yystos_[state];
+    if (state == empty_state)
+      return symbol_kind::S_YYEMPTY;
+    else
+      return YY_CAST (symbol_kind_type, yystos_[+state]);
   }
 
-  inline
   BitTorrent_Bencoding_Parser::stack_symbol_type::stack_symbol_type ()
   {}
 
-
-  inline
-  BitTorrent_Bencoding_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
-    : super_type (s, that.location)
+  BitTorrent_Bencoding_Parser::stack_symbol_type::stack_symbol_type (YY_RVREF (stack_symbol_type) that)
+    : super_type (YY_MOVE (that.state), YY_MOVE (that.value), YY_MOVE (that.location))
   {
-    value = that.value;
+#if 201103L <= YY_CPLUSPLUS
     // that is emptied.
-    that.type = empty;
+    that.state = empty_state;
+#endif
   }
 
-  inline
+  BitTorrent_Bencoding_Parser::stack_symbol_type::stack_symbol_type (state_type s, YY_MOVE_REF (symbol_type) that)
+    : super_type (s, YY_MOVE (that.value), YY_MOVE (that.location))
+  {
+    // that is emptied.
+    that.kind_ = symbol_kind::S_YYEMPTY;
+  }
+
+#if YY_CPLUSPLUS < 201103L
   BitTorrent_Bencoding_Parser::stack_symbol_type&
   BitTorrent_Bencoding_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
@@ -387,9 +359,19 @@ namespace yy {
     return *this;
   }
 
+  BitTorrent_Bencoding_Parser::stack_symbol_type&
+  BitTorrent_Bencoding_Parser::stack_symbol_type::operator= (stack_symbol_type& that)
+  {
+    state = that.state;
+    value = that.value;
+    location = that.location;
+    // that is emptied.
+    that.state = empty_state;
+    return *this;
+  }
+#endif
 
   template <typename Base>
-  inline
   void
   BitTorrent_Bencoding_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
@@ -397,100 +379,83 @@ namespace yy {
       YY_SYMBOL_PRINT (yymsg, yysym);
 
     // User destructor.
-    YYUSE (yysym.type_get ());
+    YYUSE (yysym.kind ());
   }
 
 #if YYDEBUG
   template <typename Base>
   void
-  BitTorrent_Bencoding_Parser::yy_print_ (std::ostream& yyo,
-                                     const basic_symbol<Base>& yysym) const
+  BitTorrent_Bencoding_Parser::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
     YYUSE (yyoutput);
-    symbol_number_type yytype = yysym.type_get ();
-    yyo << (yytype < yyntokens_ ? "token" : "nterm")
-        << ' ' << yytname_[yytype] << " ("
-        << yysym.location << ": ";
-    switch (yytype)
+    if (yysym.empty ())
+      yyo << "empty symbol";
+    else
+      {
+        symbol_kind_type yykind = yysym.kind ();
+        yyo << (yykind < YYNTOKENS ? "token" : "nterm")
+            << ' ' << yysym.name () << " ("
+            << yysym.location << ": ";
+        switch (yykind)
     {
-            case 6: // "integer"
-
-
-        { debug_stream () << (yysym.value.ival); }
-
+      case symbol_kind::S_INTEGER: // "integer"
+                    { debug_stream () << (yysym.value.ival); }
         break;
 
-      case 7: // "string"
-
-
-        { debug_stream () << *(yysym.value.sval); }
-
+      case symbol_kind::S_STRING: // "string"
+                    { debug_stream () << *(yysym.value.sval); }
         break;
 
-      case 8: // "list"
-
-
-        { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*(yysym.value.lval)); }
-
+      case symbol_kind::S_LIST: // "list"
+                    { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*(yysym.value.lval)); }
         break;
 
-      case 9: // "dictionary"
-
-
-        { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
-
+      case symbol_kind::S_DICTIONARY: // "dictionary"
+                    { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
         break;
 
-      case 11: // bencoding
-
-
-        { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
-
+      case symbol_kind::S_bencoding: // bencoding
+                    { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
         break;
 
-      case 13: // list_items
-
-
-        { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*(yysym.value.lval)); }
-
+      case symbol_kind::S_list_items: // list_items
+                    { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*(yysym.value.lval)); }
         break;
 
-      case 17: // dictionary_items
-
-
-        { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
-
+      case symbol_kind::S_dictionary_items: // dictionary_items
+                    { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
         break;
-
 
       default:
         break;
     }
-    yyo << ')';
+        yyo << ')';
+      }
   }
 #endif
 
-  inline
   void
-  BitTorrent_Bencoding_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
-  {
-    stack_symbol_type t (s, sym);
-    yypush_ (m, t);
-  }
-
-  inline
-  void
-  BitTorrent_Bencoding_Parser::yypush_ (const char* m, stack_symbol_type& s)
+  BitTorrent_Bencoding_Parser::yypush_ (const char* m, YY_MOVE_REF (stack_symbol_type) sym)
   {
     if (m)
-      YY_SYMBOL_PRINT (m, s);
-    yystack_.push (s);
+      YY_SYMBOL_PRINT (m, sym);
+    yystack_.push (YY_MOVE (sym));
   }
 
-  inline
   void
-  BitTorrent_Bencoding_Parser::yypop_ (unsigned int n)
+  BitTorrent_Bencoding_Parser::yypush_ (const char* m, state_type s, YY_MOVE_REF (symbol_type) sym)
+  {
+#if 201103L <= YY_CPLUSPLUS
+    yypush_ (m, stack_symbol_type (s, std::move (sym)));
+#else
+    stack_symbol_type ss (s, sym);
+    yypush_ (m, ss);
+#endif
+  }
+
+  void
+  BitTorrent_Bencoding_Parser::yypop_ (int n)
   {
     yystack_.pop (n);
   }
@@ -522,35 +487,37 @@ namespace yy {
   }
 #endif // YYDEBUG
 
-  inline BitTorrent_Bencoding_Parser::state_type
+  BitTorrent_Bencoding_Parser::state_type
   BitTorrent_Bencoding_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
-    int yyr = yypgoto_[yysym - yyntokens_] + yystate;
+    int yyr = yypgoto_[yysym - YYNTOKENS] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
       return yytable_[yyr];
     else
-      return yydefgoto_[yysym - yyntokens_];
+      return yydefgoto_[yysym - YYNTOKENS];
   }
 
-  inline bool
+  bool
   BitTorrent_Bencoding_Parser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
-  inline bool
+  bool
   BitTorrent_Bencoding_Parser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
+  BitTorrent_Bencoding_Parser::operator() ()
+  {
+    return parse ();
+  }
+
+  int
   BitTorrent_Bencoding_Parser::parse ()
   {
-    /// Whether yyla contains a lookahead.
-    bool yyempty = true;
-
-    // State.
     int yyn;
     /// Length of the RHS of the rule being reduced.
     int yylen = 0;
@@ -568,15 +535,14 @@ namespace yy {
     /// The return value of parse ().
     int yyresult;
 
-    // FIXME: This shoud be completely indented.  It is not yet to
-    // avoid gratuitous conflicts when merging into the master branch.
+#if YY_EXCEPTIONS
     try
+#endif // YY_EXCEPTIONS
       {
-    YYCDEBUG << "Starting parse" << std::endl;
+    YYCDEBUG << "Starting parse\n";
 
 
     // User initialization code.
-    
 {
   // initialize the location
   yyla.location.initialize (NULL);
@@ -589,48 +555,69 @@ namespace yy {
        location values to have been already stored, initialize these
        stacks with a primary value.  */
     yystack_.clear ();
-    yypush_ (YY_NULLPTR, 0, yyla);
+    yypush_ (YY_NULLPTR, 0, YY_MOVE (yyla));
 
-    // A new symbol was pushed on the stack.
+  /*-----------------------------------------------.
+  | yynewstate -- push a new symbol on the stack.  |
+  `-----------------------------------------------*/
   yynewstate:
-    YYCDEBUG << "Entering state " << yystack_[0].state << std::endl;
+    YYCDEBUG << "Entering state " << int (yystack_[0].state) << '\n';
+    YY_STACK_PRINT ();
 
     // Accept?
     if (yystack_[0].state == yyfinal_)
-      goto yyacceptlab;
+      YYACCEPT;
 
     goto yybackup;
 
-    // Backup.
-  yybackup:
 
+  /*-----------.
+  | yybackup.  |
+  `-----------*/
+  yybackup:
     // Try to take a decision without lookahead.
-    yyn = yypact_[yystack_[0].state];
+    yyn = yypact_[+yystack_[0].state];
     if (yy_pact_value_is_default_ (yyn))
       goto yydefault;
 
     // Read a lookahead token.
-    if (yyempty)
+    if (yyla.empty ())
       {
-        YYCDEBUG << "Reading a token: ";
+        YYCDEBUG << "Reading a token\n";
+#if YY_EXCEPTIONS
         try
+#endif // YY_EXCEPTIONS
           {
-            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location));
+            yyla.kind_ = yytranslate_ (yylex (&yyla.value, &yyla.location));
           }
+#if YY_EXCEPTIONS
         catch (const syntax_error& yyexc)
           {
+            YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
             error (yyexc);
             goto yyerrlab1;
           }
-        yyempty = false;
+#endif // YY_EXCEPTIONS
       }
     YY_SYMBOL_PRINT ("Next token is", yyla);
 
+    if (yyla.kind () == symbol_kind::S_YYerror)
+    {
+      // The scanner already issued an error message, process directly
+      // to error recovery.  But do not keep the error token as
+      // lookahead, it is too special and may lead us to an endless
+      // loop in error recovery. */
+      yyla.kind_ = symbol_kind::S_YYUNDEF;
+      goto yyerrlab1;
+    }
+
     /* If the proper action on seeing token YYLA.TYPE is to reduce or
        to detect an error, take that action.  */
-    yyn += yyla.type_get ();
-    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.type_get ())
-      goto yydefault;
+    yyn += yyla.kind ();
+    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.kind ())
+      {
+        goto yydefault;
+      }
 
     // Reduce or error.
     yyn = yytable_[yyn];
@@ -642,34 +629,33 @@ namespace yy {
         goto yyreduce;
       }
 
-    // Discard the token being shifted.
-    yyempty = true;
-
     // Count tokens shifted since error; after three, turn off error status.
     if (yyerrstatus_)
       --yyerrstatus_;
 
     // Shift the lookahead token.
-    yypush_ ("Shifting", yyn, yyla);
+    yypush_ ("Shifting", state_type (yyn), YY_MOVE (yyla));
     goto yynewstate;
+
 
   /*-----------------------------------------------------------.
   | yydefault -- do the default action for the current state.  |
   `-----------------------------------------------------------*/
   yydefault:
-    yyn = yydefact_[yystack_[0].state];
+    yyn = yydefact_[+yystack_[0].state];
     if (yyn == 0)
       goto yyerrlab;
     goto yyreduce;
 
+
   /*-----------------------------.
-  | yyreduce -- Do a reduction.  |
+  | yyreduce -- do a reduction.  |
   `-----------------------------*/
   yyreduce:
     yylen = yyr2_[yyn];
     {
       stack_symbol_type yylhs;
-      yylhs.state = yy_lr_goto_state_(yystack_[yylen].state, yyr1_[yyn]);
+      yylhs.state = yy_lr_goto_state_ (yystack_[yylen].state, yyr1_[yyn]);
       /* If YYLEN is nonzero, implement the default value of the
          action: '$$ = $1'.  Otherwise, use the top of the stack.
 
@@ -681,28 +667,28 @@ namespace yy {
       else
         yylhs.value = yystack_[0].value;
 
-      // Compute the default @$.
+      // Default location.
       {
-        slice<stack_symbol_type, stack_type> slice (yystack_, yylen);
-        YYLLOC_DEFAULT (yylhs.location, slice, yylen);
+        stack_type::slice range (yystack_, yylen);
+        YYLLOC_DEFAULT (yylhs.location, range, yylen);
+        yyerror_range[1].location = yylhs.location;
       }
 
       // Perform the reduction.
       YY_REDUCE_PRINT (yyn);
+#if YY_EXCEPTIONS
       try
+#endif // YY_EXCEPTIONS
         {
           switch (yyn)
             {
-  case 2:
-
-    {
+  case 2: // $@1: %empty
+                               {
                     parser->pushDictionary ((yystack_[0].value.dval)); }
-
     break;
 
-  case 3:
-
-    {
+  case 3: // bencoding: "dictionary" $@1 dictionary_items "dictionary_end"
+                                                    {
                     Bencoding_Dictionary_t& dictionary_r = parser->current ();
                     Bencoding_Dictionary_t* dictionary_p = &dictionary_r;
                     try {
@@ -710,25 +696,20 @@ namespace yy {
                     } catch (...) {
                       ACE_DEBUG ((LM_ERROR,
                                   ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
-                    } }
-
+                    }
+                    YYACCEPT; }
     break;
 
-  case 4:
-
-    { }
-
+  case 4: // list_items: list_items list_item
+                                       { }
     break;
 
-  case 5:
-
-    { }
-
+  case 5: // list_items: %empty
+                                       { }
     break;
 
-  case 6:
-
-    {
+  case 6: // list_item: "string"
+                           {
                     Bencoding_List_t& list_r = parser->getList ();
                     Bencoding_Element* element_p = NULL;
                     ACE_NEW_NORETURN (element_p,
@@ -737,12 +718,10 @@ namespace yy {
                     element_p->type = Bencoding_Element::BENCODING_TYPE_STRING;
                     element_p->string = (yystack_[0].value.sval);
                     list_r.push_back (element_p); }
-
     break;
 
-  case 7:
-
-    {
+  case 7: // list_item: "integer"
+                              {
                     Bencoding_List_t& list_r = parser->getList ();
                     Bencoding_Element* element_p = NULL;
                     ACE_NEW_NORETURN (element_p,
@@ -751,19 +730,15 @@ namespace yy {
                     element_p->type = Bencoding_Element::BENCODING_TYPE_INTEGER;
                     element_p->integer = (yystack_[0].value.ival);
                     list_r.push_back (element_p); }
-
     break;
 
-  case 8:
-
-    {
+  case 8: // $@2: %empty
+                           {
                     parser->pushList ((yystack_[0].value.lval)); }
-
     break;
 
-  case 9:
-
-    {
+  case 9: // list_item: "list" $@2 list_items "list_end"
+                                        {
                     Bencoding_Element* element_p = NULL;
                     ACE_NEW_NORETURN (element_p,
                                       Bencoding_Element ());
@@ -773,19 +748,15 @@ namespace yy {
                     parser->popList ();
                     Bencoding_List_t& list_r = parser->getList ();
                     list_r.push_back (element_p); }
-
     break;
 
-  case 10:
-
-    {
+  case 10: // $@3: %empty
+                                  {
                     parser->pushDictionary ((yystack_[0].value.dval)); }
-
     break;
 
-  case 11:
-
-    {
+  case 11: // list_item: "dictionary" $@3 dictionary_items "dictionary_end"
+                                                    {
                     Bencoding_Element* element_p = NULL;
                     ACE_NEW_NORETURN (element_p,
                                       Bencoding_Element ());
@@ -796,37 +767,27 @@ namespace yy {
                     parser->popDictionary ();
                     Bencoding_List_t& list_r = parser->getList ();
                     list_r.push_back (element_p); }
-
     break;
 
-  case 12:
-
-    { }
-
+  case 12: // dictionary_items: dictionary_items dictionary_item
+                                                   { }
     break;
 
-  case 13:
-
-    { }
-
+  case 13: // dictionary_items: %empty
+                                                   { }
     break;
 
-  case 14:
-
-    {
+  case 14: // $@4: %empty
+                           {
                     parser->pushKey ((yystack_[0].value.sval)); }
-
     break;
 
-  case 15:
-
-    { }
-
+  case 15: // dictionary_item: "string" $@4 dictionary_value
+                                   { }
     break;
 
-  case 16:
-
-    {
+  case 16: // dictionary_value: "string"
+                           {
                     std::string* key_string_p = &parser->getKey ();
                     parser->popKey ();
                     Bencoding_Element* element_p = NULL;
@@ -841,12 +802,10 @@ namespace yy {
                                                          element_p)); }*/
                     dictionary_r.push_back (std::make_pair (key_string_p,
                                                             element_p)); }
-
     break;
 
-  case 17:
-
-    {
+  case 17: // dictionary_value: "integer"
+                              {
                     std::string* key_string_p = &parser->getKey ();
                     parser->popKey ();
                     Bencoding_Element* element_p = NULL;
@@ -861,19 +820,15 @@ namespace yy {
                                                          element_p)); }*/
                     dictionary_r.push_back (std::make_pair (key_string_p,
                                                             element_p)); }
-
     break;
 
-  case 18:
-
-    {
+  case 18: // $@5: %empty
+                           {
                     parser->pushList ((yystack_[0].value.lval)); }
-
     break;
 
-  case 19:
-
-    {
+  case 19: // dictionary_value: "list" $@5 list_items "list_end"
+                                        {
                     std::string* key_string_p = &parser->getKey ();
                     parser->popKey ();
                     Bencoding_Element* element_p = NULL;
@@ -889,19 +844,15 @@ namespace yy {
                                                          element_p)); }*/
                     dictionary_r.push_back (std::make_pair (key_string_p,
                                                             element_p)); }
-
     break;
 
-  case 20:
-
-    {
+  case 20: // $@6: %empty
+                                  {
                     parser->pushDictionary ((yystack_[0].value.dval)); }
-
     break;
 
-  case 21:
-
-    {
+  case 21: // dictionary_value: "dictionary" $@6 dictionary_items "dictionary_end"
+                                                    {
                     std::string* key_string_p = &parser->getKey ();
                     parser->popKey ();
                     Bencoding_Element* element_p = NULL;
@@ -918,7 +869,6 @@ namespace yy {
                                                          element_p)); }*/
                     dictionary_r.push_back (std::make_pair (key_string_p,
                                                             element_p)); }
-
     break;
 
 
@@ -927,20 +877,23 @@ namespace yy {
               break;
             }
         }
+#if YY_EXCEPTIONS
       catch (const syntax_error& yyexc)
         {
+          YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
           error (yyexc);
           YYERROR;
         }
+#endif // YY_EXCEPTIONS
       YY_SYMBOL_PRINT ("-> $$ =", yylhs);
       yypop_ (yylen);
       yylen = 0;
-      YY_STACK_PRINT ();
 
       // Shift the result of the reduction.
-      yypush_ (YY_NULLPTR, yylhs);
+      yypush_ (YY_NULLPTR, YY_MOVE (yylhs));
     }
     goto yynewstate;
+
 
   /*--------------------------------------.
   | yyerrlab -- here on detecting error.  |
@@ -950,8 +903,9 @@ namespace yy {
     if (!yyerrstatus_)
       {
         ++yynerrs_;
-        error (yyla.location, yysyntax_error_ (yystack_[0].state,
-                                           yyempty ? yyempty_ : yyla.type_get ()));
+        context yyctx (*this, yyla);
+        std::string msg = yysyntax_error_ (yyctx);
+        error (yyla.location, YY_MOVE (msg));
       }
 
 
@@ -962,12 +916,12 @@ namespace yy {
            error, discard it.  */
 
         // Return failure if at end of input.
-        if (yyla.type_get () == yyeof_)
+        if (yyla.kind () == symbol_kind::S_YYEOF)
           YYABORT;
-        else if (!yyempty)
+        else if (!yyla.empty ())
           {
             yy_destroy_ ("Error: discarding", yyla);
-            yyempty = true;
+            yyla.clear ();
           }
       }
 
@@ -979,76 +933,89 @@ namespace yy {
   | yyerrorlab -- error raised explicitly by YYERROR.  |
   `---------------------------------------------------*/
   yyerrorlab:
-
-    /* Pacify compilers like GCC when the user code never invokes
-       YYERROR and the label yyerrorlab therefore never appears in user
-       code.  */
+    /* Pacify compilers when the user code never invokes YYERROR and
+       the label yyerrorlab therefore never appears in user code.  */
     if (false)
-      goto yyerrorlab;
-    yyerror_range[1].location = yystack_[yylen - 1].location;
+      YYERROR;
+
     /* Do not reclaim the symbols of the rule whose action triggered
        this YYERROR.  */
     yypop_ (yylen);
     yylen = 0;
+    YY_STACK_PRINT ();
     goto yyerrlab1;
+
 
   /*-------------------------------------------------------------.
   | yyerrlab1 -- common code for both syntax error and YYERROR.  |
   `-------------------------------------------------------------*/
   yyerrlab1:
     yyerrstatus_ = 3;   // Each real token shifted decrements this.
+    // Pop stack until we find a state that shifts the error token.
+    for (;;)
+      {
+        yyn = yypact_[+yystack_[0].state];
+        if (!yy_pact_value_is_default_ (yyn))
+          {
+            yyn += symbol_kind::S_YYerror;
+            if (0 <= yyn && yyn <= yylast_
+                && yycheck_[yyn] == symbol_kind::S_YYerror)
+              {
+                yyn = yytable_[yyn];
+                if (0 < yyn)
+                  break;
+              }
+          }
+
+        // Pop the current state because it cannot handle the error token.
+        if (yystack_.size () == 1)
+          YYABORT;
+
+        yyerror_range[1].location = yystack_[0].location;
+        yy_destroy_ ("Error: popping", yystack_[0]);
+        yypop_ ();
+        YY_STACK_PRINT ();
+      }
     {
       stack_symbol_type error_token;
-      for (;;)
-        {
-          yyn = yypact_[yystack_[0].state];
-          if (!yy_pact_value_is_default_ (yyn))
-            {
-              yyn += yyterror_;
-              if (0 <= yyn && yyn <= yylast_ && yycheck_[yyn] == yyterror_)
-                {
-                  yyn = yytable_[yyn];
-                  if (0 < yyn)
-                    break;
-                }
-            }
-
-          // Pop the current state because it cannot handle the error token.
-          if (yystack_.size () == 1)
-            YYABORT;
-
-          yyerror_range[1].location = yystack_[0].location;
-          yy_destroy_ ("Error: popping", yystack_[0]);
-          yypop_ ();
-          YY_STACK_PRINT ();
-        }
 
       yyerror_range[2].location = yyla.location;
       YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
 
       // Shift the error token.
-      error_token.state = yyn;
-      yypush_ ("Shifting", error_token);
+      error_token.state = state_type (yyn);
+      yypush_ ("Shifting", YY_MOVE (error_token));
     }
     goto yynewstate;
 
-    // Accept.
+
+  /*-------------------------------------.
+  | yyacceptlab -- YYACCEPT comes here.  |
+  `-------------------------------------*/
   yyacceptlab:
     yyresult = 0;
     goto yyreturn;
 
-    // Abort.
+
+  /*-----------------------------------.
+  | yyabortlab -- YYABORT comes here.  |
+  `-----------------------------------*/
   yyabortlab:
     yyresult = 1;
     goto yyreturn;
 
+
+  /*-----------------------------------------------------.
+  | yyreturn -- parsing is finished, return the result.  |
+  `-----------------------------------------------------*/
   yyreturn:
-    if (!yyempty)
+    if (!yyla.empty ())
       yy_destroy_ ("Cleanup: discarding lookahead", yyla);
 
     /* Do not reclaim the symbols of the rule whose action triggered
        this YYABORT or YYACCEPT.  */
     yypop_ (yylen);
+    YY_STACK_PRINT ();
     while (1 < yystack_.size ())
       {
         yy_destroy_ ("Cleanup: popping", yystack_[0]);
@@ -1057,13 +1024,13 @@ namespace yy {
 
     return yyresult;
   }
+#if YY_EXCEPTIONS
     catch (...)
       {
-        YYCDEBUG << "Exception caught: cleaning lookahead and stack"
-                 << std::endl;
+        YYCDEBUG << "Exception caught: cleaning lookahead and stack\n";
         // Do not try to display the values of the reclaimed symbols,
-        // as their printer might throw an exception.
-        if (!yyempty)
+        // as their printers might throw an exception.
+        if (!yyla.empty ())
           yy_destroy_ (YY_NULLPTR, yyla);
 
         while (1 < yystack_.size ())
@@ -1073,33 +1040,115 @@ namespace yy {
           }
         throw;
       }
+#endif // YY_EXCEPTIONS
   }
 
   void
   BitTorrent_Bencoding_Parser::error (const syntax_error& yyexc)
   {
-    error (yyexc.location, yyexc.what());
+    error (yyexc.location, yyexc.what ());
   }
 
-  // Generate an error message.
+  /* Return YYSTR after stripping away unnecessary quotes and
+     backslashes, so that it's suitable for yyerror.  The heuristic is
+     that double-quoting is unnecessary unless the string contains an
+     apostrophe, a comma, or backslash (other than backslash-backslash).
+     YYSTR is taken from yytname.  */
   std::string
-  BitTorrent_Bencoding_Parser::yysyntax_error_ (state_type yystate, symbol_number_type yytoken) const
+  BitTorrent_Bencoding_Parser::yytnamerr_ (const char *yystr)
   {
-    std::string yyres;
-    // Number of reported tokens (one for the "unexpected", one per
-    // "expected").
-    size_t yycount = 0;
-    // Its maximum.
-    enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-    // Arguments of yyformat.
-    char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+    if (*yystr == '"')
+      {
+        std::string yyr;
+        char const *yyp = yystr;
 
+        for (;;)
+          switch (*++yyp)
+            {
+            case '\'':
+            case ',':
+              goto do_not_strip_quotes;
+
+            case '\\':
+              if (*++yyp != '\\')
+                goto do_not_strip_quotes;
+              else
+                goto append;
+
+            append:
+            default:
+              yyr += *yyp;
+              break;
+
+            case '"':
+              return yyr;
+            }
+      do_not_strip_quotes: ;
+      }
+
+    return yystr;
+  }
+
+  std::string
+  BitTorrent_Bencoding_Parser::symbol_name (symbol_kind_type yysymbol)
+  {
+    return yytnamerr_ (yytname_[yysymbol]);
+  }
+
+
+
+  // BitTorrent_Bencoding_Parser::context.
+  BitTorrent_Bencoding_Parser::context::context (const BitTorrent_Bencoding_Parser& yyparser, const symbol_type& yyla)
+    : yyparser_ (yyparser)
+    , yyla_ (yyla)
+  {}
+
+  int
+  BitTorrent_Bencoding_Parser::context::expected_tokens (symbol_kind_type yyarg[], int yyargn) const
+  {
+    // Actual number of expected tokens
+    int yycount = 0;
+
+    int yyn = yypact_[+yyparser_.yystack_[0].state];
+    if (!yy_pact_value_is_default_ (yyn))
+      {
+        /* Start YYX at -YYN if negative to avoid negative indexes in
+           YYCHECK.  In other words, skip the first -YYN actions for
+           this state because they are default actions.  */
+        int yyxbegin = yyn < 0 ? -yyn : 0;
+        // Stay within bounds of both yycheck and yytname.
+        int yychecklim = yylast_ - yyn + 1;
+        int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+        for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
+          if (yycheck_[yyx + yyn] == yyx && yyx != symbol_kind::S_YYerror
+              && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
+            {
+              if (!yyarg)
+                ++yycount;
+              else if (yycount == yyargn)
+                return 0;
+              else
+                yyarg[yycount++] = YY_CAST (symbol_kind_type, yyx);
+            }
+      }
+
+    if (yyarg && yycount == 0 && 0 < yyargn)
+      yyarg[0] = symbol_kind::S_YYEMPTY;
+    return yycount;
+  }
+
+
+
+  int
+  BitTorrent_Bencoding_Parser::yy_syntax_error_arguments_ (const context& yyctx,
+                                                 symbol_kind_type yyarg[], int yyargn) const
+  {
     /* There are many possibilities here to consider:
        - If this state is a consistent state with a default action, then
          the only way this function was invoked is if the default action
          is an error action.  In that case, don't check for expected
          tokens because there are none.
-       - The only way there can be no lookahead present (in yytoken) is
+       - The only way there can be no lookahead present (in yyla) is
          if this state is a consistent state with a default action.
          Thus, detecting the absence of a lookahead is sufficient to
          determine that there is no unexpected or expected token to
@@ -1112,40 +1161,32 @@ namespace yy {
        - Of course, the expected token list depends on states to have
          correct lookahead information, and it depends on the parser not
          to perform extra reductions after fetching a lookahead from the
-         scanner and before detecting a syntax error.  Thus, state
-         merging (from LALR or IELR) and default reductions corrupt the
-         expected token list.  However, the list is correct for
-         canonical LR with one exception: it will still contain any
-         token that will not be accepted due to an error action in a
-         later state.
+         scanner and before detecting a syntax error.  Thus, state merging
+         (from LALR or IELR) and default reductions corrupt the expected
+         token list.  However, the list is correct for canonical LR with
+         one exception: it will still contain any token that will not be
+         accepted due to an error action in a later state.
     */
-    if (yytoken != yyempty_)
+
+    if (!yyctx.lookahead ().empty ())
       {
-        yyarg[yycount++] = yytname_[yytoken];
-        int yyn = yypact_[yystate];
-        if (!yy_pact_value_is_default_ (yyn))
-          {
-            /* Start YYX at -YYN if negative to avoid negative indexes in
-               YYCHECK.  In other words, skip the first -YYN actions for
-               this state because they are default actions.  */
-            int yyxbegin = yyn < 0 ? -yyn : 0;
-            // Stay within bounds of both yycheck and yytname.
-            int yychecklim = yylast_ - yyn + 1;
-            int yyxend = yychecklim < yyntokens_ ? yychecklim : yyntokens_;
-            for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
-              if (yycheck_[yyx + yyn] == yyx && yyx != yyterror_
-                  && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
-                {
-                  if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                    {
-                      yycount = 1;
-                      break;
-                    }
-                  else
-                    yyarg[yycount++] = yytname_[yyx];
-                }
-          }
+        if (yyarg)
+          yyarg[0] = yyctx.token ();
+        int yyn = yyctx.expected_tokens (yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+        return yyn + 1;
       }
+    return 0;
+  }
+
+  // Generate an error message.
+  std::string
+  BitTorrent_Bencoding_Parser::yysyntax_error_ (const context& yyctx) const
+  {
+    // Its maximum.
+    enum { YYARGS_MAX = 5 };
+    // Arguments of yyformat.
+    symbol_kind_type yyarg[YYARGS_MAX];
+    int yycount = yy_syntax_error_arguments_ (yyctx, yyarg, YYARGS_MAX);
 
     char const* yyformat = YY_NULLPTR;
     switch (yycount)
@@ -1154,21 +1195,23 @@ namespace yy {
         case N:                               \
           yyformat = S;                       \
         break
-        YYCASE_(0, YY_("syntax error"));
-        YYCASE_(1, YY_("syntax error, unexpected %s"));
-        YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-        YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-        YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-        YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+      default: // Avoid compiler warnings.
+        YYCASE_ (0, YY_("syntax error"));
+        YYCASE_ (1, YY_("syntax error, unexpected %s"));
+        YYCASE_ (2, YY_("syntax error, unexpected %s, expecting %s"));
+        YYCASE_ (3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+        YYCASE_ (4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+        YYCASE_ (5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
 #undef YYCASE_
       }
 
+    std::string yyres;
     // Argument number.
-    size_t yyi = 0;
+    std::ptrdiff_t yyi = 0;
     for (char const* yyp = yyformat; *yyp; ++yyp)
       if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
         {
-          yyres += yytnamerr_ (yyarg[yyi++]);
+          yyres += symbol_name (yyarg[yyi++]);
           ++yyp;
         }
       else
@@ -1190,7 +1233,7 @@ namespace yy {
      -19,   -19
   };
 
-  const unsigned char
+  const signed char
   BitTorrent_Bencoding_Parser::yydefact_[] =
   {
        0,     2,     0,    13,     1,     0,     3,    14,    12,     0,
@@ -1213,7 +1256,7 @@ namespace yy {
       14,    15,    16
   };
 
-  const unsigned char
+  const signed char
   BitTorrent_Bencoding_Parser::yytable_[] =
   {
       18,    19,     1,    20,    21,    22,    23,     4,    28,     0,
@@ -1229,7 +1272,7 @@ namespace yy {
        7,     7,     7,     6,     7,     8,     9
   };
 
-  const unsigned char
+  const signed char
   BitTorrent_Bencoding_Parser::yystos_[] =
   {
        0,     9,    11,    12,     0,    17,     3,     7,    18,    19,
@@ -1238,7 +1281,7 @@ namespace yy {
        4,     3
   };
 
-  const unsigned char
+  const signed char
   BitTorrent_Bencoding_Parser::yyr1_[] =
   {
        0,    10,    12,    11,    13,    13,    14,    14,    15,    14,
@@ -1246,7 +1289,7 @@ namespace yy {
       22,    20
   };
 
-  const unsigned char
+  const signed char
   BitTorrent_Bencoding_Parser::yyr2_[] =
   {
        0,     2,     0,     4,     2,     0,     1,     1,     0,     4,
@@ -1255,50 +1298,50 @@ namespace yy {
   };
 
 
-
+#if YYDEBUG || 1
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-  // First, the terminals, then, starting at \a yyntokens_, nonterminals.
+  // First, the terminals, then, starting at \a YYNTOKENS, nonterminals.
   const char*
   const BitTorrent_Bencoding_Parser::yytname_[] =
   {
-  "\"end\"", "error", "$undefined", "\"dictionary_end\"", "\"list_end\"",
-  "\"end_of_fragment\"", "\"integer\"", "\"string\"", "\"list\"",
-  "\"dictionary\"", "$accept", "bencoding", "$@1", "list_items",
-  "list_item", "$@2", "$@3", "dictionary_items", "dictionary_item", "$@4",
-  "dictionary_value", "$@5", "$@6", YY_NULLPTR
+  "\"end\"", "error", "\"invalid token\"", "\"dictionary_end\"",
+  "\"list_end\"", "\"end_of_fragment\"", "\"integer\"", "\"string\"",
+  "\"list\"", "\"dictionary\"", "$accept", "bencoding", "$@1",
+  "list_items", "list_item", "$@2", "$@3", "dictionary_items",
+  "dictionary_item", "$@4", "dictionary_value", "$@5", "$@6", YY_NULLPTR
   };
+#endif
+
 
 #if YYDEBUG
-  const unsigned short int
+  const short
   BitTorrent_Bencoding_Parser::yyrline_[] =
   {
-       0,   222,   222,   222,   233,   234,   236,   245,   254,   254,
-     266,   266,   279,   280,   282,   282,   285,   305,   325,   325,
-     348,   348
+       0,   225,   225,   225,   237,   238,   240,   249,   258,   258,
+     270,   270,   283,   284,   286,   286,   289,   309,   329,   329,
+     352,   352
   };
 
-  // Print the state stack on the debug stream.
   void
-  BitTorrent_Bencoding_Parser::yystack_print_ ()
+  BitTorrent_Bencoding_Parser::yy_stack_print_ () const
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
            i = yystack_.begin (),
            i_end = yystack_.end ();
          i != i_end; ++i)
-      *yycdebug_ << ' ' << i->state;
-    *yycdebug_ << std::endl;
+      *yycdebug_ << ' ' << int (i->state);
+    *yycdebug_ << '\n';
   }
 
-  // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  BitTorrent_Bencoding_Parser::yy_reduce_print_ (int yyrule)
+  BitTorrent_Bencoding_Parser::yy_reduce_print_ (int yyrule) const
   {
-    unsigned int yylno = yyrline_[yyrule];
+    int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
     // Print the symbols being reduced, and their result.
     *yycdebug_ << "Reducing stack by rule " << yyrule - 1
-               << " (line " << yylno << "):" << std::endl;
+               << " (line " << yylno << "):\n";
     // The symbols being reduced.
     for (int yyi = 0; yyi < yynrhs; yyi++)
       YY_SYMBOL_PRINT ("   $" << yyi + 1 << " =",
@@ -1306,16 +1349,16 @@ namespace yy {
   }
 #endif // YYDEBUG
 
-  // Symbol number corresponding to token number t.
-  inline
-  BitTorrent_Bencoding_Parser::token_number_type
+  BitTorrent_Bencoding_Parser::symbol_kind_type
   BitTorrent_Bencoding_Parser::yytranslate_ (int t)
   {
+    // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
+    // TOKEN-NUM as returned by yylex.
     static
-    const token_number_type
+    const signed char
     translate_table[] =
     {
-     0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -1343,20 +1386,18 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9
     };
-    const unsigned int user_token_number_max_ = 264;
-    const token_number_type undef_token_ = 2;
+    // Last valid token kind.
+    const int code_max = 264;
 
-    if (static_cast<int>(t) <= yyeof_)
-      return yyeof_;
-    else if (static_cast<unsigned int> (t) <= user_token_number_max_)
-      return translate_table[t];
+    if (t <= 0)
+      return symbol_kind::S_YYEOF;
+    else if (t <= code_max)
+      return YY_CAST (symbol_kind_type, translate_table[t]);
     else
-      return undef_token_;
+      return symbol_kind::S_YYUNDEF;
   }
 
-
 } // yy
-
 
 
 

@@ -1237,7 +1237,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
 
-    ACE_ASSERT (inherited::state_.trackerConnectionId == id_in);
+//    ACE_ASSERT (inherited::state_.trackerConnectionId == id_in);
     inherited::state_.trackerConnectionId = 0;
 
     if (inherited::state_.connections.empty () &&

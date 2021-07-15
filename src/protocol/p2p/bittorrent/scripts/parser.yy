@@ -13,7 +13,8 @@
 %defines                          "bittorrent_parser.h"
 %output                           "bittorrent_parser.cpp"
 
-%define "parser_class_name"       "BitTorrent_Parser"
+%define api.parser.class          {BitTorrent_Parser}
+/*%define "parser_class_name"       "BitTorrent_Parser"*/
 /* *NOTE*: this is the namespace AND the (f)lex prefix */
 /*%name-prefix                      "yy"*/
 /*%pure-parser*/

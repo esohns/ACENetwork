@@ -251,7 +251,7 @@ next_list:
             i < num_ip_addresses;
             ++i)
           {
-            ACE_UINT32 ip_address =
+            ip_address =
               *reinterpret_cast<const unsigned int*> (pointer_p + (i * 4));
             string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
             converter.str (ACE_TEXT_ALWAYS_CHAR (""));

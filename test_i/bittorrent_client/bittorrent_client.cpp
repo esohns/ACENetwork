@@ -380,7 +380,7 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
@@ -390,17 +390,17 @@ do_initializeSignals (bool useReactor_in,
 #else
 //    signals_out.sig_del (SIGINT);
   signals_out.sig_del (SIGWINCH);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
 
-// *NOTE*: gdb sends some signals (when running in an IDE ?)
-//         --> remove signals (and let IDE handle them)
-#if defined (__GNUC__) && defined (DEBUG_DEBUGGER)
-//  signals_out.sig_del (SIGINT);
-  signals_out.sig_del (SIGCONT);
-  signals_out.sig_del (SIGHUP);
-#endif
+//// *NOTE*: gdb sends some signals (when running in an IDE ?)
+////         --> remove signals (and let IDE handle them)
+//#if defined (__GNUC__) && defined (DEBUG_DEBUGGER)
+////  signals_out.sig_del (SIGINT);
+//  signals_out.sig_del (SIGCONT);
+//  signals_out.sig_del (SIGHUP);
+//#endif // __GNUC__ && DEBUG_DEBUGGER
 }
 
 #if defined (GUI_SUPPORT)

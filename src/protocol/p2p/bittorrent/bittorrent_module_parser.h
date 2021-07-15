@@ -37,7 +37,7 @@
 // forward declaration(s)
 class ACE_Message_Block;
 
-//extern const char libacenetwork_protocol_bittorrent_default_peer_parser_module_name_string[];
+extern const char libacenetwork_protocol_bittorrent_default_peer_parser_module_name_string[];
 extern const char libacenetwork_protocol_bittorrent_default_tracker_parser_module_name_string[];
 
 template <ACE_SYNCH_DECL,

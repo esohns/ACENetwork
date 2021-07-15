@@ -322,8 +322,9 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
       if (connection_p->id () == reinterpret_cast<Net_ConnectionId_t> (handle_in))
 #else
       if (connection_p->id () == static_cast<Net_ConnectionId_t> (handle_in))
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         break;
+      connection_p = NULL;
     } // end FOR
     if (likely (connection_p))
       connection_p->increase (); // increase reference count

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
-<bison-xml-report version="3.0.2" bug-report="bug-bison@gnu.org" url="http://www.gnu.org/software/bison/">
+<bison-xml-report version="3.7.4" bug-report="bug-bison@gnu.org" url="https://www.gnu.org/software/bison/">
 
-  <filename>/mnt/win_d/projects/libACENetwork/src/protocol/p2p/bittorrent/scripts/parser.yy</filename>
+  <filename>/mnt/win_d/projects/ACENetwork/src/protocol/p2p/bittorrent/scripts/parser.yy</filename>
 
   <grammar>
     <rules>
@@ -107,27 +107,27 @@
       </rule>
     </rules>
     <terminals>
-      <terminal symbol-number="0" token-number="0" name="&quot;end&quot;" usefulness="useful"/>
-      <terminal symbol-number="1" token-number="256" name="error" usefulness="useful"/>
-      <terminal symbol-number="3" token-number="258" name="&quot;handshake&quot;" usefulness="useful"/>
-      <terminal symbol-number="4" token-number="259" name="&quot;bitfield&quot;" usefulness="useful"/>
-      <terminal symbol-number="5" token-number="260" name="&quot;cancel&quot;" usefulness="useful"/>
-      <terminal symbol-number="6" token-number="261" name="&quot;choke&quot;" usefulness="useful"/>
-      <terminal symbol-number="7" token-number="262" name="&quot;have&quot;" usefulness="useful"/>
-      <terminal symbol-number="8" token-number="263" name="&quot;interested&quot;" usefulness="useful"/>
-      <terminal symbol-number="9" token-number="264" name="&quot;keep-alive&quot;" usefulness="useful"/>
-      <terminal symbol-number="10" token-number="265" name="&quot;not_interested&quot;" usefulness="useful"/>
-      <terminal symbol-number="11" token-number="266" name="&quot;piece&quot;" usefulness="useful"/>
-      <terminal symbol-number="12" token-number="267" name="&quot;port&quot;" usefulness="useful"/>
-      <terminal symbol-number="13" token-number="268" name="&quot;request&quot;" usefulness="useful"/>
-      <terminal symbol-number="14" token-number="269" name="&quot;unchoke&quot;" usefulness="useful"/>
-      <terminal symbol-number="15" token-number="270" name="&quot;end_of_fragment&quot;" usefulness="useful"/>
+      <terminal symbol-number="0" token-number="0" name="&quot;end&quot;" type="size" usefulness="useful"/>
+      <terminal symbol-number="1" token-number="256" name="error" type="" usefulness="useful"/>
+      <terminal symbol-number="3" token-number="258" name="&quot;handshake&quot;" type="handshake" usefulness="useful"/>
+      <terminal symbol-number="4" token-number="259" name="&quot;bitfield&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="5" token-number="260" name="&quot;cancel&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="6" token-number="261" name="&quot;choke&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="7" token-number="262" name="&quot;have&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="8" token-number="263" name="&quot;interested&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="9" token-number="264" name="&quot;keep-alive&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="10" token-number="265" name="&quot;not_interested&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="11" token-number="266" name="&quot;piece&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="12" token-number="267" name="&quot;port&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="13" token-number="268" name="&quot;request&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="14" token-number="269" name="&quot;unchoke&quot;" type="record" usefulness="useful"/>
+      <terminal symbol-number="15" token-number="270" name="&quot;end_of_fragment&quot;" type="size" usefulness="useful"/>
     </terminals>
     <nonterminals>
-      <nonterminal symbol-number="16" name="$accept" usefulness="useful"/>
-      <nonterminal symbol-number="17" name="session" usefulness="useful"/>
-      <nonterminal symbol-number="18" name="messages" usefulness="useful"/>
-      <nonterminal symbol-number="19" name="message" usefulness="useful"/>
+      <nonterminal symbol-number="16" name="$accept" type="" usefulness="useful"/>
+      <nonterminal symbol-number="17" name="session" type="size" usefulness="useful"/>
+      <nonterminal symbol-number="18" name="messages" type="size" usefulness="useful"/>
+      <nonterminal symbol-number="19" name="message" type="size" usefulness="useful"/>
     </nonterminals>
   </grammar>
 
@@ -135,8 +135,8 @@
 
     <state number="0">
       <itemset>
-        <item rule-number="0" point="0"/>
-        <item rule-number="1" point="0"/>
+        <item rule-number="0" dot="0"/>
+        <item rule-number="1" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -151,9 +151,9 @@
 
     <state number="1">
       <itemset>
-        <item rule-number="1" point="1"/>
-        <item rule-number="2" point="0"/>
-        <item rule-number="3" point="0"/>
+        <item rule-number="1" dot="1"/>
+        <item rule-number="2" dot="0"/>
+        <item rule-number="3" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -169,7 +169,7 @@
 
     <state number="2">
       <itemset>
-        <item rule-number="0" point="1"/>
+        <item rule-number="0" dot="1"/>
       </itemset>
       <actions>
         <transitions>
@@ -183,24 +183,24 @@
 
     <state number="3">
       <itemset>
-        <item rule-number="1" point="2">
+        <item rule-number="1" dot="2">
           <lookaheads>
             <symbol>&quot;end&quot;</symbol>
           </lookaheads>
         </item>
-        <item rule-number="2" point="1"/>
-        <item rule-number="4" point="0"/>
-        <item rule-number="5" point="0"/>
-        <item rule-number="6" point="0"/>
-        <item rule-number="7" point="0"/>
-        <item rule-number="8" point="0"/>
-        <item rule-number="9" point="0"/>
-        <item rule-number="10" point="0"/>
-        <item rule-number="11" point="0"/>
-        <item rule-number="12" point="0"/>
-        <item rule-number="13" point="0"/>
-        <item rule-number="14" point="0"/>
-        <item rule-number="15" point="0"/>
+        <item rule-number="2" dot="1"/>
+        <item rule-number="4" dot="0"/>
+        <item rule-number="5" dot="0"/>
+        <item rule-number="6" dot="0"/>
+        <item rule-number="7" dot="0"/>
+        <item rule-number="8" dot="0"/>
+        <item rule-number="9" dot="0"/>
+        <item rule-number="10" dot="0"/>
+        <item rule-number="11" dot="0"/>
+        <item rule-number="12" dot="0"/>
+        <item rule-number="13" dot="0"/>
+        <item rule-number="14" dot="0"/>
+        <item rule-number="15" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -228,7 +228,7 @@
 
     <state number="4">
       <itemset>
-        <item rule-number="0" point="2"/>
+        <item rule-number="0" dot="2"/>
       </itemset>
       <actions>
         <transitions/>
@@ -242,7 +242,7 @@
 
     <state number="5">
       <itemset>
-        <item rule-number="4" point="1"/>
+        <item rule-number="4" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -256,7 +256,7 @@
 
     <state number="6">
       <itemset>
-        <item rule-number="5" point="1"/>
+        <item rule-number="5" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -270,7 +270,7 @@
 
     <state number="7">
       <itemset>
-        <item rule-number="6" point="1"/>
+        <item rule-number="6" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -284,7 +284,7 @@
 
     <state number="8">
       <itemset>
-        <item rule-number="7" point="1"/>
+        <item rule-number="7" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -298,7 +298,7 @@
 
     <state number="9">
       <itemset>
-        <item rule-number="8" point="1"/>
+        <item rule-number="8" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -312,7 +312,7 @@
 
     <state number="10">
       <itemset>
-        <item rule-number="9" point="1"/>
+        <item rule-number="9" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -326,7 +326,7 @@
 
     <state number="11">
       <itemset>
-        <item rule-number="10" point="1"/>
+        <item rule-number="10" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -340,7 +340,7 @@
 
     <state number="12">
       <itemset>
-        <item rule-number="11" point="1"/>
+        <item rule-number="11" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -354,7 +354,7 @@
 
     <state number="13">
       <itemset>
-        <item rule-number="12" point="1"/>
+        <item rule-number="12" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -368,7 +368,7 @@
 
     <state number="14">
       <itemset>
-        <item rule-number="13" point="1"/>
+        <item rule-number="13" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -382,7 +382,7 @@
 
     <state number="15">
       <itemset>
-        <item rule-number="14" point="1"/>
+        <item rule-number="14" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -396,7 +396,7 @@
 
     <state number="16">
       <itemset>
-        <item rule-number="15" point="1"/>
+        <item rule-number="15" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -410,7 +410,7 @@
 
     <state number="17">
       <itemset>
-        <item rule-number="2" point="2"/>
+        <item rule-number="2" dot="2"/>
       </itemset>
       <actions>
         <transitions/>

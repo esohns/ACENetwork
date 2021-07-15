@@ -177,6 +177,8 @@ set (HTTP_decoder_SRCS
      test_u_connection_manager_common.h
      test_u_message.cpp
      test_u_message.h
+     test_u_module_eventhandler.cpp
+     test_u_module_eventhandler.h
      test_u_session_message.cpp
      test_u_session_message.h
      test_u_stream.cpp

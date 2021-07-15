@@ -544,11 +544,11 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
     return;
   } // end IF
   ACE_ASSERT (parser.bencoding_);
-#if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s\n"),
-              ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
-#endif
+//#if defined (_DEBUG)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%s\n"),
+//              ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
+//#endif // _DEBUG
 
   try {
     session_->notify (*parser.bencoding_);

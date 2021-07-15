@@ -114,11 +114,11 @@ BitTorrent_PeerStream_T<StreamStateType,
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  MODULE_STATISTIC_T (this,
-                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  layout_inout->append (module_p, NULL, 0);
+//  ACE_NEW_RETURN (module_p,
+//                  MODULE_STATISTIC_T (this,
+//                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_inout->append (module_p, NULL, 0);
   //ACE_NEW_RETURN (module_p,
   //                MODULE_HANDLER_T (this,
   //                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)),

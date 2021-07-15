@@ -13,7 +13,8 @@
 %defines                          "bittorrent_bencoding_parser.h"
 %output                           "bittorrent_bencoding_parser.cpp"
 
-%define "parser_class_name"       "BitTorrent_Bencoding_Parser"
+/*%define "parser_class_name"       "BitTorrent_Bencoding_Parser"*/
+%define api.parser.class          {BitTorrent_Bencoding_Parser}
 /* *NOTE*: this is the namespace AND the (f)lex prefix */
 %name-prefix                      "yy"
 /*%pure-parser*/
@@ -165,7 +166,9 @@ typedef union YYSTYPE
 /*#include "ace/Synch.h"*/
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_bencoding_scanner.h"
+
 #include "common_parser_bencoding_common.h"
+#include "common_parser_bencoding_tools.h"
 
 // *TODO*: this shouldn't be necessary
 /*#define yylex bencoding_lex*/
@@ -229,7 +232,8 @@ bencoding:        "dictionary" {
                     } catch (...) {
                       ACE_DEBUG ((LM_ERROR,
                                   ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
-                    } }
+                    }
+                    YYACCEPT; }
 list_items:       list_items list_item { }
                   |                    { }
 /*                  | %empty             { }*/

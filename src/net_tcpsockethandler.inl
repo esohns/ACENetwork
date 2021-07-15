@@ -498,13 +498,12 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
         if (unlikely (result == -1))
         {
           error = ACE_OS::last_error ();
-          if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
-              (error == ENOENT)) // <-- user abort during initialization
-                                 //     (prior to registration)
+          if (error == ENOENT) // <-- user abort during initialization
+                               //     (prior to registration)
             result = 0;
-          else
+          else if (error != EPERM) // Local close
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@, %d): \"%m\", aborting\n"),
+                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@, %d): \"%m\", aborting\n"),
                         this,
                         mask_in));
         } // end IF

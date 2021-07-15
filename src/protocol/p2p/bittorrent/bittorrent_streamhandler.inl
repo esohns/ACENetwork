@@ -68,6 +68,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
  : session_ (interfaceHandle_in)
 #endif // GUI_SUPPORT
  , sessionData_ ()
+ , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::BitTorrent_PeerStreamHandler_T"));
 
@@ -96,10 +97,13 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::start"));
 
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
   SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (session_);
+//  ACE_ASSERT (sessionData_in.connection);
   // *NOTE*: on Linux systems, file descriptors are reused immediately, so
   //         collisions can occur here (i.e. the original connection may not
   //         have finalized at this stage
@@ -110,7 +114,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
-    session_->connect (sessionId_in);
+    session_->connect (sessionData_in.connectionStates.begin ()->second->handle);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::connect(), continuing\n")));
@@ -194,15 +198,21 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::end"));
 
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
   SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (session_);
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   if (iterator != sessionData_.end ())
+  { //ACE_ASSERT ((*iterator).second->connection);
+    //handle_h = (*iterator).second->connection->id ();
     sessionData_.erase (iterator);
+  } // end IF
 
   try {
-    session_->disconnect (sessionId_in);
+    session_->disconnect (handle_h);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::disconnect(), continuing\n")));
@@ -316,6 +326,8 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
                                                                                        UserDataType>& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::notify"));
+
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
   SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
   int result = -1;
@@ -441,12 +453,13 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   // sanity check(s)
   ACE_ASSERT (iterator == sessionData_.end ());
   ACE_ASSERT (session_);
+  ACE_ASSERT (sessionData_in.connection);
 
   sessionData_.insert (std::make_pair (sessionId_in,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
-    session_->trackerConnect (sessionId_in);
+    session_->trackerConnect (sessionData_in.connection->id ());
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerConnect(), continuing\n")));
@@ -536,10 +549,12 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   ACE_ASSERT (iterator != sessionData_.end ());
   ACE_ASSERT (session_);
 
+  ACE_HANDLE handle_h = (*iterator).second->connectionStates.begin ()->second->handle;
+
   sessionData_.erase (iterator);
 
   try {
-    session_->trackerDisconnect (sessionId_in);
+    session_->trackerDisconnect (handle_h);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerDisconnect(), continuing\n")));
@@ -600,13 +615,13 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   ACE_ASSERT (configuration_);
   ACE_ASSERT (session_);
 
-#if defined (_DEBUG)
-  const typename MESSAGE_T::DATA_T& data_container_r = message_in.getR ();
-  const struct HTTP_Record& record_r = data_container_r.getR ();
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s\n"),
-              ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//  const typename MESSAGE_T::DATA_T& data_container_r = message_in.getR ();
+//  const struct HTTP_Record& record_r = data_container_r.getR ();
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%s\n"),
+//              ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
+//#endif // _DEBUG
 
   struct Common_ParserConfiguration parser_configuration = *configuration_;
   parser_configuration.block = false;
@@ -625,15 +640,15 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   if (!parser.parse (&const_cast<MESSAGE_T&> (message_in)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ParserBase_T::parse(), returning\n")));
+                ACE_TEXT ("failed to Common_ParserBase_T::parse(), returning\n")));
     return;
   } // end IF
   ACE_ASSERT (parser.bencoding_);
-#if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s\n"),
-              ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%s\n"),
+//              ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
+//#endif // _DEBUG
 
   try {
     session_->notify (*parser.bencoding_);

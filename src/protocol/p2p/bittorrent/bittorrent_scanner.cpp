@@ -1,4 +1,3 @@
-#line 2 "scanner.l"
 //#include "bittorrent_common.h"
 //#include "bittorrent_exports.h"
 //#include "bittorrent_iparser.h"
