@@ -112,10 +112,7 @@ class BitTorrent_Module_PeerParser_T
   virtual void record (struct BitTorrent_PeerRecord*&); // data record
   virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
 
-  // *NOTE*: strips the protocol data from the message buffer, leaving the
-  //         'piece' content. This data is then available only from the message
-  //         record (i.e. DATA_T)
-  bool             crunch_;
+  unsigned int headFragmentBaseOffset_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

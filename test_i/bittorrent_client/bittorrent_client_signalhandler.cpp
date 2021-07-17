@@ -56,7 +56,8 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::handleSignal"));
 
-//  int result = -1;
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
 
   bool abort = false;
 //  bool connect = false;
@@ -101,7 +102,7 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     case SIGUSR2:
 #endif
     {
-      // abort connection
+      // abort one connection
       abort = true;
 
       break;
@@ -121,13 +122,12 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
   } // end SWITCH
 
-  // ...abort ?
+  // ...abort one ?
   if (abort)
   {
     BitTorrent_Client_IPeerConnection_Manager_t* connection_manager_p =
         BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (connection_manager_p);
-
     connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
   } // end IF
 
@@ -137,17 +137,20 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
     // step1: notify curses dispatch ?
-    if (inherited::configuration_)
-      if (inherited::configuration_->cursesState)
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
-        inherited::configuration_->cursesState->finished = true;
-      } // end IF
+    ACE_ASSERT (inherited::configuration_->cursesState);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
+      inherited::configuration_->cursesState->finished = true;
+    } // end IF
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
 
-    // step2: stop event dispatch
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-                                         inherited::configuration_->dispatchState->reactorGroupId,
-                                         false);                                                    // don't block
+    // step2: stop all sessions
+    ACE_ASSERT (inherited::configuration_->control);
+    inherited::configuration_->control->stop (false);
+
+//    // step3: stop event dispatch
+//    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
+//                                         inherited::configuration_->dispatchState->reactorGroupId,
+//                                         false);                                                    // don't block
   } // end IF
 }

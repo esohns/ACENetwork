@@ -791,11 +791,10 @@ namespace yy {
         {
           switch (yyn)
             {
-  case 2: // session: "handshake" messages
-                               { (yylhs.value.size) = 67 + (yystack_[0].value.size); // 19 + 8 + 20 + 20
-                                 ACE_ASSERT ((yystack_[1].value.handshake));
+  case 2: // $@1: %empty
+                               { ACE_ASSERT ((yystack_[0].value.handshake));
                                  struct BitTorrent_PeerHandShake* handshake_p =
-                                   const_cast<struct BitTorrent_PeerHandShake*> ((yystack_[1].value.handshake));
+                                   const_cast<struct BitTorrent_PeerHandShake*> ((yystack_[0].value.handshake));
                                  try {
                                    parser->handshake (handshake_p);
                                  } catch (...) {
@@ -804,15 +803,20 @@ namespace yy {
                                  } }
     break;
 
-  case 3: // messages: messages message
+  case 3: // session: "handshake" $@1 messages
+                               { //$$ = 67 + $2; // 19 + 8 + 20 + 20
+                                 YYACCEPT; }
+    break;
+
+  case 4: // messages: messages message
                                { (yylhs.value.size) = (yystack_[1].value.size) + (yystack_[0].value.size); }
     break;
 
-  case 4: // messages: %empty
+  case 5: // messages: %empty
                                { (yylhs.value.size) = 0; }
     break;
 
-  case 5: // message: "bitfield"
+  case 6: // message: "bitfield"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -825,7 +829,7 @@ namespace yy {
                                  } }
     break;
 
-  case 6: // message: "cancel"
+  case 7: // message: "cancel"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -838,7 +842,7 @@ namespace yy {
                                  } }
     break;
 
-  case 7: // message: "choke"
+  case 8: // message: "choke"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -851,7 +855,7 @@ namespace yy {
                                  } }
     break;
 
-  case 8: // message: "have"
+  case 9: // message: "have"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -864,7 +868,7 @@ namespace yy {
                                  } }
     break;
 
-  case 9: // message: "interested"
+  case 10: // message: "interested"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -877,7 +881,7 @@ namespace yy {
                                  } }
     break;
 
-  case 10: // message: "keep-alive"
+  case 11: // message: "keep-alive"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -890,7 +894,7 @@ namespace yy {
                                  } }
     break;
 
-  case 11: // message: "not_interested"
+  case 12: // message: "not_interested"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -903,7 +907,7 @@ namespace yy {
                                  } }
     break;
 
-  case 12: // message: "piece"
+  case 13: // message: "piece"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -916,7 +920,7 @@ namespace yy {
                                  } }
     break;
 
-  case 13: // message: "port"
+  case 14: // message: "port"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -929,7 +933,7 @@ namespace yy {
                                  } }
     break;
 
-  case 14: // message: "request"
+  case 15: // message: "request"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -942,7 +946,7 @@ namespace yy {
                                  } }
     break;
 
-  case 15: // message: "unchoke"
+  case 16: // message: "unchoke"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -955,9 +959,8 @@ namespace yy {
                                  } }
     break;
 
-  case 16: // message: "end_of_fragment"
-                               { (yylhs.value.size) = (yystack_[0].value.size);
-                                 YYACCEPT; }
+  case 17: // message: "end_of_fragment"
+                               { (yylhs.value.size) = (yystack_[0].value.size); }
     break;
 
 
@@ -1316,34 +1319,34 @@ namespace yy {
   const signed char
   BitTorrent_Parser::yypact_[] =
   {
-       9,    -5,    13,    -4,    -5,    -5,    -5,    -5,    -5,    -5,
-      -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5
+       9,    -5,    13,    -5,    -5,    -4,    -5,    -5,    -5,    -5,
+      -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5
   };
 
   const signed char
   BitTorrent_Parser::yydefact_[] =
   {
-       0,     4,     0,     2,     1,     5,     6,     7,     8,     9,
-      10,    11,    12,    13,    14,    15,    16,     3
+       0,     2,     0,     5,     1,     3,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,    15,    16,    17,     4
   };
 
   const signed char
   BitTorrent_Parser::yypgoto_[] =
   {
-      -5,    -5,    -5,    -5
+      -5,    -5,    -5,    -5,    -5
   };
 
   const signed char
   BitTorrent_Parser::yydefgoto_[] =
   {
-      -1,     2,     3,    17
+      -1,     2,     3,     5,    18
   };
 
   const signed char
   BitTorrent_Parser::yytable_[] =
   {
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,     1,     4
+       6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
+      16,    17,     1,     4
   };
 
   const signed char
@@ -1356,22 +1359,22 @@ namespace yy {
   const signed char
   BitTorrent_Parser::yystos_[] =
   {
-       0,     3,    17,    18,     0,     4,     5,     6,     7,     8,
-       9,    10,    11,    12,    13,    14,    15,    19
+       0,     3,    17,    18,     0,    19,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    20
   };
 
   const signed char
   BitTorrent_Parser::yyr1_[] =
   {
-       0,    16,    17,    18,    18,    19,    19,    19,    19,    19,
-      19,    19,    19,    19,    19,    19,    19
+       0,    16,    18,    17,    19,    19,    20,    20,    20,    20,
+      20,    20,    20,    20,    20,    20,    20,    20
   };
 
   const signed char
   BitTorrent_Parser::yyr2_[] =
   {
-       0,     2,     2,     2,     0,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1
+       0,     2,     0,     3,     2,     0,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1
   };
 
 
@@ -1385,7 +1388,7 @@ namespace yy {
   "\"bitfield\"", "\"cancel\"", "\"choke\"", "\"have\"", "\"interested\"",
   "\"keep-alive\"", "\"not_interested\"", "\"piece\"", "\"port\"",
   "\"request\"", "\"unchoke\"", "\"end_of_fragment\"", "$accept",
-  "session", "messages", "message", YY_NULLPTR
+  "session", "$@1", "messages", "message", YY_NULLPTR
   };
 #endif
 
@@ -1394,8 +1397,8 @@ namespace yy {
   const short
   BitTorrent_Parser::yyrline_[] =
   {
-       0,   223,   223,   233,   234,   236,   246,   256,   266,   276,
-     286,   296,   306,   316,   326,   336,   346
+       0,   223,   223,   223,   234,   235,   237,   247,   257,   267,
+     277,   287,   297,   307,   317,   327,   337,   347
   };
 
   void

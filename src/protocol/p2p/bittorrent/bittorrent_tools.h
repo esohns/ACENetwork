@@ -40,7 +40,7 @@ class BitTorrent_Tools
   static std::string HandShakeToString (const struct BitTorrent_PeerHandShake&);
   static std::string RecordToString (const struct BitTorrent_PeerRecord&);
 
-  static std::string TypeToString (enum BitTorrent_MessageType&);
+  static std::string TypeToString (const enum BitTorrent_MessageType&);
 
   // *NOTE*: this returns the 'info_hash' tracker HTTP request value
   static std::string MetaInfoToInfoHash (const Bencoding_Dictionary_t&); // metainfo

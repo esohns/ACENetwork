@@ -129,7 +129,7 @@ TRACKER_SCRAPE_FLAGS_KEY          (min_request_interval)
 TRACKER_SCRAPE_KEY                (failure reason|files|flags)
 
 /* version 1.0 of the BitTorrent protocol */
-PEER_HANDSHAKE_PREFIX             "\x13BitTorrent\x20protocol"
+PEER_HANDSHAKE_PREFIX             \x13BitTorrent\x20protocol
 PEER_HANDSHAKE_RESERVED           {OCTET}{8}
 /* "...sha1 hash of the bencoded form of the info value from the metainfo file.
  * (This is the same value which is announced as info_hash to the tracker, only
@@ -140,7 +140,7 @@ PEER_HANDSHAKE_HASH               {OCTET}{20}
 PEER_HANDSHAKE_PEER_ID            {OCTET}{20}
 /* PEER_HANDSHAKE                    {PEER_HANDSHAKE_PREFIX}{PEER_HANDSHAKE_RESERVED}{PEER_HANDSHAKE_HASH}{PEER_HANDSHAKE_PEER_ID} */
 
-TYPE                              [0-8]
+TYPE                              {OCTET}{1}
 BITFIELD_PAYLOAD                  {OCTET}{1}
 CANCEL_PAYLOAD                    {REQUEST_PAYLOAD}
 HAVE_PAYLOAD                      {INDEX}
@@ -185,19 +185,16 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
   //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
 
   unsigned int bitfield_counter = 0;
-
-  ACE_Message_Block* message_block_p = iparser_p->buffer ();
-  ACE_ASSERT (message_block_p);
 %}
 
 <INITIAL>{
-\x13BitTorrent\x20protocol { ACE_ASSERT (yyleng == 1 + 19);
+{PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 1 + 19);
                             iparser_p->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,
                                               struct BitTorrent_PeerHandShake ());
                             ACE_ASSERT (yylval->handshake);
-                            yylval->handshake->pstr.append (yytext + 1, 19);
+                            yylval->handshake->pstr.assign (yytext + 1, 19);
                             BEGIN (state_reserved); }
 } // end <INITIAL>
 <state_reserved>{
@@ -211,14 +208,14 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 {PEER_HANDSHAKE_HASH}     { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
                             iparser_p->offset (yyleng);
-                            yylval->handshake->info_hash.append (yytext, 20);
+                            yylval->handshake->info_hash.assign (yytext, 20);
                             BEGIN (state_peer_id); }
 } // end <state_hash>
 <state_peer_id>{
 {PEER_HANDSHAKE_PEER_ID}  { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
                             iparser_p->offset (yyleng);
-                            yylval->handshake->peer_id.append (yytext, 20);
+                            yylval->handshake->peer_id.assign (yytext, 20);
                             BEGIN (state_length);
                             return yy::BitTorrent_Parser::token::HANDSHAKE; }
 } // end <state_peer_id>
@@ -293,14 +290,12 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_bitfield_payload>{
 {BITFIELD_PAYLOAD}        { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (bitfield_counter);
-                            iparser_p->offset (yyleng);
+                            iparser_p->offset (bitfield_counter);
                             yylval->record->bitfield.push_back (*reinterpret_cast<ACE_UINT8*> (yytext));
-                            --bitfield_counter;
-                            if (!bitfield_counter)
-                            {
-                              BEGIN (state_length);
-                              return yy::BitTorrent_Parser::token::BITFIELD;
-                            } }
+                            for (unsigned int i = 0; i < (bitfield_counter - 1); ++i)
+                              yylval->record->bitfield.push_back (static_cast<ACE_UINT8> (yyinput (yyscanner)));
+                            BEGIN (state_length);
+                            return yy::BitTorrent_Parser::token::BITFIELD; }
 } // end <state_bitfield_payload>
 <state_request_payload>{
 {REQUEST_PAYLOAD}         { ACE_ASSERT (yyleng == 12);
@@ -345,77 +340,12 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_piece_payload>
 <state_piece>{
 {OCTET}{1}                { ACE_ASSERT (yyleng == 1);
-                            /* undo the effects of YY_DO_BEFORE_ACTION */
-                            *yy_cp = yyg->yy_hold_char;
-
-                            // (frame and) skip over piece data
-                            message_block_p->rd_ptr (iparser_p->offset ());
-
+                            iparser_p->offset (yylval->record->length - 9);
+                            // skip over piece data
                             unsigned int bytes_to_skip =
-                              yylval->record->length - 9;
-                            ACE_Message_Block* message_p, *message_2;
-                            unsigned int remainder = message_block_p->length ();
-                            if (bytes_to_skip <= remainder)
-                            { // the current fragment contains the whole piece
-                              // --> insert buffer
-                              message_p = message_block_p->duplicate ();
-                              ACE_ASSERT (message_p);
-                              message_2 = message_block_p->cont ();
-                              if (message_2)
-                                message_p->cont (message_2);
-                              message_block_p->cont (message_p);
-
-                              message_block_p->wr_ptr (message_block_p->rd_ptr () + bytes_to_skip);
-                              ACE_ASSERT (message_block_p->length () == bytes_to_skip);
-                              message_p->rd_ptr (bytes_to_skip);
-                              ACE_ASSERT (message_p->length () == remainder);
-                              // set bytes to skip by the scanner (see below)
-                              remainder = 0;
-                            } // end IF
-                            else
-                            {
-                              // skip over trailing piece data fragment(s)
-                              unsigned int skipped_bytes = 0;
-                              while (skipped_bytes <= bytes_to_skip)
-                              {
-                                if (!iparser_p->switchBuffer ())
-                                {
-                                  ACE_DEBUG ((LM_ERROR,
-                                              ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
-                                  yyterminate ();
-                                } // end IF
-                                message_block_p = iparser_p->buffer ();
-                                skipped_bytes += message_block_p->length ();
-                              } // end WHILE
-                              remainder = (skipped_bytes - bytes_to_skip);
-
-                              // this piece ends in the current fragment
-                              // --> insert buffer, adjust writer pointer,
-                              //     switch buffers one more time
-                              message_p = message_block_p->duplicate ();
-                              ACE_ASSERT (message_p);
-                              message_2 = message_block_p->cont ();
-                              if (message_2)
-                                message_p->cont (message_2);
-                              message_block_p->cont (message_p);
-                              message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
-                              ACE_ASSERT (message_block_p->length () == remainder);
-                            } // end ELSE
-                            if (!iparser_p->switchBuffer (true))
-                            {
-                              ACE_DEBUG ((LM_ERROR,
-                                          ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
-                              yyterminate ();
-                            } // end IF
-                            iparser_p->buffer ()->rd_ptr (remainder);
-                            iparser_p->offset (remainder);
-
-                            // gobble initial bytes (if any)
-                            char c = 0;
-                            for (unsigned int i = 0; i < remainder; ++i)
-                              c = yyinput (yyscanner);
-                            ACE_UNUSED_ARG (c);
-
+                              yylval->record->length - 9 - 1;
+                            for (unsigned int i = 0; i < bytes_to_skip; ++i)
+                              yyinput (yyscanner);
                             BEGIN (state_length);
                             return yy::BitTorrent_Parser::token::PIECE; }
 } // end <state_piece>

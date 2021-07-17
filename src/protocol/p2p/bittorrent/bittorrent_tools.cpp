@@ -61,11 +61,105 @@ BitTorrent_Tools::RecordToString (const struct BitTorrent_PeerRecord& peerRecord
   std::string result;
   std::ostringstream converter;
 
+  if (!peerRecord_in.length)
+    result += ACE_TEXT_ALWAYS_CHAR ("type: KEEP-ALIVE");
+  else
+  {
+    result += ACE_TEXT_ALWAYS_CHAR ("type: ");
+    result += BitTorrent_Tools::TypeToString (peerRecord_in.type);
+    switch (peerRecord_in.type)
+    {
+      case BITTORRENT_MESSAGETYPE_CHOKE:
+      case BITTORRENT_MESSAGETYPE_UNCHOKE:
+      case BITTORRENT_MESSAGETYPE_INTERESTED:
+      case BITTORRENT_MESSAGETYPE_NOT_INTERESTED:
+        break;
+      case BITTORRENT_MESSAGETYPE_HAVE:
+      {
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter << peerRecord_in.have;
+        result += converter.str ();
+        break;
+      }
+      case BITTORRENT_MESSAGETYPE_BITFIELD:
+      {
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        for (BitTorrent_MessagePayload_BitfieldIterator iterator = peerRecord_in.bitfield.begin ();
+             iterator != peerRecord_in.bitfield.end ();
+             ++iterator)
+        {
+          result += ((*iterator & 0x01) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x02) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x04) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x08) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x10) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x20) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x40) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x80) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ACE_TEXT_ALWAYS_CHAR (" ");
+        } // end FOR
+        break;
+      }
+      case BITTORRENT_MESSAGETYPE_REQUEST:
+      {
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter << peerRecord_in.request.index;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << peerRecord_in.request.begin;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << peerRecord_in.request.length;
+        result += converter.str ();
+        break;
+      }
+      case BITTORRENT_MESSAGETYPE_PIECE:
+      {
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter << peerRecord_in.piece.index;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << peerRecord_in.piece.begin;
+        break;
+      }
+      case BITTORRENT_MESSAGETYPE_CANCEL:
+      {
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter << peerRecord_in.cancel.index;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << peerRecord_in.cancel.begin;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR (" ");
+        converter.clear ();
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter << peerRecord_in.cancel.length;
+        result += converter.str ();
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), aborting\n"),
+                    peerRecord_in.type));
+        return result;
+      }
+    } // end SWITCH
+  } // end ELSE
+
   return result;
 }
 
 std::string
-BitTorrent_Tools::TypeToString (enum BitTorrent_MessageType& type_in)
+BitTorrent_Tools::TypeToString (const enum BitTorrent_MessageType& type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::TypeToString"));
 
@@ -95,7 +189,7 @@ BitTorrent_Tools::TypeToString (enum BitTorrent_MessageType& type_in)
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown method (was: %d), aborting\n"),
+                  ACE_TEXT ("invalid/unknown type (was: %d), aborting\n"),
                   type_in));
       break;
     }

@@ -639,6 +639,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   inherited::disconnect (id_in);
 
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: peer connection closed (id was: %d)\n"),
+              ACE_TEXT (ACE::basename (metaInfoFileName_.c_str (),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              id_in));
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
 
     BitTorrent_PeerStatusIterator_t iterator =
@@ -1167,8 +1173,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: new tracker connection (id: %d)\n"),
-              ACE::basename (metaInfoFileName_.c_str (),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE_TEXT (ACE::basename (metaInfoFileName_.c_str (),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
               id_in));
 }
 template <typename PeerHandlerConfigurationType,
@@ -1231,8 +1237,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: tracker connection closed (id was: %d)\n"),
-              ACE::basename (metaInfoFileName_.c_str (),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE_TEXT (ACE::basename (metaInfoFileName_.c_str (),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
               id_in));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
@@ -1592,7 +1598,9 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
               ACE_TEXT (BitTorrent_Tools::HandShakeToString (record_in).c_str ())));
-#endif
+#endif // _DEBUG
+
+  // *TODO*: compare handshake peer id with tracker peer id
 }
 template <typename PeerHandlerConfigurationType,
           typename TrackerHandlerConfigurationType,
@@ -1655,10 +1663,30 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
               ACE_TEXT (BitTorrent_Tools::RecordToString (record_in).c_str ())));
-#endif
+#endif // _DEBUG
 
+  if (!record_in.length)
+    return;
   switch (record_in.type)
   {
+    case BITTORRENT_MESSAGETYPE_UNCHOKE:
+    {
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+
+      break;
+    }
+    case BITTORRENT_MESSAGETYPE_HAVE:
+    {
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+
+      break;
+    }
+    case BITTORRENT_MESSAGETYPE_BITFIELD:
+    {
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+
+      break;
+    }
     case BITTORRENT_MESSAGETYPE_PIECE:
     {
       // sanity check(s)

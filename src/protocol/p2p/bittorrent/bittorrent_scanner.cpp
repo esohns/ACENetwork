@@ -1114,66 +1114,66 @@ static const flex_int32_t yy_nxt[][256] =
     },
 
     {
-       27,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
+       27,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
 
-       28,   28,   28,   28,   28,   28,   28,   28,   34,   34,
-       34,   34,   34,   34,   34,   34,   34,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
 
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
 
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34
     },
 
     {
-       27,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   34,   34,
-       34,   34,   34,   34,   34,   34,   34,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
+       27,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
 
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
 
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   28,   28,   28,   28,   28
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34,   34,   34,   34,   34,
+       34,   34,   34,   34,   34,   34
     },
 
     {
@@ -5281,12 +5281,12 @@ static const flex_int32_t yy_accept[141] =
 /* Table of booleans, true if rule could match eol. */
 static const flex_int32_t yy_rule_can_match_eol[15] =
     {   0,
-0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0,     };
+0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,     };
 
 static const yy_state_type yy_NUL_trans[141] =
     {   0,
        28,   28,   30,   30,   31,   31,   32,   32,   33,   33,
-       28,   28,   35,   35,   36,   36,   37,   37,   38,   38,
+       34,   34,   35,   35,   36,   36,   37,   37,   38,   38,
        39,   39,   28,   28,   40,   40,    0,    0,    0,   42,
        43,   44,   45,    0,    0,   46,   47,    0,   48,   49,
         0,   51,   52,   53,   54,   55,   56,   57,   58,    0,
@@ -5304,8 +5304,8 @@ static const yy_state_type yy_NUL_trans[141] =
 
 static const flex_int32_t yy_rule_linenum[14] =
     {   0,
-      195,  205,  212,  219,  227,  241,  286,  295,  307,  322,
-      337,  348,  424
+      192,  202,  209,  216,  224,  238,  283,  292,  302,  317,
+      332,  343,  354
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -5819,9 +5819,6 @@ YY_DECL
 
   unsigned int bitfield_counter = 0;
 
-  ACE_Message_Block* message_block_p = iparser_p->buffer ();
-  ACE_ASSERT (message_block_p);
-
 
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
@@ -5912,7 +5909,7 @@ YY_RULE_SETUP
                             ACE_NEW_NORETURN (yylval->handshake,
                                               struct BitTorrent_PeerHandShake ());
                             ACE_ASSERT (yylval->handshake);
-                            yylval->handshake->pstr.append (yytext + 1, 19);
+                            yylval->handshake->pstr.assign (yytext + 1, 19);
                             BEGIN (state_reserved); }
 	YY_BREAK
 // end <INITIAL>
@@ -5934,7 +5931,7 @@ YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
                             iparser_p->offset (yyleng);
-                            yylval->handshake->info_hash.append (yytext, 20);
+                            yylval->handshake->info_hash.assign (yytext, 20);
                             BEGIN (state_peer_id); }
 	YY_BREAK
 // end <state_hash>
@@ -5945,7 +5942,7 @@ YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
                             iparser_p->offset (yyleng);
-                            yylval->handshake->peer_id.append (yytext, 20);
+                            yylval->handshake->peer_id.assign (yytext, 20);
                             BEGIN (state_length);
                             return yy::BitTorrent_Parser::token::HANDSHAKE; }
 	YY_BREAK
@@ -5970,6 +5967,7 @@ YY_RULE_SETUP
 // end <state_length>
 
 case 6:
+/* rule 6 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                             iparser_p->offset (yyleng);
@@ -6035,14 +6033,12 @@ case 8:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (bitfield_counter);
-                            iparser_p->offset (yyleng);
+                            iparser_p->offset (bitfield_counter);
                             yylval->record->bitfield.push_back (*reinterpret_cast<ACE_UINT8*> (yytext));
-                            --bitfield_counter;
-                            if (!bitfield_counter)
-                            {
-                              BEGIN (state_length);
-                              return yy::BitTorrent_Parser::token::BITFIELD;
-                            } }
+                            for (unsigned int i = 0; i < (bitfield_counter - 1); ++i)
+                              yylval->record->bitfield.push_back (static_cast<ACE_UINT8> (yyinput (yyscanner)));
+                            BEGIN (state_length);
+                            return yy::BitTorrent_Parser::token::BITFIELD; }
 	YY_BREAK
 // end <state_bitfield_payload>
 
@@ -6103,77 +6099,12 @@ case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                            /* undo the effects of YY_DO_BEFORE_ACTION */
-                            *yy_cp = yyg->yy_hold_char;
-
-                            // (frame and) skip over piece data
-                            message_block_p->rd_ptr (iparser_p->offset ());
-
+                            iparser_p->offset (yylval->record->length - 9);
+                            // skip over piece data
                             unsigned int bytes_to_skip =
-                              yylval->record->length - 9;
-                            ACE_Message_Block* message_p, *message_2;
-                            unsigned int remainder = message_block_p->length ();
-                            if (bytes_to_skip <= remainder)
-                            { // the current fragment contains the whole piece
-                              // --> insert buffer
-                              message_p = message_block_p->duplicate ();
-                              ACE_ASSERT (message_p);
-                              message_2 = message_block_p->cont ();
-                              if (message_2)
-                                message_p->cont (message_2);
-                              message_block_p->cont (message_p);
-
-                              message_block_p->wr_ptr (message_block_p->rd_ptr () + bytes_to_skip);
-                              ACE_ASSERT (message_block_p->length () == bytes_to_skip);
-                              message_p->rd_ptr (bytes_to_skip);
-                              ACE_ASSERT (message_p->length () == remainder);
-                              // set bytes to skip by the scanner (see below)
-                              remainder = 0;
-                            } // end IF
-                            else
-                            {
-                              // skip over trailing piece data fragment(s)
-                              unsigned int skipped_bytes = 0;
-                              while (skipped_bytes <= bytes_to_skip)
-                              {
-                                if (!iparser_p->switchBuffer ())
-                                {
-                                  ACE_DEBUG ((LM_ERROR,
-                                              ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
-                                  yyterminate ();
-                                } // end IF
-                                message_block_p = iparser_p->buffer ();
-                                skipped_bytes += message_block_p->length ();
-                              } // end WHILE
-                              remainder = (skipped_bytes - bytes_to_skip);
-
-                              // this piece ends in the current fragment
-                              // --> insert buffer, adjust writer pointer,
-                              //     switch buffers one more time
-                              message_p = message_block_p->duplicate ();
-                              ACE_ASSERT (message_p);
-                              message_2 = message_block_p->cont ();
-                              if (message_2)
-                                message_p->cont (message_2);
-                              message_block_p->cont (message_p);
-                              message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
-                              ACE_ASSERT (message_block_p->length () == remainder);
-                            } // end ELSE
-                            if (!iparser_p->switchBuffer (true))
-                            {
-                              ACE_DEBUG ((LM_ERROR,
-                                          ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
-                              yyterminate ();
-                            } // end IF
-                            iparser_p->buffer ()->rd_ptr (remainder);
-                            iparser_p->offset (remainder);
-
-                            // gobble initial bytes (if any)
-                            char c = 0;
-                            for (unsigned int i = 0; i < remainder; ++i)
-                              c = yyinput (yyscanner);
-                            ACE_UNUSED_ARG (c);
-
+                              yylval->record->length - 9 - 1;
+                            for (unsigned int i = 0; i < bytes_to_skip; ++i)
+                              yyinput (yyscanner);
                             BEGIN (state_length);
                             return yy::BitTorrent_Parser::token::PIECE; }
 	YY_BREAK

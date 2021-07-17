@@ -652,6 +652,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
       ((configuration_in.dispatchConfiguration.numberOfReactorThreads > 0) ? COMMON_EVENT_DISPATCH_REACTOR
                                                                            : COMMON_EVENT_DISPATCH_PROACTOR);
 
+  configuration_in.signalHandlerConfiguration.control = &bittorrent_control;
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
@@ -781,7 +782,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
     Common_Tools::finalizeEventDispatch (event_dispatch_state_s.reactorGroupId,
                                          event_dispatch_state_s.proactorGroupId,
-                                         false);
+                                         true);
   } // end ELSE
 
   ACE_DEBUG ((LM_DEBUG,
@@ -791,11 +792,15 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 clean:
   peer_connection_manager_p->wait ();
   tracker_connection_manager_p->wait ();
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   result = thread_manager_p->wait_grp (group_id_2);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
                 group_id_2));
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 }
 
 void

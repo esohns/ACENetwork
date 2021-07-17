@@ -453,13 +453,12 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   // sanity check(s)
   ACE_ASSERT (iterator == sessionData_.end ());
   ACE_ASSERT (session_);
-  ACE_ASSERT (sessionData_in.connection);
 
   sessionData_.insert (std::make_pair (sessionId_in,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
-    session_->trackerConnect (sessionData_in.connection->id ());
+    session_->trackerConnect (sessionData_in.connectionStates.begin ()->first);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerConnect(), continuing\n")));

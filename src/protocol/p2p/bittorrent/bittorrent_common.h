@@ -29,6 +29,7 @@
 #include "ace/config-lite.h"
 #include "ace/Assert.h"
 #include "ace/Basic_Types.h"
+#include "ace/OS.h"
 
 //#include "common_statistic_handler.h"
 
@@ -74,11 +75,11 @@ struct BitTorrent_PeerHandShake
 {
   BitTorrent_PeerHandShake ()
    : pstr (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_PEER_HANDSHAKE_PSTR_STRING))
-//   , reserved ()
+   , reserved ()
    , info_hash ()
    , peer_id ()
   {
-//    ACE_OS::memset (reserved, 0, sizeof (ACE_UINT8[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE]));
+    ACE_OS::memset (&reserved, 0, sizeof (ACE_UINT8[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE]));
   }
 
   std::string pstr;
@@ -88,6 +89,7 @@ struct BitTorrent_PeerHandShake
 };
 
 typedef std::vector<ACE_UINT8> BitTorrent_MessagePayload_Bitfield;
+typedef BitTorrent_MessagePayload_Bitfield::const_iterator BitTorrent_MessagePayload_BitfieldIterator;
 struct BitTorrent_MessagePayload_Cancel
 {
   unsigned int index;
@@ -113,8 +115,9 @@ struct BitTorrent_PeerRecord
   BitTorrent_PeerRecord ()
    : length (0)
    , type (BITTORRENT_MESSAGETYPE_INVALID)
+   , bitfield ()
   {}
- inline void operator+= (struct BitTorrent_PeerRecord rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+  inline void operator+= (struct BitTorrent_PeerRecord rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   unsigned int                               length;
   enum BitTorrent_MessageType                type;

@@ -51,7 +51,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
  : inherited (stream_in)
  , inherited2 ()
  , headFragment_ (NULL)
- , crunch_ (true) // strip protocol data ?
+ , headFragmentBaseOffset_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::BitTorrent_Module_PeerParser_T"));
 
@@ -110,16 +110,14 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
 
-    crunch_ = true;
-
     if (headFragment_)
     {
       headFragment_->release ();
       headFragment_ = NULL;
     } // end IF
+    headFragmentBaseOffset_ = 0;
   } // end IF
 
-//  crunch_ = configuration_in.crunchMessages;
   ACE_ASSERT (configuration_in.parserConfiguration);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
       inherited::msg_queue_;
@@ -169,7 +167,32 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
 
   { //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
     if (!headFragment_)
+    {
       headFragment_ = message_inout;
+
+      DATA_T* data_p = NULL;
+      ACE_NEW_NORETURN (data_p,
+                        DATA_T ());
+      if (!data_p)
+      {
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate memory, returning\n")));
+        goto error;
+      } // end IF
+      DATA_CONTAINER_T* data_container_p = NULL;
+      ACE_NEW_NORETURN (data_container_p,
+                        DATA_CONTAINER_T (data_p,
+                                          true));
+      if (!data_container_p)
+      {
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+        goto error;
+      } // end IF
+      headFragment_->initialize (data_container_p,
+                                 headFragment_->sessionId (),
+                                 NULL);
+    } // end IF
     else
     {
       for (message_p = headFragment_;
@@ -332,36 +355,191 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   data_r.peerRecord = record_inout;
   record_inout = NULL;
 
-  // debug info
+#if defined (_DEBUG)
   if (inherited2::configuration_->debugParser)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (BitTorrent_Tools::RecordToString (*data_r.peerRecord).c_str ())));
+#endif // _DEBUG
 
-  // set new head fragment ?
+  // set new head fragment
+  unsigned int message_bytes = 0;
+  if (!data_r.peerRecord->length)
+    message_bytes = 4;
+  else
+  {
+    switch (data_r.peerRecord->type)
+    {
+      case BITTORRENT_MESSAGETYPE_CHOKE:
+      case BITTORRENT_MESSAGETYPE_UNCHOKE:
+      case BITTORRENT_MESSAGETYPE_INTERESTED:
+      case BITTORRENT_MESSAGETYPE_NOT_INTERESTED:
+        message_bytes = 4 + 1; break;
+      case BITTORRENT_MESSAGETYPE_HAVE:
+        message_bytes = 4 + 1 + 4; break;
+      case BITTORRENT_MESSAGETYPE_BITFIELD:
+        message_bytes = 4 + 1 + (data_r.peerRecord->length - 1); break;
+      case BITTORRENT_MESSAGETYPE_REQUEST:
+        message_bytes = 4 + 1 + 4 + 4 + 4; break;
+      case BITTORRENT_MESSAGETYPE_PIECE:
+        message_bytes = 4 + 1 + 4 + 4 + (data_r.peerRecord->length - 9); break;
+      case BITTORRENT_MESSAGETYPE_CANCEL:
+        message_bytes = 4 + 1 + 4 + 4 + 4; break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), aborting\n"),
+                    data_r.peerRecord->type));
+        break;
+      }
+    } // end SWITCH
+  } // end ELSE
+  ACE_ASSERT (message_bytes);
+
   ACE_Message_Block* message_block_p = headFragment_;
-  do
-  {
-    if (!message_block_p->cont ()) break;
-    message_block_p = message_block_p->cont ();
-  } while (true);
-  if (message_block_p != inherited2::fragment_)
-  {
-    message_block_p = headFragment_;
-    // *IMPORTANT NOTE*: the fragment has already been unlinked in the previous
-    //                   call to switchBuffer()
-    headFragment_ = dynamic_cast<DataMessageType*> (inherited2::fragment_);
-    ACE_ASSERT (headFragment_);
+  unsigned int skipped_bytes = 0;
+  if (data_r.peerRecord->type == BITTORRENT_MESSAGETYPE_PIECE)
+  { // keep only block data
+    unsigned int header_bytes = 4 + 1 + 4 + 4;
+    do
+    { ACE_ASSERT (message_block_p);
+      if (message_block_p->length () >= header_bytes)
+      {
+        if (message_block_p->length () == header_bytes)
+        {
+          message_block_p->rd_ptr (header_bytes);
+          message_block_p = message_block_p->cont ();
+        } // end IF
+        else
+          message_block_p->rd_ptr (header_bytes);
+        break;
+      } // end IF
+      else
+      {
+        header_bytes -= message_block_p->length ();
+        message_block_p->rd_ptr (message_block_p->length ());
+      } // end ELSE
+      message_block_p = message_block_p->cont ();
+    } while (true);
+    ACE_ASSERT (message_block_p);
+    message_bytes -= 4 + 1 + 4 + 4;
+    do
+    {
+      skipped_bytes += message_block_p->length ();
+      if (skipped_bytes >= message_bytes)
+      {
+        if (skipped_bytes == message_bytes)
+        {
+          if (message_block_p->cont ())
+          {
+            ACE_Message_Block* message_block_2 = headFragment_;
+            headFragment_ = dynamic_cast<DataMessageType*> (message_block_p->cont ());
+            ACE_ASSERT (headFragment_);
+            message_block_p->cont (NULL);
+            message_block_p = message_block_2;
+          } // end IF
+          else
+          {
+            message_block_p = headFragment_;
+            headFragment_ = NULL;
+          } // end ELSE
+        } // end IF
+        else
+        {
+          unsigned int remainder = skipped_bytes - message_bytes;
+          ACE_Message_Block* message_block_2 = message_block_p->duplicate ();
+          ACE_ASSERT (message_block_2);
+          ACE_Message_Block* message_block_3 = message_block_p->cont ();
+          if (message_block_3)
+            message_block_2->cont (message_block_3);
+          message_block_p->cont (NULL);
+          message_block_p->wr_ptr (message_block_p->rd_ptr () + (message_block_p->length () - remainder));
+          message_block_2->rd_ptr (message_block_2->length () - remainder);
+          message_block_p = headFragment_;
+          headFragment_ = dynamic_cast<DataMessageType*> (message_block_2);
+          ACE_ASSERT (headFragment_);
+        } // end ELSE
+        break;
+      } // end IF
+      message_block_p = message_block_p->cont ();
+    } while (true);
+    ACE_ASSERT (message_block_p->total_length () == (data_r.peerRecord->length - 9));
   } // end IF
   else
   {
-    message_block_p = headFragment_;
-    headFragment_ = NULL;
+    do
+    {
+      skipped_bytes += message_block_p->length ();
+      if (skipped_bytes >= message_bytes)
+      {
+        unsigned int remainder = skipped_bytes - message_bytes;
+        if (remainder)
+        {
+          ACE_Message_Block* message_block_2 = message_block_p->duplicate ();
+          ACE_ASSERT (message_block_2);
+          ACE_Message_Block* message_block_3 = message_block_p->cont ();
+          if (message_block_3)
+            message_block_2->cont (message_block_3);
+          message_block_p->cont (NULL);
+          message_block_p->wr_ptr (message_block_p->rd_ptr () + (message_block_p->length () - remainder));
+          message_block_2->rd_ptr (message_block_2->length () - remainder);
+          message_block_p = headFragment_;
+          headFragment_ = dynamic_cast<DataMessageType*> (message_block_2);
+          ACE_ASSERT (headFragment_);
+        } // end IF
+        else
+        {
+          if (message_block_p->cont ())
+          {
+            ACE_Message_Block* message_block_2 = headFragment_;
+            headFragment_ = dynamic_cast<DataMessageType*> (message_block_p->cont ());
+            ACE_ASSERT (headFragment_);
+            message_block_p->cont (NULL);
+            message_block_p = message_block_2;
+          } // end IF
+          else
+          {
+            message_block_p = headFragment_;
+            headFragment_ = NULL;
+          } // end ELSE
+        } // end ELSE
+        break;
+      } // end IF
+      message_block_p = message_block_p->cont ();
+      ACE_ASSERT (message_block_p);
+    } while (true);
+    ACE_ASSERT (message_block_p->total_length () == message_bytes);
   } // end ELSE
+
+  if (headFragment_)
+  {
+    DATA_T* data_p = NULL;
+    ACE_NEW_NORETURN (data_p,
+                      DATA_T ());
+    if (!data_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory, continuing\n")));
+      return;
+    } // end IF
+    DATA_CONTAINER_T* data_container_p = NULL;
+    ACE_NEW_NORETURN (data_container_p,
+                      DATA_CONTAINER_T (data_p,
+                                        true));
+    if (!data_container_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", continuing\n")));
+      return;
+    } // end IF
+    headFragment_->initialize (data_container_p,
+                               headFragment_->sessionId (),
+                               NULL);
+  } // end IF
 
   // make sure the whole fragment chain references the same data record
   DataMessageType* message_p =
-      dynamic_cast<DataMessageType*> (headFragment_->cont ());
+      dynamic_cast<DataMessageType*> (message_block_p->cont ());
   while (message_p)
   {
     data_container_r.increase ();

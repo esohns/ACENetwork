@@ -220,8 +220,7 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 
 %%
 %start    session              ;
-session:  "handshake" messages { $$ = 67 + $2; // 19 + 8 + 20 + 20
-                                 ACE_ASSERT ($1);
+session:  "handshake"          { ACE_ASSERT ($1);
                                  struct BitTorrent_PeerHandShake* handshake_p =
                                    const_cast<struct BitTorrent_PeerHandShake*> ($1);
                                  try {
@@ -229,9 +228,11 @@ session:  "handshake" messages { $$ = 67 + $2; // 19 + 8 + 20 + 20
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::handshake(), continuing\n")));
-                                 } };
-messages: messages message     { $$ = $1 + $2; };
-          |                    { $$ = 0; };
+                                 } }
+          messages             { //$$ = 67 + $2; // 19 + 8 + 20 + 20
+                                 YYACCEPT; }
+messages: messages message     { $$ = $1 + $2; }
+          |                    { $$ = 0; }
 /*          | %empty             { $$ = 0; }; */
 message:  "bitfield"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
@@ -242,7 +243,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "cancel"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -252,7 +253,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "choke"            { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -262,7 +263,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "have"             { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -272,7 +273,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "interested"       { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -282,7 +283,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "keep-alive"       { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -292,7 +293,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "not_interested"   { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -302,7 +303,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "piece"            { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -312,7 +313,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "port"             { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -322,7 +323,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "request"          { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -332,7 +333,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
+                                 } }
           | "unchoke"          { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_PeerRecord* record_p =
@@ -342,9 +343,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } };
-          | "end_of_fragment"  { $$ = $1;
-                                 YYACCEPT; };
+                                 } }
+          | "end_of_fragment"  { $$ = $1; }
 %%
 
 void
