@@ -937,7 +937,7 @@ ACE_TMAIN (int argc_in,
     WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   struct WLANMonitor_UI_GTK_State& state_r =
-    const_cast<struct WLANMonitor_UI_GTK_State&> (gtk_manager_p->getR_2 ());
+    const_cast<struct WLANMonitor_UI_GTK_State&> (gtk_manager_p->getR ());
   logstack_p = &state_r.logStack;
   lock_p = &state_r.logStackLock;
 #endif // GTK_USE

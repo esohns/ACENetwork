@@ -21,6 +21,8 @@
 #ifndef NET_ILISTENER_H
 #define NET_ILISTENER_H
 
+#include "ace/Synch_Traits.h"
+
 #include "common_idumpstate.h"
 #include "common_iget.h"
 #include "common_iinitialize.h"
@@ -31,7 +33,7 @@ template <typename ConfigurationType> // connection-
 class Net_IListener_T
  : public Common_ITask_T<ACE_MT_SYNCH,
                          Common_ILock_T<ACE_MT_SYNCH> >
- , public Common_IGetR_2_T<ConfigurationType>
+ , public Common_IGetR_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_IDumpState
 {

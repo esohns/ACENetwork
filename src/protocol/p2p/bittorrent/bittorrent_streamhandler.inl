@@ -97,21 +97,15 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::start"));
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+    // sanity check(s)
+    ACE_ASSERT (sessionData_.find (sessionId_in) == sessionData_.end ());
+    sessionData_.insert (std::make_pair (sessionId_in,
+                                         &const_cast<SessionDataType&> (sessionData_in)));
+  } // end lock scope
 
   // sanity check(s)
   ACE_ASSERT (session_);
-//  ACE_ASSERT (sessionData_in.connection);
-  // *NOTE*: on Linux systems, file descriptors are reused immediately, so
-  //         collisions can occur here (i.e. the original connection may not
-  //         have finalized at this stage
-  if (iterator != sessionData_.end ())
-    sessionData_.erase (iterator);
-
-  sessionData_.insert (std::make_pair (sessionId_in,
-                                       &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
     session_->connect (sessionData_in.connectionStates.begin ()->second->handle);
@@ -128,7 +122,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     //  CBData_->progressData.transferred = 0;
       state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
@@ -198,18 +192,19 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::end"));
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+    SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
+    ACE_ASSERT (iterator != sessionData_.end ());
+    ACE_ASSERT ((*iterator).second);
+    handle_h = (*iterator).second->connectionStates.begin ()->second->handle;
+    sessionData_.erase (iterator);
+  } // end lock scope
 
   // sanity check(s)
   ACE_ASSERT (session_);
-  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-  if (iterator != sessionData_.end ())
-  { //ACE_ASSERT ((*iterator).second->connection);
-    //handle_h = (*iterator).second->connection->id ();
-    sessionData_.erase (iterator);
-  } // end IF
+  ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
 
   try {
     session_->disconnect (handle_h);
@@ -226,7 +221,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
 
@@ -267,17 +262,39 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::notify"));
 
-  ACE_UNUSED_ARG (sessionId_in);
-
   // sanity check(s)
   ACE_ASSERT (session_);
+
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+
+  // notify handshake ?
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+    SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
+    ACE_ASSERT (iterator != sessionData_.end ());
+    ACE_ASSERT ((*iterator).second);
+    handle_h = (*iterator).second->connectionStates.begin ()->second->handle;
+    ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
+    if (!(*iterator).second->forwardedHandshake)
+    {
+      (*iterator).second->forwardedHandshake = true;
+      ACE_ASSERT ((*iterator).second->handshake);
+      try {
+        session_->notify (handle_h,
+                          *(*iterator).second->handshake);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Net_ISession_T::notify(), continuing\n")));
+      }
+    } // end IF
+  } // end lock scope
 
   const typename BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
                                       UserDataType>::DATA_T& data_container_r =
     message_in.getR ();
   const struct BitTorrent_PeerRecord& record_r = data_container_r.getR ();
   try {
-    session_->notify (record_r,
+    session_->notify (handle_h,
+                      record_r,
                       (record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
                                                                                                          UserDataType>&> (message_in)
                                                                       : NULL);
@@ -294,7 +311,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
       CBData_->progressData.transferred += message_in.total_length ();
@@ -347,7 +364,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
       enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
@@ -472,7 +489,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       //  CBData_->progressData.transferred = 0;
       state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
@@ -567,7 +584,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
 
@@ -664,7 +681,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       CBData_->progressData.transferred += message_in.total_length ();
       state_r.eventStack.push (COMMON_UI_EVENT_DATA);
@@ -709,7 +726,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
       enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;

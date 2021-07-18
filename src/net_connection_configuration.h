@@ -234,7 +234,7 @@ class Net_ConnectionConfigurationBase_T
  public:
   Net_ConnectionConfigurationBase_T ()
    : Net_SocketConfiguration_T<TransportLayerType_e> ()
-   , dispatch (NET_EVENT_DEFAULT_DISPATCH)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , generateUniqueIOModuleNames (false)
    , messageAllocator (NULL)
    , timerManager (NULL)

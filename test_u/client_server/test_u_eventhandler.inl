@@ -71,7 +71,7 @@ Test_U_EventHandler_T<CallbackDataType>::start (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -122,7 +122,7 @@ Test_U_EventHandler_T<CallbackDataType>::end (Stream_SessionId_t sessionId_in)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -163,7 +163,7 @@ Test_U_EventHandler_T<CallbackDataType>::notify (Stream_SessionId_t sessionId_in
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -190,7 +190,7 @@ Test_U_EventHandler_T<CallbackDataType>::notify (Stream_SessionId_t sessionId_in
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   const Test_U_StreamSessionData_t& session_data_container_r =

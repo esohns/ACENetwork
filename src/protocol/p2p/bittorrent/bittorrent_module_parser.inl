@@ -589,14 +589,16 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (BitTorrent_Tools::HandShakeToString (*handshake_inout).c_str ())));
 
-  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, const_cast<ACE_MT_SYNCH::MUTEX&> (inherited::sessionData_->getR_2 ()));
+    typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
-  // sanity check(s)
-  ACE_ASSERT (!session_data_r.handshake);
+    // sanity check(s)
+    ACE_ASSERT (!session_data_r.handshake);
 
-  // *TODO*: remove type inference
-  session_data_r.handshake = handshake_inout;
+    // *TODO*: remove type inference
+    session_data_r.handshake = handshake_inout;
+  } // end lock scope
 
   handshake_inout = NULL;
 }

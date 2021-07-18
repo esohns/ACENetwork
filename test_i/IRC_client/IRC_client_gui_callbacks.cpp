@@ -77,7 +77,7 @@ connection_setup_function (void* arg_in)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   guint context_id = 0;
   GtkProgressBar* progress_bar_p = NULL;
@@ -481,7 +481,7 @@ idle_add_channel_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   GtkWindow* window_p = NULL;
   GtkHBox* hbox_p = NULL;
@@ -641,7 +641,7 @@ idle_add_connection_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   GtkWindow* window_p = NULL;
   GtkHBox* hbox_p = NULL;
@@ -775,7 +775,7 @@ idle_finalize_UI_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // step1: remove any remaining event sources
   // *NOTE*: should be 2: 'this', and idle_update_display_cb...
@@ -809,7 +809,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1033,7 +1033,7 @@ idle_remove_channel_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   GtkNotebook* notebook_p = NULL;
   Common_UI_GTK_BuildersIterator_t iterator_2;
@@ -1131,7 +1131,7 @@ idle_remove_connection_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   GtkNotebook* notebook_p = NULL;
   GtkVBox* vbox_p = NULL;
@@ -1222,7 +1222,7 @@ idle_update_channel_modes_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   GtkToggleButton* toggle_button_p = NULL;
   GtkHBox* hbox_p = NULL;
@@ -1338,7 +1338,7 @@ idle_update_display_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
   if (data_p->connections.empty ())
@@ -1346,7 +1346,7 @@ idle_update_display_cb (gpointer userData_in)
 
   // step0: retrieve active connection
   IRC_Client_GUI_Connection* connection_p =
-    IRC_Client_UI_Tools::current (const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ()),
+    IRC_Client_UI_Tools::current (const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ()),
                                   data_p->connections);
   if (!connection_p) // *NOTE*: most probable cause: no server page/corresponding connection (yet)
     return G_SOURCE_CONTINUE;
@@ -1381,7 +1381,7 @@ idle_update_progress_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   int result = -1;
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -1482,7 +1482,7 @@ idle_update_user_modes_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   GtkToggleButton* toggle_button_p = NULL;
   Common_UI_GTK_BuildersIterator_t iterator;
@@ -1583,7 +1583,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1619,7 +1619,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   int result = -1;
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -1989,7 +1989,7 @@ entry_send_changed_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -2026,7 +2026,7 @@ entry_send_kb_focused_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -2061,7 +2061,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
@@ -2251,7 +2251,7 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   try {
     data_p->controller->quit (ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_LEAVE_REASON));
@@ -2298,7 +2298,7 @@ nickname_entry_kb_focused_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -2338,7 +2338,7 @@ nickname_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -2420,7 +2420,7 @@ usersbox_changed_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // step1: retrieve active users entry
   // retrieve server tab users combobox handle
@@ -2535,7 +2535,7 @@ channel_entry_kb_focused_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -2576,7 +2576,7 @@ join_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -2768,7 +2768,7 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   int result = -1;
   IRC_UserMode mode = USERMODE_INVALID;
@@ -2898,7 +2898,7 @@ switch_channel_cb (GtkNotebook* notebook_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
@@ -2931,7 +2931,7 @@ action_away_cb (GtkAction* action_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
@@ -3053,7 +3053,7 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   int result = -1;
   IRC_ChannelMode mode           = CHANNELMODE_INVALID;
@@ -3331,7 +3331,7 @@ topic_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // *NOTE*: see also: IRC_Client_MessageHandler ctor
   std::string page_tab_label_string;
@@ -3468,7 +3468,7 @@ members_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, TRUE);
 
@@ -3737,7 +3737,7 @@ action_invite_cb (GtkAction* action_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (data_p->builderLabel);

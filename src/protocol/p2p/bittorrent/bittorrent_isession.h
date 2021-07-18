@@ -68,15 +68,17 @@ class BitTorrent_ISession_T
 
   ////////////////////////////////////////
   // callbacks
-  // *TODO*: remove ASAP
+  // *TODO*: make these 'private'
   virtual void trackerConnect (Net_ConnectionId_t) = 0;    // connection id
   virtual void trackerDisconnect (Net_ConnectionId_t) = 0; // connection id
 
   //--------------------------------------
 
   virtual void notify (const Bencoding_Dictionary_t&) = 0; // tracker (scrape-/)response record
-  virtual void notify (const struct BitTorrent_PeerHandShake&) = 0; // peer handshake record
-  virtual void notify (const struct BitTorrent_PeerRecord&, // message record
+  virtual void notify (Net_ConnectionId_t,                          // connection id
+                       const struct BitTorrent_PeerHandShake&) = 0; // peer handshake record
+  virtual void notify (Net_ConnectionId_t,                  // connection id
+                       const struct BitTorrent_PeerRecord&, // message record
                        ACE_Message_Block* = NULL) = 0;      // data piece (if applicable)
 };
 

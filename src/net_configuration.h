@@ -71,7 +71,7 @@ struct Net_UserData;
 struct Net_SessionConfiguration
 {
   Net_SessionConfiguration ()
-   : dispatch (NET_EVENT_DEFAULT_DISPATCH)
+   : dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , parserConfiguration (NULL)
   {}
 

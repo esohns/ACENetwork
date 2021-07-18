@@ -51,7 +51,7 @@ Net_SessionBase_T<AddressType,
  : configuration_ (NULL)
  , connectionConfiguration_ (NULL)
  , connectionManager_ (NULL)
- , isAsynch_ (NET_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_PROACTOR)
+ , isAsynch_ (COMMON_EVENT_DEFAULT_DISPATCH)
  , lock_ ()
  , condition_ (lock_)
  , state_ ()
@@ -371,22 +371,18 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::close"));
 
-  int result = -1;
-
   // sanity check(s)
   ACE_ASSERT (connectionManager_);
 
+  int result = -1;
+  typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
     for (Net_ConnectionIdsIterator_t iterator = state_.connections.begin ();
          iterator != state_.connections.end ();
          ++iterator)
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_p = connectionManager_->get (*iterator);
-#else
-      iconnection_p = connectionManager_->get (*iterator);
-#endif // ACE_WIN32 || ACE_WIN64
       if (!iconnection_p)
       {
         ACE_DEBUG ((LM_ERROR,

@@ -26,8 +26,8 @@
 #include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
+#include "ace/Synch_Traits.h"
 
-#include "common_iinitialize.h"
 #include "common_counter.h"
 
 #include "net_sockethandler_base.h"
@@ -58,7 +58,7 @@ class Net_AsynchUDPSocketHandler_T
   // override (part of) ACE_Service_Handler
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_UNUSED_ARG (peerSap_in); ACE_UNUSED_ARG (localSAP_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual ACE_HANDLE handle (void) const { return SocketType::get_handle (); }
   inline virtual void handle (ACE_HANDLE handle_in) { inherited3::handle (handle_in); }
 
@@ -72,6 +72,7 @@ class Net_AsynchUDPSocketHandler_T
   // convenient types
   typedef SocketType SOCKET_T;
   typedef ACE_Service_Handler SVC_HANDLER_T;
+  typedef Common_Counter_T<ACE_MT_SYNCH> COUNTER_T;
 
   Net_AsynchUDPSocketHandler_T ();
 
@@ -83,7 +84,7 @@ class Net_AsynchUDPSocketHandler_T
 
   ACE_INET_Addr          address_;
   // the number of open write (i.e. send) requests
-  mutable Common_Counter counter_;
+  mutable COUNTER_T      counter_;
 #if defined (ACE_LINUX)
   bool                   errorQueue_;
 #endif // ACE_LINUX

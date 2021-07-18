@@ -25,7 +25,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_isubscribe.h"
-#include "common_referencecounter_base.h"
+#include "common_referencecounter.h"
 
 #include "net_connection_manager.h"
 #include "net_iconnection.h"
@@ -43,18 +43,18 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename UserDataType>
 class Net_ConnectionBase_T
- : public Common_ReferenceCounterBase
+ : public Common_ReferenceCounter_T<ACE_SYNCH_USE>
  , virtual public Net_IConnection_T<AddressType,
                                     //ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
  , public Common_IRegister
 {
-  typedef Common_ReferenceCounterBase inherited;
+  typedef Common_ReferenceCounter_T<ACE_SYNCH_USE> inherited;
 
  public:
   // convenient types
-  typedef Common_ReferenceCounterBase REFERENCECOUNTER_T;
+  typedef Common_ReferenceCounter_T<ACE_SYNCH_USE> REFERENCECOUNTER_T;
   typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
                                    AddressType,
                                    ConfigurationType,

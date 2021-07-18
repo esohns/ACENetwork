@@ -90,7 +90,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (IRC_Client_GUI_Connections
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
   //   CBData_.nick.clear(); // cannot set this now...
   CBData_.label = label_in;
@@ -528,7 +528,7 @@ IRC_Client_GUI_Connection::~IRC_Client_GUI_Connection ()
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_r.lock);
 
@@ -570,7 +570,7 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
 #if defined (GTK_USE)
@@ -645,7 +645,7 @@ IRC_Client_GUI_Connection::start (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -727,7 +727,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
 //  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -1726,7 +1726,7 @@ IRC_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
 #if defined (GTK_USE)
@@ -1840,7 +1840,7 @@ IRC_Client_GUI_Connection::close ()
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
   // clean up message handlers
@@ -1947,7 +1947,7 @@ IRC_Client_GUI_Connection::error (const IRC_Record& message_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
 #if defined (GTK_USE)
@@ -2011,7 +2011,7 @@ IRC_Client_GUI_Connection::exists (const std::string& id_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
@@ -2103,7 +2103,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
 #if defined (GTK_USE)
@@ -2217,7 +2217,7 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
 #if defined (GTK_USE)

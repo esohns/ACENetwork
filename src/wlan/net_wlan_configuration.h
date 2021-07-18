@@ -83,7 +83,7 @@ struct Net_WLAN_MonitorConfiguration
    , notificationCBData (NULL)
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
-   , dispatch (NET_EVENT_DEFAULT_DISPATCH)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , SSID ()
    , subscriber (NULL)
    , userData (NULL)

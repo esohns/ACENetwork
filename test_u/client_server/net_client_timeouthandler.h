@@ -63,7 +63,7 @@ class Client_TimeoutHandler
                          const struct Test_U_ProtocolConfiguration&,
                          const Test_U_TCPConnectionConfiguration&,
                          const Test_U_UDPConnectionConfiguration&,
-                         enum Common_EventDispatchType = NET_EVENT_DEFAULT_DISPATCH);
+                         enum Common_EventDispatchType = COMMON_EVENT_DEFAULT_DISPATCH);
   inline virtual ~Client_TimeoutHandler () {}
 
   inline void mode (enum ActionModeType mode_in) { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_); mode_ = mode_in; }

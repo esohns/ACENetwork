@@ -82,7 +82,7 @@ class Net_Server_AsynchListener_T
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *(configuration_); }
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   virtual bool initialize (const ConfigurationType&); // configuration
   inline virtual bool useReactor () const { return false; }
 
@@ -108,7 +108,7 @@ class Net_Server_AsynchListener_T
   // implement (part of) Net_IListener_T
   inline virtual bool lock (bool = true) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual int unlock (bool = false) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
-  inline virtual const ACE_SYNCH_MUTEX& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_SYNCH_MUTEX ()); ACE_NOTREACHED (return ACE_SYNCH_MUTEX ();) }
+  inline virtual const ACE_SYNCH_MUTEX& getR_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_SYNCH_MUTEX ()); ACE_NOTREACHED (return ACE_SYNCH_MUTEX ();) }
   inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 

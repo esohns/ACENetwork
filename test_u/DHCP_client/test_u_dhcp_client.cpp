@@ -650,7 +650,7 @@ do_work (bool requestBroadcastReplies_in,
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   CBData_in.progressData.state = &state_r;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
@@ -1268,7 +1268,7 @@ allocate:
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     CBData_in.UIState = &state_r;
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
@@ -1587,7 +1587,7 @@ ACE_TMAIN (int argc_in,
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   logstack_p = &state_r.logStack;
   lock_p = &state_r.logStackLock;
 #endif // GTK_USE

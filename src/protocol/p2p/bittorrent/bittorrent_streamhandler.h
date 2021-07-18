@@ -64,7 +64,7 @@ class BitTorrent_PeerStreamHandler_T
  public:
   BitTorrent_PeerStreamHandler_T (SessionInterfaceType* // session handle
 #if defined (GUI_SUPPORT)
-                                  ,CBDataType* = NULL);  // ui feedback data handle
+                                  ,CBDataType* = NULL); // ui feedback data handle
 #else
                                  );
 #endif // GUI_SUPPORT

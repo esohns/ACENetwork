@@ -1047,7 +1047,7 @@ IRC_Session_T<ConnectionType,
           static_cast<typename inherited::ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
       connection_configuration_p =
-        &const_cast<ConnectionConfigurationType&> (ilistener_p->getR_2 ());
+        &const_cast<ConnectionConfigurationType&> (ilistener_p->getR ());
       break;
     }
     default:

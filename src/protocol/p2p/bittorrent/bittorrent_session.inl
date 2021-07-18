@@ -333,7 +333,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   PeerUserDataType* user_data_p = NULL;
   typename PeerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
   bool clone_module = false;
-  bool delete_module = false;
+//  bool delete_module = false;
   Stream_Module_t* module_p = NULL;
   if (inherited::connectionManager_)
   {
@@ -462,7 +462,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ISTREAM_CONNECTION_T* istream_connection_p = NULL;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
     inherited::state_.peerStatus.insert (std::make_pair (id_in, peer_status));
   } // end lock scope
 
@@ -646,15 +645,13 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
               id_in));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
     BitTorrent_PeerStatusIterator_t iterator =
         inherited::state_.peerStatus.find (id_in);
-    if (iterator != inherited::state_.peerStatus.end ())
-      inherited::state_.peerStatus.erase (iterator);
+    ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
+    inherited::state_.peerStatus.erase (iterator);
 
-    if (inherited::state_.connections.empty () &&
-        inherited::state_.controller)
-    {
+    if (inherited::state_.connections.empty ())
+    { ACE_ASSERT (inherited::state_.controller);
       try {
         inherited::state_.controller->notify (metaInfoFileName_,
                                               BITTORRENT_EVENT_CANCELLED);
@@ -731,7 +728,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_ASSERT (trackerConnectionManager_);
 
   Bencoding_DictionaryIterator_t iterator;
-  std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY);
   std::string host_name_string;
   std::string user_agent;
   Net_ConnectionId_t tracker_connection_id = 0;
@@ -760,7 +756,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   for (;
        iterator != inherited::configuration_->metaInfo->end ();
        ++iterator)
-    if (*(*iterator).first == key)
+    if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY))
       break;
   ACE_ASSERT (iterator != inherited::configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
@@ -1164,7 +1160,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
     ACE_ASSERT (!inherited::state_.trackerConnectionId);
     inherited::state_.trackerConnectionId = id_in;
   } // end lock scope
@@ -1242,13 +1237,11 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
               id_in));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
-//    ACE_ASSERT (inherited::state_.trackerConnectionId == id_in);
+    ACE_ASSERT (inherited::state_.trackerConnectionId == id_in);
     inherited::state_.trackerConnectionId = 0;
 
-    if (inherited::state_.connections.empty () &&
-        inherited::state_.controller)
-    {
+    if (inherited::state_.connections.empty ())
+    { ACE_ASSERT (inherited::state_.controller);
       try {
         inherited::state_.controller->notify (metaInfoFileName_,
                                               BITTORRENT_EVENT_CANCELLED);
@@ -1324,14 +1317,11 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // *NOTE*: this could be the response to either a request or a 'scrape', the
   //         type can be deduced from the dictionary schema
-  Bencoding_DictionaryIterator_t iterator;
-  std::string key =
-      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_SCRAPE_RESPONSE_FILES_HEADER);
-  iterator = record_in.begin ();
+  Bencoding_DictionaryIterator_t iterator = record_in.begin ();
   for (;
        iterator != record_in.end ();
        ++iterator)
-    if (*(*iterator).first == key) break;
+    if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_SCRAPE_RESPONSE_FILES_HEADER)) break;
   if (iterator != record_in.end ())
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     if (inherited::state_.trackerScrapeResponse)
@@ -1351,7 +1341,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
         &const_cast<Bencoding_Dictionary_t&> (record_in);
   } // end lock scope
 
-  key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER);
   BitTorrent_PeerAddresses_t peer_addresses;
   int result = -1;
   ACE_INET_Addr inet_address;
@@ -1361,11 +1350,11 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   for (;
        iterator != record_in.end ();
        ++iterator)
-    if (*(*iterator).first == key) break;
+    if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER)) break;
   ACE_ASSERT (iterator != record_in.end ());
   // can be 'dictionary' or 'binary' model
   if ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY)
-  {
+  { // *TODO*
     ACE_ASSERT (false);
     ACE_NOTSUP;
 
@@ -1516,7 +1505,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     delete [] thread_names_p[i];
   delete [] thread_names_p;
 
-  result = thread_manager_p->wait_grp (group_id_i); // name(s)
+  result = thread_manager_p->wait_grp (group_id_i);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1587,10 +1576,11 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerUserDataType,
                      ControllerInterfaceType
 #if defined (GUI_SUPPORT)
-                     ,CBDataType>::notify (const struct BitTorrent_PeerHandShake& record_in)
+                     ,CBDataType>::notify (Net_ConnectionId_t id_in,
 #else
-                     >::notify (const struct BitTorrent_PeerHandShake& record_in)
+                     >::notify (Net_ConnectionId_t id_in,
 #endif // GUI_SUPPORT
+                                           const struct BitTorrent_PeerHandShake& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
@@ -1600,7 +1590,41 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
               ACE_TEXT (BitTorrent_Tools::HandShakeToString (record_in).c_str ())));
 #endif // _DEBUG
 
-  // *TODO*: compare handshake peer id with tracker peer id
+  // compare handshake peer id with tracker peer id
+  ACE_ASSERT (inherited::state_.trackerRequestResponse);
+  Bencoding_DictionaryIterator_t iterator =
+      inherited::state_.trackerRequestResponse->begin ();
+  for (;
+       iterator != inherited::state_.trackerRequestResponse->end ();
+       ++iterator)
+    if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER))
+      break;
+  ACE_ASSERT (iterator != inherited::state_.trackerRequestResponse->end ());
+  if ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY)
+  {
+    Bencoding_DictionaryIterator_t iterator2 =
+        (*iterator).second->dictionary->begin ();
+    for (;
+         iterator2 != (*iterator).second->dictionary->end ();
+         ++iterator2)
+      if (*(*iterator2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_PEERID_HEADER))
+      { // *TODO*: compare IP addresses to determine corresponding peer_id
+        break;
+      } // end IF
+    ACE_ASSERT (iterator2 != (*iterator).second->dictionary->end ());
+    ACE_ASSERT ((*iterator2).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
+    if (record_in.peer_id != *(*iterator2).second->string)
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("peer-ids do not match: \"%s\" != \"%s\", continuing\n"),
+                  ACE_TEXT (record_in.peer_id.c_str ()),
+                  ACE_TEXT ((*iterator2).second->string->c_str ())));
+    } // end IF
+  } // end IF
+  else
+    ACE_DEBUG ((LM_INFO,
+                ACE_TEXT ("tracker response had binary \"peers\" model: cannot validate handshake peer_id (was: \"%s\"), continuing\n"),
+                ACE_TEXT (record_in.peer_id.c_str ())));
 }
 template <typename PeerHandlerConfigurationType,
           typename TrackerHandlerConfigurationType,
@@ -1651,11 +1675,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerUserDataType,
                      ControllerInterfaceType
 #if defined (GUI_SUPPORT)
-                     ,CBDataType>::notify (const struct BitTorrent_PeerRecord& record_in,
+                     ,CBDataType>::notify (Net_ConnectionId_t id_in,
 #else
-                     >::notify (const struct BitTorrent_PeerRecord& record_in,
+                     >::notify (Net_ConnectionId_t id_in,
 #endif // GUI_SUPPORT
-                                ACE_Message_Block* messageBlock_in)
+                                           const struct BitTorrent_PeerRecord& record_in,
+                                           ACE_Message_Block* messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 

@@ -109,11 +109,6 @@
 #define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S              10 // second(s)
 #define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL_S     1  // second(s)
 
-// event dispatch
-//#define NET_EVENT_DISPATCH_THREAD_GROUP_ID                  22
-//#define NET_EVENT_USE_THREAD_POOL                           false // multi-threaded event dispatch ? (reactor only)
-#define NET_EVENT_DEFAULT_DISPATCH                           COMMON_EVENT_DISPATCH_PROACTOR
-
 // stream
 #define NET_STREAM_MAX_MESSAGES                              0  // 0 --> no limits
 #define NET_STREAM_MESSAGE_DATA_BUFFER_SIZE                  16384 // bytes

@@ -169,7 +169,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
           ilistener_p = static_cast<ILISTENER_T*> (arg_in);
           ACE_ASSERT (ilistener_p);
           configuration_p =
-              &const_cast<ConfigurationType&> (ilistener_p->getR_2 ());
+              &const_cast<ConfigurationType&> (ilistener_p->getR ());
           break;
         }
         default:
@@ -1163,7 +1163,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
           ilistener_p = static_cast<const ILISTENER_T*> (act_in);
           ACE_ASSERT (ilistener_p);
           configuration_p =
-            &const_cast<ConfigurationType&> (ilistener_p->getR_2 ());
+            &const_cast<ConfigurationType&> (ilistener_p->getR ());
           break;
         }
         default:

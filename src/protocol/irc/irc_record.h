@@ -26,10 +26,10 @@
 #include <utility>
 #include <vector>
 
-#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
-#include "common_referencecounter_base.h"
+#include "common_referencecounter.h"
 
 //#include "irc_exports.h"
 #include "irc_codes.h"
@@ -50,7 +50,7 @@ typedef string_list_t IRC_Parameters_t;
 typedef string_list_const_iterator_t IRC_ParametersIterator_t;
 
 class IRC_Record
- : public Common_ReferenceCounterBase,
+ : public Common_ReferenceCounter_T<ACE_MT_SYNCH>,
    public Common_IDumpState
 {
  public:
@@ -91,12 +91,12 @@ class IRC_Record
     KILL,
     PING,
     PONG,
-#if defined ACE_WIN32 || defined ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #pragma message ("applying quirk code for this compiler")
     __QUIRK__ERROR,
 #else
     ERROR,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     AWAY,
     REHASH,
     RESTART,
@@ -150,7 +150,7 @@ class IRC_Record
   list_items_ranges_t parameterRanges_;
 
  private:
-  typedef Common_ReferenceCounterBase inherited;
+  typedef Common_ReferenceCounter_T<ACE_MT_SYNCH> inherited;
 };
 
 typedef IRC_Record::CommandType IRC_CommandType_t;

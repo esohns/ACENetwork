@@ -199,6 +199,7 @@ struct BitTorrent_PeerSessionData
   BitTorrent_PeerSessionData ()
    : Stream_SessionData ()
    , filename ()
+   , forwardedHandshake (false)
    , handshake (NULL)
   {}
 
@@ -211,6 +212,7 @@ struct BitTorrent_PeerSessionData
   }
 
   std::string                          filename; // .torrent file
+  bool                                 forwardedHandshake;
   struct BitTorrent_PeerHandShake*     handshake;
 };
 

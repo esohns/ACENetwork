@@ -26,6 +26,7 @@
 #include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_counter.h"
 
@@ -64,6 +65,7 @@ class Net_AsynchTCPSocketHandler_T
   // convenient types
   typedef Net_AsynchSocketHandlerBase_T<ConfigurationType> SOCKETHANDLER_BASE_T;
   typedef ACE_Service_Handler SERVICEHANDLER_T;
+  typedef Common_Counter_T<ACE_MT_SYNCH> COUNTER_T;
 
   Net_AsynchTCPSocketHandler_T ();
 
@@ -74,7 +76,7 @@ class Net_AsynchTCPSocketHandler_T
   virtual bool initiate_read ();
 
   // the number of open write (i.e. send) requests
-  mutable Common_Counter  counter_;
+  mutable COUNTER_T       counter_;
   ACE_Asynch_Read_Stream  inputStream_;
   ACE_Asynch_Write_Stream outputStream_;
   bool                    partialWrite_;
@@ -83,7 +85,7 @@ class Net_AsynchTCPSocketHandler_T
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   ACE_HANDLE              writeHandle_;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T (const Net_AsynchTCPSocketHandler_T&))

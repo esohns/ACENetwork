@@ -151,9 +151,6 @@ class BitTorrent_Session_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T& operator= (const BitTorrent_Session_T&))
 
   // convenient types
-//  typedef ACE_Connector<TrackerConnectionType,
-//                        ACE_SOCK_CONNECTOR> TRACKER_CONNECTOR_T;
-//  typedef ACE_Asynch_Connector<TrackerConnectionType> TRACKER_ASYNCH_CONNECTOR_T;
   typedef TrackerConnectorType TRACKER_CONNECTOR_T;
 
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
@@ -225,9 +222,11 @@ class BitTorrent_Session_T
   virtual void scrape ();
   virtual void trackerConnect (Net_ConnectionId_t);
   virtual void trackerDisconnect (Net_ConnectionId_t);
-  virtual void notify (const Bencoding_Dictionary_t&); // tracker message record
-  virtual void notify (const struct BitTorrent_PeerHandShake&); // peer handshake record
-  virtual void notify (const struct BitTorrent_PeerRecord&, // message record
+  virtual void notify (const Bencoding_Dictionary_t&); // tracker response/scrape record
+  virtual void notify (Net_ConnectionId_t,                      // connection id
+                       const struct BitTorrent_PeerHandShake&); // peer handshake record
+  virtual void notify (Net_ConnectionId_t,                  // connection id
+                       const struct BitTorrent_PeerRecord&, // message record
                        ACE_Message_Block* = NULL);          // data piece (if applicable)
 
   void error (const struct BitTorrent_PeerRecord&);

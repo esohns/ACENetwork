@@ -23,7 +23,6 @@
 
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Global_Macros.h"
-//#include "ace/Synch_Traits.h"
 #include "ace/Thread_Mutex.h"
 
 #include "net_common.h"
@@ -75,9 +74,6 @@ class Net_SessionBase_T
  protected:
   // convenient types
   typedef ConnectorType CONNECTOR_T;
-//  typedef ACE_Connector<ConnectionType,
-//                        ACE_SOCK_CONNECTOR> CONNECTOR_T;
-//  typedef ACE_Asynch_Connector<ConnectionType> ASYNCH_CONNECTOR_T;
 
   ConfigurationType*           configuration_;
   ConnectionConfigurationType* connectionConfiguration_;

@@ -605,7 +605,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   ACE_ASSERT (gtk_manager_p);
   ACE_ASSERT (CBData_in.UIState);
 //  Common_UI_GTK_State_t& state_r =
-//    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+//    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
 #endif // GTK_USE
@@ -1338,7 +1338,7 @@ ACE_TMAIN (int argc_in,
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   logstack_p = &state_r.logStack;
   lock_p = &state_r.logStackLock;
 #endif // GTK_USE
