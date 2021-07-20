@@ -92,23 +92,20 @@ typedef Net_IConnection_T<ACE_INET_Addr,
 
 struct HTTP_Record;
 struct Test_I_MessageData
+ : HTTP_Record
 {
   Test_I_MessageData ()
-   : HTTPRecord (NULL)
+   : HTTP_Record ()
    , M3UPlaylist (NULL)
   {};
   ~Test_I_MessageData ()
   {
-    if (HTTPRecord)
-      delete HTTPRecord;
     //if (M3UPlaylist)
     //  delete M3UPlaylist;
   };
   inline void operator+= (Test_I_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
-  inline operator struct HTTP_Record&() const { ACE_ASSERT (HTTPRecord); return *HTTPRecord; }
 
-  struct HTTP_Record* HTTPRecord;
-  M3U_Playlist_t*     M3UPlaylist;
+  M3U_Playlist_t* M3UPlaylist;
 };
 
 struct Test_I_URLStreamLoad_SessionData

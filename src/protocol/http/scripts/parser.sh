@@ -80,15 +80,15 @@ done
 
 # move generated file(s) into the project directory
 # --> these files are static (*CHECK*) and included by default
-TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
-FILES="location.hh position.hh stack.hh"
+#TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
+#FILES="location.hh position.hh stack.hh"
 # move the files into the 3rd_party include directory
-for FILE in $FILES
-do
- mv -f $FILE ${TARGET_DIRECTORY}
- if [ $? -ne 0 ]; then
-  echo "ERROR: failed to mv \"$FILE\", aborting"
-  exit 1
- fi
- echo "moved \"$FILE\"..."
-done
+#for FILE in $FILES
+#do
+# mv -f $FILE ${TARGET_DIRECTORY}
+# if [ $? -ne 0 ]; then
+#  echo "ERROR: failed to mv \"$FILE\", aborting"
+#  exit 1
+# fi
+# echo "moved \"$FILE\"..."
+#done

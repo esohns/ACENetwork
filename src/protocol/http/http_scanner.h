@@ -2,9 +2,8 @@
 #define HTTP_Scanner_HEADER_H 1
 #define HTTP_Scanner_IN_HEADER 1
 
-#include "ace/Synch.h"
 #include "http_common.h"
-#include "http_exports.h"
+//#include "http_exports.h"
 #include "http_iparser.h"
 //#undef YYTOKENTYPE
 #include "http_parser.h"

@@ -51,7 +51,6 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
  : inherited (stream_in)
  , inherited2 ()
  , headFragment_ (NULL)
- , headFragmentBaseOffset_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::BitTorrent_Module_PeerParser_T"));
 
@@ -115,7 +114,6 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
       headFragment_->release ();
       headFragment_ = NULL;
     } // end IF
-    headFragmentBaseOffset_ = 0;
   } // end IF
 
   ACE_ASSERT (configuration_in.parserConfiguration);
@@ -130,6 +128,57 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+int
+BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
+                              TimePolicyType,
+                              ConfigurationType,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              UserDataType>::put (ACE_Message_Block* messageBlock_in,
+                                                  ACE_Time_Value* timeout_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::put"));
+
+  switch (messageBlock_in->msg_type ())
+  {
+    case ACE_Message_Block::MB_USER:
+    {
+      // *NOTE*: currently, all of these are 'session' messages
+      SessionMessageType* session_message_p =
+//        dynamic_cast<SessionMessageType*> (messageBlock_in); // *TODO*: enable this (why ? it's safe(r))
+        static_cast<SessionMessageType*> (messageBlock_in);
+      if (unlikely (!session_message_p))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: dynamic_cast<Stream_SessionMessageBase_T>(0x%@) failed (type was: %d), aborting\n"),
+                    inherited::mod_->name (),
+                    messageBlock_in,
+                    messageBlock_in->msg_type ()));
+        messageBlock_in->release ();
+        return -1;
+      } // end IF
+      if (session_message_p->type () == STREAM_SESSION_MESSAGE_END)
+        inherited::stop (false, // don't wait
+                         true); // N/A
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
+
+  // drop the message into the queue
+  return inherited::put (messageBlock_in,
+                         timeout_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -305,15 +354,6 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   {
     case STREAM_SESSION_MESSAGE_END:
     {
-      // *NOTE*: (in a 'passive' scenario,) a parser thread may be waiting for
-      //         additional (entity) fragments to arrive
-      //         --> tell it to return
-      ACE_ASSERT (inherited::msg_queue_);
-      result = inherited::msg_queue_->pulse ();
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
-
       if (headFragment_)
       {
         headFragment_->release (); headFragment_ = NULL;

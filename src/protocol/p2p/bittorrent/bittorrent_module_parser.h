@@ -87,6 +87,9 @@ class BitTorrent_Module_PeerParser_T
   virtual bool initialize (const ConfigurationType&,
                            Stream_IAllocator* = NULL);
 
+  virtual int put (ACE_Message_Block*,
+                   ACE_Time_Value* = NULL);
+
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);                // return value: pass message downstream ?
@@ -111,8 +114,6 @@ class BitTorrent_Module_PeerParser_T
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void record (struct BitTorrent_PeerRecord*&); // data record
   virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
-
-  unsigned int headFragmentBaseOffset_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

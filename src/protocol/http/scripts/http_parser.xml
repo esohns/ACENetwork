@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<bison-xml-report version="3.5" bug-report="bug-bison@gnu.org" url="http://www.gnu.org/software/bison/">
+<bison-xml-report version="3.7.4" bug-report="bug-bison@gnu.org" url="https://www.gnu.org/software/bison/">
 
   <filename>/mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/parser.y</filename>
 
@@ -95,13 +95,20 @@
         </rhs>
       </rule>
       <rule number="13" usefulness="useful">
-        <lhs>body</lhs>
+        <lhs>$@1</lhs>
         <rhs>
-          <symbol>&quot;chunk&quot;</symbol>
-          <symbol>chunked_body</symbol>
+          <empty/>
         </rhs>
       </rule>
       <rule number="14" usefulness="useful">
+        <lhs>body</lhs>
+        <rhs>
+          <symbol>&quot;chunk&quot;</symbol>
+          <symbol>$@1</symbol>
+          <symbol>chunked_body</symbol>
+        </rhs>
+      </rule>
+      <rule number="15" usefulness="useful">
         <lhs>chunked_body</lhs>
         <rhs>
           <symbol>chunks</symbol>
@@ -109,14 +116,21 @@
           <symbol>&quot;delimiter&quot;</symbol>
         </rhs>
       </rule>
-      <rule number="15" usefulness="useful">
+      <rule number="16" usefulness="useful">
+        <lhs>$@2</lhs>
+        <rhs>
+          <empty/>
+        </rhs>
+      </rule>
+      <rule number="17" usefulness="useful">
         <lhs>chunks</lhs>
         <rhs>
           <symbol>&quot;chunk&quot;</symbol>
+          <symbol>$@2</symbol>
           <symbol>chunks</symbol>
         </rhs>
       </rule>
-      <rule number="16" usefulness="useful">
+      <rule number="18" usefulness="useful">
         <lhs>chunks</lhs>
         <rhs>
           <empty/>
@@ -124,33 +138,35 @@
       </rule>
     </rules>
     <terminals>
-      <terminal symbol-number="0" token-number="0" name="&quot;end&quot;" usefulness="useful"/>
-      <terminal symbol-number="1" token-number="256" name="error" usefulness="useful"/>
-      <terminal symbol-number="3" token-number="258" name="&quot;method&quot;" usefulness="useful"/>
-      <terminal symbol-number="4" token-number="259" name="&quot;uri&quot;" usefulness="useful"/>
-      <terminal symbol-number="5" token-number="260" name="&quot;version&quot;" usefulness="useful"/>
-      <terminal symbol-number="6" token-number="261" name="&quot;header&quot;" usefulness="useful"/>
-      <terminal symbol-number="7" token-number="262" name="&quot;delimiter&quot;" usefulness="useful"/>
-      <terminal symbol-number="8" token-number="263" name="&quot;status&quot;" usefulness="useful"/>
-      <terminal symbol-number="9" token-number="264" name="&quot;reason&quot;" usefulness="useful"/>
-      <terminal symbol-number="10" token-number="265" name="&quot;body&quot;" usefulness="useful"/>
-      <terminal symbol-number="11" token-number="266" name="&quot;chunk&quot;" usefulness="useful"/>
-      <terminal symbol-number="12" token-number="267" name="&quot;end_of_fragment&quot;" usefulness="unused-in-grammar"/>
+      <terminal symbol-number="0" token-number="0" name="&quot;end&quot;" type="ival" usefulness="useful"/>
+      <terminal symbol-number="1" token-number="256" name="error" type="" usefulness="useful"/>
+      <terminal symbol-number="3" token-number="258" name="&quot;method&quot;" type="sval" usefulness="useful"/>
+      <terminal symbol-number="4" token-number="259" name="&quot;uri&quot;" type="sval" usefulness="useful"/>
+      <terminal symbol-number="5" token-number="260" name="&quot;version&quot;" type="sval" usefulness="useful"/>
+      <terminal symbol-number="6" token-number="261" name="&quot;header&quot;" type="sval" usefulness="useful"/>
+      <terminal symbol-number="7" token-number="262" name="&quot;delimiter&quot;" type="ival" usefulness="useful"/>
+      <terminal symbol-number="8" token-number="263" name="&quot;status&quot;" type="sval" usefulness="useful"/>
+      <terminal symbol-number="9" token-number="264" name="&quot;reason&quot;" type="sval" usefulness="useful"/>
+      <terminal symbol-number="10" token-number="265" name="&quot;body&quot;" type="ival" usefulness="useful"/>
+      <terminal symbol-number="11" token-number="266" name="&quot;chunk&quot;" type="ival" usefulness="useful"/>
+      <terminal symbol-number="12" token-number="267" name="&quot;end_of_fragment&quot;" type="ival" usefulness="unused-in-grammar"/>
     </terminals>
     <nonterminals>
-      <nonterminal symbol-number="13" name="$accept" usefulness="useful"/>
-      <nonterminal symbol-number="14" name="message" usefulness="useful"/>
-      <nonterminal symbol-number="15" name="head" usefulness="useful"/>
-      <nonterminal symbol-number="16" name="head_rest1" usefulness="useful"/>
-      <nonterminal symbol-number="17" name="request_line_rest1" usefulness="useful"/>
-      <nonterminal symbol-number="18" name="request_line_rest2" usefulness="useful"/>
-      <nonterminal symbol-number="19" name="head_rest2" usefulness="useful"/>
-      <nonterminal symbol-number="20" name="status_line_rest1" usefulness="useful"/>
-      <nonterminal symbol-number="21" name="status_line_rest2" usefulness="useful"/>
-      <nonterminal symbol-number="22" name="headers" usefulness="useful"/>
-      <nonterminal symbol-number="23" name="body" usefulness="useful"/>
-      <nonterminal symbol-number="24" name="chunked_body" usefulness="useful"/>
-      <nonterminal symbol-number="25" name="chunks" usefulness="useful"/>
+      <nonterminal symbol-number="13" name="$accept" type="" usefulness="useful"/>
+      <nonterminal symbol-number="14" name="message" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="15" name="head" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="16" name="head_rest1" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="17" name="request_line_rest1" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="18" name="request_line_rest2" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="19" name="head_rest2" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="20" name="status_line_rest1" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="21" name="status_line_rest2" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="22" name="headers" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="23" name="body" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="24" name="$@1" type="" usefulness="useful"/>
+      <nonterminal symbol-number="25" name="chunked_body" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="26" name="chunks" type="ival" usefulness="useful"/>
+      <nonterminal symbol-number="27" name="$@2" type="" usefulness="useful"/>
     </nonterminals>
   </grammar>
 
@@ -158,10 +174,10 @@
 
     <state number="0">
       <itemset>
-        <item rule-number="0" point="0"/>
-        <item rule-number="1" point="0"/>
-        <item rule-number="2" point="0"/>
-        <item rule-number="3" point="0"/>
+        <item rule-number="0" dot="0"/>
+        <item rule-number="1" dot="0"/>
+        <item rule-number="2" dot="0"/>
+        <item rule-number="3" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -178,9 +194,9 @@
 
     <state number="1">
       <itemset>
-        <item rule-number="2" point="1"/>
-        <item rule-number="4" point="0"/>
-        <item rule-number="5" point="0"/>
+        <item rule-number="2" dot="1"/>
+        <item rule-number="4" dot="0"/>
+        <item rule-number="5" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -196,9 +212,9 @@
 
     <state number="2">
       <itemset>
-        <item rule-number="3" point="1"/>
-        <item rule-number="7" point="0"/>
-        <item rule-number="8" point="0"/>
+        <item rule-number="3" dot="1"/>
+        <item rule-number="7" dot="0"/>
+        <item rule-number="8" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -214,7 +230,7 @@
 
     <state number="3">
       <itemset>
-        <item rule-number="0" point="1"/>
+        <item rule-number="0" dot="1"/>
       </itemset>
       <actions>
         <transitions>
@@ -228,7 +244,7 @@
 
     <state number="4">
       <itemset>
-        <item rule-number="1" point="1"/>
+        <item rule-number="1" dot="1"/>
       </itemset>
       <actions>
         <transitions>
@@ -242,8 +258,8 @@
 
     <state number="5">
       <itemset>
-        <item rule-number="5" point="1"/>
-        <item rule-number="6" point="0"/>
+        <item rule-number="5" dot="1"/>
+        <item rule-number="6" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -258,7 +274,7 @@
 
     <state number="6">
       <itemset>
-        <item rule-number="2" point="2"/>
+        <item rule-number="2" dot="2"/>
       </itemset>
       <actions>
         <transitions/>
@@ -272,9 +288,9 @@
 
     <state number="7">
       <itemset>
-        <item rule-number="4" point="1"/>
-        <item rule-number="10" point="0"/>
-        <item rule-number="11" point="0"/>
+        <item rule-number="4" dot="1"/>
+        <item rule-number="10" dot="0"/>
+        <item rule-number="11" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -290,8 +306,8 @@
 
     <state number="8">
       <itemset>
-        <item rule-number="8" point="1"/>
-        <item rule-number="9" point="0"/>
+        <item rule-number="8" dot="1"/>
+        <item rule-number="9" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -306,7 +322,7 @@
 
     <state number="9">
       <itemset>
-        <item rule-number="3" point="2"/>
+        <item rule-number="3" dot="2"/>
       </itemset>
       <actions>
         <transitions/>
@@ -320,9 +336,9 @@
 
     <state number="10">
       <itemset>
-        <item rule-number="7" point="1"/>
-        <item rule-number="10" point="0"/>
-        <item rule-number="11" point="0"/>
+        <item rule-number="7" dot="1"/>
+        <item rule-number="10" dot="0"/>
+        <item rule-number="11" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -338,7 +354,7 @@
 
     <state number="11">
       <itemset>
-        <item rule-number="0" point="2"/>
+        <item rule-number="0" dot="2"/>
       </itemset>
       <actions>
         <transitions/>
@@ -352,9 +368,9 @@
 
     <state number="12">
       <itemset>
-        <item rule-number="1" point="2"/>
-        <item rule-number="12" point="0"/>
-        <item rule-number="13" point="0"/>
+        <item rule-number="1" dot="2"/>
+        <item rule-number="12" dot="0"/>
+        <item rule-number="14" dot="0"/>
       </itemset>
       <actions>
         <transitions>
@@ -370,7 +386,7 @@
 
     <state number="13">
       <itemset>
-        <item rule-number="6" point="1"/>
+        <item rule-number="6" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -384,7 +400,7 @@
 
     <state number="14">
       <itemset>
-        <item rule-number="5" point="2"/>
+        <item rule-number="5" dot="2"/>
       </itemset>
       <actions>
         <transitions/>
@@ -398,12 +414,12 @@
 
     <state number="15">
       <itemset>
-        <item rule-number="4" point="2">
+        <item rule-number="4" dot="2">
           <lookaheads>
             <symbol>&quot;delimiter&quot;</symbol>
           </lookaheads>
         </item>
-        <item rule-number="10" point="1"/>
+        <item rule-number="10" dot="1"/>
       </itemset>
       <actions>
         <transitions>
@@ -419,7 +435,7 @@
 
     <state number="16">
       <itemset>
-        <item rule-number="9" point="1"/>
+        <item rule-number="9" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -433,7 +449,7 @@
 
     <state number="17">
       <itemset>
-        <item rule-number="8" point="2"/>
+        <item rule-number="8" dot="2"/>
       </itemset>
       <actions>
         <transitions/>
@@ -447,12 +463,12 @@
 
     <state number="18">
       <itemset>
-        <item rule-number="7" point="2">
+        <item rule-number="7" dot="2">
           <lookaheads>
             <symbol>&quot;delimiter&quot;</symbol>
           </lookaheads>
         </item>
-        <item rule-number="10" point="1"/>
+        <item rule-number="10" dot="1"/>
       </itemset>
       <actions>
         <transitions>
@@ -468,7 +484,7 @@
 
     <state number="19">
       <itemset>
-        <item rule-number="12" point="1"/>
+        <item rule-number="12" dot="1"/>
       </itemset>
       <actions>
         <transitions/>
@@ -482,25 +498,16 @@
 
     <state number="20">
       <itemset>
-        <item rule-number="13" point="1"/>
-        <item rule-number="14" point="0"/>
-        <item rule-number="15" point="0"/>
-        <item rule-number="16" point="0">
-          <lookaheads>
-            <symbol>&quot;header&quot;</symbol>
-            <symbol>&quot;delimiter&quot;</symbol>
-          </lookaheads>
-        </item>
+        <item rule-number="13" dot="0"/>
+        <item rule-number="14" dot="1"/>
       </itemset>
       <actions>
         <transitions>
-          <transition type="shift" symbol="&quot;chunk&quot;" state="23"/>
-          <transition type="goto" symbol="chunked_body" state="24"/>
-          <transition type="goto" symbol="chunks" state="25"/>
+          <transition type="goto" symbol="$@1" state="23"/>
         </transitions>
         <errors/>
         <reductions>
-          <reduction symbol="$default" rule="16" enabled="true"/>
+          <reduction symbol="$default" rule="13" enabled="true"/>
         </reductions>
       </actions>
       <solved-conflicts/>
@@ -508,7 +515,7 @@
 
     <state number="21">
       <itemset>
-        <item rule-number="1" point="3"/>
+        <item rule-number="1" dot="3"/>
       </itemset>
       <actions>
         <transitions/>
@@ -522,7 +529,7 @@
 
     <state number="22">
       <itemset>
-        <item rule-number="10" point="2"/>
+        <item rule-number="10" dot="2"/>
       </itemset>
       <actions>
         <transitions/>
@@ -536,9 +543,10 @@
 
     <state number="23">
       <itemset>
-        <item rule-number="15" point="0"/>
-        <item rule-number="15" point="1"/>
-        <item rule-number="16" point="0">
+        <item rule-number="14" dot="2"/>
+        <item rule-number="15" dot="0"/>
+        <item rule-number="17" dot="0"/>
+        <item rule-number="18" dot="0">
           <lookaheads>
             <symbol>&quot;header&quot;</symbol>
             <symbol>&quot;delimiter&quot;</symbol>
@@ -547,8 +555,26 @@
       </itemset>
       <actions>
         <transitions>
-          <transition type="shift" symbol="&quot;chunk&quot;" state="23"/>
+          <transition type="shift" symbol="&quot;chunk&quot;" state="24"/>
+          <transition type="goto" symbol="chunked_body" state="25"/>
           <transition type="goto" symbol="chunks" state="26"/>
+        </transitions>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="18" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="24">
+      <itemset>
+        <item rule-number="16" dot="0"/>
+        <item rule-number="17" dot="1"/>
+      </itemset>
+      <actions>
+        <transitions>
+          <transition type="goto" symbol="$@2" state="27"/>
         </transitions>
         <errors/>
         <reductions>
@@ -558,29 +584,29 @@
       <solved-conflicts/>
     </state>
 
-    <state number="24">
+    <state number="25">
       <itemset>
-        <item rule-number="13" point="2"/>
+        <item rule-number="14" dot="3"/>
       </itemset>
       <actions>
         <transitions/>
         <errors/>
         <reductions>
-          <reduction symbol="$default" rule="13" enabled="true"/>
+          <reduction symbol="$default" rule="14" enabled="true"/>
         </reductions>
       </actions>
       <solved-conflicts/>
     </state>
 
-    <state number="25">
+    <state number="26">
       <itemset>
-        <item rule-number="10" point="0"/>
-        <item rule-number="11" point="0"/>
-        <item rule-number="14" point="1"/>
+        <item rule-number="10" dot="0"/>
+        <item rule-number="11" dot="0"/>
+        <item rule-number="15" dot="1"/>
       </itemset>
       <actions>
         <transitions>
-          <transition type="goto" symbol="headers" state="27"/>
+          <transition type="goto" symbol="headers" state="28"/>
         </transitions>
         <errors/>
         <reductions>
@@ -590,29 +616,39 @@
       <solved-conflicts/>
     </state>
 
-    <state number="26">
+    <state number="27">
       <itemset>
-        <item rule-number="15" point="2"/>
+        <item rule-number="17" dot="0"/>
+        <item rule-number="17" dot="2"/>
+        <item rule-number="18" dot="0">
+          <lookaheads>
+            <symbol>&quot;header&quot;</symbol>
+            <symbol>&quot;delimiter&quot;</symbol>
+          </lookaheads>
+        </item>
       </itemset>
       <actions>
-        <transitions/>
+        <transitions>
+          <transition type="shift" symbol="&quot;chunk&quot;" state="24"/>
+          <transition type="goto" symbol="chunks" state="29"/>
+        </transitions>
         <errors/>
         <reductions>
-          <reduction symbol="$default" rule="15" enabled="true"/>
+          <reduction symbol="$default" rule="18" enabled="true"/>
         </reductions>
       </actions>
       <solved-conflicts/>
     </state>
 
-    <state number="27">
+    <state number="28">
       <itemset>
-        <item rule-number="10" point="1"/>
-        <item rule-number="14" point="2"/>
+        <item rule-number="10" dot="1"/>
+        <item rule-number="15" dot="2"/>
       </itemset>
       <actions>
         <transitions>
           <transition type="shift" symbol="&quot;header&quot;" state="22"/>
-          <transition type="shift" symbol="&quot;delimiter&quot;" state="28"/>
+          <transition type="shift" symbol="&quot;delimiter&quot;" state="30"/>
         </transitions>
         <errors/>
         <reductions/>
@@ -620,15 +656,29 @@
       <solved-conflicts/>
     </state>
 
-    <state number="28">
+    <state number="29">
       <itemset>
-        <item rule-number="14" point="3"/>
+        <item rule-number="17" dot="3"/>
       </itemset>
       <actions>
         <transitions/>
         <errors/>
         <reductions>
-          <reduction symbol="$default" rule="14" enabled="true"/>
+          <reduction symbol="$default" rule="17" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="30">
+      <itemset>
+        <item rule-number="15" dot="3"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="15" enabled="true"/>
         </reductions>
       </actions>
       <solved-conflicts/>

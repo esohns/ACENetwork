@@ -59,8 +59,15 @@ Test_I_MessageDataContainer::setPR (struct HTTP_Record*& record_inout)
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
     return;
   } // end IF
-  data_p->HTTPRecord = record_inout;
-  record_inout = NULL;
+  data_p->form = record_inout->form; // request
+  data_p->headers = record_inout->headers;
+  data_p->method = record_inout->method;
+  data_p->reason = record_inout->reason; // response
+  data_p->status = record_inout->status; // response
+  data_p->URI = record_inout->URI;
+  data_p->version = record_inout->version;
+
+  delete record_inout; record_inout= NULL;
 
   inherited::setPR (data_p);
 }

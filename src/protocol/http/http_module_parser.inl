@@ -20,7 +20,7 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "common_timer_manager_common.h"
+#include "common_string_tools.h"
 
 #include "stream_dec_tools.h"
 
@@ -53,8 +53,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
- //, lock_ ()
-//, condtion_ (lock_)
+ , chunks_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::HTTP_Module_Parser_T"));
 
@@ -109,12 +108,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
 
-    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
-
     if (headFragment_)
     {
       headFragment_->release (); headFragment_ = NULL;
     } // end IF
+    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
+    chunks_.clear ();
   } // end IF
 
   crunch_ = configuration_in.crunchMessages;
@@ -288,6 +287,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       {
         headFragment_->release (); headFragment_ = NULL;
       } // end IF
+      chunks_.clear ();
 
       break;
     }
@@ -327,7 +327,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   // set session data format
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
       const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
-
   HTTP_HeadersIterator_t iterator =
       record_inout->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
   if (iterator != record_inout->headers.end ())
@@ -344,6 +343,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
+  DATA_T* data_p = NULL;
+  ACE_Message_Block* message_block_p = headFragment_;
+  unsigned int bytes_to_skip = 0;
 
   ACE_NEW_NORETURN (data_container_p,
                     DATA_CONTAINER_T ());
@@ -358,7 +360,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (!record_inout);
   data_container_2 = data_container_p;
   headFragment_->initialize (data_container_2,
-                             headFragment_->id (),
+                             headFragment_->sessionId (),
                              NULL);
 
   // make sure the whole fragment chain references the same data record
@@ -369,14 +371,139 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     data_container_p->increase ();
     data_container_2 = data_container_p;
     message_p->initialize (data_container_2,
-                           message_p->id (),
+                           message_p->sessionId (),
                            NULL);
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
+  // frame the content
+  data_p = &const_cast<DATA_T&> (data_container_p->getR ());
+  if (chunks_.empty ())
+  {
+    // *IMPORTANT NOTE*: the parsers' offset points to the begining of the body
+    bytes_to_skip = inherited2::offset ();
+    do
+    { ACE_ASSERT (message_block_p);
+      if (bytes_to_skip <= message_block_p->length ())
+        break;
+      bytes_to_skip -= message_block_p->length ();
+      message_block_p->rd_ptr (message_block_p->length ());
+      message_block_p = message_block_p->cont ();
+    } while (true);
+    message_block_p->rd_ptr (bytes_to_skip);
+    iterator =
+        data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+    ACE_ASSERT (iterator != data_p->headers.end ());
+    std::istringstream converter;
+    converter.str ((*iterator).second);
+    converter >> bytes_to_skip;
+    ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
+  } // end IF
+  else
+  { ACE_ASSERT (!chunks_.empty ());
+    ACE_Message_Block* message_block_2 = NULL;
+    CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
+    CHUNKS_ITERATOR_T iterator_3;
+    unsigned int total_data = 0;
+    bytes_to_skip = (*iterator_2).first; // skip HTTP header + first chunk line
+    do
+    { ACE_ASSERT (message_block_p);
+      if (bytes_to_skip <= message_block_p->length ())
+        break;
+      bytes_to_skip -= message_block_p->length ();
+      message_block_p->rd_ptr (message_block_p->length ());
+      message_block_p = message_block_p->cont ();
+    } while (true);
+    message_block_p->rd_ptr (bytes_to_skip);
+    for (;
+         iterator_2 != chunks_.end ();
+         ++iterator_2)
+    {
+      total_data += (*iterator_2).second;
+      bytes_to_skip = (*iterator_2).second; // skip chunk
+      if (!bytes_to_skip) // no (more) data
+      {
+        // skip over any trailing header(s) and end delimiter
+        bytes_to_skip = inherited2::offset () - (*iterator_2).first;
+        do
+        { ACE_ASSERT (message_block_p);
+          if (bytes_to_skip <= message_block_p->length ())
+            break;
+          bytes_to_skip -= message_block_p->length ();
+          message_block_p->rd_ptr (message_block_p->length ());
+          message_block_p = message_block_p->cont ();
+        } while (true);
+        message_block_p->rd_ptr (bytes_to_skip);
+      } // end IF
+      else
+      {
+        do
+        { ACE_ASSERT (message_block_p);
+          if (bytes_to_skip <= message_block_p->length ())
+            break;
+          bytes_to_skip -= message_block_p->length ();
+          message_block_p = message_block_p->cont ();
+        } while (true);
+        if (bytes_to_skip < message_block_p->length ())
+        {
+          message_block_2 = message_block_p->duplicate ();
+          message_block_2->cont (message_block_p->cont ());
+          message_block_p->cont (message_block_2);
+          message_block_p->length (bytes_to_skip);
+          message_block_2->rd_ptr (bytes_to_skip);
+        } // end IF
+        message_block_p = message_block_p->cont ();
+        // skip over chunk delimiter
+        while (!message_block_p->length ())
+          message_block_p = message_block_p->cont ();
+        ACE_ASSERT (*message_block_p->rd_ptr () == '\r');
+        message_block_p->rd_ptr (1);
+        while (!message_block_p->length ())
+          message_block_p = message_block_p->cont ();
+        ACE_ASSERT (*message_block_p->rd_ptr () == '\n');
+        message_block_p->rd_ptr (1);
+        // skip over next chunk line
+        iterator_3 = iterator_2;
+        std::advance (iterator_3, 1);
+        ACE_ASSERT (iterator_3 != chunks_.end ());
+        bytes_to_skip = (*iterator_3).first -
+                        ((*iterator_2).first + (*iterator_2).second + 2);
+        do
+        { ACE_ASSERT (message_block_p);
+          if (bytes_to_skip <= message_block_p->length ())
+            break;
+          bytes_to_skip -= message_block_p->length ();
+          message_block_p->rd_ptr (message_block_p->length ());
+          message_block_p = message_block_p->cont ();
+        } while (true);
+        message_block_p->rd_ptr (bytes_to_skip);
+      } // end ELSE
+    } // end FOR
+    ACE_ASSERT (headFragment_->total_length () == total_data);
+  } // end ELSE
+
   inherited2::finished_ = true;
 error:
   inherited2::record_ = NULL;
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+void
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::chunk (unsigned int size_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::chunk"));
+
+  chunks_.push_back (std::make_pair (inherited2::offset (), size_in));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -422,6 +549,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
+ , chunks_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
 
@@ -500,12 +628,12 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
-
     if (headFragment_)
     {
       headFragment_->release (); headFragment_ = NULL;
     } // end IF
+    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
+    chunks_.clear ();
   } // end IF
 
   crunch_ = configuration_in.crunchMessages;
@@ -739,6 +867,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       {
         headFragment_->release (); headFragment_ = NULL;
       } // end IF
+      chunks_.clear ();
 
       // *TODO*: remove type inference
       //if (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT)
@@ -865,6 +994,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
+  DATA_T* data_p = NULL;
+  ACE_Message_Block* message_block_p = headFragment_;
+  unsigned int bytes_to_skip = 0;
 
   ACE_NEW_NORETURN (data_container_p,
                     DATA_CONTAINER_T ());
@@ -895,7 +1027,148 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     message_p = static_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
+  // frame the content
+  data_p = &const_cast<DATA_T&> (data_container_p->getR ());
+  if (chunks_.empty ())
+  {
+    // *IMPORTANT NOTE*: the parsers' offset points to the begining of the body
+    bytes_to_skip = inherited2::offset ();
+    do
+    { ACE_ASSERT (message_block_p);
+      if (bytes_to_skip <= message_block_p->length ())
+        break;
+      bytes_to_skip -= message_block_p->length ();
+      message_block_p->rd_ptr (message_block_p->length ());
+      message_block_p = message_block_p->cont ();
+    } while (true);
+    message_block_p->rd_ptr (bytes_to_skip);
+    iterator =
+        data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+    ACE_ASSERT (iterator != data_p->headers.end ());
+    std::istringstream converter;
+    converter.str ((*iterator).second);
+    converter >> bytes_to_skip;
+    ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
+  } // end IF
+  else
+  { ACE_ASSERT (!chunks_.empty ());
+    ACE_Message_Block* message_block_2 = NULL;
+    CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
+    CHUNKS_ITERATOR_T iterator_3;
+    unsigned int total_data = 0;
+    bytes_to_skip = (*iterator_2).first; // skip HTTP header + first chunk line
+    do
+    { ACE_ASSERT (message_block_p);
+      if (bytes_to_skip <= message_block_p->length ())
+        break;
+      bytes_to_skip -= message_block_p->length ();
+      message_block_p->rd_ptr (message_block_p->length ());
+      message_block_p = message_block_p->cont ();
+    } while (true);
+    message_block_p->rd_ptr (bytes_to_skip);
+    for (;
+         iterator_2 != chunks_.end ();
+         ++iterator_2)
+    {
+      total_data += (*iterator_2).second;
+      bytes_to_skip = (*iterator_2).second; // skip chunk
+      if (!bytes_to_skip) // no (more) data
+      {
+        // skip over any trailing header(s) and end delimiter
+        bytes_to_skip = inherited2::offset () - (*iterator_2).first;
+        do
+        { ACE_ASSERT (message_block_p);
+          if (bytes_to_skip <= message_block_p->length ())
+            break;
+          bytes_to_skip -= message_block_p->length ();
+          message_block_p->rd_ptr (message_block_p->length ());
+          message_block_p = message_block_p->cont ();
+        } while (true);
+        message_block_p->rd_ptr (bytes_to_skip);
+      } // end IF
+      else
+      {
+        do
+        { ACE_ASSERT (message_block_p);
+          if (bytes_to_skip <= message_block_p->length ())
+            break;
+          bytes_to_skip -= message_block_p->length ();
+          message_block_p = message_block_p->cont ();
+        } while (true);
+        if (bytes_to_skip < message_block_p->length ())
+        {
+          message_block_2 = message_block_p->duplicate ();
+          message_block_2->cont (message_block_p->cont ());
+          message_block_p->cont (message_block_2);
+          message_block_p->length (bytes_to_skip);
+          message_block_2->rd_ptr (bytes_to_skip);
+        } // end IF
+        message_block_p = message_block_p->cont ();
+        // skip over chunk delimiter
+        while (!message_block_p->length ())
+          message_block_p = message_block_p->cont ();
+        ACE_ASSERT (*message_block_p->rd_ptr () == '\r');
+        message_block_p->rd_ptr (1);
+        while (!message_block_p->length ())
+          message_block_p = message_block_p->cont ();
+        ACE_ASSERT (*message_block_p->rd_ptr () == '\n');
+        message_block_p->rd_ptr (1);
+        // skip over next chunk line
+        iterator_3 = iterator_2;
+        std::advance (iterator_3, 1);
+        ACE_ASSERT (iterator_3 != chunks_.end ());
+        bytes_to_skip = (*iterator_3).first -
+                        ((*iterator_2).first + (*iterator_2).second + 2);
+        do
+        { ACE_ASSERT (message_block_p);
+          if (bytes_to_skip <= message_block_p->length ())
+            break;
+          bytes_to_skip -= message_block_p->length ();
+          message_block_p->rd_ptr (message_block_p->length ());
+          message_block_p = message_block_p->cont ();
+        } while (true);
+        message_block_p->rd_ptr (bytes_to_skip);
+      } // end ELSE
+    } // end FOR
+    ACE_ASSERT (headFragment_->total_length () == total_data);
+  } // end ELSE
+
   inherited2::finished_ = true;
 error:
   inherited2::record_ = NULL;
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename StatisticContainerType,
+          typename TimerManagerType,
+          typename UserDataType>
+void
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      TimerManagerType,
+                      UserDataType>::chunk (unsigned int size_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::chunk"));
+
+  chunks_.push_back (std::make_pair (inherited2::offset (), size_in));
 }

@@ -21,21 +21,20 @@
 #ifndef HTTP_MODULE_PARSER_H
 #define HTTP_MODULE_PARSER_H
 
+#include <utility>
+#include <vector>
+
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
-//#include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
-//#include "stream_task_base_synch.h"
 
 #include "http_common.h"
 #include "http_defines.h"
-//#include "http_exports.h"
 #include "http_iparser.h"
 #include "http_parser_driver.h"
 
-//extern HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[];
 extern const char libacenetwork_protocol_default_http_parser_module_name_string[];
 
 // forward declaration(s)
@@ -98,16 +97,23 @@ class HTTP_Module_Parser_T
 
   // implement (part of) HTTP_IParser
   virtual void record (struct HTTP_Record*&); // data record
+  inline virtual unsigned int currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); }; // current chunk size
   inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  virtual void chunk (unsigned int); // size
 
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
+  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
   // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
-  bool             crunch_;
+  bool     crunch_;
+
+  //                            offset        size
+  typedef std::vector<std::pair<unsigned int, unsigned int> > CHUNKS_T;
+  typedef CHUNKS_T::const_iterator CHUNKS_ITERATOR_T;
+  CHUNKS_T chunks_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -216,16 +222,23 @@ class HTTP_Module_ParserH_T
 
   // implement (part of) HTTP_IParser
   virtual void record (struct HTTP_Record*&); // data record
+  inline virtual unsigned int currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); }; // current chunk size
   inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  virtual void chunk (unsigned int); // size
 
   // convenience types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
+  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
   // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
-  bool             crunch_;
+  bool     crunch_;
+
+  //                            offset        size
+  typedef std::vector<std::pair<unsigned int, unsigned int> > CHUNKS_T;
+  typedef CHUNKS_T::const_iterator CHUNKS_ITERATOR_T;
+  CHUNKS_T chunks_;
 };
 
 // include template definition

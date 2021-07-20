@@ -100,6 +100,8 @@ typedef void* yyscan_t;
 extern int yydebug;
 #define YYERROR_VERBOSE 1
 #define YYLTYPE_IS_DECLARED 1
+
+#undef YYTOKENTYPE
 }
 
 // calling conventions / parameter passing
@@ -219,14 +221,13 @@ void yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);
 
 %%
 %start              message;
-
 message:            head "delimiter" body            { $$ = $1 + $2 + $3; };
 head:               "method" head_rest1              { $$ = $1->size () + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.method =
                                                          HTTP_Tools::MethodToType (*$1);
-                                                     };
+                                                     }
                     | "version" head_rest2           { $$ = $1->size () + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
@@ -254,20 +255,20 @@ head:               "method" head_rest1              { $$ = $1->size () + $2 + 1
 
                                                        record_r.version =
                                                            HTTP_Tools::VersionToType (match_results[1].str ());
-                                                     };
-head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; };
+                                                     }
+head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; }
 request_line_rest1: "uri" request_line_rest2         { $$ = $1->size () + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.URI = *$1;
-                                                     };
+                                                     }
 request_line_rest2: "version"                        { $$ = $1->size () + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.version =
                                                          HTTP_Tools::VersionToType (*$1);
-                                                     };
-head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; };
+                                                     }
+head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; }
 status_line_rest1:  "status" status_line_rest2       { $$ = $1->size () + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
@@ -277,12 +278,12 @@ status_line_rest1:  "status" status_line_rest2       { $$ = $1->size () + $2 + 1
                                                        converter >> status;
                                                        record_r.status =
                                                            static_cast<HTTP_Status_t> (status);
-                                                     };
+                                                     }
 status_line_rest2:  "reason"                         { $$ = $1->size () + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.reason = *$1;
-                                                     };
+                                                     }
 headers:            headers "header"                 { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
                                                                  act on any set transfer encoding. */
@@ -322,47 +323,64 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                            ACE_DEBUG ((LM_ERROR,
                                                                        ACE_TEXT ("caught exception in HTTP_IParser::encoding(), continuing\n")));
                                                          }
-                                                       } };
-                    |                                { $$ = 0; };
+                                                       } // end IF
+                                                     }
+                    |                                { $$ = 0; }
 /*                    | %empty                         { $$ = 0; }; */
 body:               "body"                           { $$ = $1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-                                                       HTTP_HeadersIterator_t iterator =
-                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-                                                       ACE_ASSERT (iterator != record_r.headers.end ());
-                                                       std::istringstream converter;
-                                                       converter.str ((*iterator).second);
-                                                       unsigned int content_length = 0;
-                                                       converter >> content_length;
-                                                       if ($1 == static_cast<int> (content_length))
-                                                       {
-                                                         struct HTTP_Record* record_p =
-                                                           &record_r;
-                                                         try {
-                                                           iparser_p->record (record_p);
-                                                         } catch (...) {
-                                                           ACE_DEBUG ((LM_ERROR,
-                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
-                                                         }
-                                                         YYACCEPT;
-                                                       } };
-                    | "chunk" chunked_body           { $$ = $1 + $2; };
-chunked_body:       chunks headers "delimiter"     { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-                                                     struct HTTP_Record& record_r =
-                                                       iparser_p->current ();
-                                                     struct HTTP_Record* record_p =
-                                                       &record_r;
-                                                     try {
-                                                       iparser_p->record (record_p);
-                                                     } catch (...) {
-                                                       ACE_DEBUG ((LM_ERROR,
-                                                                   ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+//                                                       HTTP_HeadersIterator_t iterator =
+//                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+//                                                       ACE_ASSERT (iterator != record_r.headers.end ());
+//                                                       std::istringstream converter;
+//                                                       converter.str ((*iterator).second);
+//                                                       unsigned int content_length = 0;
+//                                                       converter >> content_length;
+//                                                       ACE_ASSERT ($1 == static_cast<int> (content_length));
+                                                       struct HTTP_Record* record_p =
+                                                         &record_r;
+                                                       try {
+                                                         iparser_p->record (record_p);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                       }
+                                                       YYACCEPT;
                                                      }
-                                                     YYACCEPT; };
-chunks:             "chunk" chunks                   { $$ = $1 + $2; };
-                    |                                { $$ = 0; };
-/*                    | %empty                         { $$ = 0; }; */
+                    | "chunk"                        {
+                                                       try {
+                                                         iparser_p->chunk ($1);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::chunk(), continuing\n")));
+                                                       }
+                                                     }
+                      chunked_body                   { $$ = $1; }
+chunked_body:       chunks headers "delimiter"       { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       struct HTTP_Record* record_p =
+                                                         &record_r;
+                                                       try {
+                                                         iparser_p->record (record_p);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                   ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                       }
+                                                       YYACCEPT;
+                                                     }
+chunks:             "chunk"                          {
+                                                       try {
+                                                         iparser_p->chunk ($1);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::chunk(), continuing\n")));
+                                                       }
+                                                     }
+                    chunks                           { $$ = $1; }
+                    |                                { $$ = 0; }
+/*                    | %empty                         { $$ = 0; } */
 %%
 
 /*

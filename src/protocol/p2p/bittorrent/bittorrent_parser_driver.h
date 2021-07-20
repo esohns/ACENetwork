@@ -69,18 +69,15 @@ class BitTorrent_ParserDriver
   virtual void error (const yy::location&, // location
                       const std::string&); // message
 //  virtual void error (const std::string&); // message
-  inline virtual struct BitTorrent_PeerRecord& current () { ACE_ASSERT (record_); return *record_; }
+  inline virtual struct BitTorrent_PeerRecord& current () { struct BitTorrent_PeerRecord dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
 
   ////////////////////////////////////////
   // callbacks
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void record (struct BitTorrent_PeerRecord*&); // data record
-  virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
+  virtual void record (struct BitTorrent_PeerRecord*&) = 0; // data record
+  virtual void handshake (struct BitTorrent_PeerHandShake*&) = 0; // handshake
 
   inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-
-  struct BitTorrent_PeerHandShake* handShake_;
-  struct BitTorrent_PeerRecord*    record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver (const BitTorrent_ParserDriver&))
@@ -99,8 +96,5 @@ class BitTorrent_ParserDriver
   inline virtual void destroy (yyscan_t state_in, struct yy_buffer_state*& buffer_inout) { BitTorrent_Scanner__delete_buffer (buffer_inout, state_in); buffer_inout = NULL; }
   inline virtual bool lex () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
 };
-
-// include template definition
-//#include "bittorrent_parser_driver.inl"
 
 #endif

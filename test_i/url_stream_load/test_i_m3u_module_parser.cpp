@@ -87,10 +87,9 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
 
   const Test_I_MessageDataContainer& data_container_r = message_inout->getR ();
   const Test_I_MessageData& data_r = data_container_r.getR ();
-  ACE_ASSERT (data_r.HTTPRecord);
-  HTTP_HeadersIterator_t iterator =
-    data_r.HTTPRecord->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-  ACE_ASSERT (iterator != data_r.HTTPRecord->headers.end ());
+  HTTP_HeadersConstIterator_t iterator =
+    data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+  ACE_ASSERT (iterator != data_r.headers.end ());
   std::istringstream converter;
   converter.str ((*iterator).second);
   unsigned int content_length = 0;

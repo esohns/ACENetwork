@@ -43,9 +43,12 @@ class HTTP_IParser
 
   using IPARSER_T::error;
 
+  virtual unsigned int currentChunkSize () = 0; // current chunk size
+
   ////////////////////////////////////////
   // callbacks
   virtual void encoding (const std::string&) = 0; // encoding
+  virtual void chunk (unsigned int) = 0; // size
 };
 
 #endif

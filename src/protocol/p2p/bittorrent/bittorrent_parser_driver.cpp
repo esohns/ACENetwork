@@ -24,7 +24,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
 #include "ace/Message_Queue.h"
-//#include "ace/Synch.h"
 
 #include "net_macros.h"
 
@@ -37,12 +36,9 @@
 
 BitTorrent_ParserDriver::BitTorrent_ParserDriver ()
  : inherited ()
- , handShake_ (NULL)
- , record_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::BitTorrent_ParserDriver"));
 
-//  inherited::parser_.set (this);
 }
 
 void
@@ -102,32 +98,6 @@ BitTorrent_ParserDriver::error (const yy::location& location_in,
 
 ////   std::clog << message_in << std::endl;
 //}
-
-void
-BitTorrent_ParserDriver::record (struct BitTorrent_PeerRecord*& record_inout)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::record"));
-
-  // sanity check(s)
-  ACE_ASSERT (record_inout);
-
-  ACE_ASSERT (false);
-
-  record_inout = NULL;
-}
-
-void
-BitTorrent_ParserDriver::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::handshake"));
-
-  // sanity check(s)
-  ACE_ASSERT (handShake_inout);
-
-  ACE_ASSERT (false);
-
-  handShake_inout = NULL;
-}
 
 bool
 BitTorrent_ParserDriver::initialize (yyscan_t& state_inout, struct Common_ScannerState* scannerState_in)

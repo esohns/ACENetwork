@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.  */
+/* A Bison parser, made by GNU Bison 3.7.4.  */
 
 /* Skeleton interface for Bison GLR parsers in C
 
-   Copyright (C) 2002-2015, 2018-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -92,24 +92,29 @@ extern int yydebug;
 #define YYLTYPE_IS_DECLARED 1
 
 
-/* Token type.  */
-//#ifndef YYTOKENTYPE
+/* Token kinds.  */
+#undef YYTOKENTYPE
+#ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    END = 0,
-    METHOD = 258,
-    URI = 259,
-    _VERSION = 260,
-    HEADER = 261,
-    DELIMITER = 262,
-    STATUS = 263,
-    REASON = 264,
-    BODY = 265,
-    CHUNK = 266,
-    END_OF_FRAGMENT = 267
+    YYEMPTY = -2,
+    END = 0,                       /* "end"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    METHOD = 258,                  /* "method"  */
+    URI = 259,                     /* "uri"  */
+    _VERSION = 260,                /* "version"  */
+    HEADER = 261,                  /* "header"  */
+    DELIMITER = 262,               /* "delimiter"  */
+    STATUS = 263,                  /* "status"  */
+    REASON = 264,                  /* "reason"  */
+    BODY = 265,                    /* "body"  */
+    CHUNK = 266,                   /* "chunk"  */
+    END_OF_FRAGMENT = 267          /* "end_of_fragment"  */
   };
-//#endif
+  typedef enum yytokentype yytoken_kind_t;
+#endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
