@@ -487,7 +487,15 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              HTTP_HeadersIterator_t iterator =
                                  record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              if (iterator != record_r.headers.end ())
-                               BEGIN (body);
+                             {
+                               converter.str ((*iterator).second);
+                               converter.clear ();
+                               converter >> content_length_or_chunk_size;
+                               if (!content_length_or_chunk_size)
+                                 BEGIN (INITIAL); // no data
+                               else
+                                 BEGIN (body);
+                             } // end IF
                              else
                              {
                                iterator =

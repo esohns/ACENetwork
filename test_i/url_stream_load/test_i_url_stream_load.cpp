@@ -192,7 +192,6 @@ do_process_arguments (int argc_in,
 #endif // GUI_SUPPORT
                       std::string& fileName_out,
                       std::string& UIDefinitonFileName_out,
-                      std::string& hostName_out,
                       bool& logToFile_out,
                       unsigned short& port_out,
                       bool& useReactor_out,
@@ -200,6 +199,7 @@ do_process_arguments (int argc_in,
                       bool& traceInformation_out,
                       std::string& URL_out,
                       bool& printVersionAndExit_out,
+                      std::string& hostName_out,
                       ACE_INET_Addr& remoteHost_out,
                       bool& useSSL_out)
 {
@@ -233,7 +233,6 @@ do_process_arguments (int argc_in,
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
-  hostName_out.clear ();
   logToFile_out = false;
   port_out = 0;
   useReactor_out = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -243,6 +242,7 @@ do_process_arguments (int argc_in,
   traceInformation_out = false;
   URL_out = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   printVersionAndExit_out = false;
+  hostName_out.clear ();
   int result =
     remoteHost_out.set (static_cast<u_short> (HTTP_DEFAULT_SERVER_PORT),
                         static_cast<ACE_UINT32> (INADDR_LOOPBACK),
@@ -1095,7 +1095,6 @@ ACE_TMAIN (int argc_in,
 #endif // GUI_SUPPORT
                              output_file,
                              ui_definition_file,
-                             hostname,
                              log_to_file,
                              port,
                              use_reactor,
@@ -1103,6 +1102,7 @@ ACE_TMAIN (int argc_in,
                              trace_information,
                              url,
                              print_version_and_exit,
+                             hostname,
                              address,
                              use_ssl))
   {

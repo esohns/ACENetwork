@@ -96,9 +96,6 @@ class BitTorrent_Module_PeerParser_T
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
- protected:
-  DataMessageType* headFragment_;
-
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_PeerParser_T (const BitTorrent_Module_PeerParser_T&))
@@ -114,6 +111,8 @@ class BitTorrent_Module_PeerParser_T
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void record (struct BitTorrent_PeerRecord*&); // data record
   virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
+
+  DataMessageType* headFragment_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

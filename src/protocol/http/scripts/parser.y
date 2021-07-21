@@ -357,6 +357,28 @@ body:               "body"                           { $$ = $1;
                                                        }
                                                      }
                       chunked_body                   { $$ = $1; }
+                    |                                { $$ = 0;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       HTTP_HeadersIterator_t iterator =
+                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                                                       ACE_ASSERT (iterator != record_r.headers.end ());
+                                                       std::istringstream converter;
+                                                       converter.str ((*iterator).second);
+                                                       unsigned int content_length = 0;
+                                                       converter >> content_length;
+                                                       ACE_ASSERT (!content_length);
+                                                       struct HTTP_Record* record_p =
+                                                         &record_r;
+                                                       try {
+                                                         iparser_p->record (record_p);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                       }
+                                                       YYACCEPT;
+                                                     }
+/*                    | %empty                         { $$ = 0; }; */
 chunked_body:       chunks headers "delimiter"       { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
