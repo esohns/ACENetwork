@@ -406,7 +406,7 @@ typedef int yytype_uint16;
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  15
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  19
+#define YYNRULES  20
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  31
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
@@ -462,8 +462,9 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   222,   222,   223,   229,   257,   258,   263,   269,   270,
-     280,   285,   326,   328,   349,   349,   358,   371,   371,   380
+       0,   224,   224,   225,   231,   259,   260,   265,   271,   272,
+     282,   287,   328,   330,   351,   351,   360,   382,   395,   395,
+     404
 };
 #endif
 
@@ -486,9 +487,9 @@ static const yytype_int8 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     0,     3,    12,     0,     4,
-      12,     1,     0,     7,     6,     5,    10,     9,     8,    13,
-      14,     2,    11,    19,    17,    15,    12,    19,     0,    18,
-      16
+      12,     1,    16,     7,     6,     5,    10,     9,     8,    13,
+      14,     2,    11,    20,    18,    15,    12,    20,     0,    19,
+      17
 };
 
   /* YYPGOTO[NTERM-NUM].  */
@@ -534,14 +535,16 @@ static const yytype_int8 yystos[] =
 static const yytype_int8 yyr1[] =
 {
        0,    13,    14,    15,    15,    16,    17,    18,    19,    20,
-      21,    22,    22,    23,    24,    23,    25,    27,    26,    26
+      21,    22,    22,    23,    24,    23,    23,    25,    27,    26,
+      26
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     3,     2,     2,     2,     2,     1,     2,     2,
-       1,     2,     0,     1,     0,     3,     3,     0,     3,     0
+       1,     2,     0,     1,     0,     3,     0,     3,     0,     3,
+       0
 };
 
 
@@ -549,14 +552,16 @@ static const yytype_int8 yyr2[] =
 static const yytype_int8 yydprec[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0
 };
 
 /* YYMERGER[RULE-NUM] -- Index of merging function for rule #RULE-NUM.  */
 static const yytype_int8 yymerger[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0
 };
 
 /* YYIMMEDIATE[RULE-NUM] -- True iff rule #RULE-NUM is not to be deferred, as
@@ -564,7 +569,8 @@ static const yytype_int8 yymerger[] =
 static const yybool yyimmediate[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0
 };
 
 /* YYCONFLP[YYPACT[STATE-NUM]] -- Pointer into YYCONFL of start of
@@ -1416,7 +1422,31 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 16: /* chunked_body: chunks headers "delimiter"  */
+  case 16: /* body: %empty  */
+                                                     { ((*yyvalp).ival) = 0;
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       HTTP_HeadersIterator_t iterator =
+                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                                                       ACE_ASSERT (iterator != record_r.headers.end ());
+                                                       std::istringstream converter;
+                                                       converter.str ((*iterator).second);
+                                                       unsigned int content_length = 0;
+                                                       converter >> content_length;
+                                                       ACE_ASSERT (!content_length);
+                                                       struct HTTP_Record* record_p =
+                                                         &record_r;
+                                                       try {
+                                                         iparser_p->record (record_p);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                       }
+                                                       YYACCEPT;
+                                                     }
+    break;
+
+  case 17: /* chunked_body: chunks headers "delimiter"  */
                                                      { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
@@ -1432,7 +1462,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      }
     break;
 
-  case 17: /* $@2: %empty  */
+  case 18: /* $@2: %empty  */
                                                      {
                                                        try {
                                                          iparser_p->chunk ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival));
@@ -1443,11 +1473,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      }
     break;
 
-  case 18: /* chunks: "chunk" $@2 chunks  */
+  case 19: /* chunks: "chunk" $@2 chunks  */
                                                      { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 19: /* chunks: %empty  */
+  case 20: /* chunks: %empty  */
                                                      { ((*yyvalp).ival) = 0; }
     break;
 

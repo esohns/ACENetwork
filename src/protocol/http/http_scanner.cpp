@@ -76742,8 +76742,8 @@ static const yy_state_type yy_NUL_trans[2386] =
 static const flex_int32_t yy_rule_linenum[23] =
     {   0,
       354,  358,  364,  375,  386,  397,  405,  413,  421,  428,
-      439,  450,  461,  469,  477,  485,  537,  568,  597,  605,
-      619,  662
+      439,  450,  461,  469,  477,  485,  545,  576,  605,  613,
+      627,  670
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -77588,7 +77588,15 @@ YY_RULE_SETUP
                              HTTP_HeadersIterator_t iterator =
                                  record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              if (iterator != record_r.headers.end ())
-                               BEGIN (body);
+                             {
+                               converter.str ((*iterator).second);
+                               converter.clear ();
+                               converter >> content_length_or_chunk_size;
+                               if (!content_length_or_chunk_size)
+                                 BEGIN (INITIAL); // no data
+                               else
+                                 BEGIN (body);
+                             } // end IF
                              else
                              {
                                iterator =
