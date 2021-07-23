@@ -111,6 +111,7 @@ METAINFO_KEY_FILES_VALUE          (ld({METAINFO_KEY_FILES_DICTIONARY_KEY}({INTEG
 METAINFO_FILE                     {DICTIONARY}
 
 %s state_string
+%s state_string_2
 %s state_integer
 %s state_list
 %s state_dictionary_key
@@ -166,7 +167,11 @@ METAINFO_FILE                     {DICTIONARY}
                            ACE_ASSERT (yylval->sval);
                            yy_pop_state ();
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
-                         } }
+                         } // end IF
+                         BEGIN(state_string_2);
+                         yy_push_state (state_string_2); }
+} // end <state_string>
+<state_string_2>{
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
 //                         yylloc->columns (string_length);
                          ACE_NEW_NORETURN (yylval->sval,
@@ -175,9 +180,9 @@ METAINFO_FILE                     {DICTIONARY}
                          yylval->sval->push_back (yytext[0]);
                          for (unsigned int i = 0; i < (string_length - 1); ++i)
                            yylval->sval->push_back (yyinput ());
-                         yy_pop_state ();
+                         yy_pop_state (); yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::STRING; }
-} // end <state_string>
+} // end <state_string_2>
 <state_integer>{
 "e"                    { ACE_ASSERT (yyleng == 1);
                          yy_pop_state (); }

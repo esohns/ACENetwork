@@ -644,8 +644,8 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   parser_configuration.messageQueue = NULL;
 
   // parse bencoded record
-  PARSER_T parser (parser_configuration.debugScanner,
-                   parser_configuration.debugParser);
+  PARSER_T parser (false, //parser_configuration.debugScanner,
+                   false /*parser_configuration.debugParser*/);
   if (!parser.initialize (parser_configuration))
   {
     ACE_DEBUG ((LM_ERROR,

@@ -310,8 +310,8 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   ACE_ASSERT (!metaInfo_out);
 
   bool block_in_parse = configuration_in.block;
-  BitTorrent_Bencoding_ParserDriver parser (configuration_in.debugScanner,
-                                            configuration_in.debugParser);
+  BitTorrent_Bencoding_ParserDriver parser (false, //configuration_in.debugScanner,
+                                            false /*configuration_in.debugParser*/);
 
   const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
     false;
