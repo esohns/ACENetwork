@@ -153,24 +153,24 @@ class BitTorrent_Session_T
   // convenient types
   typedef TrackerConnectorType TRACKER_CONNECTOR_T;
 
-  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
-                                         Common_TimePolicy_t,
-                                         PeerModuleHandlerConfigurationType,
-                                         typename PeerStreamType::CONTROL_MESSAGE_T,
-                                         typename PeerStreamType::MESSAGE_T,
-                                         typename PeerStreamType::SESSION_MESSAGE_T,
-                                         Stream_SessionId_t,
-                                         typename PeerStreamType::SESSION_DATA_T,
-                                         PeerUserDataType> PEER_MESSAGEHANDLER_T;
-  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
-                                         Common_TimePolicy_t,
-                                         TrackerModuleHandlerConfigurationType,
-                                         typename TrackerStreamType::CONTROL_MESSAGE_T,
-                                         typename TrackerStreamType::MESSAGE_T,
-                                         typename TrackerStreamType::SESSION_MESSAGE_T,
-                                         Stream_SessionId_t,
-                                         typename TrackerStreamType::SESSION_DATA_T,
-                                         TrackerUserDataType> TRACKER_MESSAGEHANDLER_T;
+  typedef Stream_Module_MessageHandlerA_T<ACE_MT_SYNCH,
+                                          Common_TimePolicy_t,
+                                          PeerModuleHandlerConfigurationType,
+                                          typename PeerStreamType::CONTROL_MESSAGE_T,
+                                          typename PeerStreamType::MESSAGE_T,
+                                          typename PeerStreamType::SESSION_MESSAGE_T,
+                                          Stream_SessionId_t,
+                                          typename PeerStreamType::SESSION_DATA_T,
+                                          PeerUserDataType> PEER_MESSAGEHANDLER_T;
+  typedef Stream_Module_MessageHandlerA_T<ACE_MT_SYNCH,
+                                          Common_TimePolicy_t,
+                                          TrackerModuleHandlerConfigurationType,
+                                          typename TrackerStreamType::CONTROL_MESSAGE_T,
+                                          typename TrackerStreamType::MESSAGE_T,
+                                          typename TrackerStreamType::SESSION_MESSAGE_T,
+                                          Stream_SessionId_t,
+                                          typename TrackerStreamType::SESSION_DATA_T,
+                                          TrackerUserDataType> TRACKER_MESSAGEHANDLER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          Stream_SessionId_t,

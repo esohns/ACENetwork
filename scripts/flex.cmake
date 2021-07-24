@@ -1,3 +1,7 @@
+if (WIN32)
+ set (FLEX_EXECUTABLE "H:\\bin\\flex_bison\\win_flex.exe" CACHE PATH "Flex executable")
+endif (WIN32)
+
 find_package (FLEX)
 if (FLEX_FOUND)
  message (STATUS "Found flex \"${FLEX_EXECUTABLE}\"")

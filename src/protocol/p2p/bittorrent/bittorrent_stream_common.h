@@ -126,6 +126,7 @@ struct BitTorrent_PeerModuleHandlerConfiguration
   BitTorrent_PeerModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    , destination ()
+   , outboundStreamName ()
    , protocolConfiguration (NULL)
    //, session (NULL)
 //   , streamConfiguration (NULL)
@@ -136,6 +137,7 @@ struct BitTorrent_PeerModuleHandlerConfiguration
   }
 
   std::string                              destination; // folder
+  std::string                              outboundStreamName; // aggregator
   struct BitTorrent_ProtocolConfiguration* protocolConfiguration;
   //BitTorrent_ISession_t*                   session;
 //  struct BitTorrent_StreamConfiguration*   streamConfiguration;
@@ -149,6 +151,7 @@ struct BitTorrent_TrackerModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
 //   , CBData (NULL)
    , destination ()
+   , outboundStreamName ()
    , protocolConfiguration (NULL)
    //, session (NULL)
 //   , streamConfiguration (NULL)
@@ -158,6 +161,7 @@ struct BitTorrent_TrackerModuleHandlerConfiguration
 
 //  struct Common_UI_GTKState*               CBData;
   std::string                              destination; // folder
+  std::string                              outboundStreamName; // aggregator
   struct BitTorrent_ProtocolConfiguration* protocolConfiguration;
   //BitTorrent_ISession_t*                   session;
 //  struct BitTorrent_StreamConfiguration*   streamConfiguration;

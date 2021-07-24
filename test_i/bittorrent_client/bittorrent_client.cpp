@@ -525,6 +525,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   ACE_ASSERT (peer_connection_manager_p);
   ACE_ASSERT (tracker_connection_manager_p);
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
+  allocator_configuration.defaultBufferSize = BITTORRENT_BUFFER_SIZE;
   Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                                      BITTORRENT_BUFFER_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (allocator_configuration))

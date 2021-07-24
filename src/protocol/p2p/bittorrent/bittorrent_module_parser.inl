@@ -311,7 +311,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
 //    headFragment_ = NULL;
 //  } // end lock scope
 
-continue_:
+//continue_:
 error:
   if (release_inbound_message)
   {

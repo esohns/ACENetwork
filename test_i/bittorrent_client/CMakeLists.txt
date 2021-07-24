@@ -168,15 +168,6 @@ if (UNIX)
  add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
 endif (UNIX)
 
-set (LLVM_COMPILER_ID_STRING "Clang")
-string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
-string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
-if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
- add_compile_options (-std=c++11)
-#add_compile_options (-fPIC)
- add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
-endif ()
-
 set (EXECUTABLE bittorrent_client)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -394,11 +385,13 @@ elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl OPENSSL_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ImageMagick IMAGEMAGICK_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${ACE_LIB_PATH}
                            ${OPENSSL_LIB_PATH}
                            ${FFMPEG_LIB_PATH}
-                           ${GTK_LIB_PATH})
+                           ${GTK_LIB_PATH}
+                           ${IMAGEMAGICK_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
                          ARGS "-l -t"
 #                        FORWARD_ARGS

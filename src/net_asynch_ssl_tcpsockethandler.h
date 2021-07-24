@@ -28,16 +28,20 @@
 #include "ace/Notification_Strategy.h"
 #include "ace/SSL/SSL_Asynch_Stream.h"
 
-#include "common_referencecounter_base.h"
+#include "common_counter.h"
 
 #include "net_sockethandler_base.h"
 
 template <typename ConfigurationType>
 class Net_AsynchSSLTCPSocketHandler_T
- : public Net_SocketHandlerBase_T<ConfigurationType>
+ : public Net_AsynchSocketHandlerBase_T<ConfigurationType>
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
 {
+  typedef Net_AsynchSocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Service_Handler inherited2;
+  typedef ACE_Notification_Strategy inherited3;
+
  public:
   virtual ~Net_AsynchSSLTCPSocketHandler_T ();
 
@@ -58,6 +62,9 @@ class Net_AsynchSSLTCPSocketHandler_T
                       ACE_Reactor_Mask);  // mask
 
  protected:
+  // convenient types
+  typedef Common_Counter_T<ACE_MT_SYNCH> COUNTER_T;
+
   Net_AsynchSSLTCPSocketHandler_T ();
 
   // helper method(s)
@@ -67,15 +74,12 @@ class Net_AsynchSSLTCPSocketHandler_T
 
 //  ACE_Message_Block*          buffer_;
   // the number of open write (i.e. send) requests
-  Common_ReferenceCounterBase counter_;
-  ACE_SSL_Asynch_Stream       stream_;
-  ACE_INET_Addr               localSAP_;
-  ACE_INET_Addr               remoteSAP_;
+  mutable COUNTER_T     counter_;
+  ACE_SSL_Asynch_Stream stream_;
+  ACE_INET_Addr         localSAP_;
+  ACE_INET_Addr         remoteSAP_;
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Service_Handler inherited2;
-  typedef ACE_Notification_Strategy inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSSLTCPSocketHandler_T (const Net_AsynchSSLTCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSSLTCPSocketHandler_T& operator= (const Net_AsynchSSLTCPSocketHandler_T&))

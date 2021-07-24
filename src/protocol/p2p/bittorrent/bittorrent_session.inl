@@ -452,6 +452,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   inherited::connect (id_in);
 
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: new peer connection (id: %d)\n"),
+              ACE_TEXT (ACE::basename (metaInfoFileName_.c_str (),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              id_in));
+
   struct BitTorrent_PeerStatus peer_status;
   struct BitTorrent_PeerHandShake* record_p = NULL;
   struct BitTorrent_PeerMessageData* data_p = NULL;

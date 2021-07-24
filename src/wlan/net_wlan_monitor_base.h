@@ -285,7 +285,7 @@ class Net_WLAN_Monitor_Base_T
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual bool lock (bool = true) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual int unlock (bool = false) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
-  inline virtual const ACE_MT_SYNCH::MUTEX& getR () const { ACE_MT_SYNCH::MUTEX lock; return lock; }
+  inline virtual const ACE_MT_SYNCH::MUTEX& getR_2 () const { ACE_MT_SYNCH::MUTEX lock; return lock; }
   inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void wait (bool = true) const { ACE_NOTSUP; ACE_NOTREACHED (return;) }
