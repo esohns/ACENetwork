@@ -804,19 +804,24 @@ namespace yy {
     break;
 
   case 3: // session: "handshake" $@1 messages
-                               { //$$ = 67 + $2; // 19 + 8 + 20 + 20
+                               { (yylhs.value.size) = 67 + (yystack_[0].value.size); // 19 + 8 + 20 + 20
                                  YYACCEPT; }
     break;
 
-  case 4: // messages: messages message
+  case 4: // session: messages
+                               { (yylhs.value.size) = (yystack_[0].value.size);
+                                 YYACCEPT; }
+    break;
+
+  case 5: // messages: messages message
                                { (yylhs.value.size) = (yystack_[1].value.size) + (yystack_[0].value.size); }
     break;
 
-  case 5: // messages: %empty
+  case 6: // messages: %empty
                                { (yylhs.value.size) = 0; }
     break;
 
-  case 6: // message: "bitfield"
+  case 7: // message: "bitfield"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -826,10 +831,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 7: // message: "cancel"
+  case 8: // message: "cancel"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -839,10 +845,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 8: // message: "choke"
+  case 9: // message: "choke"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -852,10 +859,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 9: // message: "have"
+  case 10: // message: "have"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -865,10 +873,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 10: // message: "interested"
+  case 11: // message: "interested"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -878,10 +887,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 11: // message: "keep-alive"
+  case 12: // message: "keep-alive"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -891,10 +901,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 12: // message: "not_interested"
+  case 13: // message: "not_interested"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -904,10 +915,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 13: // message: "piece"
+  case 14: // message: "piece"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -917,10 +929,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 14: // message: "port"
+  case 15: // message: "port"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -930,10 +943,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 15: // message: "request"
+  case 16: // message: "request"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -943,10 +957,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 16: // message: "unchoke"
+  case 17: // message: "unchoke"
                                { (yylhs.value.size) = (yystack_[0].value.record)->length + 4;
                                  ACE_ASSERT ((yystack_[0].value.record));
                                  struct BitTorrent_PeerRecord* record_p =
@@ -956,10 +971,11 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 } }
+                                 }
+                                 YYACCEPT; }
     break;
 
-  case 17: // message: "end_of_fragment"
+  case 18: // message: "end_of_fragment"
                                { (yylhs.value.size) = (yystack_[0].value.size); }
     break;
 
@@ -1319,62 +1335,62 @@ namespace yy {
   const signed char
   BitTorrent_Parser::yypact_[] =
   {
-       9,    -5,    13,    -5,    -5,    -4,    -5,    -5,    -5,    -5,
-      -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5
+       9,    -5,    13,    -4,    -5,    -5,    -5,    -5,    -5,    -5,
+      -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5,    -4
   };
 
   const signed char
   BitTorrent_Parser::yydefact_[] =
   {
-       0,     2,     0,     5,     1,     3,     6,     7,     8,     9,
-      10,    11,    12,    13,    14,    15,    16,    17,     4
+       6,     2,     0,     4,     6,     1,     7,     8,     9,    10,
+      11,    12,    13,    14,    15,    16,    17,    18,     5,     3
   };
 
   const signed char
   BitTorrent_Parser::yypgoto_[] =
   {
-      -5,    -5,    -5,    -5,    -5
+      -5,    -5,    -5,    10,    -5
   };
 
   const signed char
   BitTorrent_Parser::yydefgoto_[] =
   {
-      -1,     2,     3,     5,    18
+      -1,     2,     4,     3,    18
   };
 
   const signed char
   BitTorrent_Parser::yytable_[] =
   {
        6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
-      16,    17,     1,     4
+      16,    17,     1,     5,    19
   };
 
   const signed char
   BitTorrent_Parser::yycheck_[] =
   {
        4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
-      14,    15,     3,     0
+      14,    15,     3,     0,     4
   };
 
   const signed char
   BitTorrent_Parser::yystos_[] =
   {
-       0,     3,    17,    18,     0,    19,     4,     5,     6,     7,
-       8,     9,    10,    11,    12,    13,    14,    15,    20
+       0,     3,    17,    19,    18,     0,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    20,    19
   };
 
   const signed char
   BitTorrent_Parser::yyr1_[] =
   {
-       0,    16,    18,    17,    19,    19,    20,    20,    20,    20,
-      20,    20,    20,    20,    20,    20,    20,    20
+       0,    16,    18,    17,    17,    19,    19,    20,    20,    20,
+      20,    20,    20,    20,    20,    20,    20,    20,    20
   };
 
   const signed char
   BitTorrent_Parser::yyr2_[] =
   {
-       0,     2,     0,     3,     2,     0,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1,     1,     1
+       0,     2,     0,     3,     1,     2,     0,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     1
   };
 
 
@@ -1397,8 +1413,8 @@ namespace yy {
   const short
   BitTorrent_Parser::yyrline_[] =
   {
-       0,   223,   223,   223,   234,   235,   237,   247,   257,   267,
-     277,   287,   297,   307,   317,   327,   337,   347
+       0,   223,   223,   223,   234,   236,   237,   239,   250,   261,
+     272,   283,   294,   305,   316,   327,   338,   349,   360
   };
 
   void

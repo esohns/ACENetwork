@@ -196,6 +196,9 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             ACE_ASSERT (yylval->handshake);
                             yylval->handshake->pstr.assign (yytext + 1, 19);
                             BEGIN (state_reserved); }
+{LENGTH}                  { ACE_ASSERT (yyleng == 4);
+                            BEGIN (state_length);
+                            yyless (0); }
 } // end <INITIAL>
 <state_reserved>{
 {PEER_HANDSHAKE_RESERVED} { ACE_ASSERT (yyleng == 8);

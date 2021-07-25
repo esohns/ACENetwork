@@ -201,9 +201,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::handleDataMessage"));
 
   DataMessageType* message_p = NULL;
-//  int result = -1;
   bool release_inbound_message = true; // message_inout
-  bool release_message = false; // message_p
 
   // initialize return value(s)
   passMessageDownstream_out = false;
@@ -214,65 +212,47 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  { //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-    if (!headFragment_)
-    {
-      headFragment_ = message_inout;
+  if (!headFragment_)
+  {
+    headFragment_ = message_inout;
 
-      DATA_T* data_p = NULL;
-      ACE_NEW_NORETURN (data_p,
-                        DATA_T ());
-      if (!data_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
-        goto error;
-      } // end IF
-      DATA_CONTAINER_T* data_container_p = NULL;
-      ACE_NEW_NORETURN (data_container_p,
-                        DATA_CONTAINER_T (data_p,
-                                          true));
-      if (!data_container_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-        goto error;
-      } // end IF
-      headFragment_->initialize (data_container_p,
-                                 headFragment_->sessionId (),
-                                 NULL);
+    DATA_T* data_p = NULL;
+    ACE_NEW_NORETURN (data_p,
+                      DATA_T ());
+    if (!data_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory, returning\n")));
+      goto error;
     } // end IF
-    else
+    DATA_CONTAINER_T* data_container_p = NULL;
+    ACE_NEW_NORETURN (data_container_p,
+                      DATA_CONTAINER_T (data_p,
+                                        true));
+    if (!data_container_p)
     {
-      for (message_p = headFragment_;
-           message_p->cont ();
-           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
-      message_p->cont (message_inout);
-
-      //// just signal the parser (see below for an explanation)
-      //result = condition_.broadcast ();
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
-      //              inherited::mod_->name ()));
-    } // end ELSE
-
-    message_p = headFragment_;
-  } // end lock scope
-  ACE_ASSERT (message_p);
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+      goto error;
+    } // end IF
+    headFragment_->initialize (data_container_p,
+                                headFragment_->sessionId (),
+                                NULL);
+  } // end IF
+  else
+  {
+    for (message_p = headFragment_;
+          message_p->cont ();
+          message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
+    message_p->cont (message_inout);
+  } // end ELSE
   message_inout = NULL;
   release_inbound_message = false;
+next:
+  message_p = headFragment_;
 
-  { // *NOTE*: protect scanner/parser state
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
-    // OK: parse the message (fragment)
-
-    //  ACE_DEBUG ((LM_DEBUG,
-    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->id (),
-    //              message_p->length ()));
-
+  while (message_p)
+  {
     if (!this->parse (message_p))
     { // *NOTE*: most probable reason: connection
       //         has been closed --> session end
@@ -282,47 +262,15 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
                   message_p->id ()));
       goto error;
     } // end IF
-    // the message fragment has been parsed successfully
-  } // end lock scope
+    goto next;
+  };
 
-//  // *NOTE*: the message has been parsed successfully
-//  //         --> pass the data (chain) downstream
-//  {
-//    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
-//    //// *NOTE*: new data fragments may have arrived by now
-//    ////         --> set the next head fragment ?
-//    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
-//    //if (message_2)
-//    //  message_p->cont (NULL);
-
-//    result = inherited::put_next (headFragment_, NULL);
-//    if (result == -1)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
-//                  inherited::mod_->name ()));
-
-//      // clean up
-//      headFragment_->release ();
-
-//      goto error;
-//    } // end IF
-//    headFragment_ = NULL;
-//  } // end lock scope
-
-//continue_:
 error:
   if (release_inbound_message)
   {
     ACE_ASSERT (message_inout);
     message_inout->release ();
     message_inout = NULL;
-  } // end IF
-  if (release_message)
-  {
-    ACE_ASSERT (message_p);
-    message_p->release ();
   } // end IF
 }
 
@@ -641,6 +589,30 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   } // end lock scope
 
   handshake_inout = NULL;
+
+  unsigned int handshake_bytes = inherited2::offset ();
+  ACE_Message_Block* message_block_p = headFragment_;
+  do
+  {
+    ACE_ASSERT (message_block_p);
+    if (message_block_p->length () >= handshake_bytes)
+    {
+      if (message_block_p->length () == handshake_bytes)
+      {
+        message_block_p->rd_ptr (handshake_bytes);
+        message_block_p = message_block_p->cont ();
+      } // end IF
+      else
+        message_block_p->rd_ptr (handshake_bytes);
+      break;
+    } // end IF
+    else
+    {
+      handshake_bytes -= message_block_p->length ();
+      message_block_p->rd_ptr (message_block_p->length ());
+    } // end ELSE
+    message_block_p = message_block_p->cont ();
+  } while (true);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

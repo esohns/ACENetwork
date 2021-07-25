@@ -324,8 +324,9 @@ namespace yy {
         S_END_OF_FRAGMENT = 15,                  // "end_of_fragment"
         S_YYACCEPT = 16,                         // $accept
         S_session = 17,                          // session
-        S_messages = 18,                         // messages
-        S_message = 19                           // message
+        S_18_1 = 18,                             // $@1
+        S_messages = 19,                         // messages
+        S_message = 20                           // message
       };
     };
 
@@ -836,9 +837,9 @@ namespace yy {
     /// Constants.
     enum
     {
-      yylast_ = 13,     ///< Last index in yytable_.
-      yynnts_ = 4,  ///< Number of nonterminal symbols.
-      yyfinal_ = 4 ///< Termination state number.
+      yylast_ = 14,     ///< Last index in yytable_.
+      yynnts_ = 5,  ///< Number of nonterminal symbols.
+      yyfinal_ = 5 ///< Termination state number.
     };
 
 

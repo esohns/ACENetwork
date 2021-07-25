@@ -12,13 +12,14 @@ setlocal enabledelayedexpansion
 pushd . >NUL 2>&1
 
 @rem set BisonEXE="%ProgramFiles(x86)%\GnuWin32\bin\bison.exe"
-set BisonEXE="C:\cygwin64\bin\bison.exe"
+@rem set BisonEXE="C:\cygwin64\bin\bison.exe"
+set BisonEXE="H:\bin\flex_bison\win_bison.exe"
 if exist %BisonEXE% goto Next
 echo invalid file ^(was: "%BisonEXE%"^)^, exiting
 goto Failed
 
 :Next
-set YACC_FILE=parser.y
+set YACC_FILE=parser.yy
 if NOT exist "%YACC_FILE%" (
  echo invalid yacc file ^(was: "%YACC_FILE%"^)^, exiting
  goto Failed
@@ -43,8 +44,8 @@ if %ERRORLEVEL% NEQ 0 (
  goto Failed
 )
 
-@move /Y http_parser.cpp .\.. >NUL
-@move /Y http_parser.h .\.. >NUL
+@move /Y bittorrent_parser.cpp .\.. >NUL
+@move /Y bittorrent_parser.h .\.. >NUL
 @rem @del /F /Q location.hh >NUL
 @rem @del /F /Q position.hh >NUL
 @rem @del /F /Q stack.hh >NUL

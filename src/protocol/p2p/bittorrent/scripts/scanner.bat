@@ -12,7 +12,8 @@ setlocal enabledelayedexpansion
 pushd . >NUL 2>&1
 
 @rem set FlexEXE="%ProgramFiles(x86)%\GnuWin32\bin\flex.exe"
-set FlexEXE="C:\cygwin64\bin\flex.exe"
+@rem set FlexEXE="C:\cygwin64\bin\flex.exe"
+set FlexEXE="H:\bin\flex_bison\win_flex.exe"
 if exist %FlexEXE% goto Next
 echo invalid file ^(was: "%FlexEXE%"^)^, exiting
 goto Failed
