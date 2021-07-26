@@ -108,7 +108,11 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   ACE_ASSERT (session_);
 
   try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     session_->connect (reinterpret_cast<Net_ConnectionId_t> (sessionData_in.connectionStates.begin ()->second->handle));
+#else
+    session_->connect (static_cast<Net_ConnectionId_t> (sessionData_in.connectionStates.begin ()->second->handle));
+#endif // ACE_WIN32 || ACE_WIN64
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::connect(), continuing\n")));
@@ -202,7 +206,11 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
 
   try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     session_->disconnect (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+#else
+    session_->disconnect (static_cast<Net_ConnectionId_t> (handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::disconnect(), continuing\n")));
@@ -274,7 +282,11 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
       (*iterator).second->forwardedHandshake = true;
       ACE_ASSERT ((*iterator).second->handshake);
       try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         session_->notify (reinterpret_cast<Net_ConnectionId_t> (handle_h),
+#else
+        session_->notify (static_cast<Net_ConnectionId_t> (handle_h),
+#endif // ACE_WIN32 || ACE_WIN64
                           *(*iterator).second->handshake);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
@@ -288,11 +300,15 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
     message_in.getR ();
   const struct BitTorrent_PeerRecord& record_r = data_container_r.getR ();
   try {
-    session_->notify (reinterpret_cast<Net_ConnectionId_t> (handle_h),
-                      record_r,
-                      (record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
-                                                                                                         UserDataType>&> (message_in)
-                                                                      : NULL);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        session_->notify (reinterpret_cast<Net_ConnectionId_t> (handle_h),
+#else
+        session_->notify (static_cast<Net_ConnectionId_t> (handle_h),
+#endif // ACE_WIN32 || ACE_WIN64
+                          record_r,
+                          (record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
+                                                                                                             UserDataType>&> (message_in)
+                                                                          : NULL);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::notify(), continuing\n")));
@@ -470,7 +486,11 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     session_->trackerConnect (reinterpret_cast<Net_ConnectionId_t> (sessionData_in.connectionStates.begin ()->second->handle));
+#else
+    session_->trackerConnect (static_cast<Net_ConnectionId_t> (sessionData_in.connectionStates.begin ()->second->handle));
+#endif // ACE_WIN32 || ACE_WIN64
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerConnect(), continuing\n")));
@@ -560,7 +580,11 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   sessionData_.erase (iterator);
 
   try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     session_->trackerDisconnect (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+#else
+    session_->trackerDisconnect (static_cast<Net_ConnectionId_t> (handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerDisconnect(), continuing\n")));
