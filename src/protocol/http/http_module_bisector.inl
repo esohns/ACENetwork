@@ -155,7 +155,7 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::initialize"));
 
-  bool result = false;
+//  bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);

@@ -293,7 +293,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::handleSessionMessage"));
 
-  int result = -1;
+//  int result = -1;
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -1431,7 +1431,7 @@ BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerParser_T::handleDataMessage"));
 
   DataMessageType* message_p = NULL;
-  int result = -1;
+//  int result = -1;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
 
@@ -1516,7 +1516,7 @@ BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
 //    headFragment_ = NULL;
 //  } // end lock scope
 
-continue_:
+//continue_:
 error:
   if (release_inbound_message)
   {

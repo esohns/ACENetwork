@@ -5,7 +5,7 @@ if (UNIX)
  set (DHCP_CLIENT_IMPLEMENTATION "dhcpd" CACHE STRING "use dhcpd")
  set (DHCP_CLIENT_IMPLEMENTATION "framework_dhcp" CACHE STRING "use framework DHCP (ACENetwork)")
 
- set_property (CACHE MONITOR_IMPLEMENTATION PROPERTY STRINGS "none dhclient" "dhcpd" "framework_dhcp")
+ set_property (CACHE MONITOR_IMPLEMENTATION PROPERTY STRINGS "none" "dhclient" "dhcpd" "framework_dhcp")
 elseif (WIN32)
  set (DHCP_CLIENT_IMPLEMENTATION "wlanapi_dhcp" CACHE STRING "use wlanapi DHCP (default)")
 

@@ -89,7 +89,7 @@ if (UNIX)
 
 # set (DNS_LIB_FILE libdns-export.so)
 #  set (DNS_LIB_FILE libdns-export.so.1104)
-set (DNS_LIB_FILE libdns.so)
+ set (DNS_LIB_FILE libdns.so)
  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu

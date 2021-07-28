@@ -388,7 +388,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       result = inherited::close (arg_in);
       if (unlikely (result == -1))
       {
-        int error = ACE_OS::last_error ();
+//        int error = ACE_OS::last_error ();
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to HandlerType::close(%u): \"%m\", continuing\n"),
                     id_i,

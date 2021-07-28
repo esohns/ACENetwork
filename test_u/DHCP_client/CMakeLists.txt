@@ -5,30 +5,30 @@
  find_package (Threads)
 endif (UNIX)
 
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_LIB_FILE}"
-               NO_DEFAULT_PATH)
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
+#set (ACE_LIB_FILE libACE.so)
+#if (UNIX)
+# find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+#               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
+#               PATHS ENV ACE_ROOT
+#               PATH_SUFFIXES lib
+#               DOC "searching for ${ACE_LIB_FILE}"
+#               NO_DEFAULT_PATH)
+#elseif (WIN32)
+# if (CMAKE_BUILD_TYPE STREQUAL Debug)
+#  set (LIB_FILE_SUFFIX d)
+# endif ()
+# unset (ACE_LIB_FILE)
+# set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
+# find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+#               PATHS ENV ACE_ROOT
+#               PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
+#               DOC "searching for ${ACE_LIB_FILE}"
+#               NO_DEFAULT_PATH)
+#endif ()
 #if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-endif ()
+#if (NOT ACE_LIBRARY)
+# message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
+#endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -72,7 +72,7 @@ add_definitions (-DACENETWORK_HAS_DLL)
 if (UNIX)
 # include_directories (${PKG_CAP_INCLUDE_DIRS})
 
- include_directories (/usr/local/src/ACE_wrappers)
+# include_directories (/usr/local/src/ACE_wrappers)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
@@ -88,7 +88,7 @@ if (UNIX)
 elseif (WIN32)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
 
@@ -163,15 +163,6 @@ set (${PROJECT_NAME}_DHCPClient_EXE_CFG
 if (UNIX)
  add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
 endif (UNIX)
-
-set (LLVM_COMPILER_ID_STRING "Clang")
-string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
-string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
-if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
- add_compile_options (-std=c++11)
-#add_compile_options (-fPIC)
- add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
-endif ()
 
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 add_executable (${EXECUTABLE}

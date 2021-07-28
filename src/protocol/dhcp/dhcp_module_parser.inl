@@ -269,7 +269,7 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::initialize"));
 
-  bool result = false;
+//  bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.parserConfiguration);
@@ -323,7 +323,7 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::handleDataMessage"));
 
-  int result = -1;
+//  int result = -1;
   struct DHCP_Record* record_p = NULL;
 
   // append the "\0\0"-sequence, as required by flex

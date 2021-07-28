@@ -28,7 +28,7 @@
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
 
-#include "common_referencecounter_base.h"
+#include "common_counter.h"
 
 //#include "net_netlinksockethandler.h"
 #include "net_sockethandler_base.h"
@@ -56,6 +56,9 @@ class Net_AsynchNetlinkSocketHandler_T
                       ACE_Reactor_Mask);  // mask
 
  protected:
+  // convenient types
+  typedef Common_Counter_T<ACE_MT_SYNCH> COUNTER_T;
+
   Net_AsynchNetlinkSocketHandler_T ();
 
   // helper method(s)
@@ -64,11 +67,11 @@ class Net_AsynchNetlinkSocketHandler_T
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
   // this keeps the number of open write (i.e. send) requests
-  Common_ReferenceCounterBase counter_;
-  ACE_Asynch_Read_Dgram       inputStream_;
-  ACE_Asynch_Write_Dgram      outputStream_;
-//  Net_Netlink_Addr            localSAP_;
-//  Net_Netlink_Addr            remoteSAP_;
+  mutable COUNTER_T      counter_;
+  ACE_Asynch_Read_Dgram  inputStream_;
+  ACE_Asynch_Write_Dgram outputStream_;
+//  Net_Netlink_Addr     localSAP_;
+//  Net_Netlink_Addr     remoteSAP_;
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
