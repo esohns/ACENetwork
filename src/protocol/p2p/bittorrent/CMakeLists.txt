@@ -30,11 +30,11 @@ endif ()
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
- if (DHCLIENT_SUPPORT)
+# if (DHCLIENT_SUPPORT)
 #  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
 #                              $<BUILD_INTERFACE:/usr/include/bind-export>)
-  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${BIND9_CFLAGS})
- endif (DHCLIENT_SUPPORT)
+#  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${BIND9_CFLAGS})
+# endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FLEX_INCLUDE_DIRS}>)

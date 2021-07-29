@@ -33,7 +33,7 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
 void
 net_wlan_dhclient_connection_event_cb (dhcpctl_handle handle_in,
                                        dhcpctl_status status_in,
@@ -160,5 +160,5 @@ continue_:
     return;
   }
 }
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64

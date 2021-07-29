@@ -60,4 +60,3 @@ elseif (WIN32)
   add_definitions (-DWLANAPI_DHCP_USE)
  endif ()
 endif ()
-

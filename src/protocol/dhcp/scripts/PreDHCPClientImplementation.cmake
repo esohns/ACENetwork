@@ -15,11 +15,12 @@ if (UNIX)
                 HINTS /usr/lib
                 PATH_SUFFIXES x86_64-linux-gnu
                 DOC "searching for ${JSON_LIB_FILE} (system paths)")
-  if (JSON_LIBRARY)
-   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+  if (NOT JSON_LIBRARY)
+    message (WARNING "could not find ${JSON_LIB_FILE}, continuing")
+    set (DHCLIENT_SUPPORT_ENABLE OFF)
   else ()
-   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
-  endif (JSON_LIBRARY)
+   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+  endif (NOT JSON_LIBRARY)
 
 #  set (ISC_LIB_FILE libisc-export.so)
 # set (ISC_LIB_FILE libisc-export.so.1100)
@@ -35,44 +36,11 @@ if (UNIX)
   message (STATUS "Found ISC library \"${ISC_LIBRARY}\"")
  endif (NOT ISC_LIBRARY)
 
-# set (GSS_LIB_FILE libgss.so.3)
-#  set (GSS_LIB_FILE libgssglue.so)
-#  find_library (GSS_LIBRARY ${GSS_LIB_FILE}
-#                HINTS /usr/lib64 /usr/lib
-#                PATH_SUFFIXES x86_64-linux-gnu
-#                DOC "searching for ${GSS_LIB_FILE} (system paths)")
-#  if (NOT GSS_LIBRARY)
-#   message (FATAL_ERROR "could not find ${GSS_LIB_FILE}, aborting")
-#  else ()
-#   message (STATUS "Found generic security services library \"${GSS_LIBRARY}\"")
-#  endif (NOT GSS_LIBRARY)
-
  pkg_check_modules (PKG_KRB5_GSSAPI krb5-gssapi)
  if (NOT PKG_KRB5_GSSAPI_FOUND)
   message (WARNING "could not find krb5-gssapi, continuing")
   set (DHCLIENT_SUPPORT_ENABLE OFF)
  endif (NOT PKG_KRB5_GSSAPI_FOUND)
-#  set (KRB5_LIB_FILE libkrb5.so.3)
-#  find_library (KRB5_LIBRARY ${KRB5_LIB_FILE}
-#                HINTS /usr/lib
-#                PATH_SUFFIXES x86_64-linux-gnu
-#                DOC "searching for ${KRB5_LIB_FILE} (system paths)")
-#  if (NOT KRB5_LIBRARY)
-#   message (FATAL_ERROR "could not find ${KRB5_LIB_FILE}, aborting")
-#  else ()
-#   message (STATUS "Found MIT kerberos library \"${KRB5_LIBRARY}\"")
-#  endif ()
-
-#  set (GSS_KRB5_LIB_FILE libgssapi_krb5.so.2)
-#  find_library (GSS_KRB5_LIBRARY ${GSS_KRB5_LIB_FILE}
-#                HINTS /usr/lib
-#                PATH_SUFFIXES x86_64-linux-gnu
-#                DOC "searching for ${GSS_KRB5_LIB_FILE} (system paths)")
-#  if (NOT GSS_KRB5_LIBRARY)
-#   message (FATAL_ERROR "could not find ${GSS_KRB5_LIB_FILE}, aborting")
-#  else ()
-#   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
-#  endif (NOT GSS_KRB5_LIBRARY)
 
 # set (GEOIP_LIB_FILE libGeoIP.so.1)
  set (GEOIP_LIB_FILE libGeoIP.so)

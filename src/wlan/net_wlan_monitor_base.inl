@@ -105,9 +105,9 @@ Net_WLAN_Monitor_Base_T<AddressType,
  , familyId_ (0)
  , socketHandle_ (NULL)
 #endif // NL80211_SUPPORT
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
  , dhclientCBData_ ()
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64
  , configuration_ (NULL)
  , isActive_ (false)
@@ -132,7 +132,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 //  inherited::reactor (ACE_Reactor::instance ());
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
   dhclientCBData_.monitor = this;
 
   isc_result_t status_i = dhcpctl_initialize ();
@@ -140,7 +140,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::dhcpctl_initialize(): \"%s\", continuing\n"),
                 ACE_TEXT (isc_result_totext (status_i))));
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64
 }
 
@@ -1663,7 +1663,7 @@ associate:
       // *NOTE*: the Win32 API does not let developers interfere with the DHCP
       //         handshake/addressing process programmatically at this time
 #elif defined (ACE_LINUX)
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
       ACE_ASSERT (dhclientCBData_.connection == dhcpctl_null_handle);
       dhcpctl_handle authenticator_h = dhcpctl_null_handle;
       ACE_INET_Addr inet_address (static_cast<u_short> (DHCP_DHCLIENT_OMAPI_PORT),
@@ -1702,7 +1702,7 @@ associate:
       } // end IF
       DHCP_Tools::disconnectDHClient (dhclientCBData_.connection);
       dhclientCBData_.connection = dhcpctl_null_handle;
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -539,7 +539,7 @@ DHCP_Tools::generateXID ()
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
 bool
 DHCP_Tools::hasDHClientOmapiSupport ()
 {
@@ -1479,5 +1479,5 @@ clean:
 
   return true;
 }
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64

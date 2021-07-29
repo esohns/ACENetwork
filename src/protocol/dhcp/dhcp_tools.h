@@ -40,9 +40,9 @@ extern "C"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
 typedef void (*Net_DHClientCallback_t) (dhcpctl_handle, dhcpctl_status, void*);
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
 class DHCP_Tools
@@ -67,7 +67,7 @@ class DHCP_Tools
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
   static bool DHClientOmapiSupport (bool); // toggle
 
   // *IMPORTANT NOTE*: the following preconditions must be met:
@@ -102,7 +102,7 @@ class DHCP_Tools
 
   static bool relinquishLease (dhcpctl_handle,      // connection handle
                                const std::string&); // interface identifier
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
  private:
@@ -113,9 +113,9 @@ class DHCP_Tools
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#if defined (DHCLIENT_SUPPORT)
+#if defined (DHCLIENT_USE)
   static bool hasDHClientOmapiSupport ();
-#endif // DHCLIENT_SUPPORT
+#endif // DHCLIENT_USE
 #endif // ACE_WIN32 || ACE_WIN64
 };
 

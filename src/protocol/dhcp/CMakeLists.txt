@@ -186,7 +186,7 @@ set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES VERSION ${VERSIO
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
- if (DHCLIENT_SUPPORT)
+ if (DHCLIENT_USE)
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${DHCPCTL_LIBRARY})
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${OMAPI_LIBRARY})
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${IRS_LIBRARY})
@@ -203,7 +203,7 @@ if (UNIX)
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_JSON_LIBRARIES})
 
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_LIBXML_LIBRARIES})
-endif (DHCLIENT_SUPPORT)
+endif (DHCLIENT_USE)
 elseif (WIN32)
 # target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ntdll.lib)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
