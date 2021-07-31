@@ -52,7 +52,7 @@ if (UNIX)
                DOC "searching for ${ACE_XML_LIB_FILE}"
                NO_DEFAULT_PATH)
 # else ()
-#  find_library (ACEXML_LIBRARY ${ACE_XML_LIB_FILE}
+#  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
 #                DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
 # endif ()
 elseif (WIN32)

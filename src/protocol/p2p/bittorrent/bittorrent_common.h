@@ -71,6 +71,40 @@ enum BitTorrent_MessageType
   BITTORRENT_MESSAGETYPE_INVALID,
 };
 
+struct BitTorrent_Piece_Chunk
+{
+  BitTorrent_Piece_Chunk ()
+   : offset (0)
+   , length (0)
+  {};
+
+  unsigned int offset;
+  unsigned int length;
+};
+typedef std::vector<struct BitTorrent_Piece_Chunk> BitTorrent_PieceChunks_t;
+typedef BitTorrent_PieceChunks_t::const_iterator BitTorrent_PieceChunksIterator_t;
+struct bittorrent_piece_chunks_less
+{
+  inline bool operator() (const struct BitTorrent_Piece_Chunk& lhs_in, const struct BitTorrent_Piece_Chunk& rhs_in) const { ACE_ASSERT (lhs_in.offset != rhs_in.offset); return (lhs_in.offset < rhs_in.offset); }
+};
+
+struct BitTorrent_Piece
+{
+  BitTorrent_Piece ()
+   : chunks ()
+   , fd (ACE_INVALID_HANDLE)
+   , filename ()
+   , hash ()
+  {};
+
+  BitTorrent_PieceChunks_t chunks;
+  ACE_HANDLE               fd;
+  std::string              filename;
+  std::string              hash; // SHA1 20 bytes
+};
+typedef std::vector<struct BitTorrent_Piece> BitTorrent_Pieces_t;
+typedef BitTorrent_Pieces_t::iterator BitTorrent_PiecesIterator_t;
+
 struct BitTorrent_PeerHandShake
 {
   BitTorrent_PeerHandShake ()
@@ -79,7 +113,7 @@ struct BitTorrent_PeerHandShake
    , info_hash ()
    , peer_id ()
   {
-    ACE_OS::memset (&reserved, 0, sizeof (ACE_UINT8[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE]));
+    ACE_OS::memset (reserved, 0, sizeof (ACE_UINT8[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE]));
   }
 
   std::string pstr;

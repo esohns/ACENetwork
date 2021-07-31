@@ -203,11 +203,11 @@ if (UNIX)
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_JSON_LIBRARIES})
 
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_LIBXML_LIBRARIES})
-endif (DHCLIENT_USE)
+ endif (DHCLIENT_USE)
 elseif (WIN32)
 # target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ntdll.lib)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
-endif (WIN32)
+endif ()
 target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_DHCP CommonTimer)
 

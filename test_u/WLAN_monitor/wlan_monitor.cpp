@@ -256,7 +256,7 @@ do_processArguments (const int& argc_in,
                               ACE_TEXT ("adg::ikln:r:s:tv"));
 #endif // ACE_WIN32 || ACE_WIN64
   int option = 0;
-  std::stringstream converter;
+//  std::stringstream converter;
   while ((option = argumentParser ()) != EOF)
   {
     switch (option)

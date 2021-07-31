@@ -138,10 +138,7 @@ BitTorrent_Control_T<SessionAsynchType,
       NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
       NULL;
-  std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY);
   std::string user_agent;
-  // *TODO*: support more link layer types
-  int link_layers = (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
   bool use_SSL = false;
 
   // step1: parse metainfo
@@ -204,7 +201,7 @@ BitTorrent_Control_T<SessionAsynchType,
   for (;
        iterator != configuration_->metaInfo->end ();
        ++iterator)
-    if (*(*iterator).first == key)
+    if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY))
       break;
   ACE_ASSERT (iterator != configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
@@ -234,38 +231,38 @@ BitTorrent_Control_T<SessionAsynchType,
   data_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                                   HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*configuration_->metaInfo))));
+                                                             HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*configuration_->metaInfo))));
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
-                                                   HTTP_Tools::URLEncode (session_state_p->peerId)));
+                                                             HTTP_Tools::URLEncode (session_state_p->peerId)));
   converter << BITTORRENT_DEFAULT_PORT;
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PORT_HEADER),
-                                                   converter.str ()));
+                                       converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << 0;
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_UPLOADED_HEADER),
-                                                   converter.str ()));
+                                       converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BitTorrent_Tools::MetaInfoToLength (*configuration_->metaInfo);
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
-                                                   converter.str ()));
+                                       converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << 1;
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
-                                                   converter.str ()));
+                                       converter.str ()));
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
-                                                   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  interface_identifier = Net_Common_Tools::getDefaultInterface_2 (link_layers);
+  interface_identifier = Net_Common_Tools::getDefaultInterface_2 ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
 #else
-  interface_identifier = Net_Common_Tools::getDefaultInterface (link_layers);
+  interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
 #endif // 
 #else
-  interface_identifier = Net_Common_Tools::getDefaultInterface (link_layers);
-#endif // 
+  interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+#endif // ACE_WIN32 || ACE_WIN64
   if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
                                                        external_ip_address))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -285,12 +282,12 @@ BitTorrent_Control_T<SessionAsynchType,
 #endif // ACE_WIN32 || ACE_WIN64
   else
     data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
-                                                     Net_Common_Tools::IPAddressToString (external_ip_address).c_str ()));
+                                         Net_Common_Tools::IPAddressToString (external_ip_address).c_str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS;
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_NUMWANT_HEADER),
-                                                   converter.str ()));
+                                       converter.str ()));
   if (session_state_p->key.empty ())
     session_state_p->key = BitTorrent_Tools::generateKey ();
   //record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_KEY_HEADER),
@@ -305,14 +302,14 @@ BitTorrent_Control_T<SessionAsynchType,
 #endif // HAVE_CONFIG_H
   if (!user_agent.empty ())
     data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
-                                                        user_agent));
+                                            user_agent));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
-                                                      host_name_string));
+                                          host_name_string));
 //                                            HTTP_Tools::IPAddress2HostName (tracker_address).c_str ()));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
-                                                      ACE_TEXT_ALWAYS_CHAR ("*/*")));
+                                          ACE_TEXT_ALWAYS_CHAR ("*/*")));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
-                                                      ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
+                                          ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
 
   // *IMPORTANT NOTE*: fire-and-forget API (record_p)
   ACE_NEW_NORETURN (data_container_p,
@@ -351,8 +348,9 @@ allocate:
   ACE_ASSERT (!data_container_p);
 
   isession_p->trackerConnect (tracker_address);
+  typedef typename SessionType::TRACKER_CONNECTION_MANAGER_SINGLETON_T TRACKER_CONNECTION_MANAGER_SINGLETON_2;
   iconnection_p =
-    configuration_->trackerConnectionManager->get (tracker_address);
+    TRACKER_CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_address);
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,

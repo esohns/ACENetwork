@@ -533,13 +533,12 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   result = inherited2::peer_.close (); // shutdown SSL context
   if (unlikely (result == -1))
   {
-    int error = ACE_OS::last_error ();
+    error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if (error != ENOTSOCK) // 10038: local close
 #else
-    ACE_UNUSED_ARG (error);
-    if (true) // *TODO*
-#endif
+    if (error != EBADF) // // 9: EBADF
+#endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SSL_SOCK_Stream::close(): \"%m\", aborting\n")));
     else

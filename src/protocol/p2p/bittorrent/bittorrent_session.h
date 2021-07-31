@@ -27,6 +27,7 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
 #include "net_connection_configuration.h"
@@ -132,6 +133,8 @@ class BitTorrent_Session_T
   typedef typename PeerConnectionType::ISTREAM_CONNECTION_T ISTREAM_CONNECTION_T;
   typedef typename TrackerConnectionType::ISTREAM_CONNECTION_T ITRACKER_STREAM_CONNECTION_T;
   typedef ControllerInterfaceType ICONTROLLER_T;
+  typedef ACE_Singleton<TrackerConnectionManagerType,
+                        ACE_SYNCH_MUTEX> TRACKER_CONNECTION_MANAGER_SINGLETON_T;
 
   BitTorrent_Session_T ();
   virtual ~BitTorrent_Session_T ();
@@ -144,7 +147,6 @@ class BitTorrent_Session_T
 
  protected:
   TrackerConnectionConfigurationType* trackerConnectionConfiguration_;
-  TrackerConnectionManagerType*       trackerConnectionManager_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T (const BitTorrent_Session_T&))
@@ -219,6 +221,10 @@ class BitTorrent_Session_T
   // implement/override (part of) BitTorrent_ISession_T
   virtual void connect (Net_ConnectionId_t);
   virtual void disconnect (Net_ConnectionId_t);
+  virtual void request (Net_ConnectionId_t, // connection id
+                        unsigned int,       // index (piece#)
+                        unsigned int,       // begin (offset)
+                        unsigned int);      // length (bytes)
   virtual void scrape ();
   virtual void trackerConnect (Net_ConnectionId_t);
   virtual void trackerDisconnect (Net_ConnectionId_t);
@@ -233,7 +239,6 @@ class BitTorrent_Session_T
   void log (const struct BitTorrent_PeerRecord&);
 
   bool                             logToFile_;
-  std::string                      metaInfoFileName_;
   PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;
   PEER_HANDLER_T                   peerStreamHandler_;
   TRACKER_MESSAGEHANDLER_MODULE_T* trackerHandlerModule_;

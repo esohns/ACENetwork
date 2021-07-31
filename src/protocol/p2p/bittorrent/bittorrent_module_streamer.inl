@@ -68,8 +68,6 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Streamer_T::handleDataMessage"));
 
-  int result = -1;
-
   // don't care (implies yes per default, if part of a stream)
   // *NOTE*: as this is an "upstream" module, the "wording" is wrong
   //         --> the logic remains the same, though
@@ -84,30 +82,19 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
       message_inout->getR ();
   const typename DataMessageType::DATA_T::DATA_T& record_r =
         data_container_r.getR ();
-
   // sanity check(s)
   ACE_ASSERT ((record_r.handShakeRecord || record_r.peerRecord) &&
               !(record_r.handShakeRecord && record_r.peerRecord));
-
-  std::ostringstream converter;
+//  std::ostringstream converter;
+  int result = -1;
+  ACE_UINT32 value_i = 0;
 
   if (record_r.handShakeRecord)
-  {
-//    // sanity check
-//    if (message_inout->space () < (49 + record_r.handShakeRecord->pstr.size ()))
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
-//                  message_inout->id (),
-//                  message_inout->space (),
-//                  (49 + record_r.handShakeRecord->pstr.size ())));
-//      goto error;
-//    } // end IF
-
-    unsigned char pstrlen =
-        static_cast<unsigned char> (record_r.handShakeRecord->pstr.size ());
+  { ACE_ASSERT (message_inout->space () >= (49 + record_r.handShakeRecord->pstr.size ()));
+    ACE_UINT8 pstrlen =
+        static_cast<ACE_UINT8> (record_r.handShakeRecord->pstr.size ());
     result = message_inout->copy (reinterpret_cast<char*> (&pstrlen),
-                                  1);
+                                  sizeof (ACE_UINT8));
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -153,10 +140,83 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
   } // end IF
   else
   {
-    ACE_ASSERT (false);
-    ACE_NOTSUP;
-
-    ACE_NOTREACHED (return;)
+    switch (record_r.peerRecord->type)
+    {
+      case BITTORRENT_MESSAGETYPE_REQUEST:
+      {
+        value_i = 1 + 4 + 4 + 4;
+        value_i =
+            (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN ? ACE_SWAP_LONG (value_i)
+                                                 : value_i);
+        result =
+            message_inout->copy (reinterpret_cast<char*> (&value_i),
+                                 sizeof (ACE_UINT32));
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+        ACE_UINT8 type =
+            static_cast<ACE_UINT8> (BITTORRENT_MESSAGETYPE_REQUEST);
+        result =
+            message_inout->copy (reinterpret_cast<char*> (&type),
+                                 sizeof (ACE_UINT8));
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+        value_i = record_r.peerRecord->request.index;
+        value_i =
+            (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN ? ACE_SWAP_LONG (value_i)
+                                                 : value_i);
+        result =
+            message_inout->copy (reinterpret_cast<char*> (&value_i),
+                                 sizeof (ACE_UINT32));
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+        value_i = record_r.peerRecord->request.begin;
+        value_i =
+            (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN ? ACE_SWAP_LONG (value_i)
+                                                 : value_i);
+        result =
+            message_inout->copy (reinterpret_cast<char*> (&value_i),
+                                 sizeof (ACE_UINT32));
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+        value_i = record_r.peerRecord->request.length;
+        value_i =
+            (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN ? ACE_SWAP_LONG (value_i)
+                                                 : value_i);
+        result =
+            message_inout->copy (reinterpret_cast<char*> (&value_i),
+                                 sizeof (ACE_UINT32));
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown message type (was: %d), aborting\n"),
+                    record_r.peerRecord->type));
+        goto error;
+      }
+    } // end SWITCH
   } // end ELSE
 
 //continue_:

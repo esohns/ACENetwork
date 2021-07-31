@@ -49,9 +49,12 @@
 // protocol
 #define BITTORRENT_PRT_PEER_ID_LENGTH                     20 // bytes
 #define BITTORRENT_PRT_INFO_HASH_SIZE                     20 // bytes
+#define BITTORRENT_PRT_INFO_PIECE_HASH_SIZE               20 // bytes
 
 #define BITTORRENT_METAINFO_ANNOUNCE_KEY                  "announce"
 #define BITTORRENT_METAINFO_INFO_KEY                      "info"
+#define BITTORRENT_METAINFO_INFO_PIECE_LENGTH_KEY         "piece length"
+#define BITTORRENT_METAINFO_INFO_PIECES_KEY               "pieces"
 #define BITTORRENT_METAINFO_INFO_LENGTH_KEY               "length"
 #define BITTORRENT_METAINFO_INFO_FILES_KEY                "files"
 
@@ -86,6 +89,7 @@
 #define BITTORRENT_PEER_HANDSHAKE_PSTR_STRING             "BitTorrent protocol"
 #define BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE           8 // bytes
 
+#define BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX          32768 // bytes
 
 // session
 #define BITTORRENT_SESSION_HANDLER_THREAD_NAME            "bittorrent_session"

@@ -907,7 +907,7 @@ allocate:
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
   message_p->initialize (message_data_container_p,
-                         message_p->id (),
+                         message_p->sessionId (),
                          NULL);
   // *IMPORTANT NOTE*: fire-and-forget API (message_p)
   message_block_p = message_p;

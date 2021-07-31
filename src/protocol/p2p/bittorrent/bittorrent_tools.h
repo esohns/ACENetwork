@@ -30,6 +30,7 @@
 #include "common_parser_bencoding_tools.h"
 
 #include "bittorrent_common.h"
+//#include "bittorrent_network.h"
 
 class BitTorrent_Tools
 {
@@ -45,7 +46,6 @@ class BitTorrent_Tools
   // *NOTE*: this returns the 'info_hash' tracker HTTP request value
   static std::string MetaInfoToInfoHash (const Bencoding_Dictionary_t&); // metainfo
   static unsigned int MetaInfoToLength (const Bencoding_Dictionary_t&); // metainfo
-
   // *IMPORTANT NOTE*: caller needs to free the return value (third argument)
   static bool parseMetaInfoFile (const struct Common_ParserConfiguration&, // parser configuration
                                  const std::string&,                       // metainfo (aka .bittorrent) file
@@ -63,6 +63,8 @@ class BitTorrent_Tools
   static bool torrentSupportsScrape (const std::string&); // announce URI
   static std::string AnnounceURLToScrapeURL (const std::string&); // announce URI
 
+  static bool isPieceComplete (unsigned int,                     // piece length
+                               const BitTorrent_PieceChunks_t&); // chunks
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools (const BitTorrent_Tools&))

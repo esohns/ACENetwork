@@ -75,13 +75,13 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
       shutdown = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#if defined (_DEBUG)
-      // *NOTE*: gdb raises SIGINT with code SI_USER on 'interrupt'
-      //         --> do not shutdown in this case
-      shutdown = !(Common_Error_Tools::inDebugSession () &&
-                   (signal_in.signal == SIGINT)    &&
-                   (signal_in.siginfo.si_code == SI_USER));
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//      // *NOTE*: gdb raises SIGINT with code SI_USER on 'interrupt'
+//      //         --> do not shutdown in this case
+//      shutdown = !(Common_Error_Tools::inDebugSession () &&
+//                   (signal_in.signal == SIGINT)    &&
+//                   (signal_in.siginfo.si_code == SI_USER));
+//#endif // _DEBUG
 #endif // ACE_WIN32 || defined ACE_WIN64
       break;
     }

@@ -23,6 +23,7 @@
 
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Global_Macros.h"
+#include "ace/Singleton.h"
 #include "ace/Thread_Mutex.h"
 
 #include "net_common.h"
@@ -74,15 +75,15 @@ class Net_SessionBase_T
  protected:
   // convenient types
   typedef ConnectorType CONNECTOR_T;
+  typedef ACE_Singleton<ConnectionManagerType,
+                        ACE_SYNCH_MUTEX> CONNECTION_MANAGER_SINGLETON_T;
 
-  ConfigurationType*           configuration_;
-  ConnectionConfigurationType* connectionConfiguration_;
-  ConnectionManagerType*       connectionManager_;
-  bool                         isAsynch_;
+  ConfigurationType*         configuration_;
+  bool                       isAsynch_;
 
-  ACE_Thread_Mutex             lock_;
-  ACE_Condition_Thread_Mutex   condition_;
-  StateType                    state_;
+  ACE_Thread_Mutex           lock_;
+  ACE_Condition_Thread_Mutex condition_;
+  StateType                  state_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_SessionBase_T (const Net_SessionBase_T&))

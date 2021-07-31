@@ -637,10 +637,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   configuration_in.sessionConfiguration.controller =
       &bittorrent_control;
-  configuration_in.sessionConfiguration.connectionManager =
-      peer_connection_manager_p;
-  configuration_in.sessionConfiguration.trackerConnectionManager =
-      tracker_connection_manager_p;
   configuration_in.sessionConfiguration.metaInfoFileName =
       metaInfoFileName_in;
   configuration_in.sessionConfiguration.connectionConfiguration =

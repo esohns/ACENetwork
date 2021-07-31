@@ -1277,7 +1277,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   //         and is totally inefficient
   //         --> remove ASAP
   std::string filename_string =
-      Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""));
+      Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""), true);
   std::string command_line_string =
       //ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
     ACE_TEXT_ALWAYS_CHAR ("curl http://myexternalip.com/raw >> ");

@@ -159,6 +159,10 @@ struct BitTorrent_PeerStatus
 };
 typedef std::map<Net_ConnectionId_t, struct BitTorrent_PeerStatus> BitTorrent_PeerStatus_t;
 typedef BitTorrent_PeerStatus_t::iterator BitTorrent_PeerStatusIterator_t;
+
+typedef std::map<Net_ConnectionId_t, BitTorrent_MessagePayload_Bitfield> BitTorrent_PeerPieces_t;
+typedef BitTorrent_PeerPieces_t::iterator BitTorrent_PeerPiecesIterator_t;
+
 struct BitTorrent_SessionState
 {
   BitTorrent_SessionState ()
@@ -168,11 +172,13 @@ struct BitTorrent_SessionState
    , key ()
    , metaInfo (NULL)
    , peerId ()
+   , peerPieces ()
    , peerStatus ()
    , trackerConnectionId (0)
    , trackerId ()
    , trackerRequestResponse (NULL)
    , trackerScrapeResponse (NULL)
+   , pieces ()
   {};
 
   Net_ConnectionIds_t     connections;
@@ -181,11 +187,14 @@ struct BitTorrent_SessionState
   std::string             key; // tracker-
   Bencoding_Dictionary_t* metaInfo;
   std::string             peerId;
+  BitTorrent_PeerPieces_t peerPieces;
   BitTorrent_PeerStatus_t peerStatus;
   Net_ConnectionId_t      trackerConnectionId;
   std::string             trackerId;
   Bencoding_Dictionary_t* trackerRequestResponse;
   Bencoding_Dictionary_t* trackerScrapeResponse;
+
+  BitTorrent_Pieces_t     pieces;
 };
 
 #endif

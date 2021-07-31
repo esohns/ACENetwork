@@ -250,17 +250,13 @@ struct BitTorrent_Client_SessionConfiguration
   BitTorrent_Client_SessionConfiguration ()
    : BitTorrent_SessionConfiguration ()
    , connectionConfiguration (NULL)
-   , connectionManager (NULL)
    , controller (NULL)
    , trackerConnectionConfiguration (NULL)
-   , trackerConnectionManager (NULL)
   {}
 
   BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
-  BitTorrent_Client_PeerConnection_Manager_t*       connectionManager;
   BitTorrent_Client_IControl_t*                     controller;
   BitTorrent_Client_TrackerConnectionConfiguration* trackerConnectionConfiguration;
-  BitTorrent_Client_TrackerConnection_Manager_t*    trackerConnectionManager;
 };
 
 //////////////////////////////////////////

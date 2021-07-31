@@ -49,9 +49,7 @@ Net_SessionBase_T<AddressType,
                   StateType,
                   SessionInterfaceType>::Net_SessionBase_T ()
  : configuration_ (NULL)
- , connectionConfiguration_ (NULL)
- , connectionManager_ (NULL)
- , isAsynch_ (COMMON_EVENT_DEFAULT_DISPATCH)
+ , isAsynch_ (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_PROACTOR)
  , lock_ ()
  , condition_ (lock_)
  , state_ ()
@@ -88,8 +86,6 @@ Net_SessionBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::~Net_SessionBase_T"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    // sanity check(s)
-    ACE_ASSERT (connectionManager_);
     // *TODO*: remove type inference
     if (!state_.connections.empty ())
       ACE_DEBUG ((LM_WARNING,
@@ -101,11 +97,8 @@ Net_SessionBase_T<AddressType,
          iterator != state_.connections.end ();
          ++iterator)
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_p = connectionManager_->get (*iterator);
-#else
-      iconnection_p = connectionManager_->get (*iterator);
-#endif // ACE_WIN32 || ACE_WIN64
+      iconnection_p =
+          CONNECTION_MANAGER_SINGLETON_T::instance ()->get (*iterator);
       if (!iconnection_p)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -114,10 +107,7 @@ Net_SessionBase_T<AddressType,
         continue;
       } // end IF
       iconnection_p->close ();
-
-      // clean up
-      iconnection_p->decrease ();
-      iconnection_p = NULL;
+      iconnection_p->decrease (); iconnection_p = NULL;
     } // end FOR
   } // end lock scope
 }
@@ -152,9 +142,6 @@ Net_SessionBase_T<AddressType,
 
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   // *TODO*: remove type inferences
-  connectionConfiguration_ =
-      const_cast<ConfigurationType&> (configuration_in).connectionConfiguration;
-  connectionManager_ = configuration_in.connectionManager;
   isAsynch_ = (configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR);
 
   return true;
@@ -188,13 +175,16 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::connect"));
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
+
   ConnectorType connector (true);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
   // step1: initialize connector
   typename ConnectorType::ICONNECTOR_T* iconnector_p = &connector;
-  ACE_ASSERT (connectionConfiguration_);
-  if (!iconnector_p->initialize (*connectionConfiguration_))
+  if (!iconnector_p->initialize (*configuration_->connectionConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -223,7 +213,8 @@ Net_SessionBase_T<AddressType,
     do
     {
       // *TODO*: this does not work...
-      iconnection_p = connectionManager_->get (address_in);
+      iconnection_p =
+          CONNECTION_MANAGER_SINGLETON_T::instance ()->get (address_in);
       if (iconnection_p)
         break; // done
 
@@ -237,9 +228,9 @@ Net_SessionBase_T<AddressType,
   else
     iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      connectionManager_->get (reinterpret_cast<Net_ConnectionId_t> (handle));
+      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else
-      connectionManager_->get (static_cast<Net_ConnectionId_t> (handle));
+      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle));
 #endif // ACE_WIN32 || ACE_WIN64
   if (!iconnection_p)
   {
@@ -327,10 +318,8 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::disconnect"));
 
-  // sanity check(s)
-  ACE_ASSERT (connectionManager_);
-
-  ConnectionType* connection_p = connectionManager_->get (address_in);
+  ConnectionType* connection_p =
+      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (address_in);
   if (!connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -371,9 +360,6 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::close"));
 
-  // sanity check(s)
-  ACE_ASSERT (connectionManager_);
-
   int result = -1;
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
 
@@ -382,7 +368,8 @@ Net_SessionBase_T<AddressType,
          iterator != state_.connections.end ();
          ++iterator)
     {
-      iconnection_p = connectionManager_->get (*iterator);
+      iconnection_p =
+          CONNECTION_MANAGER_SINGLETON_T::instance ()->get (*iterator);
       if (!iconnection_p)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -391,8 +378,6 @@ Net_SessionBase_T<AddressType,
         continue;
       } // end IF
       iconnection_p->close ();
-
-      // clean up
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end FOR
 
