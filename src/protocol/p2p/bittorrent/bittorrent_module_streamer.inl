@@ -142,6 +142,34 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
   {
     switch (record_r.peerRecord->type)
     {
+      case BITTORRENT_MESSAGETYPE_INTERESTED:
+      {
+        value_i = 1;
+        value_i =
+            (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN ? ACE_SWAP_LONG (value_i)
+                                                 : value_i);
+        result =
+            message_inout->copy (reinterpret_cast<char*> (&value_i),
+                                 sizeof (ACE_UINT32));
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+        ACE_UINT8 type =
+            static_cast<ACE_UINT8> (BITTORRENT_MESSAGETYPE_INTERESTED);
+        result =
+            message_inout->copy (reinterpret_cast<char*> (&type),
+                                 sizeof (ACE_UINT8));
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+        break;
+      }
       case BITTORRENT_MESSAGETYPE_REQUEST:
       {
         value_i = 1 + 4 + 4 + 4;

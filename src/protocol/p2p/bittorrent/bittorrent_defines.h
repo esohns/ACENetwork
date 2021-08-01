@@ -89,7 +89,7 @@
 #define BITTORRENT_PEER_HANDSHAKE_PSTR_STRING             "BitTorrent protocol"
 #define BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE           8 // bytes
 
-#define BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX          32768 // bytes
+#define BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX          16384 // bytes
 
 // session
 #define BITTORRENT_SESSION_HANDLER_THREAD_NAME            "bittorrent_session"

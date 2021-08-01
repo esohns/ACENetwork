@@ -61,6 +61,7 @@ class BitTorrent_ISession_T
  public:
   inline virtual ~BitTorrent_ISession_T () {}
 
+  virtual void interested (Net_ConnectionId_t) = 0; // connection id
   virtual void request (Net_ConnectionId_t, // connection id
                         unsigned int,       // index (piece#)
                         unsigned int,       // begin (offset)

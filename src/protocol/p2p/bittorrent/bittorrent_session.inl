@@ -277,7 +277,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
     ACE_ASSERT (!((*iterator_2).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
     std::string piece_hashes = *(*iterator_2).second->string;
+    Bencoding_DictionaryIterator_t iterator_3 =
+        (*iterator).second->dictionary->begin ();
+    for (;
+         iterator_3 != (*iterator).second->dictionary->end ();
+         ++iterator_3)
+      if (*(*iterator_3).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECE_LENGTH_KEY))
+        break;
+    ACE_ASSERT (iterator_3 != (*iterator).second->dictionary->end ());
+    ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
     struct BitTorrent_Piece piece_s;
+    unsigned int total_length =
+        BitTorrent_Tools::MetaInfoToLength (*configuration_in.metaInfo);
     while (!piece_hashes.empty ())
     {
       piece_s.filename =
@@ -287,6 +298,11 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       piece_s.hash =
           piece_hashes.substr (0, BITTORRENT_PRT_INFO_PIECE_HASH_SIZE);
       piece_hashes.erase (0, BITTORRENT_PRT_INFO_PIECE_HASH_SIZE);
+      piece_s.length =
+          (piece_hashes.empty () ? total_length % (*iterator_3).second->integer
+                                 : (*iterator_3).second->integer);
+      if (!piece_s.length)
+        piece_s.length = (*iterator_3).second->integer;
       inherited::state_.pieces.push_back (piece_s);
     } // end WHILE
   } // end lock scope
@@ -700,6 +716,177 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end lock scope
 }
 
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerHandlerModuleType,
+          typename TrackerHandlerModuleType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
+          typename PeerConnectorType,
+          typename TrackerConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
+void
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
+                     PeerStreamType,
+                     TrackerStreamType,
+                     StreamStatusType,
+                     PeerHandlerModuleType,
+                     TrackerHandlerModuleType,
+                     PeerConnectionType,
+                     TrackerConnectionType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
+                     PeerConnectorType,
+                     TrackerConnectorType,
+                     ConfigurationType,
+                     StateType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::interested (Net_ConnectionId_t id_in)
+#else
+                     >::interested (Net_ConnectionId_t id_in)
+#endif // GUI_SUPPORT
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::interested"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration->allocatorConfiguration);
+
+  ICONNECTION_T* iconnection_p = NULL;
+  ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+  struct BitTorrent_PeerRecord* record_p = NULL;
+  struct BitTorrent_PeerMessageData* data_p = NULL;
+  typename PeerStreamType::MESSAGE_T::DATA_T* data_container_p = NULL;
+  typename PeerStreamType::MESSAGE_T* message_p = NULL;
+  ACE_Message_Block* message_block_p = NULL;
+
+  iconnection_p =
+      inherited::CONNECTION_MANAGER_SINGLETON_T::instance ()->get (id_in);
+  if (!iconnection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve peer connection handle (id was: %d), aborting\n"),
+                id_in));
+    goto error;
+  } // end IF
+  istream_connection_p = dynamic_cast<ISTREAM_CONNECTION_T*> (iconnection_p);
+  if (!istream_connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
+                iconnection_p));
+    goto error;
+  } // end IF
+
+  ACE_NEW_NORETURN (record_p,
+                    struct BitTorrent_PeerRecord ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    goto error;
+  } // end IF
+  record_p->type = BITTORRENT_MESSAGETYPE_INTERESTED;
+
+  ACE_NEW_NORETURN (data_p,
+                    struct BitTorrent_PeerMessageData ());
+  if (!data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    goto error;
+  } // end IF
+  data_p->peerRecord = record_p;
+  record_p = NULL;
+
+  // *IMPORTANT NOTE*: fire-and-forget API (data_p)
+  ACE_NEW_NORETURN (data_container_p,
+                    typename ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T (data_p,
+                                                                                true));
+  if (!data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    goto error;
+  } // end IF
+  data_p = NULL;
+
+allocate:
+  message_p =
+    static_cast<typename ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->connectionConfiguration->messageAllocator->malloc (sizeof (typename ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T)));
+  // keep retrying ?
+  if (!message_p &&
+      !inherited::configuration_->connectionConfiguration->messageAllocator->block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate message: \"%m\", returning\n")));
+    goto error;
+  } // end IF
+  // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
+  message_p->initialize (data_container_p,
+                         message_p->sessionId (),
+                         NULL);
+  data_container_p = NULL;
+
+  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
+  message_block_p = message_p;
+  try {
+    istream_connection_p->send (message_block_p);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IStreamConnection_T::send(), returning\n")));
+    goto error;
+  }
+  message_p = NULL;
+
+  // clean up
+  iconnection_p->decrease ();
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: interested in peer (id was: %d)...\n"),
+              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              id_in));
+
+  return;
+
+error:
+  if (record_p)
+    delete record_p;
+  if (data_p)
+    delete data_p;
+  if (data_container_p)
+    data_container_p->decrease ();
+  if (iconnection_p)
+   iconnection_p->decrease ();
+}
 
 template <typename PeerHandlerConfigurationType,
           typename TrackerHandlerConfigurationType,
@@ -1930,30 +2117,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
           break;
       ACE_ASSERT (iterator_2 != inherited::configuration_->metaInfo->end ());
       ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
-      Bencoding_DictionaryIterator_t iterator_3 =
-          (*iterator_2).second->dictionary->begin ();
-      for (;
-           iterator_3 != (*iterator_2).second->dictionary->end ();
-           ++iterator_3)
-        if (*(*iterator_3).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECE_LENGTH_KEY))
-          break;
-      ACE_ASSERT (iterator_3 != (*iterator_2).second->dictionary->end ());
-      ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-      BitTorrent_PiecesIterator_t iterator_4;
       BitTorrent_PiecesIterator_t iterator_5 = inherited::state_.pieces.begin ();
       for (;
            iterator_5 != inherited::state_.pieces.end ();
            ++iterator_5)
       {
-        unsigned int piece_length = (*iterator_3).second->integer;
-        iterator_4 = iterator_5;
-        std::advance (iterator_4, 1);
-        if (unlikely (iterator_4 == inherited::state_.pieces.end ()))
-        {
-          piece_length = BitTorrent_Tools::MetaInfoToLength (*inherited::configuration_->metaInfo) % (*iterator_3).second->integer;
-          piece_length = (piece_length ? piece_length : (*iterator_3).second->integer);
-        } // end IF
-        if (!BitTorrent_Tools::isPieceComplete (piece_length,
+        if (!BitTorrent_Tools::isPieceComplete ((*iterator_5).length,
                                                 (*iterator_5).chunks) &&
             BitTorrent_Tools::havePiece (std::distance (inherited::state_.pieces.begin (), iterator_5),
                                          (*iterator_7).second))
@@ -1964,34 +2133,35 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       std::sort ((*iterator_5).chunks.begin (),
                  (*iterator_5).chunks.end (),
                  less_s);
-      struct BitTorrent_Piece_Chunk chunk_s;
+      unsigned int offset = 0, length = 0;
       BitTorrent_PieceChunksIterator_t iterator_6 =
           (*iterator_5).chunks.begin ();
       for (;
            iterator_6 != (*iterator_5).chunks.end ();
            ++iterator_6)
       {
-        if (!chunk_s.offset && !(*iterator_6).offset)
+        if (!offset && !(*iterator_6).offset)
         {
-          chunk_s.length = (*iterator_6).length;
+          length = BitTorrent_Tools::chunkLength (*iterator_6);
           continue;
         } // end IF
-        if ((*iterator_6).offset != (chunk_s.offset + chunk_s.length))
+        if ((*iterator_6).offset != (offset + length))
           break;
-        chunk_s = *iterator_6;
+        offset = (*iterator_6).offset;
+        length = BitTorrent_Tools::chunkLength (*iterator_6);
       } // end FOR
-      chunk_s.offset = chunk_s.offset + chunk_s.length;
+      offset = offset + length;
       unsigned int missing_data =
           static_cast<unsigned int> (BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX);
       if (iterator_6 != (*iterator_5).chunks.end ())
-        missing_data = (*iterator_6).offset -
-                       (chunk_s.offset + chunk_s.length);
-      chunk_s.length =
-        std::min (missing_data, static_cast<unsigned int> (BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX));
+        missing_data = (*iterator_6).offset - offset;
+      length =
+        std::min (missing_data,
+                  static_cast<unsigned int> (BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX));
       request (id_in,
                std::distance (inherited::state_.pieces.begin (), iterator_5),
-               chunk_s.offset,
-               chunk_s.length);
+               offset,
+               length);
       break;
     }
     case BITTORRENT_MESSAGETYPE_HAVE:
@@ -2026,6 +2196,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       unsigned int index_2 = record_in.have % (sizeof (ACE_UINT8) * 8);
       ACE_ASSERT (!((*iterator).second[index] & (0x80 >> index_2)));
       (*iterator).second[index] |= (0x80 >> index_2);
+
+      // send 'interested' ?
+      BitTorrent_PeerStatusIterator_t iterator_2;
+      iterator_2 = inherited::state_.peerStatus.find (id_in);
+      ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
+      if (!(*iterator_2).second.am_interested &&
+          BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
+                                             (*iterator).second))
+      {
+        interested (id_in);
+        (*iterator_2).second.am_interested = true;
+      } // end IF
       break;
     }
     case BITTORRENT_MESSAGETYPE_BITFIELD:
@@ -2036,6 +2218,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
       ACE_ASSERT ((*iterator).second.empty ());
       (*iterator).second = record_in.bitfield;
+
+      // send 'interested' ?
+      BitTorrent_PeerStatusIterator_t iterator_2;
+      iterator_2 = inherited::state_.peerStatus.find (id_in);
+      ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
+      if (!(*iterator_2).second.am_interested &&
+          BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
+                                             (*iterator).second))
+      {
+        interested (id_in);
+        (*iterator_2).second.am_interested = true;
+      } // end IF
       break;
     }
     case BITTORRENT_MESSAGETYPE_PIECE:

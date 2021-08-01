@@ -216,8 +216,9 @@ class BitTorrent_Session_T
                                        TrackerModuleHandlerConfigurationType> >::iterator TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T;
 
   // implement/override (part of) BitTorrent_ISession_T
-  virtual void connect (Net_ConnectionId_t);
-  virtual void disconnect (Net_ConnectionId_t);
+  virtual void connect (Net_ConnectionId_t); // connection id
+  virtual void disconnect (Net_ConnectionId_t); // connection id
+  virtual void interested (Net_ConnectionId_t); // connection id
   virtual void request (Net_ConnectionId_t, // connection id
                         unsigned int,       // index (piece#)
                         unsigned int,       // begin (offset)

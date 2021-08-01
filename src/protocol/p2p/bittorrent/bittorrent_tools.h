@@ -66,7 +66,10 @@ class BitTorrent_Tools
   static bool isPieceComplete (unsigned int,                     // piece length
                                const BitTorrent_PieceChunks_t&); // chunks
   static bool havePiece (unsigned int,                               // piece index
-                         const BitTorrent_MessagePayload_Bitfield&); // have bitfield
+                         const BitTorrent_MessagePayload_Bitfield&); // 'have' bitfield
+  static bool hasMissingPiece (const BitTorrent_Pieces_t&,                 // pieces
+                               const BitTorrent_MessagePayload_Bitfield&); // 'have' bitfield
+  inline static unsigned int chunkLength (const struct BitTorrent_Piece_Chunk& chunk_in) { return (chunk_in.data ? chunk_in.data->total_length () : 0); }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())

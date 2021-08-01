@@ -29,11 +29,10 @@
 #include "ace/config-lite.h"
 #include "ace/Assert.h"
 #include "ace/Basic_Types.h"
+#include "ace/Message_Block.h"
 #include "ace/OS.h"
 
 //#include "common_statistic_handler.h"
-
-//#include "stream_common.h"
 
 #include "bittorrent_defines.h"
 
@@ -74,12 +73,12 @@ enum BitTorrent_MessageType
 struct BitTorrent_Piece_Chunk
 {
   BitTorrent_Piece_Chunk ()
-   : offset (0)
-   , length (0)
+   : data (NULL)
+   , offset (0)
   {};
 
-  unsigned int offset;
-  unsigned int length;
+  ACE_Message_Block* data;
+  unsigned int       offset;
 };
 typedef std::vector<struct BitTorrent_Piece_Chunk> BitTorrent_PieceChunks_t;
 typedef BitTorrent_PieceChunks_t::const_iterator BitTorrent_PieceChunksIterator_t;
@@ -92,17 +91,18 @@ struct BitTorrent_Piece
 {
   BitTorrent_Piece ()
    : chunks ()
-   , fd (ACE_INVALID_HANDLE)
    , filename ()
    , hash ()
+   , length (0)
   {};
 
   BitTorrent_PieceChunks_t chunks;
-  ACE_HANDLE               fd;
   std::string              filename;
   std::string              hash; // SHA1 20 bytes
+  unsigned int             length;
 };
 typedef std::vector<struct BitTorrent_Piece> BitTorrent_Pieces_t;
+typedef BitTorrent_Pieces_t::const_iterator BitTorrent_PiecesConstIterator_t;
 typedef BitTorrent_Pieces_t::iterator BitTorrent_PiecesIterator_t;
 
 struct BitTorrent_PeerHandShake
