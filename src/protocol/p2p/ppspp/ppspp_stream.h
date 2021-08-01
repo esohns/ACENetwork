@@ -195,9 +195,6 @@ class HTTP_Stream_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T (const HTTP_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T& operator= (const HTTP_Stream_T&))
 
-  // *TODO*: remove this API
-  void ping ();
-
   // modules
   MODULE_MARSHAL_T   marshal_;
   //MODULE_PARSER_T    parser_;

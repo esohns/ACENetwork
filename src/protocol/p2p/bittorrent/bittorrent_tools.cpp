@@ -51,6 +51,27 @@ BitTorrent_Tools::HandShakeToString (const struct BitTorrent_PeerHandShake& peer
   std::string result;
   std::ostringstream converter;
 
+  result += peerHandshake_in.pstr;
+  result += ACE_TEXT_ALWAYS_CHAR (" ");
+  for (unsigned int i = 0;
+       i < BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE;
+       ++i)
+  {
+    result += ((peerHandshake_in.reserved[i] & 0x80) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ((peerHandshake_in.reserved[i] & 0x40) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ((peerHandshake_in.reserved[i] & 0x20) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ((peerHandshake_in.reserved[i] & 0x10) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ((peerHandshake_in.reserved[i] & 0x08) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ((peerHandshake_in.reserved[i] & 0x04) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ((peerHandshake_in.reserved[i] & 0x02) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ((peerHandshake_in.reserved[i] & 0x01) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+    result += ACE_TEXT_ALWAYS_CHAR (" ");
+  } // end FOR
+//  result += ACE_TEXT_ALWAYS_CHAR (" ");
+  result += peerHandshake_in.info_hash;
+  result += ACE_TEXT_ALWAYS_CHAR (" ");
+  result += peerHandshake_in.peer_id;
+
   return result;
 }
 std::string
@@ -88,16 +109,17 @@ BitTorrent_Tools::RecordToString (const struct BitTorrent_PeerRecord& peerRecord
              iterator != peerRecord_in.bitfield.end ();
              ++iterator)
         {
-          result += ((*iterator & 0x01) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x02) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x04) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x08) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x10) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x20) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x40) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
           result += ((*iterator & 0x80) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x40) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x20) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x10) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x08) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x04) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x02) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          result += ((*iterator & 0x01) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
           result += ACE_TEXT_ALWAYS_CHAR (" ");
         } // end FOR
+        result.erase (result.end () - 1);
         break;
       }
       case BITTORRENT_MESSAGETYPE_REQUEST:
@@ -505,9 +527,10 @@ BitTorrent_Tools::torrentSupportsScrape (const std::string& announceURL_in)
                                    std::string::npos);
   if (position == std::string::npos)
     return false;
+  ++position;
 
   return (announceURL_in.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY),
-                               ++position) == position);
+                               position) == position);
 }
 std::string
 BitTorrent_Tools::AnnounceURLToScrapeURL (const std::string& announceURL_in)
@@ -552,4 +575,16 @@ BitTorrent_Tools::isPieceComplete (unsigned int length_in,
     total_length += (*iterator).length;
 
   return (length_in == total_length);
+}
+
+bool
+BitTorrent_Tools::havePiece (unsigned int index_in,
+                             const BitTorrent_MessagePayload_Bitfield& bitfield_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::havePiece"));
+
+  unsigned int array_index_i = index_in / (sizeof (ACE_UINT8) * 8);
+  unsigned int array_offset_i = index_in % (sizeof (ACE_UINT8) * 8);
+
+  return bitfield_in[array_index_i] & (0x80 >> array_offset_i);
 }

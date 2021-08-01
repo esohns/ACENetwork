@@ -480,6 +480,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                        ACE_DIRECTORY_SEPARATOR_CHAR)),
               id_in));
 
+  BitTorrent_MessagePayload_Bitfield peer_pieces;
   struct BitTorrent_PeerStatus peer_status;
   struct BitTorrent_PeerHandShake* record_p = NULL;
   struct BitTorrent_PeerMessageData* data_p = NULL;
@@ -490,6 +491,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ISTREAM_CONNECTION_T* istream_connection_p = NULL;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+    inherited::state_.peerPieces.insert (std::make_pair (id_in, peer_pieces));
     inherited::state_.peerStatus.insert (std::make_pair (id_in, peer_status));
   } // end lock scope
 
@@ -676,10 +678,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
               id_in));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-    BitTorrent_PeerStatusIterator_t iterator =
+    BitTorrent_PeerPiecesIterator_t iterator =
+        inherited::state_.peerPieces.find (id_in);
+    ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
+    inherited::state_.peerPieces.erase (iterator);
+    BitTorrent_PeerStatusIterator_t iterator_2 =
         inherited::state_.peerStatus.find (id_in);
-    ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-    inherited::state_.peerStatus.erase (iterator);
+    ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
+    inherited::state_.peerStatus.erase (iterator_2);
 
     if (inherited::state_.connections.empty ())
     { ACE_ASSERT (inherited::state_.controller);
@@ -756,8 +762,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // sanity check(s)
   ACE_ASSERT (id_in);
-  ACE_ASSERT (index_in);
-  ACE_ASSERT (begin_in);
   ACE_ASSERT (length_in);
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->connectionConfiguration);
@@ -840,7 +844,7 @@ allocate:
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
   message_p->initialize (data_container_p,
-                         1,
+                         message_p->sessionId (),
                          NULL);
   data_container_p = NULL;
 
@@ -857,6 +861,15 @@ allocate:
 
   // clean up
   iconnection_p->decrease ();
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: requested chunk (piece %u, begin %u, length %u) from peer (id was: %d)...\n"),
+              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              index_in,
+              begin_in,
+              length_in,
+              id_in));
 
   return;
 
@@ -1193,8 +1206,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   typename TrackerConnectorType::ICONNECTOR_T* iconnector_p = &connector;
   typename TrackerConnectorType::ICONNECTION_T* iconnection_p = NULL;
   int result = -1;
-  ACE_ASSERT (trackerConnectionConfiguration_);
-  if (!iconnector_p->initialize (*trackerConnectionConfiguration_))
+  if (!iconnector_p->initialize (*inherited::configuration_->trackerConnectionConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -1900,67 +1912,84 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     case BITTORRENT_MESSAGETYPE_UNCHOKE:
     {
       BitTorrent_PeerStatusIterator_t iterator;
+      BitTorrent_PeerPiecesIterator_t iterator_7;
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
       iterator = inherited::state_.peerStatus.find (id_in);
       ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
       (*iterator).second.am_choking = false;
 
       // request a missing chunk from this peer
+      iterator_7 = inherited::state_.peerPieces.find (id_in);
+      ACE_ASSERT (iterator_7 != inherited::state_.peerPieces.end ());
       Bencoding_DictionaryIterator_t iterator_2 =
           inherited::configuration_->metaInfo->begin ();
       for (;
            iterator_2 != inherited::configuration_->metaInfo->end ();
            ++iterator_2)
-        if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECE_LENGTH_KEY))
+        if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY))
           break;
       ACE_ASSERT (iterator_2 != inherited::configuration_->metaInfo->end ());
-      ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-      BitTorrent_PiecesIterator_t iterator_4;
-      BitTorrent_PiecesIterator_t iterator_3 = inherited::state_.pieces.begin ();
+      ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+      Bencoding_DictionaryIterator_t iterator_3 =
+          (*iterator_2).second->dictionary->begin ();
       for (;
-           iterator_3 != inherited::state_.pieces.end ();
+           iterator_3 != (*iterator_2).second->dictionary->end ();
            ++iterator_3)
+        if (*(*iterator_3).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECE_LENGTH_KEY))
+          break;
+      ACE_ASSERT (iterator_3 != (*iterator_2).second->dictionary->end ());
+      ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+      BitTorrent_PiecesIterator_t iterator_4;
+      BitTorrent_PiecesIterator_t iterator_5 = inherited::state_.pieces.begin ();
+      for (;
+           iterator_5 != inherited::state_.pieces.end ();
+           ++iterator_5)
       {
-        unsigned int piece_length = (*iterator_2).second->integer;
-        iterator_4 = iterator_3;
+        unsigned int piece_length = (*iterator_3).second->integer;
+        iterator_4 = iterator_5;
         std::advance (iterator_4, 1);
         if (unlikely (iterator_4 == inherited::state_.pieces.end ()))
         {
-          piece_length = BitTorrent_Tools::MetaInfoToLength (*inherited::configuration_->metaInfo) % (*iterator_2).second->integer;
-          piece_length = (piece_length ? piece_length : (*iterator_2).second->integer);
+          piece_length = BitTorrent_Tools::MetaInfoToLength (*inherited::configuration_->metaInfo) % (*iterator_3).second->integer;
+          piece_length = (piece_length ? piece_length : (*iterator_3).second->integer);
         } // end IF
         if (!BitTorrent_Tools::isPieceComplete (piece_length,
-                                                (*iterator_3).chunks))
+                                                (*iterator_5).chunks) &&
+            BitTorrent_Tools::havePiece (std::distance (inherited::state_.pieces.begin (), iterator_5),
+                                         (*iterator_7).second))
           break;
       } // end FOR
-      ACE_ASSERT (iterator_3 != inherited::state_.pieces.end ());
+      ACE_ASSERT (iterator_5 != inherited::state_.pieces.end ());
       struct bittorrent_piece_chunks_less less_s;
-      std::sort ((*iterator_3).chunks.begin (),
-                 (*iterator_3).chunks.end (),
+      std::sort ((*iterator_5).chunks.begin (),
+                 (*iterator_5).chunks.end (),
                  less_s);
       struct BitTorrent_Piece_Chunk chunk_s;
-      BitTorrent_PieceChunksIterator_t iterator_5 =
-          (*iterator_3).chunks.begin ();
+      BitTorrent_PieceChunksIterator_t iterator_6 =
+          (*iterator_5).chunks.begin ();
       for (;
-           iterator_5 != (*iterator_3).chunks.end ();
-           ++iterator_5)
+           iterator_6 != (*iterator_5).chunks.end ();
+           ++iterator_6)
       {
-        if (!chunk_s.offset && !(*iterator_5).offset)
+        if (!chunk_s.offset && !(*iterator_6).offset)
         {
-          chunk_s.length = (*iterator_5).length;
+          chunk_s.length = (*iterator_6).length;
           continue;
         } // end IF
-        if ((*iterator_5).offset != (chunk_s.offset + chunk_s.length))
+        if ((*iterator_6).offset != (chunk_s.offset + chunk_s.length))
           break;
-        chunk_s = *iterator_5;
+        chunk_s = *iterator_6;
       } // end FOR
       chunk_s.offset = chunk_s.offset + chunk_s.length;
-      unsigned int missing_data = (*iterator_5).offset -
-                                  (chunk_s.offset + chunk_s.length);
+      unsigned int missing_data =
+          static_cast<unsigned int> (BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX);
+      if (iterator_6 != (*iterator_5).chunks.end ())
+        missing_data = (*iterator_6).offset -
+                       (chunk_s.offset + chunk_s.length);
       chunk_s.length =
         std::min (missing_data, static_cast<unsigned int> (BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX));
       request (id_in,
-               std::distance (inherited::state_.pieces.begin (), iterator_3),
+               std::distance (inherited::state_.pieces.begin (), iterator_5),
                chunk_s.offset,
                chunk_s.length);
       break;
@@ -2146,6 +2175,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::log"));
 
   std::string message_text = BitTorrent_Tools::RecordToString (record_in);
+  message_text += '\n';
   log (std::string (), // --> server log
        message_text);
 }

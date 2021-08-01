@@ -346,7 +346,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
 #if defined (_DEBUG)
   if (inherited2::configuration_->debugParser)
     ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("%s"),
+                ACE_TEXT ("%s\n"),
                 ACE_TEXT (BitTorrent_Tools::RecordToString (*data_r.peerRecord).c_str ())));
 #endif // _DEBUG
 

@@ -110,7 +110,7 @@ BitTorrent_Message_T<SessionDataType,
   const struct BitTorrent_PeerRecord& record_r = inherited::data_->getR ();
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
+              ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s\n"),
               inherited::id (),
               inherited::total_length (),
               ACE_TEXT (BitTorrent_Tools::RecordToString (record_r).c_str ())));

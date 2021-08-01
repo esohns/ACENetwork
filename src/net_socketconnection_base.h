@@ -53,6 +53,8 @@ class Net_SocketConnectionBase_T
                                   SocketConfigurationType,
                                   HandlerConfigurationType>
 {
+  typedef HandlerType inherited;
+
  public:
   virtual ~Net_SocketConnectionBase_T ();
 
@@ -105,17 +107,12 @@ class Net_SocketConnectionBase_T
                      ACE_Message_Block&); // (initial) data (if any)
 
   // *TODO*: move this into the handler
-  HandlerConfigurationType configuration_;
+  HandlerConfigurationType* configuration_;
 
  private:
-  typedef HandlerType inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T (const Net_SocketConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_SocketConnectionBase_T& operator= (const Net_SocketConnectionBase_T&))
-
-  // helper methods
-//  void shutdown ();
 };
 
 //////////////////////////////////////////
@@ -140,6 +137,8 @@ class Net_AsynchSocketConnectionBase_T
                                   SocketConfigurationType,
                                   HandlerConfigurationType>
 {
+  typedef HandlerType inherited;
+
  public:
   inline virtual ~Net_AsynchSocketConnectionBase_T () {};
 
@@ -182,11 +181,9 @@ class Net_AsynchSocketConnectionBase_T
   virtual int open (void*); // arg
 
   // *TODO*: move this into the handler
-  HandlerConfigurationType configuration_;
+  HandlerConfigurationType* configuration_;
 
  private:
-  typedef HandlerType inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T (const Net_AsynchSocketConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSocketConnectionBase_T& operator= (const Net_AsynchSocketConnectionBase_T&))

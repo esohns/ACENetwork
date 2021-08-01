@@ -912,13 +912,22 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // *NOTE*: feed the data into the stream (queue of the tail module 'reader'
   //         task; Note: 'tail' module to support potential 'streamer' modules)
-  module_p = stream_.tail ();
+  module_p = stream_.head ();
+  ACE_ASSERT (module_p);
+  do
+  {
+    if (unlikely (!module_p->next () || // aggregator
+                  !module_p->next ()->next () || // next is aggregator
+                  (!ACE_OS::strcmp (module_p->next ()->name (),
+                                    ACE_TEXT ("ACE_Stream_Tail")) ||
+                   !ACE_OS::strcmp (module_p->next ()->name (),
+                                    ACE_TEXT (STREAM_MODULE_TAIL_NAME)))))
+      break;
+    module_p = module_p->next ();
+  } while (true);
   ACE_ASSERT (module_p);
   task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  task_p = task_p->next ();
-  ACE_ASSERT (task_p);
-  //result = task_p->reply (message_inout, NULL);
   result = task_p->put (message_inout, NULL);
   if (unlikely (result == -1))
   {
@@ -1698,18 +1707,27 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // *NOTE*: feed the data into the stream (queue of the tail module 'reader'
   //         task; Note: 'tail' module to support potential 'streamer' modules)
-  module_p = stream_.tail ();
+  module_p = stream_.head ();
+  ACE_ASSERT (module_p);
+  do
+  {
+    if (unlikely (!module_p->next () || // aggregator
+                  !module_p->next ()->next () || // next is aggregator
+                  (!ACE_OS::strcmp (module_p->next ()->name (),
+                                    ACE_TEXT ("ACE_Stream_Tail")) ||
+                   !ACE_OS::strcmp (module_p->next ()->name (),
+                                    ACE_TEXT (STREAM_MODULE_TAIL_NAME)))))
+      break;
+    module_p = module_p->next ();
+  } while (true);
   ACE_ASSERT (module_p);
   task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  task_p = task_p->next ();
-  ACE_ASSERT (task_p);
-  //result = task_p->reply (message_inout, NULL);
   result = task_p->put (message_inout, NULL);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u/%s%s: failed to ACE_Task::put(): \"%m\", returning\n"),
+                ACE_TEXT ("%u/%s/%s: failed to ACE_Task::put(): \"%m\", returning\n"),
                 id (),
                 ACE_TEXT (stream_.name ().c_str ()),
                 module_p->name ()));

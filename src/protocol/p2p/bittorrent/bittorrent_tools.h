@@ -65,6 +65,9 @@ class BitTorrent_Tools
 
   static bool isPieceComplete (unsigned int,                     // piece length
                                const BitTorrent_PieceChunks_t&); // chunks
+  static bool havePiece (unsigned int,                               // piece index
+                         const BitTorrent_MessagePayload_Bitfield&); // have bitfield
+
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools (const BitTorrent_Tools&))

@@ -212,9 +212,6 @@ class DHCP_Stream_T
   ACE_UNIMPLEMENTED_FUNC (DHCP_Stream_T (const DHCP_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Stream_T& operator= (const DHCP_Stream_T&))
 
-  // *TODO*: remove this API
-  void ping ();
-
   // modules
   //MODULE_PARSER_T    parser_;
   MODULE_MARSHAL_T   marshal_;

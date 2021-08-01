@@ -49,7 +49,7 @@ Net_SocketConnectionBase_T<HandlerType,
                                                                       const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
- , configuration_ ()
+ , configuration_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::Net_SocketConnectionBase_T"));
 
@@ -110,42 +110,10 @@ Net_SocketConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::send"));
 
-  int result = -1;
+  ACE_ASSERT (false);
+  ACE_NOTSUP
 
-  Stream_Module_t* module_p, *module_2 = NULL;
-  Stream_Task_t* task_p = NULL;
-  // *NOTE*: feed the data into the stream at the 'top' of the outbound stream
-  //         (which is the module just above the stream tail)
-  result = inherited::stream_.top (module_p);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", returning\n")));
-    goto clean_up;
-  } // end IF
-  ACE_ASSERT (module_p);
-  module_2 = inherited::stream_.tail ();
-  ACE_ASSERT (module_2);
-  while (module_p->next () != module_2)
-    module_p = module_p->next ();
-  ACE_ASSERT (module_p);
-  //Stream_Task_t* task_p = module_p->writer ();
-  task_p = module_p->reader ();
-  ACE_ASSERT (task_p);
-  //result = task_p->reply (message_inout, NULL);
-  result = task_p->put_next (message_inout, NULL);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::put_next(): \"%m\", returning\n")));
-    goto clean_up;
-  } // end IF
-
-  return;
-
-clean_up:
-  message_inout->release ();
-  message_inout = NULL;
+  ACE_NOTREACHED (return;)
 }
 
 template <typename HandlerType,
@@ -169,17 +137,14 @@ Net_SocketConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::set"));
 
   // sanity check(s)
-  SocketConfigurationType socket_configuration;
-  //// *TODO*: remove type inference
-  //if (configuration_.socketConfiguration)
-  //  socket_configuration = *configuration_.socketConfiguration;
+  ACE_ASSERT (configuration_);
 
   ITRANSPORTLAYER_T* itransportlayer_p = this;
   ACE_ASSERT (itransportlayer_p);
 
   if (!itransportlayer_p->initialize (this->dispatch (),
                                       role_in,
-                                      socket_configuration))
+                                      *configuration_.socketConfiguration))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
 }
@@ -204,24 +169,26 @@ Net_SocketConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::open"));
 
+  // sanity check(s)
+  ACE_ASSERT (!configuration_);
+
   // step0: initialize this connection
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
-  const HandlerConfigurationType* handler_configuration_p = NULL;
   switch (this->role ())
   {
     case NET_ROLE_CLIENT:
     {
       ICONNECTOR_T* iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
-      handler_configuration_p = &(iconnector_p->get ());
+      configuration_ = &(iconnector_p->get ());
       break;
     }
     case NET_ROLE_SERVER:
     {
       ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
-      handler_configuration_p = &(ilistener_p->get ());
+      configuration_ = &(ilistener_p->get ());
       break;
     }
     default:
@@ -232,11 +199,11 @@ Net_SocketConnectionBase_T<HandlerType,
       return -1;
     }
   } // end SWITCH
-  ACE_ASSERT (handler_configuration_p);
+  ACE_ASSERT (configuration_);
   // *TODO*: remove type inference
-  ACE_ASSERT (handler_configuration_p->userData);
+  ACE_ASSERT (configuration_->userData);
   ConfigurationType* configuration_p =
-    handler_configuration_p->userData->configuration;
+    configuration_->userData->configuration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {
@@ -442,7 +409,7 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                                                                   const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
- , configuration_ ()
+ , configuration_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::Net_AsynchSocketConnectionBase_T"));
 
@@ -468,11 +435,12 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::act"));
 
-  // initialize this connection
+  // sanity check(s)
+  ACE_ASSERT (!configuration_);
 
+  // initialize this connection
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
-  const HandlerConfigurationType* handler_configuration_p = NULL;
   switch (this->role ())
   {
     case NET_ROLE_CLIENT:
@@ -480,14 +448,14 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
       const ICONNECTOR_T* iconnector_p =
         static_cast<const ICONNECTOR_T*> (act_in);
       ACE_ASSERT (iconnector_p);
-      handler_configuration_p = &iconnector_p->get ();
+      configuration_ = &iconnector_p->get ();
       break;
     }
     case NET_ROLE_SERVER:
     {
       const ILISTENER_T* ilistener_p = static_cast<const ILISTENER_T*> (act_in);
       ACE_ASSERT (ilistener_p);
-      handler_configuration_p = &ilistener_p->get ();
+      configuration_ = &ilistener_p->get ();
       break;
     }
     default:
@@ -498,11 +466,11 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
       return;
     }
   } // end SWITCH
-  ACE_ASSERT (handler_configuration_p);
+  ACE_ASSERT (configuration_);
   // *TODO*: remove type inference
-  ACE_ASSERT (handler_configuration_p->userData);
+  ACE_ASSERT (configuration_->userData);
   ConfigurationType* configuration_p =
-    handler_configuration_p->userData->configuration;
+    configuration_->userData->configuration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {
@@ -532,42 +500,10 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::send"));
 
-  int result = -1;
+  ACE_ASSERT (false);
+  ACE_NOTSUP
 
-  Stream_Module_t* module_p, *module_2 = NULL;
-  Stream_Task_t* task_p = NULL;
-  // *NOTE*: feed the data into the stream at the 'top' of the outbound stream
-  //         (which is the module just above the stream tail)
-  result = inherited::stream_.top (module_p);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Stream::top(): \"%m\", returning\n")));
-    goto clean_up;
-  } // end IF
-  ACE_ASSERT (module_p);
-  module_2 = inherited::stream_.tail ();
-  ACE_ASSERT (module_2);
-  while (module_p->next () != module_2)
-    module_p = module_p->next ();
-  ACE_ASSERT (module_p);
-  //Stream_Task_t* task_p = module_p->writer ();
-  task_p = module_p->reader ();
-  ACE_ASSERT (task_p);
-  //result = task_p->reply (message_inout, NULL);
-  result = task_p->put (message_inout, NULL);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::put(): \"%m\", returning\n")));
-    goto clean_up;
-  } // end IF
-
-  return;
-
-clean_up:
-  message_inout->release ();
-  message_inout = NULL;
+  ACE_NOTREACHED (return;)
 }
 
 template <typename HandlerType,
@@ -591,14 +527,10 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::set"));
 
   // sanity check(s)
-  SocketConfigurationType socket_configuration;
-  //// *TODO*: remove type inference
-  //if (configuration_.socketConfiguration)
-  //  socket_configuration = *configuration_.socketConfiguration;
+  ACE_ASSERT (configuration_);
 
   ITRANSPORTLAYER_T* itransportlayer_p = this;
   ACE_ASSERT (itransportlayer_p);
-
   if (!itransportlayer_p->initialize (this->dispatch (),
                                       role_in,
                                       *configuration_.socketConfiguration))
@@ -629,9 +561,9 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
   ACE_UNUSED_ARG (arg_in);
 
   ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (-1);
+  ACE_NOTSUP_RETURN (-1)
 
 #if defined (_MSC_VER)
-  ACE_NOTREACHED (true);
-#endif
+  ACE_NOTREACHED (return;)
+#endif // _MSC_VER
 }

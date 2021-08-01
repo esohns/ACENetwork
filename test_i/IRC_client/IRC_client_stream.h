@@ -121,9 +121,6 @@ class IRC_Client_Stream_T
   virtual bool initialize (const IRC_Client_StreamConfiguration_t&,
                            ACE_HANDLE);
 
-  // *TODO*: remove this API
-  void ping ();
-
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream_T (const IRC_Client_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream_T& operator= (const IRC_Client_Stream_T&))
