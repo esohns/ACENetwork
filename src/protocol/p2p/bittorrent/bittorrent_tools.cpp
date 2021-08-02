@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "bittorrent_tools.h"
 
 #include <regex>
@@ -42,6 +41,29 @@
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_defines.h"
 #include "bittorrent_stream_common.h"
+
+// initialize statics
+int
+BitTorrent_Tools::selector (const dirent* dirEntry_in)
+{
+  //NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::selector"));
+
+  // *IMPORTANT NOTE*: select only files following the naming schema for
+  //                   piece files: "<NUMBER>_XXXXXX.piece"
+
+  // sanity check --> suffix ok ?
+  std::string file_extension =
+      Common_File_Tools::fileExtension (ACE_TEXT_ALWAYS_CHAR (dirEntry_in->d_name),
+                                        true);
+  if (ACE_OS::strncmp (file_extension.c_str (),
+                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECE_FILENAME_SUFFIX),
+                       ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECE_FILENAME_SUFFIX))))
+    return 0;
+
+  return 1;
+}
+
+//////////////////////////////////////////
 
 std::string
 BitTorrent_Tools::HandShakeToString (const struct BitTorrent_PeerHandShake& peerHandshake_in)
@@ -148,6 +170,7 @@ BitTorrent_Tools::RecordToString (const struct BitTorrent_PeerRecord& peerRecord
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << peerRecord_in.piece.begin;
+        result += converter.str ();
         break;
       }
       case BITTORRENT_MESSAGETYPE_CANCEL:
@@ -601,4 +624,310 @@ BitTorrent_Tools::hasMissingPiece (const BitTorrent_Pieces_t& pieces_in,
       return true;
 
   return false;
+}
+
+bool
+BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
+                             unsigned int index_in,
+                             struct BitTorrent_Piece& piece_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::savePiece"));
+
+  // step1: validate piece hash
+  unsigned int total_length = 0;
+  for (BitTorrent_PieceChunksIterator_t iterator = piece_in.chunks.begin ();
+       iterator != piece_in.chunks.end ();
+       ++iterator)
+    total_length += (*iterator).data->total_length ();
+  unsigned char* data_p = NULL, *data_2 = NULL;
+  ACE_Message_Block* message_block_p = NULL;
+  ACE_NEW_NORETURN (data_p,
+                    unsigned char[total_length]);
+  if (!data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory (was: %u byte(s)), aborting\n"),
+                sizeof (unsigned char[total_length])));
+    return false;
+  } // end IF
+  struct bittorrent_piece_chunks_less less_s;
+  std::sort (piece_in.chunks.begin (),
+             piece_in.chunks.end (),
+             less_s);
+  data_2 = data_p;
+  for (BitTorrent_PieceChunksIterator_t iterator = piece_in.chunks.begin ();
+       iterator != piece_in.chunks.end ();
+       ++iterator)
+  {
+    message_block_p = (*iterator).data;
+    while (message_block_p)
+    {
+      ACE_OS::memcpy (data_2,
+                      message_block_p->rd_ptr (),
+                      message_block_p->length ());
+      data_2 += message_block_p->length ();
+      message_block_p = message_block_p->cont ();
+    } // end WHILE
+  } // end FOR
+  unsigned char piece_hash[SHA_DIGEST_LENGTH + 1];
+  SHA1 (data_p,
+        total_length,
+        piece_hash);
+  piece_hash[SHA_DIGEST_LENGTH] = '\0';
+  if (ACE_OS::memcmp (piece_hash,
+                      piece_in.hash.c_str (),
+                      SHA_DIGEST_LENGTH))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to validate piece hash; freeing chunk(s), aborting\n")));
+    delete [] data_p; data_p = NULL;
+    BitTorrent_Tools::freeChunks (piece_in.chunks);
+    return false;
+  } // end IF
+
+  // step2: write the piece to a temporary file
+  std::string filename =
+      Common_File_Tools::getUserDownloadDirectory (ACE_TEXT_ALWAYS_CHAR (""));
+  filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  filename += metaInfoFileName_in;
+  // sanity check(s): directory exists ?
+  // No ? --> (try to) create it then
+  if (unlikely (!Common_File_Tools::isDirectory (filename)))
+  {
+    if (!Common_File_Tools::createDirectory (filename))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_File_Tools::createDirectory(\"%s\"), aborting\n"),
+                  ACE_TEXT (filename.c_str ())));
+      delete [] data_p; data_p = NULL;
+      return false;
+    } // end IF
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("created directory: \"%s\"\n"),
+                ACE_TEXT (filename.c_str ())));
+  } // end IF
+  filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  std::ostringstream converter;
+  converter << index_in;
+  filename += converter.str ();
+  filename += ACE_TEXT_ALWAYS_CHAR ("_");
+  filename += piece_in.filename;
+  filename += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECE_FILENAME_SUFFIX);
+  if (!Common_File_Tools::store (filename,
+                                 data_p,
+                                 total_length))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::store(\"%s\"), aborting\n"),
+                ACE_TEXT (filename.c_str ())));
+    delete [] data_p; data_p = NULL;
+    return false;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: saved piece to \"%s\"...\n"),
+              ACE_TEXT (metaInfoFileName_in.c_str ()),
+              ACE_TEXT (filename.c_str ())));
+  delete [] data_p; data_p = NULL;
+
+  return true;
+}
+
+void
+BitTorrent_Tools::freeChunks (BitTorrent_PieceChunks_t& chunks_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::freeChunks"));
+
+  for (BitTorrent_PieceChunksIterator_t iterator = chunks_in.begin ();
+       iterator != chunks_in.end ();
+       ++iterator)
+    (*iterator).data->release ();
+  chunks_in.clear ();
+}
+
+bool
+BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
+                                 const Bencoding_Dictionary_t& metaInfo_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::assembleFiles"));
+
+  // step1: retrieve all piece file(s)
+  std::string pieces_path =
+      Common_File_Tools::getUserDownloadDirectory (ACE_TEXT_ALWAYS_CHAR (""));
+  pieces_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  pieces_path += metaInfoFileName_in;
+  Common_File_IdentifierList_t piece_files =
+    Common_File_Tools::files (pieces_path,
+                              BitTorrent_Tools::selector);
+  // sanity check(s)
+  ACE_ASSERT (Common_File_Tools::size (piece_files) == BitTorrent_Tools::MetaInfoToLength (metaInfo_in));
+
+  // step2: sort by name
+  struct common_file_identifier_less file_identifier_less;
+  std::sort (piece_files.begin (),
+             piece_files.end (),
+             file_identifier_less);
+
+  // step3: process piece(s)
+  uint8_t* data_p = NULL;
+  unsigned int file_size = 0;
+  Bencoding_DictionaryIterator_t iterator = metaInfo_in.begin ();
+  for (;
+       iterator != metaInfo_in.end ();
+       ++iterator)
+    if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY))
+      break;
+  ACE_ASSERT (iterator != metaInfo_in.end ());
+  ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+  Bencoding_DictionaryIterator_t iterator_2 =
+      (*iterator).second->dictionary->begin ();
+  for (;
+       iterator_2 != (*iterator).second->dictionary->end ();
+       ++iterator_2)
+    if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_KEY))
+      break;
+  ACE_ASSERT (iterator_2 != (*iterator).second->dictionary->end ());
+  ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
+  Bencoding_ListIterator_t iterator_3 = (*iterator_2).second->list->begin ();
+  ACE_ASSERT (iterator_3 != (*iterator_2).second->list->end ());
+  ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+  Bencoding_DictionaryIterator_t iterator_4 =
+      (*iterator_3)->dictionary->begin ();
+  for (;
+       iterator_4 != (*iterator_3)->dictionary->end ();
+       ++iterator_4)
+    if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY))
+      break;
+  ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
+  ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+  unsigned int current_file_length = (*iterator_4).second->integer;
+  iterator_4 = (*iterator_3)->dictionary->begin ();
+  for (;
+       iterator_4 != (*iterator_3)->dictionary->end ();
+       ++iterator_4)
+    if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_PATH_KEY))
+      break;
+  ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
+  ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
+  std::string current_file_path =
+      BitTorrent_Tools::listToPath (*(*iterator_4).second->list);
+  std::string current_file_path_on_disk = pieces_path;
+  current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  current_file_path_on_disk += current_file_path;
+  unsigned int bytes_to_write = 0;
+  for (Common_File_IdentifierListIterator_t iterator_5 = piece_files.begin ();
+       iterator_5 != piece_files.end ();
+       ++iterator_5)
+  {
+    // step1: load the current piece file into memory
+    if (!Common_File_Tools::load ((*iterator_5).identifier,
+                                  data_p,
+                                  file_size,
+                                  0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
+                  ACE_TEXT ((*iterator_5).identifier.c_str ())));
+      return false;
+    } // end IF
+
+    // step2: write to the current file
+write_file:
+    bytes_to_write = ((file_size >= current_file_length) ? current_file_length
+                                                         : file_size);
+    if (!Common_File_Tools::store (current_file_path_on_disk,
+                                   data_p,
+                                   bytes_to_write,
+                                   true)) // append if exists
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_File_Tools::store(\"%s\"), aborting\n"),
+                  ACE_TEXT (current_file_path_on_disk.c_str ())));
+      delete [] data_p; data_p = NULL;
+      return false;
+    } // end IF
+    current_file_length -= bytes_to_write;
+    file_size -= bytes_to_write;
+    if (current_file_length)
+    { // *NOTE*: wrote at least file_size bytes here
+      ACE_ASSERT (!file_size);
+      // --> load the next piece and continue
+      delete [] data_p; data_p = NULL;
+      continue;
+    } // end IF
+    // done with the current file
+    // --> get the next filename/size ?
+    ++iterator_3;
+    if (iterator_3 != (*iterator_2).second->list->end ())
+    { ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+      iterator_4 = (*iterator_3)->dictionary->begin ();
+      for (;
+           iterator_4 != (*iterator_3)->dictionary->end ();
+           ++iterator_4)
+        if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY))
+          break;
+      ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
+      ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+      current_file_length = (*iterator_4).second->integer;
+      iterator_4 = (*iterator_3)->dictionary->begin ();
+      for (;
+           iterator_4 != (*iterator_3)->dictionary->end ();
+           ++iterator_4)
+        if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_PATH_KEY))
+          break;
+      ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
+      ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
+      current_file_path =
+          BitTorrent_Tools::listToPath (*(*iterator_4).second->list);
+      current_file_path_on_disk = pieces_path;
+      current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+      current_file_path_on_disk += current_file_path;
+      if (file_size)
+        goto write_file; // there is data left
+      // --> load the next piece and continue
+    } // end IF
+    ACE_ASSERT (!file_size);
+    delete [] data_p; data_p = NULL;
+  } // end FOR
+
+  // clean up
+  Common_File_Tools::deleteFiles (piece_files);
+
+  return true;
+}
+
+unsigned int
+BitTorrent_Tools::receivedBytes (const BitTorrent_Pieces_t& pieces_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::receivedBytes"));
+
+  unsigned int result = 0;
+
+  for (BitTorrent_PiecesConstIterator_t iterator = pieces_in.begin ();
+       iterator != pieces_in.end ();
+       ++iterator)
+    for (BitTorrent_PieceChunksIterator_t iterator_2 = (*iterator).chunks.begin ();
+         iterator_2 != (*iterator).chunks.end ();
+         ++iterator_2)
+      result += BitTorrent_Tools::chunkLength (*iterator_2);
+
+  return result;
+}
+
+std::string
+BitTorrent_Tools::listToPath (const Bencoding_List_t& list_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::listToPath"));
+
+  std::string result;
+
+  for (Bencoding_ListIterator_t iterator = list_in.begin ();
+       iterator != list_in.end ();
+       ++iterator)
+  { ACE_ASSERT ((*iterator)->type == Bencoding_Element::BENCODING_TYPE_STRING);
+    result += *(*iterator)->string;
+    result += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  } // end FOR
+  result.erase (--result.end ());
+
+  return result;
 }

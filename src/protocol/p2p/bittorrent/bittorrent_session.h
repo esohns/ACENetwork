@@ -135,6 +135,7 @@ class BitTorrent_Session_T
   typedef ControllerInterfaceType ICONTROLLER_T;
   typedef ACE_Singleton<TrackerConnectionManagerType,
                         ACE_SYNCH_MUTEX> TRACKER_CONNECTION_MANAGER_SINGLETON_T;
+  typedef typename TrackerStreamType::MESSAGE_T TRACKER_MESSAGE_T;
 
   BitTorrent_Session_T ();
   virtual ~BitTorrent_Session_T ();
@@ -144,6 +145,7 @@ class BitTorrent_Session_T
   virtual void connect (const ACE_INET_Addr&);
   virtual void trackerConnect (const ACE_INET_Addr&);
   inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); }
+  inline virtual Net_ConnectionId_t trackerConnectionId () { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, 0); return inherited::state_.trackerConnectionId; }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T (const BitTorrent_Session_T&))
@@ -235,6 +237,12 @@ class BitTorrent_Session_T
 
   void error (const struct BitTorrent_PeerRecord&);
   void log (const struct BitTorrent_PeerRecord&);
+
+  bool getConnectionAndMessage (Net_ConnectionId_t,                    // connection id
+                                ISTREAM_CONNECTION_T*&,                // return value: connection handle
+                                typename PeerStreamType::MESSAGE_T*&); // return value: message handle
+  // *IMPORTANT NOTE*: must be called with lock !
+  void requestNextPiece (Net_ConnectionId_t); // connection id
 
   bool                             logToFile_;
   PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;

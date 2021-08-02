@@ -144,7 +144,7 @@ TYPE                              {OCTET}{1}
 BITFIELD_PAYLOAD                  {OCTET}{1}
 CANCEL_PAYLOAD                    {REQUEST_PAYLOAD}
 HAVE_PAYLOAD                      {INDEX}
-PIECE_PAYLOAD                     {INDEX}{BEGIN}{OCTET}{1}
+PIECE_PAYLOAD_HEAD                {INDEX}{BEGIN}
 PORT_PAYLOAD                      {OCTET}{2}
 REQUEST_PAYLOAD                   {INDEX}{BEGIN}{LENGTH}
 PAYLOAD                           ({BITFIELD_PAYLOAD}|{CANCEL_PAYLOAD}|{HAVE_PAYLOAD}|{PIECE_PAYLOAD}|{PORT_PAYLOAD}|{REQUEST_PAYLOAD})
@@ -331,7 +331,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             return yy::BitTorrent_Parser::token::CANCEL; }
 } // end <state_cancel_payload>
 <state_piece_payload>{
-{PIECE_PAYLOAD}           { ACE_ASSERT (yyleng == 8);
+{PIECE_PAYLOAD_HEAD}      { ACE_ASSERT (yyleng == 8);
                             iparser_p->offset (yyleng);
                             yylval->record->piece.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
@@ -343,12 +343,16 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_piece_payload>
 <state_piece>{
 {OCTET}{1}                { ACE_ASSERT (yyleng == 1);
-                            iparser_p->offset (yylval->record->length - 9);
                             // skip over piece data
                             unsigned int bytes_to_skip =
                               yylval->record->length - 9 - 1;
+                            char c = 0;
                             for (unsigned int i = 0; i < bytes_to_skip; ++i)
+                            {
                               yyinput (yyscanner);
+                              // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
+                              *(yyg->yy_c_buf_p - 1) = c;
+                            } // end IF
                             BEGIN (state_length);
                             return yy::BitTorrent_Parser::token::PIECE; }
 } // end <state_piece>

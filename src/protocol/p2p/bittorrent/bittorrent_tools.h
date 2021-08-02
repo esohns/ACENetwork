@@ -70,11 +70,22 @@ class BitTorrent_Tools
   static bool hasMissingPiece (const BitTorrent_Pieces_t&,                 // pieces
                                const BitTorrent_MessagePayload_Bitfield&); // 'have' bitfield
   inline static unsigned int chunkLength (const struct BitTorrent_Piece_Chunk& chunk_in) { return (chunk_in.data ? chunk_in.data->total_length () : 0); }
+  static bool savePiece (const std::string&,                         // metainfo (aka .bittorrent) file
+                         unsigned int,                               // piece index
+                         struct BitTorrent_Piece&);                  // piece
+  static void freeChunks (BitTorrent_PieceChunks_t&); // chunks
+  static bool assembleFiles (const std::string&,             // metainfo (aka .bittorrent) file
+                             const Bencoding_Dictionary_t&); // metainfo
+  static unsigned int receivedBytes (const BitTorrent_Pieces_t&); // pieces
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools (const BitTorrent_Tools&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools& operator= (const BitTorrent_Tools&))
+
+  static std::string listToPath (const Bencoding_List_t&); // path list
+
+  static int selector (const dirent*); // directory entry
 };
 
 #endif

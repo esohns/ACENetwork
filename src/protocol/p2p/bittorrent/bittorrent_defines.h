@@ -57,6 +57,8 @@
 #define BITTORRENT_METAINFO_INFO_PIECES_KEY               "pieces"
 #define BITTORRENT_METAINFO_INFO_LENGTH_KEY               "length"
 #define BITTORRENT_METAINFO_INFO_FILES_KEY                "files"
+#define BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY         "length"
+#define BITTORRENT_METAINFO_INFO_FILES_PATH_KEY           "path"
 
 #define BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER       "info_hash"
 #define BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER         "peer_id"
@@ -101,5 +103,6 @@
 #define BITTORRENT_DEFAULT_HANDLER_MODULE_NAME            "BitTorrentHandler"
 #define BITTORRENT_DEFAULT_PEER_PARSER_MODULE_NAME        "PeerParser"
 #define BITTORRENT_DEFAULT_TRACKER_PARSER_MODULE_NAME     "TrackerParser"
+#define BITTORRENT_DEFAULT_PIECE_FILENAME_SUFFIX          ".piece"
 
 #endif

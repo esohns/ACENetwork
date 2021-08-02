@@ -39,6 +39,8 @@ class BitTorrent_IControl_T
   //         communication with the swarm of registered peers
   virtual void request (const std::string&) = 0; // metainfo (aka '.torrent') file URI
   virtual SessionInterfaceType* get (const std::string&) = 0; // metainfo (aka '.torrent') file URI
+  virtual void notifyTracker (const std::string&,         // metainfo (aka '.torrent') file URI
+                              enum BitTorrent_Event) = 0; // event
 
   virtual void stop (bool = false) = 0; // wait ?
   virtual void wait () = 0;

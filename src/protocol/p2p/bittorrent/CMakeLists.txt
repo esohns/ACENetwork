@@ -128,6 +128,7 @@ set (source_files
      bittorrent_control.h
      bittorrent_control.inl
      bittorrent_defines.h
+     bittorrent_icontrol.h
      bittorrent_iparser.h
      bittorrent_isession.h
      bittorrent_message.cpp
@@ -258,6 +259,7 @@ install (FILES
          bittorrent_control.h
          bittorrent_control.inl
          bittorrent_defines.h
+         bittorrent_icontrol.h
          bittorrent_iparser.h
          bittorrent_isession.h
          bittorrent_message.h

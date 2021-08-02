@@ -26,8 +26,9 @@
 
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Global_Macros.h"
-//#include "ace/Synch_Traits.h"
 #include "ace/Thread_Mutex.h"
+
+#include "common_parser_bencoding_common.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_icontrol.h"
@@ -52,6 +53,8 @@ class BitTorrent_Control_T
   inline virtual const SESSIONS_T& getR () const { return sessions_; }
   virtual void request (const std::string&); // metainfo (aka '.torrent') file URI
   virtual SessionInterfaceType* get (const std::string&); // metainfo (aka '.torrent') file URI
+  virtual void notifyTracker (const std::string&,     // metainfo (aka '.torrent') file URI
+                              enum BitTorrent_Event); // event
   virtual void stop (bool = false); // wait ?
   virtual void wait ();
   ////////////////////////////////////////
@@ -63,6 +66,11 @@ class BitTorrent_Control_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T (const BitTorrent_Control_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T& operator= (const BitTorrent_Control_T&))
+
+  bool getTrackerConnectionAndMessage (SessionInterfaceType*,                                // session handle
+                                       const Bencoding_Dictionary_t&,                        // metainfo
+                                       typename SessionType::ITRACKER_STREAM_CONNECTION_T*&, // return value: connection handle
+                                       typename SessionType::TRACKER_MESSAGE_T*&);           // return value: message handle
 
   ACE_Condition_Thread_Mutex condition_;
   SessionConfigurationType*  configuration_;
