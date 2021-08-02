@@ -721,8 +721,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.reactorGroupId,
-                                         event_dispatch_state_s.proactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                         event_dispatch_state_s.reactorGroupId,
                                          false);
 
     goto clean;
@@ -748,8 +748,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.reactorGroupId,
-                                         event_dispatch_state_s.proactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                         event_dispatch_state_s.reactorGroupId,
                                          false);
 
     goto clean;
@@ -777,8 +777,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("session complete...\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.reactorGroupId,
-                                         event_dispatch_state_s.proactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                         event_dispatch_state_s.reactorGroupId,
                                          true);
   } // end ELSE
 

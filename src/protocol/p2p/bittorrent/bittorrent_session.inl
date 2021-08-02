@@ -299,10 +299,11 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
           piece_hashes.substr (0, BITTORRENT_PRT_INFO_PIECE_HASH_SIZE);
       piece_hashes.erase (0, BITTORRENT_PRT_INFO_PIECE_HASH_SIZE);
       piece_s.length =
-          (piece_hashes.empty () ? total_length % (*iterator_3).second->integer
-                                 : (*iterator_3).second->integer);
-      piece_s.length = (piece_s.length ? piece_s.length
-                                       : (*iterator_3).second->integer);
+          (piece_hashes.empty () ? total_length % static_cast<unsigned int> ((*iterator_3).second->integer)
+                                 : static_cast<unsigned int> ((*iterator_3).second->integer));
+      piece_s.length =
+        (piece_s.length ? piece_s.length
+                        : static_cast<unsigned int> ((*iterator_3).second->integer));
       inherited::state_.pieces.push_back (piece_s);
     } // end WHILE
   } // end lock scope

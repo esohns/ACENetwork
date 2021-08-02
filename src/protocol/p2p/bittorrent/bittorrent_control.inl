@@ -680,7 +680,7 @@ BitTorrent_Control_T<SessionAsynchType,
       NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
       NULL;
-  Net_ConnectionId_t tracker_connection_id = ACE_INVALID_HANDLE;
+  Net_ConnectionId_t tracker_connection_id = 0;
   typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
 
   ACE_NEW_NORETURN (data_p,
@@ -761,7 +761,7 @@ allocate:
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
                   ACE_TEXT (host_name_string.c_str ())));
       goto error;
     } // end IF

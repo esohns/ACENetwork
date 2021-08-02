@@ -647,7 +647,7 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory (was: %u byte(s)), aborting\n"),
-                sizeof (unsigned char[total_length])));
+                sizeof (unsigned char) * total_length));
     return false;
   } // end IF
   struct bittorrent_piece_chunks_less less_s;
@@ -799,7 +799,8 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
       break;
   ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
   ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-  unsigned int current_file_length = (*iterator_4).second->integer;
+  unsigned int current_file_length =
+    static_cast<unsigned int> ((*iterator_4).second->integer);
   iterator_4 = (*iterator_3)->dictionary->begin ();
   for (;
        iterator_4 != (*iterator_3)->dictionary->end ();
@@ -867,7 +868,8 @@ write_file:
           break;
       ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
       ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-      current_file_length = (*iterator_4).second->integer;
+      current_file_length =
+        static_cast<unsigned int> ((*iterator_4).second->integer);
       iterator_4 = (*iterator_3)->dictionary->begin ();
       for (;
            iterator_4 != (*iterator_3)->dictionary->end ();
