@@ -85,11 +85,8 @@ if (UNIX)
                                "$<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>")
 
    if (GTKGLAREA_SUPPORT)
-# *NOTE*: check out the 'master' branch for gtk3-based applications
-# *NOTE*: check out the 'gtkglarea-2' branch for gtk2-based applications
-# *TODO*: verify automatically
     target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../gtkglarea>)
+                                $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
    endif (GTKGLAREA_SUPPORT)
 
    if (LIBGLADE_SUPPORT)
@@ -139,11 +136,8 @@ elseif (WIN32)
                                $<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>)
 
    if (GTKGLAREA_SUPPORT)
-# *NOTE*: check out the 'master' branch for gtk3-based applications
-# *NOTE*: check out the 'gtkglarea-2' branch for gtk2-based applications
-# *TODO*: verify automatically
     target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../gtkglarea>)
+                                $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
    endif (GTKGLAREA_SUPPORT)
 
 # libglade
@@ -235,8 +229,6 @@ elseif (WIN32)
    target_link_libraries (${PROJECT_NAME}_Test_I ${GTK_LIBRARIES})
    if (GTKGL_SUPPORT)
     target_link_libraries (${PROJECT_NAME}_Test_I OpenGL32.lib)
-#    target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../libepoxy/cmake/${CMAKE_BUILD_TYPE}/epoxy1_static.lib)
- #   target_link_libraries (${PROJECT_NAME}_Test_I "C:/Documents and Settings/Erik/My Documents/Visual Studio 2010/Projects/gtkglarea/${CMAKE_BUILD_TYPE}/gtkglarea.lib")
 
     target_link_libraries (${PROJECT_NAME}_Test_I CommonOpenGL)
    endif (GTKGL_SUPPORT)
