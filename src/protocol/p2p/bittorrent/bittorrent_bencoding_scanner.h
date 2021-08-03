@@ -40,7 +40,6 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
 
 #include "location.hh"
 
-//#include "bittorrent_exports.h"
 #include "bittorrent_iparser.h"
 #include "bittorrent_bencoding_parser.h"
 
@@ -48,6 +47,8 @@ class BitTorrent_Bencoding_Scanner
  : public BitTorrent_Bencoding_Scanner_FlexLexer
  , public BitTorrent_Bencoding_IScanner_t
 {
+  typedef BitTorrent_Bencoding_Scanner_FlexLexer inherited;
+
  public:
   BitTorrent_Bencoding_Scanner ()
    : BitTorrent_Bencoding_Scanner_FlexLexer (NULL, NULL)
@@ -75,6 +76,7 @@ class BitTorrent_Bencoding_Scanner
   inline virtual const BitTorrent_Bencoding_IParser* const getP_2 () const { return parser_; }
   inline virtual void setP (BitTorrent_Bencoding_IParser* parser_in) { parser_ = parser_in; }
   inline virtual void debug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void reset () { inherited::yylineno = 1; }
   inline virtual bool initialize (yyscan_t&, struct Common_ScannerState*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool lex () {ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }

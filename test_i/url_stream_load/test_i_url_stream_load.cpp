@@ -682,7 +682,7 @@ do_work (bool debugParser_in,
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
-  int group_id = -1;
+//  int group_id = -1;
   ACE_thread_t thread_id = 0;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)

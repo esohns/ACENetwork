@@ -141,7 +141,7 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #endif // GUI_SUPPORT
-  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
+//  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GUI_SUPPORT)

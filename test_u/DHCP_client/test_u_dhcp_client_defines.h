@@ -26,7 +26,7 @@
 #define TEST_U_DEFAULT_OUTPUT_FILE                        "output.txt"
 #define TEST_U_THREAD_NAME                                "stream processor"
 
-#define TEST_U_DEFAULT_BUFFER_SIZE                        DHCP_BUFFER_SIZE
+//#define TEST_U_DEFAULT_BUFFER_SIZE                        DHCP_BUFFER_SIZE
 
 //---------------------------------------
 

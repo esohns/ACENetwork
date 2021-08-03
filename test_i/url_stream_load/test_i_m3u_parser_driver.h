@@ -92,6 +92,7 @@ class M3U_ParserDriver
   // implement Common_ILexScanner_T
   inline virtual const M3U_IParser_t* const getP_2 () const { return this; }
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { M3U_set_debug ((toggle_in ? 1 : 0), state_in); }
+  inline virtual void reset () { M3U_set_lineno (1, inherited::scannerState_.lexState); M3U_set_column (1, inherited::scannerState_.lexState); }
   inline virtual bool initialize (yyscan_t& state_inout, struct Common_ScannerState* scannerState_in) { ACE_UNUSED_ARG (scannerState_in); return (M3U_lex_init_extra (this, &state_inout) == 0); }
   inline virtual void finalize (yyscan_t& state_inout) { int result = M3U_lex_destroy (state_inout); ACE_UNUSED_ARG (result); state_inout = NULL; }
   virtual struct yy_buffer_state* create (yyscan_t, // state handle
