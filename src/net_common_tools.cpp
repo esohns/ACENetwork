@@ -719,7 +719,8 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
 }
 
 ACE_INET_Addr
-Net_Common_Tools::stringToIPAddress (std::string& address_in)
+Net_Common_Tools::stringToIPAddress (std::string& address_in,
+                                     unsigned short portIfNoneProvided_in)
 {
   NETWORK_TRACE ("Net_Common_Tools::stringToIPAddress");
 
@@ -730,7 +731,12 @@ Net_Common_Tools::stringToIPAddress (std::string& address_in)
   std::string ip_address_string = address_in;
   std::string::size_type position = ip_address_string.find (':', 0);
   if (likely (position == std::string::npos))
-    ip_address_string += ACE_TEXT_ALWAYS_CHAR (":0");
+  {
+    ip_address_string += ':';
+    std::ostringstream converter;
+    converter << portIfNoneProvided_in;
+    ip_address_string += converter.str ();
+  } // end IF
 
   int result = -1;
   ACE_INET_Addr inet_address;
@@ -1203,10 +1209,6 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   // initialize return value(s)
   IPAddress_out.reset ();
 
-  // *TODO*: this implementation is broken; it does not consider the specific
-  //         interface, but returns the external IP of the interface that
-  //         happens to route the DNS resolution query (see below)
-
   // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -1280,7 +1282,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
       Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""), true);
   std::string command_line_string =
       //ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
-    ACE_TEXT_ALWAYS_CHAR ("curl http://myexternalip.com/raw >> ");
+    ACE_TEXT_ALWAYS_CHAR ("curl -f -L -s http://myexternalip.com/raw >> ");
   command_line_string += filename_string;
 
   result = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
@@ -1293,6 +1295,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
                 ACE_TEXT ("failed to ACE_OS::system(\"%s\"): \"%m\" (result was: %d), aborting\n"),
                 ACE_TEXT (command_line_string.c_str ()),
                 WEXITSTATUS (result)));
+    Common_File_Tools::deleteFile (filename_string);
     return false;
   } // end IF
   unsigned char* data_p = NULL;
@@ -1305,6 +1308,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
                 ACE_TEXT (filename_string.c_str ())));
+    Common_File_Tools::deleteFile (filename_string);
     return false;
   } // end IF
   if (unlikely (!Common_File_Tools::deleteFile (filename_string)))
@@ -1314,7 +1318,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 
   std::string resolution_record_string = reinterpret_cast<char*> (data_p);
   resolution_record_string.resize (file_size_i);
-  delete [] data_p;
+  delete [] data_p; data_p = NULL;
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("nslookup data: \"%s\"\n"),
 //              ACE_TEXT (resolution_record_string.c_str ())));
@@ -1322,14 +1326,14 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   std::string external_ip_address;
   std::istringstream converter;
   char buffer_a[BUFSIZ];
-  std::string regex_string =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)(?:\r)$");
-#else
-    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)$");
-#endif // ACE_WIN32 || ACE_WIN64
-  std::regex regex (regex_string);
-  std::smatch match_results;
+//  std::string regex_string =
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)(?:\r)$");
+//#else
+//    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)$");
+//#endif // ACE_WIN32 || ACE_WIN64
+//  std::regex regex (regex_string);
+//  std::smatch match_results;
   converter.str (resolution_record_string);
 //  bool is_first = true;
   std::string buffer_string;
@@ -1362,11 +1366,13 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
     external_ip_address = buffer_string;
     break;
   } while (!converter.fail ());
-  if (unlikely (external_ip_address.empty ()))
+//  if (unlikely (external_ip_address.empty ()))
+  if (!Net_Common_Tools::matchIPAddress (external_ip_address))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to resolve IP address (was: %s), aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (internal_ip_address).c_str ())));
+                ACE_TEXT ("failed to resolve internal IP address (was: %s, result was: \"%s\"), aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (internal_ip_address).c_str ()),
+                ACE_TEXT (external_ip_address.c_str ())));
     return false;
   } // end IF
   IPAddress_out = Net_Common_Tools::stringToIPAddress (external_ip_address);

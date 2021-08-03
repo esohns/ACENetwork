@@ -1560,7 +1560,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 //              ACE_TEXT (BitTorrent_Tools::Dictionary2String (record_in).c_str ())));
 //#endif
 
-  // *NOTE*: this could be the response to either a request or a 'scrape', the
+  // *NOTE*: this could be the response to either a response or a 'scrape', the
   //         type can be deduced from the dictionary schema
   Bencoding_DictionaryIterator_t iterator = record_in.begin ();
   for (;

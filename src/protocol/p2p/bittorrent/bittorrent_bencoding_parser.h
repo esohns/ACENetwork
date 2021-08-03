@@ -277,11 +277,10 @@ namespace yy {
     YYUNDEF = 257,                 // "invalid token"
     END_OF_DICTIONARY = 258,       // "dictionary_end"
     END_OF_LIST = 259,             // "list_end"
-    END_OF_FRAGMENT = 260,         // "end_of_fragment"
-    INTEGER = 261,                 // "integer"
-    STRING = 262,                  // "string"
-    LIST = 263,                    // "list"
-    DICTIONARY = 264               // "dictionary"
+    INTEGER = 260,                 // "integer"
+    STRING = 261,                  // "string"
+    LIST = 262,                    // "list"
+    DICTIONARY = 263               // "dictionary"
       };
       /// Backward compatibility alias (Bison 3.6).
       typedef token_kind_type yytokentype;
@@ -298,31 +297,31 @@ namespace yy {
     {
       enum symbol_kind_type
       {
-        YYNTOKENS = 10, ///< Number of tokens.
+        YYNTOKENS = 9, ///< Number of tokens.
         S_YYEMPTY = -2,
         S_YYEOF = 0,                             // "end"
         S_YYerror = 1,                           // error
         S_YYUNDEF = 2,                           // "invalid token"
         S_END_OF_DICTIONARY = 3,                 // "dictionary_end"
         S_END_OF_LIST = 4,                       // "list_end"
-        S_END_OF_FRAGMENT = 5,                   // "end_of_fragment"
-        S_INTEGER = 6,                           // "integer"
-        S_STRING = 7,                            // "string"
-        S_LIST = 8,                              // "list"
-        S_DICTIONARY = 9,                        // "dictionary"
-        S_YYACCEPT = 10,                         // $accept
-        S_bencoding = 11,                        // bencoding
-        S_12_1 = 12,                             // $@1
+        S_INTEGER = 5,                           // "integer"
+        S_STRING = 6,                            // "string"
+        S_LIST = 7,                              // "list"
+        S_DICTIONARY = 8,                        // "dictionary"
+        S_YYACCEPT = 9,                          // $accept
+        S_bencoding = 10,                        // bencoding
+        S_11_1 = 11,                             // $@1
+        S_12_2 = 12,                             // $@2
         S_list_items = 13,                       // list_items
         S_list_item = 14,                        // list_item
-        S_15_2 = 15,                             // $@2
-        S_16_3 = 16,                             // $@3
+        S_15_3 = 15,                             // $@3
+        S_16_4 = 16,                             // $@4
         S_dictionary_items = 17,                 // dictionary_items
         S_dictionary_item = 18,                  // dictionary_item
-        S_19_4 = 19,                             // $@4
+        S_19_5 = 19,                             // $@5
         S_dictionary_value = 20,                 // dictionary_value
-        S_21_5 = 21,                             // $@5
-        S_22_6 = 22                              // $@6
+        S_21_6 = 21,                             // $@6
+        S_22_7 = 22                              // $@7
       };
     };
 
@@ -473,6 +472,9 @@ namespace yy {
     /// Parse.
     /// \returns  0 iff parsing succeeded.
     virtual int parse ();
+
+    // *EDIT*
+    virtual void set (yyscan_t);
 
 #if YYDEBUG
     /// The current debugging stream.
@@ -830,9 +832,9 @@ namespace yy {
     /// Constants.
     enum
     {
-      yylast_ = 26,     ///< Last index in yytable_.
-      yynnts_ = 13,  ///< Number of nonterminal symbols.
-      yyfinal_ = 4 ///< Termination state number.
+      yylast_ = 34,     ///< Last index in yytable_.
+      yynnts_ = 14,  ///< Number of nonterminal symbols.
+      yyfinal_ = 8 ///< Termination state number.
     };
 
 

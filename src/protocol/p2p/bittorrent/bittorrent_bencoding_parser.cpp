@@ -70,16 +70,15 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
+#include "common_parser_bencoding_common.h"
+#include "common_parser_bencoding_tools.h"
+
 #include "net_macros.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
-/*#include "ace/Synch.h"*/
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_bencoding_scanner.h"
-
-#include "common_parser_bencoding_common.h"
-#include "common_parser_bencoding_tools.h"
 
 // *TODO*: this shouldn't be necessary
 /*#define yylex bencoding_lex*/
@@ -415,16 +414,16 @@ namespace yy {
                     { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
         break;
 
-      case symbol_kind::S_bencoding: // bencoding
-                    { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
-        break;
-
       case symbol_kind::S_list_items: // list_items
-                    { debug_stream () << Common_Parser_Bencoding_Tools::ListToString (*(yysym.value.lval)); }
+                    { debug_stream () << (yysym.value.ival); }
         break;
 
       case symbol_kind::S_dictionary_items: // dictionary_items
-                    { debug_stream () << Common_Parser_Bencoding_Tools::DictionaryToString (*(yysym.value.dval)); }
+                    { debug_stream () << (yysym.value.ival); }
+        break;
+
+      case symbol_kind::S_dictionary_item: // dictionary_item
+                    { debug_stream () << *(yysym.value.sval); }
         break;
 
       default:
@@ -682,17 +681,13 @@ namespace yy {
         {
           switch (yyn)
             {
-  case 2: // $@1: %empty
-                               {
-                    parser->pushDictionary ((yystack_[0].value.dval)); }
-    break;
-
-  case 3: // bencoding: "dictionary" $@1 dictionary_items "dictionary_end"
-                                                    {
-                    Bencoding_Dictionary_t& dictionary_r = parser->current ();
-                    Bencoding_Dictionary_t* dictionary_p = &dictionary_r;
+  case 2: // bencoding: "integer"
+                            {
+                    parser->pushInteger ((yystack_[0].value.ival));
+                    struct Bencoding_Element& element_r = parser->current ();
+                    struct Bencoding_Element* element_p = &element_r;
                     try {
-                      parser->record (dictionary_p);
+                      parser->record (element_p);
                     } catch (...) {
                       ACE_DEBUG ((LM_ERROR,
                                   ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
@@ -700,175 +695,141 @@ namespace yy {
                     YYACCEPT; }
     break;
 
-  case 4: // list_items: list_items list_item
-                                       { }
+  case 3: // bencoding: "string"
+                             {
+                    parser->pushString ((yystack_[0].value.sval));
+                    struct Bencoding_Element& element_r = parser->current ();
+                    struct Bencoding_Element* element_p = &element_r;
+                    try {
+                      parser->record (element_p);
+                    } catch (...) {
+                      ACE_DEBUG ((LM_ERROR,
+                                  ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
+                    }
+                    YYACCEPT; }
     break;
 
-  case 5: // list_items: %empty
-                                       { }
-    break;
-
-  case 6: // list_item: "string"
-                           {
-                    Bencoding_List_t& list_r = parser->getList ();
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type = Bencoding_Element::BENCODING_TYPE_STRING;
-                    element_p->string = (yystack_[0].value.sval);
-                    list_r.push_back (element_p); }
-    break;
-
-  case 7: // list_item: "integer"
-                              {
-                    Bencoding_List_t& list_r = parser->getList ();
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type = Bencoding_Element::BENCODING_TYPE_INTEGER;
-                    element_p->integer = (yystack_[0].value.ival);
-                    list_r.push_back (element_p); }
-    break;
-
-  case 8: // $@2: %empty
+  case 4: // $@1: %empty
                            {
                     parser->pushList ((yystack_[0].value.lval)); }
     break;
 
-  case 9: // list_item: "list" $@2 list_items "list_end"
+  case 5: // bencoding: "list" $@1 list_items "list_end"
                                         {
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type = Bencoding_Element::BENCODING_TYPE_LIST;
-                    element_p->list = (yystack_[1].value.lval);
-                    parser->popList ();
-                    Bencoding_List_t& list_r = parser->getList ();
-                    list_r.push_back (element_p); }
+                    parser->pop ();
+                    struct Bencoding_Element& element_r = parser->current ();
+                    struct Bencoding_Element* element_p = &element_r;
+                    try {
+                      parser->record (element_p);
+                    } catch (...) {
+                      ACE_DEBUG ((LM_ERROR,
+                                  ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
+                    }
+                    YYACCEPT; }
     break;
 
-  case 10: // $@3: %empty
+  case 6: // $@2: %empty
+                                 {
+                    parser->pushDictionary ((yystack_[0].value.dval)); }
+    break;
+
+  case 7: // bencoding: "dictionary" $@2 dictionary_items "dictionary_end"
+                                                    {
+                    parser->pop ();
+                    struct Bencoding_Element& element_r = parser->current ();
+                    struct Bencoding_Element* element_p = &element_r;
+                    try {
+                      parser->record (element_p);
+                    } catch (...) {
+                      ACE_DEBUG ((LM_ERROR,
+                                  ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
+                    }
+                    YYACCEPT; }
+    break;
+
+  case 8: // list_items: list_items list_item
+                                       { }
+    break;
+
+  case 9: // list_items: %empty
+                                       { }
+    break;
+
+  case 10: // list_item: "integer"
+                            {
+                    parser->pushInteger ((yystack_[0].value.ival)); }
+    break;
+
+  case 11: // list_item: "string"
+                             {
+                    parser->pushString ((yystack_[0].value.sval)); }
+    break;
+
+  case 12: // $@3: %empty
+                           {
+                    parser->pushList ((yystack_[0].value.lval)); }
+    break;
+
+  case 13: // list_item: "list" $@3 list_items "list_end"
+                                        {
+                    parser->pop (); }
+    break;
+
+  case 14: // $@4: %empty
                                   {
                     parser->pushDictionary ((yystack_[0].value.dval)); }
     break;
 
-  case 11: // list_item: "dictionary" $@3 dictionary_items "dictionary_end"
+  case 15: // list_item: "dictionary" $@4 dictionary_items "dictionary_end"
                                                     {
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type =
-                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                    element_p->dictionary = (yystack_[1].value.dval);
-                    parser->popDictionary ();
-                    Bencoding_List_t& list_r = parser->getList ();
-                    list_r.push_back (element_p); }
+                    parser->pop (); }
     break;
 
-  case 12: // dictionary_items: dictionary_items dictionary_item
+  case 16: // dictionary_items: dictionary_items dictionary_item
                                                    { }
     break;
 
-  case 13: // dictionary_items: %empty
+  case 17: // dictionary_items: %empty
                                                    { }
-    break;
-
-  case 14: // $@4: %empty
-                           {
-                    parser->pushKey ((yystack_[0].value.sval)); }
-    break;
-
-  case 15: // dictionary_item: "string" $@4 dictionary_value
-                                   { }
-    break;
-
-  case 16: // dictionary_value: "string"
-                           {
-                    std::string* key_string_p = &parser->getKey ();
-                    parser->popKey ();
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type = Bencoding_Element::BENCODING_TYPE_STRING;
-                    element_p->string = (yystack_[0].value.sval);
-                    Bencoding_Dictionary_t& dictionary_r =
-                      parser->getDictionary ();
-/*                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }*/
-                    dictionary_r.push_back (std::make_pair (key_string_p,
-                                                            element_p)); }
-    break;
-
-  case 17: // dictionary_value: "integer"
-                              {
-                    std::string* key_string_p = &parser->getKey ();
-                    parser->popKey ();
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type = Bencoding_Element::BENCODING_TYPE_INTEGER;
-                    element_p->integer = (yystack_[0].value.ival);
-                    Bencoding_Dictionary_t& dictionary_r =
-                      parser->getDictionary ();
-/*                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }*/
-                    dictionary_r.push_back (std::make_pair (key_string_p,
-                                                            element_p)); }
     break;
 
   case 18: // $@5: %empty
                            {
+                    parser->pushKey ((yystack_[0].value.sval)); }
+    break;
+
+  case 19: // dictionary_item: "string" $@5 dictionary_value
+                                   { }
+    break;
+
+  case 20: // dictionary_value: "integer"
+                            {
+                    parser->pushInteger ((yystack_[0].value.ival)); }
+    break;
+
+  case 21: // dictionary_value: "string"
+                             {
+                    parser->pushString ((yystack_[0].value.sval)); }
+    break;
+
+  case 22: // $@6: %empty
+                           {
                     parser->pushList ((yystack_[0].value.lval)); }
     break;
 
-  case 19: // dictionary_value: "list" $@5 list_items "list_end"
+  case 23: // dictionary_value: "list" $@6 list_items "list_end"
                                         {
-                    std::string* key_string_p = &parser->getKey ();
-                    parser->popKey ();
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type = Bencoding_Element::BENCODING_TYPE_LIST;
-                    element_p->list = (yystack_[1].value.lval);
-                    parser->popList ();
-                    Bencoding_Dictionary_t& dictionary_r =
-                      parser->getDictionary ();
-/*                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }*/
-                    dictionary_r.push_back (std::make_pair (key_string_p,
-                                                            element_p)); }
+                    parser->pop (); }
     break;
 
-  case 20: // $@6: %empty
+  case 24: // $@7: %empty
                                   {
                     parser->pushDictionary ((yystack_[0].value.dval)); }
     break;
 
-  case 21: // dictionary_value: "dictionary" $@6 dictionary_items "dictionary_end"
+  case 25: // dictionary_value: "dictionary" $@7 dictionary_items "dictionary_end"
                                                     {
-                    std::string* key_string_p = &parser->getKey ();
-                    parser->popKey ();
-                    Bencoding_Element* element_p = NULL;
-                    ACE_NEW_NORETURN (element_p,
-                                      Bencoding_Element ());
-                    ACE_ASSERT (element_p);
-                    element_p->type =
-                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                    element_p->dictionary = (yystack_[1].value.dval);
-                    parser->popDictionary ();
-                    Bencoding_Dictionary_t& dictionary_r =
-                      parser->getDictionary ();
-/*                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }*/
-                    dictionary_r.push_back (std::make_pair (key_string_p,
-                                                            element_p)); }
+                    parser->pop (); }
     break;
 
 
@@ -1220,81 +1181,83 @@ namespace yy {
   }
 
 
-  const signed char BitTorrent_Bencoding_Parser::yypact_ninf_ = -19;
+  const signed char BitTorrent_Bencoding_Parser::yypact_ninf_ = -21;
 
   const signed char BitTorrent_Bencoding_Parser::yytable_ninf_ = -1;
 
   const signed char
   BitTorrent_Bencoding_Parser::yypact_[] =
   {
-      -7,   -19,     7,   -19,   -19,    13,   -19,   -19,   -19,    17,
-     -19,   -19,   -19,   -19,   -19,   -19,   -19,    -3,    14,   -19,
-     -19,   -19,   -19,   -19,   -19,   -19,   -19,   -19,     6,    15,
-     -19,   -19
+       3,   -21,   -21,   -21,   -21,     1,   -21,   -21,   -21,    -1,
+      26,   -21,   -21,   -21,   -21,   -21,   -21,   -21,   -21,   -21,
+     -21,   -21,    20,    11,    27,   -21,   -21,   -21,   -21,   -21,
+     -21,   -21,   -21,   -21,    16,    28,   -21,   -21
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yydefact_[] =
   {
-       0,     2,     0,    13,     1,     0,     3,    14,    12,     0,
-      17,    16,    18,    20,    15,     5,    13,     0,     0,    19,
-       7,     6,     8,    10,     4,    21,     5,    13,     0,     0,
-       9,    11
+       0,     2,     3,     4,     6,     0,     9,    17,     1,     0,
+       0,     5,    10,    11,    12,    14,     8,     7,    18,    16,
+       9,    17,     0,     0,     0,    20,    21,    22,    24,    19,
+      13,    15,     9,    17,     0,     0,    23,    25
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yypgoto_[] =
   {
-     -19,   -19,   -19,   -18,   -19,   -19,   -19,   -16,   -19,   -19,
-     -19,   -19,   -19
+     -21,   -21,   -21,   -21,   -20,   -21,   -21,   -21,   -19,   -21,
+     -21,   -21,   -21,   -21
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yydefgoto_[] =
   {
-      -1,     2,     3,    17,    24,    26,    27,     5,     8,     9,
-      14,    15,    16
+      -1,     5,     6,     7,     9,    16,    20,    21,    10,    19,
+      22,    29,    32,    33
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yytable_[] =
   {
-      18,    19,     1,    20,    21,    22,    23,     4,    28,     0,
-      30,    29,    20,    21,    22,    23,     6,    25,    31,     0,
-       7,     7,     7,    10,    11,    12,    13
+      23,     8,    24,    11,    12,    13,    14,    15,     1,     2,
+       3,     4,    34,     0,    35,    30,    12,    13,    14,    15,
+      36,    12,    13,    14,    15,    25,    26,    27,    28,    17,
+      31,    37,    18,    18,    18
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yycheck_[] =
   {
-      16,     4,     9,     6,     7,     8,     9,     0,    26,    -1,
-       4,    27,     6,     7,     8,     9,     3,     3,     3,    -1,
-       7,     7,     7,     6,     7,     8,     9
+      20,     0,    21,     4,     5,     6,     7,     8,     5,     6,
+       7,     8,    32,    -1,    33,     4,     5,     6,     7,     8,
+       4,     5,     6,     7,     8,     5,     6,     7,     8,     3,
+       3,     3,     6,     6,     6
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yystos_[] =
   {
-       0,     9,    11,    12,     0,    17,     3,     7,    18,    19,
-       6,     7,     8,     9,    20,    21,    22,    13,    17,     4,
-       6,     7,     8,     9,    14,     3,    15,    16,    13,    17,
-       4,     3
+       0,     5,     6,     7,     8,    10,    11,    12,     0,    13,
+      17,     4,     5,     6,     7,     8,    14,     3,     6,    18,
+      15,    16,    19,    13,    17,     5,     6,     7,     8,    20,
+       4,     3,    21,    22,    13,    17,     4,     3
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yyr1_[] =
   {
-       0,    10,    12,    11,    13,    13,    14,    14,    15,    14,
-      16,    14,    17,    17,    19,    18,    20,    20,    21,    20,
-      22,    20
+       0,     9,    10,    10,    11,    10,    12,    10,    13,    13,
+      14,    14,    15,    14,    16,    14,    17,    17,    19,    18,
+      20,    20,    21,    20,    22,    20
   };
 
   const signed char
   BitTorrent_Bencoding_Parser::yyr2_[] =
   {
-       0,     2,     0,     4,     2,     0,     1,     1,     0,     4,
-       0,     4,     2,     0,     0,     3,     1,     1,     0,     4,
-       0,     4
+       0,     2,     1,     1,     0,     4,     0,     4,     2,     0,
+       1,     1,     0,     4,     0,     4,     2,     0,     0,     3,
+       1,     1,     0,     4,     0,     4
   };
 
 
@@ -1305,10 +1268,10 @@ namespace yy {
   const BitTorrent_Bencoding_Parser::yytname_[] =
   {
   "\"end\"", "error", "\"invalid token\"", "\"dictionary_end\"",
-  "\"list_end\"", "\"end_of_fragment\"", "\"integer\"", "\"string\"",
-  "\"list\"", "\"dictionary\"", "$accept", "bencoding", "$@1",
-  "list_items", "list_item", "$@2", "$@3", "dictionary_items",
-  "dictionary_item", "$@4", "dictionary_value", "$@5", "$@6", YY_NULLPTR
+  "\"list_end\"", "\"integer\"", "\"string\"", "\"list\"",
+  "\"dictionary\"", "$accept", "bencoding", "$@1", "$@2", "list_items",
+  "list_item", "$@3", "$@4", "dictionary_items", "dictionary_item", "$@5",
+  "dictionary_value", "$@6", "$@7", YY_NULLPTR
   };
 #endif
 
@@ -1317,9 +1280,9 @@ namespace yy {
   const short
   BitTorrent_Bencoding_Parser::yyrline_[] =
   {
-       0,   225,   225,   225,   237,   238,   240,   249,   258,   258,
-     270,   270,   283,   284,   286,   286,   289,   309,   329,   329,
-     352,   352
+       0,   223,   223,   234,   245,   245,   258,   258,   271,   272,
+     274,   276,   278,   278,   282,   282,   286,   287,   289,   289,
+     292,   294,   296,   296,   300,   300
   };
 
   void
@@ -1384,10 +1347,10 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9
+       5,     6,     7,     8
     };
     // Last valid token kind.
-    const int code_max = 264;
+    const int code_max = 263;
 
     if (t <= 0)
       return symbol_kind::S_YYEOF;
@@ -1415,13 +1378,15 @@ yy::BitTorrent_Bencoding_Parser::error (const location_type& location_in,
   }
 }
 
-/*void
+void
 yy::BitTorrent_Bencoding_Parser::set (yyscan_t context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Parser::set"));
 
-  yyscanner = context_in;
-} */
+  struct Common_ScannerState& state_r =
+      const_cast<struct Common_ScannerState&> (scanner->getR ());
+  state_r.lexState = context_in;
+}
 
 /*void
 yysetdebug (int debug_in)

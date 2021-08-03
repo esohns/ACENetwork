@@ -399,11 +399,11 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
     goto clean;
   } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsed meta-info file \"%s\"...\n"),
-//              ACE_TEXT (metaInfoFileName_in.c_str ())));
+  ACE_ASSERT (parser.bencoding_);
+  ACE_ASSERT (parser.bencoding_->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
 
-  metaInfo_out = parser.bencoding_;
+  metaInfo_out = parser.bencoding_->dictionary;
+  parser.bencoding_ = NULL;
 
   result = true;
 

@@ -22,7 +22,6 @@
 #include "bittorrent_bencoding_parser_driver.h"
 
 #include "ace/Log_Msg.h"
-//#include "ace/Synch.h"
 
 #include "common_parser_bencoding_tools.h"
 
@@ -37,17 +36,55 @@ BitTorrent_Bencoding_ParserDriver::BitTorrent_Bencoding_ParserDriver (bool trace
  : inherited (traceScanning_in,
               traceParsing_in)
  , bencoding_ (NULL)
- , dictionaries_ ()
- , lists_ ()
+ , isFirst_ (true)
+ , current_ ()
+ , key_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::BitTorrent_Bencoding_ParserDriver_T"));
 
 }
 
-BitTorrent_Bencoding_ParserDriver::~BitTorrent_Bencoding_ParserDriver ()
+void
+BitTorrent_Bencoding_ParserDriver::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::~BitTorrent_Bencoding_ParserDriver_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::dump_state"));
 
+  // sanity check(s)
+  if (!bencoding_)
+    return;
+
+  std::string bencoding_string;
+  switch (bencoding_->type)
+  {
+    case Bencoding_Element::BENCODING_TYPE_INTEGER:
+    {
+      std::ostringstream converter;
+      converter << bencoding_->integer;
+      bencoding_string = converter.str ();
+      break;
+    }
+    case Bencoding_Element::BENCODING_TYPE_STRING:
+      bencoding_string = *bencoding_->string;
+      break;
+    case Bencoding_Element::BENCODING_TYPE_LIST:
+      bencoding_string =
+          Common_Parser_Bencoding_Tools::ListToString (*bencoding_->list);
+      break;
+    case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      bencoding_string =
+          Common_Parser_Bencoding_Tools::DictionaryToString (*bencoding_->dictionary);
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid element type (was: %d), continuing\n"),
+                  bencoding_->type));
+      break;
+    }
+  } // end SWITCH
+  ACE_DEBUG ((LM_INFO,
+              ACE_TEXT ("%s\n"),
+              ACE_TEXT (bencoding_string.c_str ())));
 }
 
 void
@@ -74,7 +111,8 @@ BitTorrent_Bencoding_ParserDriver::error (const struct YYLTYPE& location_in,
 
   // dump message
   ACE_Message_Block* message_block_p = inherited::fragment_;
-  while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
+  while (message_block_p->prev ())
+    message_block_p = message_block_p->prev ();
   ACE_ASSERT (message_block_p);
   Common_IDumpState* idump_state_p =
     dynamic_cast<Common_IDumpState*> (message_block_p);
@@ -117,7 +155,8 @@ BitTorrent_Bencoding_ParserDriver::error (const yy::location& location_in,
 
   // dump message
   ACE_Message_Block* message_block_p = inherited::fragment_;
-  while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
+  while (message_block_p->prev ())
+    message_block_p = message_block_p->prev ();
   ACE_ASSERT (message_block_p);
   Common_IDumpState* idump_state_p =
     dynamic_cast<Common_IDumpState*> (message_block_p);
@@ -134,26 +173,8 @@ BitTorrent_Bencoding_ParserDriver::error (const yy::location& location_in,
   //std::clog << location_in << ": " << message_in << std::endl;
 }
 
-//template <typename SessionMessageType>
-//void
-//BitTorrent_Bencoding_ParserDriver::error (const std::string& message_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::error"));
-
-//  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
-//  ACE_DEBUG ((LM_ERROR,
-//              ACE_TEXT ("\": \"%s\"...\n"),
-//              ACE_TEXT (message_in.c_str ())));
-////   ACE_DEBUG((LM_ERROR,
-////              ACE_TEXT("failed to parse \"%s\": \"%s\"...\n"),
-////              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
-////              message_in.c_str()));
-
-////   std::clog << message_in << std::endl;
-//}
-
 void
-BitTorrent_Bencoding_ParserDriver::record (Bencoding_Dictionary_t*& bencoding_in)
+BitTorrent_Bencoding_ParserDriver::record (struct Bencoding_Element*& bencoding_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::record"));
 
@@ -167,26 +188,136 @@ BitTorrent_Bencoding_ParserDriver::record (Bencoding_Dictionary_t*& bencoding_in
 }
 
 void
-//BitTorrent_Bencoding_ParserDriver::set (Bencoding_Dictionary_t* dictionary_in)
+BitTorrent_Bencoding_ParserDriver::pushInteger (ACE_INT64 integer_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::pushInteger"));
+
+  struct Bencoding_Element* element_p = NULL;
+  ACE_NEW_NORETURN (element_p,
+                    struct Bencoding_Element);
+  ACE_ASSERT (element_p);
+  element_p->type = Bencoding_Element::BENCODING_TYPE_INTEGER;
+  element_p->integer = integer_in;
+
+  push (element_p);
+}
+
+void
+BitTorrent_Bencoding_ParserDriver::pushString (std::string* string_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::pushString"));
+
+  struct Bencoding_Element* element_p = NULL;
+  ACE_NEW_NORETURN (element_p,
+                    struct Bencoding_Element);
+  ACE_ASSERT (element_p);
+  element_p->type = Bencoding_Element::BENCODING_TYPE_STRING;
+  element_p->string = string_in;
+
+  push (element_p);
+}
+
+void
+BitTorrent_Bencoding_ParserDriver::pushList (Bencoding_List_t* list_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::pushList"));
+
+  struct Bencoding_Element* element_p = NULL;
+  ACE_NEW_NORETURN (element_p,
+                    struct Bencoding_Element);
+  ACE_ASSERT (element_p);
+  element_p->type = Bencoding_Element::BENCODING_TYPE_LIST;
+  element_p->list = list_in;
+
+  push (element_p);
+}
+
+void
 BitTorrent_Bencoding_ParserDriver::pushDictionary (Bencoding_Dictionary_t* dictionary_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::pushDictionary"));
 
-  dictionaries_.push (dictionary_in);
+  struct Bencoding_Element* element_p = NULL;
+  ACE_NEW_NORETURN (element_p,
+                    struct Bencoding_Element);
+  ACE_ASSERT (element_p);
+  element_p->type = Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+  element_p->dictionary = dictionary_in;
 
-  if (!bencoding_)
-    bencoding_ = dictionary_in;
+  push (element_p);
 }
 
 void
-BitTorrent_Bencoding_ParserDriver::dump_state () const
+BitTorrent_Bencoding_ParserDriver::push (struct Bencoding_Element* element_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::push"));
 
-  // sanity check(s)
-  ACE_ASSERT (bencoding_);
+  if (unlikely (isFirst_))
+  {
+    isFirst_ = false;
+    ACE_ASSERT (!bencoding_);
+    bencoding_ = element_in;
+  } // end IF
 
-  ACE_DEBUG ((LM_INFO,
-              ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::MetaInfoToString (*bencoding_).c_str ())));
+  if (current_.empty ())
+  {
+    switch (element_in->type)
+    {
+      case Bencoding_Element::BENCODING_TYPE_INTEGER:
+      case Bencoding_Element::BENCODING_TYPE_STRING:
+        break;
+      case Bencoding_Element::BENCODING_TYPE_LIST:
+      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+        current_.push (element_in); break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid element type (was: %d), continuing\n"),
+                    element_in->type));
+        break;
+      }
+    } // end SWITCH
+    return;
+  } // end IF
+
+  struct Bencoding_Element*& current_p = current_.top ();
+  switch (current_p->type)
+  {
+    case Bencoding_Element::BENCODING_TYPE_LIST:
+    {
+      current_p->list->push_back (element_in);
+      break;
+    }
+    case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+    { ACE_ASSERT (key_);
+      current_p->dictionary->push_back (std::make_pair (key_, element_in));
+      key_ = NULL;
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid element type (was: %d), continuing\n"),
+                  current_p->type));
+      ACE_ASSERT (false);
+      break;
+    }
+  } // end SWITCH
+
+  switch (element_in->type)
+  {
+    case Bencoding_Element::BENCODING_TYPE_INTEGER:
+    case Bencoding_Element::BENCODING_TYPE_STRING:
+      break;
+    case Bencoding_Element::BENCODING_TYPE_LIST:
+    case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      current_.push (element_in); break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid element type (was: %d), continuing\n"),
+                  element_in->type));
+      break;
+    }
+  } // end SWITCH
 }

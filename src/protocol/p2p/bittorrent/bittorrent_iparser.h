@@ -32,7 +32,7 @@
 
 class BitTorrent_Bencoding_IParser
  : public Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
-                                     Bencoding_Dictionary_t>
+                                     struct Bencoding_Element>
  , virtual public Common_ILexScanner_T<struct Common_ScannerState,
                                        BitTorrent_Bencoding_IParser>
 // , public Common_IGet_T<Bencoding_Dictionary_t>
@@ -41,22 +41,19 @@ class BitTorrent_Bencoding_IParser
  public:
   // convenient types
   typedef Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
-                                     Bencoding_Dictionary_t> IPARSER_T;
+                                     struct Bencoding_Element> IPARSER_T;
   typedef Common_ILexScanner_T<struct Common_ScannerState,
                                BitTorrent_Bencoding_IParser> ISCANNER_T;
 
   using IPARSER_T::error;
 //  using Common_IScanner::error;
 
-  virtual Bencoding_Dictionary_t& getDictionary () = 0;
-  virtual std::string& getKey () = 0;
-  virtual Bencoding_List_t& getList () = 0;
-  virtual void popDictionary () = 0;
-  virtual void popKey () = 0;
-  virtual void popList () = 0;
-  virtual void pushDictionary (Bencoding_Dictionary_t*) = 0; // dictionary handle
-  virtual void pushKey (std::string*) = 0; // key handle
+  virtual void pushInteger (ACE_INT64) = 0; // integer value
+  virtual void pushString (std::string*) = 0; // string value
   virtual void pushList (Bencoding_List_t*) = 0; // list handle
+  virtual void pushKey (std::string*) = 0; // key handle
+  virtual void pushDictionary (Bencoding_Dictionary_t*) = 0; // dictionary handle
+  virtual void pop () = 0;
 };
 
 template <typename RecordType>

@@ -191,6 +191,9 @@ class Net_Common_Tools
 
   // *NOTE*: this returns the external (i.e. routable) IP address (for clients
   //         behind a (NATted-) gateway)
+  // *TODO*: this implementation is broken; it does not consider the specific
+  //         interface, but returns the external IP of the interface that
+  //         happens to route the DNS resolution query (see below)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static bool interfaceToExternalIPAddress (REFGUID,            // interface identifier
@@ -220,7 +223,7 @@ class Net_Common_Tools
 
 //  static std::string dump (struct nl_msg*);
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-  // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
+  // *NOTE*: if the first argument is '0', the trailing ":0" will be cropped
   //         from the return value
   static std::string IPAddressToString (unsigned short, // port (network byte order !)
                                         ACE_UINT32);    // IP address (network byte order !)
@@ -228,7 +231,8 @@ class Net_Common_Tools
 
   static bool matchIPAddress (std::string&); // dotted-decimal
   // *NOTE*: (see also: ace/INET_Addr.h:237)
-  static ACE_INET_Addr stringToIPAddress (std::string&); // host name (DNS name or dotted-decimal)
+  static ACE_INET_Addr stringToIPAddress (std::string&,        // host name (DNS name or dotted-decimal)
+                                          unsigned short = 0); // port# if none provided (i.e. no trailing ":x")
   static bool isLocal (const ACE_INET_Addr&);
 
   // transport layer

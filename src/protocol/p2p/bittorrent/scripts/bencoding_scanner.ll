@@ -1,5 +1,4 @@
 %top{
-  #include "ace/Synch.h"
   #include "bittorrent_iparser.h"
 //  #include "bittorrent_bencoding_scanner.h"
 
@@ -37,9 +36,11 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
 
   #include <sstream>
 
+  #include "ace/Log_Msg.h"
+  #include "ace/OS_Memory.h"
+
   #include "net_macros.h"
 
-  #include "ace/Synch.h"
   #include "bittorrent_bencoding_parser.h"
   #include "bittorrent_bencoding_scanner.h"
 
@@ -115,7 +116,9 @@ METAINFO_FILE                     {DICTIONARY}
 %s state_integer
 %s state_list
 %s state_dictionary_key
+%s state_dictionary_key_2
 %s state_dictionary_value
+%s state_dictionary_value_2
 
 %{
 /* handle locations */
@@ -145,21 +148,40 @@ METAINFO_FILE                     {DICTIONARY}
 %}
 
 <INITIAL>{
-"d"                    { ACE_ASSERT (yyleng == 1);
-                         BEGIN(state_dictionary_key);
+"i"                    { parser_->offset (1);
+                         yylval->ival = 0;
+                         yy_push_state (state_integer); }
+{DIGIT}{1}             { yyless (0);
+                         yy_push_state (state_string); }
+"l"                    { parser_->offset (1);
+                         yy_push_state (state_list);
+                         ACE_NEW_NORETURN (yylval->lval,
+                                           Bencoding_List_t ());
+                         ACE_ASSERT (yylval->lval);
+                         return yy::BitTorrent_Bencoding_Parser::token::LIST; }
+"d"                    { parser_->offset (1);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
                          return yy::BitTorrent_Bencoding_Parser::token::DICTIONARY; }
 } // end <INITIAL>
+<state_integer>{
+"e"                    { yy_pop_state ();
+                         return yy::BitTorrent_Bencoding_Parser::token::INTEGER; }
+{DIGIT}+               { parser_->offset (yyleng);
+                         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+                         converter.clear ();
+                         converter << yytext;
+                         converter >> yylval->ival; }
+} // end <state_integer>
 <state_string>{
-{DIGIT}+               {
+{DIGIT}+               { parser_->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
                          converter >> string_length; }
-":"                    { ACE_ASSERT (yyleng == 1);
+":"                    { parser_->offset (1);
                          if (!string_length)
                          { // --> found an empty string
                            ACE_NEW_NORETURN (yylval->sval,
@@ -168,84 +190,103 @@ METAINFO_FILE                     {DICTIONARY}
                            yy_pop_state ();
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } // end IF
-                         BEGIN(state_string_2);
-                         yy_push_state (state_string_2); }
+                         BEGIN(state_string_2); }
 } // end <state_string>
 <state_string_2>{
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
-//                         yylloc->columns (string_length);
+                         parser_->offset (string_length);
                          ACE_NEW_NORETURN (yylval->sval,
                                            std::string ());
                          ACE_ASSERT (yylval->sval);
                          yylval->sval->push_back (yytext[0]);
                          for (unsigned int i = 0; i < (string_length - 1); ++i)
                            yylval->sval->push_back (yyinput ());
-                         yy_pop_state (); yy_pop_state ();
+                         yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::STRING; }
 } // end <state_string_2>
-<state_integer>{
-"e"                    { ACE_ASSERT (yyleng == 1);
-                         yy_pop_state (); }
-{DIGIT}+               {
-                         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-                         converter.clear ();
-                         converter << yytext;
-                         converter >> yylval->ival;
-                         return yy::BitTorrent_Bencoding_Parser::token::INTEGER; }
-"i"                    { ACE_ASSERT (yyleng == 1); }
-} // end <state_integer>
 <state_list>{
-"e"                    { ACE_ASSERT (yyleng == 1);
+"e"                    { parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_LIST; }
+"i"                    { parser_->offset (1);
+                         yylval->ival = 0;
+                         yy_push_state (state_integer); }
 {DIGIT}{1}             { yyless (0);
                          yy_push_state (state_string); }
-"i"                    { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
-                         yy_push_state (state_integer); }
-"l"                    { ACE_ASSERT (yyleng == 1);
+"l"                    { parser_->offset (1);
                          ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
                          ACE_ASSERT (yylval->lval);
+                         yy_push_state (state_list);
                          return yy::BitTorrent_Bencoding_Parser::token::LIST; }
-"d"                    { ACE_ASSERT (yyleng == 1);
-                         yy_push_state (state_dictionary_key);
+"d"                    { parser_->offset (1);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
+                         yy_push_state (state_dictionary_key);
                          return yy::BitTorrent_Bencoding_Parser::token::DICTIONARY; }
 } // end <state_list>
 <state_dictionary_key>{
-"e"                    { ACE_ASSERT (yyleng == 1);
+"e"                    { parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_DICTIONARY; }
-{DIGIT}{1}             { yyless (0);
-                         BEGIN(state_dictionary_value);
-                         yy_push_state (state_string); }
-} // end <state_dictionary_key>
+{DIGIT}+               { parser_->offset (yyleng);
+                         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+                         converter.clear ();
+                         converter << yytext;
+                         converter >> string_length; }
+":"                    { parser_->offset (1);
+                         if (!string_length)
+                         { // --> found an empty string
+                           ACE_NEW_NORETURN (yylval->sval,
+                                             std::string ());
+                           ACE_ASSERT (yylval->sval);
+                           yy_push_state (state_dictionary_value);
+                           return yy::BitTorrent_Bencoding_Parser::token::STRING;
+                         } // end IF
+                         BEGIN(state_dictionary_key_2); }
+} // end <state_string>
+<state_dictionary_key_2>{
+{OCTET}{1}             { ACE_ASSERT (string_length != 0);
+                         parser_->offset (string_length);
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string ());
+                         ACE_ASSERT (yylval->sval);
+                         yylval->sval->push_back (yytext[0]);
+                         for (unsigned int i = 0; i < (string_length - 1); ++i)
+                           yylval->sval->push_back (yyinput ());
+                         yy_push_state (state_dictionary_value);
+                         return yy::BitTorrent_Bencoding_Parser::token::STRING; }
+} // end <state_dictionary_key_2>
 <state_dictionary_value>{
-{DIGIT}{1}             { yyless (0);
-                         BEGIN(state_dictionary_key);
-                         yy_push_state (state_string); }
-"i"                    { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
-                         BEGIN(state_dictionary_key);
+"i"                    { parser_->offset (1);
+                         yylval->ival = 0;
+                         yy_push_state (state_dictionary_value_2);
                          yy_push_state (state_integer); }
-"l"                    { ACE_ASSERT (yyleng == 1);
-                         BEGIN(state_dictionary_key);
+{DIGIT}{1}             { yyless (0);
+                         yy_push_state (state_dictionary_value_2);
+                         yy_push_state (state_string); }
+"l"                    { parser_->offset (1);
+                         yy_push_state (state_dictionary_value_2);
                          yy_push_state (state_list);
                          ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
                          ACE_ASSERT (yylval->lval);
                          return yy::BitTorrent_Bencoding_Parser::token::LIST; }
-"d"                    { ACE_ASSERT (yyleng == 1);
-                         BEGIN(state_dictionary_key);
+"d"                    { parser_->offset (1);
+                         yy_push_state (state_dictionary_value_2);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
                          return yy::BitTorrent_Bencoding_Parser::token::DICTIONARY; }
 } // end <state_dictionary_value>
+<state_dictionary_value_2>{
+{OCTET}{1}             { yyless (0);
+                         yy_pop_state (); // state_dictionary_value_2
+                         yy_pop_state (); // state_dictionary_value
+                         BEGIN(state_dictionary_key); }
+} // end <state_dictionary_value_2>
 <<EOF>>                { return yy::BitTorrent_Bencoding_Parser::token::END; }
 <*>{OCTET}             { /* *TODO*: use (?s:.) ? */
                          if (!isBlocking ())

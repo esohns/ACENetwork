@@ -674,6 +674,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
     return;
   } // end IF
   ACE_ASSERT (parser.bencoding_);
+  ACE_ASSERT (parser.bencoding_->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
 //#if defined (_DEBUG)
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("%s\n"),
@@ -681,11 +682,12 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 //#endif // _DEBUG
 
   try {
-    session_->notify (*parser.bencoding_);
+    session_->notify (*parser.bencoding_->dictionary);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::notify(), continuing\n")));
   }
+  delete parser.bencoding_; parser.bencoding_ = NULL;
 
 #if defined (GUI_SUPPORT)
   if (CBData_)

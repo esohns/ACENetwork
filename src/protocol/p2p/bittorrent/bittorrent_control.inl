@@ -756,15 +756,10 @@ allocate:
                   ACE_TEXT (*(*iterator).second->string->c_str ())));
       goto error;
     } // end IF
-    result = tracker_address.set (host_name_string.c_str (),
-                                  AF_INET);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (host_name_string.c_str ())));
-      goto error;
-    } // end IF
+    tracker_address =
+        Net_Common_Tools::stringToIPAddress (host_name_string,
+                                             (use_SSL ? HTTPS_DEFAULT_SERVER_PORT
+                                                      : HTTP_DEFAULT_SERVER_PORT));
     session_in->trackerConnect (tracker_address);
     iconnection_p =
       TRACKER_CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_address);
