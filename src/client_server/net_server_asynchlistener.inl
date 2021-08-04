@@ -442,12 +442,12 @@ Net_Server_AsynchListener_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::bind(0x%@[\"%s\"]): \"%m\", aborting\n"),
                 listen_handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in, false, false).c_str ())));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::bind(%d[\"%s\"]): \"%m\", aborting\n"),
                 listen_handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in, false, false).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
     goto close;
   } // end IF

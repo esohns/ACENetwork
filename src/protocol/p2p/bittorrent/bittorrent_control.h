@@ -59,8 +59,9 @@ class BitTorrent_Control_T
   virtual void wait ();
   ////////////////////////////////////////
   // callbacks
-  virtual void notify (const std::string&,     // metainfo (aka '.torrent') file URI
-                       enum BitTorrent_Event); // event
+  virtual void notify (const std::string&,    // metainfo (aka '.torrent') file URI
+                       enum BitTorrent_Event, // event
+                       const std::string&);   // (optional) data
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T ())
@@ -68,9 +69,10 @@ class BitTorrent_Control_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T& operator= (const BitTorrent_Control_T&))
 
   bool getTrackerConnectionAndMessage (SessionInterfaceType*,                                // session handle
-                                       const Bencoding_Dictionary_t&,                        // metainfo
                                        typename SessionType::ITRACKER_STREAM_CONNECTION_T*&, // return value: connection handle
                                        typename SessionType::TRACKER_MESSAGE_T*&);           // return value: message handle
+  void requestRedirected (SessionInterfaceType*, // session handle
+                          const std::string&);   // redirected URL
 
   ACE_Condition_Thread_Mutex condition_;
   SessionConfigurationType*  configuration_;

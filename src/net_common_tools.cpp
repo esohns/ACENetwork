@@ -704,7 +704,6 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
 #else
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);
-
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
 #endif
@@ -3260,6 +3259,34 @@ continue_:
 }
 
 std::string
+Net_Common_Tools::IPAddressToString (const ACE_INET_Addr& address_in,
+                                     bool addressOnly_in,
+                                     bool resolve_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddressToString"));
+
+  std::string result =
+      Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0
+                                                           : ACE_HTONS (address_in.get_port_number ())),
+                                           ACE_HTONL (address_in.get_ip_address ()));
+  if (resolve_in)
+  {
+    std::string hostname_string;
+    if (!Net_Common_Tools::getAddress (hostname_string,
+                                       result))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::getAddress(%s), aborting\n"),
+                  ACE_TEXT (result.c_str ())));
+      return ACE_TEXT_ALWAYS_CHAR ("");
+    } // end IF
+    result = hostname_string;
+  } // end IF
+
+  return result;
+}
+
+std::string
 Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getDefaultInterface"));
@@ -3638,12 +3665,6 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getAddress"));
 
-//  struct hostent host, *result_p;
-//  ACE_OS::memset (&host, 0, sizeof (struct hostent));
-//  ACE_HOSTENT_DATA buffer;
-//  ACE_OS::memset (buffer, 0, sizeof (ACE_HOSTENT_DATA));
-//  int error = 0;
-
   int result = -1;
   ACE_INET_Addr inet_address;
   ACE_TCHAR buffer_a[HOST_NAME_MAX];
@@ -3668,7 +3689,8 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
       return false;
     } // end IF
 
-    result = inet_address.get_host_name (buffer_a, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
+    result = inet_address.get_host_name (buffer_a,
+                                         sizeof (ACE_TCHAR[HOST_NAME_MAX]));
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -3677,7 +3699,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
       return false;
     } // end IF
 
-    dottedDecimal_inout = buffer_a;
+    hostName_inout = buffer_a;
   } // end IF
   else
   {
@@ -3693,7 +3715,8 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
       return false;
     } // end IF
 
-    const char* result_p = inet_address.get_host_addr (buffer_a, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
+    const char* result_p =
+        inet_address.get_host_addr (buffer_a, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
     if (unlikely (!result_p))
     {
       ACE_DEBUG ((LM_ERROR,

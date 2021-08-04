@@ -167,32 +167,34 @@ struct BitTorrent_SessionState
 {
   BitTorrent_SessionState ()
    : connections ()
-   //, controller (NULL)
    , fileName ()
    , key ()
    , metaInfo (NULL)
    , peerId ()
    , peerPieces ()
    , peerStatus ()
+   , trackerAddress ()
    , trackerConnectionId (0)
    , trackerId ()
    , trackerRequestResponse (NULL)
    , trackerScrapeResponse (NULL)
+   , trackerBaseURI ()
    , pieces ()
   {};
 
   Net_ConnectionIds_t     connections;
-  //BitTorrent_IControl_t*  controller;
   std::string             fileName; // .torrent file
   std::string             key; // tracker-
   Bencoding_Dictionary_t* metaInfo;
   std::string             peerId;
-  BitTorrent_PeerPieces_t peerPieces;
-  BitTorrent_PeerStatus_t peerStatus;
+  BitTorrent_PeerPieces_t peerPieces; // map of the pieces the peers have
+  BitTorrent_PeerStatus_t peerStatus; // choked/unchoked, interested/not interested
+  ACE_INET_Addr           trackerAddress; // *NOTE*: might be redirected
   Net_ConnectionId_t      trackerConnectionId;
   std::string             trackerId;
   Bencoding_Dictionary_t* trackerRequestResponse;
   Bencoding_Dictionary_t* trackerScrapeResponse;
+  std::string             trackerBaseURI;
 
   BitTorrent_Pieces_t     pieces;
 };

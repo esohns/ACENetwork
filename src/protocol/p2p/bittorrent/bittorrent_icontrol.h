@@ -47,8 +47,9 @@ class BitTorrent_IControl_T
 
   ////////////////////////////////////////
   // callbacks
-  virtual void notify (const std::string&,         // metainfo (aka '.torrent') file URI
-                       enum BitTorrent_Event) = 0; // event
+  virtual void notify (const std::string&,      // metainfo (aka '.torrent') file URI
+                       enum BitTorrent_Event,   // event
+                       const std::string&) = 0; // (optional) data
 };
 
 #endif

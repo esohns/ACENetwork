@@ -204,7 +204,9 @@ class BitTorrent_TrackerMessage_T
 
   virtual HTTP_Method_t command () const; // return value: message type
   static std::string CommandToString (HTTP_Method_t);
-//  using inherited::initialize;
+
+  // implement Common_IDumpState
+  virtual void dump_state () const;
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet

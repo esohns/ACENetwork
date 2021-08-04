@@ -62,6 +62,8 @@ class HTTP_Tools
   // *NOTE*: this 'escapes' the input so it can be sent in an URL
   //         (see also: RFC 1738)
   static std::string URLEncode (const std::string&);
+  // *NOTE*: removes any parameters (i.e. ?name=value&name=value...)
+  static std::string stripURI (const std::string&);
 
   static std::string IPAddressToHostName (const ACE_INET_Addr&); // host address
 

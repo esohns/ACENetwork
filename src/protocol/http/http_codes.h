@@ -42,6 +42,7 @@ class HTTP_Codes
     HTTP_VERSION_1_0,
     HTTP_VERSION_1_1,
     HTTP_VERSION_2,
+    HTTP_VERSION_3,
     /////////////////////////////////////
     HTTP_VERSION_MAX,
     HTTP_VERSION_INVALID
@@ -61,7 +62,12 @@ class HTTP_Codes
     HTTP_STATUS_MULTIPLECHOICES     = 300,
     HTTP_STATUS_MOVEDPERMANENTLY    = 301,
     HTTP_STATUS_MOVEDTEMPORARILY    = 302,
+    HTTP_STATUS_SEEOTHER            = 303, // since 1.1
     HTTP_STATUS_NOTMODIFIED         = 304,
+    HTTP_STATUS_USEPROXY            = 305, // since 1.1
+    HTTP_STATUS_SWITCHPROXY         = 306, // since 1.1
+    HTTP_STATUS_TEMPORARYREDIRECT   = 307, // since 1.1
+    HTTP_STATUS_PERMANENTREDIRECT   = 308, // rfc7538
     /////////////////////////////////////
     // 4xx Client Error
     HTTP_STATUS_BADREQUEST          = 400,

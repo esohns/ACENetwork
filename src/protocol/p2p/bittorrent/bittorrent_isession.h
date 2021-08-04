@@ -70,6 +70,7 @@ class BitTorrent_ISession_T
 
   virtual void trackerConnect (const AddressType&) = 0; // tracker address
   virtual void trackerDisconnect (const AddressType&) = 0; // tracker address
+  virtual AddressType trackerAddress () = 0; // return value: tracker address
   virtual Net_ConnectionId_t trackerConnectionId () = 0; // return value: tracker connection id
 
   ////////////////////////////////////////
@@ -77,6 +78,8 @@ class BitTorrent_ISession_T
   // *TODO*: make these 'private'
   virtual void trackerConnect (Net_ConnectionId_t) = 0;    // connection id
   virtual void trackerDisconnect (Net_ConnectionId_t) = 0; // connection id
+  virtual void trackerRedirect (Net_ConnectionId_t,      // connection id
+                                const std::string&) = 0; // HTTP response "Location" header
 
   //--------------------------------------
 

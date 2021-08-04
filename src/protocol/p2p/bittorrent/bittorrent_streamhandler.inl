@@ -639,25 +639,74 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 
-  ACE_UNUSED_ARG (sessionId_in);
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
+  ACE_ASSERT (iterator != sessionData_.end ());
   ACE_ASSERT (session_);
 
-//#if defined (_DEBUG)
-//  const typename MESSAGE_T::DATA_T& data_container_r = message_in.getR ();
-//  const struct HTTP_Record& record_r = data_container_r.getR ();
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("%s\n"),
-//              ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
-//#endif // _DEBUG
+  ACE_HANDLE handle_h =
+      (*iterator).second->connectionStates.begin ()->second->handle;
 
+  const typename MESSAGE_T::DATA_T& data_container_r = message_in.getR ();
+  const struct HTTP_Record& record_r = data_container_r.getR ();
+
+  // handle redirects
+  switch (record_r.status)
+  {
+    case HTTP_Codes::HTTP_STATUS_OK:
+      break;
+    case HTTP_Codes::HTTP_STATUS_MULTIPLECHOICES:
+    case HTTP_Codes::HTTP_STATUS_MOVEDPERMANENTLY:
+    case HTTP_Codes::HTTP_STATUS_MOVEDTEMPORARILY:
+    case HTTP_Codes::HTTP_STATUS_NOTMODIFIED:
+    case HTTP_Codes::HTTP_STATUS_USEPROXY:
+    case HTTP_Codes::HTTP_STATUS_SWITCHPROXY:
+    case HTTP_Codes::HTTP_STATUS_TEMPORARYREDIRECT:
+    case HTTP_Codes::HTTP_STATUS_PERMANENTREDIRECT:
+    {
+      // step1: redirected --> extract location
+      HTTP_HeadersConstIterator_t iterator_2 =
+          record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_LOCATION_STRING));
+      if (iterator_2 == record_r.headers.end ())
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("missing \"%s\" HTTP header, returning\n"),
+                    ACE_TEXT (HTTP_PRT_HEADER_LOCATION_STRING)));
+        return;
+      } // end IF
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("tracker has been redirected to \"%s\" (status was: %d)\n"),
+                  ACE_TEXT ((*iterator_2).second.c_str ()),
+                  record_r.status));
+      try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        session_->trackerRedirect (reinterpret_cast<Net_ConnectionId_t> (handle_h),
+#else
+        session_->trackerRedirect (static_cast<Net_ConnectionId_t> (handle_h),
+#endif // ACE_WIN32 || ACE_WIN64
+                                   (*iterator_2).second);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in BitTorrent_ISession_T::trackerRedirect(), continuing\n")));
+      }
+      return;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid HTTP response (status was: %d): \"%s\", returning\n"),
+                  record_r.status,
+                  ACE_TEXT (record_r.reason.c_str ())));
+      return;
+    }
+  } // end SWITCH
+
+  // parse bencoded record
   struct Common_ParserConfiguration parser_configuration = *configuration_;
   parser_configuration.block = false;
   parser_configuration.messageQueue = NULL;
-
-  // parse bencoded record
   PARSER_T parser (parser_configuration.debugScanner,
                    parser_configuration.debugParser);
   if (!parser.initialize (parser_configuration))
@@ -666,7 +715,6 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
                 ACE_TEXT ("failed to BitTorrent_Bencoding_ParserDriver_T::initialize(), returning\n")));
     return;
   } // end IF
-
   if (!parser.parse (&const_cast<MESSAGE_T&> (message_in)))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -680,7 +728,6 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 //              ACE_TEXT ("%s\n"),
 //              ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
 //#endif // _DEBUG
-
   try {
     session_->notify (*parser.bencoding_->dictionary);
   } catch (...) {

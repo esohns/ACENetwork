@@ -736,12 +736,12 @@ Net_Client_AsynchConnector_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address, false, false).c_str ()),
                 ACE::sock_error (static_cast<int> (error))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address, false, false).c_str ()),
                 ACE_TEXT (ACE_OS::strerror (error))));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF

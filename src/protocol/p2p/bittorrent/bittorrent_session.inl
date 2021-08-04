@@ -649,7 +649,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     { ACE_ASSERT (inherited::state_.controller);
       try {
         inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
-                                              BITTORRENT_EVENT_CANCELLED);
+                                              BITTORRENT_EVENT_CANCELLED,
+                                              ACE_TEXT_ALWAYS_CHAR (""));
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
@@ -1403,7 +1404,20 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-    ACE_ASSERT (!inherited::state_.trackerConnectionId);
+    if (inherited::state_.trackerConnectionId)
+    {
+      typename TrackerConnectorType::ICONNECTION_T* iconnection_p =
+        TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (inherited::state_.trackerConnectionId);
+      if (!iconnection_p)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to retrieve tracker connection handle (id was: %d), continuing\n"),
+                    inherited::state_.trackerConnectionId));
+      else
+      {
+        iconnection_p->close ();
+        iconnection_p->decrease (); iconnection_p= NULL;
+      } // end ELSE
+    } // end IF
     inherited::state_.trackerConnectionId = id_in;
   } // end lock scope
 
@@ -1482,19 +1496,90 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
               id_in));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-    ACE_ASSERT (inherited::state_.trackerConnectionId == id_in);
-    inherited::state_.trackerConnectionId = 0;
+    if (inherited::state_.trackerConnectionId == id_in)
+      inherited::state_.trackerConnectionId = 0;
 
     if (inherited::state_.connections.empty ())
     { ACE_ASSERT (inherited::state_.controller);
       try {
         inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
-                                              BITTORRENT_EVENT_CANCELLED);
+                                              BITTORRENT_EVENT_CANCELLED,
+                                              ACE_TEXT_ALWAYS_CHAR (""));
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
       }
     } // end IF
+  } // end lock scope
+}
+
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerHandlerModuleType,
+          typename TrackerHandlerModuleType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
+          typename PeerConnectorType,
+          typename TrackerConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
+void
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
+                     PeerStreamType,
+                     TrackerStreamType,
+                     StreamStatusType,
+                     PeerHandlerModuleType,
+                     TrackerHandlerModuleType,
+                     PeerConnectionType,
+                     TrackerConnectionType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
+                     PeerConnectorType,
+                     TrackerConnectorType,
+                     ConfigurationType,
+                     StateType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::trackerRedirect (Net_ConnectionId_t id_in,
+#else
+                     >::trackerRedirect (Net_ConnectionId_t id_in,
+#endif // GUI_SUPPORT
+                                         const std::string& location_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerRedirect"));
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+    ACE_ASSERT (inherited::state_.controller);
+    try {
+      inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
+                                            BITTORRENT_EVENT_TRACKER_REDIRECTED,
+                                            location_in);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
+    }
   } // end lock scope
 }
 
@@ -1579,7 +1664,27 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // response is regular --> (try to) connect to all peers
 
+  // retain tracker id for future notifications
+  iterator = record_in.begin ();
+    for (;
+         iterator != record_in.end ();
+         ++iterator)
+      if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_TRACKERID_HEADER))
+        break;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+    if (iterator != record_in.end ())
+    { ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
+      if (inherited::state_.trackerId.empty ())
+        inherited::state_.trackerId = *(*iterator).second->string;
+      else if (unlikely (inherited::state_.trackerId != *(*iterator).second->string))
+      { // update
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("tracked id changed (is: %s, was: %s), updating\n"),
+                    ACE_TEXT ((*iterator).second->string->c_str ()),
+                    ACE_TEXT (inherited::state_.trackerId.c_str ())));
+        inherited::state_.trackerId = *(*iterator).second->string;
+      } // end ELSE
+    } // end IF
     if (inherited::state_.trackerRequestResponse)
       Common_Parser_Bencoding_Tools::free (inherited::state_.trackerRequestResponse);
     inherited::state_.trackerRequestResponse =
@@ -2070,7 +2175,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
           ACE_ASSERT (inherited::state_.controller);
           try {
             inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
-                                                  BITTORRENT_EVENT_COMPLETE);
+                                                  BITTORRENT_EVENT_COMPLETE,
+                                                  ACE_TEXT_ALWAYS_CHAR (""));
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));

@@ -104,7 +104,7 @@ BitTorrent_Message_T<SessionDataType,
 
   // sanity check(s)
   if (!inherited::isInitialized_)
-    return;
+    return inherited::dump_state ();
   ACE_ASSERT (inherited::data_);
 
   const struct BitTorrent_PeerRecord& record_r = inherited::data_->getR ();
@@ -114,6 +114,7 @@ BitTorrent_Message_T<SessionDataType,
               inherited::id (),
               inherited::total_length (),
               ACE_TEXT (BitTorrent_Tools::RecordToString (record_r).c_str ())));
+  return inherited::dump_state ();
 }
 
 template <typename SessionDataType,
@@ -269,6 +270,47 @@ BitTorrent_TrackerMessage_T<SessionDataType,
 
 template <typename SessionDataType,
           typename UserDataType>
+void
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::dump_state"));
+
+  std::ostringstream converter;
+  const typename inherited::DATA_T& data_container_r = inherited::getR ();
+  const struct HTTP_Record& record_r = data_container_r.getR ();
+
+  // count continuations
+  unsigned int count = 1;
+  std::string info;
+  for (const ACE_Message_Block* source = this;
+       source != NULL;
+       source = source->cont (), count++)
+  {
+    converter.str (ACE_TEXT (""));
+    converter << count;
+    info += converter.str ();
+    info += ACE_TEXT ("# [");
+    converter.str (ACE_TEXT (""));
+    converter << source->length ();
+    info += converter.str ();
+    info += ACE_TEXT (" byte(s)]: \"");
+    info.append (source->rd_ptr (), source->length ());
+    info += ACE_TEXT ("\"\n");
+  } // end FOR
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s%s"),
+              inherited::id (),
+              inherited::total_length (),
+              ACE_TEXT (info.c_str ()),
+              ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
+
+  // delegate to base
+  inherited::dump_state ();
+}
+
+template <typename SessionDataType,
+          typename UserDataType>
 ACE_Message_Block*
 BitTorrent_TrackerMessage_T<SessionDataType,
                             UserDataType>::duplicate (void) const
@@ -325,12 +367,3 @@ BitTorrent_TrackerMessage_T<SessionDataType,
 
   return message_p;
 }
-
-//std::string
-//BitTorrent_TrackerMessage_T::CommandTypeToString (HTTP_Method_t method_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::CommandTypeToString"));
-
-//  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
-//                                                       : HTTP_Tools::Method2String (method_in));
-//}

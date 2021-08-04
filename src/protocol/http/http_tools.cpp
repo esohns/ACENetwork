@@ -597,6 +597,35 @@ HTTP_Tools::URLEncode (const std::string& string_in)
 }
 
 std::string
+HTTP_Tools::stripURI (const std::string& URI_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::stripURI"));
+
+  std::string result;
+
+  std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^(\\/(?:[^\\/]+\\/)*(?:[^?]*))(?:\\?(.*))?$");
+  std::regex regex (regex_string,
+                    std::regex_constants::ECMAScript);
+  std::smatch match_results;
+  if (unlikely (!std::regex_match (URI_in,
+                                   match_results,
+                                   regex,
+                                   std::regex_constants::match_default)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URI string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URI_in.c_str ())));
+    return result;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  ACE_ASSERT (match_results[1].matched);
+  result = match_results[1].str ();
+
+  return result;
+}
+
+std::string
 HTTP_Tools::IPAddressToHostName (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::IPAddressToHostName"));

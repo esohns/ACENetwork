@@ -146,6 +146,7 @@ class BitTorrent_Session_T
   virtual void trackerConnect (const ACE_INET_Addr&);
   inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); }
   inline virtual Net_ConnectionId_t trackerConnectionId () { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, 0); return inherited::state_.trackerConnectionId; }
+  inline virtual ACE_INET_Addr trackerAddress () { ACE_INET_Addr dummy; ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, dummy); return inherited::state_.trackerAddress; }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T (const BitTorrent_Session_T&))
@@ -228,6 +229,8 @@ class BitTorrent_Session_T
   virtual void scrape ();
   virtual void trackerConnect (Net_ConnectionId_t);
   virtual void trackerDisconnect (Net_ConnectionId_t);
+  virtual void trackerRedirect (Net_ConnectionId_t,  // connection id
+                                const std::string&); // HTTP response "Location" header
   virtual void notify (const Bencoding_Dictionary_t&); // tracker response/scrape record
   virtual void notify (Net_ConnectionId_t,                      // connection id
                        const struct BitTorrent_PeerHandShake&); // peer handshake record
