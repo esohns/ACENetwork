@@ -501,22 +501,22 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
-  int result = -1;
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
+  int result = -1;
   // *TODO*: clean this up
   struct BitTorrent_Client_CursesState curses_state;
   struct BitTorrent_Client_ThreadData curses_thread_data;
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
-  //char thread_name[BUFSIZ];
-  //ACE_OS::memset (thread_name, 0, sizeof (thread_name));
+  char thread_name[BUFSIZ];
+  ACE_OS::memset (thread_name, 0, sizeof (thread_name));
   char* thread_name_p = NULL;
   const char* thread_name_2 = NULL;
   int group_id_2 = (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = NULL;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   BitTorrent_Client_Control_t bittorrent_control (&configuration_in.sessionConfiguration);
   BitTorrent_Client_PeerConnection_Manager_t* peer_connection_manager_p =
       BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
@@ -586,6 +586,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
   Net_ConnectionConfigurationsIterator_t iterator;
   Net_ConnectionConfigurationsIterator_t iterator_2;
+  ACE_thread_t thread_id = 0;
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -699,11 +700,13 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   } // end IF
 
   // step6b: (try to) connect to the torrent tracker
-  thread_manager_p = ACE_Thread_Manager::instance ();
-  ACE_ASSERT (thread_manager_p);
+  bittorrent_control.start (thread_id);
 
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
+  thread_manager_p = ACE_Thread_Manager::instance ();
+  ACE_ASSERT (thread_manager_p);
+
   curses_thread_data.configuration = &configuration_in;
   curses_thread_data.controller = &bittorrent_control;
   curses_thread_data.cursesState = &curses_state;
@@ -767,13 +770,17 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     bittorrent_control.request (metaInfoFileName_in);
     // wait for the download to complete
     try {
-      bittorrent_control.wait ();
+      bittorrent_control.wait (true);
     }
     catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in BitTorrent_IControl_T::wait(), returning\n")));
       goto clean;
     }
+    bittorrent_control.stop (true,  // wait ?
+                             true,  // high priority ?
+                             true); // locked access ?
+
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("session complete...\n")));
 

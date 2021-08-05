@@ -253,7 +253,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // *TODO*: remove type inferences
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, false);
-    inherited::state_.controller = configuration_in.controller;
     inherited::state_.metaInfo = configuration_in.metaInfo;
     // initialize piece data
     // *TODO*: load completed piece data from somewhere
@@ -635,6 +634,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                        ACE_DIRECTORY_SEPARATOR_CHAR)),
               id_in));
 
+  bool notify_controller_b = false;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     BitTorrent_PeerPiecesIterator_t iterator =
         inherited::state_.peerPieces.find (id_in);
@@ -644,19 +644,20 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
         inherited::state_.peerStatus.find (id_in);
     ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
     inherited::state_.peerStatus.erase (iterator_2);
-
-    if (inherited::state_.connections.empty ())
-    { ACE_ASSERT (inherited::state_.controller);
-      try {
-        inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
-                                              BITTORRENT_EVENT_CANCELLED,
-                                              ACE_TEXT_ALWAYS_CHAR (""));
-      } catch (...) {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
-      }
-    } // end IF
+    if (unlikely (inherited::state_.connections.empty ()))
+      notify_controller_b = true;
   } // end lock scope
+  if (notify_controller_b)
+  { ACE_ASSERT (inherited::configuration_->controller);
+    try {
+      inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
+                                                     BITTORRENT_EVENT_CANCELLED,
+                                                     ACE_TEXT_ALWAYS_CHAR (""));
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
+    }
+  } // end IF
 }
 
 template <typename PeerHandlerConfigurationType,
@@ -1495,22 +1496,24 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
+  bool notify_controller_b = false;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     if (inherited::state_.trackerConnectionId == id_in)
       inherited::state_.trackerConnectionId = 0;
-
     if (inherited::state_.connections.empty ())
-    { ACE_ASSERT (inherited::state_.controller);
-      try {
-        inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
-                                              BITTORRENT_EVENT_CANCELLED,
-                                              ACE_TEXT_ALWAYS_CHAR (""));
-      } catch (...) {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
-      }
-    } // end IF
+      notify_controller_b = true;
   } // end lock scope
+  if (notify_controller_b)
+  { ACE_ASSERT (inherited::configuration_->controller);
+    try {
+      inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
+                                                     BITTORRENT_EVENT_CANCELLED,
+                                                     ACE_TEXT_ALWAYS_CHAR (""));
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
+    }
+  } // end IF
 }
 
 template <typename PeerHandlerConfigurationType,
@@ -1570,17 +1573,91 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerRedirect"));
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-    ACE_ASSERT (inherited::state_.controller);
-    try {
-      inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
-                                            BITTORRENT_EVENT_TRACKER_REDIRECTED,
-                                            location_in);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
-    }
-  } // end lock scope
+  ACE_ASSERT (inherited::configuration_->controller);
+  try {
+    inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
+                                                   BITTORRENT_EVENT_TRACKER_REDIRECTED,
+                                                   location_in);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
+  }
+}
+
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerHandlerModuleType,
+          typename TrackerHandlerModuleType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
+          typename PeerConnectorType,
+          typename TrackerConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
+void
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
+                     PeerStreamType,
+                     TrackerStreamType,
+                     StreamStatusType,
+                     PeerHandlerModuleType,
+                     TrackerHandlerModuleType,
+                     PeerConnectionType,
+                     TrackerConnectionType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
+                     PeerConnectorType,
+                     TrackerConnectorType,
+                     ConfigurationType,
+                     StateType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::trackerError (Net_ConnectionId_t id_in,
+#else
+                     >::trackerError (Net_ConnectionId_t id_in,
+#endif // GUI_SUPPORT
+                                      const struct HTTP_Record& response_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerError"));
+
+  ACE_ASSERT (inherited::configuration_);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: tracker error (id was: %d): %s\n"),
+              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              id_in,
+              ACE_TEXT (HTTP_Tools::dump (response_in).c_str ())));
+
+  ACE_ASSERT (inherited::configuration_->controller);
+  try {
+    inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
+                                                   BITTORRENT_EVENT_CANCELLED,
+                                                   ACE_TEXT_ALWAYS_CHAR (""));
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
+  }
 }
 
 template <typename PeerHandlerConfigurationType,
@@ -2134,58 +2211,64 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       chunk_s.data = messageBlock_in;
       chunk_s.offset = record_in.piece.begin;
       BitTorrent_PiecesIterator_t iterator;
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-      iterator = inherited::state_.pieces.begin ();
-      std::advance (iterator, record_in.piece.index);
-      (*iterator).chunks.push_back (chunk_s);
-      if (unlikely (BitTorrent_Tools::isPieceComplete ((*iterator).length,
-                                                       (*iterator).chunks)))
-      {
-        if (!BitTorrent_Tools::savePiece (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                                                               ACE_DIRECTORY_SEPARATOR_CHAR)),
-                                          record_in.piece.index,
-                                          *iterator))
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.pieces.begin ();
+        std::advance (iterator, record_in.piece.index);
+        (*iterator).chunks.push_back (chunk_s);
+        if (unlikely (BitTorrent_Tools::isPieceComplete ((*iterator).length,
+                                                         (*iterator).chunks)))
         {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to BitTorrent_Tools::savePiece(%s,%u), continuing\n"),
-                      ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                     ACE_DIRECTORY_SEPARATOR_CHAR),
-                      record_in.piece.index));
-          // --> download again ?! *TODO*: handle case where the chunks are still available
-        } // end IF
-        else
-        {
-          for (iterator = inherited::state_.pieces.begin ();
-               iterator != inherited::state_.pieces.end ();
-               ++iterator)
-            if (!BitTorrent_Tools::isPieceComplete ((*iterator).length,
-                                                    (*iterator).chunks))
-              goto request_next;
-          // all complete !
-
-          // assemble the file(s) from the downloaded piece(s)
-          if (!BitTorrent_Tools::assembleFiles (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                                                                     ACE_DIRECTORY_SEPARATOR_CHAR)),
-                                                *inherited::configuration_->metaInfo))
+          if (!BitTorrent_Tools::savePiece (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                                                                                 ACE_DIRECTORY_SEPARATOR_CHAR)),
+                                            record_in.piece.index,
+                                            *iterator))
+          {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("%s: failed to BitTorrent_Tools::assembleFiles(), continuing\n"),
+                        ACE_TEXT ("failed to BitTorrent_Tools::savePiece(%s,%u), continuing\n"),
                         ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                       ACE_DIRECTORY_SEPARATOR_CHAR)));
+                                       ACE_DIRECTORY_SEPARATOR_CHAR),
+                        record_in.piece.index));
+            // --> download again ?! *TODO*: handle case where the chunks are still available
+          } // end IF
+          else
+          {
+            for (iterator = inherited::state_.pieces.begin ();
+                 iterator != inherited::state_.pieces.end ();
+                 ++iterator)
+              if (!BitTorrent_Tools::isPieceComplete ((*iterator).length,
+                                                      (*iterator).chunks))
+                goto request_next;
+            // all complete !
 
-          ACE_ASSERT (inherited::state_.controller);
-          try {
-            inherited::state_.controller->notify (inherited::configuration_->metaInfoFileName,
-                                                  BITTORRENT_EVENT_COMPLETE,
-                                                  ACE_TEXT_ALWAYS_CHAR (""));
-          } catch (...) {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
-          }
-          break;
-        } // end ELSE IF
-      } // end IF
+            // assemble the file(s) from the downloaded piece(s)
+            if (!BitTorrent_Tools::assembleFiles (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                                                                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+                                                  *inherited::configuration_->metaInfo))
+            {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("%s: failed to BitTorrent_Tools::assembleFiles(), continuing\n"),
+                          ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                                         ACE_DIRECTORY_SEPARATOR_CHAR)));
+              // --> download again ?!
+              break;
+            } // end IF
+            goto notify;
+          } // end ELSE IF
+        } // end IF
+      } // end lock scope
 request_next:
       requestNextPiece (id_in);
+      break;
+notify:
+      ACE_ASSERT (inherited::configuration_->controller);
+      try {
+        inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
+                                                       BITTORRENT_EVENT_COMPLETE,
+                                                       ACE_TEXT_ALWAYS_CHAR (""));
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
+      }
       break;
     }
     default:

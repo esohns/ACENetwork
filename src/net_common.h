@@ -191,6 +191,7 @@ enum Net_Connection_Status
   ////////////////////////////////////////
   NET_CONNECTION_STATUS_OK                   = 0,
   ////////////////////////////////////////
+  NET_CONNECTION_STATUS_INITIALIZING,
   NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
   ////////////////////////////////////////
   NET_CONNECTION_STATUS_CLOSED,      // (local) close ()

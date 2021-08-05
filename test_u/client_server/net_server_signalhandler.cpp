@@ -135,20 +135,11 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     // - activation timers (connection attempts, ...)
     // [- UI dispatch]
 
-    // step1: stop GTK event processing
-    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
-    //         compared to doing it here
-//#if defined (GUI_SUPPORT)
-//#if defined (GTK_USE)
-//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
-//#endif // GTK_USE
-//#endif // GUI_SUPPORT
-
-    // step2: invoke controller (if any)
+    // step1: invoke controller (if any)
     if (inherited::configuration_->TCPListener)
     {
       try {
-        inherited::configuration_->TCPListener->stop ();
+        inherited::configuration_->TCPListener->stop (false, true, true);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
@@ -159,7 +150,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     if (inherited::configuration_->SSLListener)
     {
       try {
-        inherited::configuration_->SSLListener->stop ();
+        inherited::configuration_->SSLListener->stop (false, true, true);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
@@ -168,7 +159,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     } // end IF
 #endif // SSL_SUPPORT
 
-    // step3: stop timer
+    // step2: stop timer
     if (inherited::configuration_->statisticReportingTimerId >= 0)
     {
       const void* act_p = NULL;
@@ -190,9 +181,9 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_2 = TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_2);
 
-    iconnection_manager_p->stop (false, true);
+    iconnection_manager_p->stop (false, true, true);
     iconnection_manager_p->abort ();
-    iconnection_manager_2->stop (false, true);
+    iconnection_manager_2->stop (false, true, true);
     iconnection_manager_2->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)

@@ -631,7 +631,9 @@ do_work (unsigned int numberOfDispatchThreads_in,
     timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-    gtk_manager_p->stop ();
+    gtk_manager_p->stop (true,  // wait ?
+                         true,  // high priority ?
+                         true); // locked access ?
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -1326,15 +1328,15 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
 #if defined (GTK_USE)
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
+//  Common_MessageStack_t* logstack_p = NULL;
+//  ACE_SYNCH_MUTEX* lock_p = NULL;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  logstack_p = &state_r.logStack;
-  lock_p = &state_r.logStackLock;
+//  logstack_p = &state_r.logStack;
+//  lock_p = &state_r.logStackLock;
 #endif // GTK_USE
 
   struct IRC_Client_Configuration configuration;

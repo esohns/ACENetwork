@@ -1062,8 +1062,9 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                           GTK_STOCK_MEDIA_PLAY);
 
     try {
-      ui_cb_data_p->monitor->stop (true,
-                                   true);
+      ui_cb_data_p->monitor->stop (true,  // wait ?
+                                   true,  // high priority ?
+                                   true); // locked access ?
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask_T::stop(): \"%m\", aborting\n")));
@@ -1852,8 +1853,9 @@ button_quit_clicked_cb (GtkButton* button_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
-                                                           false); // N/A
+  WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+                                                           true,  // high priority ?
+                                                           true); // locked access ?
 } // button_quit_clicked_cb
 #ifdef __cplusplus
 }

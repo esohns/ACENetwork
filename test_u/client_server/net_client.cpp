@@ -917,8 +917,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       Common_Timer_Tools::finalize ();
       timer_manager_p->stop ();
 #if defined (GTK_USE)
-      gtk_manager_p->stop (true,
-                           true);
+      gtk_manager_p->stop (true,  // wait ?
+                           true,  // high priority ?
+                           true); // locked access ?
 #endif // GTK_USE
       return;
     } // end IF
@@ -947,8 +948,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
-      gtk_manager_p->stop (true,
-                           true);
+      gtk_manager_p->stop (true,  // wait ?
+                           true,  // high priority ?
+                           true); // locked access ?
 #else
       ;
 #endif // GTK_USE
@@ -997,7 +999,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       return;
     } // end IF
     Test_U_TCPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_2 = NULL;
+//    Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_2 = NULL;
     if (useReactor_in)
     {
       iconnection_p =
@@ -1047,8 +1049,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
-        gtk_manager_p->stop (true,
-                             true);
+        gtk_manager_p->stop (true,  // wait ?
+                             true,  // high priority ?
+                             true); // locked access ?
 #else
         ;
 #endif // GTK_USE

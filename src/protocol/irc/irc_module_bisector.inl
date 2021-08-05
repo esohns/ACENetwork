@@ -543,6 +543,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
 
       if (likely (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT))
         inherited::stop (false, // wait for completion ?
+                         false, // high priority ?
                          true); // N/A
 
       break;

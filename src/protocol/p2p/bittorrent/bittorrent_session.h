@@ -231,6 +231,8 @@ class BitTorrent_Session_T
   virtual void trackerDisconnect (Net_ConnectionId_t);
   virtual void trackerRedirect (Net_ConnectionId_t,  // connection id
                                 const std::string&); // HTTP response "Location" header
+  virtual void trackerError (Net_ConnectionId_t,         // connection id
+                             const struct HTTP_Record&); // HTTP response
   virtual void notify (const Bencoding_Dictionary_t&); // tracker response/scrape record
   virtual void notify (Net_ConnectionId_t,                      // connection id
                        const struct BitTorrent_PeerHandShake&); // peer handshake record

@@ -189,6 +189,7 @@ class Net_ISessionBase_T
   virtual void disconnect (const AddressType&) = 0; // peer address
 
   virtual void close (bool = false) = 0; // wait ?
+  virtual void wait () = 0;
 
   ////////////////////////////////////////
   // callbacks

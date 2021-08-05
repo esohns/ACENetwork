@@ -1039,7 +1039,7 @@ error:
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
-    gtk_manager_p->stop (true);
+    gtk_manager_p->stop (true, true, true);
 #else
     ;
 #endif // GTK_USE
@@ -1050,8 +1050,7 @@ error:
                                          group_id);
   if (configuration.listener &&
       !useUDP_in)
-    configuration.listener->stop (true,
-                                  true);
+    configuration.listener->stop (true, true, true);
 }
 
 void

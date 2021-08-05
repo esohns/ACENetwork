@@ -94,6 +94,7 @@ class Net_Connection_Manager_T
   inline virtual const typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T& getR_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ();) }
   virtual void start (ACE_thread_t&); // N/A
   virtual void stop (bool = true,  // wait for completion ?
+                     bool = true,  // high priority ?
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isActive_; }
   virtual void wait (bool = true) const; // N/A

@@ -131,24 +131,19 @@ FileServer_SignalHandler::handle (const struct Common_Signal& signal_in)
     // - activation timers (connection attempts, ...)
     // [- UI dispatch]
 
-    // step1: stop GTK event processing
-    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
-    //         compared to doing it here
-//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
-
-    // step2: invoke controller (if any)
+    // step1: invoke controller (if any)
     if (inherited::configuration_->listener)
     {
       try {
-        inherited::configuration_->listener->stop ();
+        inherited::configuration_->listener->stop (true, true, true);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
+                    ACE_TEXT ("caught exception in Common_ITask::stop(), returning\n")));
         return;
       }
     } // end IF
 
-    // step3: stop timer
+    // step2: stop timer
     if (inherited::configuration_->statisticReportingTimerId >= 0)
     {
       const void* act_p = NULL;
@@ -169,8 +164,8 @@ FileServer_SignalHandler::handle (const struct Common_Signal& signal_in)
       inherited::configuration_->statisticReportingTimerId = -1;
     } // end IF
 
-    // step4: stop accepting connections, abort open connections
-    iconnection_manager_p->stop (false, true);
+    // step3: stop accepting connections, abort open connections
+    iconnection_manager_p->stop (false, true, true);
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)

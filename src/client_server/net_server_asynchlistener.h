@@ -77,6 +77,7 @@ class Net_Server_AsynchListener_T
   // *WARNING*: this API is NOT re-entrant !
   virtual void start (ACE_thread_t&); // return value: thread handle (if any)
   virtual void stop (bool = true,  // wait for completion ?
+                     bool = true,  // high priority ?
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; }
 

@@ -33,18 +33,18 @@
 
 #include "bittorrent_client_gui_common.h"
 
-struct BitTorrent_Client_SessionState
- : BitTorrent_SessionState
-{
-  BitTorrent_Client_SessionState ()
-   : BitTorrent_SessionState ()
-   , controller (NULL)
-   , session (NULL)
-  {};
+//struct BitTorrent_Client_SessionState
+// : BitTorrent_SessionState
+//{
+//  BitTorrent_Client_SessionState ()
+//   : BitTorrent_SessionState ()
+//   , controller (NULL)
+//   , session (NULL)
+//  {};
 
-  BitTorrent_Client_IControl_t* controller;
-  BitTorrent_Client_ISession_t* session;
-};
+//  BitTorrent_Client_IControl_t* controller;
+//  BitTorrent_Client_ISession_t* session;
+//};
 
 typedef BitTorrent_Session_T<Net_TCPSocketConfiguration_t,
                              Net_TCPSocketConfiguration_t,
@@ -63,7 +63,7 @@ typedef BitTorrent_Session_T<Net_TCPSocketConfiguration_t,
                              BitTorrent_Client_PeerConnector_t,
                              BitTorrent_Client_TrackerConnector_t,
                              struct BitTorrent_Client_SessionConfiguration,
-                             struct BitTorrent_Client_SessionState,
+                             struct BitTorrent_SessionState,
                              struct Net_UserData,
                              struct Net_UserData,
                              BitTorrent_Client_IControl_t,
@@ -85,7 +85,7 @@ typedef BitTorrent_Session_T<Net_TCPSocketConfiguration_t,
                              BitTorrent_Client_AsynchPeerConnector_t,
                              BitTorrent_Client_AsynchTrackerConnector_t,
                              struct BitTorrent_Client_SessionConfiguration,
-                             struct BitTorrent_Client_SessionState,
+                             struct BitTorrent_SessionState,
                              struct Net_UserData,
                              struct Net_UserData,
                              BitTorrent_Client_IControl_t,
@@ -97,6 +97,6 @@ typedef BitTorrent_Control_T<BitTorrent_Client_AsynchSession_t,
                              BitTorrent_Client_Session_t,
                              struct BitTorrent_Client_SessionConfiguration,
                              BitTorrent_Client_ISession_t,
-                             struct BitTorrent_Client_SessionState> BitTorrent_Client_Control_t;
+                             struct BitTorrent_SessionState> BitTorrent_Client_Control_t;
 
 #endif

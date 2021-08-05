@@ -377,6 +377,7 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   int result = -1;
 
   // step1: initialize asynchronous I/O
+  inherited::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
   inherited::open (handle_in,
                    messageBlock_in);
   if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))

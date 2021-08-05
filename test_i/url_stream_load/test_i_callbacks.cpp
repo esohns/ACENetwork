@@ -411,9 +411,9 @@ idle_initialize_UI_cb (gpointer userData_in)
   Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  size_t pdu_size_i =
-    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
-    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+//  size_t pdu_size_i =
+//    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
+//    (*iterator_2).second->allocatorConfiguration->paddingBytes;
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> ((*iterator_2).second->allocatorConfiguration->defaultBufferSize));
 
@@ -1142,7 +1142,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     struct HTTP_Record* HTTP_record_p = NULL;
     Test_I_Message::DATA_T* message_data_p = NULL;
     Test_I_Message* message_p = NULL;
-    ACE_Message_Block* message_block_p = NULL;
+//    ACE_Message_Block* message_block_p = NULL;
     GtkSpinner* spinner_p = NULL;
     GtkProgressBar* progressbar_p = NULL;
     size_t pdu_size_i = 0;
@@ -1415,7 +1415,7 @@ allocate:
     //struct Test_I_URLStreamLoad_SessionData& session_data_r =
     //    const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_data_container_p->get ());
 
-    message_block_p = message_p;
+//    message_block_p = message_p;
 //    istream_connection_p->send (message_block_p);
     message_p->release ();
 
@@ -1646,7 +1646,9 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+                                                      true,  // high priority ?
+                                                      true); // locked access ?
 
   return FALSE;
 } // button_quit_clicked_cb

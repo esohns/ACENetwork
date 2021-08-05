@@ -920,7 +920,9 @@ allocate:
 
 clean_up:
   timer_manager_p->stop ();
-  connection_manager_p->stop ();
+  connection_manager_p->stop (true,  // wait ?
+                              true,  // high priority ?
+                              true); // locked access ?
   Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
                                        event_dispatch_state_s.reactorGroupId,
                                        true);

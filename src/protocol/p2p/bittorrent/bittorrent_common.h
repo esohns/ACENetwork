@@ -173,7 +173,7 @@ struct BitTorrent_PeerRecord
 
 enum BitTorrent_Event
 {
-  BITTORRENT_EVENT_CANCELLED = 0,
+  BITTORRENT_EVENT_CANCELLED = ACE_Message_Block::MB_USER,
   BITTORRENT_EVENT_COMPLETE,
   BITTORRENT_EVENT_TRACKER_REDIRECTED,
   ////////////////////////////////////////

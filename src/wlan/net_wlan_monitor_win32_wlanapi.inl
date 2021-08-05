@@ -141,11 +141,13 @@ Net_WLAN_Monitor_T<//AddressType,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
                    UserDataType>::stop (bool waitForCompletion_in,
+                                        bool highPriority_in,
                                         bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
 
   ACE_UNUSED_ARG (waitForCompletion_in);
+  ACE_UNUSED_ARG (highPriority_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)

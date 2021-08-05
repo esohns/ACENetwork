@@ -145,7 +145,7 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
                                 BitTorrent_Client_PeerConnectionConfiguration,
                                 struct BitTorrent_Client_PeerConnectionState,
                                 Net_TCPSocketConfiguration_t,
-                                struct BitTorrent_Client_SessionState,
+                                struct BitTorrent_SessionState,
                                 BitTorrent_Client_PeerConnection_Manager_t,
                                 struct Net_UserData> BitTorrent_Client_PeerStream_t;
 
@@ -168,7 +168,7 @@ typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_TrackerStreamState,
                                    BitTorrent_Client_TrackerConnectionConfiguration,
                                    struct BitTorrent_Client_TrackerConnectionState,
                                    Net_TCPSocketConfiguration_t,
-                                   struct BitTorrent_Client_SessionState,
+                                   struct BitTorrent_SessionState,
                                    BitTorrent_Client_TrackerConnection_Manager_t,
                                    struct Net_UserData> BitTorrent_Client_TrackerStream_t;
 

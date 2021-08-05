@@ -289,14 +289,13 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
         return;
       }
     } // end SWITCH
-    //if (handle_h == ACE_INVALID_HANDLE)
-    //{
-    //  // *PORTABILITY*: tracing in a signal handler context is not portable
-    //  // *TODO*
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%m\", continuing\n"),
-    //              ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
-    //} // end IF
+    if (unlikely (handle_h == ACE_INVALID_HANDLE))
+    {
+      // *PORTABILITY*: tracing in a signal handler context is not portable
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%m\", continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
+    } // end IF
   } // end IF
 
   // ...shutdown ?
@@ -308,12 +307,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     // - activation timers (connection attempts, ...)
     // [- UI dispatch]
 
-    // step1: stop GTK event processing
-    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
-    //         compared to doing it here
-//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
-
-    // step2: stop action timer (if any)
+    // step1: stop action timer (if any)
     if (timerId_ >= 0)
     {
       const void* act_p = NULL;
@@ -334,7 +328,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     timer_manager_p->stop (false, // wait for completion ?
                            true); // N/A
 
-    // step3: cancel connection attempts (if any)
+    // step2: cancel connection attempts (if any)
     if (eventDispatch_ == COMMON_EVENT_DISPATCH_PROACTOR)
     {
       switch (inherited::configuration_->protocolConfiguration->transportLayer)
@@ -384,21 +378,23 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       } // end SWITCH
     } // end IF
 
-    // step4: stop accepting connections, abort open connections
+    // step3: stop accepting connections, abort open connections
     switch (inherited::configuration_->protocolConfiguration->transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
       case NET_TRANSPORTLAYER_SSL:
       {
         iconnection_manager_p->stop (false, // wait for completion ?
-                                     true); // N/A
+                                     true,  // high priority ?
+                                     true); // locked access ?
         iconnection_manager_p->abort ();
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
       {
         iconnection_manager_2->stop (false, // wait for completion ?
-                                     true); // N/A
+                                     true,  // high priority ?
+                                     true); // locked access ?
         iconnection_manager_2->abort ();
         break;
       }
@@ -415,12 +411,5 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
                                          inherited::configuration_->dispatchState->reactorGroupId,
                                          false);                                                    // don't block
-
-    // step6: stop UI ?
-//#if defined (GUI_SUPPORT)
-//#if defined (GTK_USE)
-//      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-//#endif // GTK_USE
-//#endif // GUI_SUPPORT
   } // end IF
 }

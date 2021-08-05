@@ -149,7 +149,9 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
     DHCPClient_IConnectionManager_t* iconnection_manager_p =
         DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
-    iconnection_manager_p->stop (false, false);
+    iconnection_manager_p->stop (false, // wait ?
+                                 true,  // high priority ?
+                                 true); // locked access ?
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)

@@ -163,6 +163,7 @@ class Net_WLAN_Monitor_T<//AddressType,
   // override (part of) Common_ITaskControl_T
   virtual void start (ACE_thread_t&); // return value: thread handle (if any)
   virtual void stop (bool = true,  // wait for completion ?
+                     bool = true,  // high priority ?
                      bool = true); // locked access ?
 //  inline bool isRunning () const { return isActive_; }
 
@@ -230,6 +231,7 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Common_ITaskControl_T
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
+                     bool = true,  // high priority ?
                      bool = true); // locked access ?
 //  inline bool isRunning () const { return isActive_; }
 
@@ -372,6 +374,7 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Common_ITaskControl_T
   virtual void start (ACE_thread_t&); // N/A
   virtual void stop (bool = true,  // wait for completion ?
+                     bool = true,  // high priority ?
                      bool = true); // locked access ?
 //  inline bool isRunning () const { return isActive_; }
 
@@ -481,6 +484,7 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Common_ITaskControl_T
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
+                     bool = true,  // high priority ?
                      bool = true); // locked access ?
 //  inline bool isRunning () const { return isActive_; }
 

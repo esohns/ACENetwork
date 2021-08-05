@@ -42,8 +42,8 @@ class BitTorrent_IControl_T
   virtual void notifyTracker (const std::string&,         // metainfo (aka '.torrent') file URI
                               enum BitTorrent_Event) = 0; // event
 
-  virtual void stop (bool = false) = 0; // wait ?
-  virtual void wait () = 0;
+//  virtual void stop (bool = false) = 0; // wait ?
+//  virtual void wait () = 0;
 
   ////////////////////////////////////////
   // callbacks

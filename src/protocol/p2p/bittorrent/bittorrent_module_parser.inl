@@ -149,6 +149,9 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::put"));
 
+  int result = -1;
+  bool stop = false;
+
   switch (messageBlock_in->msg_type ())
   {
     case ACE_Message_Block::MB_USER:
@@ -160,16 +163,15 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
       if (unlikely (!session_message_p))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: dynamic_cast<Stream_SessionMessageBase_T>(0x%@) failed (type was: %d), aborting\n"),
+                    ACE_TEXT ("%s: static_cast<Stream_SessionMessageBase_T>(0x%@) failed (type was: %d), aborting\n"),
                     inherited::mod_->name (),
                     messageBlock_in,
                     messageBlock_in->msg_type ()));
         messageBlock_in->release ();
         return -1;
       } // end IF
-      if (session_message_p->type () == STREAM_SESSION_MESSAGE_END)
-        inherited::stop (false, // don't wait
-                         true); // N/A
+      if (unlikely (session_message_p->type () == STREAM_SESSION_MESSAGE_END))
+        stop = true;
       break;
     }
     default:
@@ -177,8 +179,15 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   } // end SWITCH
 
   // drop the message into the queue
-  return inherited::put (messageBlock_in,
-                         timeout_in);
+  result = inherited::put (messageBlock_in,
+                           timeout_in);
+
+  if (unlikely (stop))
+   inherited::stop (false, // don't wait
+                    false, // high priority ?
+                    true); // N/A
+
+  return result;
 }
 
 template <ACE_SYNCH_DECL,

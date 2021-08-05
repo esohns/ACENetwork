@@ -322,6 +322,8 @@ class Net_Common_Tools
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools (const Net_Common_Tools&))
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools& operator= (const Net_Common_Tools&))
+
+  inline static bool hasPort (const std::string& IPAddress_in) { return (IPAddress_in.find_last_of (':', std::string::npos) != std::string::npos); }
 };
 
 #endif

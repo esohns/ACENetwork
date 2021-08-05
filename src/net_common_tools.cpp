@@ -377,8 +377,8 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
     std::string::size_type last_colon_pos =
       return_value.find_last_of (':',
                                  std::string::npos); // begin searching at the end !
-    if (likely (last_colon_pos != std::string::npos))
-      return_value = return_value.substr (0, last_colon_pos);
+    ACE_ASSERT (last_colon_pos != std::string::npos);
+    return_value = return_value.substr (0, last_colon_pos);
   } // end IF
 
   return return_value;
@@ -744,7 +744,8 @@ Net_Common_Tools::stringToIPAddress (std::string& address_in,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(%s): \"%m\", aborting\n"),
+                ACE_TEXT (ip_address_string.c_str ())));
     return ACE_INET_Addr ();
   } // end IF
 
@@ -3670,25 +3671,23 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
   ACE_TCHAR buffer_a[HOST_NAME_MAX];
   ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
 
-  if (hostName_inout.empty ())
-  {
-    // sanity check
-    if (unlikely (dottedDecimal_inout.empty ()))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid arguments (hostname/address empty), aborting\n")));
-      return false;
-    } // end IF
+  // sanity check(s)
+  ACE_ASSERT (hostName_inout.empty () || dottedDecimal_inout.empty ());
 
-    result = inet_address.set (dottedDecimal_inout.c_str (), AF_INET);
+  if (hostName_inout.empty ())
+  { ACE_ASSERT (!dottedDecimal_inout.empty ());
+    std::string ip_address_and_port = dottedDecimal_inout;
+    if (!Net_Common_Tools::hasPort (dottedDecimal_inout))
+      ip_address_and_port += ":0";
+    result = inet_address.set (ip_address_and_port.c_str (),
+                               AF_INET);
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (dottedDecimal_inout.c_str ())));
+                  ACE_TEXT (ip_address_and_port.c_str ())));
       return false;
     } // end IF
-
     result = inet_address.get_host_name (buffer_a,
                                          sizeof (ACE_TCHAR[HOST_NAME_MAX]));
     if (unlikely (result == -1))
@@ -3702,7 +3701,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
     hostName_inout = buffer_a;
   } // end IF
   else
-  {
+  { ACE_ASSERT (!hostName_inout.empty ());
     result = inet_address.set (0,
                                hostName_inout.c_str (),
                                1,
@@ -3714,7 +3713,6 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
                   ACE_TEXT (hostName_inout.c_str ())));
       return false;
     } // end IF
-
     const char* result_p =
         inet_address.get_host_addr (buffer_a, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
     if (unlikely (!result_p))

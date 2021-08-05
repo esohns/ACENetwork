@@ -156,14 +156,16 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // step4: stop monitor
     inherited::configuration_->monitor->stop (false, // wait ?
-                                              true);
+                                              true,  // high priority ?
+                                              true); // locked access ?
 
 //    // step1: stop GTK event processing ?
 //    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
 //    //         compared to doing it here
 //    if (CBData_)
-//      WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,
-//                                                               true);
+//      WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+//                                                               true,  // high priority ?
+//                                                               true); // locked access ?
 
 //    // step5: stop reactor (&& proactor, if applicable)
 //    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?

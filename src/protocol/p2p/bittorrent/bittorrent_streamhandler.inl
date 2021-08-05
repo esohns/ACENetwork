@@ -689,16 +689,23 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                    (*iterator_2).second);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in BitTorrent_ISession_T::trackerRedirect(), continuing\n")));
+                    ACE_TEXT ("caught exception in BitTorrent_ISession_T::trackerRedirect(), returning\n")));
       }
       return;
     }
     default:
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid HTTP response (status was: %d): \"%s\", returning\n"),
-                  record_r.status,
-                  ACE_TEXT (record_r.reason.c_str ())));
+      try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        session_->trackerError (reinterpret_cast<Net_ConnectionId_t> (handle_h),
+#else
+        session_->trackerError (static_cast<Net_ConnectionId_t> (handle_h),
+#endif // ACE_WIN32 || ACE_WIN64
+                                record_r);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in BitTorrent_ISession_T::trackerError(), returning\n")));
+      }
       return;
     }
   } // end SWITCH

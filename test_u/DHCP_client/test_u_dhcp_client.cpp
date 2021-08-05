@@ -1295,13 +1295,13 @@ allocate:
 #endif // GTK_USE
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    HWND window_p = ::GetConsoleWindow ();
-    if (!window_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-      return;
-    } // end IF
+//    HWND window_p = ::GetConsoleWindow ();
+//    if (!window_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
+//      return;
+//    } // end IF
     //BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
     //ACE_UNUSED_ARG (was_visible_b);
 #endif
@@ -1319,7 +1319,9 @@ allocate:
               ACE_TEXT ("finished working...\n")));
 
   timer_manager_p->stop ();
-  connection_manager_p->stop ();
+  connection_manager_p->stop (false,  // wait ?
+                              true,   // high priority ?
+                              true);  // locked access ?
   connection_manager_p->wait ();
   Common_Tools::finalizeEventDispatch (useReactor_in,
                                        !useReactor_in,

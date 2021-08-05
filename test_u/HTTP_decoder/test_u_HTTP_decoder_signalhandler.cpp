@@ -149,7 +149,9 @@ Test_U_Protocol_SignalHandler::handle (const struct Common_Signal& signal_in)
     Test_U_IConnectionManager_t* iconnection_manager_p =
         TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
-    iconnection_manager_p->stop ();
+    iconnection_manager_p->stop (false, // wait ?
+                                 true,  // high priority ?
+                                 true); // locked access ?
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)

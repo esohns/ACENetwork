@@ -841,12 +841,16 @@ do_work (bool debugParser_in,
 #endif // GUI_SUPPORT
 
   // step3: clean up
-  connection_manager_p->stop (false, true);
+  connection_manager_p->stop (false, // wait ?
+                              true,  // high priority ?
+                              true); // locked access ?
   connection_manager_p->abort (false);
   connection_manager_p->wait ();
-  connection_manager_2->stop (false, true);
+  connection_manager_2->stop (false, // wait ?
+                              true,  // high priority ?
+                              true); // locked access ?
   connection_manager_2->abort ();
-  connection_manager_2->wait (false);
+  connection_manager_2->wait ();
 
   Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
                                        event_dispatch_state_s.reactorGroupId,
@@ -895,7 +899,9 @@ clean:
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true,  // wait ?
+                                                        true,  // high priority ?
+                                                        true); // locked access ?
 #else
     ;
 #endif // GTK_USE

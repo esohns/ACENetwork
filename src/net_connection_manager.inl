@@ -442,7 +442,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);
          iterator.advance ())
-      if (connection_p == connection_in)
+      if (unlikely (connection_p == connection_in))
       {
         found = true;
         result = iterator.remove ();
@@ -576,9 +576,12 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          StateType,
                          StatisticContainerType,
                          UserDataType>::stop (bool waitForCompletion_in,
+                                              bool highPriority_in,
                                               bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
+
+  ACE_UNUSED_ARG (highPriority_in);
 
   int result = -1;
 

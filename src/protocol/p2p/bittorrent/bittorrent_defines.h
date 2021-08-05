@@ -100,6 +100,10 @@
 #define BITTORRENT_SESSION_LOG_FILENAME_PREFIX             "bittorrent_session"
 #define BITTORRENT_DEFAULT_SESSION_LOG                     false // log to file ? : stdout
 
+// control
+#define BITTORRENT_CONTROL_HANDLER_THREAD_NAME             "bittorrent_control"
+#define BITTORRENT_CONTROL_HANDLER_THREAD_GROUP_ID         NET_CONNECTION_HANDLER_THREAD_GROUP_ID + 2 // *TODO*
+
 // client
 #define BITTORRENT_DEFAULT_HANDLER_MODULE_NAME             "BitTorrentHandler"
 #define BITTORRENT_DEFAULT_PEER_PARSER_MODULE_NAME         "PeerParser"

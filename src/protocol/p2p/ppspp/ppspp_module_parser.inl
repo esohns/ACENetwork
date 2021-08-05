@@ -1111,6 +1111,7 @@ HTTP_Module_ParserH_T<LockType,
       // *TODO*: remove type inference
       if (inherited::thr_count_ || inherited::runSvcOnStart_)
         this->inherited::TASK_BASE_T::stop (false, // wait ?
+                                            false, // high priority ?
                                             true); // locked access ?
 
       break;

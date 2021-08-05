@@ -323,13 +323,12 @@ Net_SessionBase_T<AddressType,
   if (!connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (peer was: \"%s\") not found, returning\n"),
+                ACE_TEXT ("connection (peer address was: \"%s\") not found, returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return;
   } // end IF
-
   connection_p->close ();
-  connection_p->decrease ();
+  connection_p->decrease (); connection_p = NULL;
 }
 
 template <typename AddressType,
@@ -360,9 +359,7 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::close"));
 
-  int result = -1;
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
-
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     for (Net_ConnectionIdsIterator_t iterator = state_.connections.begin ();
          iterator != state_.connections.end ();
@@ -383,12 +380,52 @@ Net_SessionBase_T<AddressType,
 
     if (waitForCompletion_in)
     {
-      result = condition_.wait ();
-      if (result == -1)
+      int result = condition_.wait ();
+      if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SYNCH_CONDITION::wait(): \"%m\", continuing\n")));
+                    ACE_TEXT ("failed to ACE_Condition_Thread_Mutex::wait(): \"%m\", continuing\n")));
       ACE_ASSERT (state_.connections.empty ());
     } // end IF
+  } // end lock scope
+}
+
+template <typename AddressType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename ConnectionType,
+          typename ConnectionManagerType,
+          typename ConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename SessionInterfaceType>
+void
+Net_SessionBase_T<AddressType,
+                  ConnectionConfigurationType,
+                  ConnectionStateType,
+                  StatisticContainerType,
+                  SocketConfigurationType,
+                  HandlerConfigurationType,
+                  ConnectionType,
+                  ConnectionManagerType,
+                  ConnectorType,
+                  ConfigurationType,
+                  StateType,
+                  SessionInterfaceType>::wait ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::wait"));
+
+  int result = -1;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+    if (state_.connections.empty ())
+      return;
+    result = condition_.wait ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Condition_Thread_Mutex::wait(): \"%m\", continuing\n")));
+    ACE_ASSERT (state_.connections.empty ());
   } // end lock scope
 }
 
@@ -425,7 +462,6 @@ Net_SessionBase_T<AddressType,
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     std::pair<Net_ConnectionIdsIterator_t, bool> result =
         state_.connections.insert (id_in);
-//    ACE_UNUSED_ARG (result);
     ACE_ASSERT (result.second);
   } // end lock scope
 
@@ -467,6 +503,13 @@ Net_SessionBase_T<AddressType,
     iterator = state_.connections.find (id_in);
     if (iterator != state_.connections.end ())
       state_.connections.erase (iterator);
+    if (state_.connections.empty ())
+    {
+      int result = condition_.broadcast ();
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Condition_Thread_Mutex::broadcast(): \"%m\", continuing\n")));
+    } // end IF
   } // end lock scope
 
   //ACE_DEBUG ((LM_DEBUG,

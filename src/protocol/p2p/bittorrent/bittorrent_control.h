@@ -26,12 +26,25 @@
 
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Thread_Mutex.h"
 
-#include "common_parser_bencoding_common.h"
+#include "common_ilock.h"
+
+#include "common_task_ex.h"
+
+#include "common_time_common.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_icontrol.h"
+
+struct BitTorrent_Control_Event
+{
+  // *NOTE*: this is really a enum BitTorrent_Event
+  int         type;
+  std::string metaInfoFileName;
+  std::string data;
+};
 
 template <typename SessionAsynchType,
           typename SessionType,
@@ -39,15 +52,33 @@ template <typename SessionAsynchType,
           typename SessionInterfaceType,
           typename SessionStateType>
 class BitTorrent_Control_T
- : public BitTorrent_IControl_T<SessionInterfaceType>
+ : public Common_Task_Ex_T<ACE_MT_SYNCH,
+                           Common_TimePolicy_t,
+                           Common_ILock_T<ACE_MT_SYNCH>,
+                           struct BitTorrent_Control_Event>
+ , public BitTorrent_IControl_T<SessionInterfaceType>
 {
+  typedef Common_Task_Ex_T<ACE_MT_SYNCH,
+                           Common_TimePolicy_t,
+                           Common_ILock_T<ACE_MT_SYNCH>,
+                           struct BitTorrent_Control_Event> inherited;
+
  public:
   // convenient types
   typedef std::map<std::string, SessionInterfaceType*> SESSIONS_T;
   typedef typename SESSIONS_T::iterator SESSIONS_ITERATOR_T;
 
   BitTorrent_Control_T (SessionConfigurationType*);
-  inline virtual ~BitTorrent_Control_T () { stop (true); }
+  inline virtual ~BitTorrent_Control_T () { stop (true, true, true); }
+
+  // override Common_ITaskControl_T
+  virtual void stop (bool = true,  // wait for completion ?
+                     bool = true,  // high priority ? (i.e. do not wait for queued messages)
+                     bool = true); // locked access ?
+  virtual void wait (bool = true) const; // wait for the message queue ? : worker thread(s) only
+
+  // implement Common_ITaskHandler_T
+  virtual void handle (struct BitTorrent_Control_Event*&); // event handle
 
   // implement BitTorrent_IControl_T
   inline virtual const SESSIONS_T& getR () const { return sessions_; }
@@ -55,8 +86,6 @@ class BitTorrent_Control_T
   virtual SessionInterfaceType* get (const std::string&); // metainfo (aka '.torrent') file URI
   virtual void notifyTracker (const std::string&,     // metainfo (aka '.torrent') file URI
                               enum BitTorrent_Event); // event
-  virtual void stop (bool = false); // wait ?
-  virtual void wait ();
   ////////////////////////////////////////
   // callbacks
   virtual void notify (const std::string&,    // metainfo (aka '.torrent') file URI
@@ -74,10 +103,10 @@ class BitTorrent_Control_T
   void requestRedirected (SessionInterfaceType*, // session handle
                           const std::string&);   // redirected URL
 
-  ACE_Condition_Thread_Mutex condition_;
-  SessionConfigurationType*  configuration_;
-  ACE_Thread_Mutex           lock_;
-  SESSIONS_T                 sessions_;
+  mutable ACE_Condition_Thread_Mutex condition_;
+  SessionConfigurationType*          configuration_;
+  mutable ACE_Thread_Mutex           lock_;
+  SESSIONS_T                         sessions_;
 };
 
 // include template definition

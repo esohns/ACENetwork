@@ -69,6 +69,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::handle_input"));
 
+  ACE_UNUSED_ARG (handle_in);
+
   int result = -1;
   ssize_t bytes_received_i = -1;
   ACE_Message_Block* message_block_p = NULL;
@@ -638,6 +640,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
 
   // step1: initialize asynchronous I/O
+  inherited::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
   inherited::open (handle_in,
                    messageBlock_in);
   if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))

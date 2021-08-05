@@ -145,6 +145,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   ConfigurationType* configuration_p = NULL;
 
+  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
+
   // step0: initialize connection base
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener

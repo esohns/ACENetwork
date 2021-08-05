@@ -1282,7 +1282,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     {
       case NET_TRANSPORTLAYER_TCP:
       { ACE_ASSERT (configuration_p->TCPListener);
-        configuration_p->TCPListener->stop ();
+        configuration_p->TCPListener->stop (true, true, true);
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
@@ -1310,7 +1310,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
       {
 #if defined (SSL_SUPPORT)
         ACE_ASSERT (configuration_p->SSLListener);
-        configuration_p->SSLListener->stop ();
+        configuration_p->SSLListener->stop (true, true, true);
 #endif // SSL_SUPPORT
         break;
       }
@@ -1644,7 +1644,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true, true);
 
   return FALSE;
 } // button_quit_clicked_cb

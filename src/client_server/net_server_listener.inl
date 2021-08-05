@@ -269,11 +269,13 @@ Net_Server_Listener_T<HandlerType,
                       StateType,
                       StreamType,
                       UserDataType>::stop (bool waitForCompletion_in,
+                                           bool highPriority_in,
                                            bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::stop"));
 
   ACE_UNUSED_ARG (waitForCompletion_in);
+  ACE_UNUSED_ARG (highPriority_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)

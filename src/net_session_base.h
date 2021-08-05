@@ -65,6 +65,7 @@ class Net_SessionBase_T
   virtual void connect (const AddressType&); // peer address
   virtual void disconnect (const AddressType&); // peer address
   virtual void close (bool = false); // wait ?
+  virtual void wait ();
 
   ////////////////////////////////////////
   // callbacks

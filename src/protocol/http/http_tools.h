@@ -37,7 +37,7 @@ class HTTP_Tools
   inline virtual ~HTTP_Tools () {};
 
   // debug info
-  static std::string dump (const HTTP_Record&);
+  static std::string dump (const struct HTTP_Record&);
 
   static std::string MethodToString (const HTTP_Method_t&);
   static std::string VersionToString (const HTTP_Version_t&);

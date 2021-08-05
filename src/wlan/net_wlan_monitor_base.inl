@@ -172,8 +172,9 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // WLANAPI_SUPPORT
 #else
   if (unlikely (isActive_))
-    inherited::stop (true,
-                     true);
+    inherited::stop (true,  // wait ?
+                     false, // high priority ?
+                     true); // locked access ?
 
 #if defined (WEXT_SUPPORT)
   int result = -1;

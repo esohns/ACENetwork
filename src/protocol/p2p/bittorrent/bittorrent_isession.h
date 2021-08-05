@@ -30,6 +30,7 @@
 
 // forward declarations
 class ACE_Message_Block;
+struct HTTP_Record;
 
 template <typename AddressType,
           typename PeerConnectionConfigurationType,
@@ -80,6 +81,8 @@ class BitTorrent_ISession_T
   virtual void trackerDisconnect (Net_ConnectionId_t) = 0; // connection id
   virtual void trackerRedirect (Net_ConnectionId_t,      // connection id
                                 const std::string&) = 0; // HTTP response "Location" header
+  virtual void trackerError (Net_ConnectionId_t,      // connection id
+                             const struct HTTP_Record&) = 0; // HTTP response
 
   //--------------------------------------
 

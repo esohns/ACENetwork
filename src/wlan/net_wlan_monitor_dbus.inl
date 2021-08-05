@@ -95,8 +95,9 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (inherited::isActive_))
   { ACE_ASSERT (connection_);
     dbus_connection_close (connection_);
-    inherited::stop (true,
-                     true);
+    inherited::stop (true,  // wait ?
+                     false, // high priority ?
+                     true); // locked access ?
   } // end IF
   if (unlikely (connection_))
     dbus_connection_unref (connection_);
@@ -281,18 +282,17 @@ Net_WLAN_Monitor_T<AddressType,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_DBUS,
                    UserDataType>::stop (bool waitForCompletion_in,
+                                        bool highPriority_in,
                                         bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
-
-  ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
   if (!inherited::isActive_)
     return;
 
   inherited::stop (waitForCompletion_in,
+                   highPriority_in,
                    lockedAccess_in);
 //  deviceDBusObjectPath_.resize (0);
 
