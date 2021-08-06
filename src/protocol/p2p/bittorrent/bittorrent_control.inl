@@ -784,6 +784,7 @@ BitTorrent_Control_T<SessionAsynchType,
       NULL;
   Net_ConnectionId_t tracker_connection_id = 0;
   typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
+  unsigned int buffer_size_i = 0;
 
   ACE_NEW_NORETURN (data_p,
                     typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T ());
@@ -809,10 +810,13 @@ BitTorrent_Control_T<SessionAsynchType,
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->trackerConnectionConfiguration);
   ACE_ASSERT (configuration_->trackerConnectionConfiguration->allocatorConfiguration);
+  buffer_size_i =
+      configuration_->trackerConnectionConfiguration->allocatorConfiguration->defaultBufferSize +
+      configuration_->trackerConnectionConfiguration->allocatorConfiguration->paddingBytes;
 
 allocate:
   message_out =
-    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerConnectionConfiguration->messageAllocator->malloc (configuration_->trackerConnectionConfiguration->allocatorConfiguration->defaultBufferSize));
+    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerConnectionConfiguration->messageAllocator->malloc (buffer_size_i));
   // keep retrying ?
   if (!message_out &&
       !configuration_->trackerConnectionConfiguration->messageAllocator->block ())

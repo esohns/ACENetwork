@@ -586,7 +586,7 @@ BitTorrent_Tools::isPieceComplete (unsigned int length_in,
 
   unsigned int total_length = 0;
 
-  for (BitTorrent_PieceChunksIterator_t iterator = chunks_in.begin ();
+  for (BitTorrent_PieceChunksConstIterator_t iterator = chunks_in.begin ();
        iterator != chunks_in.end ();
        ++iterator)
   { ACE_ASSERT ((*iterator).data);
@@ -627,35 +627,32 @@ BitTorrent_Tools::hasMissingPiece (const BitTorrent_Pieces_t& pieces_in,
 }
 
 bool
-BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
-                             unsigned int index_in,
-                             struct BitTorrent_Piece& piece_in)
+BitTorrent_Tools::validatePieceHash (const struct BitTorrent_Piece& piece_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::savePiece"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::validatePieceHash"));
 
-  // step1: validate piece hash
-  unsigned int total_length = 0;
-  for (BitTorrent_PieceChunksIterator_t iterator = piece_in.chunks.begin ();
-       iterator != piece_in.chunks.end ();
-       ++iterator)
-    total_length += (*iterator).data->total_length ();
+//  // sanity check(s)
+//  unsigned int total_length = 0;
+//  for (BitTorrent_PieceChunksConstIterator_t iterator = piece_in.chunks.begin ();
+//       iterator != piece_in.chunks.end ();
+//       ++iterator)
+//    total_length += (*iterator).data->total_length ();
+//  ACE_ASSERT (total_length == piece_in.length);
+
   unsigned char* data_p = NULL, *data_2 = NULL;
   ACE_Message_Block* message_block_p = NULL;
+  // concatenate the data
   ACE_NEW_NORETURN (data_p,
-                    unsigned char[total_length]);
+                    unsigned char[piece_in.length]);
   if (!data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory (was: %u byte(s)), aborting\n"),
-                sizeof (unsigned char) * total_length));
+                sizeof (unsigned char) * piece_in.length));
     return false;
   } // end IF
-  struct bittorrent_piece_chunks_less less_s;
-  std::sort (piece_in.chunks.begin (),
-             piece_in.chunks.end (),
-             less_s);
   data_2 = data_p;
-  for (BitTorrent_PieceChunksIterator_t iterator = piece_in.chunks.begin ();
+  for (BitTorrent_PieceChunksConstIterator_t iterator = piece_in.chunks.begin ();
        iterator != piece_in.chunks.end ();
        ++iterator)
   {
@@ -669,23 +666,25 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
       message_block_p = message_block_p->cont ();
     } // end WHILE
   } // end FOR
-  unsigned char piece_hash[SHA_DIGEST_LENGTH + 1];
-  SHA1 (data_p,
-        total_length,
-        piece_hash);
-  piece_hash[SHA_DIGEST_LENGTH] = '\0';
-  if (ACE_OS::memcmp (piece_hash,
-                      piece_in.hash.c_str (),
-                      SHA_DIGEST_LENGTH))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to validate piece hash; freeing chunk(s), aborting\n")));
-    delete [] data_p; data_p = NULL;
-    BitTorrent_Tools::freeChunks (piece_in.chunks);
-    return false;
-  } // end IF
 
-  // step2: write the piece to a temporary file
+  unsigned char piece_hash[SHA_DIGEST_LENGTH];
+  // hash and compare
+  SHA1 (data_p,
+        piece_in.length,
+        piece_hash);
+  delete [] data_p; data_p = NULL;
+  return (ACE_OS::memcmp (piece_hash,
+                          piece_in.hash.c_str (),
+                          SHA_DIGEST_LENGTH) == 0);
+}
+
+bool
+BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
+                             unsigned int index_in,
+                             struct BitTorrent_Piece& piece_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::savePiece"));
+
   std::string filename =
       Common_File_Tools::getUserDownloadDirectory (ACE_TEXT_ALWAYS_CHAR (""));
   filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -699,7 +698,6 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_File_Tools::createDirectory(\"%s\"), aborting\n"),
                   ACE_TEXT (filename.c_str ())));
-      delete [] data_p; data_p = NULL;
       return false;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
@@ -713,23 +711,60 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
   filename += ACE_TEXT_ALWAYS_CHAR ("_");
   filename += piece_in.filename;
   filename += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECE_FILENAME_SUFFIX);
-  if (!Common_File_Tools::store (filename,
-                                 data_p,
-                                 total_length))
+
+  int flags_i =  (O_BINARY |
+                  O_CREAT  |
+                  O_TRUNC  |
+                  O_WRONLY);
+  ACE_FILE_IO stream;
+  BitTorrent_PieceChunksConstIterator_t iterator = piece_in.chunks.begin ();
+  ACE_Message_Block* message_block_p = (*iterator).data;
+  ssize_t result = 0;
+  size_t bytes_transferred_i = 0;
+  int result_2 = 0;
+  bool result_3 = true;
+  if (!Common_File_Tools::open (filename,
+                                flags_i,
+                                stream))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_File_Tools::store(\"%s\"), aborting\n"),
-                ACE_TEXT (filename.c_str ())));
-    delete [] data_p; data_p = NULL;
+                ACE_TEXT ("failed to Common_File_Tools::open(\"%s\", %d), aborting\n"),
+                ACE_TEXT (filename.c_str ()),
+                flags_i));
     return false;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: saved piece to \"%s\"...\n"),
-              ACE_TEXT (metaInfoFileName_in.c_str ()),
-              ACE_TEXT (filename.c_str ())));
-  delete [] data_p; data_p = NULL;
-
-  return true;
+  ++iterator;
+  while (iterator != piece_in.chunks.end ())
+  {
+    message_block_p->next ((*iterator).data);
+    message_block_p = (*iterator).data;
+    ++iterator;
+  } // end FOR
+  result = stream.send_n ((*piece_in.chunks.begin ()).data,
+                          NULL,
+                          &bytes_transferred_i);
+  if (bytes_transferred_i != piece_in.length)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_FILE_IO::send_n(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (filename.c_str ())));
+    result_3 = false;
+  } // end IF
+  result_2 = stream.close ();
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_FILE_IO::close(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (filename.c_str ())));
+    result_3 = false;
+  } // end IF
+  else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: saved piece to \"%s\" (%u byte(s))...\n"),
+                ACE_TEXT (metaInfoFileName_in.c_str ()),
+                ACE_TEXT (filename.c_str ()),
+                piece_in.length));
+  return result_3;
 }
 
 void
@@ -907,12 +942,78 @@ BitTorrent_Tools::receivedBytes (const BitTorrent_Pieces_t& pieces_in)
   for (BitTorrent_PiecesConstIterator_t iterator = pieces_in.begin ();
        iterator != pieces_in.end ();
        ++iterator)
-    for (BitTorrent_PieceChunksIterator_t iterator_2 = (*iterator).chunks.begin ();
+    for (BitTorrent_PieceChunksConstIterator_t iterator_2 = (*iterator).chunks.begin ();
          iterator_2 != (*iterator).chunks.end ();
          ++iterator_2)
       result += BitTorrent_Tools::chunkLength (*iterator_2);
 
   return result;
+}
+
+void
+BitTorrent_Tools::sanitizePiece (BitTorrent_PieceChunks_t& chunks_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::sanitizePiece"));
+
+  // step1: sort all data by offset and length
+  struct bittorrent_piece_chunks_less less_s;
+  std::sort (chunks_in.begin (),
+             chunks_in.end (),
+             less_s);
+
+  BitTorrent_PieceChunksIterator_t iterator_3, iterator_4;
+  unsigned int overlap_i = 0;
+  ACE_Message_Block* message_block_p = NULL, *message_block_2 = NULL;
+  // step2: merge any overlaps
+  iterator_3 = chunks_in.begin ();
+  if (iterator_3 == chunks_in.end ())
+    return; // no chunks yet
+  iterator_4 = iterator_3;
+  std::advance (iterator_4, 1);
+  while (iterator_4 != chunks_in.end ())
+  { // step2a: remove 'duplicates'
+    while ((*iterator_3).offset == (*iterator_4).offset)
+    {
+      (*iterator_4).data->release (); (*iterator_4).data = NULL;
+      iterator_4 = chunks_in.erase (iterator_4);
+    } // end WHILE
+    // step2b: handle overlaps
+    overlap_i =
+        (*iterator_3).offset + (*iterator_3).data->total_length () -
+        (*iterator_4).offset;
+    if (overlap_i)
+    {
+      // step2ba: crop the last continuation until the last continuation
+      //          contains all (!) the (remaining) overlap
+      do
+      {
+        // step2baa: retrieve last continuation
+        message_block_p = (*iterator_3).data;
+        message_block_2 = NULL;
+        while (message_block_p->cont ())
+        {
+          message_block_2 = message_block_p;
+          message_block_p = message_block_p->cont ();
+        } // end WHILE
+        // step2bab: last continuation contains the overlap ?
+        if (message_block_p->length () > overlap_i)
+          break; // proceed
+        // step2bac: no --> crop and continue
+        overlap_i -= message_block_p->length ();
+        ACE_ASSERT (message_block_2);
+        message_block_2->cont (NULL);
+        message_block_p->release ();
+      } while (overlap_i);
+      // step2bb: crop the remaining overlap (if any)
+      if (overlap_i)
+      { ACE_ASSERT (message_block_p);
+        message_block_p->rd_ptr (overlap_i);
+      } // end IF
+    } // end IF
+    ACE_ASSERT ((*iterator_3).offset + (*iterator_3).data->total_length () == (*iterator_4).offset);
+    std::advance (iterator_3, 1);
+    std::advance (iterator_4, 1);
+  } // end WHILE
 }
 
 std::string

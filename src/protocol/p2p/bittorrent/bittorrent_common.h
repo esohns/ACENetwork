@@ -81,10 +81,17 @@ struct BitTorrent_Piece_Chunk
   unsigned int       offset;
 };
 typedef std::vector<struct BitTorrent_Piece_Chunk> BitTorrent_PieceChunks_t;
-typedef BitTorrent_PieceChunks_t::const_iterator BitTorrent_PieceChunksIterator_t;
+typedef BitTorrent_PieceChunks_t::const_iterator BitTorrent_PieceChunksConstIterator_t;
+typedef BitTorrent_PieceChunks_t::iterator BitTorrent_PieceChunksIterator_t;
 struct bittorrent_piece_chunks_less
 {
-  inline bool operator() (const struct BitTorrent_Piece_Chunk& lhs_in, const struct BitTorrent_Piece_Chunk& rhs_in) const { ACE_ASSERT (lhs_in.offset != rhs_in.offset); return (lhs_in.offset < rhs_in.offset); }
+  bool operator() (const struct BitTorrent_Piece_Chunk& lhs_in, const struct BitTorrent_Piece_Chunk& rhs_in) const
+  { // *NOTE*: sort so that given equal offsets, the chunks with the most data
+    //         are first in line
+    if (lhs_in.offset != rhs_in.offset)
+      return (lhs_in.offset < rhs_in.offset);
+    return (lhs_in.data->total_length () > rhs_in.data->total_length ());
+  };
 };
 
 struct BitTorrent_Piece

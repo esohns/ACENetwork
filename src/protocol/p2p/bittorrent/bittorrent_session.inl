@@ -1496,24 +1496,24 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
-  bool notify_controller_b = false;
+//  bool notify_controller_b = false;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     if (inherited::state_.trackerConnectionId == id_in)
       inherited::state_.trackerConnectionId = 0;
-    if (inherited::state_.connections.empty ())
-      notify_controller_b = true;
+//    if (inherited::state_.connections.empty ())
+//      notify_controller_b = true;
   } // end lock scope
-  if (notify_controller_b)
-  { ACE_ASSERT (inherited::configuration_->controller);
-    try {
-      inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
-                                                     BITTORRENT_EVENT_CANCELLED,
-                                                     ACE_TEXT_ALWAYS_CHAR (""));
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
-    }
-  } // end IF
+//  if (notify_controller_b)
+//  { ACE_ASSERT (inherited::configuration_->controller);
+//    try {
+//      inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
+//                                                     BITTORRENT_EVENT_CANCELLED,
+//                                                     ACE_TEXT_ALWAYS_CHAR (""));
+//    } catch (...) {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
+//    }
+//  } // end IF
 }
 
 template <typename PeerHandlerConfigurationType,
@@ -2127,97 +2127,143 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     return;
   switch (record_in.type)
   {
+    case BITTORRENT_MESSAGETYPE_CHOKE:
+    {
+      BitTorrent_PeerStatusIterator_t iterator;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
+        (*iterator).second.am_choking = true;
+      } // end lock scope
+      break;
+    }
     case BITTORRENT_MESSAGETYPE_UNCHOKE:
     {
       BitTorrent_PeerStatusIterator_t iterator;
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-      iterator = inherited::state_.peerStatus.find (id_in);
-      ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-      (*iterator).second.am_choking = false;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
+        (*iterator).second.am_choking = false;
+      } // end lock scope
       requestNextPiece (id_in);
       break;
     }
     case BITTORRENT_MESSAGETYPE_HAVE:
     {
       BitTorrent_PeerPiecesIterator_t iterator;
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-      iterator = inherited::state_.peerPieces.find (id_in);
-      ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
-      if ((*iterator).second.empty ())
-      { // protocol error: no bitfield message received yet ?
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("%u: populating pieces bitfield...\n"),
-                    id_in));
-        Bencoding_DictionaryIterator_t iterator_2 =
-            inherited::configuration_->metaInfo->begin ();
-        for (;
-             iterator_2 != inherited::configuration_->metaInfo->end ();
-             ++iterator_2)
-          if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECES_KEY))
-            break;
-        ACE_ASSERT (iterator_2 != inherited::configuration_->metaInfo->end ());
-        ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
-        ACE_ASSERT (!((*iterator_2).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
-        unsigned int pieces =
-            (*iterator_2).second->string->size () / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
-        for (unsigned int i = 0;
-             i < pieces;
-             ++i)
-          (*iterator).second.push_back (0);
-      } // end IF
-      unsigned int index = record_in.have / (sizeof (ACE_UINT8) * 8);
-      unsigned int index_2 = record_in.have % (sizeof (ACE_UINT8) * 8);
-      ACE_ASSERT (!((*iterator).second[index] & (0x80 >> index_2)));
-      (*iterator).second[index] |= (0x80 >> index_2);
+      bool send_interested_b = false;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.peerPieces.find (id_in);
+        ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
+        if ((*iterator).second.empty ())
+        { // protocol error: no bitfield message received yet ?
+          ACE_DEBUG ((LM_WARNING,
+                      ACE_TEXT ("%u: populating pieces bitfield...\n"),
+                      id_in));
+          Bencoding_DictionaryIterator_t iterator_2 =
+              inherited::configuration_->metaInfo->begin ();
+          for (;
+               iterator_2 != inherited::configuration_->metaInfo->end ();
+               ++iterator_2)
+            if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECES_KEY))
+              break;
+          ACE_ASSERT (iterator_2 != inherited::configuration_->metaInfo->end ());
+          ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
+          ACE_ASSERT (!((*iterator_2).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
+          unsigned int pieces =
+              (*iterator_2).second->string->size () / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
+          for (unsigned int i = 0;
+               i < pieces;
+               ++i)
+            (*iterator).second.push_back (0);
+        } // end IF
+        unsigned int index = record_in.have / (sizeof (ACE_UINT8) * 8);
+        unsigned int index_2 = record_in.have % (sizeof (ACE_UINT8) * 8);
+        ACE_ASSERT (!((*iterator).second[index] & (0x80 >> index_2)));
+        (*iterator).second[index] |= (0x80 >> index_2);
 
-      // send 'interested' ?
-      BitTorrent_PeerStatusIterator_t iterator_2;
-      iterator_2 = inherited::state_.peerStatus.find (id_in);
-      ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-      if (!(*iterator_2).second.am_interested &&
-          BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
-                                             (*iterator).second))
-      {
+        // send 'interested' ?
+        BitTorrent_PeerStatusIterator_t iterator_2;
+        iterator_2 = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
+        if (!(*iterator_2).second.am_interested &&
+            BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
+                                               (*iterator).second))
+        {
+          (*iterator_2).second.am_interested = true;
+          send_interested_b = true;
+        } // end IF
+      } // end lock scope
+      if (send_interested_b)
         interested (id_in);
-        (*iterator_2).second.am_interested = true;
-      } // end IF
       break;
     }
     case BITTORRENT_MESSAGETYPE_BITFIELD:
     {
       BitTorrent_PeerPiecesIterator_t iterator;
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-      iterator = inherited::state_.peerPieces.find (id_in);
-      ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
-      ACE_ASSERT ((*iterator).second.empty ());
-      (*iterator).second = record_in.bitfield;
+      bool send_interested_b = false;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.peerPieces.find (id_in);
+        ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
+        ACE_ASSERT ((*iterator).second.empty ());
+        (*iterator).second = record_in.bitfield;
 
-      // send 'interested' ?
-      BitTorrent_PeerStatusIterator_t iterator_2;
-      iterator_2 = inherited::state_.peerStatus.find (id_in);
-      ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-      if (!(*iterator_2).second.am_interested &&
-          BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
-                                             (*iterator).second))
-      {
+        // send 'interested' ?
+        BitTorrent_PeerStatusIterator_t iterator_2;
+        iterator_2 = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
+        if (!(*iterator_2).second.am_interested &&
+            BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
+                                               (*iterator).second))
+        {
+          (*iterator_2).second.am_interested = true;
+          send_interested_b = true;
+        } // end IF
+      } // end lock scope
+      if (send_interested_b)
         interested (id_in);
-        (*iterator_2).second.am_interested = true;
-      } // end IF
       break;
     }
     case BITTORRENT_MESSAGETYPE_PIECE:
     { ACE_ASSERT (messageBlock_in);
       struct BitTorrent_Piece_Chunk chunk_s;
-      chunk_s.data = messageBlock_in;
       chunk_s.offset = record_in.piece.begin;
       BitTorrent_PiecesIterator_t iterator;
+      bool request_next_piece_b = true;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
         iterator = inherited::state_.pieces.begin ();
         std::advance (iterator, record_in.piece.index);
+        // sanity check(s): piece already complete ?
+        if (unlikely (BitTorrent_Tools::isPieceComplete ((*iterator).length,
+                                                         (*iterator).chunks)))
+          goto continue_;
+        chunk_s.data = messageBlock_in->duplicate ();
+        if (unlikely (!chunk_s.data))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to BitTorrent_Message_T::duplicate(), continuing\n")));
+          goto continue_;
+        } // end IF
         (*iterator).chunks.push_back (chunk_s);
+        BitTorrent_Tools::sanitizePiece ((*iterator).chunks);
         if (unlikely (BitTorrent_Tools::isPieceComplete ((*iterator).length,
                                                          (*iterator).chunks)))
         {
+          if (!BitTorrent_Tools::validatePieceHash (*iterator))
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to BitTorrent_Tools::validatePieceHash(%s,%u), continuing\n"),
+                        ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR),
+                        record_in.piece.index));
+            // --> download again
+            for (BitTorrent_PieceChunksConstIterator_t iterator_2 = (*iterator).chunks.begin ();
+                 iterator_2 != (*iterator).chunks.end ();
+                 ++iterator_2)
+              (*iterator_2).data->release ();
+            (*iterator).chunks.clear ();
+            goto continue_;
+          } // end IF
           if (!BitTorrent_Tools::savePiece (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                                                                                  ACE_DIRECTORY_SEPARATOR_CHAR)),
                                             record_in.piece.index,
@@ -2228,36 +2274,40 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                         ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                                        ACE_DIRECTORY_SEPARATOR_CHAR),
                         record_in.piece.index));
-            // --> download again ?! *TODO*: handle case where the chunks are still available
+            ACE_ASSERT (false); // *TODO*
+            break;
           } // end IF
-          else
-          {
-            for (iterator = inherited::state_.pieces.begin ();
-                 iterator != inherited::state_.pieces.end ();
-                 ++iterator)
-              if (!BitTorrent_Tools::isPieceComplete ((*iterator).length,
-                                                      (*iterator).chunks))
-                goto request_next;
-            // all complete !
+          for (iterator = inherited::state_.pieces.begin ();
+               iterator != inherited::state_.pieces.end ();
+               ++iterator)
+            if (!BitTorrent_Tools::isPieceComplete ((*iterator).length,
+                                                    (*iterator).chunks))
+              goto continue_;
+          // all complete !
 
-            // assemble the file(s) from the downloaded piece(s)
-            if (!BitTorrent_Tools::assembleFiles (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                                                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
-                                                  *inherited::configuration_->metaInfo))
-            {
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("%s: failed to BitTorrent_Tools::assembleFiles(), continuing\n"),
-                          ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                         ACE_DIRECTORY_SEPARATOR_CHAR)));
-              // --> download again ?!
-              break;
-            } // end IF
-            goto notify;
-          } // end ELSE IF
+          // assemble the file(s) from the downloaded piece(s)
+          if (!BitTorrent_Tools::assembleFiles (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                                                                                     ACE_DIRECTORY_SEPARATOR_CHAR)),
+                                                *inherited::configuration_->metaInfo))
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("%s: failed to BitTorrent_Tools::assembleFiles(), continuing\n"),
+                        ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)));
+            ACE_ASSERT (false); // *TODO*
+            break;
+          } // end IF
+          goto notify;
         } // end IF
+continue_:
+        BitTorrent_PeerStatusIterator_t iterator_2;
+        iterator_2 = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
+        if ((*iterator_2).second.am_choking)
+          request_next_piece_b = false;
       } // end lock scope
-request_next:
-      requestNextPiece (id_in);
+      if (request_next_piece_b)
+        requestNextPiece (id_in);
       break;
 notify:
       ACE_ASSERT (inherited::configuration_->controller);
@@ -2612,6 +2662,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::requestNextPiece"));
 
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
   BitTorrent_PeerPiecesIterator_t iterator =
       inherited::state_.peerPieces.find (id_in);
   ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
@@ -2626,14 +2677,13 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                      (*iterator).second))
       break;
   } // end FOR
-  ACE_ASSERT (iterator_2 != inherited::state_.pieces.end ());
-  struct bittorrent_piece_chunks_less less_s;
-  std::sort ((*iterator_2).chunks.begin (),
-             (*iterator_2).chunks.end (),
-             less_s);
+  if (iterator_2 == inherited::state_.pieces.end ())
+  { // --> none of the peers have any missing piece
+    ACE_ASSERT (false); // *TODO*: try again later ?
+    return;
+  } // end IF
   unsigned int offset = 0, length = 0;
-  BitTorrent_PieceChunksIterator_t iterator_3 =
-      (*iterator_2).chunks.begin ();
+  BitTorrent_PieceChunksIterator_t iterator_3 = (*iterator_2).chunks.begin ();
   for (;
        iterator_3 != (*iterator_2).chunks.end ();
        ++iterator_3)

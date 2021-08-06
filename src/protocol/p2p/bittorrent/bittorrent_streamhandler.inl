@@ -726,6 +726,17 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_ParserBase_T::parse(), returning\n")));
+    try {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      session_->trackerError (reinterpret_cast<Net_ConnectionId_t> (handle_h),
+#else
+      session_->trackerError (static_cast<Net_ConnectionId_t> (handle_h),
+#endif // ACE_WIN32 || ACE_WIN64
+                              record_r);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in BitTorrent_ISession_T::trackerError(), returning\n")));
+    }
     return;
   } // end IF
   ACE_ASSERT (parser.bencoding_);
