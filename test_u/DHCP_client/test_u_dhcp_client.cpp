@@ -994,15 +994,10 @@ do_work (bool requestBroadcastReplies_in,
   else
   {
     // step1: wait for the connection to register with the manager
+    deadline = COMMON_TIME_NOW +
+               ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                               0);
     // *TODO*: avoid tight loop here
-    deadline = (COMMON_TIME_NOW +
-                ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S,
-                                0));
-    //result = ACE_OS::sleep (timeout);
-    //if (result == -1)
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-    //              &timeout));
     do
     {
       (*iterator_2).second.second.connection =
@@ -1106,19 +1101,15 @@ do_work (bool requestBroadcastReplies_in,
     {
       configuration_in.handle = ACE_INVALID_HANDLE;
 
-      // *TODO*: avoid tight loop here
-      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
-      //result = ACE_OS::sleep (timeout);
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-      //              &timeout));
+      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                              0);
       deadline = COMMON_TIME_NOW + timeout;
-      //CBData_in.connection = NULL;
+      // *TODO*: avoid tight loop here
       do
       {
         iconnection_p =
-          connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress);
+          connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress,
+                                     false);
         if (iconnection_p)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1128,7 +1119,6 @@ do_work (bool requestBroadcastReplies_in,
           configuration_in.handle =
               static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif
-          iconnection_p->decrease ();
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);

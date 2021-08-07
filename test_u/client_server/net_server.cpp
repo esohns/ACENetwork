@@ -1094,13 +1094,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
     else
     {
       // step1: wait for the connection to register with the manager
-      // *TODO*: avoid these tight loops
-      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                              0);
       ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+      // *TODO*: avoid these tight loops
       // *TODO*: this may not be accurate/applicable for/to all protocols
       do
       {
-        // *TODO*: avoid these tight loops
         iconnection_p =
           connection_manager_2->get (connection_configuration_p_2->listenAddress,
                                      false);

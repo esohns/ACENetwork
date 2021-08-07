@@ -970,13 +970,21 @@ BitTorrent_Tools::sanitizePiece (BitTorrent_PieceChunks_t& chunks_in)
     return; // no chunks yet
   iterator_4 = iterator_3;
   std::advance (iterator_4, 1);
+  bool done_b = false;
   while (iterator_4 != chunks_in.end ())
   { // step2a: remove 'duplicates'
     while ((*iterator_3).offset == (*iterator_4).offset)
-    {
+    { ACE_ASSERT ((*iterator_4).data);
       (*iterator_4).data->release (); (*iterator_4).data = NULL;
       iterator_4 = chunks_in.erase (iterator_4);
+      if (iterator_4 == chunks_in.end ())
+      {
+        done_b = true;
+        break;
+      } // end IF
     } // end WHILE
+    if (done_b)
+      break;
     // step2b: handle overlaps
     overlap_i =
         (*iterator_3).offset + (*iterator_3).data->total_length () -

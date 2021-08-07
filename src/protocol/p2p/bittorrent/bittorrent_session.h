@@ -221,7 +221,8 @@ class BitTorrent_Session_T
   // implement/override (part of) BitTorrent_ISession_T
   virtual void connect (Net_ConnectionId_t); // connection id
   virtual void disconnect (Net_ConnectionId_t); // connection id
-  virtual void interested (Net_ConnectionId_t); // connection id
+  virtual void interested (Net_ConnectionId_t, // connection id
+                           bool);              // interested ? : not interested
   virtual void request (Net_ConnectionId_t, // connection id
                         unsigned int,       // index (piece#)
                         unsigned int,       // begin (offset)

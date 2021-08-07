@@ -850,15 +850,10 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   else
   {
     // step2: wait for the connection to register with the manager
+    deadline = COMMON_TIME_NOW +
+               ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                               0);
     // *TODO*: avoid tight loop here
-    deadline = (COMMON_TIME_NOW +
-                ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S,
-                                0));
-    //result = ACE_OS::sleep (timeout);
-    //if (result == -1)
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-    //              &timeout));
     do
     {
       iconnection_p = connection_manager_p->get (address_in);
@@ -880,7 +875,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   do
   {
     status = iconnection_p->status ();
-    if (status == NET_CONNECTION_STATUS_OK) break;
+    if (status == NET_CONNECTION_STATUS_OK)
+      break;
   } while (COMMON_TIME_NOW < deadline);
   if (unlikely (status != NET_CONNECTION_STATUS_OK))
   {

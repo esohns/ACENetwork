@@ -208,8 +208,10 @@ Net_SessionBase_T<AddressType,
   {
     deadline =
         (COMMON_TIME_NOW +
-         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0));
-    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL_S, 0);
+         ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                         0));
+    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S,
+                          0);
     do
     {
       // *TODO*: this does not work...
