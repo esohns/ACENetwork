@@ -239,14 +239,10 @@ idle_load_segment_cb (gpointer userData_in)
   {
     data_p->handle = ACE_INVALID_HANDLE;
 
-    // *TODO*: avoid tight loop here
-    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
-    //result = ACE_OS::sleep (timeout);
-    //if (result == -1)
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-    //              &timeout));
+    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                            0);
     ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+    // *TODO*: avoid tight loop here
     do
     {
       iconnection_p =
@@ -260,7 +256,6 @@ idle_load_segment_cb (gpointer userData_in)
 #else
             static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif
-        iconnection_p->decrease ();
         break;
       } // end IF
     } while (COMMON_TIME_NOW < deadline);
@@ -271,11 +266,21 @@ idle_load_segment_cb (gpointer userData_in)
                   &timeout));
   } // end IF
   else
+  {
     iconnection_p =
       iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address,
                                   true);
-  if ((data_p->handle == ACE_INVALID_HANDLE) ||
-      !iconnection_p)
+    if (iconnection_p)
+    {
+      data_p->handle =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
+#else
+          static_cast<ACE_HANDLE> (iconnection_p->id ());
+#endif
+    } // end IF
+  } // end ELSE
+  if (data_p->handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
@@ -1291,14 +1296,10 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     {
       data_p->handle = ACE_INVALID_HANDLE;
 
-      // *TODO*: avoid tight loop here
-      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S, 0);
-      //result = ACE_OS::sleep (timeout);
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-      //              &timeout));
+      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                              0);
       ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+      // *TODO*: avoid tight loop here
       do
       {
         iconnection_p =
@@ -1312,7 +1313,6 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 #else
               static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif
-          iconnection_p->decrease ();
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);
@@ -1323,11 +1323,21 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                     &timeout));
     } // end IF
     else
+    {
       iconnection_p =
         iconnection_manager_p->get (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address,
                                     true);
-    if ((data_p->handle == ACE_INVALID_HANDLE) ||
-        !iconnection_p)
+      if (iconnection_p)
+      {
+        data_p->handle =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+            reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
+#else
+            static_cast<ACE_HANDLE> (iconnection_p->id ());
+#endif
+      } // end IF
+    } // end ELSE
+    if (data_p->handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),

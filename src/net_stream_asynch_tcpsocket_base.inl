@@ -192,25 +192,20 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   int error = 0;
   ACE_Message_Block* message_block_p = NULL;
 
-//  if (!inherited::buffer_)
-//  {
-    // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
-    //                   been notified
-//    result = inherited::getq (inherited::buffer_, NULL);
-    result = inherited2::getq (message_block_p, NULL);
-    if (unlikely (result == -1))
-    { // *NOTE*: most probable reason: socket has been closed by the peer, which
-      //         close()s the processing stream (see: handle_close()),
-      //         shutting down the message queue
-      error = ACE_OS::last_error ();
-      if (error != ESHUTDOWN) // 108: happens on Linux
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")));
-      return -1;
-    } // end IF
-//  } // end IF
-//  ACE_ASSERT (inherited::buffer_);
-    ACE_ASSERT (message_block_p);
+  // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
+  //                   been notified
+  result = inherited2::getq (message_block_p, NULL);
+  if (unlikely (result == -1))
+  { // *NOTE*: most probable reason: socket has been closed by the peer, which
+    //         close()s the processing stream (see: handle_close()),
+    //         shutting down the message queue
+    error = ACE_OS::last_error ();
+    if (error != ESHUTDOWN) // 108: happens on Linux
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")));
+    return -1;
+  } // end IF
+  ACE_ASSERT (message_block_p);
 
   // start (asynchronous) write
   this->increase ();
@@ -218,8 +213,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 send:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
-//    inherited::outputStream_.writev (*inherited::buffer_,                  // data
-//                                     inherited::buffer_->length (),        // bytes to write
       inherited::outputStream_.writev (*message_block_p,                     // data
                                        message_block_p->length (),           // bytes to write
                                        NULL,                                 // ACT
@@ -227,47 +220,31 @@ send:
                                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #else
   result =
-//    inherited::outputStream_.write (*inherited::buffer_,                  // data
-//                                    inherited::buffer_->length (),        // bytes to write
       inherited::outputStream_.write (*message_block_p,                     // data
                                       message_block_p->length (),           // bytes to write
                                       NULL,                                 // ACT
                                       0,                                    // priority
                                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   if (unlikely (result == -1))
   {
     error = ACE_OS::last_error ();
     // *WARNING*: this could fail on multi-threaded proactors
-    if (error == EAGAIN) goto send; // 11   : happens on Linux
+    if (error == EAGAIN)            // 11   : happens on Linux
+      goto send;
     if ((error != ENOTSOCK)     &&  // 10038: happens on Win32
         (error != ECONNABORTED) &&  // 10053: happens on Win32
         (error != ECONNRESET)   &&  // 10054: happens on Win32
         (error != ENOTCONN))        // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
-//                  inherited::buffer_->length ()));
                   message_block_p->length ()));
 
     // clean up
-//    inherited::buffer_->release ();
-//    inherited::buffer_ = NULL;
     message_block_p->release ();
     this->decrease ();
     inherited::counter_.decrease ();
   } // end IF
-//  else if (result == 0)
-//  {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: socket was closed\n"),
-//                handle_in));
-//#else
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: socket was closed\n"),
-//                handle_in));
-//#endif
-//  } // end IF
 
   return result;
 }
@@ -320,7 +297,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                   ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                   handle_in,
                   mask_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
 }
@@ -346,10 +323,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::close"));
 
   int result = -1;
+  ACE_HANDLE handle_h = inherited::handle ();
 
-  // step1: cancel i/o operation(s), release (write) socket handle, ...
-  ACE_HANDLE handle = inherited::handle ();
-  result = inherited::handle_close (handle,
+  // close socket handle(s)
+  result = inherited::handle_close (handle_h,
                                     ACE_Event_Handler::ALL_EVENTS_MASK);
   if (unlikely (result == -1))
   {
@@ -366,34 +343,18 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
         (error != EINVAL)     && // 22 : Linux [client: local close()]
         (error != EPIPE)      && // 32 : Linux [client: remote close()]
         (error != EINPROGRESS))  // 115: happens on Linux
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HandlerType::handle_close(0x%@,%d): \"%m\", continuing\n"),
-                  handle,
+                  handle_h,
                   ACE_Event_Handler::ALL_EVENTS_MASK));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
-                  handle,
+                  handle_h,
                   ACE_Event_Handler::ALL_EVENTS_MASK));
-#endif
-  } // end IF
-
-  //  step2: wake up any open read operation; it will release the connection
-  if (likely (handle != ACE_INVALID_HANDLE))
-  {
-    result = ACE_OS::closesocket (handle);
-    if (unlikely (result == -1))
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                  handle));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 }
 
@@ -424,6 +385,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   ACE_ASSERT (inherited2::msg_queue_);
 
   // step1: wait for the queue to flush
+  // *TODO*: why is this necessary ?
   while (!inherited2::msg_queue_->is_empty ())
   {
     result = ACE_OS::sleep (one_second);
@@ -447,7 +409,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     Net_Common_Tools::setNoDelay (handle, true);
     Net_Common_Tools::setNoDelay (handle, no_delay);
   } // end IF
-#endif
+#endif // ACE_LINUX
 }
 
 template <typename HandlerType,
@@ -489,7 +451,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
               id (), handle,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 template <typename HandlerType,
@@ -577,7 +539,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                   ACE_TEXT ("%d: socket was closed\n"),
                   result_in.handle ()));
 #endif
-
       break;
     }
     default:
@@ -675,8 +636,12 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   inherited::handle_write_stream (result_in);
 
   // partial write ?
-  if (inherited::partialWrite_)
-      goto continue_;
+  if (unlikely (inherited::partialWrite_))
+  {
+    inherited::partialWrite_ = false;
+    this->increase ();
+//    goto continue_;
+  } // end IF
 
   // reschedule ?
   // *TODO*: put the buffer back into the queue and call handle_output()
@@ -705,6 +670,6 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //#endif
 //    } // end IF
 
-continue_:
+//continue_:
   this->decrease ();
 }

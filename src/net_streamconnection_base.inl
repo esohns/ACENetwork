@@ -1438,15 +1438,17 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited::cancel ();
 
   // step2b: deregister with the connection manager (if any) ?
-  close_socket_b = (inherited2::count () <= 2);
+//  close_socket_b = (inherited2::count () <= 2);
   if (likely (inherited2::isRegistered_))
     inherited2::deregister ();
 
   // step2c: release socket handle(s) ?
   result =
-    (close_socket_b ? inherited::handle_close (handle_in,
-                                               mask_in)
-                    : 0);
+//    (close_socket_b ? inherited::handle_close (handle_in,
+//                                               mask_in)
+//                    : 0);
+    inherited::handle_close (handle_in,
+                             mask_in);
 
   return result;
 }
@@ -2252,6 +2254,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *NOTE*: the message block is released by the base class
   inherited::handle_write_stream (result_in);
 
+//  ACE_ASSERT (this->count () > 1);
   this->decrease ();
 }
 

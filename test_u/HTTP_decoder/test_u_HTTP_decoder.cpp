@@ -760,15 +760,10 @@ do_work (unsigned int bufferSize_in,
   else
   {
     // step1: wait for the connection to register with the manager
+    deadline = COMMON_TIME_NOW +
+               ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                               0);
     // *TODO*: avoid tight loop here
-    deadline = (COMMON_TIME_NOW +
-                ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_S,
-                                0));
-    //result = ACE_OS::sleep (timeout);
-    //if (result == -1)
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-    //              &timeout));
     do
     {
       connection_p =

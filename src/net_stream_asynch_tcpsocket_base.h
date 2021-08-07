@@ -42,7 +42,7 @@ template <typename HandlerType, // implements ACE_Service_Handler
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename UserDataType>
 class Net_StreamAsynchTCPSocketBase_T

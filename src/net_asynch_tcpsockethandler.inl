@@ -42,7 +42,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inputStream_ ()
  , outputStream_ ()
  , partialWrite_ (false)
- //, PDUSize_ (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
  , localSAP_ ()
  , peerSAP_ ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -62,22 +61,18 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::~Net_AsynchTCPSocketHandler_T (
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   int result = -1;
-
-  if (likely (writeHandle_ != ACE_INVALID_HANDLE))
+  if (unlikely (writeHandle_ != ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("closing write handle (was: %d) in dtor --> check implementation !\n"),
                 writeHandle_));
-    result = ACE_OS::close (writeHandle_);
+    result = ACE_OS::closesocket (writeHandle_);
     if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                   writeHandle_));
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
-
-//  if (buffer_)
-//    buffer_->release ();
 }
 
 template <typename ConfigurationType>
@@ -111,8 +106,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     goto error;
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
-
-  //PDUSize_ = inherited::configuration_->PDUSize;
 
   // step1: tweak socket
   if (likely (inherited::configuration_->bufferSize))
@@ -232,8 +225,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 //#endif
 
   // step2: initialize i/o streams
-  //Common_IRefCount* iref_count_p = this;
-  //ACE_ASSERT (iref_count_p);
   result = inputStream_.open (*this,       // event handler
                               handle_in,   // handle
                               NULL,        // completion key
@@ -286,17 +277,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::handle_close"));
 
-  //ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
   int result = -1;
-  //ACE_HANDLE handle_h = inherited2::handle ();
-  //ACE_ASSERT (handle_in == handle_h); // *TODO*
-  ACE_HANDLE handle_h = handle_in;
 
-  if (handle_h != ACE_INVALID_HANDLE)
-  { ACE_ASSERT (handle_h == inherited2::handle_);
-    result = ACE_OS::closesocket (handle_h);
+  if (handle_in != ACE_INVALID_HANDLE)
+  { ACE_ASSERT (handle_in == inherited2::handle_);
+    result = ACE_OS::closesocket (handle_in);
     if (unlikely (result == -1))
     {
       int error = ACE_OS::last_error ();
@@ -304,12 +291,12 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
       if (error != ENOTSOCK) // 10038: local close
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                    handle_h));
+                    handle_in));
 #else
       if (error != EBADF) // 9: Linux: local close() *TODO*
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                    handle_h));
+                    handle_in));
 #endif // ACE_WIN32 || ACE_WIN64
      } // end IF
   } // end IF
@@ -396,18 +383,23 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::notify"));
 
   int result = -1;
+  ACE_HANDLE handle_h = inherited2::handle_;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  handle_h = writeHandle_;
+#endif // ACE_WIN32 || ACE_WIN64
 
   try {
-    result = this->handle_output (inherited2::handle ());
+    result = this->handle_output (handle_h);
   } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in ACE_Event_Handler::handle_output(0x%@): \"%m\", continuing\n"),
-                inherited2::handle ()));
+                handle_h));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in ACE_Event_Handler::handle_output(%d): \"%m\", continuing\n"),
-                inherited2::handle ()));
+                handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
     result = -1;
   }
@@ -534,25 +526,21 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    inherited::outputStream_.writev (*inherited::buffer_,                   // data
-//                                     inherited::buffer_->length (),         // bytes to write
         outputStream_.writev (message_block_r,                      // data
                               message_block_r.length (),            // bytes to write
                               NULL,                                 // ACT
                               0,                                    // priority
                               COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #else
-//    inherited::outputStream_.write (*inherited::buffer_,                  // data
-//                                    inherited::buffer_->length (),        // bytes to write
         outputStream_.write (message_block_r,                      // data
                              message_block_r.length (),            // bytes to write
                              NULL,                                 // ACT
                              0,                                    // priority
                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         partialWrite_ = true;
 
-        goto continue_; // done
+        return;
       } // end IF
 
       break;
@@ -560,7 +548,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
   } // end SWITCH
   message_block_r.release ();
 
-continue_:
   if (unlikely (close))
     cancel ();
 
@@ -592,16 +579,17 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read ()
   message_block_p->size (inherited::configuration_->allocatorConfiguration->defaultBufferSize);
 
   // start (asynchronous) read
+  int result = -1;
 receive:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  int result =
-    inputStream_.readv (*message_block_p,                                                     // buffer
-                        inherited::configuration_->allocatorConfiguration->defaultBufferSize, // bytes to read
-                        NULL,                                                                 // ACT
-                        0,                                                                    // priority
-                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                                 // signal
+  result =
+      inputStream_.readv (*message_block_p,                                                     // buffer
+                          inherited::configuration_->allocatorConfiguration->defaultBufferSize, // bytes to read
+                          NULL,                                                                 // ACT
+                          0,                                                                    // priority
+                          COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                                 // signal
 #else
-  int result =
+  result =
     inputStream_.read (*message_block_p,                                                     // buffer
                        inherited::configuration_->allocatorConfiguration->defaultBufferSize, // bytes to read
                        NULL,                                                                 // ACT
