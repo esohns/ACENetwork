@@ -349,7 +349,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             char c = 0;
                             for (unsigned int i = 0; i < bytes_to_skip; ++i)
                             {
-                              yyinput (yyscanner);
+                              c = static_cast<char> (yyinput (yyscanner));
                               // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
                               *(yyg->yy_c_buf_p - 1) = c;
                             } // end IF

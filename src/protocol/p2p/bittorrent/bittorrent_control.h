@@ -40,7 +40,8 @@
 
 struct BitTorrent_Control_Event
 {
-  // *NOTE*: this is really a enum BitTorrent_Event
+  // *NOTE*: this is really a enum BitTorrent_Event (but it's abused to carry
+  //         ACE_Message_Block::MB_STOP to shutdown the controller)
   int         type;
   std::string metaInfoFileName;
   std::string data;

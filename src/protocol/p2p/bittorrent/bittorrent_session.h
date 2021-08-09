@@ -227,6 +227,7 @@ class BitTorrent_Session_T
                         unsigned int,       // index (piece#)
                         unsigned int,       // begin (offset)
                         unsigned int);      // length (bytes)
+  virtual void have (unsigned int);  // index (piece#)
   virtual void scrape ();
   virtual void trackerConnect (Net_ConnectionId_t);
   virtual void trackerDisconnect (Net_ConnectionId_t);
@@ -247,7 +248,6 @@ class BitTorrent_Session_T
   bool getConnectionAndMessage (Net_ConnectionId_t,                    // connection id
                                 ISTREAM_CONNECTION_T*&,                // return value: connection handle
                                 typename PeerStreamType::MESSAGE_T*&); // return value: message handle
-  // *IMPORTANT NOTE*: must be called with lock !
   void requestNextPiece (Net_ConnectionId_t); // connection id
 
   bool                             logToFile_;

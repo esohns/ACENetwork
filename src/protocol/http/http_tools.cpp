@@ -21,7 +21,6 @@
 
 #include "stream_dec_common.h"
 
-//#include "ace/Synch.h"
 #include "http_tools.h"
 
 #include <algorithm>
@@ -528,7 +527,8 @@ HTTP_Tools::URLRequiresSSL (const std::string& URL_in)
 }
 
 std::string
-HTTP_Tools::URLEncode (const std::string& string_in)
+HTTP_Tools::URLEncode (const std::string& string_in,
+                       bool escapeAll_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLEncode"));
 
@@ -538,21 +538,20 @@ HTTP_Tools::URLEncode (const std::string& string_in)
   //         'std::setlocale(LC_ALL, "C")')
   //         --> replace with (C++-)US-ASCII
   std::locale locale;
-//  std::locale locale (ACE_TEXT_ALWAYS_CHAR (""));
   try {
-    std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
+    std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_ASCII_STRING));
     locale = us_ascii_locale;
   } catch (std::runtime_error& exception_in) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
-                ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
+                ACE_TEXT (COMMON_LOCALE_EN_US_ASCII_STRING),
                 ACE_TEXT (exception_in.what ())));
     Common_Tools::printLocales ();
     return result;
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
-                ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
+                ACE_TEXT (COMMON_LOCALE_EN_US_ASCII_STRING)));
     Common_Tools::printLocales ();
     return result;
   }
@@ -562,32 +561,38 @@ HTTP_Tools::URLEncode (const std::string& string_in)
   for (std::string::const_iterator iterator = string_in.begin ();
        iterator != string_in.end ();
        ++iterator)
-  { // 'unreserved' characters (see also: RFC 3986)
-    if (!std::isdigit (*iterator, locale) &&
-        !std::isalpha (*iterator, locale) &&
-        !((*iterator == '.') || (*iterator == '-') || (*iterator == '_') ||
-          (*iterator == '~')))//             &&
-//    // 'reserved' characters (see also: RFC 3986)
-//        !((*iterator == '!')  || (*iterator == '*')  || (*iterator == '\'') ||
-//          (*iterator == '(')  || (*iterator == ')')  || (*iterator == ';') ||
-//          (*iterator == ':')  || (*iterator == '@')  || (*iterator == '&') ||
-//          (*iterator == '=')  || (*iterator == '+')  || (*iterator == '$') ||
-//          (*iterator == '/')  || (*iterator == '?')  || (*iterator == '#') ||
-//          (*iterator == '[')  || (*iterator == ']')))
+  {
+    if (escapeAll_in                                ||
+        // 'unreserved' characters (see also: RFC 3986)
+        (!std::isdigit (*iterator, locale) &&
+         !std::isalpha (*iterator, locale) &&
+         !((*iterator == '.') || (*iterator == '-') || (*iterator == '_') ||
+          (*iterator == '~')))                      ||
+        // 'unsafe' characters (see also: RFC 1738)
+        ((*iterator == '<') || (*iterator == '>') || (*iterator == '"') ||
+         (*iterator == '#') || (*iterator == '%') || (*iterator == '{') ||
+         (*iterator == '}') || (*iterator == '|') || (*iterator == '\\') ||
+         (*iterator == '^') || (*iterator == '~')  || (*iterator == '[') ||
+         (*iterator == ']')  || (*iterator == '`')) ||
+        // 'reserved' characters (see also: RFC 1738)
+        ((*iterator == ';') || (*iterator == '/') || (*iterator == '?') ||
+          (*iterator == ':') || (*iterator == '@') || (*iterator == '=') ||
+          (*iterator == '&')))
     {
       result += '%';
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       // *TODO*: there is probably a better way to do this...
-      converter << std::setw (2)
-                << static_cast<unsigned short> (*iterator);
+      converter << std::setw (2) << static_cast<unsigned short> (*iterator);
       converted_string = converter.str ();
-//      std::transform (converted_string.begin (), converted_string.end (),
-//                      converted_string.begin (),
-//                      [](unsigned char c) { return std::toupper (c); });
+      // "...For consistency, URI producers and normalizers should use
+      //  uppercase hexadecimal digits for all percent-encodings. ..."
+      std::transform (converted_string.begin (), converted_string.end (),
+                      converted_string.begin (),
+                      [](unsigned char c) { return std::toupper (c); });
       result +=
-          ((converted_string.size () == 2) ? converted_string
-                                           : converted_string.substr (2, std::string::npos));
+        ((converted_string.size () == 2) ? converted_string
+                                         : converted_string.substr (2, std::string::npos));
     } // end IF
     else
       result += *iterator;

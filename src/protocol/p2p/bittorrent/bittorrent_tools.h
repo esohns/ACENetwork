@@ -22,6 +22,7 @@
 #define BITTORRENT_TOOLS_H
 
 #include <string>
+#include <vector>
 
 #include "ace/Global_Macros.h"
 
@@ -63,6 +64,8 @@ class BitTorrent_Tools
   static bool torrentSupportsScrape (const std::string&); // announce URI
   static std::string AnnounceURLToScrapeURL (const std::string&); // announce URI
 
+  static std::vector<unsigned int> getPieceIndexes (const BitTorrent_Pieces_t&, // pieces
+                                                    bool);                      // ? missing : complete
   static bool isPieceComplete (unsigned int,                     // piece length
                                const BitTorrent_PieceChunks_t&); // chunks
   static bool havePiece (unsigned int,                               // piece index
@@ -72,13 +75,20 @@ class BitTorrent_Tools
   inline static unsigned int chunkLength (const struct BitTorrent_Piece_Chunk& chunk_in) { return (chunk_in.data ? chunk_in.data->total_length () : 0); }
   static bool validatePieceHash (const struct BitTorrent_Piece&); // piece
   static bool savePiece (const std::string&,                         // metainfo (aka .bittorrent) file
+                         unsigned int,                               // total number of pieces
                          unsigned int,                               // piece index
                          struct BitTorrent_Piece&);                  // piece
   static void freeChunks (BitTorrent_PieceChunks_t&); // chunks
   static bool assembleFiles (const std::string&,             // metainfo (aka .bittorrent) file
                              const Bencoding_Dictionary_t&); // metainfo
   static unsigned int receivedBytes (const BitTorrent_Pieces_t&); // pieces
-  static void sanitizePiece (BitTorrent_PieceChunks_t&); // piece chunks
+  static void sanitizeChunks (BitTorrent_PieceChunks_t&); // chunks
+  static unsigned int chunksLength (const BitTorrent_PieceChunks_t&); // chunks
+  static std::vector<struct BitTorrent_MessagePayload_Request> getMissingChunks (unsigned int,                     // piece length
+                                                                                 const BitTorrent_PieceChunks_t&); // chunks
+
+  static bool loadPieces (const std::string&,    // metainfo (aka .bittorrent) file
+                          BitTorrent_Pieces_t&); // return value: pieces
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
@@ -86,6 +96,7 @@ class BitTorrent_Tools
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools& operator= (const BitTorrent_Tools&))
 
   static std::string listToPath (const Bencoding_List_t&); // path list
+  static unsigned int pieceFileNameToIndex (const std::string&); // piece filename (FQ)
 
   static int selector (const dirent*); // directory entry
 };

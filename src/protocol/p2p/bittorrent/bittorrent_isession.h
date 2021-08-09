@@ -68,6 +68,7 @@ class BitTorrent_ISession_T
                         unsigned int,       // index (piece#)
                         unsigned int,       // begin (offset)
                         unsigned int) = 0;  // length (bytes)
+  virtual void have (unsigned int) = 0;  // index (piece#)
   virtual void scrape () = 0;
 
   virtual void trackerConnect (const AddressType&) = 0; // tracker address

@@ -525,9 +525,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   ACE_ASSERT (peer_connection_manager_p);
   ACE_ASSERT (tracker_connection_manager_p);
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
-  allocator_configuration.defaultBufferSize = BITTORRENT_BUFFER_SIZE;
+  allocator_configuration.defaultBufferSize = BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
   Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                     BITTORRENT_BUFFER_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+                                                                                     BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -955,13 +955,13 @@ ACE_TMAIN (int argc_in,
   if (log_to_file)
     log_file_name =
       Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                        ACE::basename (argv_in[0]));
-  if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]), // program name
-                                            log_file_name,              // log file name
-                                            false,                      // log to syslog ?
-                                            false,                      // trace messages ?
-                                            trace_information,          // debug messages ?
-                                            NULL))                      // logger
+                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0])));
+  if (!Common_Log_Tools::initializeLogging (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0])), // program name
+                                            log_file_name,                                     // log file name
+                                            false,                                             // log to syslog ?
+                                            false,                                             // trace messages ?
+                                            trace_information,                                 // debug messages ?
+                                            NULL))                                             // logger
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));

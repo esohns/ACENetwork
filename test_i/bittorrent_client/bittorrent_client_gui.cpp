@@ -450,7 +450,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
 
   Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                     BITTORRENT_BUFFER_SIZE);
+                                                                                     BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,

@@ -22,8 +22,6 @@
 #define BITTORRENT_DEFINES_H
 
 // stream
-// *TODO*: this makes no sense, remove ASAP
-#define BITTORRENT_BUFFER_SIZE                             16384
 #define BITTORRENT_DEFAULT_MODULE_MARSHAL_NAME_STRING      "BitTorrentPeerMarshal"
 #define BITTORRENT_DEFAULT_MODULE_HANDLER_NAME_STRING      "BitTorrentPeerHandler"
 #define BITTORRENT_DEFAULT_STREAM_NAME_STRING              "BitTorrentPeerStream"
@@ -53,12 +51,13 @@
 
 #define BITTORRENT_METAINFO_ANNOUNCE_KEY                   "announce"
 #define BITTORRENT_METAINFO_INFO_KEY                       "info"
-#define BITTORRENT_METAINFO_INFO_PIECE_LENGTH_KEY          "piece length"
-#define BITTORRENT_METAINFO_INFO_PIECES_KEY                "pieces"
-#define BITTORRENT_METAINFO_INFO_LENGTH_KEY                "length"
 #define BITTORRENT_METAINFO_INFO_FILES_KEY                 "files"
 #define BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY          "length"
 #define BITTORRENT_METAINFO_INFO_FILES_PATH_KEY            "path"
+#define BITTORRENT_METAINFO_INFO_LENGTH_KEY                "length"
+#define BITTORRENT_METAINFO_INFO_NAME_KEY                  "name"
+#define BITTORRENT_METAINFO_INFO_PIECE_LENGTH_KEY          "piece length"
+#define BITTORRENT_METAINFO_INFO_PIECES_KEY                "pieces"
 
 #define BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER        "info_hash"
 #define BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER          "peer_id"
@@ -109,5 +108,6 @@
 #define BITTORRENT_DEFAULT_PEER_PARSER_MODULE_NAME         "PeerParser"
 #define BITTORRENT_DEFAULT_TRACKER_PARSER_MODULE_NAME      "TrackerParser"
 #define BITTORRENT_DEFAULT_PIECE_FILENAME_SUFFIX           ".piece"
+#define BITTORRENT_DEFAULT_PIECES_DIRECTORY_SUFFIX         "_pieces"
 
 #endif

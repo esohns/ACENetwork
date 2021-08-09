@@ -60,8 +60,9 @@ class HTTP_Tools
   static bool URLRequiresSSL (const std::string&); // URL
 
   // *NOTE*: this 'escapes' the input so it can be sent in an URL
-  //         (see also: RFC 1738)
-  static std::string URLEncode (const std::string&);
+  //         (see also: RFC 1738, RFC 3986)
+  static std::string URLEncode (const std::string&, // input string
+                                bool = false);      // '%xx' everything ?
   // *NOTE*: removes any parameters (i.e. ?name=value&name=value...)
   static std::string stripURI (const std::string&);
 

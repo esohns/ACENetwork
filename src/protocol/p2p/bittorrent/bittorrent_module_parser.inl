@@ -117,14 +117,19 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   } // end IF
 
   ACE_ASSERT (configuration_in.parserConfiguration);
+  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
       inherited::msg_queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize parser driver: \"%m\", aborting\n")));
+    const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      NULL;
     return false;
   } // end IF
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+    NULL;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -421,7 +426,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     ACE_ASSERT (message_block_p);
     message_bytes -= 4 + 1 + 4 + 4;
     do
-    {
+    { ACE_ASSERT (message_block_p);
       skipped_bytes += message_block_p->length ();
       if (skipped_bytes >= message_bytes)
       {

@@ -1954,6 +1954,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     // connection closed/reset (by peer) ? --> not an error
     unsigned long error = result_in.error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *NOTE*: ERROR_SEM_TIMEOUT 121
     if ((error != ERROR_NETNAME_DELETED)   && // 64  : peer close()
         (error != ERROR_OPERATION_ABORTED) && // 995 : local close()
         (error != ERROR_CONNECTION_ABORTED))  // 1236: local close()

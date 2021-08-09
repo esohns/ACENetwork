@@ -415,6 +415,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       message_block_p = message_block_p->cont ();
     } while (true);
     message_block_p->rd_ptr (bytes_to_skip);
+    if (!message_block_p->length ())
+      message_block_p = message_block_p->cont ();
     for (;
          iterator_2 != chunks_.end ();
          ++iterator_2)
@@ -480,6 +482,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       } // end ELSE
     } // end FOR
     ACE_ASSERT (headFragment_->total_length () == total_data);
+    chunks_.clear ();
   } // end ELSE
 
   inherited2::finished_ = true;
