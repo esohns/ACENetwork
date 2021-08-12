@@ -153,7 +153,7 @@ allocate:
                                static_cast<OWN_TYPE_T*> (inherited::message_block_allocator_->calloc (sizeof (OWN_TYPE_T))),
                                OWN_TYPE_T (*this));
     } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
+      ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
                   sizeof (OWN_TYPE_T)));
       return NULL;
@@ -188,7 +188,7 @@ allocate:
     message_p->cont_ = inherited::cont_->duplicate ();
     if (!message_p->cont_)
     {
-      ACE_DEBUG ((LM_ERROR,
+      ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to BitTorrent_Message_T::duplicate(): \"%m\", aborting\n")));
 
       // clean up

@@ -471,18 +471,17 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
       //                          the reactor
       //         --> server side: too many open connections
       error = ACE_OS::last_error ();
-      if ((mask_in == ACE_Event_Handler::ALL_EVENTS_MASK) &&
-          ((error == ETIMEDOUT) ||   // 110: failed to connect: timed out
-           (error == ECONNREFUSED))) // 111: failed to connect: connection refused
+      if (((error == ETIMEDOUT) ||   // 110/10060: failed to connect: timed out
+           (error == ECONNREFUSED))) // 111/10061: failed to connect: connection refused
       {
         // *IMPORTANT NOTE*: the connection hasn't been open()ed / registered
         //                   --> remove the (final) reference manually
         // *NOTE*: the dtor (deregisters from the reactor and) close()s the
         //         socket handle
-        inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-        result = inherited2::remove_reference ();
-        ACE_ASSERT (result == 0);
-        break;
+        //inherited2::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+        //result = inherited2::remove_reference ();
+        //ACE_ASSERT (result == 0);
+        //break;
       } // end IF
 
       if (handle_in != ACE_INVALID_HANDLE)

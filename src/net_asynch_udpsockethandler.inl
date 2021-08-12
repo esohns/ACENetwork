@@ -250,12 +250,17 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_LINUX
   handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-#if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("opened socket %s (handle: 0x%@)\n"),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
               handle));
-#endif // _DEBUG
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("opened socket %s (handle: %d)\n"),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
+              handle));
+#endif // ACE_WIN32 || ACE_WIN64
   if (likely (!inherited::configuration_->writeOnly))
   { ACE_ASSERT (writeHandle_ == ACE_INVALID_HANDLE);
     writeHandle_ = ACE_OS::socket (AF_INET,    // family
@@ -272,11 +277,17 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                     ACE_TEXT ("failed to SocketType::close(): \"%m\", continuing\n")));
       goto error;
     } // end IF
-#if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("opened write socket (handle: 0x%@)\n"),
+                ACE_TEXT ("0x%@: opened write socket (handle: 0x%@)\n"),
+                handle,
                 writeHandle_));
-#endif // _DEBUG
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: opened write socket (handle: 0x%@)\n"),
+                handle,
+                writeHandle_));
+#endif // ACE_WIN32 || ACE_WIN64
 
     // set source address ?
     if (unlikely (inherited::configuration_->sourcePort))
@@ -306,12 +317,17 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
-#if defined (_DEBUG)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
                   writeHandle_,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#endif // _DEBUG
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("bound write socket (handle: %d) to %s\n"),
+                  writeHandle_,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
   else
@@ -346,7 +362,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: connected datagram socket to %s\n"),
@@ -357,8 +372,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                 ACE_TEXT ("%d: connected datagram socket to %s\n"),
                 writeHandle_,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
-#endif
-#endif // _DEBUG
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   if (likely (!inherited::configuration_->writeOnly))
@@ -424,11 +438,17 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   if (!PDUSize_) // --> fall back
     PDUSize_ = inherited::configuration_->bufferSize;
   ACE_ASSERT (PDUSize_);
-//#if defined (_DEBUG)
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("maximum message size: %u\n"),
-//              PDUSize_));
-//#endif // _DEBUG
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%@: maximum message size: %u\n"),
+              handle,
+              PDUSize_));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%u: maximum message size: %u\n"),
+              handle,
+              PDUSize_));
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step4a: tweak outbound socket (if any)
   if (likely (inherited::configuration_->bufferSize))
@@ -489,14 +509,14 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       if (!Net_Common_Tools::enableErrorQueue (handle))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::enableErrorQueue() (handle was: %d), aborting\n"),
+                    ACE_TEXT ("failed to Net_Common_Tools::enableErrorQueue(%d), aborting\n"),
                     handle));
         goto error;
       } // end IF
     if (!Net_Common_Tools::enableErrorQueue (writeHandle_))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::enableErrorQueue() (handle was: %d), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::enableErrorQueue(%d), aborting\n"),
                   writeHandle_));
       goto error;
     } // end IF
@@ -564,11 +584,31 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
+  // *WORKAROUND*: when close()d, Net_AsynchStreamConnectionBase_T calls
+  //               into this directly, without calling handle_close() on
+  //               itself. This is a problem for 'writeOnly' connections;
+  //               having no read operation, the parent class stream is
+  //               never stop()ed. --> call handle_close() manually here
+  // *TODO*: the above should not concern this level of abstraction: remove ASAP
+  bool is_writeonly_b =
+    ((writeHandle_ != ACE_INVALID_HANDLE) && // handle multiple invocations
+     (writeHandle_ == inherited2::get_handle ()));
+  if (is_writeonly_b &&    // 'writeOnly'
+      !address_.is_any ()) // avoid recursion
+  {
+    static ACE_INET_Addr inet_addr_sap_any (ACE_sap_any_cast (const ACE_INET_Addr&));
+    ACE_INET_Addr source_SAP = inet_addr_sap_any;
+    address_ = inet_addr_sap_any;
+    return this->handle_close (handle_in,
+                               mask_in);
+  } // end IF
+
   int result = 0;
-  ACE_HANDLE handle_h = SocketType::get_handle ();
+  ACE_HANDLE handle_h = inherited2::get_handle ();
   //ACE_ASSERT (handle_in == handle_h);
 
-  if (handle_h != ACE_INVALID_HANDLE)
+  if ((handle_h != ACE_INVALID_HANDLE) &&
+      !is_writeonly_b)
   {
     result = ACE_OS::closesocket (handle_h);
     if (unlikely (result == -1))
@@ -582,7 +622,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                   handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
-  SocketType::set_handle (ACE_INVALID_HANDLE);
+  inherited2::set_handle (ACE_INVALID_HANDLE);
   if (writeHandle_ != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (writeHandle_);
@@ -626,15 +666,19 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ERROR_INVALID_ACCESS) && //  12: operation was triggered from a different thread
-          (error != ERROR_IO_PENDING))       // 997: 
+      if ((error != ERROR_INVALID_ACCESS) && //    12: operation was triggered from a different thread
+          (error != EFAULT)               && //    14: already cancelled
+          (error != ERROR_IO_PENDING)     && //   997:
+          (error != WSAENOTSOCK))            // 10038: already cancelled
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%s\", continuing\n"),
+                    ACE_TEXT ("0x%@: failed to ACE_Asynch_Read_Dgram::cancel(): \"%s\", continuing\n"),
+                    inherited2::get_handle (),
                     ACE_TEXT (Common_Error_Tools::errorToString (error, false).c_str ())));
 #else
       ACE_UNUSED_ARG (error);
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\", continuing\n")));
+                  ACE_TEXT ("%d: failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\", continuing\n"),
+                  inherited2::get_handle ()));
 #endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
@@ -643,15 +687,20 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ERROR_INVALID_ACCESS) && //  12: operation was triggered from a different thread
-        (error != ERROR_IO_PENDING))       // 997:
+    if ((error != ERROR_INVALID_ACCESS) && //    12: operation was triggered from a different thread
+        (error != EFAULT)               && //    14: already cancelled
+        (error != ERROR_IO_PENDING)     && //   997:
+        (error != WSAENOTSOCK)          && // 10038: already cancelled
+        (error != WSAENOTCONN))            // 10057: local close
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%s\", continuing\n"),
+                  ACE_TEXT ("0x%@: failed to ACE_Asynch_Write_Dgram::cancel(): \"%s\", continuing\n"),
+                  writeHandle_,
                   ACE_TEXT (Common_Error_Tools::errorToString (error, false).c_str ())));
 #else
     ACE_UNUSED_ARG (error);
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(%d): \"%m\", continuing\n")));
+                ACE_TEXT ("%d: failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\", continuing\n"),
+                writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 }

@@ -287,7 +287,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   return get (reinterpret_cast<ACE_HANDLE> (id_in));
 #else
   return get (static_cast<ACE_HANDLE> (id_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 template <ACE_SYNCH_DECL,

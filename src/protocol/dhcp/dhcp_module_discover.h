@@ -24,8 +24,9 @@
 #include "ace/Global_Macros.h"
 
 #include "stream_headmoduletask_base.h"
-//#include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
+
+#include "dhcp_network.h"
 
 extern const char libacenetwork_protocol_default_dhcp_discover_module_name_string[];
 
@@ -94,9 +95,8 @@ class DHCP_Module_Discover_T
   ACE_HANDLE connect (const ACE_INET_Addr&, // peer (i.e. server) address
                       bool&);               // return value: use reactor ?
 
-  ACE_HANDLE handle_;
-  bool       isSessionConnection_;
-  bool       sendRequestOnOffer_;
+  DHCP_IConnection_t* connection_;
+  bool                sendRequestOnOffer_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

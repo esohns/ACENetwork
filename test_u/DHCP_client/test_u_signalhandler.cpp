@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_u_signalhandler.h"
 
 #include "ace/Log_Msg.h"
@@ -154,10 +153,10 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
                                  true); // locked access ?
     iconnection_manager_p->abort ();
 
-    // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-                                         inherited::configuration_->dispatchState->reactorGroupId,
-                                         false);                                                    // don't block
+    //// step5: stop reactor (&& proactor, if applicable)
+    //Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
+    //                                     inherited::configuration_->dispatchState->reactorGroupId,
+    //                                     false);                                                    // don't block
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF

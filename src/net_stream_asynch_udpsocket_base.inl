@@ -1428,11 +1428,13 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
     message_block_p->release ();
 
   result = handle_close (result_in.handle (),
-                         ACE_Event_Handler::ALL_EVENTS_MASK);
+    ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
                 result_in.handle (),
                 ACE_Event_Handler::ALL_EVENTS_MASK));
+
+  this->decrease ();
 }
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT

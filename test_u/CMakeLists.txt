@@ -309,6 +309,7 @@ add_subdirectory (client_server)
 add_subdirectory (DHCP_client)
 add_subdirectory (file_server)
 add_subdirectory (HTTP_decoder)
+add_subdirectory (PCP_client)
 add_subdirectory (WLAN_monitor)
 
 add_custom_target (test_u ALL

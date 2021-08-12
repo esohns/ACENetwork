@@ -57,10 +57,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        ConnectorType>::DHCP_Module_Discover_T (ISTREAM_T* stream_in)
 #else
                        ConnectorType>::DHCP_Module_Discover_T (typename inherited::ISTREAM_T* stream_in)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
- , handle_ (ACE_INVALID_HANDLE)
- , isSessionConnection_ (false)
+ , connection_ (NULL)
  , sendRequestOnOffer_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::DHCP_Module_Discover_T"));
@@ -88,37 +87,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::~DHCP_Module_Discover_T"));
 
-  typename SessionMessageType::DATA_T::DATA_T* session_data_p = NULL;
-
-  if (!inherited::sessionData_)
-    return;
-
-  session_data_p =
-      &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
-
-  if (!session_data_p->connection)
-    return;
-
-  if (handle_ != ACE_INVALID_HANDLE)
-  {
-    // sanity check(s)
-    ACE_ASSERT (session_data_p->connection);
-
-    session_data_p->connection->close ();
-    session_data_p->connection->decrease (); session_data_p->connection = NULL;
-  } // end IF
-  else
-  {
-    if (isSessionConnection_)
-    {
-      // sanity check(s)
-      ACE_ASSERT (session_data_p->connection);
-
-      session_data_p->connection->decrease ();
-    } // end IF
-    else
-      session_data_p->connection = NULL;
-  } // end ELSE
+  if (connection_)
+    connection_->decrease ();
 }
 
 template <ACE_SYNCH_DECL,
@@ -149,9 +119,16 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 
   if (unlikely (inherited::isInitialized_))
   {
+    if (connection_)
+    {
+      connection_->decrease (); connection_ = NULL;
+    } // end IF
   } // end IF
 
-  // *TODO*: remove type inference
+  // *TODO*: remove type inferences
+  connection_ = configuration_in.connection;
+  if (connection_)
+    connection_->increase ();
   sendRequestOnOffer_ =
       configuration_in.protocolConfiguration->sendRequestOnOffer;
 
@@ -190,30 +167,28 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (message_inout->isInitialized ());
+  ACE_ASSERT (connection_);
 
   const typename DataMessageType::DATA_T& data_r = message_inout->getR ();
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
     const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
-  // sanity check(s)
-  ACE_ASSERT (session_data_r.connection);
-
   u_short port_number = DHCP_DEFAULT_SERVER_PORT;
-  ACE_INET_Addr address;
-  bool clone_module;
-  typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
-  bool reset_configuration = false;
-  ConnectionManagerType* connection_manager_p = NULL;
-  bool use_reactor = false;
-  bool write_only = false;
+  //ACE_INET_Addr address;
+  //bool clone_module;
+  //typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
+  //bool reset_configuration = false;
+  //ConnectionManagerType* connection_manager_p = NULL;
+  //bool use_reactor = false;
+  //bool write_only = false;
   DHCP_OptionsIterator_t iterator;
   int result = -1;
   Net_ConnectionConfigurationsIterator_t iterator_2;
   struct ether_addr ether_addrs_s;
   struct DHCP_Record DHCP_record;
   std::string buffer_2;
-  typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+  //typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
   ACE_Message_Block* message_block_p = NULL;
   DataMessageType* message_p = NULL;
 
@@ -235,7 +210,12 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   iterator =
     data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER);
   if (iterator == data_r.options.end ())
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("%s: no server address specified, continuing\n"),
+                inherited::mod_->name ()));
     goto continue_;
+  } // end IF
 
   ACE_ASSERT ((*iterator).second.size () == sizeof (ACE_UINT32));
   result =
@@ -251,119 +231,121 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                 inherited::mod_->name ()));
     return;
   } // end IF
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: DHCP server address: \"%s\"\n"),
               inherited::mod_->name (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
-#endif // _DEBUG
 
-  // step2a: set up the (broadcast) connection configuration
-  // step2aa: set up the socket configuration
-  // *TODO*: remove type inferences
-  // sanity check(s)
-  if (!session_data_r.connection)
-  {
-    address =
-      NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress;
-    write_only =
-      NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly;
-    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress =
-      session_data_r.serverAddress;
-    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = true;
+  //// step2a: set up the (broadcast) connection configuration
+  //// step2aa: set up the socket configuration
+  //// *TODO*: remove type inferences
+  //// sanity check(s)
+  //if (!session_data_r.connection)
+  //{
+  //  address =
+  //    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress;
+  //  write_only =
+  //    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly;
+  //  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress =
+  //    session_data_r.serverAddress;
+  //  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = true;
 
-    // step2ab: set up the connection manager
-    // *NOTE*: the stream configuration may contain a module handle that is
-    //         meant to be the final module of 'this' processing stream. As
-    //         the (possibly external) DHCP (broadcast) connection probably
-    //         (!) is oblivious of 'this' pipeline, the connection probably
-    //         (!) should not enqueue that same module again
-    //         --> temporarily 'hide' the module handle, if any
-    // *TODO*: this 'measure' diminishes the generic utility of this module
-    //         --> to be removed ASAP
-    // *TODO*: remove type inferences
-    // sanity check(s)
-    ACE_ASSERT (inherited::configuration_->streamConfiguration);
+  //  // step2ab: set up the connection manager
+  //  // *NOTE*: the stream configuration may contain a module handle that is
+  //  //         meant to be the final module of 'this' processing stream. As
+  //  //         the (possibly external) DHCP (broadcast) connection probably
+  //  //         (!) is oblivious of 'this' pipeline, the connection probably
+  //  //         (!) should not enqueue that same module again
+  //  //         --> temporarily 'hide' the module handle, if any
+  //  // *TODO*: this 'measure' diminishes the generic utility of this module
+  //  //         --> to be removed ASAP
+  //  // *TODO*: remove type inferences
+  //  // sanity check(s)
+  //  ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
-    // *TODO*: remove type inferences
-    connection_manager_p =
-      ConnectionManagerType::SINGLETON_T::instance ();
-    ACE_ASSERT (connection_manager_p);
-    clone_module =
-      inherited::configuration_->streamConfiguration->configuration->cloneModule;
-    module_p =
-      inherited::configuration_->streamConfiguration->configuration->module;
-    inherited::configuration_->streamConfiguration->configuration->cloneModule =
-      false;
-    inherited::configuration_->streamConfiguration->configuration->module =
-      NULL;
-    reset_configuration = true;
-    //connection_manager_p->set ((*iterator_2).second,
-    //                           configuration_->userData);
+  //  // *TODO*: remove type inferences
+  //  connection_manager_p =
+  //    ConnectionManagerType::SINGLETON_T::instance ();
+  //  ACE_ASSERT (connection_manager_p);
+  //  clone_module =
+  //    inherited::configuration_->streamConfiguration->configuration->cloneModule;
+  //  module_p =
+  //    inherited::configuration_->streamConfiguration->configuration->module;
+  //  inherited::configuration_->streamConfiguration->configuration->cloneModule =
+  //    false;
+  //  inherited::configuration_->streamConfiguration->configuration->module =
+  //    NULL;
+  //  reset_configuration = true;
+  //  //connection_manager_p->set ((*iterator_2).second,
+  //  //                           configuration_->userData);
 
-    handle_ = this->connect (session_data_r.serverAddress,
-                             use_reactor);
-    if (unlikely (handle_ == ACE_INVALID_HANDLE))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to connect to %s, returning\n"),
-                  inherited::mod_->name (),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
-      goto error;
-    } // end IF
-    if (use_reactor)
-      session_data_r.connection =
-  #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
-  #else
-        connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
-  #endif
-    else
-      session_data_r.connection =
-          connection_manager_p->get (session_data_r.serverAddress);
-    if (unlikely (!session_data_r.connection))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to connect to %s, returning\n"),
-                  inherited::mod_->name (),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
-      goto error;
-    } // end IF
+  //  handle_ = this->connect (session_data_r.serverAddress,
+  //                           use_reactor);
+  //  if (unlikely (handle_ == ACE_INVALID_HANDLE))
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("%s: failed to connect to %s, returning\n"),
+  //                inherited::mod_->name (),
+  //                ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
+  //    goto error;
+  //  } // end IF
+  //  if (use_reactor)
+  //    session_data_r.connection =
+  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
+  //#else
+  //      connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
+  //#endif
+  //  else
+  //    session_data_r.connection =
+  //        connection_manager_p->get (session_data_r.serverAddress);
+  //  if (unlikely (!session_data_r.connection))
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("%s: failed to connect to %s, returning\n"),
+  //                inherited::mod_->name (),
+  //                ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
+  //    goto error;
+  //  } // end IF
 
-    // step2e: reset the connection configuration
-    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
-    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
-    inherited::configuration_->streamConfiguration->configuration->cloneModule =
-      clone_module;
-    inherited::configuration_->streamConfiguration->configuration->module =
-      module_p;
-  } // end IF
+  //  // step2e: reset the connection configuration
+  //  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
+  //  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
+  //  inherited::configuration_->streamConfiguration->configuration->cloneModule =
+  //    clone_module;
+  //  inherited::configuration_->streamConfiguration->configuration->module =
+  //    module_p;
+  //} // end IF
 
   goto continue_;
 
-error:
-  if (reset_configuration)
-  {
-    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
-    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
-    inherited::configuration_->streamConfiguration->configuration->cloneModule =
-      clone_module;
-    inherited::configuration_->streamConfiguration->configuration->module =
-      module_p;
-    //connection_manager_p->set ((*iterator_2).second,
-    //                           configuration_->userData);
-  } // end IF
-
-  return;
+//error:
+//  if (reset_configuration)
+//  {
+//    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress = address;
+//    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->writeOnly = write_only;
+//    inherited::configuration_->streamConfiguration->configuration->cloneModule =
+//      clone_module;
+//    inherited::configuration_->streamConfiguration->configuration->module =
+//      module_p;
+//    //connection_manager_p->set ((*iterator_2).second,
+//    //                           configuration_->userData);
+//  } // end IF
+//
+//  return;
 
 continue_:
   // sanity check(s)
   if  (!sendRequestOnOffer_ ||
        (DHCP_Tools::type (data_r) != DHCP_Codes::DHCP_MESSAGE_OFFER))
-    goto reply; // done
-
+    goto reply;
   if (data_r.xid != session_data_r.xid)
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("%s: xids do not match, returning\n"),
+                inherited::mod_->name ()));
     return; // done
+  } // end IF
 
   ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
   message_p = inherited::allocateMessage ((*iterator_2).second->allocatorConfiguration->defaultBufferSize);
@@ -392,7 +374,7 @@ continue_:
 #else
     Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
 #endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_ASSERT (DHCP_CHADDR_SIZE >= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
                   ETH_ALEN);
@@ -425,19 +407,8 @@ continue_:
                          message_p->id (),
                          NULL);
 
-  istream_connection_p =
-    dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (session_data_r.connection);
-  if (unlikely (!istream_connection_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to dynamic_cast<Net_ISocketConnection_T>(%@): \"%m\", returning\n"),
-                inherited::mod_->name (),
-                session_data_r.connection));
-    message_p->release ();
-    return;
-  } // end IF
   message_block_p = message_p;
-  istream_connection_p->send (message_block_p);
+  connection_->send (message_block_p);
 
   return;
 
@@ -446,6 +417,7 @@ reply:
   if ((data_r.op != DHCP_Codes::DHCP_OP_REPLY))
     return; // done
 
+  // *TODO*
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s"),
               ACE_TEXT (DHCP_Tools::dump (data_r).c_str ())));
@@ -481,100 +453,36 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::isInitialized_);
   ACE_ASSERT (inherited::sessionData_);
 
+  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
+
   switch (message_inout->type ())
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      // sanity check(s)
-      ACE_ASSERT (handle_ == ACE_INVALID_HANDLE);
+      //ConnectionManagerType* connection_manager_p =
+      //  ConnectionManagerType::SINGLETON_T::instance ();
+      //ACE_ASSERT (connection_manager_p);
+      //bool clone_module = false;//, delete_module = false;
+      //typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
+      //bool reset_configuration = false;
+      //ACE_Time_Value deadline = ACE_Time_Value::zero;
+      //ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
+      //enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 
-      // step1: retrieve a handle to the session data
-      typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
-
-      // step2: set up a (UDP) connection ?
-      ConnectionManagerType* connection_manager_p =
-        ConnectionManagerType::SINGLETON_T::instance ();
-      ACE_ASSERT (connection_manager_p);
-      bool clone_module = false;//, delete_module = false;
-      typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
-      bool reset_configuration = false;
-      ACE_Time_Value deadline = ACE_Time_Value::zero;
-      ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
-      enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-//      bool use_reactor = false;
-      //Net_ConnectionConfigurationsIterator_t iterator;
-//      bool write_only = false;
-//      struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
-
-      // sanity check(s)
-      ACE_ASSERT (inherited::configuration_);
-
+      if (connection_)
+        goto continue_;
       // *TODO*: remove type inferences
-      if (inherited::configuration_->connection)
+      if (session_data_r.connection)
       {
-        // sanity check(s)
-        ACE_ASSERT (!session_data_r.connection);
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("%s: using session connection\n"),
+                    inherited::mod_->name ()));
 
-        session_data_r.connection = inherited::configuration_->connection;
-
+        connection_ = session_data_r.connection;
+        connection_->increase ();
         goto continue_;
       } // end IF
-      else if (session_data_r.connection)
-      {
-        session_data_r.connection->increase ();
-
-        isSessionConnection_ = true;
-
-        goto continue_;
-      } // end ELSE IF
-      else
-      {
-        // sanity check(s)
-        ACE_ASSERT (inherited::configuration_->streamConfiguration);
-
-        // *NOTE*: this means that this module is part of a connection
-        //         processing stream
-        //         --> grab a handle to the connection
-        // *IMPORTANT NOTE*: Note how this can work only as long as at least
-        //                   one upstream (or this) module operates
-        //                   asynchronously
-        // *TODO*: Note how the session ID is being reused for a particular
-        //         purpose (in this case, to hold the socket handle of the
-        //         connection). This will not work in some scenarios (e.g.
-        //         when a connection handles several consecutive sessions,
-        //         and/or each session needs a reference to its' own specific
-        //         and/or 'unique' ID...)
-        if (inherited::configuration_->streamConfiguration->configuration->sessionId)
-        {
-          // *NOTE*: this may have to wait for the connection to finish
-          //         initializing
-          // *TODO*: avoid tight loop here
-          deadline = COMMON_TIME_NOW + timeout;
-          do
-          {
-            if (!session_data_r.connection)
-              session_data_r.connection =
-                connection_manager_p->get (static_cast<Net_ConnectionId_t> (inherited::configuration_->streamConfiguration->configuration->sessionId));
-            if (!session_data_r.connection)
-              continue;
-
-            status = session_data_r.connection->status ();
-            if (status == NET_CONNECTION_STATUS_OK)
-              break;
-          } while (COMMON_TIME_NOW < deadline);
-          if (unlikely (!session_data_r.connection))
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("%s: failed to retrieve connection handle (handle was: %u), aborting\n"),
-                        ACE_TEXT (inherited::mod_->name ()),
-                        inherited::configuration_->streamConfiguration->configuration->sessionId));
-            goto error;
-          } // end IF
-
-          goto continue_;
-        } // end IF
-      } // end ELSE
 
 //      // step2a: set up the (broadcast) connection configuration
 //      iterator =
@@ -669,92 +577,31 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 continue_:
       break;
 
-error:
-      if (reset_configuration)
-      {
-//        (*iterator_2).second->writeOnly = write_only;
-        inherited::configuration_->streamConfiguration->configuration->cloneModule =
-          clone_module;
-        inherited::configuration_->streamConfiguration->configuration->module =
-          module_p;
+//error:
+//      if (reset_configuration)
+//      {
+////        (*iterator_2).second->writeOnly = write_only;
+//        inherited::configuration_->streamConfiguration->configuration->cloneModule =
+//          clone_module;
+//        inherited::configuration_->streamConfiguration->configuration->module =
+//          module_p;
+//
+//        //connection_manager_p->set (*configuration_,
+//        //                           configuration_->userData);
+//      } // end IF
 
-        //connection_manager_p->set (*configuration_,
-        //                           configuration_->userData);
-      } // end IF
-
-      if (!session_data_r.connection)
-        goto continue_2;
-
-      if (handle_ != ACE_INVALID_HANDLE)
-      {
-        session_data_r.connection->close ();
-        session_data_r.connection->decrease (); session_data_r.connection = NULL;
-
-        handle_ = ACE_INVALID_HANDLE;
-      } // end IF
-      else
-      {
-        if (isSessionConnection_)
-        {
-          session_data_r.connection->decrease ();
-
-          isSessionConnection_ = false;
-        } // end ELSE IF
-        else
-          session_data_r.connection = NULL;
-      } // end ELSE
-
-continue_2:
+//continue_2:
       this->notify (STREAM_SESSION_MESSAGE_ABORT);
 
       break;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
-
-      if (!session_data_r.connection)
-        goto continue_3;
-
-      if (handle_ != ACE_INVALID_HANDLE)
+      if (connection_)
       {
-        // sanity check(s)
-        ACE_ASSERT (session_data_r.connection);
-
-        session_data_r.connection->close ();
-        session_data_r.connection->decrease (); session_data_r.connection = NULL;
-
-        handle_ = ACE_INVALID_HANDLE;
+        connection_->decrease (); connection_ = NULL;
       } // end IF
-      else
-      {
-        if (isSessionConnection_)
-        {
-          // sanity check(s)
-          ACE_ASSERT (session_data_r.connection);
 
-          session_data_r.connection->decrease ();
-
-          isSessionConnection_ = false;
-        } // end ELSE IF
-        else
-          session_data_r.connection = NULL;
-      } // end ELSE
-
-//      if (connectionHandle_ != ACE_INVALID_HANDLE)
-//      {
-//        // sanity check(s)
-//        ACE_ASSERT (session_data_r.connection);
-
-//        session_data_r.connection->close ();
-//        session_data_r.connection->decrease ();
-//        session_data_r.connection = NULL;
-
-//        connectionHandle_ = ACE_INVALID_HANDLE;
-//      } // end IF
-
-continue_3:
       break;
     }
     default:

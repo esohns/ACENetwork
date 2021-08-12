@@ -51,7 +51,7 @@ class Test_U_SessionMessage
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_AllocatorConfiguration,
+                                                 struct DHCP_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
@@ -65,7 +65,7 @@ class Test_U_SessionMessage
                          struct Stream_UserData*);
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);
-  inline virtual ~Test_U_SessionMessage () {};
+  inline virtual ~Test_U_SessionMessage () {}
 
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;

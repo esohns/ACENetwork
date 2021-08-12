@@ -21,6 +21,8 @@
 #ifndef HTTP_DEFINES_H
 #define HTTP_DEFINES_H
 
+#include "ace/Default_Constants.h"
+
 // stream
 #define HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING   "HTTPMarshal"
 #define HTTP_DEFAULT_MODULE_PARSER_NAME_STRING    "HTTPParser"
@@ -36,10 +38,10 @@
 
 #define HTTP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 
-#define HTTP_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST
-#define HTTP_DEFAULT_SERVER_PORT                  80
-
 // protocol
+#define HTTP_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST
+#define HTTP_DEFAULT_SERVER_PORT                  ACE_DEFAULT_HTTP_PORT
+
 #define HTTP_DEFAULT_PRINT_PROGRESSDOT            false
 #define HTTP_COMMAND_STRING_RESPONSE              "HTTP_RESPONSE"
 #define HTTP_PRT_VERSION_STRING_PREFIX            "HTTP/"
@@ -69,7 +71,9 @@
 #define HTTP_PRT_REGEX_CHUNK_LINE                 "^([[:xdigit:]]+)(?:(;.+)*)(?:\\r\\n)$"
 
 //////////////////////////////////////////
+// HTTPS
 
+// protocol
 #define HTTPS_DEFAULT_SERVER_PORT                 443
 
 #endif

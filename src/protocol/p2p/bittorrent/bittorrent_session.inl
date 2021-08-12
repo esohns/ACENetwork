@@ -30,9 +30,9 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
-#endif
+#endif // HAVE_CONFIG_H
 
 #include "net_client_defines.h"
 
@@ -786,11 +786,138 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerUserDataType,
                      ControllerInterfaceType
 #if defined (GUI_SUPPORT)
+                     ,CBDataType>::choke (Net_ConnectionId_t id_in,
+#else
+                     >::choke (Net_ConnectionId_t id_in,
+#endif // GUI_SUPPORT
+                                          bool choke_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::choke"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration->allocatorConfiguration);
+
+  struct BitTorrent_PeerRecord* record_p = NULL;
+  struct BitTorrent_PeerMessageData* data_p = NULL;
+  typename PeerStreamType::MESSAGE_T::DATA_T* data_container_p = NULL;
+  typename PeerStreamType::MESSAGE_T* message_p = NULL;
+  ACE_Message_Block* message_block_p = NULL;
+  ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+
+  ACE_NEW_NORETURN (record_p,
+                    struct BitTorrent_PeerRecord ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    goto error;
+  } // end IF
+  record_p->type = (choke_in ? BITTORRENT_MESSAGETYPE_CHOKE
+                             : BITTORRENT_MESSAGETYPE_UNCHOKE);
+
+  if (!getConnectionAndMessage (id_in,
+                                istream_connection_p,
+                                message_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to BitTorrent_Session_T::getConnectionAndMessage, returning\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (istream_connection_p); ACE_ASSERT (message_p);
+  data_container_p =
+      &const_cast<typename PeerStreamType::MESSAGE_T::DATA_T&> (message_p->getR ());
+  data_p =
+      &const_cast<struct BitTorrent_PeerMessageData&> (data_container_p->getR ());
+  data_p->peerRecord = record_p;
+  record_p = NULL;
+
+  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
+  message_block_p = message_p;
+  try {
+    istream_connection_p->send (message_block_p);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IStreamConnection_T::send(), returning\n")));
+    goto error;
+  }
+  message_p = NULL;
+
+  // clean up
+  istream_connection_p->decrease ();
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: interested in peer (id was: %d)...\n"),
+              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
+                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              id_in));
+
+  return;
+
+error:
+  if (record_p)
+    delete record_p;
+  if (message_p)
+    message_p->release ();
+  if (istream_connection_p)
+    istream_connection_p->decrease ();
+}
+
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerHandlerModuleType,
+          typename TrackerHandlerModuleType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
+          typename PeerConnectorType,
+          typename TrackerConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
+void
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
+                     PeerStreamType,
+                     TrackerStreamType,
+                     StreamStatusType,
+                     PeerHandlerModuleType,
+                     TrackerHandlerModuleType,
+                     PeerConnectionType,
+                     TrackerConnectionType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
+                     PeerConnectorType,
+                     TrackerConnectorType,
+                     ConfigurationType,
+                     StateType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
                      ,CBDataType>::interested (Net_ConnectionId_t id_in,
 #else
                      >::interested (Net_ConnectionId_t id_in,
 #endif // GUI_SUPPORT
-                                               bool interedted_in)
+                                               bool interested_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::interested"));
 
@@ -814,7 +941,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     goto error;
   } // end IF
-  record_p->type = (interedted_in ? BITTORRENT_MESSAGETYPE_INTERESTED
+  record_p->type = (interested_in ? BITTORRENT_MESSAGETYPE_INTERESTED
                                   : BITTORRENT_MESSAGETYPE_NOT_INTERESTED);
 
   if (!getConnectionAndMessage (id_in,
@@ -979,6 +1106,205 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("%s: requested chunk (piece %u, begin %u, length %u) from peer (id was: %d)...\n"),
+  //            ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
+  //                                     ACE_DIRECTORY_SEPARATOR_CHAR)),
+  //            index_in,
+  //            begin_in,
+  //            length_in,
+  //            id_in));
+
+  return;
+
+error:
+  if (record_p)
+    delete record_p;
+  if (message_p)
+    message_p->release ();
+  if (istream_connection_p)
+    istream_connection_p->decrease ();
+}
+
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerHandlerModuleType,
+          typename TrackerHandlerModuleType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
+          typename PeerConnectorType,
+          typename TrackerConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
+void
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
+                     PeerStreamType,
+                     TrackerStreamType,
+                     StreamStatusType,
+                     PeerHandlerModuleType,
+                     TrackerHandlerModuleType,
+                     PeerConnectionType,
+                     TrackerConnectionType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
+                     PeerConnectorType,
+                     TrackerConnectorType,
+                     ConfigurationType,
+                     StateType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::piece (Net_ConnectionId_t id_in,
+#else
+                     >::piece (Net_ConnectionId_t id_in,
+#endif // GUI_SUPPORT
+                                          unsigned int index_in,
+                                          unsigned int begin_in,
+                                          unsigned int length_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::piece"));
+
+  // sanity check(s)
+  ACE_ASSERT (id_in);
+  ACE_ASSERT (length_in);
+
+  struct BitTorrent_PeerRecord* record_p = NULL;
+  struct BitTorrent_PeerMessageData* data_p = NULL;
+  typename PeerStreamType::MESSAGE_T::DATA_T* data_container_p = NULL;
+  typename PeerStreamType::MESSAGE_T* message_p = NULL;
+  ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+  unsigned int missing_bytes = length_in, offset = 0;
+  BitTorrent_PiecesConstIterator_t iterator;
+  ACE_Message_Block* message_block_p = NULL, *message_block_2 = NULL, *message_block_3 = NULL;
+  BitTorrent_PieceChunksConstIterator_t iterator_2;
+
+  ACE_NEW_NORETURN (record_p,
+                    struct BitTorrent_PeerRecord ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    goto error;
+  } // end IF
+  record_p->type = BITTORRENT_MESSAGETYPE_PIECE;
+  record_p->piece.index = index_in;
+  record_p->piece.begin = begin_in;
+
+  if (!getConnectionAndMessage (id_in,
+                                istream_connection_p,
+                                message_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to BitTorrent_Session_T::getConnectionAndMessage, returning\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (istream_connection_p); ACE_ASSERT (message_p);
+  data_container_p =
+      &const_cast<typename PeerStreamType::MESSAGE_T::DATA_T&> (message_p->getR ());
+  data_p =
+      &const_cast<struct BitTorrent_PeerMessageData&> (data_container_p->getR ());
+  data_p->peerRecord = record_p;
+  record_p = NULL;
+
+  // attach chunk
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+    iterator = inherited::state_.pieces.begin ();
+    std::advance (iterator, index_in);
+    // sanity check(s)
+    if (unlikely (!BitTorrent_Tools::isPieceComplete ((*iterator).length,
+                                                      (*iterator).chunks)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("requested piece (was: %u) is incomplete, returning\n"),
+                  index_in));
+      goto error;
+    } // end IF
+    iterator_2 = (*iterator).chunks.begin ();
+    while ((*iterator_2).offset < begin_in)
+      ++iterator_2;
+    if ((*iterator_2).offset > begin_in)
+      --iterator_2;
+    ACE_ASSERT (((*iterator_2).offset <= begin_in) && ((*iterator_2).offset + (*iterator_2).data->total_length () > begin_in));
+    message_block_p = (*iterator_2).data->duplicate ();
+    if (!message_block_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory, returning\n")));
+      goto error;
+    } // end IF
+    offset = begin_in - (*iterator_2).offset;
+    ACE_ASSERT (offset < message_block_p->length ());
+    message_block_p->rd_ptr (offset);
+    message_block_2 = message_block_p;
+    while (missing_bytes)
+    {
+      if (message_block_2->length () >= missing_bytes)
+      {
+        message_block_2->length (missing_bytes);
+        break;
+      } // end IF
+      missing_bytes -= message_block_2->length ();
+      if (message_block_2->cont ())
+      {
+        message_block_2 = message_block_2->cont ();
+        continue;
+      } // end IF
+      std::advance (iterator_2, 1);
+      ACE_ASSERT (iterator_2 != (*iterator).chunks.end ()); // requested too much data !
+      message_block_3 = (*iterator_2).data->duplicate ();
+      if (!message_block_3)
+      {
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate memory, returning\n")));
+        message_block_p->release (); message_block_p = NULL;
+        goto error;
+      } // end IF
+      message_block_2->cont (message_block_3);
+      message_block_2 = message_block_3;
+    } // end WHILE
+    if (message_block_2->cont ())
+    {
+      message_block_2->cont ()->release (); message_block_2->cont (NULL);
+    } // end IF
+    ACE_ASSERT (message_block_p->total_length () == length_in);
+    message_p->cont (message_block_p);
+  } // end lock scope
+
+  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
+  message_block_p = message_p;
+  try {
+    istream_connection_p->send (message_block_p);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IStreamConnection_T::send(), returning\n")));
+    goto error;
+  }
+  message_p = NULL;
+
+  // clean up
+  istream_connection_p->decrease ();
+
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("%s: sent chunk (piece %u, begin %u, length %u) to peer (id was: %d)...\n"),
   //            ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
   //                                     ACE_DIRECTORY_SEPARATOR_CHAR)),
   //            index_in,
@@ -2231,13 +2557,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
-#if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%u: %s\n"),
-              id_in,
-              ACE_TEXT (BitTorrent_Tools::HandShakeToString (record_in).c_str ())));
-#endif // _DEBUG
-
   // compare handshake peer id with tracker peer id
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     ACE_ASSERT (inherited::state_.trackerRequestResponse);
@@ -2271,7 +2590,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       } // end IF
     } // end IF
     else
-      ACE_DEBUG ((LM_INFO,
+      ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%u: tracker response had binary \"peers\" model: cannot validate handshake peer_id (was: \"%s\"), continuing\n"),
                   id_in,
                   ACE_TEXT (record_in.peer_id.c_str ())));
@@ -2367,6 +2686,29 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       requestNextPiece (id_in);
       break;
     }
+    case BITTORRENT_MESSAGETYPE_INTERESTED:
+    {
+      BitTorrent_PeerStatusIterator_t iterator;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
+        (*iterator).second.peer_interested = true;
+        (*iterator).second.peer_choking = false;
+      } // end lock scope
+      choke (id_in,
+             false);
+      break;
+    }
+    case BITTORRENT_MESSAGETYPE_NOT_INTERESTED:
+    {
+      BitTorrent_PeerStatusIterator_t iterator;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
+        (*iterator).second.peer_interested = false;
+      } // end lock scope
+      break;
+    }
     case BITTORRENT_MESSAGETYPE_HAVE:
     {
       BitTorrent_PeerPiecesIterator_t iterator;
@@ -2443,6 +2785,22 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       if (send_interested_b)
         interested (id_in,
                     true);
+      break;
+    }
+    case BITTORRENT_MESSAGETYPE_REQUEST:
+    {
+      BitTorrent_PeerStatusIterator_t iterator;
+      bool send_piece_b = true;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        iterator = inherited::state_.peerStatus.find (id_in);
+        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
+        send_piece_b = !(*iterator).second.peer_choking;
+      } // end lock scope
+      if (send_piece_b)
+        piece (id_in,
+               record_in.request.index,
+               record_in.request.begin,
+               record_in.request.length);
       break;
     }
     case BITTORRENT_MESSAGETYPE_PIECE:

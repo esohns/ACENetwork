@@ -35,7 +35,6 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_file_tools.h"
-//#include "ace/Synch.h"
 #include "common_timer_manager.h"
 
 #include "common_ui_gtk_common.h"
@@ -845,7 +844,45 @@ idle_finalize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
-  ACE_UNUSED_ARG (userData_in);
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct DHCPClient_UI_CBData* data_p =
+    static_cast<struct DHCPClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p->configuration);
+
+  DHCPClient_ConnectionManager_t* connection_manager_p =
+    DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
+  {
+    DHCPClient_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
+#else
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
+#endif // ACE_WIN32 || ACE_WIN64
+    if (iconnection_p)
+    {
+      iconnection_p->close ();
+      iconnection_p->decrease (); iconnection_p = NULL;
+    } // end ELSE
+    data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
+  } // end IF
+  if (data_p->configuration->handle != ACE_INVALID_HANDLE)
+  {
+    DHCPClient_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+    if (iconnection_p)
+    {
+      iconnection_p->close ();
+      iconnection_p->decrease (); iconnection_p = NULL;
+    } // end ELSE
+    data_p->configuration->handle = ACE_INVALID_HANDLE;
+  } // end IF
 
   // leave GTK
   gtk_main_quit ();
@@ -880,6 +917,22 @@ idle_update_info_display_cb (gpointer userData_in)
     { ACE_ASSERT (event_p);
       switch (*event_p)
       {
+        case COMMON_UI_EVENT_DATA:
+        {
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
+          ACE_ASSERT (spin_button_p);
+          gtk_spin_button_set_value (spin_button_p,
+                                     static_cast<gdouble> (data_p->progressData.transferred));
+
+          spin_button_p =
+              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          break;
+        }
         case COMMON_UI_EVENT_STARTED:
         {
           spin_button_p =
@@ -906,27 +959,22 @@ idle_update_info_display_cb (gpointer userData_in)
           is_session_message = true;
           break;
         }
-        case COMMON_UI_EVENT_DATA:
-        {
-          spin_button_p =
-            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
-          ACE_ASSERT (spin_button_p);
-          gtk_spin_button_set_value (spin_button_p,
-                                     static_cast<gdouble> (data_p->progressData.transferred));
-
-          spin_button_p =
-              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
-          ACE_ASSERT (spin_button_p);
-
-          break;
-        }
         case COMMON_UI_EVENT_STOPPED:
         {
           spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          is_session_message = true;
+          break;
+        }
+        case COMMON_UI_EVENT_CONNECT:
+        case COMMON_UI_EVENT_DISCONNECT:
+        {
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
           ACE_ASSERT (spin_button_p);
 
           is_session_message = true;
@@ -1100,24 +1148,25 @@ action_discover_activate_cb (GtkAction* action_in,
                                                                                          1);
 
   // retrieve buffer
-  spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
-  ACE_ASSERT (spin_button_p);
-
+  //spin_button_p =
+  //  GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+  //                                           ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
+  //ACE_ASSERT (spin_button_p);
+  Net_ConnectionConfigurationsIterator_t iterator_3 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+  ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
   size_t pdu_size_i =
-    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
-    (*iterator_2).second->allocatorConfiguration->paddingBytes;
-
+    (*iterator_3).second->allocatorConfiguration->defaultBufferSize +
+    (*iterator_3).second->allocatorConfiguration->paddingBytes;
   //(*iterator_2).second->PDUSize =
   //  static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
 
   Test_U_Message* message_p = NULL;
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
+    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
-  if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
+  if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1160,7 +1209,7 @@ allocate:
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
   message_p->initialize (DHCP_record,
-                         message_p->id (),
+                         message_p->sessionId (),
                          NULL);
 
   DHCPClient_IConnectionManager_t* iconnection_manager_p =
@@ -1199,11 +1248,8 @@ allocate:
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;
 
-  iterator_2 =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress,
+      iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1211,7 +1257,7 @@ allocate:
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1878,24 +1924,24 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //    bool write_only = (*iterator_3).second.writeOnly;
 //    (*iterator_3).second.writeOnly = false;
     //data_p->configuration->listenerConfiguration.address = (ACE_INET_Addr&)ACE_Addr::sap_any;
-//    int result = -1;
-//    result =
-//      (*iterator_3).second.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//                                              // *IMPORTANT NOTE*: this needs to be INADDR_ANY (0.0.0.0) (instead of
-//                                              //                   255.255.255.255: why ?)
-//                                              static_cast<ACE_UINT32> (INADDR_ANY),
-//#else
-//                                              static_cast<ACE_UINT32> (INADDR_BROADCAST),
-//#endif // ACE_WIN32 || ACE_WIN64
-//                                              1,
-//                                              0);
-//    if (result == -1)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-//      goto continue_;
-//    } // end IF
+    int result = -1;
+    result =
+      NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                                                                                   // *IMPORTANT NOTE*: this needs to be INADDR_ANY (0.0.0.0) (instead of
+                                                                                   //                   255.255.255.255: why ?)
+                                                                                   static_cast<ACE_UINT32> (INADDR_ANY),
+#else
+                                                                                   static_cast<ACE_UINT32> (INADDR_BROADCAST),
+#endif // ACE_WIN32 || ACE_WIN64
+                                                                                   1,
+                                                                                   0);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+      goto continue_;
+    } // end IF
 
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       iconnector_p = &connector_bcast;
@@ -1917,7 +1963,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                &data_p->configuration->userData);
 //    handle_connection_manager = true;
 
-    // step2: connect (unicast)
+    // step2: connect (broadcast)
     data_p->configuration->handle =
         iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
@@ -1978,7 +2024,10 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     // connect (broadcast) ?
     if (!data_p->configuration->protocolConfiguration.requestBroadcastReplies)
+    {
+      failed = false;
       goto continue_;
+    } // end IF
     iterator_3 =
           data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
@@ -2064,7 +2113,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
               reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
 #else
               static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
           iconnection_p->decrease (); iconnection_p = NULL;
           break;
         } // end IF
@@ -2096,7 +2145,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                 ACE_TEXT ("%d: opened UDP socket: %s\n"),
                 data_p->configuration->broadcastHandle,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     failed = false;
 

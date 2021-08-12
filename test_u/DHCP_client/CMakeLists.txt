@@ -126,7 +126,6 @@ set (${EXECUTABLE}_EXE_SRCS
      test_u_dhcp_client_defines.h
      test_u_eventhandler.cpp
      test_u_eventhandler.h
-     test_u_listener_common.h
      test_u_message.cpp
      test_u_message.h
      test_u_module_eventhandler.cpp

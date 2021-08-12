@@ -153,7 +153,7 @@ typedef DHCPClient_Subscribers_t::const_iterator DHCPClient_SubscribersIterator_
 //                                struct DHCP_AllocatorConfiguration> DHCPClient_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Common_AllocatorConfiguration,
+                                          struct DHCP_AllocatorConfiguration,
                                           Stream_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> DHCPClient_MessageAllocator_t;
@@ -251,10 +251,10 @@ struct DHCPClient_Configuration
 #else
    : Test_U_Configuration ()
 #endif // GUI_SUPPORT
+   , allocatorConfiguration ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , parserConfiguration ()
-//   , allocatorConfiguration ()
    , streamConfiguration ()
 //   , listenerConfiguration ()
    , broadcastHandle (ACE_INVALID_HANDLE)
@@ -262,6 +262,7 @@ struct DHCPClient_Configuration
    , handle (ACE_INVALID_HANDLE)
   {}
 
+  struct DHCP_AllocatorConfiguration           allocatorConfiguration;
   // **************************** signal data **********************************
   struct DHCPClient_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
@@ -269,7 +270,6 @@ struct DHCPClient_Configuration
   // **************************** parser data **********************************
   struct Common_ParserConfiguration            parserConfiguration;
   // **************************** stream data **********************************
-//  struct DHCP_AllocatorConfiguration allocatorConfiguration;
   DHCPClient_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
   struct DHCP_ProtocolConfiguration            protocolConfiguration;

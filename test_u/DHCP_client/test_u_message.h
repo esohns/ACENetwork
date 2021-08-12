@@ -49,7 +49,7 @@ class Test_U_Message
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_AllocatorConfiguration,
+                                                 struct DHCP_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;

@@ -17,8 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "stdafx.h"
 
-#ifndef TEST_U_LISTENER_COMMON_H
-#define TEST_U_LISTENER_COMMON_H
-
-#endif
+#include "pcp_sessionmessage.h"

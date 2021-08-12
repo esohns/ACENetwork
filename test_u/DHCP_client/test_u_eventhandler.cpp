@@ -219,6 +219,20 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
   switch (sessionMessage_in.type ())
   {
+    case STREAM_SESSION_MESSAGE_CONNECT:
+    {
+#if defined (GTK_USE)
+      event_e = COMMON_UI_EVENT_CONNECT;
+#endif // GTK_USE
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_DISCONNECT:
+    {
+#if defined (GTK_USE)
+      event_e = COMMON_UI_EVENT_DISCONNECT;
+#endif // GTK_USE
+      break;
+    }
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)

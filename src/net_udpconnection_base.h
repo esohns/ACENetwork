@@ -130,7 +130,7 @@ class Net_UDPConnectionBase_T
   // helper method(s)
 #if defined (ACE_LINUX)
   void processErrorQueue ();
-#endif
+#endif // ACE_LINUX
 };
 
 //////////////////////////////////////////
@@ -227,12 +227,12 @@ class Net_AsynchUDPConnectionBase_T
   //using inherited2::initialize;
 
   // override (part of) Net_IAsynchSocketHandler
-  virtual bool initiate_read ();
+  //virtual bool initiate_read ();
 
   // helper method(s)
 #if defined (ACE_LINUX)
   void processErrorQueue ();
-#endif
+#endif // ACE_LINUX
 };
 
 // include template definition

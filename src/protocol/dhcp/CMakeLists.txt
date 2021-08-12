@@ -1,8 +1,8 @@
 ﻿include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/PreDHCPClientImplementation.cmake)
 
-if (UNIX)
- pkg_check_modules (PKG_FFMPEG REQUIRED libavutil)
-endif (UNIX)
+#if (UNIX)
+# pkg_check_modules (PKG_FFMPEG REQUIRED libavutil)
+#endif (UNIX)
 
 add_library (${PROJECT_NAME}_Protocol_DHCP STATIC "")
 
@@ -33,8 +33,8 @@ endif ()
 add_definitions (-DNET_HAS_DLL)
 
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+# target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${BIND9_CFLAGS})
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC /usr/include/bind9)
@@ -225,7 +225,7 @@ export (TARGETS ${PROJECT_NAME}_Protocol_DHCP
 
 ############### install files ################
 install (FILES
-         dhcp_bisector.h
+#         dhcp_bisector.h
          dhcp_codes.h
          dhcp_common.h
          dhcp_common_modules.h
@@ -238,8 +238,8 @@ install (FILES
          dhcp_scanner.h
          dhcp_message.h
          dhcp_message.inl
-         dhcp_module_bisector.h
-         dhcp_module_bisector.inl
+#         dhcp_module_bisector.h
+#         dhcp_module_bisector.inl
          dhcp_module_discover.h
          dhcp_module_discover.inl
          dhcp_module_parser.h

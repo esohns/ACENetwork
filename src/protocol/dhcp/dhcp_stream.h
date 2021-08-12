@@ -98,7 +98,7 @@ class DHCP_Stream_T
 
  public:
   DHCP_Stream_T ();
-  inline virtual ~DHCP_Stream_T () { inherited::shutdown (); };
+  inline virtual ~DHCP_Stream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list

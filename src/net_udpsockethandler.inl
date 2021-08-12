@@ -215,8 +215,8 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #endif // ACE_LINUX
   result =
     inherited2::peer_.open ((configuration_p->writeOnly ? (configuration_p->sourcePort ? source_SAP
-                                                                                                     : inet_addr_sap_any)
-                                                               : configuration_p->listenAddress), // local SAP
+                                                                                       : inet_addr_sap_any)
+                                                        : configuration_p->listenAddress), // local SAP
                             ACE_PROTOCOL_FAMILY_INET,                                                    // protocol family
                             0,                                                                           // protocol
                             1);                                                                          // reuse_addr
@@ -225,8 +225,8 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString ((configuration_p->writeOnly ? (configuration_p->sourcePort ? source_SAP
-                                                                                                                                        : inet_addr_sap_any)
-                                                                                                  : configuration_p->listenAddress)).c_str ())));
+                                                                                                                          : inet_addr_sap_any)
+                                                                                           : configuration_p->listenAddress)).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)

@@ -591,32 +591,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
 
 }
 
-//template <typename HandlerType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename TimerManagerType,
-//          typename UserDataType>
-//Net_AsynchUDPConnectionBase_T<HandlerType,
-//                              ConfigurationType,
-//                              StateType,
-//                              StatisticContainerType,
-//                              HandlerConfigurationType,
-//                              StreamType,
-//                              TimerManagerType,
-//                              UserDataType>::Net_AsynchUDPConnectionBase_T ()
-// : inherited (true)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::Net_AsynchUDPConnectionBase_T"));
-
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-
-//  ACE_NOTREACHED (return;)
-//}
-
 template <typename SocketHandlerType,
           typename ConfigurationType,
           typename StateType,
@@ -666,7 +640,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
           (error != ECONNRESET))              // 10054: reset by peer
 #else
       if (error != ECONNRESET) // 104: reset by peer
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
                     this->id ()));
@@ -713,11 +687,14 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     // clean up
     delete fake_result_p;
   } // end ELSE
-  ACE_ASSERT (this->count () >= 2); // connection manager, read operation
-                                    // (+ stream module(s))
-  this->decrease ();
 
 continue_:
+  ACE_ASSERT (this->count () >= 2); // connection manager, read operation
+                                    // (+ stream module(s))
+
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
+    this->decrease (); // there is no read operation
+
   return;
 
 error:
@@ -732,7 +709,9 @@ error:
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
+
+  this->decrease ();
 }
 
 template <typename SocketHandlerType,
@@ -836,7 +815,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 send:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     // *NOTE*: this is a fire-and-forget API for message_block_p
     result_2 =
       inherited::outputStream_.send (message_block_p,                      // data
@@ -854,7 +833,7 @@ send:
       // *WARNING*: this could fail on multi-threaded proactors
       if (error == EAGAIN) // 11   : happens on Linux
         goto send;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
                   message_block_p->total_length ()));
@@ -1000,41 +979,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                    message_block);
 }
 
-template <typename SocketHandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_AsynchUDPConnectionBase_T<SocketHandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              StreamType,
-                              UserDataType>::initiate_read ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::initiate_read"));
-
-  inherited::increase ();
-  if (unlikely (!inherited::initiate_read ()))
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(0x%@): \"%m\", aborting\n"),
-                id (), inherited::HANDLER_T::get_handle ()));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(%d): \"%m\", aborting\n"),
-                this->id (), inherited::HANDLER_T::get_handle ()));
-#endif
-    inherited::decrease ();
-    return false;
-  } // end IF
-
-  return true;
-}
-
 #if defined (ACE_LINUX)
 template <typename SocketHandlerType,
           typename ConfigurationType,
@@ -1156,4 +1100,4 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     } // end SWITCH
   } // end FOR
 }
-#endif
+#endif // ACE_LINUX

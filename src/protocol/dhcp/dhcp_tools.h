@@ -48,7 +48,7 @@ typedef void (*Net_DHClientCallback_t) (dhcpctl_handle, dhcpctl_status, void*);
 class DHCP_Tools
 {
  public:
-  inline virtual ~DHCP_Tools () {};
+  inline virtual ~DHCP_Tools () {}
 
   // debug info
   static std::string dump (const DHCP_Record&);

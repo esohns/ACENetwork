@@ -620,7 +620,7 @@ do_work (bool requestBroadcastReplies_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_AllocatorConfiguration> heap_allocator;
+                         struct DHCP_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1029,6 +1029,7 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ()),
                 status));
+    (*iterator_2).second.second.connection->decrease ();
     return;
   } // end IF
   // step1c: wait for the connection stream to finish initializing
@@ -1039,6 +1040,7 @@ do_work (bool requestBroadcastReplies_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(%@), returning\n"),
                 (*iterator_2).second.second.connection));
+    (*iterator_2).second.second.connection->decrease ();
     return;
   } // end IF
   istream_connection_p->wait (STREAM_STATE_RUNNING,
@@ -1072,6 +1074,7 @@ do_work (bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+      (*iterator_2).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1087,6 +1090,7 @@ do_work (bool requestBroadcastReplies_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
+      (*iterator_2).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1128,6 +1132,7 @@ do_work (bool requestBroadcastReplies_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
+      (*iterator_2).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1184,6 +1189,7 @@ allocate:
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
 //      message_data_container_p->decrease ();
+      (*iterator_2).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1223,7 +1229,7 @@ allocate:
     // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
     //  message_p->initialize (message_data_container_p,
     message_p->initialize (DHCP_record,
-                           message_p->id (),
+                           message_p->sessionId (),
                            NULL);
 
     DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1279,6 +1285,7 @@ allocate:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
+      (*iterator_2).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1312,22 +1319,16 @@ allocate:
   connection_manager_p->stop (false,  // wait ?
                               true,   // high priority ?
                               true);  // locked access ?
-  connection_manager_p->wait ();
-  Common_Tools::finalizeEventDispatch (useReactor_in,
-                                       !useReactor_in,
-                                       group_id);
-
-  if ((*iterator_2).second.second.connection)
-  {
-//    configuration_in.moduleHandlerconfiguration_in.connection->close ();
-    (*iterator_2).second.second.connection->decrease ();
-    (*iterator_2).second.second.connection = NULL;
-  } // end IF
+  connection_manager_p->abort (false); // wait ?
+  (*iterator_2).second.second.connection->decrease ();
   if (iconnection_p)
   {
-//    iconnection_p->close ();
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
+  connection_manager_p->wait ();
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                       event_dispatch_state_s.reactorGroupId,
+                                       true);
 
 //  if (!UIDefinitionFileName_in.empty ())
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);

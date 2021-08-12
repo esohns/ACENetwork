@@ -50,14 +50,15 @@
 // *TODO*: use platform macros wherever possible
 #define NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE                  (ETH_ALEN * 2) + (ETH_ALEN - 1) + 1 // "ab:cd:ef:gh:ij:kl\0"
 
+#define NET_ADDRESS_IPV4_MULTICAST                                       "224.0.0.1"
+
+#define NET_ADDRESS_IPV6_ADDRESS_BYTES                                 16
+
+#define NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING                 "Address"
 #if defined (ACE_LINUX)
 // *NOTE*: binding to these ports requires the CAP_NET_BIND_SERVICE capability
 #define NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT                            1023
 #endif // ACE_LINUX
-//#define NET_ADDRESS_IP_BROADCAST                        "255.255.255.255"
-#define NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING                 "Address"
-
-#define NET_ADDRESS_DEFAULT_IP_MULTICAST                               "224.0.0.1"
 #define NET_ADDRESS_DEFAULT_PORT                                       10001
 
 // protocols

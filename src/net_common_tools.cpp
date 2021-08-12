@@ -1963,7 +1963,8 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
   struct _GUID result = GUID_NULL;
 
   // sanity check(s)
-  ACE_ASSERT (interfaceIndex_in);
+  if (!interfaceIndex_in)
+    return GUID_NULL;
 
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   union _NET_LUID_LH interface_luid_u;
@@ -1972,7 +1973,7 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
                                                 &interface_luid_u);
   if (unlikely (result_2 != NO_ERROR))
   {
-    ACE_DEBUG ((LM_DEBUG,
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ConvertInterfaceIndexToLuid(%u), aborting\n"),
                 interfaceIndex_in,
                 ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
@@ -1982,7 +1983,7 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
                                          &result);
   if (unlikely (result_2 != NO_ERROR))
   {
-    ACE_DEBUG ((LM_DEBUG,
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ConvertInterfaceLuidToGuid(%q), aborting\n"),
                 interface_luid_u.Value,
                 ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
@@ -2100,6 +2101,7 @@ Net_Common_Tools::adapterName (const std::string& friendlyName_in)
 
   return result;
 }
+
 NET_IFINDEX
 Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
 {
@@ -2109,7 +2111,8 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
   NET_IFINDEX result = 0;
 
   // sanity check(s)
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  if (interfaceIdentifier_in.empty ())
+    return 0;
   struct _GUID interface_identifier_s = GUID_NULL, interface_identifier_2 = GUID_NULL;
   if (Common_Tools::isGUID (interfaceIdentifier_in))
     interface_identifier_s =
@@ -2165,7 +2168,6 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
       result = adapter_info_2->Index;
       break;
     } // end ELSE IF
-
     adapter_info_2 = adapter_info_2->Next;
   } // end WHILE
 
