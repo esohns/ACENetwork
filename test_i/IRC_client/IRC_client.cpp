@@ -781,7 +781,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step3: initialize client connector
   IRC_Client_ConnectionConfiguration connection_configuration;
-  connection_configuration.address = serverAddress_in;
+  connection_configuration.socketConfiguration.address = serverAddress_in;
 
   //connection_configuration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
   connection_configuration.statisticReportingInterval =
@@ -790,7 +790,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
-  connection_configuration.initialize (configuration_in.streamConfiguration);
+  connection_configuration.streamConfiguration =
+    &configuration_in.streamConfiguration;
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
@@ -811,7 +812,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   else
     connector_p = &asynch_connector;
   //if (!connector_p->initialize (connector_configuration))
-  if (!connector_p->initialize (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second)))
+  if (!connector_p->initialize (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -848,7 +849,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // step4: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
+  connection_manager_p->set (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
                              NULL);
 
   // event loop(s):

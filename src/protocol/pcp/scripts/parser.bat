@@ -12,7 +12,7 @@ setlocal enabledelayedexpansion
 pushd . >NUL 2>&1
 
 @rem set BisonEXE="%ProgramFiles(x86)%\GnuWin32\bin\bison.exe"
-set BisonEXE="C:\cygwin64\bin\bison.exe"
+set BisonEXE="H:\bin\flex_bison\win_bison.exe"
 if exist %BisonEXE% goto Next
 echo invalid file ^(was: "%BisonEXE%"^)^, exiting
 goto Failed
@@ -43,16 +43,16 @@ if %ERRORLEVEL% NEQ 0 (
  goto Failed
 )
 
-@move /Y http_parser.cpp .\.. >NUL
-@move /Y http_parser.h .\.. >NUL
+@move /Y pcp_parser.cpp .\.. >NUL
+@move /Y pcp_parser.h .\.. >NUL
 @rem @del /F /Q location.hh >NUL
 @rem @del /F /Q position.hh >NUL
 @rem @del /F /Q stack.hh >NUL
-if %ERRORLEVEL% NEQ 0 (
- echo failed to delete parser file^(s^)^, exiting
- set RC=%ERRORLEVEL%
- goto Failed
-)
+@rem if %ERRORLEVEL% NEQ 0 (
+@rem  echo failed to delete parser file^(s^)^, exiting
+@rem  set RC=%ERRORLEVEL%
+@rem  goto Failed
+@rem )
 
 goto Clean_Up
 

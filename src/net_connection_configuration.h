@@ -56,8 +56,7 @@ struct Net_UserData;
 struct Net_SocketConfigurationBase
 {
   Net_SocketConfigurationBase ()
-   : allocatorConfiguration (NULL)
-   , bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
+   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
    , interfaceIdentifier (GUID_NULL)
@@ -71,53 +70,50 @@ struct Net_SocketConfigurationBase
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
    , domain (PF_INET)
    , type (SOCK_STREAM)
-   , protocol (0)
-   , statisticCollectionInterval (0,
-                                  NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL_MS * 1000)
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S,
-                                 0)
-   , useThreadPerConnection (false)
+   , protocol (IPPROTO_TCP)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     //interfaceIdentifier =
     //  Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
   }
-  inline virtual ~Net_SocketConfigurationBase () {}
+  //inline virtual ~Net_SocketConfigurationBase () {}
 
-  struct Common_AllocatorConfiguration* allocatorConfiguration;
-  int                                   bufferSize; // socket buffer size (I/O)
+  int          bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID                          interfaceIdentifier; // NIC-
+  struct _GUID interfaceIdentifier; // NIC-
 #else
-  std::string                           interfaceIdentifier; // NIC-
+  std::string  interfaceIdentifier; // NIC-
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-  std::string                           interfaceIdentifier; // NIC-
+  std::string  interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64
   // *TODO*: win32 udp sockets do not linger
-  bool                                  linger;
-  bool                                  useLoopBackDevice;   // (if any)
+  bool         linger;
+  bool         useLoopBackDevice;   // (if any)
 
-  int                                   domain;   // socket(3) parameter
-  int                                   type;     // socket(3) parameter
-  int                                   protocol; // socket(3) parameter
-  // *TODO*: move these into Net_SocketConfiguration_T ASAP
-  ACE_Time_Value                        statisticCollectionInterval; // [ACE_Time_Value::zero: off]
-  ACE_Time_Value                        statisticReportingInterval; // [ACE_Time_Value::zero: off]
-  bool                                  useThreadPerConnection;
+  int          domain;   // socket(3) parameter
+  int          type;     // socket(3) parameter
+  int          protocol; // socket(3) parameter
 };
 
 template <enum Net_TransportLayerType TransportLayerType_e>
 class Net_SocketConfiguration_T
  : public Net_SocketConfigurationBase
 {
+  typedef Net_SocketConfigurationBase inherited;
+
  public:
   Net_SocketConfiguration_T ()
-   : Net_SocketConfigurationBase ()
-  {}
-  inline virtual ~Net_SocketConfiguration_T () {}
+   : inherited ()
+  { // *IMPORTANT NOTE*: only the template specializations are currently
+    //                   supported
+    ACE_ASSERT (false);
+    ACE_NOTSUP;
+    ACE_NOTREACHED (return;)
+  }
+  //inline virtual ~Net_SocketConfiguration_T () {}
 };
 
 //////////////////////////////////////////
@@ -127,13 +123,15 @@ template <>
 class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK>
  : public Net_SocketConfigurationBase
 {
+  typedef Net_SocketConfigurationBase inherited;
+
  public:
   Net_SocketConfiguration_T ()
-   : Net_SocketConfigurationBase ()
+   : inherited ()
    , address ()
    , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
   {}
-  inline virtual ~Net_SocketConfiguration_T () {}
+  //inline virtual ~Net_SocketConfiguration_T () {}
 
   Net_Netlink_Addr address;
   int              protocol;
@@ -144,9 +142,11 @@ template <>
 class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
  : public Net_SocketConfigurationBase
 {
+  typedef Net_SocketConfigurationBase inherited;
+
  public:
   Net_SocketConfiguration_T ()
-   : Net_SocketConfigurationBase ()
+   : inherited ()
    , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
               static_cast<ACE_UINT32> (INADDR_ANY))
   {
@@ -163,7 +163,7 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
     } // end IF
   }
-  inline virtual ~Net_SocketConfiguration_T () {}
+  //inline virtual ~Net_SocketConfiguration_T () {}
 
   ACE_INET_Addr address; // listening/peer-
 };
@@ -172,9 +172,11 @@ template <>
 class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
  : public Net_SocketConfigurationBase
 {
+  typedef Net_SocketConfigurationBase inherited;
+
  public:
   Net_SocketConfiguration_T ()
-   : Net_SocketConfigurationBase ()
+   : inherited ()
    , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
 // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
 //                SO_LINGER
@@ -185,6 +187,9 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
    , sourcePort (0)
    , writeOnly (false) // *TODO*: remove ASAP
   {
+    type = SOCK_DGRAM;
+    protocol = IPPROTO_UDP;
+
     int result = -1;
 
     if (unlikely (useLoopBackDevice))
@@ -210,7 +215,7 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
     if (unlikely (writeOnly))
       listenAddress.reset ();
   }
-  inline virtual ~Net_SocketConfiguration_T () {}
+  //inline virtual ~Net_SocketConfiguration_T () {}
 
   // *IMPORTANT NOTE*: set this for asynchronous event dispatch; the socket
   //                   needs to be associated with the peer address, as the data
@@ -222,47 +227,74 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
   bool          writeOnly; // *TODO*: remove ASAP
 };
 
-#define NET_SOCKET_CONFIGURATION_TCP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>* > (X)
-#define NET_SOCKET_CONFIGURATION_UDP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>* > (X)
+//#define NET_SOCKET_CONFIGURATION_TCP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>* > (X)
+//#define NET_SOCKET_CONFIGURATION_UDP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>* > (X)
 
 //////////////////////////////////////////
 
-template <enum Net_TransportLayerType TransportLayerType_e>
-class Net_ConnectionConfigurationBase_T
- : public Net_SocketConfiguration_T<TransportLayerType_e>
+struct Net_ConnectionConfigurationBase
 {
- public:
-  Net_ConnectionConfigurationBase_T ()
-   : Net_SocketConfiguration_T<TransportLayerType_e> ()
+  Net_ConnectionConfigurationBase ()
+   : allocatorConfiguration (NULL)
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , generateUniqueIOModuleNames (false)
    , messageAllocator (NULL)
+   , statisticCollectionInterval (0,
+                                  NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL_MS * 1000)
+   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S,
+                                 0)
    , timerManager (NULL)
+   , useThreadPerConnection (false)
   {}
 
-  enum Common_EventDispatchType dispatch;
-  bool                          generateUniqueIOModuleNames; // stream-
-  Stream_IAllocator*            messageAllocator;
-  Common_ITimerCB_t*            timerManager;
+  struct Common_AllocatorConfiguration* allocatorConfiguration;
+  enum Common_EventDispatchType         dispatch;
+  bool                                  generateUniqueIOModuleNames; // stream-
+  Stream_IAllocator*                    messageAllocator;
+  ACE_Time_Value                        statisticCollectionInterval; // [ACE_Time_Value::zero: off]
+  ACE_Time_Value                        statisticReportingInterval; // [ACE_Time_Value::zero: off]
+  Common_ITimerCB_t*                    timerManager;
+  bool                                  useThreadPerConnection;
 };
+
+template <enum Net_TransportLayerType TransportLayerType_e>
+class Net_ConnectionConfiguration_T
+ : public Net_ConnectionConfigurationBase
+{
+  typedef Net_ConnectionConfigurationBase inherited;
+
+ public:
+  Net_ConnectionConfiguration_T ()
+   : inherited ()
+   , socketConfiguration ()
+  {}
+
+  // convenient types
+  typedef Net_SocketConfiguration_T<TransportLayerType_e> SOCKET_CONFIGURATION_T;
+
+  SOCKET_CONFIGURATION_T socketConfiguration;
+};
+
+#define NET_CONFIGURATION_TCP_CAST(X) static_cast<Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_TCP>* > (X)
+#define NET_CONFIGURATION_UDP_CAST(X) static_cast<Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_UDP>* > (X)
 
 //////////////////////////////////////////
 
 template <typename StreamConfigurationType, // *NOTE*: connection-
           enum Net_TransportLayerType TransportLayerType_e>
 class Net_StreamConnectionConfiguration_T
- : public Net_ConnectionConfigurationBase_T<TransportLayerType_e>
+ : public Net_ConnectionConfiguration_T<TransportLayerType_e>
 {
-  typedef Net_ConnectionConfigurationBase_T<TransportLayerType_e> inherited;
+  typedef Net_ConnectionConfiguration_T<TransportLayerType_e> inherited;
 
  public:
-  Net_StreamConnectionConfiguration_T ();
-  inline virtual ~Net_StreamConnectionConfiguration_T () {}
-
-  bool initialize (const StreamConfigurationType&);
+  Net_StreamConnectionConfiguration_T ()
+   : inherited ()
+   , streamConfiguration (NULL)
+  {}
+  //inline virtual ~Net_StreamConnectionConfiguration_T () {}
 
   StreamConfigurationType* streamConfiguration;
-  bool                     isInitialized_;
 };
 
 //////////////////////////////////////////
@@ -273,24 +305,24 @@ typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkSocketC
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPSocketConfiguration_t;
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPSocketConfiguration_t;
 
+#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+typedef Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkConnectionConfiguration_t;
+#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+typedef Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPConnectionConfiguration_t;
+
 typedef std::map<std::string,
-                 struct Net_SocketConfigurationBase*> Net_ConnectionConfigurations_t;
+                 struct Net_ConnectionConfigurationBase*> Net_ConnectionConfigurations_t;
 typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationsIterator_t;
 
 //#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-//typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkConnectionConfigurationBase_t;
+//typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
+//                                            NET_TRANSPORTLAYER_NETLINK> Net_NetlinkStreamConnectionConfiguration_t;
 //#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-//typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_TCP> Net_TCPConnectionConfigurationBase_t;
-//typedef Net_ConnectionConfigurationBase_T<NET_TRANSPORTLAYER_UDP> Net_UDPConnectionConfigurationBase_t;
-
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
-                                            NET_TRANSPORTLAYER_NETLINK> Net_NetlinkStreamConnectionConfiguration_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
-typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
-                                            NET_TRANSPORTLAYER_TCP> Net_TCPStreamConnectionConfiguration_t;
-typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
-                                            NET_TRANSPORTLAYER_UDP> Net_UDPStreamConnectionConfiguration_t;
+//typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
+//                                            NET_TRANSPORTLAYER_TCP> Net_TCPStreamConnectionConfiguration_t;
+//typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
+//                                            NET_TRANSPORTLAYER_UDP> Net_UDPStreamConnectionConfiguration_t;
 
 // include template definition
 #include "net_connection_configuration.inl"

@@ -382,7 +382,7 @@ idle_initialize_ui_cb (gpointer userData_in)
     data_p->configuration->connectionConfigurations.find(ACE_TEXT_ALWAYS_CHAR(""));
   ACE_ASSERT(iterator_3 != data_p->configuration->connectionConfigurations.end());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<gdouble> (NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator_3).second)->address.get_port_number ()));
+                             static_cast<gdouble> (NET_CONFIGURATION_TCP_CAST ((*iterator_3).second)->socketConfiguration.address.get_port_number ()));
 
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -818,8 +818,8 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_PORT_NAME)));
     ACE_ASSERT (spin_button_p);
-    NET_SOCKET_CONFIGURATION_TCP_CAST ((*iterator_3).second)->address.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
-                                                                                       1);
+    NET_CONFIGURATION_TCP_CAST ((*iterator_3).second)->socketConfiguration.address.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
+                                                                                                    1);
 
     GtkFileChooserButton* file_chooser_button_p =
       GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -853,7 +853,7 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
         Common_UI_GTK_Tools::UTF8ToLocale (filename_p, -1);
     g_free (filename_p);
 
-    if (!data_p->configuration->listener->initialize (*dynamic_cast<FileServer_TCPConnectionConfiguration*> ((*iterator_3).second)))
+    if (!data_p->configuration->listener->initialize (*static_cast<FileServer_TCPConnectionConfiguration*> ((*iterator_3).second)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Test_U_Server_IListener::initialize(): \"%m\", returning\n")));

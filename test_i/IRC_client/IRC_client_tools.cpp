@@ -230,7 +230,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
                            const ACE_INET_Addr& peerAddress_in,
                            const struct IRC_LoginOptions& loginOptions_in,
                            bool cloneModule_in,
-                           bool deleteModule_in,
+                           //bool deleteModule_in,
                            Stream_Module_t*& finalModule_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Tools::connect"));
@@ -251,21 +251,26 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   ACE_ASSERT (configuration_p);
   ACE_ASSERT (configuration_p->protocolConfiguration);
   ACE_ASSERT (configuration_p->streamConfiguration);
+  ACE_ASSERT (configuration_p->streamConfiguration->configuration_);
 
   // step1: set up configuration
   configuration_p->protocolConfiguration->loginOptions =
       loginOptions_in;
-  configuration_p->address = peerAddress_in;
+  configuration_p->socketConfiguration.address = peerAddress_in;
+  bool clone_module_b =
+    configuration_p->streamConfiguration->configuration_->cloneModule;
+  Stream_Module_t* final_module_p =
+    configuration_p->streamConfiguration->configuration_->module;
   if (finalModule_inout)
   {
-    configuration_p->streamConfiguration->configuration->cloneModule =
+    configuration_p->streamConfiguration->configuration_->cloneModule =
       cloneModule_in;
     //configuration_p->streamConfiguration->configuration->deleteModule =
     //  deleteModule_in;
-    configuration_p->streamConfiguration->configuration->module =
+    configuration_p->streamConfiguration->configuration_->module =
       finalModule_inout;
-    if (deleteModule_in)
-      finalModule_inout = NULL;
+    //if (cloneModule_in)
+    //  finalModule_inout = NULL;
   } // end IF
 
   // step2: initialize connector
@@ -290,6 +295,99 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ())));
     goto error;
   } // end IF
+  if (!connector_in.useReactor ())
+  {
+    // step0a: wait for the connection attempt to complete
+    IRC_Client_IConnector_t::IASYNCH_CONNECTOR_T* iasynch_connector_p =
+      dynamic_cast<IRC_Client_IConnector_t::IASYNCH_CONNECTOR_T*> (&connector_in);
+    ACE_ASSERT (iasynch_connector_p);
+    typename IRC_Client_AsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
+    typename IRC_Client_AsynchConnector_t::ISTREAM_CONNECTION_T* istream_connection_p =
+      NULL;
+    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
+                            0);
+    ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S,
+                          0);
+    //ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S,
+    //                                       0);
+    Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+    int result = iasynch_connector_p->wait (return_value,
+                                            timeout);
+    if (unlikely (result))
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ()),
+                  ACE::sock_error (result)));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ()),
+                  ACE_TEXT (ACE_OS::strerror (result))));
+#endif // ACE_WIN32 || ACE_WIN64
+      goto error;
+    } // end IF
+
+    // step0b: wait for the connection to register with the manager
+    // *TODO*: this may not be accurate/applicable for/to all protocols
+    do
+    {
+      // *TODO*: avoid this tight loop
+      iconnection_p = connection_manager_p->get (peerAddress_in,
+                                                 true);
+      if (iconnection_p)
+        break; // done
+      result = ACE_OS::sleep (delay);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                    &delay));
+    } while (COMMON_TIME_NOW < deadline);
+    if (!iconnection_p)
+      goto error;
+
+    // step3a: wait for the connection to finish initializing
+    //deadline = COMMON_TIME_NOW + initialization_timeout;
+    // *TODO*: avoid tight loop here
+    do
+    {
+      status = iconnection_p->status ();
+      // *TODO*: break early upon failure too
+      if (status == NET_CONNECTION_STATUS_OK)
+        break;
+    } while (COMMON_TIME_NOW < deadline);
+    if (status != NET_CONNECTION_STATUS_OK)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("connection failed to initialize (status was: %d), returning\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ()),
+                  status));
+      iconnection_p->decrease (); iconnection_p = NULL;
+      goto error;
+    } // end IF
+    // step3b: wait for the connection stream to finish initializing
+    istream_connection_p =
+      dynamic_cast<typename IRC_Client_AsynchConnector_t::ISTREAM_CONNECTION_T*> (iconnection_p);
+    if (!istream_connection_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
+                  iconnection_p));
+      iconnection_p->decrease (); iconnection_p = NULL;
+      goto error;
+    } // end IF
+    istream_connection_p->wait (STREAM_STATE_RUNNING,
+                                NULL); // <-- block
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+
+  // clean up
+  configuration_p->streamConfiguration->configuration_->cloneModule =
+    clone_module_b;
+  configuration_p->streamConfiguration->configuration_->module =
+    final_module_p;
 
   //connection_manager_p->unlock ();
 
@@ -299,11 +397,15 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   return return_value;
 
 error:
-  if (deleteModule_in)
-  {
-    delete finalModule_inout;
-    finalModule_inout = NULL;
-  } // end IF
+  //if (deleteModule_in)
+  //{
+  //  delete finalModule_inout;
+  //  finalModule_inout = NULL;
+  //} // end IF
+  configuration_p->streamConfiguration->configuration_->cloneModule =
+    clone_module_b;
+  configuration_p->streamConfiguration->configuration_->module =
+    final_module_p;
 
   return ACE_INVALID_HANDLE;
 }

@@ -54,14 +54,6 @@ class Net_UDPSocketHandler_T
   typedef ACE_Svc_Handler<SocketType,
                           ACE_SYNCH_USE> SVC_HANDLER_T;
 
-  //// override some event handler methods
-  //virtual ACE_Event_Handler::Reference_Count add_reference (void);
-  //// *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
-  //// the lifecycle of the event handler. To avoid unforseen behavior, make sure
-  //// that the event handler has been properly deregistered from the reactor
-  //// before removing the last reference (delete on zero).
-  //virtual ACE_Event_Handler::Reference_Count remove_reference (void);
-
   virtual int open (void* = NULL); // args
 
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
@@ -77,13 +69,20 @@ class Net_UDPSocketHandler_T
 
   inline bool registerWithReactor () { return (inherited2::open (NULL) == 0); }
   inline void deregisterFromReactor () { inherited2::shutdown (); }
+  inline ssize_t send (const void* buffer_in,
+                       size_t size_in,
+                       const ACE_INET_Addr& address_in,
+                       int flags_in) { return inherited2::peer_.send (buffer_in,
+                                                                      size_in,
+                                                                      address_in,
+                                                                      flags_in); }
 
-  ACE_INET_Addr                     address_;
+  ACE_INET_Addr address_;
 #if defined (ACE_LINUX)
-  bool                              errorQueue_;
+  bool          errorQueue_;
 #endif // ACE_LINUX
   // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
-  ACE_HANDLE                        writeHandle_;
+  ACE_HANDLE    writeHandle_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
@@ -114,13 +113,64 @@ class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   typedef ACE_Svc_Handler<Net_SOCK_CODgram,
                           ACE_SYNCH_USE> SVC_HANDLER_T;
 
-  //// override some event handler methods
-  //virtual ACE_Event_Handler::Reference_Count add_reference (void);
-  //// *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
-  //// the lifecycle of the event handler. To avoid unforseen behavior, make sure
-  //// that the event handler has been properly deregistered from the reactor
-  //// before removing the last reference (delete on zero).
-  //virtual ACE_Event_Handler::Reference_Count remove_reference (void);
+  virtual int open (void* = NULL); // args
+
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+
+  // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
+  using SVC_HANDLER_T::get_handle;
+  using SVC_HANDLER_T::set_handle;
+
+ protected:
+  Net_UDPSocketHandler_T ();
+  virtual ~Net_UDPSocketHandler_T ();
+
+  inline bool registerWithReactor () { return (inherited2::open (NULL) == 0); }
+  inline void deregisterFromReactor () { inherited2::shutdown (); }
+  inline ssize_t send (const void* buffer_in,
+                      size_t size_in,
+                      const ACE_INET_Addr& address_in,
+                      int flags_in) { return inherited2::peer_.send (buffer_in,
+                                                                     size_in,
+                                                                     address_in,
+                                                                     flags_in); }
+
+  ACE_INET_Addr address_;
+#if defined (ACE_LINUX)
+  bool          errorQueue_;
+#endif // ACE_LINUX
+  // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
+  ACE_HANDLE    writeHandle_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))
+};
+
+/////////////////////////////////////////
+
+// partial specialization (for multicast sockets)
+template <ACE_SYNCH_DECL,
+          typename ConfigurationType>
+class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
+                             Net_SOCK_Dgram_Mcast,
+                             ConfigurationType>
+ : public Net_SocketHandlerBase_T<ConfigurationType>
+ , public ACE_Svc_Handler<Net_SOCK_Dgram_Mcast,
+                          ACE_SYNCH_USE>
+ , public ACE_Reactor_Notification_Strategy // *NOTE*: the 'write'-strategy
+ // *NOTE*: use this to modify the source/target address after initialization
+{
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<Net_SOCK_Dgram_Mcast,
+                          ACE_SYNCH_USE> inherited2;
+  typedef ACE_Reactor_Notification_Strategy inherited3;
+
+ public:
+  // convenient types
+  typedef ACE_Svc_Handler<Net_SOCK_Dgram_Mcast,
+                          ACE_SYNCH_USE> SVC_HANDLER_T;
 
   virtual int open (void* = NULL); // args
 
@@ -137,13 +187,19 @@ class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 
   inline bool registerWithReactor () { return (inherited2::open (NULL) == 0); }
   inline void deregisterFromReactor () { inherited2::shutdown (); }
+  inline ssize_t send (const void* buffer_in,
+                       size_t size_in,
+                       const ACE_INET_Addr& address_in,
+                       int flags_in) { ACE_UNUSED_ARG (address_in); return inherited2::peer_.send (buffer_in,
+                                                                                                   size_in,
+                                                                                                   flags_in); }
 
-  ACE_INET_Addr                     address_;
+  ACE_INET_Addr address_;
 #if defined (ACE_LINUX)
-  bool                              errorQueue_;
+  bool          errorQueue_;
 #endif // ACE_LINUX
   // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
-  ACE_HANDLE                        writeHandle_;
+  ACE_HANDLE    writeHandle_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))

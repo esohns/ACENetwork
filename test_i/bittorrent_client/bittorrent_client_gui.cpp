@@ -480,7 +480,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
 //    ACE_Time_Value (reporting_interval, 0);
   peer_connection_configuration.messageAllocator = &peer_message_allocator;
 
-  peer_connection_configuration.initialize (CBData_in.configuration->peerStreamConfiguration);
+  peer_connection_configuration.streamConfiguration =
+    &CBData_in.configuration->peerStreamConfiguration;
 
   CBData_in.configuration->peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                                 &peer_connection_configuration));
@@ -491,7 +492,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
   tracker_connection_configuration.messageAllocator =
     &tracker_message_allocator;
 
-  tracker_connection_configuration.initialize (CBData_in.configuration->trackerStreamConfiguration);
+  tracker_connection_configuration.streamConfiguration =
+    &CBData_in.configuration->trackerStreamConfiguration;
 
   CBData_in.configuration->trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                                    &tracker_connection_configuration));
@@ -552,14 +554,14 @@ do_work (unsigned int numberOfDispatchThreads_in,
   ACE_ASSERT (peer_connection_manager_p);
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                          ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  peer_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
+  peer_connection_manager_p->set (*static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
                                   NULL);
   BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =
       BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (tracker_connection_manager_p);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  tracker_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
+  tracker_connection_manager_p->set (*static_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
                                      NULL);
 
   // step3b: initialize timer manager

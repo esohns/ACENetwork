@@ -411,7 +411,7 @@ PCP_Tools::OptionToString (PCP_Option_t option_in)
 
 void
 PCP_Tools::mapAddress (const ACE_INET_Addr& address_in,
-                       ACE_UINT8*& mappedAddress_inout)
+                       ACE_UINT8 mappedAddress_inout[])
 {
   NETWORK_TRACE (ACE_TEXT ("PCP_Tools::mapAddress"));
 

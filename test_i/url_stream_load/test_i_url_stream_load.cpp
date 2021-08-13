@@ -565,16 +565,17 @@ do_work (bool debugParser_in,
 
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
-  connection_configuration.address = remoteHost_in;
+  connection_configuration.socketConfiguration.address = remoteHost_in;
   connection_configuration.allocatorConfiguration = &allocator_configuration;
-  connection_configuration.useLoopBackDevice =
-    connection_configuration.address.is_loopback ();
+  connection_configuration.socketConfiguration.useLoopBackDevice =
+    connection_configuration.socketConfiguration.address.is_loopback ();
 //  connection_configuration.statisticReportingInterval =
 //    statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
   //connection_configuration.PDUSize = bufferSize_in;
   //connection_configuration.userData = &CBData_in.configuration->userData;
-  connection_configuration.initialize (configuration_in.streamConfiguration);
+  connection_configuration.streamConfiguration =
+    &configuration_in.streamConfiguration;
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
@@ -584,11 +585,12 @@ do_work (bool debugParser_in,
 
   Test_I_URLStreamLoad_ConnectionConfiguration_2_t connection_configuration_2;
   connection_configuration_2.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_2.useLoopBackDevice = false;
+  connection_configuration_2.socketConfiguration.useLoopBackDevice = false;
 //  connection_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
   connection_configuration_2.messageAllocator = &message_allocator_2;
-  connection_configuration_2.initialize (configuration_in.streamConfiguration_2);
+  connection_configuration_2.streamConfiguration =
+    &configuration_in.streamConfiguration_2;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2"),
                                                                     &connection_configuration_2));
   Net_ConnectionConfigurationsIterator_t iterator_2 =
@@ -668,14 +670,14 @@ do_work (bool debugParser_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator).second),
+  connection_manager_p->set (*static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator).second),
                              NULL);
   Test_I_ConnectionManager_2_t* connection_manager_2 =
     TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
   ACE_ASSERT (connection_manager_2);
   connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_2->set (*dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second),
+  connection_manager_2->set (*static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second),
                              NULL);
 
   Common_Timer_Manager_t* timer_manager_p =

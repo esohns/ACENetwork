@@ -30,6 +30,7 @@
 
 #include "common_counter.h"
 
+#include "net_sock_dgram.h"
 #include "net_sockethandler_base.h"
 
 // forward declarations
@@ -59,7 +60,7 @@ class Net_AsynchUDPSocketHandler_T
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
   inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_UNUSED_ARG (peerSap_in); ACE_UNUSED_ARG (localSAP_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  inline virtual ACE_HANDLE handle (void) const { return SocketType::get_handle (); }
+  inline virtual ACE_HANDLE handle (void) const { return inherited2::get_handle (); }
   inline virtual void handle (ACE_HANDLE handle_in) { inherited3::handle (handle_in); }
 
   virtual int handle_close (ACE_HANDLE,        // handle
@@ -80,7 +81,79 @@ class Net_AsynchUDPSocketHandler_T
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
   // implement (part of) Net_IAsynchSocketHandler
-  virtual bool initiate_read ();
+  virtual bool initiate_read (ACE_Message_Block*&); // buffer
+
+  ACE_INET_Addr          address_;
+  // the number of open write (i.e. send) requests
+  mutable COUNTER_T      counter_;
+#if defined (ACE_LINUX)
+  bool                   errorQueue_;
+#endif // ACE_LINUX
+  ACE_Asynch_Read_Dgram  inputStream_;
+  ACE_Asynch_Write_Dgram outputStream_;
+  unsigned int           PDUSize_; // --> MTU
+  // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
+  ACE_HANDLE             writeHandle_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T (const Net_AsynchUDPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T& operator= (const Net_AsynchUDPSocketHandler_T&))
+
+  // override/hide (part of) ACE_Service_Handler
+  inline virtual void handle_wakeup () { cancel (); }
+
+  // implement/hide ACE_Notification_Strategy
+  virtual int notify (void);
+  inline virtual int notify (ACE_Event_Handler*, ACE_Reactor_Mask) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+};
+
+/////////////////////////////////////////
+
+// partial specialization (for multicast sockets)
+template <typename ConfigurationType>
+class Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
+                                   ConfigurationType>
+ : public Net_AsynchSocketHandlerBase_T<ConfigurationType>
+ , public Net_SOCK_Dgram_Mcast
+ , public ACE_Service_Handler
+ , public ACE_Notification_Strategy
+ // *NOTE*: use this to modify the source/target address after initialization
+ , public Common_IReset
+{
+  typedef Net_AsynchSocketHandlerBase_T<ConfigurationType> inherited;
+  typedef Net_SOCK_Dgram_Mcast inherited2;
+  typedef ACE_Service_Handler inherited3;
+  typedef ACE_Notification_Strategy inherited4;
+
+ public:
+  virtual ~Net_AsynchUDPSocketHandler_T ();
+
+  // override (part of) ACE_Service_Handler
+  virtual void open (ACE_HANDLE,          // (socket) handle
+                     ACE_Message_Block&); // initial data (if any)
+  inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_UNUSED_ARG (peerSap_in); ACE_UNUSED_ARG (localSAP_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual ACE_HANDLE handle (void) const { return inherited2::get_handle (); }
+  inline virtual void handle (ACE_HANDLE handle_in) { inherited3::handle (handle_in); }
+
+  virtual int handle_close (ACE_HANDLE,        // handle
+                            ACE_Reactor_Mask); // event mask
+
+  // implement (part of) Net_IAsynchSocketHandler
+  virtual void cancel ();
+
+ protected:
+  // convenient types
+  typedef Net_SOCK_Dgram_Mcast SOCKET_T;
+  typedef ACE_Service_Handler SVC_HANDLER_T;
+  typedef Common_Counter_T<ACE_MT_SYNCH> COUNTER_T;
+
+  Net_AsynchUDPSocketHandler_T ();
+
+  // override (part of) ACE_Service_Handler
+  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
+
+  // implement (part of) Net_IAsynchSocketHandler
+  virtual bool initiate_read (ACE_Message_Block*&); // buffer
 
   ACE_INET_Addr          address_;
   // the number of open write (i.e. send) requests

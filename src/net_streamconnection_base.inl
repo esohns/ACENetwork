@@ -228,8 +228,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //         pipe ?
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->configuration_);
   //if (!inherited2::configuration_->useThreadPerConnection)
-  inherited2::configuration_->streamConfiguration->configuration->notificationStrategy =
+  inherited2::configuration_->streamConfiguration->configuration_->notificationStrategy =
     static_cast<HandlerType*> (this);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
                                      inherited2::state_.handle)))
@@ -1040,16 +1041,17 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->configuration_);
 
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
+  if (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator)
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
@@ -1060,7 +1062,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
+        !inherited2::configuration_->streamConfiguration->configuration_->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -1078,9 +1080,9 @@ allocate:
                                          NULL));
   if (unlikely (!message_block_p))
   {
-    if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
+    if (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator)
     {
-      if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
+      if (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("%u: failed to allocate memory: \"%m\", aborting\n"),
                     id ()));
@@ -1207,7 +1209,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
   } // end SWITCH
   ACE_ASSERT (configuration_p);
-  socket_handler_configuration_p = configuration_p;
+  socket_handler_configuration_p = &configuration_p->socketConfiguration;
 
   if (unlikely (!inherited::initialize (*socket_handler_configuration_p)))
   {
@@ -1866,16 +1868,17 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->configuration_);
 
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
+  if (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator)
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
@@ -1886,7 +1889,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
+        !inherited2::configuration_->streamConfiguration->configuration_->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -1904,9 +1907,9 @@ allocate:
                                          NULL));
   if (unlikely (!message_block_p))
   {
-    if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator)
+    if (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator)
     {
-      if (inherited2::configuration_->streamConfiguration->configuration->messageAllocator->block ())
+      if (inherited2::configuration_->streamConfiguration->configuration_->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("%u: failed to allocate memory: \"%m\", aborting\n"),
                     id ()));
@@ -1918,6 +1921,50 @@ allocate:
   } // end IF
 
   return message_block_p;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename StreamStatusType,
+          typename UserDataType>
+bool
+Net_AsynchStreamConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 HandlerConfigurationType,
+                                 StreamType,
+                                 StreamStatusType,
+                                 UserDataType>::initiate_read ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::initiate_read"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->allocatorConfiguration);
+
+  // allocate a data buffer
+  size_t pdu_size_i =
+    inherited2::configuration_->allocatorConfiguration->defaultBufferSize +
+    inherited2::configuration_->allocatorConfiguration->paddingBytes;
+  ACE_Message_Block* message_block_p = this->allocateMessage (pdu_size_i);
+  if (unlikely (!message_block_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ISocketHandler::allocateMessage(%u), aborting\n"),
+                pdu_size_i));
+    return false;
+  } // end IF
+  message_block_p->size (inherited2::configuration_->allocatorConfiguration->defaultBufferSize);
+
+  // delegate to base class(es), fire-and-forget message_block_p
+  return inherited::initiate_read (message_block_p);
 }
 
 template <typename HandlerType,
@@ -2032,10 +2079,10 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       // start next read ?
       if (close_b)
         break;
-      if (unlikely (!inherited::initiate_read ()))
+      if (unlikely (!this->initiate_read ()))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", returning\n"),
+                    ACE_TEXT ("%u: failed to Net_AsynchStreamConnectionBase_T::initiate_read(): \"%m\", returning\n"),
                     id ()));
         break;
       } // end IF
@@ -2061,7 +2108,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     if (error != EBADF) // 9: local close (Linux)
 #endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n"),
+                  ACE_TEXT ("%u: failed to Net_AsynchStreamConnectionBase_T::handle_close(): \"%m\", continuing\n"),
                   id));
   } // end IF
 
@@ -2176,7 +2223,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
   } // end SWITCH
 
-  if (unlikely (!inherited::initiate_read ()))
+  if (unlikely (!this->initiate_read ()))
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -2186,9 +2233,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         (error != ERROR_NETNAME_DELETED)) // happens on Win32
 #else
     if (error)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
+                  ACE_TEXT ("%u: failed to Net_AsynchStreamConnectionBase_T::initiate_read(): \"%m\", aborting\n"),
                   id ()));
     goto error;
   } // end IF
@@ -2211,7 +2258,7 @@ error:
                 ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
                 result_in.handle (),
                 ACE_Event_Handler::ALL_EVENTS_MASK));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   this->decrease ();
 }

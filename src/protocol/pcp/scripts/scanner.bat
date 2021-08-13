@@ -12,7 +12,7 @@ setlocal enabledelayedexpansion
 pushd . >NUL 2>&1
 
 @rem set FlexEXE="%ProgramFiles(x86)%\GnuWin32\bin\flex.exe"
-set FlexEXE="C:\cygwin64\bin\flex.exe"
+set FlexEXE="H:\bin\flex_bison\win_flex.exe"
 if exist %FlexEXE% goto Next
 echo invalid file ^(was: "%FlexEXE%"^)^, exiting
 goto Failed
@@ -44,13 +44,13 @@ if %ERRORLEVEL% NEQ 0 (
 
 @rem @move /Y http_bisector.cpp .. >NUL
 @rem @move /Y http_bisector.h .. >NUL
-@move /Y http_scanner.cpp .. >NUL
-@move /Y http_scanner.h .. >NUL
-if %ERRORLEVEL% NEQ 0 (
- echo failed to move scanner file^(s^)^, exiting
- set RC=%ERRORLEVEL%
- goto Failed
-)
+@move /Y pcp_scanner.cpp .. >NUL
+@move /Y pcp_scanner.h .. >NUL
+@rem if %ERRORLEVEL% NEQ 0 (
+@rem  echo failed to move scanner file^(s^)^, exiting
+@rem  set RC=%ERRORLEVEL%
+@rem  goto Failed
+@rem )
 
 goto Clean_Up
 

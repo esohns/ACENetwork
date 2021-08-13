@@ -377,6 +377,62 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::cancel ()
 }
 
 template <typename ConfigurationType>
+bool
+Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read (ACE_Message_Block*& message_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::initiate_read"));
+
+  // sanity check(s)
+  ACE_ASSERT (message_inout);
+
+  int result = -1;
+receive:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result =
+    inputStream_.readv (*message_inout,                       // buffer
+                        message_inout->size (),               // bytes to read
+                        NULL,                                 // ACT
+                        0,                                    // priority
+                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+#else
+  result =
+    inputStream_.read (*message_inout,                       // buffer
+                       message_inout->size (),               // bytes to read
+                       NULL,                                 // ACT
+                       0,                                    // priority
+                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+#endif // ACE_WIN32 || ACE_WIN64
+  if (unlikely (result == -1))
+  {
+    int error = ACE_OS::last_error ();
+    // *WARNING*: this could fail on multi-threaded proactors
+    if (error == EAGAIN)     // 11 : happens on Linux
+      goto receive;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENXIO)                 && // 6    : happens on Win32
+        (error != EFAULT)                && // 14   : *TODO*: happens on Win32
+        (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
+        (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
+        (error != ENOTSOCK)              && // 10038: local close()
+        (error != ECONNRESET))              // 10054: reset by peer
+#else
+    if (error != ECONNRESET) // 104: reset by peer
+#endif // ACE_WIN32 || ACE_WIN64
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Read_Stream::readv(%u): \"%m\", aborting\n"),
+                  message_inout->size ()));
+
+    // clean up
+    message_inout->release (); message_inout = NULL;
+
+    return false;
+  } // end IF
+  message_inout = NULL;
+
+  return true;
+}
+
+template <typename ConfigurationType>
 int
 Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
 {
@@ -552,75 +608,4 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
     cancel ();
 
   counter_.decrease ();
-}
-
-template <typename ConfigurationType>
-bool
-Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::initiate_read"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->allocatorConfiguration);
-
-  // allocate a data buffer
-  size_t pdu_size_i =
-    inherited::configuration_->allocatorConfiguration->defaultBufferSize +
-    inherited::configuration_->allocatorConfiguration->paddingBytes;
-  ACE_Message_Block* message_block_p = this->allocateMessage (pdu_size_i);
-  if (unlikely (!message_block_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::allocateMessage(%u), aborting\n"),
-                pdu_size_i));
-    return false;
-  } // end IF
-  message_block_p->size (inherited::configuration_->allocatorConfiguration->defaultBufferSize);
-
-  // start (asynchronous) read
-  int result = -1;
-receive:
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  result =
-      inputStream_.readv (*message_block_p,                                                     // buffer
-                          inherited::configuration_->allocatorConfiguration->defaultBufferSize, // bytes to read
-                          NULL,                                                                 // ACT
-                          0,                                                                    // priority
-                          COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                                 // signal
-#else
-  result =
-    inputStream_.read (*message_block_p,                                                     // buffer
-                       inherited::configuration_->allocatorConfiguration->defaultBufferSize, // bytes to read
-                       NULL,                                                                 // ACT
-                       0,                                                                    // priority
-                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                                 // signal
-#endif // ACE_WIN32 || ACE_WIN64
-  if (unlikely (result == -1))
-  {
-    int error = ACE_OS::last_error ();
-    // *WARNING*: this could fail on multi-threaded proactors
-    if (error == EAGAIN)     // 11 : happens on Linux
-      goto receive;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENXIO)                 && // 6    : happens on Win32
-        (error != EFAULT)                && // 14   : *TODO*: happens on Win32
-        (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
-        (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
-        (error != ENOTSOCK)              && // 10038: local close()
-        (error != ECONNRESET))              // 10054: reset by peer
-#else
-    if (error != ECONNRESET) // 104: reset by peer
-#endif // ACE_WIN32 || ACE_WIN64
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Read_Stream::readv(%u): \"%m\", aborting\n"),
-                  pdu_size_i));
-
-    // clean up
-    message_block_p->release ();
-
-    return false;
-  } // end IF
-
-  return true;
 }

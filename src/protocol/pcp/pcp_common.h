@@ -133,7 +133,7 @@ struct PCPOption
   }
   ~PCPOption () {}
 
-  ACE_UINT8                       code;
+  enum PCP_Codes::OptionType      code;
   ACE_UINT8                       reserved;
   ACE_UINT16                      length;
   union
@@ -152,7 +152,7 @@ struct PCP_Record
    : version (PCP_Codes::PCP_VERSION_INVALID)
    , opcode (0)
    , reserved (0)
-   , result_code (0)
+   , result_code (PCP_Codes::PCP_RESULTCODE_INVALID)
    , lifetime (0)
    , epoch_time (0)
    , reserved_2 (0)
@@ -188,21 +188,21 @@ struct PCP_Record
   ~PCP_Record () {}
   inline struct PCP_Record& operator= (const struct PCP_Record& rhs_in) { *this = rhs_in; return *this; }
 
-  PCP_Codes::VersionType     version;
+  enum PCP_Codes::VersionType    version;
   // *NOTE*: this contains the (MSB) 'R'-bit
-  ACE_UINT8                  opcode;
-  ACE_UINT8                  reserved; // 16 bits in request
-  ACE_UINT8                  result_code; // response only !
-  ACE_UINT32                 lifetime; // second(s): 0: remove mapping
-  ACE_UINT32                 epoch_time; // response only !
-  ACE_UINT32                 reserved_2; // response only !
-  ACE_INET_Addr              client_address; // request only !
+  ACE_UINT8                      opcode;
+  ACE_UINT8                      reserved; // 16 bits in request
+  enum PCP_Codes::ResultCodeType result_code; // response only !
+  ACE_UINT32                     lifetime; // second(s): 0: remove mapping
+  ACE_UINT32                     epoch_time; // response only !
+  ACE_UINT32                     reserved_2; // response only !
+  ACE_INET_Addr                  client_address; // request only !
   union
   {
-    struct PCPOpcodeMapData  map;
-    struct PCPOpcodePeerData peer;
+    struct PCPOpcodeMapData      map;
+    struct PCPOpcodePeerData     peer;
   };
-  PCP_Options_t              options;
+  PCP_Options_t                  options;
 };
 
 struct PCP_MessageData

@@ -55,12 +55,14 @@ class Net_IAsynchSocketHandler
  : virtual public Net_ISocketHandler
 {
  public:
-  virtual bool initiate_read () = 0;
-
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual bool initiate_read (ACE_Message_Block*&) = 0; // buffer
+  
   // *NOTE*: cancels all asynchronous operations
   virtual void cancel () = 0; // event mask
 
   ////////////////////////////////////////
+  // 'write' callback
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE) = 0; // handle
 };
 
@@ -166,6 +168,7 @@ class Net_IStreamConnection_T
 {
  public:
   // convenient types
+  typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
   typedef Net_ISocketConnection_T<AddressType,
                                   ConfigurationType,

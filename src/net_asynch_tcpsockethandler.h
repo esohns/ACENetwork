@@ -73,7 +73,7 @@ class Net_AsynchTCPSocketHandler_T
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
   // implement (part of) Net_IAsynchSocketHandler
-  virtual bool initiate_read ();
+  virtual bool initiate_read (ACE_Message_Block*&); // buffer
 
   // the number of open write (i.e. send) requests
   mutable COUNTER_T       counter_;

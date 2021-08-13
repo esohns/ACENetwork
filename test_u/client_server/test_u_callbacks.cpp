@@ -1248,14 +1248,14 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
           data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
         ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
         connection_configuration_p =
-          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
+          static_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
         ACE_ASSERT (connection_configuration_p);
         ACE_HANDLE handle_h =
-          configuration_p->UDPConnector->connect (connection_configuration_p->listenAddress);
+          configuration_p->UDPConnector->connect (connection_configuration_p->socketConfiguration.listenAddress);
         ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("connected to %s\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->listenAddress).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->socketConfiguration.listenAddress).c_str ())));
         break;
       }
       case NET_TRANSPORTLAYER_SSL:
@@ -1291,19 +1291,20 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
           data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
         ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
         connection_configuration_p =
-          dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
+          static_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
         ACE_ASSERT (connection_configuration_p);
         typename Test_U_UDPConnectionManager_t::INTERFACE_T* connection_manager_p =
           TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
         ACE_ASSERT (connection_manager_p);
         typename Test_U_UDPConnectionManager_t::CONNECTION_T* connection_p =
-          connection_manager_p->get (connection_configuration_p->listenAddress, false);
+          connection_manager_p->get (connection_configuration_p->socketConfiguration.listenAddress,
+                                     false);
         ACE_ASSERT (connection_p);
         connection_p->close ();
         connection_p->decrease (); connection_p = NULL;
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("disconnected from %s\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->listenAddress).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->socketConfiguration.listenAddress).c_str ())));
         break;
       }
       case NET_TRANSPORTLAYER_SSL:

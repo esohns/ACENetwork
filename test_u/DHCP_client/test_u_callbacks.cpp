@@ -237,7 +237,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress.get_port_number ()));
+                             static_cast<double> (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.get_port_number ()));
 
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
@@ -298,7 +298,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                (*iterator_2).second->useLoopBackDevice);
+                                NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice);
 
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -309,8 +309,8 @@ idle_initialize_UI_cb (gpointer userData_in)
                              std::numeric_limits<double>::max ());
 
   size_t pdu_size_i =
-    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
-    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+    NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->allocatorConfiguration->defaultBufferSize +
+    NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->allocatorConfiguration->paddingBytes;
 
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (pdu_size_i));
@@ -600,12 +600,12 @@ idle_initialize_UI_cb (gpointer userData_in)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    if (InlineIsEqualGUID ((*iterator_2).second->interfaceIdentifier, GUID_NULL))
+    if (InlineIsEqualGUID (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier, GUID_NULL))
 #else
-    if ((*iterator_2).second->interfaceIdentifier.empty ())
+    if (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.empty ())
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-    if ((*iterator_2).second->interfaceIdentifier.empty ())
+    if (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.empty ())
 #endif // ACE_WIN32 || ACE_WIN64
       gtk_combo_box_set_active (combo_box_p, 0);
     else
@@ -629,9 +629,9 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       std::string interface_identifier =
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-        Common_Tools::GUIDToString ((*iterator_2).second->interfaceIdentifier);
+        Common_Tools::GUIDToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
-        (*iterator_2).second->interfaceIdentifier;
+        NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #endif // ACE_WIN32 || ACE_WIN64
       do
@@ -1120,7 +1120,7 @@ action_discover_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
       static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1144,8 +1144,8 @@ action_discover_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (data_p->configuration->protocolConfiguration.requestBroadcastReplies ? ACE_TEXT_ALWAYS_CHAR ("In_2")
                                                                                                                                : ACE_TEXT_ALWAYS_CHAR ("In"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress.set_port_number (port_number,
-                                                                                         1);
+  NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.set_port_number (port_number,
+                                                                                                      1);
 
   // retrieve buffer
   //spin_button_p =
@@ -1164,9 +1164,10 @@ action_discover_activate_cb (GtkAction* action_in,
   Test_U_Message* message_p = NULL;
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->messageAllocator->malloc (pdu_size_i));
+    static_cast<Test_U_Message*> (static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
-  if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->messageAllocator->block ())
+  if (!message_p &&
+      !static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1184,12 +1185,12 @@ allocate:
   struct ether_addr ether_addrs_s =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // _WIN32_WINNT_VISTA
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // ACE_WIN32 || ACE_WIN64
     ACE_ASSERT (DHCP_CHADDR_SIZE >= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
@@ -1216,7 +1217,7 @@ allocate:
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-    iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->listenAddress,
+    iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.listenAddress,
                                 false);
   if (!iconnection_p)
   {
@@ -1224,7 +1225,7 @@ allocate:
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.listenAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1249,7 +1250,7 @@ allocate:
   iconnection_p->decrease (); iconnection_p = NULL;
 
   iconnection_p =
-      iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->peerAddress,
+      iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1257,7 +1258,7 @@ allocate:
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1281,7 +1282,7 @@ action_inform_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
     static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -1294,7 +1295,7 @@ action_inform_activate_cb (GtkAction* action_in,
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-    iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->listenAddress,
+    iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.listenAddress,
                                 false);
   ACE_ASSERT (iconnection_p);
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1318,7 +1319,7 @@ action_inform_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress,
+      iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1326,7 +1327,7 @@ action_inform_activate_cb (GtkAction* action_in,
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1339,9 +1340,10 @@ action_inform_activate_cb (GtkAction* action_in,
 
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
+    static_cast<Test_U_Message*> (static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
-  if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
+  if (!message_p &&
+      !static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1365,12 +1367,12 @@ allocate:
   ACE_INET_Addr IP_address, gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  if (!Net_Common_Tools::interfaceToIPAddress_2 ((*iterator_2).second->interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress_2 (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier,
 #else
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier,
 #endif // _WIN32_WINNT_VISTA
 #else
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier,
 #endif // ACE_WIN32 || ACE_WIN64
                                                IP_address,
                                                gateway_address))
@@ -1379,17 +1381,17 @@ allocate:
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second->interfaceIdentifier))));
+                ACE_TEXT (Net_Common_Tools::interfaceToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
-                ACE_TEXT ((*iterator_2).second->interfaceIdentifier.c_str ()),
+                ACE_TEXT (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str ()),
                 NULL));
 #endif // _WIN32_WINNT_VISTA
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
-                ACE_TEXT ((*iterator_2).second->interfaceIdentifier.c_str ()),
+                ACE_TEXT (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str ()),
                 NULL));
 #endif // ACE_WIN32 || ACE_WIN64
     return;
@@ -1398,12 +1400,12 @@ allocate:
   struct ether_addr ether_addrs_s =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // _WIN32_WINNT_VISTA
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (DHCP_CHADDR_SIZE > ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
@@ -1440,7 +1442,7 @@ action_request_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
     static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -1453,7 +1455,7 @@ action_request_activate_cb (GtkAction* action_in,
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-    iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->listenAddress,
+    iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.listenAddress,
                                 false);
   ACE_ASSERT (iconnection_p);
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1477,7 +1479,7 @@ action_request_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress,
+      iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1485,7 +1487,7 @@ action_request_activate_cb (GtkAction* action_in,
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1498,9 +1500,10 @@ action_request_activate_cb (GtkAction* action_in,
 
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
+    static_cast<Test_U_Message*> (static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
-  if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
+  if (!message_p &&
+      !static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1524,12 +1527,12 @@ allocate:
   struct ether_addr ether_addrs_s =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // _WIN32_WINNT_VISTA
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
@@ -1568,7 +1571,7 @@ action_release_activate_cb (GtkAction* action_in,
   struct DHCPClient_UI_CBData* data_p =
     static_cast<struct DHCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration->messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -1581,7 +1584,7 @@ action_release_activate_cb (GtkAction* action_in,
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   DHCPClient_IConnection_t* iconnection_p =
-      iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->listenAddress,
+      iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.listenAddress,
                                   false);
   ACE_ASSERT (iconnection_p);
   DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
@@ -1605,7 +1608,7 @@ action_release_activate_cb (GtkAction* action_in,
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   iconnection_p =
-      iconnection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress,
+      iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress,
                                   true);
   if (!iconnection_p)
   {
@@ -1613,7 +1616,7 @@ action_release_activate_cb (GtkAction* action_in,
     // *TODO*: restart the listener
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Connection_Manager_T::get(%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress).c_str ())));
     return;
   } // end IF
   DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
@@ -1623,12 +1626,12 @@ action_release_activate_cb (GtkAction* action_in,
   size_t pdu_size_i =
     (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
     (*iterator_2).second->allocatorConfiguration->paddingBytes;
-
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
+    static_cast<Test_U_Message*> (static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->malloc (pdu_size_i));
   // keep retrying ?
-  if (!message_p && !dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
+  if (!message_p &&
+      !static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_2).second)->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1650,12 +1653,12 @@ allocate:
   ACE_INET_Addr IP_address, gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  if (!Net_Common_Tools::interfaceToIPAddress_2 ((*iterator_2).second->interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress_2 (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier,
 #else
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier,
 #endif // _WIN32_WINNT_VISTA
 #else
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second->interfaceIdentifier,
+  if (!Net_Common_Tools::interfaceToIPAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier,
 #endif // ACE_WIN32 || ACE_WIN64
                                                IP_address,
                                                gateway_address))
@@ -1664,17 +1667,17 @@ allocate:
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second->interfaceIdentifier))));
+                ACE_TEXT (Net_Common_Tools::interfaceToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
-                ACE_TEXT ((*iterator_2).second->interfaceIdentifier.c_str ()),
+                ACE_TEXT (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str ()),
                 NULL));
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
-                ACE_TEXT ((*iterator_2).second->interfaceIdentifier.c_str ()),
+                ACE_TEXT (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str ()),
                 NULL));
 #endif // ACE_WIN32 || ACE_WIN64
     return;
@@ -1683,12 +1686,12 @@ allocate:
   struct ether_addr ether_addrs_s =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    Net_Common_Tools::interfaceToLinkLayerAddress_2 ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // _WIN32_WINNT_VISTA
 #else
-    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second->interfaceIdentifier);
+    Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (DHCP_CHADDR_SIZE > ETH_ALEN);
   ACE_OS::memcpy (&(DHCP_record.chaddr),
@@ -1783,7 +1786,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 //#else
 //      g_value_get_string (&value);
 //#endif
-  (*iterator_2).second->interfaceIdentifier =
+  NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     Common_Tools::StringToGUID (g_value_get_string (&value));
@@ -1926,16 +1929,16 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     //data_p->configuration->listenerConfiguration.address = (ACE_INET_Addr&)ACE_Addr::sap_any;
     int result = -1;
     result =
-      NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+      NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                                                                   // *IMPORTANT NOTE*: this needs to be INADDR_ANY (0.0.0.0) (instead of
-                                                                                   //                   255.255.255.255: why ?)
-                                                                                   static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                                                // *IMPORTANT NOTE*: this needs to be INADDR_ANY (0.0.0.0) (instead of
+                                                                                                //                   255.255.255.255: why ?)
+                                                                                                static_cast<ACE_UINT32> (INADDR_ANY),
 #else
-                                                                                   static_cast<ACE_UINT32> (INADDR_BROADCAST),
+                                                                                                static_cast<ACE_UINT32> (INADDR_BROADCAST),
 #endif // ACE_WIN32 || ACE_WIN64
-                                                                                   1,
-                                                                                   0);
+                                                                                                1,
+                                                                                                0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1947,7 +1950,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       iconnector_p = &connector_bcast;
     else
       iconnector_p = &asynch_connector_bcast;
-    if (!iconnector_p->initialize (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)))
+    if (!iconnector_p->initialize (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -1959,13 +1962,13 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //        data_p->configuration->socketConfiguration.address;
 //    data_p->configuration->socketConfiguration.address =
 //        data_p->configuration->listenerConfiguration.address;
-    connection_manager_p->set (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+    connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                &data_p->configuration->userData);
 //    handle_connection_manager = true;
 
     // step2: connect (broadcast)
     data_p->configuration->handle =
-        iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress);
+        iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
@@ -1980,7 +1983,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       do
       {
         iconnection_p =
-          connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress,
+          connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
                                      false);
         if (iconnection_p)
         {
@@ -2000,26 +2003,26 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ()),
                     &timeout));
     } // end IF
     if (data_p->configuration->handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
                 data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened UDP socket: %s\n"),
                 data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
     // connect (broadcast) ?
@@ -2083,13 +2086,13 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //        data_p->configuration->socketConfiguration.address;
 //    data_p->configuration->socketConfiguration.address =
 //        data_p->configuration->listenerConfiguration.address;
-    connection_manager_p->set (*dynamic_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+    connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                &data_p->configuration->userData);
 //    handle_connection_manager = true;
 
     // step2: connect
     data_p->configuration->broadcastHandle =
-        iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress);
+        iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
@@ -2104,7 +2107,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       do
       {
         iconnection_p =
-            connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress,
+            connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
                                        false);
         if (iconnection_p)
         {
@@ -2125,26 +2128,26 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to \"%s\" (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ()),
                     &timeout));
     } // end IF
     if (data_p->configuration->broadcastHandle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
                 data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened UDP socket: %s\n"),
                 data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
     failed = false;

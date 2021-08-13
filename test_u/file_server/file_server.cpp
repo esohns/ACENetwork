@@ -632,17 +632,17 @@ do_work (
   if (useUDP_in)
   {
     result =
-      udp_connection_configuration.listenAddress.set (listeningPortNumber_in,
-                                                      static_cast<ACE_UINT32> (INADDR_ANY),
-                                                      1,
-                                                      0);
+      udp_connection_configuration.socketConfiguration.listenAddress.set (listeningPortNumber_in,
+                                                                          static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                          1,
+                                                                          0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    udp_connection_configuration.writeOnly = true;
+    udp_connection_configuration.socketConfiguration.writeOnly = true;
   } // end IF
   // ****************** connection configuration data **************************
   //configuration.userData.connectionConfiguration =
@@ -651,7 +651,8 @@ do_work (
   if (useUDP_in)
   {
     udp_connection_configuration.messageAllocator = &message_allocator;
-    udp_connection_configuration.initialize (configuration.streamConfiguration);
+    udp_connection_configuration.streamConfiguration =
+      &configuration.streamConfiguration;
     configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                    &udp_connection_configuration));
   } // end IF
@@ -663,7 +664,8 @@ do_work (
     //    &tcp_connection_configuration;
 
     tcp_connection_configuration.messageAllocator = &message_allocator;
-    tcp_connection_configuration.initialize (configuration.streamConfiguration);
+    tcp_connection_configuration.streamConfiguration =
+      &configuration.streamConfiguration;
     configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                    &tcp_connection_configuration));
   } // end ELSE
@@ -754,7 +756,7 @@ do_work (
   // step3: initialize connection manager
   connection_manager_p->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  iconnection_manager_p->set (*dynamic_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second),
+  iconnection_manager_p->set (*static_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second),
                               NULL);
 
   // step4: initialize listener
@@ -762,10 +764,10 @@ do_work (
   if (useLoopBack_in)
   {
     result =
-      NET_SOCKET_CONFIGURATION_TCP_CAST((*iterator).second)->address.set (listeningPortNumber_in,
-                                                                          INADDR_LOOPBACK,
-                                                                          1,
-                                                                          0);
+      NET_CONFIGURATION_TCP_CAST((*iterator).second)->socketConfiguration.address.set (listeningPortNumber_in,
+                                                                                       INADDR_LOOPBACK,
+                                                                                       1,
+                                                                                       0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -786,8 +788,8 @@ do_work (
   } // end IF
   else
   {
-    NET_SOCKET_CONFIGURATION_TCP_CAST((*iterator).second)->address.set_port_number (listeningPortNumber_in,
-                                                                                    1);
+    NET_CONFIGURATION_TCP_CAST((*iterator).second)->socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                                                 1);
 //    configuration.UDPListenerConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
 //                                                                          1);
   } // end ELSE
@@ -880,7 +882,7 @@ do_work (
   if (UIDefinitionFile_in.empty ())
   {
 #endif // GUI_SUPPORT
-    if (!configuration.listener->initialize (*dynamic_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second)))
+    if (!configuration.listener->initialize (*static_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, aborting\n")));

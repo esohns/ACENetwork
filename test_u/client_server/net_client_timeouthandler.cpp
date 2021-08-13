@@ -259,7 +259,7 @@ continue_:
     {
       case NET_TRANSPORTLAYER_TCP:
       {
-        peer_address = connectionConfiguration_->address;
+        peer_address = connectionConfiguration_->socketConfiguration.address;
         switch (eventDispatch_)
         {
           case COMMON_EVENT_DISPATCH_PROACTOR:
@@ -284,7 +284,7 @@ continue_:
       }
       case NET_TRANSPORTLAYER_UDP:
       {
-        peer_address = UDPConnectionConfiguration_->peerAddress;
+        peer_address = UDPConnectionConfiguration_->socketConfiguration.peerAddress;
         switch (eventDispatch_)
         {
           case COMMON_EVENT_DISPATCH_PROACTOR:
@@ -309,7 +309,7 @@ continue_:
       }
       case NET_TRANSPORTLAYER_SSL:
       {
-        peer_address = connectionConfiguration_->address;
+        peer_address = connectionConfiguration_->socketConfiguration.address;
 #if defined (SSL_SUPPORT)
         ssl_tcp_connector_p = &SSLConnector_;
 #endif // SSL_SUPPORT

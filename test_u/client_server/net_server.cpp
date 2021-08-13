@@ -643,26 +643,28 @@ do_work (unsigned int maximumNumberOfConnections_in,
   connection_configuration.allocatorConfiguration =
       &configuration_in.allocatorConfiguration;
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.initialize (configuration_in.streamConfiguration);
+  connection_configuration.streamConfiguration =
+    &configuration_in.streamConfiguration;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                     &connection_configuration));
   iterator =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
   connection_configuration_p =
-    dynamic_cast<Test_U_TCPConnectionConfiguration*> ((*iterator).second);
+    static_cast<Test_U_TCPConnectionConfiguration*> ((*iterator).second);
   ACE_ASSERT (connection_configuration_p);
   connection_configuration_2.allocatorConfiguration =
       &configuration_in.allocatorConfiguration;
   connection_configuration_2.messageAllocator = &message_allocator;
-  connection_configuration_2.initialize (configuration_in.streamConfiguration);
+  connection_configuration_2.streamConfiguration =
+    &configuration_in.streamConfiguration;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
                                                                     &connection_configuration_2));
   iterator_2 =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
   ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
   connection_configuration_p_2 =
-    dynamic_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
+    static_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
   ACE_ASSERT (connection_configuration_p_2);
 
   //  config.delete_module = false;
@@ -872,26 +874,26 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step4c: start listening
   if (!useReactor_in)
-    connection_configuration_p_2->connect = true;
+    connection_configuration_p_2->socketConfiguration.connect = true;
   if (useLoopBack_in)
   {
     result =
-      connection_configuration_p_2->listenAddress.set (listeningPortNumber_in,
-                                                       INADDR_LOOPBACK,
-                                                       1,
-                                                       0);
+      connection_configuration_p_2->socketConfiguration.listenAddress.set (listeningPortNumber_in,
+                                                                           INADDR_LOOPBACK,
+                                                                           1,
+                                                                           0);
     ACE_ASSERT (!result);
     result =
-      connection_configuration_p_2->peerAddress.set (listeningPortNumber_in,
-                                                     INADDR_LOOPBACK,
-                                                     1,
-                                                     0);
+      connection_configuration_p_2->socketConfiguration.peerAddress.set (listeningPortNumber_in,
+                                                                         INADDR_LOOPBACK,
+                                                                         1,
+                                                                         0);
     ACE_ASSERT (!result);
     result =
-      connection_configuration_p->address.set (listeningPortNumber_in,
-                                               INADDR_LOOPBACK,
-                                               1,
-                                               0);
+      connection_configuration_p->socketConfiguration.address.set (listeningPortNumber_in,
+                                                                   INADDR_LOOPBACK,
+                                                                   1,
+                                                                   0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -905,14 +907,17 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                           event_dispatch_state_s.reactorGroupId,
+                                           true);
       Common_Timer_Tools::finalize ();
       return;
     } // end IF
   } // end IF
   else
   {
-    connection_configuration_p_2->listenAddress.set_port_number (listeningPortNumber_in,
-                                                                 1);
+    connection_configuration_p_2->socketConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
+                                                                                     1);
 
     std::string interface_identifier =
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
@@ -922,18 +927,18 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                             peer_address,
                                             gateway_address);
     result =
-      connection_configuration_p_2->peerAddress.set (static_cast<u_short> (listeningPortNumber_in + 1),
-                                                     //peer_address.get_ip_address (),
-                                                     static_cast<ACE_UINT32> (INADDR_LOOPBACK),
-                                                     1,
-                                                     0);
+      connection_configuration_p_2->socketConfiguration.peerAddress.set (static_cast<u_short> (listeningPortNumber_in + 1),
+                                                                         //peer_address.get_ip_address (),
+                                                                         static_cast<ACE_UINT32> (INADDR_LOOPBACK),
+                                                                         1,
+                                                                         0);
     ACE_ASSERT (result != -1);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("set peer address to %s\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 
-    connection_configuration_p->address.set_port_number (listeningPortNumber_in,
-                                                         1);
+    connection_configuration_p->socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                             1);
   } // end ELSE
 
   ACE_ASSERT (configuration_in.TCPListener);
@@ -942,10 +947,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize TCP listener, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                                        : event_dispatch_state_s.proactorGroupId));
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                         event_dispatch_state_s.reactorGroupId,
+                                         true);
+
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -964,10 +969,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize SSL listener, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                                        : event_dispatch_state_s.proactorGroupId));
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                         event_dispatch_state_s.reactorGroupId,
+                                         true);
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1059,10 +1063,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                                        : event_dispatch_state_s.proactorGroupId));
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                         event_dispatch_state_s.reactorGroupId,
+                                         true);
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1078,7 +1081,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   if (protocol_in == NET_TRANSPORTLAYER_UDP)
   {
     ACE_HANDLE handle_h =
-      configuration_in.UDPConnector->connect (connection_configuration_p_2->listenAddress);
+      configuration_in.UDPConnector->connect (connection_configuration_p_2->socketConfiguration.listenAddress);
     ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
     Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
     if (configuration_in.UDPConnector->useReactor ())
@@ -1102,7 +1105,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       do
       {
         iconnection_p =
-          connection_manager_2->get (connection_configuration_p_2->listenAddress,
+          connection_manager_2->get (connection_configuration_p_2->socketConfiguration.listenAddress,
                                      false);
         if (iconnection_p)
           break;
@@ -1112,12 +1115,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p_2->listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p_2->socketConfiguration.listenAddress).c_str ())));
 
-      Common_Tools::finalizeEventDispatch (useReactor_in,
-                                           !useReactor_in,
-                                           (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                                          : event_dispatch_state_s.proactorGroupId));
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                           event_dispatch_state_s.reactorGroupId,
+                                           true);
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)

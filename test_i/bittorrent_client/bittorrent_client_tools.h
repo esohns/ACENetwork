@@ -31,13 +31,10 @@
 class BitTorrent_Client_Tools
 {
  public:
-  // *NOTE*: iff (delete module == true), fire-and-forget the next-to-last
-  //         argument
   static ACE_HANDLE connect (BitTorrent_Client_IPeerConnector_t&,    // connector handle
                              BitTorrent_Client_ITrackerConnector_t&, // connector handle
                              const ACE_INET_Addr&,                   // peer address
-                             bool,                                   // clone module ?
-                             bool,                                   // delete module ?
+                             bool,                                   // clone module ? // ? ==> delete module
                              Stream_Module_t*&,                      // (final) module handle
                              bool = true);                           // peer ? : tracker
 

@@ -111,7 +111,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
   if (result == -1)
     goto error;
   PCP_Tools::mapAddress (data_r.client_address,
-                         &address_a[0]);
+                         address_a);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
                          sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));
@@ -160,7 +160,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
       if (result == -1)
         goto error;
       PCP_Tools::mapAddress (data_r.map.external_address,
-                             &address_a[0]);
+                             address_a);
       result =
         message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
                              sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));
@@ -209,7 +209,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
       if (result == -1)
         goto error;
       PCP_Tools::mapAddress (data_r.peer.external_address,
-                             &address_a[0]);
+                             address_a);
       result =
         message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
                              sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));
@@ -229,7 +229,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
       if (result == -1)
         goto error;
       PCP_Tools::mapAddress (data_r.peer.remote_peer_address,
-                             &address_a[0]);
+                             address_a);
       result =
         message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
                              sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));
@@ -274,7 +274,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
       case PCP_Codes::PCP_OPTION_THIRD_PARTY:
       {
         PCP_Tools::mapAddress ((*iterator).third_party.address,
-                               &address_a[0]);
+                               address_a);
         result =
           message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
                                sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));
@@ -305,7 +305,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
         if (result == -1)
           goto error;
         PCP_Tools::mapAddress ((*iterator).filter.remote_peer_address,
-                               &address_a[0]);
+                               address_a);
         result =
           message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
                                sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));

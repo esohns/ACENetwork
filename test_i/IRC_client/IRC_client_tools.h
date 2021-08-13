@@ -45,8 +45,8 @@ class IRC_Client_Tools
   static ACE_HANDLE connect (IRC_Client_IConnector_t&, // connector handle
                              const ACE_INET_Addr&,     // peer address
                              const IRC_LoginOptions&,  // login options
-                             bool,                     // clone module ?
-                             bool,                     // delete module ?
+                             bool,                     // clone module ? // *NOTE*: ? ==> delete module
+                             //bool,                     // delete module ?
                              Stream_Module_t*&);       // (final) module handle
 
  private:

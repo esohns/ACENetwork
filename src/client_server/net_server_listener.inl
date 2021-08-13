@@ -209,27 +209,27 @@ Net_Server_Listener_T<HandlerType,
   ACE_ASSERT (configuration_);
 
   // *TODO*: remove type inferences
-  if (unlikely (configuration_->useLoopBackDevice))
+  if (unlikely (configuration_->socketConfiguration.useLoopBackDevice))
   {
     result =
-      configuration_->address.set (configuration_->address.get_port_number (), // port
-                                   INADDR_LOOPBACK,                            // IP address
-                                   1,                                          // encode ?
-                                   0);                                         // map ?
+      configuration_->socketConfiguration.address.set (configuration_->socketConfiguration.address.get_port_number (), // port
+                                                       INADDR_LOOPBACK,                                                // IP address
+                                                       1,                                                              // encode ?
+                                                       0);                                                             // map ?
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to AddressType::set(): \"%m\", returning\n")));
       return;
     } // end IF
   } // end IF
   result =
-    inherited::open (configuration_->address,  // local address
-                     ACE_Reactor::instance (), // reactor handle
-                     ACE_NONBLOCK,             // flags (use non-blocking sockets)
-                     //0,                      // flags (default is blocking sockets)
-                     1,                        // always accept all pending connections
-                     1);                       // (try to) re-use address
+    inherited::open (configuration_->socketConfiguration.address,  // local address
+                     ACE_Reactor::instance (),                     // reactor handle
+                     ACE_NONBLOCK,                                 // flags (use non-blocking sockets)
+                     //0,                                          // flags (default is blocking sockets)
+                     1,                                            // always accept all pending connections
+                     1);                                           // (try to) re-use address
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -237,19 +237,17 @@ Net_Server_Listener_T<HandlerType,
     return;
   } // end IF
   isOpen_ = true;
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 
   isListening_ = true;
 }
@@ -295,12 +293,12 @@ Net_Server_Listener_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: suspended listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: suspended listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
   isListening_ = false;
@@ -422,7 +420,7 @@ Net_Server_Listener_T<HandlerType,
 
   //Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = handler_in;
   //ilinklayer_p->set (NET_ROLE_SERVER);
-  handler_in->set(NET_ROLE_SERVER);
+  handler_in->set (NET_ROLE_SERVER);
 
   return inherited::accept_svc_handler (handler_in);
 }

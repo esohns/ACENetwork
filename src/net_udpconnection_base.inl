@@ -250,11 +250,11 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
   // place data into the socket
   bytes_sent =
-      inherited::peer_.send (message_block_p->rd_ptr (), // data
-                             message_block_p->length (), // #bytes to send
-                             inherited::address_,        // peer address
-                             0);//,                      // flags
-                             //NULL);                   // timeout
+      inherited::HANDLER_T::send (message_block_p->rd_ptr (), // data
+                                  message_block_p->length (), // #bytes to send
+                                  inherited::address_,        // peer address
+                                  0);//,                      // flags
+                                  //NULL);                   // timeout
   switch (bytes_sent)
   {
     case -1:
@@ -361,12 +361,12 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
 
   handle_out =
-    (inherited::CONNECTION_BASE_T::configuration_->writeOnly ? inherited::writeHandle_
-                                                             : inherited::peer_.get_handle ());
+    (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly ? inherited::writeHandle_
+                                                                                 : inherited::peer_.get_handle ());
   localSAP_out.reset ();
   peerSAP_out.reset ();
 
-  if (likely (!inherited::CONNECTION_BASE_T::configuration_->writeOnly))
+  if (likely (!inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (unlikely (result == -1))
@@ -381,7 +381,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
     peerSAP_out = inherited::address_;
   else
   {
@@ -621,7 +621,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     goto error;
 
   // step2: start reading ? (need to pass any data ?)
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
   { ACE_ASSERT (!messageBlock_in.length ());
     goto continue_;
   } // end IF
@@ -692,7 +692,7 @@ continue_:
   ACE_ASSERT (this->count () >= 2); // connection manager, read operation
                                     // (+ stream module(s))
 
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
     this->decrease (); // there is no read operation
 
   return;
@@ -876,12 +876,12 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
 
   handle_out =
-    (inherited::CONNECTION_BASE_T::configuration_->writeOnly ? inherited::writeHandle_
-                                                             : inherited::HANDLER_T::SOCKET_T::get_handle ());
+    (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly ? inherited::writeHandle_
+                                                                                 : inherited::HANDLER_T::SOCKET_T::get_handle ());
   localSAP_out.reset ();
   peerSAP_out.reset ();
 
-  if (likely (!inherited::CONNECTION_BASE_T::configuration_->writeOnly))
+  if (likely (!inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
   {
     result = inherited::HANDLER_T::SOCKET_T::get_local_addr (localSAP_out);
     if (unlikely (result == -1))
@@ -896,7 +896,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->writeOnly))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
     peerSAP_out = inherited::address_;
   else
   {

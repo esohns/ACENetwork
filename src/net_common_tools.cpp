@@ -446,13 +446,13 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   NETWORK_TRACE ("Net_Common_Tools::isLocal");
 
   // sanity check(s)
-  if (unlikely (address_in.is_any () ||
-                address_in.is_loopback ()))
+  if (unlikely (address_in.is_any ()      ||
+                address_in.is_loopback () ||
+                address_in.is_multicast ()))
     return true;
 
   // retrieve all assigned local addresses
   ACE_INET_Addr local_ip_address;
-  //ACE_INET_Addr network_address;
   std::vector<ACE_INET_Addr> local_ip_addresses_a;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   //ULONG flags = (GAA_FLAG_INCLUDE_PREFIX             |
@@ -706,8 +706,7 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   ACE_NOTSUP_RETURN (false);
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
   for (std::vector<ACE_INET_Addr>::const_iterator iterator = local_ip_addresses_a.begin ();
        iterator != local_ip_addresses_a.end ();
        ++iterator)

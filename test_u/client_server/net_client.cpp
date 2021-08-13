@@ -616,7 +616,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   tcp_connection_configuration.messageAllocator = &message_allocator;
   tcp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  tcp_connection_configuration.initialize (configuration_in.streamConfiguration);
+  tcp_connection_configuration.streamConfiguration =
+    &configuration_in.streamConfiguration;
 
   udp_connection_configuration.allocatorConfiguration =
       &configuration_in.allocatorConfiguration;
@@ -624,7 +625,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   udp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   //udp_connection_configuration.writeOnly = true;
-  udp_connection_configuration.initialize (configuration_in.streamConfiguration);
+  udp_connection_configuration.streamConfiguration =
+    &configuration_in.streamConfiguration;
   Net_ConnectionConfigurationsIterator_t iterator, iterator_2;
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
@@ -781,16 +783,16 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("set peer address: %s\n"),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-  tcp_connection_configuration.address = peer_address;
+  tcp_connection_configuration.socketConfiguration.address = peer_address;
   if (!useReactor_in)
-    udp_connection_configuration.connect = true;
-  udp_connection_configuration.peerAddress = peer_address;
+    udp_connection_configuration.socketConfiguration.connect = true;
+  udp_connection_configuration.socketConfiguration.peerAddress = peer_address;
   ACE_INET_Addr listen_address;
   result =
-    udp_connection_configuration.listenAddress.set (static_cast<u_short> (serverPortNumber_in + 1),
-                                                    static_cast<ACE_UINT32> (INADDR_ANY),
-                                                    1,
-                                                    0);
+    udp_connection_configuration.socketConfiguration.listenAddress.set (static_cast<u_short> (serverPortNumber_in + 1),
+                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                        1,
+                                                                        0);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::set() (was: %s), continuing\n"),
@@ -798,7 +800,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("set listen address: %s\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (udp_connection_configuration.listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (udp_connection_configuration.socketConfiguration.listenAddress).c_str ())));
 
   configuration_in.signalHandler = &signalHandler_in;
   Client_TimeoutHandler timeout_handler (actionMode_in,

@@ -27,13 +27,13 @@
 #include "net_connection_configuration.h"
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         Net_TCPSocketConfiguration_t> Net_TCPIConnector_t;
+                         Net_TCPSocketConfiguration_t> Net_TCPISocketConnector_t;
 typedef Net_IAsynchConnector_T<ACE_INET_Addr,
-                               Net_TCPSocketConfiguration_t> Net_TCPIAsynchConnector_t;
+                               Net_TCPSocketConfiguration_t> Net_TCPIAsynchSocketConnector_t;
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         Net_UDPSocketConfiguration_t> Net_UDPIConnector_t;
+                         Net_UDPSocketConfiguration_t> Net_UDPISocketConnector_t;
 typedef Net_IAsynchConnector_T<ACE_INET_Addr,
-                               Net_UDPSocketConfiguration_t> Net_UDPIAsynchConnector_t;
+                               Net_UDPSocketConfiguration_t> Net_UDPIAsynchSocketConnector_t;
 
 #endif

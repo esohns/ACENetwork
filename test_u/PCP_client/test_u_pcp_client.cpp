@@ -179,11 +179,10 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
 #endif // ACE_WIN32 || ACE_WIN64
-  // *TODO*: this doesn't really make sense (see '-n' option)
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-o          : use loopback [")
-            << NET_INTERFACE_DEFAULT_USE_LOOPBACK
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
+  //std::cout << ACE_TEXT_ALWAYS_CHAR ("-o          : use loopback [")
+  //          << NET_INTERFACE_DEFAULT_USE_LOOPBACK
+  //          << ACE_TEXT_ALWAYS_CHAR ("]")
+  //          << std::endl;
   //std::cout << ACE_TEXT_ALWAYS_CHAR ("-q          : send request on offer [")
   //          << TEST_U_DEFAULT_PCP_SEND_REQUEST_ON_OFFER
   //          << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -234,7 +233,7 @@ do_processArguments (int argc_in,
 #else
                      std::string& interfaceIdentifier_out,
 #endif // ACE_WIN32 || ACE_WIN64
-                     bool& useLoopback_out,
+                     //bool& useLoopback_out,
                      //bool& sendRequestOnOffer_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
@@ -281,7 +280,7 @@ do_processArguments (int argc_in,
   interfaceIdentifier_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
 #endif // ACE_WIN32 || ACE_WIN64
-  useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
+  //useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   //sendRequestOnOffer_out = TEST_U_DEFAULT_PCP_SEND_REQUEST_ON_OFFER;
   useReactor_out =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -296,22 +295,22 @@ do_processArguments (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("de:f::g::lors:tvx:"),
+                              ACE_TEXT ("de:f::g::lrs:tvx:"),
 #else
-                              ACE_TEXT ("df::g::lors:tvx:"),
+                              ACE_TEXT ("df::g::lrs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("df::lors:tvx:"),
+                              ACE_TEXT ("df::lrs:tvx:"),
 #endif // GUI_SUPPORT
 #else
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("de:f::g::ln::ors:tvx:"),
+                              ACE_TEXT ("de:f::g::ln::rs:tvx:"),
 #else
-                              ACE_TEXT ("df::g::ln::ors:tvx:"),
+                              ACE_TEXT ("df::g::ln::rs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("df::ln::ors:tvx:"),
+                              ACE_TEXT ("df::ln::rs:tvx:"),
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                               1,                         // skip command name
@@ -380,12 +379,12 @@ do_processArguments (int argc_in,
           interfaceIdentifier_out.clear ();
         break;
       }
-#endif
-      case 'o':
-      {
-        useLoopback_out = true;
-        break;
-      }
+#endif // ACE_WIN32 || ACE_WIN64
+      //case 'o':
+      //{
+      //  useLoopback_out = true;
+      //  break;
+      //}
       //case 'q':
       //{
       //  sendRequestOnOffer_out = true;
@@ -544,7 +543,7 @@ do_work (//bool requestBroadcastReplies_in,
 #else
          const std::string& interfaceIdentifier_in,
 #endif // ACE_WIN32 || ACE_WIN64
-         bool useLoopback_in,
+         //bool useLoopback_in,
          //bool sendRequestOnOffer_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
@@ -593,13 +592,9 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
   // step0b: initialize random number generator
-  Common_Tools::initialize ();
+  Common_Tools::initialize (true); // initialize random number generation
 
   // step0c: initialize configuration and stream
-  //configuration_in.userData.connectionConfiguration =
-  //    &configuration_in.connectionConfiguration;
-  //configuration_in.userData.streamConfiguration =
-  //    &configuration_in.streamConfiguration;
   configuration_in.dispatch =
       (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                      : COMMON_EVENT_DISPATCH_PROACTOR);
@@ -661,45 +656,136 @@ do_work (//bool requestBroadcastReplies_in,
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
   // *********************** socket configuration data *************************
-  // *IMPORTANT NOTE*: (global) UDP broadcast appears to be broken on
-  //                   Windows 7 and above (see e.g.:
-  //                   - http://serverfault.com/questions/72112/how-to-alter-the-global-broadcast-address-255-255-255-255-behavior-on-windows
-  // *WORKAROUND*: make sure the 'metric' value of the 'target' interface
-  //               (i.e. the one that shares the subnet with the target PCP
-  //               server) is the lowest (run 'route print' and inspect the
-  //               (global) broadcast route entries) to ensure that broadcast
-  //               packets are (at least) sent out on the correct subnet
-  PCPClient_ConnectionConfiguration connection_configuration;
-  connection_configuration.allocatorConfiguration = &configuration_in.allocatorConfiguration;
-  result =
-    connection_configuration.peerAddress.set (static_cast<u_short> (PCP_DEFAULT_SERVER_PORT),
-                                              static_cast<ACE_UINT32> (INADDR_BROADCAST),
-                                              1,
-                                              0);
+  ACE_INET_Addr interface_address, gateway_address;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
+#else
+  if (!interfaceIdentifier_in.empty ())
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  if (!interfaceIdentifier_in.empty ())
+#endif // ACE_WIN32 || ACE_WIN64
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (!Net_Common_Tools::interfaceToIPAddress_2 (interfaceIdentifier_in,
+#else
+    if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+#endif // _WIN32_WINNT_VISTA
+#else
+    if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+#endif // ACE_WIN32 || ACE_WIN64
+                                                 interface_address,
+                                                 gateway_address))
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(\"%s\"), aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), aborting\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
+                  NULL));
+#endif // ACE_WIN32 || ACE_WIN64
+      return;
+    } // end IF
+    interface_address.set_port_number (PCP_DEFAULT_CLIENT_PORT,
+                                       1);
+    result = 0;
+  } // end ELSE IF
+  else
+  {
+    result =
+      interface_address.set (static_cast<u_short> (PCP_DEFAULT_CLIENT_PORT),
+                             static_cast<ACE_UINT32> (INADDR_ANY),
+                             1, // encode
+                             AF_INET);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    struct _GUID interface_identifier =
+      Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
+#else
+    std::string interface_identifier =
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
+#endif // _WIN32_WINNT_VISTA
+#else
+    std::string interface_identifier =
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
+#endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (InlineIsEqualGUID (interface_identifier, GUID_NULL))
+#else
+    if (interface_identifier.empty ())
+#endif // _WIN32_WINNT_VISTA
+#else
+    if (interface_identifier.empty ())
+#endif // ACE_WIN32 || ACE_WIN64
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::getDefaultInterface(), aborting\n")));
+      return;
+    } // end IF
+    gateway_address = Net_Common_Tools::getGateway (interface_identifier);
+    if (gateway_address.is_any ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::getGateway(\"%s\"), aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+      return;
+    } // end IF
+  } // end IF
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
     return;
   } // end IF
-
+  PCPClient_ConnectionConfiguration connection_configuration_outbound_unicast;
+  PCPClient_ConnectionConfiguration connection_configuration_inbound_unicast;
+  PCPClient_ConnectionConfiguration connection_configuration_inbound_multicast;
+  connection_configuration_outbound_unicast.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration;
+  connection_configuration_outbound_unicast.socketConfiguration.peerAddress =
+    gateway_address;
+  connection_configuration_outbound_unicast.socketConfiguration.peerAddress.set_port_number (static_cast<u_short> (PCP_DEFAULT_SERVER_PORT),
+                                                                                             1); // encode
   if (useReactor_in)
     ;
   else
-    connection_configuration.connect = true;
-  connection_configuration.interfaceIdentifier = interfaceIdentifier_in;
-  connection_configuration.useLoopBackDevice = useLoopback_in;
-  connection_configuration.writeOnly = true;
-  connection_configuration.statisticReportingInterval =
+    connection_configuration_outbound_unicast.socketConfiguration.connect =
+    true;
+  connection_configuration_outbound_unicast.socketConfiguration.interfaceIdentifier =
+    interfaceIdentifier_in;
+  connection_configuration_outbound_unicast.socketConfiguration.writeOnly =
+    true;
+  connection_configuration_outbound_unicast.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.initialize (configuration_in.streamConfiguration);
-
+  connection_configuration_outbound_unicast.messageAllocator = &message_allocator;
+  connection_configuration_outbound_unicast.streamConfiguration =
+    &configuration_in.streamConfiguration;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Out"),
-                                                                    &connection_configuration));
+                                                                    &connection_configuration_outbound_unicast));
   Net_ConnectionConfigurationsIterator_t iterator =
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
+
+  connection_configuration_inbound_unicast =
+    connection_configuration_outbound_unicast;
+  connection_configuration_inbound_unicast.socketConfiguration.connect =
+    false;
+  connection_configuration_inbound_unicast.socketConfiguration.listenAddress =
+    interface_address;
+  connection_configuration_inbound_unicast.socketConfiguration.writeOnly =
+    false;
 
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
@@ -753,87 +839,24 @@ do_work (//bool requestBroadcastReplies_in,
   //    sendRequestOnOffer_in;
 
   // ********************* listener configuration data *************************
-  connection_configuration.connect = false;
-  connection_configuration.writeOnly = false;
-  if (useLoopback_in)
-    result =
-      connection_configuration.listenAddress.set (PCP_DEFAULT_CLIENT_PORT,
-                                                  ACE_LOCALHOST,
-                                                  1,
-                                                  ACE_ADDRESS_FAMILY_INET);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  else if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
-#else
-  else if (!interfaceIdentifier_in.empty ())
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  else if (!interfaceIdentifier_in.empty ())
-#endif // ACE_WIN32 || ACE_WIN64
-  {
-    ACE_INET_Addr gateway_address;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    if (!Net_Common_Tools::interfaceToIPAddress_2 (interfaceIdentifier_in,
-#else
-    if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-#endif // _WIN32_WINNT_VISTA
-#else
-    if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-#endif // ACE_WIN32 || ACE_WIN64
-                                                 connection_configuration.listenAddress,
-                                                 gateway_address))
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(\"%s\"), continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
-                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), continuing\n"),
-                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
-                  NULL));
-#endif // ACE_WIN32 || ACE_WIN64
-      result = -1;
-    } // end IF
-    connection_configuration.listenAddress.set_port_number (PCP_DEFAULT_CLIENT_PORT,
-                                                            1);
-    result = 0;
-  } // end ELSE IF
-  else
-    result =
-      connection_configuration.listenAddress.set (static_cast<u_short> (PCP_DEFAULT_CLIENT_PORT),
-                                                  static_cast<ACE_UINT32> (INADDR_ANY),
-                                                  1,  // encode
-                                                  AF_INET);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
-    return;
-  } // end IF
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In"),
-                                                                    &connection_configuration));
-
+                                                                    &connection_configuration_inbound_unicast));
+  connection_configuration_inbound_multicast = connection_configuration_inbound_unicast;
   result =
-    connection_configuration.listenAddress.set (static_cast<u_short> (PCP_DEFAULT_CLIENT_PORT),
-                                                ACE_TEXT_ALWAYS_CHAR (NET_ADDRESS_IPV4_MULTICAST),
-                                                1,  // encode
-                                                AF_INET);
+    connection_configuration_inbound_multicast.socketConfiguration.listenAddress.set (static_cast<u_short> (PCP_DEFAULT_CLIENT_PORT),
+                                                                                      ACE_TEXT_ALWAYS_CHAR (NET_ADDRESS_IPV4_MULTICAST),
+                                                                                      1,  // encode
+                                                                                      AF_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
     return;
   } // end IF
+  connection_configuration_inbound_multicast.socketConfiguration.peerAddress =
+    connection_configuration_inbound_multicast.socketConfiguration.listenAddress;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In_2"),
-                                                                    &connection_configuration));
+                                                                    &connection_configuration_inbound_multicast));
 
   // step0b: initialize event dispatch
   if (useReactor_in)
@@ -870,7 +893,7 @@ do_work (//bool requestBroadcastReplies_in,
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*dynamic_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+  connection_manager_p->set (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
                              &configuration_in.userData);
 
   // step0d: initialize regular (global) statistic reporting
@@ -955,7 +978,7 @@ do_work (//bool requestBroadcastReplies_in,
   //         connection to the unicast address is handled by the discovery
   //         module
 //  configuration_in.streamConfiguration.configuration_.module = NULL;
-  connection_manager_p->set (*dynamic_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+  connection_manager_p->set (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
                              &configuration_in.userData);
 
   //Test_U_OutboundConnector_t connector (connection_manager_p,
@@ -968,29 +991,29 @@ do_work (//bool requestBroadcastReplies_in,
     iconnector_p = &connector;
   else
     iconnector_p = &asynch_connector;
-  if (unlikely (!iconnector_p->initialize (*dynamic_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second))))
+  if (unlikely (!iconnector_p->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second))))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
     return;
   } // end IF
-  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->connect = true;
-  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->writeOnly = true;
+  //NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->connect = true;
+  //NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->writeOnly = true;
   handle =
-    iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress);
+    iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress);
   if (unlikely (handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
     return;
   } // end IF
-  iterator_2 =
-    configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("In"));
-  ACE_ASSERT (iterator_2 != configuration_in.streamConfiguration.end ());
-  PCPClient_StreamConfiguration_t::ITERATOR_T iterator_3 =
-    configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
-  ACE_ASSERT (iterator_2 != configuration_in.streamConfiguration.end ());
+  //iterator_2 =
+  //  configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("In"));
+  //ACE_ASSERT (iterator_2 != configuration_in.streamConfiguration.end ());
+  //PCPClient_StreamConfiguration_t::ITERATOR_T iterator_3 =
+  //  configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
+  //ACE_ASSERT (iterator_2 != configuration_in.streamConfiguration.end ());
   if (unlikely (iconnector_p->useReactor ()))
   {
     (*iterator_2).second.second.connection =
@@ -999,9 +1022,9 @@ do_work (//bool requestBroadcastReplies_in,
 #else
         connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
 #endif // ACE_WIN32 || ACE_WIN64
-    (*iterator_3).second.second.connection =
-      (*iterator_2).second.second.connection;
-    (*iterator_3).second.second.connection->increase ();
+    //(*iterator_3).second.second.connection =
+    //  (*iterator_2).second.second.connection;
+    //(*iterator_3).second.second.connection->increase ();
   } // end IF
   else
   {
@@ -1013,7 +1036,7 @@ do_work (//bool requestBroadcastReplies_in,
     do
     {
       (*iterator_2).second.second.connection =
-          connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress);
+          connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress);
       if ((*iterator_2).second.second.connection)
         break;
     } while (COMMON_TIME_NOW < deadline);
@@ -1022,14 +1045,14 @@ do_work (//bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
     return;
   } // end IF
   else if (!iconnector_p->useReactor ())
   {
-    (*iterator_3).second.second.connection =
-      (*iterator_2).second.second.connection;
-    (*iterator_3).second.second.connection->increase ();
+    //(*iterator_3).second.second.connection =
+    //  (*iterator_2).second.second.connection;
+    //(*iterator_3).second.second.connection->increase ();
   } // end ELSE IF
   // step1b: wait for the connection to finish initializing
   // *TODO*: avoid tight loop here
@@ -1045,10 +1068,10 @@ do_work (//bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ()),
                 status));
     (*iterator_2).second.second.connection->decrease ();
-    (*iterator_3).second.second.connection->decrease ();
+    //(*iterator_3).second.second.connection->decrease ();
     return;
   } // end IF
   // step1c: wait for the connection stream to finish initializing
@@ -1060,7 +1083,7 @@ do_work (//bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(%@), returning\n"),
                 (*iterator_2).second.second.connection));
     (*iterator_2).second.second.connection->decrease ();
-    (*iterator_3).second.second.connection->decrease ();
+    //(*iterator_3).second.second.connection->decrease ();
     return;
   } // end IF
   istream_connection_p->wait (STREAM_STATE_RUNNING,
@@ -1068,14 +1091,16 @@ do_work (//bool requestBroadcastReplies_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
               (*iterator_2).second.second.connection->id (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->peerAddress).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
 
   // step1ca: reinitialize connection manager
   if (useReactor_in)
     ;
   else
-    NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->connect = false; // *TODO*: ?
-  NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->writeOnly = false;
+    NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.connect =
+    false; // *TODO*: ?
+  NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.writeOnly =
+    false;
   //connection_manager_p->set (configuration,
   //                           &configuration_in.userData);
 
@@ -1088,12 +1113,12 @@ do_work (//bool requestBroadcastReplies_in,
       iconnector_p = &connector_2;
     else
       iconnector_p = &asynch_connector_2;
-    if (!iconnector_p->initialize (*dynamic_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second)))
+    if (!iconnector_p->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
       (*iterator_2).second.second.connection->decrease ();
-      (*iterator_3).second.second.connection->decrease ();
+      //(*iterator_3).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1103,14 +1128,14 @@ do_work (//bool requestBroadcastReplies_in,
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     configuration_in.handle =
-        iconnector_p->connect (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress);
+        iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress);
     if (configuration_in.handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
       (*iterator_2).second.second.connection->decrease ();
-      (*iterator_3).second.second.connection->decrease ();
+      //(*iterator_3).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1132,7 +1157,7 @@ do_work (//bool requestBroadcastReplies_in,
       do
       {
         iconnection_p =
-          connection_manager_p->get (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress,
+          connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
                                      false);
         if (iconnection_p)
         {
@@ -1151,16 +1176,16 @@ do_work (//bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
       (*iterator_2).second.second.connection->decrease ();
-      (*iterator_3).second.second.connection->decrease ();
+      //(*iterator_3).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: listening to (UDP) %s\n"),
                 iconnection_p->id (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_SOCKET_CONFIGURATION_UDP_CAST ((*iterator).second)->listenAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
 
     // step2: send PCP request
 //    ACE_NEW_NORETURN (message_data_p,
@@ -1208,7 +1233,7 @@ allocate:
                   ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
 //      message_data_container_p->decrease ();
       (*iterator_2).second.second.connection->decrease ();
-      (*iterator_3).second.second.connection->decrease ();
+      //(*iterator_3).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1218,9 +1243,9 @@ allocate:
     PCP_record.lifetime = PCP_DEFAULT_MAP_LIFETIME_S;
     std::string device_identifier_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_Common_Tools::interfaceToString ((*iterator).second->interfaceIdentifier);
+      Net_Common_Tools::interfaceToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.interfaceIdentifier);
 #else
-      (*iterator).second->interfaceIdentifier;
+      NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.interfaceIdentifier;
 #endif // ACE_WIN32 || ACE_WIN64
       //Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
     ACE_INET_Addr gateway_address;
@@ -1232,7 +1257,7 @@ allocate:
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
                   ACE_TEXT (device_identifier_string.c_str ())));
       (*iterator_2).second.second.connection->decrease ();
-      (*iterator_3).second.second.connection->decrease ();
+      //(*iterator_3).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1252,7 +1277,7 @@ allocate:
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), returning\n"),
                   ACE_TEXT (device_identifier_string.c_str ())));
       (*iterator_2).second.second.connection->decrease ();
-      (*iterator_3).second.second.connection->decrease ();
+      //(*iterator_3).second.second.connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1357,7 +1382,7 @@ allocate:
                               true);  // locked access ?
   connection_manager_p->abort (false); // wait ?
   (*iterator_2).second.second.connection->decrease ();
-  (*iterator_3).second.second.connection->decrease ();
+  //(*iterator_3).second.second.connection->decrease ();
   if (iconnection_p)
   {
     iconnection_p->decrease (); iconnection_p = NULL;
@@ -1504,7 +1529,7 @@ ACE_TMAIN (int argc_in,
 #else
   std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
-  bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
+  //bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   //bool send_request_on_offer =
   //    TEST_U_DEFAULT_PCP_SEND_REQUEST_ON_OFFER;
   bool use_reactor =
@@ -1540,7 +1565,7 @@ ACE_TMAIN (int argc_in,
 #else
                             interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
-                            use_loopback,
+                            //use_loopback,
                             //send_request_on_offer,
                             use_reactor,
                             statistic_reporting_interval,
@@ -1837,7 +1862,7 @@ ACE_TMAIN (int argc_in,
 #else
            interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
-           use_loopback,
+           //use_loopback,
            //send_request_on_offer,
            use_reactor,
            statistic_reporting_interval,

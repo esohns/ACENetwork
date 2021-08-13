@@ -91,17 +91,18 @@ IRC_Stream_T<StreamStateType,
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));
 
   // sanity check(s)
+  ACE_ASSERT (configuration_in.configuration_);
   ACE_ASSERT (!inherited::isRunning ());
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration->setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
 //  SessionDataType* session_data_p = NULL;
   typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
   BISECTOR_T* bisector_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -112,7 +113,7 @@ IRC_Stream_T<StreamStateType,
                 ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
 
@@ -158,7 +159,7 @@ IRC_Stream_T<StreamStateType,
 
   // ---------------------------------------------------------------------------
 
-  if (configuration_in.configuration->setupPipeline)
+  if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -173,7 +174,7 @@ IRC_Stream_T<StreamStateType,
 
 error:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
 
   return false;

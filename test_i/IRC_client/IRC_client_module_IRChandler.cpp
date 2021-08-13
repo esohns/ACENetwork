@@ -1247,6 +1247,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration->configuration_);
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (record_inout);
 
@@ -1258,13 +1259,13 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 
   // step1: allocate a message buffer
   IRC_Message* message_p =
-    inherited::allocateMessage (inherited::configuration_->streamConfiguration->configuration->allocatorConfiguration->defaultBufferSize);
+    inherited::allocateMessage (inherited::configuration_->streamConfiguration->configuration_->allocatorConfiguration->defaultBufferSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u), returning\n"),
                 inherited::mod_->name (),
-                inherited::configuration_->streamConfiguration->configuration->allocatorConfiguration->defaultBufferSize));
+                inherited::configuration_->streamConfiguration->configuration_->allocatorConfiguration->defaultBufferSize));
     record_inout->decrease (); record_inout = NULL;
     return;
   } // end IF

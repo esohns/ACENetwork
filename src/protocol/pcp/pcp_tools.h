@@ -45,7 +45,7 @@ class PCP_Tools
 
   inline static bool isRequest (const struct PCP_Record& record_in) { return (record_in.opcode & 0x80); }
   static void mapAddress (const ACE_INET_Addr&, // address
-                          ACE_UINT8*&);         // return value: mapped address
+                          ACE_UINT8[]);         // return value: mapped address
   static ACE_UINT64 generateNonce ();
 
  private:

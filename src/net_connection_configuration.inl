@@ -22,32 +22,32 @@
 
 #include "ace/Log_Msg.h"
 
-template <typename StreamConfigurationType,
-          enum Net_TransportLayerType TransportLayerType>
-Net_StreamConnectionConfiguration_T<StreamConfigurationType,
-                                    TransportLayerType>::Net_StreamConnectionConfiguration_T ()
- : inherited ()
- , streamConfiguration (NULL)
- , isInitialized_ (false)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::Net_StreamConnectionConfiguration_T"));
+//template <typename StreamConfigurationType,
+//          enum Net_TransportLayerType TransportLayerType>
+//Net_StreamConnectionConfiguration_T<StreamConfigurationType,
+//                                    TransportLayerType>::Net_StreamConnectionConfiguration_T ()
+// : inherited ()
+// , streamConfiguration (NULL)
+// , isInitialized_ (false)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::Net_StreamConnectionConfiguration_T"));
+//
+//}
 
-}
-
-template <typename StreamConfigurationType,
-          enum Net_TransportLayerType TransportLayerType>
-bool
-Net_StreamConnectionConfiguration_T<StreamConfigurationType,
-                                    TransportLayerType>::initialize (const StreamConfigurationType& streamConfiguration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::initialize"));
-
-  // sanity check(s)
-  ACE_ASSERT (!isInitialized_);
-
-  streamConfiguration =
-    &const_cast<StreamConfigurationType&> (streamConfiguration_in);
-  isInitialized_ = true;
-
-  return true;
-}
+//template <typename StreamConfigurationType,
+//          enum Net_TransportLayerType TransportLayerType>
+//bool
+//Net_StreamConnectionConfiguration_T<StreamConfigurationType,
+//                                    TransportLayerType>::initialize (const StreamConfigurationType& streamConfiguration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::initialize"));
+//
+//  // sanity check(s)
+//  ACE_ASSERT (!isInitialized_);
+//
+//  streamConfiguration =
+//    &const_cast<StreamConfigurationType&> (streamConfiguration_in);
+//  isInitialized_ = true;
+//
+//  return true;
+//}

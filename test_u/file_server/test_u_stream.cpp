@@ -109,13 +109,13 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
   ACE_ASSERT ((*iterator).second.second.outboundQueue);
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration->setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
 //  struct FileServer_SessionData* session_data_p = NULL;
   Test_U_Module_Net_Writer_t* net_io_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -126,7 +126,7 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -166,8 +166,8 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.configuration->setupPipeline)
-    if (!inherited::setup (configuration_in.configuration->notificationStrategy))
+  if (configuration_in.configuration_->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
@@ -186,7 +186,7 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
 
 error:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
 
   return false;
@@ -234,7 +234,7 @@ Test_U_UDPStream::load (Stream_ILayout* layout_inout,
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-  if (inherited::configuration_->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+  if (inherited::configuration_->configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     ACE_NEW_RETURN (module_p,
                     Test_U_Module_Net_UDPTarget_Module (this,
                                                         ACE_TEXT_ALWAYS_CHAR (MODULE_NET_TARGET_DEFAULT_NAME_STRING)),
@@ -267,14 +267,14 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
   //(*iterator).second.second.stream = this;
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.configuration->setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
 //  struct FileServer_SessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
   Test_U_FileReaderH* file_source_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -285,7 +285,7 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -325,8 +325,8 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.configuration->setupPipeline)
-    if (!inherited::setup (configuration_in.configuration->notificationStrategy))
+  if (configuration_in.configuration_->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
@@ -345,7 +345,7 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
 
 error:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration->setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
 
   return false;

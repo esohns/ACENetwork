@@ -289,6 +289,7 @@ class Net_AsynchStreamConnectionBase_T
 
   // override (part of) Net_ISocketHandler
   virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  virtual bool initiate_read ();
 
   // *IMPORTANT NOTE*: supports synchronicity-agnostic connections
   inline virtual int open (void* = NULL) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }

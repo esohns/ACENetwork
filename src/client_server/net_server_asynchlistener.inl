@@ -560,50 +560,48 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_ASSERT (configuration_);
 
   // *TODO*: remove type inferences
-  if (unlikely (configuration_->useLoopBackDevice))
+  if (unlikely (configuration_->socketConfiguration.useLoopBackDevice))
   {
     result =
-      configuration_->address.set (configuration_->address.get_port_number (), // port
-                                   INADDR_LOOPBACK,                            // address
-                                   1,                                          // encode ?
-                                   0);                                         // map ?
+      configuration_->socketConfiguration.address.set (configuration_->socketConfiguration.address.get_port_number (), // port
+                                                       INADDR_LOOPBACK,                                                // address
+                                                       1,                                                              // encode ?
+                                                       0);                                                             // map ?
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to AddressType::set(): \"%m\", returning\n")));
       return;
     } // end IF
   } // end IF
   result =
-    open (configuration_->address,    // local SAP
-          0,                          // bytes to read
-          1,                          // pass_addresses ?
-          ACE_DEFAULT_ASYNCH_BACKLOG, // backlog
-          1,                          // SO_REUSEADDR ?
-          NULL,                       // proactor (use default)
-          true,                       // validate new connections ?
-          1,                          // reissue_accept ?
-          -1);                        // number of initial accepts
+    open (configuration_->socketConfiguration.address, // local SAP
+          0,                                           // bytes to read
+          1,                                           // pass_addresses ?
+          ACE_DEFAULT_ASYNCH_BACKLOG,                  // backlog
+          1,                                           // SO_REUSEADDR ?
+          NULL,                                        // proactor (use default)
+          true,                                        // validate new connections ?
+          1,                                           // reissue_accept ?
+          -1);                                         // number of initial accepts
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
     return;
   } // end IF
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 
   isListening_ = true;
 }
@@ -671,20 +669,18 @@ Net_Server_AsynchListener_T<HandlerType,
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT ("failed to ACE_POSIX_Asynch_Accept::close(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-#if defined (_DEBUG)
   else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: stopped listening: %s\n"),
                 inherited::get_handle (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: stopped listening: %s\n"),
                 inherited::get_handle (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 
   isListening_ = false;
 }

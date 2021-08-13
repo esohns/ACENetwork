@@ -477,7 +477,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
 //    ACE_Time_Value (reporting_interval, 0);
   connection_configuration.messageAllocator = &message_allocator;
 
-  connection_configuration.initialize (CBData_in.configuration->streamConfiguration);
+  connection_configuration.streamConfiguration =
+    &CBData_in.configuration->streamConfiguration;
 
   CBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                             &connection_configuration));
@@ -551,7 +552,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*dynamic_cast<IRC_Client_ConnectionConfiguration*> ((*iterator).second),
+  connection_manager_p->set (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator).second),
                              NULL);
 
   // step3b: initialize timer manager

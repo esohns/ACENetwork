@@ -613,7 +613,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   peer_connection_configuration.allocatorConfiguration = &allocator_configuration;
   peer_connection_configuration.messageAllocator =
     &peer_message_allocator;
-  peer_connection_configuration.initialize (configuration_in.peerStreamConfiguration);
+  peer_connection_configuration.streamConfiguration =
+    &configuration_in.peerStreamConfiguration;
 
   configuration_in.peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                         &peer_connection_configuration));
@@ -628,7 +629,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     &allocator_configuration;
   tracker_connection_configuration.messageAllocator =
     &tracker_message_allocator;
-  tracker_connection_configuration.initialize (configuration_in.trackerStreamConfiguration);
+  tracker_connection_configuration.streamConfiguration =
+    &configuration_in.trackerStreamConfiguration;
 
   configuration_in.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                            &tracker_connection_configuration));
@@ -641,9 +643,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.sessionConfiguration.metaInfoFileName =
       metaInfoFileName_in;
   configuration_in.sessionConfiguration.connectionConfiguration =
-    dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second);
+    static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second);
   configuration_in.sessionConfiguration.trackerConnectionConfiguration =
-    dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second);
+    static_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second);
   configuration_in.sessionConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
   configuration_in.sessionConfiguration.dispatch =
@@ -679,11 +681,11 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step5: initialize connection manager
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                          ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  peer_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
+  peer_connection_manager_p->set (*static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
                                   NULL);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  tracker_connection_manager_p->set (*dynamic_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
+  tracker_connection_manager_p->set (*static_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
                                      NULL);
 
   // event loop(s):
