@@ -1402,7 +1402,7 @@ allocate:
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (option_s);
   message_p->initialize (PCP_record,
-                         message_p->id (),
+                         message_p->sessionId (),
                          NULL);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -1499,7 +1499,7 @@ allocate:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     Net_Common_Tools::interfaceToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
-    (*iterator_2).second->interfaceIdentifier;
+    NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier;
 #endif // ACE_WIN32 || ACE_WIN64
     //Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
   ACE_INET_Addr gateway_address;
@@ -1519,7 +1519,7 @@ allocate:
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (option_s);
   message_p->initialize (PCP_record,
-                         message_p->id (),
+                         message_p->sessionId (),
                          NULL);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -1722,9 +1722,11 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
-    PCPClient_InboundConnectorBcast_t connector_bcast (true);
-    PCPClient_InboundAsynchConnectorBcast_t asynch_connector_bcast (true);
-    PCPClient_IConnector_t* iconnector_p = NULL;
+    PCPClient_InboundConnector_t connector (true);
+    PCPClient_InboundAsynchConnector_t asynch_connector (true);
+    PCPClient_InboundConnectorMcast_t connector_mcast (true);
+    PCPClient_InboundAsynchConnectorMcast_t asynch_connector_mcast (true);
+    PCPClient_IConnector_t* iconnector_p = NULL, *iconnector_mcast = NULL;
     Net_ConnectionConfigurationsIterator_t iterator_3 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
@@ -1748,9 +1750,15 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     //} // end IF
 
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
-      iconnector_p = &connector_bcast;
+    {
+      iconnector_p = &connector;
+      iconnector_mcast = &connector_mcast;
+    } // end IF
     else
-      iconnector_p = &asynch_connector_bcast;
+    {
+      iconnector_p = &asynch_connector;
+      iconnector_mcast = &asynch_connector_mcast;
+    } // end ELSE
     if (!iconnector_p->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second)))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1877,6 +1885,13 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //      goto continue_;
 //    } // end IF
 
+    if (!iconnector_mcast->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+      goto continue_;
+    } // end IF
+
     // step1: initialize connection manager
 //    peer_address =
 //        data_p->configuration->socketConfiguration.address;
@@ -1888,7 +1903,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     // step2: connect
     data_p->configuration->multicastHandle =
-        iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress);
+      iconnector_mcast->connect (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
@@ -1913,7 +1928,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 #else
               static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif // ACE_WIN32 || ACE_WIN64
-          iconnection_p->decrease (); iconnection_p = NULL;
           break;
         } // end IF
       } while (COMMON_TIME_NOW < deadline);

@@ -177,7 +177,7 @@ typedef Net_Client_AsynchConnector_T<PCPClient_InboundAsynchConnectionMcast_t,
                                      PCP_Statistic_t,
                                      Net_UDPSocketConfiguration_t,
                                      Test_U_InboundConnectionStream,
-                                     struct Net_UserData> PCPClient_InboundAsynchConnectorBcast_t;
+                                     struct Net_UserData> PCPClient_InboundAsynchConnectorMcast_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                PCPClient_InboundConnectionMcast_t,
                                Net_SOCK_Connector,
@@ -187,7 +187,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                PCP_Statistic_t,
                                Net_UDPSocketConfiguration_t,
                                Test_U_InboundConnectionStream,
-                               struct Net_UserData> PCPClient_InboundConnectorBcast_t;
+                               struct Net_UserData> PCPClient_InboundConnectorMcast_t;
 
 // outbound
 typedef Net_Client_AsynchConnector_T<PCPClient_OutboundAsynchConnection_t,
@@ -197,7 +197,7 @@ typedef Net_Client_AsynchConnector_T<PCPClient_OutboundAsynchConnection_t,
                                      PCP_Statistic_t,
                                      Net_UDPSocketConfiguration_t,
                                      Test_U_OutboundConnectionStream,
-                                     struct Net_UserData> PCPClient_OutboundAsynchConnectorBcast_t;
+                                     struct Net_UserData> PCPClient_OutboundAsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                PCPClient_OutboundConnection_t,
                                Net_SOCK_Connector,
@@ -207,6 +207,6 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                PCP_Statistic_t,
                                Net_UDPSocketConfiguration_t,
                                Test_U_OutboundConnectionStream,
-                               struct Net_UserData> PCPClient_OutboundConnectorBcast_t;
+                               struct Net_UserData> PCPClient_OutboundConnector_t;
 
 #endif

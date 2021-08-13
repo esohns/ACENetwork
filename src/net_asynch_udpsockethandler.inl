@@ -1099,6 +1099,16 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
     goto error;
   } // end IF
+  result = inherited2::join (inherited::configuration_->listenAddress,
+                             1,
+                             NULL);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::join(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->listenAddress).c_str ())));
+    goto error;
+  } // end IF
 #if defined (ACE_LINUX)
   if (drop_capabilities)
   {

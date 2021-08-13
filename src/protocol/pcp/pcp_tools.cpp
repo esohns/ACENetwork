@@ -418,6 +418,12 @@ PCP_Tools::mapAddress (const ACE_INET_Addr& address_in,
   ACE_OS::memset (mappedAddress_inout,
                   0,
                   sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));
+  mappedAddress_inout[10] = 0xFF; mappedAddress_inout[11] = 0xFF;
+  ACE_UINT32 ip_address = address_in.get_ip_address ();
+  ip_address =
+    ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (ip_address)
+                                           : ip_address);
+  *reinterpret_cast<ACE_UINT32*> (&mappedAddress_inout[12]) = ip_address;
 }
 
 ACE_UINT64

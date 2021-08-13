@@ -28,8 +28,7 @@ class PCP_Codes
  public:
   enum VersionType
   {
-    //PCP_VERSION_1 = 1, 
-    PCP_VERSION_2,
+    PCP_VERSION_2 = 2,
     /////////////////////////////////////
     PCP_VERSION_MAX,
     PCP_VERSION_INVALID

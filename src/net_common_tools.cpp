@@ -1206,7 +1206,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToExternalIPAddress"));
 
   // initialize return value(s)
-  IPAddress_out.reset ();
+  IPAddress_out = ACE_sap_any_cast (ACE_INET_Addr&);
 
   // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

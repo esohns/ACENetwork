@@ -659,6 +659,15 @@ do_work (//bool requestBroadcastReplies_in,
   ACE_INET_Addr interface_address, gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  struct _GUID interface_identifier = GUID_NULL;
+#else
+  std::string interface_identifier;
+#endif // _WIN32_WINNT_VISTA
+#else
+  std::string interface_identifier;
+#endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #else
   if (!interfaceIdentifier_in.empty ())
@@ -700,6 +709,7 @@ do_work (//bool requestBroadcastReplies_in,
     interface_address.set_port_number (PCP_DEFAULT_CLIENT_PORT,
                                        1);
     result = 0;
+    interface_identifier = interfaceIdentifier_in;
   } // end ELSE IF
   else
   {
@@ -710,14 +720,14 @@ do_work (//bool requestBroadcastReplies_in,
                              AF_INET);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    struct _GUID interface_identifier =
+    interface_identifier =
       Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
 #else
-    std::string interface_identifier =
+    interface_identifier =
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
 #endif // _WIN32_WINNT_VISTA
 #else
-    std::string interface_identifier =
+    interface_identifier =
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -764,7 +774,7 @@ do_work (//bool requestBroadcastReplies_in,
     connection_configuration_outbound_unicast.socketConfiguration.connect =
     true;
   connection_configuration_outbound_unicast.socketConfiguration.interfaceIdentifier =
-    interfaceIdentifier_in;
+    interface_identifier;
   connection_configuration_outbound_unicast.socketConfiguration.writeOnly =
     true;
   connection_configuration_outbound_unicast.statisticReportingInterval =
@@ -985,8 +995,8 @@ do_work (//bool requestBroadcastReplies_in,
   //                                      configuration_in.statisticReportingInterval);
   //Test_U_OutboundAsynchConnector_t asynch_connector (connection_manager_p,
   //                                                   configuration_in.statisticReportingInterval);
-  PCPClient_OutboundConnectorBcast_t connector (true);
-  PCPClient_OutboundAsynchConnectorBcast_t asynch_connector (true);
+  PCPClient_OutboundConnector_t connector (true);
+  PCPClient_OutboundAsynchConnector_t asynch_connector (true);
   if (useReactor_in)
     iconnector_p = &connector;
   else
@@ -1048,12 +1058,12 @@ do_work (//bool requestBroadcastReplies_in,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
     return;
   } // end IF
-  else if (!iconnector_p->useReactor ())
+  if (!iconnector_p->useReactor ())
   {
     //(*iterator_3).second.second.connection =
     //  (*iterator_2).second.second.connection;
     //(*iterator_3).second.second.connection->increase ();
-  } // end ELSE IF
+  } // end IF
   // step1b: wait for the connection to finish initializing
   // *TODO*: avoid tight loop here
   deadline = COMMON_TIME_NOW + timeout;

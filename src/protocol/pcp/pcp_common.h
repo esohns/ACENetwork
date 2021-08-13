@@ -129,9 +129,33 @@ struct PCPOption
                     option_in.code));
         break; // *TODO*: throw ?
       }
-    } // end SWITCH  
+    } // end SWITCH
   }
   ~PCPOption () {}
+  struct PCPOption& operator= (const struct PCPOption& rhs_in)
+  {
+    code = rhs_in.code;
+    reserved = rhs_in.reserved;
+    length = rhs_in.length;
+    switch (rhs_in.code)
+    {
+      case PCP_Codes::PCP_OPTION_THIRD_PARTY:
+        third_party = rhs_in.third_party; break;
+      case PCP_Codes::PCP_OPTION_PREFER_FAILURE:
+        break;
+      case PCP_Codes::PCP_OPTION_FILTER:
+        filter = rhs_in.filter;  break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown option code (was: %d), continuing\n"),
+                    rhs_in.code));
+        break; // *TODO*: throw ?
+      }
+    } // end SWITCH  
+
+    return *this;
+  }
 
   enum PCP_Codes::OptionType      code;
   ACE_UINT8                       reserved;
@@ -186,7 +210,36 @@ struct PCP_Record
     } // end SWITCH
   }
   ~PCP_Record () {}
-  inline struct PCP_Record& operator= (const struct PCP_Record& rhs_in) { *this = rhs_in; return *this; }
+  struct PCP_Record& operator= (const struct PCP_Record& rhs_in)
+  {
+    version = rhs_in.version;
+    opcode = rhs_in.opcode;
+    reserved = rhs_in.reserved;
+    result_code = rhs_in.result_code;
+    lifetime = rhs_in.lifetime;
+    epoch_time = rhs_in.epoch_time;
+    reserved_2 = rhs_in.reserved_2;
+    client_address = rhs_in.client_address;
+    switch (rhs_in.opcode)
+    {
+      case PCP_Codes::PCP_OPCODE_MAP:
+        map = rhs_in.map; break;
+      case PCP_Codes::PCP_OPCODE_PEER:
+        peer = rhs_in.peer; break;
+      case PCP_Codes::PCP_OPCODE_ANNOUNCE:
+        break; // *TODO*
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown opcode (was: %d), continuing\n"),
+                    rhs_in.opcode));
+        break; // *TODO*: throw ?
+      }
+    } // end SWITCH
+    options = rhs_in.options;
+
+    return *this;
+  }
 
   enum PCP_Codes::VersionType    version;
   // *NOTE*: this contains the (MSB) 'R'-bit

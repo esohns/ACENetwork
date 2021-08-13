@@ -242,4 +242,4 @@ Net_SOCK_CODgram::open (const ACE_Addr& remoteSAP_in,
   }
   return error ? -1 : 0;
 }
-#endif
+#endif // ACE_WIN32 || ACE_WIN64

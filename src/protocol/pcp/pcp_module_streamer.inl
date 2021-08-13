@@ -98,7 +98,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
   if (result == -1)
     goto error;
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&short_i),
+    message_inout->copy (reinterpret_cast<const char*> (&short_i), // 0
                          sizeof (ACE_UINT16));
   if (result == -1)
     goto error;

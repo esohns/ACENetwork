@@ -30,6 +30,8 @@
 class Net_SOCK_Dgram
  : public ACE_SOCK_Dgram
 {
+  typedef ACE_SOCK_Dgram inherited;
+
  public:
   Net_SOCK_Dgram ();
   virtual ~Net_SOCK_Dgram ();
@@ -44,11 +46,9 @@ class Net_SOCK_Dgram
             int = ACE_PROTOCOL_FAMILY_INET, // protocol family
             int = 0,                        // protocol
             int = 0);                       // reuse address ?
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
  private:
-  typedef ACE_SOCK_Dgram inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_Dgram (const Net_SOCK_Dgram&))
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_Dgram& operator= (const Net_SOCK_Dgram&))
 };
@@ -69,11 +69,11 @@ class Net_SOCK_CODgram
   inline ssize_t send (const void* buf,
                        size_t n,
                        const ACE_Addr& addr,
-                       int flags = 0) const { ACE_UNUSED_ARG (addr); return inherited::send (buf, n, flags, NULL); };
+                       int flags = 0) const { ACE_UNUSED_ARG (addr); return inherited::send (buf, n, flags, NULL); }
   inline ssize_t recv (void*,
                        size_t,
                        ACE_Addr&,
-                       int = 0) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
+                       int = 0) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -99,7 +99,8 @@ class Net_SOCK_Dgram_Mcast
   typedef ACE_SOCK_Dgram_Mcast inherited;
 
  public:
-  using ACE_SOCK::get_remote_addr;
+  inline int get_local_addr (ACE_Addr& address_out) const { static_cast<ACE_INET_Addr&> (address_out) = inherited::send_addr_; return 0; }
+  inline int get_remote_addr (ACE_Addr& address_out) const { static_cast<ACE_INET_Addr&> (address_out) = inherited::send_addr_; return 0; }
 };
 
 class Net_SOCK_Dgram_Bcast
