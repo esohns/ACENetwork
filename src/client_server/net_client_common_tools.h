@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -18,41 +18,35 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_CLIENT_TOOLS_H
-#define IRC_CLIENT_TOOLS_H
-
-#include <string>
+#ifndef NET_CLIENT_COMMON_TOOLS_H
+#define NET_CLIENT_COMMON_TOOLS_H
 
 #include "ace/config-macros.h"
 #include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
 
-#include "stream_common.h"
-
-#include "IRC_client_common.h"
-#include "IRC_client_network.h"
-
-// forward declaration(s)
-struct IRC_LoginOptions;
-
-class IRC_Client_Tools
+class Net_Client_Common_Tools
 {
  public:
-  static void parseConfigurationFile (const std::string&,
-                                      IRC_LoginOptions&,
-                                      IRC_Client_Connections_t&);
-
-  static ACE_HANDLE connect (IRC_Client_IConnector_t&, // connector handle
-                             const ACE_INET_Addr&,     // peer address
-                             const IRC_LoginOptions&,  // login options
-                             bool,                     // clone module ?
-                             Stream_Module_t*&);       // (final) module handle
+  template <typename AddressType,
+            typename ConnectorType,
+            typename ConnectionConfigurationType,
+            typename UserDataType,
+            typename ConnectionManagerType>
+  static ACE_HANDLE connect (ConnectorType&,
+                             const ConnectionConfigurationType&, // (connection-) configuration
+                             const UserDataType&,                // user data
+                             const AddressType&,                 // (peer) address
+                             bool = true,                        // wait ?
+                             bool = true);                       // peer address ? : local address
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (~IRC_Client_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools (const IRC_Client_Tools&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Tools& operator= (const IRC_Client_Tools&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Common_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Client_Common_Tools ())
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Common_Tools (const Net_Client_Common_Tools&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Client_Common_Tools& operator= (const Net_Client_Common_Tools&))
 };
+
+// include template definition
+#include "net_client_common_tools.inl"
 
 #endif

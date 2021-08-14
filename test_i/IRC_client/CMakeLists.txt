@@ -1,4 +1,4 @@
-﻿option (GTK3_SUPPORT "enable Gtk3 support" ON)
+﻿#option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
  include (CheckLibraryExists)
@@ -113,15 +113,15 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
 
- if (GUI_SUPPORT)
-  if (CURSES_USE)
-   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
-  endif (CURSES_USE)
- endif (GUI_SUPPORT)
+# if (GUI_SUPPORT)
+#  if (CURSES_USE)
+#   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
+#  endif (CURSES_USE)
+# endif (GUI_SUPPORT)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)

@@ -735,11 +735,9 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
     while (!connections_.is_empty ())
     {
-#if defined (_DEBUG)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("waiting for %u connection(s)...\n"),
                   connections_.size ()));
-#endif // _DEBUG
       result = condition_.wait ();
       if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,

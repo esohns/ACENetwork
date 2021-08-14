@@ -48,7 +48,7 @@ class Test_U_UDPConnection
                                   Test_U_UDPConnectionConfiguration,
                                   struct Net_StreamConnectionState,
                                   Net_StreamStatistic_t,
-                                  Test_U_Stream,
+                                  Test_U_Stream_T<Test_U_UDPConnectionManager_t>,
                                   struct Net_UserData>
  , public Net_IPing
 {
@@ -57,7 +57,7 @@ class Test_U_UDPConnection
                                   Test_U_UDPConnectionConfiguration,
                                   struct Net_StreamConnectionState,
                                   Net_StreamStatistic_t,
-                                  Test_U_Stream,
+                                  Test_U_Stream_T<Test_U_UDPConnectionManager_t>,
                                   struct Net_UserData> inherited;
 
   friend class ACE_Connector<Test_U_UDPConnection, ACE_SOCK_CONNECTOR>;
@@ -83,7 +83,7 @@ class Test_U_AsynchUDPConnection
                                         Test_U_UDPConnectionConfiguration,
                                         struct Net_StreamConnectionState,
                                         Net_StreamStatistic_t,
-                                        Test_U_Stream,
+                                        Test_U_Stream_T<Test_U_UDPConnectionManager_t>,
                                         struct Net_UserData>
  , public Net_IPing
 {
@@ -91,7 +91,7 @@ class Test_U_AsynchUDPConnection
                                         Test_U_UDPConnectionConfiguration,
                                         struct Net_StreamConnectionState,
                                         Net_StreamStatistic_t,
-                                        Test_U_Stream,
+                                        Test_U_Stream_T<Test_U_UDPConnectionManager_t>,
                                         struct Net_UserData> inherited;
 
  friend class ACE_Asynch_Connector<Test_U_AsynchUDPConnection>;

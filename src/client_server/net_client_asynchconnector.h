@@ -102,14 +102,14 @@ class Net_Client_AsynchConnector_T
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
-  ConfigurationType*     configuration_; // connection-
+  ConfigurationType*    configuration_; // connection-
 
   typedef std::map<ACE_HANDLE, int> HANDLE_TO_ERROR_MAP_T;
   typedef HANDLE_TO_ERROR_MAP_T::iterator HANDLE_TO_ERROR_MAP_ITERATOR_T;
 
-  HANDLE_TO_ERROR_MAP_T  handles_;
-  bool                   managed_;
-  AddressType            SAP_;
+  HANDLE_TO_ERROR_MAP_T handles_;
+  bool                  managed_;
+  AddressType           SAP_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
@@ -138,8 +138,8 @@ class Net_Client_AsynchConnector_T
                                    const AddressType&,                // remote address
                                    const AddressType&);               // local address
 
-  ACE_SYNCH_CONDITION    condition_;
-  ACE_SYNCH_MUTEX        lock_;
+  ACE_SYNCH_CONDITION   condition_;
+  ACE_SYNCH_MUTEX       lock_;
 };
 
 //////////////////////////////////////////
@@ -221,9 +221,9 @@ class Net_Client_AsynchConnector_T<HandlerType,
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
-  ConfigurationType*     configuration_; // connection-
-  bool                   managed_;
-  ACE_INET_Addr          SAP_;
+  ConfigurationType*  configuration_; // connection-
+  bool                managed_;
+  ACE_INET_Addr       SAP_;
 
  private:
   // convenient types
@@ -238,8 +238,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    const ACE_INET_Addr&,              // remote address
                                    const ACE_INET_Addr&);             // local address
 
-  ACE_SYNCH_CONDITION    condition_;
-  ACE_SYNCH_MUTEX        lock_;
+  ACE_SYNCH_CONDITION condition_;
+  ACE_SYNCH_MUTEX     lock_;
 };
 
 //////////////////////////////////////////
@@ -309,9 +309,9 @@ class Net_Client_AsynchConnector_T<HandlerType,
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
-  ConfigurationType*     configuration_; // connection-
-  bool                   managed_;
-  Net_Netlink_Addr       SAP_;
+  ConfigurationType*  configuration_; // connection-
+  bool                managed_;
+  Net_Netlink_Addr    SAP_;
 
  private:
   // convenient types
@@ -326,8 +326,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    const Net_Netlink_Addr&,           // remote address
                                    const Net_Netlink_Addr&);          // local address
 
-  ACE_SYNCH_CONDITION    condition_;
-  ACE_SYNCH_MUTEX        lock_;
+  ACE_SYNCH_CONDITION condition_;
+  ACE_SYNCH_MUTEX     lock_;
 };
 #endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 

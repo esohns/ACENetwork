@@ -140,6 +140,7 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_sessionmessage.h
      test_u_stream.cpp
      test_u_stream.h
+     test_u_stream.inl
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
      test_u_udpconnection.cpp
@@ -255,6 +256,7 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_sessionmessage.h
      test_u_stream.cpp
      test_u_stream.h
+     test_u_stream.inl
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
      test_u_udpconnection.cpp

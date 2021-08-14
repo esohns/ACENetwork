@@ -121,14 +121,20 @@ set (source_files_client
      net_client_asynchconnector.h
      net_client_asynchconnector.inl
      net_client_common.h
+     net_client_common_tools.cpp
+     net_client_common_tools.h
      net_client_connector.cpp
      net_client_connector.h
      net_client_connector.inl
-     net_client_defines.h
-#     net_client_exports.h
-     net_client_ssl_connector.cpp
-     net_client_ssl_connector.h
-     net_client_ssl_connector.inl)
+     net_client_defines.h)
+#     net_client_exports.h)
+if (SSL_SUPPORT)
+ set (source_files_client
+      net_client_ssl_connector.cpp
+      net_client_ssl_connector.h
+      net_client_ssl_connector.inl
+      ${source_files_client})
+endif (SSL_SUPPORT)
 
 #set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -165,10 +171,14 @@ set (source_files_server
 #     net_server_exports.h
      net_server_listener.cpp
      net_server_listener.h
-     net_server_listener.inl
-     net_server_ssl_listener.cpp
-     net_server_ssl_listener.h
-     net_server_ssl_listener.inl)
+     net_server_listener.inl)
+if (SSL_SUPPORT)
+ set (source_files_server
+      net_server_ssl_listener.cpp
+      net_server_ssl_listener.h
+      net_server_ssl_listener.inl
+      ${source_files_server})
+endif (SSL_SUPPORT)
 
 #set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -207,6 +217,7 @@ export (TARGETS ${PROJECT_NAME}_Client ${PROJECT_NAME}_Server
 install (FILES
          net_client_asynchconnector.h
          net_client_common.h
+         net_client_common_tools.h
          net_client_connector.h
          net_client_defines.h
 #         net_client_exports.h

@@ -53,7 +53,7 @@ class Test_U_TCPConnection
                                   Test_U_TCPConnectionConfiguration,
                                   struct Net_StreamConnectionState,
                                   Net_StreamStatistic_t,
-                                  Test_U_Stream,
+                                  Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                   struct Net_UserData>
  , public Net_IPing
 {
@@ -62,7 +62,7 @@ class Test_U_TCPConnection
                                   Test_U_TCPConnectionConfiguration,
                                   struct Net_StreamConnectionState,
                                   Net_StreamStatistic_t,
-                                  Test_U_Stream,
+                                  Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                   struct Net_UserData> inherited;
 
   friend class ACE_Acceptor<Test_U_TCPConnection, ACE_SOCK_ACCEPTOR>;
@@ -89,7 +89,7 @@ class Test_U_AsynchTCPConnection
                                         Test_U_TCPConnectionConfiguration,
                                         struct Net_StreamConnectionState,
                                         Net_StreamStatistic_t,
-                                        Test_U_Stream,
+                                        Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                         struct Net_UserData>
  , public Net_IPing
 {
@@ -97,7 +97,7 @@ class Test_U_AsynchTCPConnection
                                        Test_U_TCPConnectionConfiguration,
                                        struct Net_StreamConnectionState,
                                        Net_StreamStatistic_t,
-                                       Test_U_Stream,
+                                       Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                        struct Net_UserData> inherited;
 
  friend class ACE_Asynch_Acceptor<Test_U_AsynchTCPConnection>;
@@ -128,7 +128,7 @@ class Test_U_SSLConnection
                                   Test_U_TCPConnectionConfiguration,
                                   struct Net_StreamConnectionState,
                                   Net_StreamStatistic_t,
-                                  Test_U_Stream,
+                                  Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                   struct Net_UserData>
  , public Net_IPing
 {
@@ -137,7 +137,7 @@ class Test_U_SSLConnection
                                   Test_U_TCPConnectionConfiguration,
                                   struct Net_StreamConnectionState,
                                   Net_StreamStatistic_t,
-                                  Test_U_Stream,
+                                  Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                   struct Net_UserData> inherited;
 
   friend class ACE_Acceptor<Test_U_SSLConnection, ACE_SSL_SOCK_Acceptor>;

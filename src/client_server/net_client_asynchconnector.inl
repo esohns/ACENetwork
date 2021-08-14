@@ -771,7 +771,7 @@ Net_Client_AsynchConnector_T<HandlerType,
     SAP_ = address_in;
   } // end lock scope
 
-  CONNECTION_T* handler_p = NULL;
+  HandlerType* handler_p = NULL;
   handler_p = make_handler ();
   if (unlikely (!handler_p))
   {
@@ -795,6 +795,14 @@ Net_Client_AsynchConnector_T<HandlerType,
   ACE_Message_Block message_block;
   handler_p->open (ACE_INVALID_HANDLE,
                    message_block);
+  enum Net_Connection_Status status_e = handler_p->status ();
+  if (unlikely (status_e != NET_CONNECTION_STATUS_OK))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
+    handler_p->decrease ();
+    return ACE_INVALID_HANDLE;
+  } // end IF
 
   return handler_p->handle ();
 }

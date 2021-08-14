@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.0.2.
+// A Bison parser, made by GNU Bison 3.7.4.
 
 // Skeleton implementation for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2013 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,33 +29,23 @@
 
 // This special exception was added by the Free Software Foundation in
 // version 2.2 of Bison.
-// //                    "%code top" blocks.
 
+// DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+// especially those whose name start with YY_ or yy_.  They are
+// private implementation details that can be changed or removed.
+
+// "%code top" blocks.
 
 #include "stdafx.h"
 
 
 
 
-// First part of user declarations.
-
-
-
-# ifndef YY_NULLPTR
-#  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULLPTR nullptr
-#  else
-#   define YY_NULLPTR 0
-#  endif
-# endif
 
 #include "irc_parser.h"
 
-// User implementation prologue.
-
 
 // Unqualified %code blocks.
-
 
 // *NOTE*: necessary only if %debug is set in the definition file (see above)
 #if defined (YYDEBUG)
@@ -72,18 +62,17 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "irc_message.h"
 #include "irc_module_parser.h"
 #include "irc_parser_driver.h"
 
 // *TODO*: this shouldn't be necessary
 #define yylex IRC_Scanner_lex
-
 
 
 
@@ -96,6 +85,16 @@ using namespace std;
 # endif
 # ifndef YY_
 #  define YY_(msgid) msgid
+# endif
+#endif
+
+
+// Whether we are compiled with exception support.
+#ifndef YY_EXCEPTIONS
+# if defined __GNUC__ && !defined __EXCEPTIONS
+#  define YY_EXCEPTIONS 0
+# else
+#  define YY_EXCEPTIONS 1
 # endif
 #endif
 
@@ -116,12 +115,9 @@ using namespace std;
         {                                                               \
           (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
         }                                                               \
-    while (/*CONSTCOND*/ false)
+    while (false)
 # endif
 
-
-// Suppress unused-variable warnings by "using" E.
-#define YYUSE(E) ((void) (E))
 
 // Enable debugging if requested.
 #if YYDEBUG
@@ -135,7 +131,7 @@ using namespace std;
     {                                           \
       *yycdebug_ << Title << ' ';               \
       yy_print_ (*yycdebug_, Symbol);           \
-      *yycdebug_ << std::endl;                  \
+      *yycdebug_ << '\n';                       \
     }                                           \
   } while (false)
 
@@ -148,74 +144,35 @@ using namespace std;
 # define YY_STACK_PRINT()               \
   do {                                  \
     if (yydebug_)                       \
-      yystack_print_ ();                \
+      yy_stack_print_ ();                \
   } while (false)
 
 #else // !YYDEBUG
 
 # define YYCDEBUG if (false) std::cerr
-# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE(Symbol)
-# define YY_REDUCE_PRINT(Rule)           static_cast<void>(0)
-# define YY_STACK_PRINT()                static_cast<void>(0)
+# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE (Symbol)
+# define YY_REDUCE_PRINT(Rule)           static_cast<void> (0)
+# define YY_STACK_PRINT()                static_cast<void> (0)
 
 #endif // !YYDEBUG
 
 #define yyerrok         (yyerrstatus_ = 0)
-#define yyclearin       (yyempty = true)
+#define yyclearin       (yyla.clear ())
 
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-
 namespace yy {
-
-
-  /* Return YYSTR after stripping away unnecessary quotes and
-     backslashes, so that it's suitable for yyerror.  The heuristic is
-     that double-quoting is unnecessary unless the string contains an
-     apostrophe, a comma, or backslash (other than backslash-backslash).
-     YYSTR is taken from yytname.  */
-  std::string
-  IRC_Parser::yytnamerr_ (const char *yystr)
-  {
-    if (*yystr == '"')
-      {
-        std::string yyr = "";
-        char const *yyp = yystr;
-
-        for (;;)
-          switch (*++yyp)
-            {
-            case '\'':
-            case ',':
-              goto do_not_strip_quotes;
-
-            case '\\':
-              if (*++yyp != '\\')
-                goto do_not_strip_quotes;
-              // Fall through.
-            default:
-              yyr += *yyp;
-              break;
-
-            case '"':
-              return yyr;
-            }
-      do_not_strip_quotes: ;
-      }
-
-    return yystr;
-  }
-
 
   /// Build a parser object.
   IRC_Parser::IRC_Parser (IRC_ParserDriver* driver_yyarg, unsigned int* messageCount_yyarg, yyscan_t yyscanner_yyarg)
-    :
 #if YYDEBUG
-      yydebug_ (false),
+    : yydebug_ (false),
       yycdebug_ (&std::cerr),
+#else
+    :
 #endif
       driver (driver_yyarg),
       messageCount (messageCount_yyarg),
@@ -225,147 +182,162 @@ namespace yy {
   IRC_Parser::~IRC_Parser ()
   {}
 
+  IRC_Parser::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
+  {}
 
   /*---------------.
-  | Symbol types.  |
+  | symbol kinds.  |
   `---------------*/
-
-  inline
-  IRC_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
-    : std::runtime_error (m)
-    , location (l)
-  {}
 
   // basic_symbol.
   template <typename Base>
-  inline
-  IRC_Parser::basic_symbol<Base>::basic_symbol ()
-    : value ()
-  {}
-
-  template <typename Base>
-  inline
-  IRC_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
-    : Base (other)
-    , value ()
-    , location (other.location)
-  {
-    value = other.value;
-  }
-
-
-  template <typename Base>
-  inline
-  IRC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
+  IRC_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& that)
+    : Base (that)
+    , value (that.value)
+    , location (that.location)
   {}
 
 
   /// Constructor for valueless symbols.
   template <typename Base>
-  inline
-  IRC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
+  IRC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_MOVE_REF (location_type) l)
     : Base (t)
     , value ()
     , location (l)
   {}
 
   template <typename Base>
-  inline
-  IRC_Parser::basic_symbol<Base>::~basic_symbol ()
+  IRC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_RVREF (semantic_type) v, YY_RVREF (location_type) l)
+    : Base (t)
+    , value (YY_MOVE (v))
+    , location (YY_MOVE (l))
+  {}
+
+  template <typename Base>
+  IRC_Parser::symbol_kind_type
+  IRC_Parser::basic_symbol<Base>::type_get () const YY_NOEXCEPT
   {
+    return this->kind ();
   }
 
   template <typename Base>
-  inline
+  bool
+  IRC_Parser::basic_symbol<Base>::empty () const YY_NOEXCEPT
+  {
+    return this->kind () == symbol_kind::S_YYEMPTY;
+  }
+
+  template <typename Base>
   void
   IRC_Parser::basic_symbol<Base>::move (basic_symbol& s)
   {
-    super_type::move(s);
-    value = s.value;
-    location = s.location;
+    super_type::move (s);
+    value = YY_MOVE (s.value);
+    location = YY_MOVE (s.location);
   }
 
-  // by_type.
-  inline
-  IRC_Parser::by_type::by_type ()
-     : type (empty)
+  // by_kind.
+  IRC_Parser::by_kind::by_kind ()
+    : kind_ (symbol_kind::S_YYEMPTY)
   {}
 
-  inline
-  IRC_Parser::by_type::by_type (const by_type& other)
-    : type (other.type)
+#if 201103L <= YY_CPLUSPLUS
+  IRC_Parser::by_kind::by_kind (by_kind&& that)
+    : kind_ (that.kind_)
+  {
+    that.clear ();
+  }
+#endif
+
+  IRC_Parser::by_kind::by_kind (const by_kind& that)
+    : kind_ (that.kind_)
   {}
 
-  inline
-  IRC_Parser::by_type::by_type (token_type t)
-    : type (yytranslate_ (t))
+  IRC_Parser::by_kind::by_kind (token_kind_type t)
+    : kind_ (yytranslate_ (t))
   {}
 
-  inline
   void
-  IRC_Parser::by_type::move (by_type& that)
+  IRC_Parser::by_kind::clear ()
   {
-    type = that.type;
-    that.type = empty;
+    kind_ = symbol_kind::S_YYEMPTY;
   }
 
-  inline
-  int
-  IRC_Parser::by_type::type_get () const
+  void
+  IRC_Parser::by_kind::move (by_kind& that)
   {
-    return type;
+    kind_ = that.kind_;
+    that.clear ();
+  }
+
+  IRC_Parser::symbol_kind_type
+  IRC_Parser::by_kind::kind () const YY_NOEXCEPT
+  {
+    return kind_;
+  }
+
+  IRC_Parser::symbol_kind_type
+  IRC_Parser::by_kind::type_get () const YY_NOEXCEPT
+  {
+    return this->kind ();
   }
 
 
   // by_state.
-  inline
-  IRC_Parser::by_state::by_state ()
-    : state (empty)
+  IRC_Parser::by_state::by_state () YY_NOEXCEPT
+    : state (empty_state)
   {}
 
-  inline
-  IRC_Parser::by_state::by_state (const by_state& other)
-    : state (other.state)
+  IRC_Parser::by_state::by_state (const by_state& that) YY_NOEXCEPT
+    : state (that.state)
   {}
 
-  inline
+  void
+  IRC_Parser::by_state::clear () YY_NOEXCEPT
+  {
+    state = empty_state;
+  }
+
   void
   IRC_Parser::by_state::move (by_state& that)
   {
     state = that.state;
-    that.state = empty;
+    that.clear ();
   }
 
-  inline
-  IRC_Parser::by_state::by_state (state_type s)
+  IRC_Parser::by_state::by_state (state_type s) YY_NOEXCEPT
     : state (s)
   {}
 
-  inline
-  IRC_Parser::symbol_number_type
-  IRC_Parser::by_state::type_get () const
+  IRC_Parser::symbol_kind_type
+  IRC_Parser::by_state::kind () const YY_NOEXCEPT
   {
-    return state == empty ? 0 : yystos_[state];
+    if (state == empty_state)
+      return symbol_kind::S_YYEMPTY;
+    else
+      return YY_CAST (symbol_kind_type, yystos_[+state]);
   }
 
-  inline
   IRC_Parser::stack_symbol_type::stack_symbol_type ()
   {}
 
-
-  inline
-  IRC_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
-    : super_type (s, that.location)
+  IRC_Parser::stack_symbol_type::stack_symbol_type (YY_RVREF (stack_symbol_type) that)
+    : super_type (YY_MOVE (that.state), YY_MOVE (that.value), YY_MOVE (that.location))
   {
-    value = that.value;
+#if 201103L <= YY_CPLUSPLUS
     // that is emptied.
-    that.type = empty;
+    that.state = empty_state;
+#endif
   }
 
-  inline
+  IRC_Parser::stack_symbol_type::stack_symbol_type (state_type s, YY_MOVE_REF (symbol_type) that)
+    : super_type (s, YY_MOVE (that.value), YY_MOVE (that.location))
+  {
+    // that is emptied.
+    that.kind_ = symbol_kind::S_YYEMPTY;
+  }
+
+#if YY_CPLUSPLUS < 201103L
   IRC_Parser::stack_symbol_type&
   IRC_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
@@ -375,9 +347,19 @@ namespace yy {
     return *this;
   }
 
+  IRC_Parser::stack_symbol_type&
+  IRC_Parser::stack_symbol_type::operator= (stack_symbol_type& that)
+  {
+    state = that.state;
+    value = that.value;
+    location = that.location;
+    // that is emptied.
+    that.state = empty_state;
+    return *this;
+  }
+#endif
 
   template <typename Base>
-  inline
   void
   IRC_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
@@ -385,57 +367,35 @@ namespace yy {
       YY_SYMBOL_PRINT (yymsg, yysym);
 
     // User destructor.
-    switch (yysym.type_get ())
+    switch (yysym.kind ())
     {
-            case 3: // "space"
-
-
-        { (yysym.value.ival) = 0; }
-
+      case symbol_kind::S_SPACE: // "space"
+                                  { (yysym.value.ival) = 0; }
         break;
 
-      case 4: // "origin"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
+      case symbol_kind::S_ORIGIN: // "origin"
+                                  { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
         break;
 
-      case 5: // "user"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
+      case symbol_kind::S_USER: // "user"
+                                  { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
         break;
 
-      case 6: // "host"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
+      case symbol_kind::S_HOST: // "host"
+                                  { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
         break;
 
-      case 7: // "cmd_string"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
+      case symbol_kind::S_CMD_STRING: // "cmd_string"
+                                  { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
         break;
 
-      case 8: // "cmd_numeric"
-
-
-        { (yysym.value.ival) = 0; }
-
+      case symbol_kind::S_CMD_NUMERIC: // "cmd_numeric"
+                                  { (yysym.value.ival) = 0; }
         break;
 
-      case 9: // "param"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
+      case symbol_kind::S_PARAM: // "param"
+                                  { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
         break;
-
 
       default:
         break;
@@ -445,94 +405,77 @@ namespace yy {
 #if YYDEBUG
   template <typename Base>
   void
-  IRC_Parser::yy_print_ (std::ostream& yyo,
-                                     const basic_symbol<Base>& yysym) const
+  IRC_Parser::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
     YYUSE (yyoutput);
-    symbol_number_type yytype = yysym.type_get ();
-    yyo << (yytype < yyntokens_ ? "token" : "nterm")
-        << ' ' << yytname_[yytype] << " ("
-        << yysym.location << ": ";
-    switch (yytype)
+    if (yysym.empty ())
+      yyo << "empty symbol";
+    else
+      {
+        symbol_kind_type yykind = yysym.kind ();
+        yyo << (yykind < YYNTOKENS ? "token" : "nterm")
+            << ' ' << yysym.name () << " ("
+            << yysym.location << ": ";
+        switch (yykind)
     {
-            case 3: // "space"
-
-
-        { debug_stream () << (yysym.value.ival); }
-
+      case symbol_kind::S_SPACE: // "space"
+                                  { debug_stream () << (yysym.value.ival); }
         break;
 
-      case 4: // "origin"
-
-
-        { debug_stream () << *(yysym.value.sval); }
-
+      case symbol_kind::S_ORIGIN: // "origin"
+                                  { debug_stream () << *(yysym.value.sval); }
         break;
 
-      case 5: // "user"
-
-
-        { debug_stream () << *(yysym.value.sval); }
-
+      case symbol_kind::S_USER: // "user"
+                                  { debug_stream () << *(yysym.value.sval); }
         break;
 
-      case 6: // "host"
-
-
-        { debug_stream () << *(yysym.value.sval); }
-
+      case symbol_kind::S_HOST: // "host"
+                                  { debug_stream () << *(yysym.value.sval); }
         break;
 
-      case 7: // "cmd_string"
-
-
-        { debug_stream () << *(yysym.value.sval); }
-
+      case symbol_kind::S_CMD_STRING: // "cmd_string"
+                                  { debug_stream () << *(yysym.value.sval); }
         break;
 
-      case 8: // "cmd_numeric"
-
-
-        { debug_stream () << (yysym.value.ival); }
-
+      case symbol_kind::S_CMD_NUMERIC: // "cmd_numeric"
+                                  { debug_stream () << (yysym.value.ival); }
         break;
 
-      case 9: // "param"
-
-
-        { debug_stream () << *(yysym.value.sval); }
-
+      case symbol_kind::S_PARAM: // "param"
+                                  { debug_stream () << *(yysym.value.sval); }
         break;
-
 
       default:
         break;
     }
-    yyo << ')';
+        yyo << ')';
+      }
   }
 #endif
 
-  inline
   void
-  IRC_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
-  {
-    stack_symbol_type t (s, sym);
-    yypush_ (m, t);
-  }
-
-  inline
-  void
-  IRC_Parser::yypush_ (const char* m, stack_symbol_type& s)
+  IRC_Parser::yypush_ (const char* m, YY_MOVE_REF (stack_symbol_type) sym)
   {
     if (m)
-      YY_SYMBOL_PRINT (m, s);
-    yystack_.push (s);
+      YY_SYMBOL_PRINT (m, sym);
+    yystack_.push (YY_MOVE (sym));
   }
 
-  inline
   void
-  IRC_Parser::yypop_ (unsigned int n)
+  IRC_Parser::yypush_ (const char* m, state_type s, YY_MOVE_REF (symbol_type) sym)
+  {
+#if 201103L <= YY_CPLUSPLUS
+    yypush_ (m, stack_symbol_type (s, std::move (sym)));
+#else
+    stack_symbol_type ss (s, sym);
+    yypush_ (m, ss);
+#endif
+  }
+
+  void
+  IRC_Parser::yypop_ (int n)
   {
     yystack_.pop (n);
   }
@@ -564,35 +507,37 @@ namespace yy {
   }
 #endif // YYDEBUG
 
-  inline IRC_Parser::state_type
+  IRC_Parser::state_type
   IRC_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
-    int yyr = yypgoto_[yysym - yyntokens_] + yystate;
+    int yyr = yypgoto_[yysym - YYNTOKENS] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
       return yytable_[yyr];
     else
-      return yydefgoto_[yysym - yyntokens_];
+      return yydefgoto_[yysym - YYNTOKENS];
   }
 
-  inline bool
+  bool
   IRC_Parser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
-  inline bool
+  bool
   IRC_Parser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
+  IRC_Parser::operator() ()
+  {
+    return parse ();
+  }
+
+  int
   IRC_Parser::parse ()
   {
-    /// Whether yyla contains a lookahead.
-    bool yyempty = true;
-
-    // State.
     int yyn;
     /// Length of the RHS of the rule being reduced.
     int yylen = 0;
@@ -610,22 +555,21 @@ namespace yy {
     /// The return value of parse ().
     int yyresult;
 
-    // FIXME: This shoud be completely indented.  It is not yet to
-    // avoid gratuitous conflicts when merging into the master branch.
+#if YY_EXCEPTIONS
     try
+#endif // YY_EXCEPTIONS
       {
-    YYCDEBUG << "Starting parse" << std::endl;
+    YYCDEBUG << "Starting parse\n";
 
 
     // User initialization code.
-
 {
   // Initialize the initial location
   //@$.begin.filename = @$.end.filename = &driver->file;
 
   // initialize the token value container
   // $$.ival = 0;
-  (yyla.value).sval = NULL;
+  yyla.value.sval = NULL;
 }
 
 
@@ -635,48 +579,69 @@ namespace yy {
        location values to have been already stored, initialize these
        stacks with a primary value.  */
     yystack_.clear ();
-    yypush_ (YY_NULLPTR, 0, yyla);
+    yypush_ (YY_NULLPTR, 0, YY_MOVE (yyla));
 
-    // A new symbol was pushed on the stack.
+  /*-----------------------------------------------.
+  | yynewstate -- push a new symbol on the stack.  |
+  `-----------------------------------------------*/
   yynewstate:
-    YYCDEBUG << "Entering state " << yystack_[0].state << std::endl;
+    YYCDEBUG << "Entering state " << int (yystack_[0].state) << '\n';
+    YY_STACK_PRINT ();
 
     // Accept?
     if (yystack_[0].state == yyfinal_)
-      goto yyacceptlab;
+      YYACCEPT;
 
     goto yybackup;
 
-    // Backup.
-  yybackup:
 
+  /*-----------.
+  | yybackup.  |
+  `-----------*/
+  yybackup:
     // Try to take a decision without lookahead.
-    yyn = yypact_[yystack_[0].state];
+    yyn = yypact_[+yystack_[0].state];
     if (yy_pact_value_is_default_ (yyn))
       goto yydefault;
 
     // Read a lookahead token.
-    if (yyempty)
+    if (yyla.empty ())
       {
-        YYCDEBUG << "Reading a token: ";
+        YYCDEBUG << "Reading a token\n";
+#if YY_EXCEPTIONS
         try
+#endif // YY_EXCEPTIONS
           {
-            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location, driver, messageCount, yyscanner));
+            yyla.kind_ = yytranslate_ (yylex (&yyla.value, &yyla.location, driver, messageCount, yyscanner));
           }
+#if YY_EXCEPTIONS
         catch (const syntax_error& yyexc)
           {
+            YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
             error (yyexc);
             goto yyerrlab1;
           }
-        yyempty = false;
+#endif // YY_EXCEPTIONS
       }
     YY_SYMBOL_PRINT ("Next token is", yyla);
 
+    if (yyla.kind () == symbol_kind::S_YYerror)
+    {
+      // The scanner already issued an error message, process directly
+      // to error recovery.  But do not keep the error token as
+      // lookahead, it is too special and may lead us to an endless
+      // loop in error recovery. */
+      yyla.kind_ = symbol_kind::S_YYUNDEF;
+      goto yyerrlab1;
+    }
+
     /* If the proper action on seeing token YYLA.TYPE is to reduce or
        to detect an error, take that action.  */
-    yyn += yyla.type_get ();
-    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.type_get ())
-      goto yydefault;
+    yyn += yyla.kind ();
+    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.kind ())
+      {
+        goto yydefault;
+      }
 
     // Reduce or error.
     yyn = yytable_[yyn];
@@ -688,34 +653,33 @@ namespace yy {
         goto yyreduce;
       }
 
-    // Discard the token being shifted.
-    yyempty = true;
-
     // Count tokens shifted since error; after three, turn off error status.
     if (yyerrstatus_)
       --yyerrstatus_;
 
     // Shift the lookahead token.
-    yypush_ ("Shifting", yyn, yyla);
+    yypush_ ("Shifting", state_type (yyn), YY_MOVE (yyla));
     goto yynewstate;
+
 
   /*-----------------------------------------------------------.
   | yydefault -- do the default action for the current state.  |
   `-----------------------------------------------------------*/
   yydefault:
-    yyn = yydefact_[yystack_[0].state];
+    yyn = yydefact_[+yystack_[0].state];
     if (yyn == 0)
       goto yyerrlab;
     goto yyreduce;
 
+
   /*-----------------------------.
-  | yyreduce -- Do a reduction.  |
+  | yyreduce -- do a reduction.  |
   `-----------------------------*/
   yyreduce:
     yylen = yyr2_[yyn];
     {
       stack_symbol_type yylhs;
-      yylhs.state = yy_lr_goto_state_(yystack_[yylen].state, yyr1_[yyn]);
+      yylhs.state = yy_lr_goto_state_ (yystack_[yylen].state, yyr1_[yyn]);
       /* If YYLEN is nonzero, implement the default value of the
          action: '$$ = $1'.  Otherwise, use the top of the stack.
 
@@ -727,51 +691,47 @@ namespace yy {
       else
         yylhs.value = yystack_[0].value;
 
-      // Compute the default @$.
+      // Default location.
       {
-        slice<stack_symbol_type, stack_type> slice (yystack_, yylen);
-        YYLLOC_DEFAULT (yylhs.location, slice, yylen);
+        stack_type::slice range (yystack_, yylen);
+        YYLLOC_DEFAULT (yylhs.location, range, yylen);
+        yyerror_range[1].location = yylhs.location;
       }
 
       // Perform the reduction.
       YY_REDUCE_PRINT (yyn);
+#if YY_EXCEPTIONS
       try
+#endif // YY_EXCEPTIONS
         {
           switch (yyn)
             {
-  case 5:
-
-    { driver->record_->prefix_.origin = *(yystack_[1].value.sval);
+  case 5: // prefix: ':' "origin" ext_prefix
+                                                              { driver->record_->prefix_.origin = *(yystack_[1].value.sval);
 /*                                                              ACE_DEBUG ((LM_DEBUG,
                                                                             ACE_TEXT ("set origin: \"%s\"\n"),
                                                                 driver->myCurrentMessage->prefix_.origin.c_str ())); */
                                                               }
-
     break;
 
-  case 6:
-
-    { driver->record_->prefix_.user = *(yystack_[1].value.sval);
+  case 6: // ext_prefix: '!' "user" ext_prefix
+                                                              { driver->record_->prefix_.user = *(yystack_[1].value.sval);
 /*                                                              ACE_DEBUG ((LM_DEBUG,
                                                                             ACE_TEXT ("set user: \"%s\"\n"),
                                                                 driver->myCurrentMessage->prefix_.user.c_str ())); */
                                                               }
-
     break;
 
-  case 7:
-
-    { driver->record_->prefix_.host = *(yystack_[1].value.sval);
+  case 7: // ext_prefix: '@' "host" ext_prefix
+                                                              { driver->record_->prefix_.host = *(yystack_[1].value.sval);
 /*                                                              ACE_DEBUG ((LM_DEBUG,
                                                                             ACE_TEXT ("set host: \"%s\"\n"),
                                                                 driver.record_->prefix_.host.c_str ())); */
                                                               }
-
     break;
 
-  case 10:
-
-    { ACE_ASSERT (driver->record_->command_.string == NULL);
+  case 10: // command: "cmd_string"
+                                                              { ACE_ASSERT (driver->record_->command_.string == NULL);
                                                                 ACE_NEW_NORETURN (driver->record_->command_.string,
                                                                                   std::string (*(yystack_[0].value.sval)));
                                                                 ACE_ASSERT (driver->record_->command_.string);
@@ -780,38 +740,31 @@ namespace yy {
                                                                             ACE_TEXT ("set command: \"%s\"\n"),
                                                                             driver->record_->command_.string->c_str ())); */
                                                               }
-
     break;
 
-  case 11:
-
-    { driver->record_->command_.numeric = static_cast<IRC_NumericCommand_t> ((yystack_[0].value.ival));
+  case 11: // command: "cmd_numeric"
+                                                              { driver->record_->command_.numeric = static_cast<IRC_NumericCommand_t> ((yystack_[0].value.ival));
                                                                 driver->record_->command_.discriminator = IRC_Record::Command::NUMERIC;
 /*                                                              ACE_DEBUG ((LM_DEBUG,
                                                                             ACE_TEXT ("set command (numeric): %d\n"),
                                                                             $1)); */
                                                               }
-
     break;
 
-  case 14:
-
-    { driver->record_->parameters_.push_front (*(yystack_[1].value.sval));
+  case 14: // params: "param" params
+                                                              { driver->record_->parameters_.push_front (*(yystack_[1].value.sval));
 /*                                                              ACE_DEBUG ((LM_DEBUG,
                                                                             ACE_TEXT ("set param: \"%s\"\n"),
                                                                             driver->record_->parameters_.front ().c_str ())); */
                                                               }
-
     break;
 
-  case 16:
-
-    { driver->record_->parameters_.push_front (*(yystack_[0].value.sval));
+  case 16: // trailing: "param"
+                                                              { driver->record_->parameters_.push_front (*(yystack_[0].value.sval));
 /*                                                              ACE_DEBUG ((LM_DEBUG,
                                                                             ACE_TEXT ("set final param: \"%s\"\n"),
                                                                             driver->record_->parameters_.front ().c_str ())); */
                                                               }
-
     break;
 
 
@@ -820,20 +773,23 @@ namespace yy {
               break;
             }
         }
+#if YY_EXCEPTIONS
       catch (const syntax_error& yyexc)
         {
+          YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
           error (yyexc);
           YYERROR;
         }
+#endif // YY_EXCEPTIONS
       YY_SYMBOL_PRINT ("-> $$ =", yylhs);
       yypop_ (yylen);
       yylen = 0;
-      YY_STACK_PRINT ();
 
       // Shift the result of the reduction.
-      yypush_ (YY_NULLPTR, yylhs);
+      yypush_ (YY_NULLPTR, YY_MOVE (yylhs));
     }
     goto yynewstate;
+
 
   /*--------------------------------------.
   | yyerrlab -- here on detecting error.  |
@@ -843,8 +799,9 @@ namespace yy {
     if (!yyerrstatus_)
       {
         ++yynerrs_;
-        error (yyla.location, yysyntax_error_ (yystack_[0].state,
-                                           yyempty ? yyempty_ : yyla.type_get ()));
+        context yyctx (*this, yyla);
+        std::string msg = yysyntax_error_ (yyctx);
+        error (yyla.location, YY_MOVE (msg));
       }
 
 
@@ -855,12 +812,12 @@ namespace yy {
            error, discard it.  */
 
         // Return failure if at end of input.
-        if (yyla.type_get () == yyeof_)
+        if (yyla.kind () == symbol_kind::S_YYEOF)
           YYABORT;
-        else if (!yyempty)
+        else if (!yyla.empty ())
           {
             yy_destroy_ ("Error: discarding", yyla);
-            yyempty = true;
+            yyla.clear ();
           }
       }
 
@@ -872,76 +829,89 @@ namespace yy {
   | yyerrorlab -- error raised explicitly by YYERROR.  |
   `---------------------------------------------------*/
   yyerrorlab:
-
-    /* Pacify compilers like GCC when the user code never invokes
-       YYERROR and the label yyerrorlab therefore never appears in user
-       code.  */
+    /* Pacify compilers when the user code never invokes YYERROR and
+       the label yyerrorlab therefore never appears in user code.  */
     if (false)
-      goto yyerrorlab;
-    yyerror_range[1].location = yystack_[yylen - 1].location;
+      YYERROR;
+
     /* Do not reclaim the symbols of the rule whose action triggered
        this YYERROR.  */
     yypop_ (yylen);
     yylen = 0;
+    YY_STACK_PRINT ();
     goto yyerrlab1;
+
 
   /*-------------------------------------------------------------.
   | yyerrlab1 -- common code for both syntax error and YYERROR.  |
   `-------------------------------------------------------------*/
   yyerrlab1:
     yyerrstatus_ = 3;   // Each real token shifted decrements this.
+    // Pop stack until we find a state that shifts the error token.
+    for (;;)
+      {
+        yyn = yypact_[+yystack_[0].state];
+        if (!yy_pact_value_is_default_ (yyn))
+          {
+            yyn += symbol_kind::S_YYerror;
+            if (0 <= yyn && yyn <= yylast_
+                && yycheck_[yyn] == symbol_kind::S_YYerror)
+              {
+                yyn = yytable_[yyn];
+                if (0 < yyn)
+                  break;
+              }
+          }
+
+        // Pop the current state because it cannot handle the error token.
+        if (yystack_.size () == 1)
+          YYABORT;
+
+        yyerror_range[1].location = yystack_[0].location;
+        yy_destroy_ ("Error: popping", yystack_[0]);
+        yypop_ ();
+        YY_STACK_PRINT ();
+      }
     {
       stack_symbol_type error_token;
-      for (;;)
-        {
-          yyn = yypact_[yystack_[0].state];
-          if (!yy_pact_value_is_default_ (yyn))
-            {
-              yyn += yyterror_;
-              if (0 <= yyn && yyn <= yylast_ && yycheck_[yyn] == yyterror_)
-                {
-                  yyn = yytable_[yyn];
-                  if (0 < yyn)
-                    break;
-                }
-            }
-
-          // Pop the current state because it cannot handle the error token.
-          if (yystack_.size () == 1)
-            YYABORT;
-
-          yyerror_range[1].location = yystack_[0].location;
-          yy_destroy_ ("Error: popping", yystack_[0]);
-          yypop_ ();
-          YY_STACK_PRINT ();
-        }
 
       yyerror_range[2].location = yyla.location;
       YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
 
       // Shift the error token.
-      error_token.state = yyn;
-      yypush_ ("Shifting", error_token);
+      error_token.state = state_type (yyn);
+      yypush_ ("Shifting", YY_MOVE (error_token));
     }
     goto yynewstate;
 
-    // Accept.
+
+  /*-------------------------------------.
+  | yyacceptlab -- YYACCEPT comes here.  |
+  `-------------------------------------*/
   yyacceptlab:
     yyresult = 0;
     goto yyreturn;
 
-    // Abort.
+
+  /*-----------------------------------.
+  | yyabortlab -- YYABORT comes here.  |
+  `-----------------------------------*/
   yyabortlab:
     yyresult = 1;
     goto yyreturn;
 
+
+  /*-----------------------------------------------------.
+  | yyreturn -- parsing is finished, return the result.  |
+  `-----------------------------------------------------*/
   yyreturn:
-    if (!yyempty)
+    if (!yyla.empty ())
       yy_destroy_ ("Cleanup: discarding lookahead", yyla);
 
     /* Do not reclaim the symbols of the rule whose action triggered
        this YYABORT or YYACCEPT.  */
     yypop_ (yylen);
+    YY_STACK_PRINT ();
     while (1 < yystack_.size ())
       {
         yy_destroy_ ("Cleanup: popping", yystack_[0]);
@@ -950,13 +920,13 @@ namespace yy {
 
     return yyresult;
   }
+#if YY_EXCEPTIONS
     catch (...)
       {
-        YYCDEBUG << "Exception caught: cleaning lookahead and stack"
-                 << std::endl;
+        YYCDEBUG << "Exception caught: cleaning lookahead and stack\n";
         // Do not try to display the values of the reclaimed symbols,
-        // as their printer might throw an exception.
-        if (!yyempty)
+        // as their printers might throw an exception.
+        if (!yyla.empty ())
           yy_destroy_ (YY_NULLPTR, yyla);
 
         while (1 < yystack_.size ())
@@ -966,33 +936,115 @@ namespace yy {
           }
         throw;
       }
+#endif // YY_EXCEPTIONS
   }
 
   void
   IRC_Parser::error (const syntax_error& yyexc)
   {
-    error (yyexc.location, yyexc.what());
+    error (yyexc.location, yyexc.what ());
   }
 
-  // Generate an error message.
+  /* Return YYSTR after stripping away unnecessary quotes and
+     backslashes, so that it's suitable for yyerror.  The heuristic is
+     that double-quoting is unnecessary unless the string contains an
+     apostrophe, a comma, or backslash (other than backslash-backslash).
+     YYSTR is taken from yytname.  */
   std::string
-  IRC_Parser::yysyntax_error_ (state_type yystate, symbol_number_type yytoken) const
+  IRC_Parser::yytnamerr_ (const char *yystr)
   {
-    std::string yyres;
-    // Number of reported tokens (one for the "unexpected", one per
-    // "expected").
-    size_t yycount = 0;
-    // Its maximum.
-    enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-    // Arguments of yyformat.
-    char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+    if (*yystr == '"')
+      {
+        std::string yyr;
+        char const *yyp = yystr;
 
+        for (;;)
+          switch (*++yyp)
+            {
+            case '\'':
+            case ',':
+              goto do_not_strip_quotes;
+
+            case '\\':
+              if (*++yyp != '\\')
+                goto do_not_strip_quotes;
+              else
+                goto append;
+
+            append:
+            default:
+              yyr += *yyp;
+              break;
+
+            case '"':
+              return yyr;
+            }
+      do_not_strip_quotes: ;
+      }
+
+    return yystr;
+  }
+
+  std::string
+  IRC_Parser::symbol_name (symbol_kind_type yysymbol)
+  {
+    return yytnamerr_ (yytname_[yysymbol]);
+  }
+
+
+
+  // IRC_Parser::context.
+  IRC_Parser::context::context (const IRC_Parser& yyparser, const symbol_type& yyla)
+    : yyparser_ (yyparser)
+    , yyla_ (yyla)
+  {}
+
+  int
+  IRC_Parser::context::expected_tokens (symbol_kind_type yyarg[], int yyargn) const
+  {
+    // Actual number of expected tokens
+    int yycount = 0;
+
+    int yyn = yypact_[+yyparser_.yystack_[0].state];
+    if (!yy_pact_value_is_default_ (yyn))
+      {
+        /* Start YYX at -YYN if negative to avoid negative indexes in
+           YYCHECK.  In other words, skip the first -YYN actions for
+           this state because they are default actions.  */
+        int yyxbegin = yyn < 0 ? -yyn : 0;
+        // Stay within bounds of both yycheck and yytname.
+        int yychecklim = yylast_ - yyn + 1;
+        int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+        for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
+          if (yycheck_[yyx + yyn] == yyx && yyx != symbol_kind::S_YYerror
+              && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
+            {
+              if (!yyarg)
+                ++yycount;
+              else if (yycount == yyargn)
+                return 0;
+              else
+                yyarg[yycount++] = YY_CAST (symbol_kind_type, yyx);
+            }
+      }
+
+    if (yyarg && yycount == 0 && 0 < yyargn)
+      yyarg[0] = symbol_kind::S_YYEMPTY;
+    return yycount;
+  }
+
+
+
+  int
+  IRC_Parser::yy_syntax_error_arguments_ (const context& yyctx,
+                                                 symbol_kind_type yyarg[], int yyargn) const
+  {
     /* There are many possibilities here to consider:
        - If this state is a consistent state with a default action, then
          the only way this function was invoked is if the default action
          is an error action.  In that case, don't check for expected
          tokens because there are none.
-       - The only way there can be no lookahead present (in yytoken) is
+       - The only way there can be no lookahead present (in yyla) is
          if this state is a consistent state with a default action.
          Thus, detecting the absence of a lookahead is sufficient to
          determine that there is no unexpected or expected token to
@@ -1005,40 +1057,32 @@ namespace yy {
        - Of course, the expected token list depends on states to have
          correct lookahead information, and it depends on the parser not
          to perform extra reductions after fetching a lookahead from the
-         scanner and before detecting a syntax error.  Thus, state
-         merging (from LALR or IELR) and default reductions corrupt the
-         expected token list.  However, the list is correct for
-         canonical LR with one exception: it will still contain any
-         token that will not be accepted due to an error action in a
-         later state.
+         scanner and before detecting a syntax error.  Thus, state merging
+         (from LALR or IELR) and default reductions corrupt the expected
+         token list.  However, the list is correct for canonical LR with
+         one exception: it will still contain any token that will not be
+         accepted due to an error action in a later state.
     */
-    if (yytoken != yyempty_)
+
+    if (!yyctx.lookahead ().empty ())
       {
-        yyarg[yycount++] = yytname_[yytoken];
-        int yyn = yypact_[yystate];
-        if (!yy_pact_value_is_default_ (yyn))
-          {
-            /* Start YYX at -YYN if negative to avoid negative indexes in
-               YYCHECK.  In other words, skip the first -YYN actions for
-               this state because they are default actions.  */
-            int yyxbegin = yyn < 0 ? -yyn : 0;
-            // Stay within bounds of both yycheck and yytname.
-            int yychecklim = yylast_ - yyn + 1;
-            int yyxend = yychecklim < yyntokens_ ? yychecklim : yyntokens_;
-            for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
-              if (yycheck_[yyx + yyn] == yyx && yyx != yyterror_
-                  && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
-                {
-                  if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                    {
-                      yycount = 1;
-                      break;
-                    }
-                  else
-                    yyarg[yycount++] = yytname_[yyx];
-                }
-          }
+        if (yyarg)
+          yyarg[0] = yyctx.token ();
+        int yyn = yyctx.expected_tokens (yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+        return yyn + 1;
       }
+    return 0;
+  }
+
+  // Generate an error message.
+  std::string
+  IRC_Parser::yysyntax_error_ (const context& yyctx) const
+  {
+    // Its maximum.
+    enum { YYARGS_MAX = 5 };
+    // Arguments of yyformat.
+    symbol_kind_type yyarg[YYARGS_MAX];
+    int yycount = yy_syntax_error_arguments_ (yyctx, yyarg, YYARGS_MAX);
 
     char const* yyformat = YY_NULLPTR;
     switch (yycount)
@@ -1047,21 +1091,23 @@ namespace yy {
         case N:                               \
           yyformat = S;                       \
         break
-        YYCASE_(0, YY_("syntax error"));
-        YYCASE_(1, YY_("syntax error, unexpected %s"));
-        YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-        YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-        YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-        YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+      default: // Avoid compiler warnings.
+        YYCASE_ (0, YY_("syntax error"));
+        YYCASE_ (1, YY_("syntax error, unexpected %s"));
+        YYCASE_ (2, YY_("syntax error, unexpected %s, expecting %s"));
+        YYCASE_ (3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+        YYCASE_ (4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+        YYCASE_ (5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
 #undef YYCASE_
       }
 
+    std::string yyres;
     // Argument number.
-    size_t yyi = 0;
+    std::ptrdiff_t yyi = 0;
     for (char const* yyp = yyformat; *yyp; ++yyp)
       if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
         {
-          yyres += yytnamerr_ (yyarg[yyi++]);
+          yyres += symbol_name (yyarg[yyi++]);
           ++yyp;
         }
       else
@@ -1082,7 +1128,7 @@ namespace yy {
      -21,   -21,   -21,   -21,   -21,     1,     1,   -21,   -21
   };
 
-  const unsigned char
+  const signed char
   IRC_Parser::yydefact_[] =
   {
        0,     4,    10,    11,     0,     0,     0,     3,    15,     0,
@@ -1102,7 +1148,7 @@ namespace yy {
       -1,     5,     6,    19,     7,     8,    15,    23
   };
 
-  const unsigned char
+  const signed char
   IRC_Parser::yytable_[] =
   {
        1,     2,     3,     9,    16,    27,    28,     2,     3,    12,
@@ -1118,7 +1164,7 @@ namespace yy {
        5,    -1,     6,     6
   };
 
-  const unsigned char
+  const signed char
   IRC_Parser::yystos_[] =
   {
        0,     0,     7,     8,    10,    14,    15,    17,    18,     4,
@@ -1126,14 +1172,14 @@ namespace yy {
       19,    19,     9,    20,     0,     5,     6,    16,    16
   };
 
-  const unsigned char
+  const signed char
   IRC_Parser::yyr1_[] =
   {
        0,    13,    14,    14,    14,    15,    16,    16,    16,    17,
       18,    18,    19,    19,    19,    19,    20,    20
   };
 
-  const unsigned char
+  const signed char
   IRC_Parser::yyr2_[] =
   {
        0,     2,     2,     1,     1,     3,     3,     3,     1,     3,
@@ -1141,48 +1187,49 @@ namespace yy {
   };
 
 
-
+#if YYDEBUG || 1
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-  // First, the terminals, then, starting at \a yyntokens_, nonterminals.
+  // First, the terminals, then, starting at \a YYNTOKENS, nonterminals.
   const char*
   const IRC_Parser::yytname_[] =
   {
-  "\"end_of_message\"", "error", "$undefined", "\"space\"", "\"origin\"",
-  "\"user\"", "\"host\"", "\"cmd_string\"", "\"cmd_numeric\"", "\"param\"",
-  "':'", "'!'", "'@'", "$accept", "message", "prefix", "ext_prefix",
-  "body", "command", "params", "trailing", YY_NULLPTR
+  "\"end_of_message\"", "error", "\"invalid token\"", "\"space\"",
+  "\"origin\"", "\"user\"", "\"host\"", "\"cmd_string\"",
+  "\"cmd_numeric\"", "\"param\"", "':'", "'!'", "'@'", "$accept",
+  "message", "prefix", "ext_prefix", "body", "command", "params",
+  "trailing", YY_NULLPTR
   };
+#endif
+
 
 #if YYDEBUG
   const unsigned char
   IRC_Parser::yyrline_[] =
   {
-       0,   148,   148,   149,   150,   151,   156,   161,   166,   167,
-     168,   177,   183,   184,   185,   191,   192,   198
+       0,   149,   149,   150,   151,   152,   157,   162,   167,   168,
+     169,   178,   184,   185,   186,   192,   193,   199
   };
 
-  // Print the state stack on the debug stream.
   void
-  IRC_Parser::yystack_print_ ()
+  IRC_Parser::yy_stack_print_ () const
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
            i = yystack_.begin (),
            i_end = yystack_.end ();
          i != i_end; ++i)
-      *yycdebug_ << ' ' << i->state;
-    *yycdebug_ << std::endl;
+      *yycdebug_ << ' ' << int (i->state);
+    *yycdebug_ << '\n';
   }
 
-  // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  IRC_Parser::yy_reduce_print_ (int yyrule)
+  IRC_Parser::yy_reduce_print_ (int yyrule) const
   {
-    unsigned int yylno = yyrline_[yyrule];
+    int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
     // Print the symbols being reduced, and their result.
     *yycdebug_ << "Reducing stack by rule " << yyrule - 1
-               << " (line " << yylno << "):" << std::endl;
+               << " (line " << yylno << "):\n";
     // The symbols being reduced.
     for (int yyi = 0; yyi < yynrhs; yyi++)
       YY_SYMBOL_PRINT ("   $" << yyi + 1 << " =",
@@ -1190,16 +1237,16 @@ namespace yy {
   }
 #endif // YYDEBUG
 
-  // Symbol number corresponding to token number t.
-  inline
-  IRC_Parser::token_number_type
+  IRC_Parser::symbol_kind_type
   IRC_Parser::yytranslate_ (int t)
   {
+    // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
+    // TOKEN-NUM as returned by yylex.
     static
-    const token_number_type
+    const signed char
     translate_table[] =
     {
-     0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,    11,     2,     2,     2,     2,     2,     2,
@@ -1227,20 +1274,18 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9
     };
-    const unsigned int user_token_number_max_ = 264;
-    const token_number_type undef_token_ = 2;
+    // Last valid token kind.
+    const int code_max = 264;
 
-    if (static_cast<int>(t) <= yyeof_)
-      return yyeof_;
-    else if (static_cast<unsigned int> (t) <= user_token_number_max_)
-      return translate_table[t];
+    if (t <= 0)
+      return symbol_kind::S_YYEOF;
+    else if (t <= code_max)
+      return YY_CAST (symbol_kind_type, translate_table[t]);
     else
-      return undef_token_;
+      return symbol_kind::S_YYUNDEF;
   }
 
-
 } // yy
-
 
 
 

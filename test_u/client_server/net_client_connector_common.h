@@ -54,7 +54,7 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection,
                                      struct Net_StreamConnectionState,
                                      Net_StreamStatistic_t,
                                      Net_TCPSocketConfiguration_t,
-                                     Test_U_Stream,
+                                     Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                      struct Net_UserData> Client_TCP_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Test_U_TCPConnection,
@@ -64,7 +64,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                struct Net_StreamConnectionState,
                                Net_StreamStatistic_t,
                                Net_TCPSocketConfiguration_t,
-                               Test_U_Stream,
+                               Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                struct Net_UserData> Client_TCP_Connector_t;
 #if defined (SSL_SUPPORT)
 typedef Net_Client_SSL_Connector_T<Test_U_SSLConnection,
@@ -72,7 +72,7 @@ typedef Net_Client_SSL_Connector_T<Test_U_SSLConnection,
                                    Test_U_TCPConnectionConfiguration,
                                    struct Net_StreamConnectionState,
                                    Net_StreamStatistic_t,
-                                   Test_U_Stream,
+                                   Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                                    struct Net_UserData> Client_SSL_Connector_t;
 #endif // SSL_SUPPORT
 
@@ -82,7 +82,7 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
                                      struct Net_StreamConnectionState,
                                      Net_StreamStatistic_t,
                                      Net_UDPSocketConfiguration_t,
-                                     Test_U_Stream,
+                                     Test_U_Stream_T<Test_U_UDPConnectionManager_t>,
                                      struct Net_UserData> Client_UDP_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Test_U_UDPConnection,
@@ -92,7 +92,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                struct Net_StreamConnectionState,
                                Net_StreamStatistic_t,
                                Net_UDPSocketConfiguration_t,
-                               Test_U_Stream,
+                               Test_U_Stream_T<Test_U_UDPConnectionManager_t>,
                                struct Net_UserData> Client_UDP_Connector_t;
 
 #endif

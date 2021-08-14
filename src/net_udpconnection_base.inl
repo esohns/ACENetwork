@@ -710,8 +710,6 @@ error:
                 ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
 #endif // ACE_WIN32 || ACE_WIN64
-
-  this->decrease ();
 }
 
 template <typename SocketHandlerType,

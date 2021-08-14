@@ -90,6 +90,8 @@
                     <child>
                       <object class="GtkComboBox" id="combobox_interface">
                         <property name="visible">True</property>
+                        <property name="tooltip_markup">interface</property>
+                        <property name="tooltip_text" translatable="yes">interface</property>
                         <property name="model">liststore_interface</property>
                         <property name="has_frame">False</property>
                         <property name="focus_on_click">False</property>
@@ -107,6 +109,8 @@
                           <object class="GtkEntry" id="entry_server">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="tooltip_markup">PCP server address</property>
+                            <property name="tooltip_text" translatable="yes">PCP server address</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">localhost</property>
@@ -116,8 +120,6 @@
                             <signal name="changed" handler="entry_server_changed_cb"/>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -125,26 +127,24 @@
                           <object class="GtkSpinButton" id="spinbutton_server_port">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="tooltip_markup">PCP server port</property>
+                            <property name="tooltip_text" translatable="yes">PCP server port</property>
                             <property name="max_length">5</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="caps_lock_warning">False</property>
                             <property name="primary_icon_stock">gtk-connect</property>
-                            <property name="adjustment">adjustment_server</property>
+                            <property name="adjustment">adjustment_server_port</property>
                             <property name="numeric">True</property>
                             <property name="wrap">True</property>
                             <signal name="change_value" handler="spinbutton_server_port_change_value_cb"/>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -193,6 +193,8 @@
                           <object class="GtkEntry" id="entry_external_address">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="tooltip_markup">external address</property>
+                            <property name="tooltip_text" translatable="yes">external address</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">localhost</property>
@@ -201,8 +203,6 @@
                             <signal name="changed" handler="entry_external_address_changed_cb"/>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -210,6 +210,8 @@
                           <object class="GtkSpinButton" id="spinbutton_external_port">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="tooltip_markup">external port</property>
+                            <property name="tooltip_text" translatable="yes">external port</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="caps_lock_warning">False</property>
@@ -220,8 +222,6 @@
                             <signal name="change_value" handler="spinbutton_external_port_change_value_cb"/>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -232,10 +232,52 @@
                         <property name="position">0</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkHBox" id="hbox_mapping_2">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkEntry" id="entry_internal_address">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_markup">internal address</property>
+                            <property name="tooltip_text" translatable="yes">internal address</property>
+                            <property name="has_frame">False</property>
+                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="text" translatable="yes">localhost</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="primary_icon_stock">gtk-network</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="spinbutton_internal_port">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_markup">internal port</property>
+                            <property name="tooltip_text" translatable="yes">internal port</property>
+                            <property name="has_frame">False</property>
+                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="primary_icon_stock">gtk-connect</property>
+                            <property name="adjustment">adjustment_internal_port</property>
+                            <property name="numeric">True</property>
+                            <property name="wrap">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -250,6 +292,8 @@
                           <object class="GtkSpinButton" id="spinbutton_session_messages">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
+                            <property name="tooltip_markup">session messages</property>
+                            <property name="tooltip_text" translatable="yes">session messages</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
@@ -265,6 +309,8 @@
                           <object class="GtkSpinButton" id="spinbutton_data_messages">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
+                            <property name="tooltip_markup">data messages</property>
+                            <property name="tooltip_text" translatable="yes">data messages</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
@@ -285,6 +331,8 @@
                       <object class="GtkSpinButton" id="spinbutton_data">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
+                        <property name="tooltip_markup">received bytes</property>
+                        <property name="tooltip_text" translatable="yes">received bytes</property>
                         <property name="editable">False</property>
                         <property name="has_frame">False</property>
                         <property name="invisible_char">&#x25CF;</property>
@@ -534,7 +582,7 @@
     <property name="stock_id">gtk-info</property>
     <signal name="activate" handler="action_announce_activate_cb"/>
   </object>
-  <object class="GtkAdjustment" id="adjustment_server">
+  <object class="GtkAdjustment" id="adjustment_server_port">
     <property name="value">5351</property>
     <property name="lower">1</property>
     <property name="upper">65535</property>
@@ -576,5 +624,13 @@
       <!-- column-name identifier -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_internal_port">
+    <property name="value">80</property>
+    <property name="lower">1</property>
+    <property name="upper">65535</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">100</property>
+    <property name="page_size">10</property>
   </object>
 </interface>

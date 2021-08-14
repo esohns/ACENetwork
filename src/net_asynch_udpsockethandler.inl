@@ -224,10 +224,10 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_LINUX
   if (likely (!inherited::configuration_->writeOnly))
     source_SAP = inherited::configuration_->listenAddress;
-  result = inherited2::open (source_SAP,               // local SAP
-                             ACE_PROTOCOL_FAMILY_INET, // protocol family
-                             0,                        // protocol
-                             1);                       // reuse_addr
+  result = inherited2::open (source_SAP,                               // local SAP
+                             ACE_PROTOCOL_FAMILY_INET,                 // protocol family
+                             0,                                        // protocol
+                             inherited::configuration_->reuseAddress); // reuse_addr
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -261,6 +261,30 @@ Net_AsynchUDPSocketHandler_T<SocketType,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
               handle));
 #endif // ACE_WIN32 || ACE_WIN64
+
+//  // set socket option(s)
+//  if (likely (inherited::configuration_->reuseAddress))
+//  { ACE_ASSERT (inherited::configuration_->domain != PF_UNIX);
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    if (unlikely (!Net_Common_Tools::setReuseAddress (handle)))
+//#else
+//    if (unlikely (!Net_Common_Tools::setReuseAddress (handle,
+//                                                      inherited::configuration_->reusePort)))
+//#endif // ACE_WIN32 || ACE_WIN64
+//    {
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(0x%@), aborting\n"),
+//                  handle));
+//#else
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(%d), aborting\n"),
+//                  handle));
+//#endif // ACE_WIN32 || ACE_WIN64
+//      goto error;
+//    } // end IF
+//  } // end IF
+
   if (likely (!inherited::configuration_->writeOnly))
   { ACE_ASSERT (writeHandle_ == ACE_INVALID_HANDLE);
     writeHandle_ = ACE_OS::socket (AF_INET,    // family
@@ -288,6 +312,29 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                 handle,
                 writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64
+
+    // set socket option(s)
+    if (likely (inherited::configuration_->reuseAddress))
+    { ACE_ASSERT (inherited::configuration_->domain != PF_UNIX);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (unlikely (!Net_Common_Tools::setReuseAddress (writeHandle_)))
+#else
+      if (unlikely (!Net_Common_Tools::setReuseAddress (writeHandle_,
+                                                        inherited::configuration_->reusePort)))
+#endif // ACE_WIN32 || ACE_WIN64
+      {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(0x%@), aborting\n"),
+                    writeHandle_));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(%d), aborting\n"),
+                    writeHandle_));
+#endif // ACE_WIN32 || ACE_WIN64
+        goto error;
+      } // end IF
+    } // end IF
 
     // set source address ?
     if (unlikely (inherited::configuration_->sourcePort))
@@ -566,8 +613,8 @@ error:
                     ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64
-      writeHandle_ = ACE_INVALID_HANDLE;
     } // end IF
+    writeHandle_ = ACE_INVALID_HANDLE;
   } // end IF
   inherited::isInitialized_ = false;
 }

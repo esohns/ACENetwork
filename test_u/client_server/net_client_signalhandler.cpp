@@ -407,9 +407,10 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       }
     } // end SWITCH
 
-    // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-                                         inherited::configuration_->dispatchState->reactorGroupId,
-                                         false);                                                    // don't block
+    // stop event dispatch ?
+    if (inherited::configuration_->stopEventDispatchOnShutdown)
+      Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
+                                           inherited::configuration_->dispatchState->reactorGroupId,
+                                           false); // don't block
   } // end IF
 }

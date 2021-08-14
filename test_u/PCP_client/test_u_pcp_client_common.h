@@ -301,11 +301,13 @@ struct PCPClient_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE
+   , connection (NULL)
    , progressData ()
    , subscribers ()
   {}
 
   struct PCPClient_Configuration*  configuration;
+  PCPClient_IOutboundConnection_t* connection;
   struct PCPClient_UI_ProgressData progressData;
   PCPClient_Subscribers_t          subscribers;
 };

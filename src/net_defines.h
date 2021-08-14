@@ -50,7 +50,7 @@
 // *TODO*: use platform macros wherever possible
 #define NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE                  (ETH_ALEN * 2) + (ETH_ALEN - 1) + 1 // "ab:cd:ef:gh:ij:kl\0"
 
-#define NET_ADDRESS_IPV4_MULTICAST                                       "224.0.0.1"
+#define NET_ADDRESS_IPV4_MULTICAST                                     "224.0.0.1"
 
 #define NET_ADDRESS_IPV6_ADDRESS_BYTES                                 16
 
@@ -82,6 +82,11 @@
 #define NET_SOCKET_DEFAULT_TCP_NODELAY                                 true  // SO_NODELAY
 #define NET_SOCKET_DEFAULT_TCP_KEEPALIVE                               false // SO_KEEPALIVE
 #define NET_SOCKET_DEFAULT_UDP_CONNECT                                 false
+#define NET_SOCKET_DEFAULT_REUSEADDR                                   false // SO_REUSEADDR
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#define NET_SOCKET_DEFAULT_REUSEPORT                                   false // SO_REUSEPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 // connection / handler
 #define NET_CONNECTION_HANDLER_THREAD_NAME                             "connection dispatch"

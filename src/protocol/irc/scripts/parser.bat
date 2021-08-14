@@ -12,7 +12,7 @@ setlocal enabledelayedexpansion
 pushd . >NUL 2>&1
 
 @rem set BisonEXE="%ProgramFiles(x86)%\GnuWin32\bin\bison.exe"
-set BisonEXE="C:\cygwin64\bin\bison.exe"
+set BisonEXE="H:\bin\flex_bison\win_bison.exe"
 if exist %BisonEXE% goto Next
 set BisonEXE="C:\mingw\msys\1.0\bin\bison.exe"
 if exist %BisonEXE% goto Next

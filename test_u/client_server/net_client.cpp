@@ -847,6 +847,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     &configuration_in.protocolConfiguration;
   configuration_in.signalHandlerConfiguration.messageAllocator =
     &message_allocator;
+  configuration_in.signalHandlerConfiguration.stopEventDispatchOnShutdown =
+    UIDefinitionFile_in.empty ();
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -978,7 +980,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       if (numberOfDispatchThreads_in >= 1)
         Common_Tools::finalizeEventDispatch (configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId,
                                              configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId,
-                                             false);                                // don't block
+                                             false); // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1065,20 +1067,25 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  // step2: dispatch events
-  Common_Tools::dispatchEvents (useReactor_in,
-                                (useReactor_in ? configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId
-                                               : configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId));
-
-  // step3: clean up
+  if (UIDefinitionFile_in.empty ())
+  {
+    // step2: dispatch events
+    Common_Tools::dispatchEvents (useReactor_in,
+                                  (useReactor_in ? configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId
+                                                 : configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId));
+  } // end IF
+  else
+  {
 #if defined (GUI_SUPPORT)
-  if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
     gtk_manager_p->wait ();
 #else
     ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+  } // end ELSE
+
+  // step3: clean up
   //		{ // synch access
   //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1098,6 +1105,11 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //  connection_manager_p->wait ();
   TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
   TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+
+  // step5: stop reactor (&& proactor, if applicable)
+  Common_Tools::finalizeEventDispatch (configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId,
+                                       configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId,
+                                       false); // don't block
 
 //  { // synch access
 //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);

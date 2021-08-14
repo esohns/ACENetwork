@@ -82,6 +82,10 @@ class PCPClient_ConnectionConfiguration
 
 //////////////////////////////////////////
 
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          struct PCP_ConnectionState,
+                          PCP_Statistic_t> PCPClient_IOutboundConnection_t;
+
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 PCPClient_ConnectionConfiguration,
                                 struct PCP_ConnectionState,

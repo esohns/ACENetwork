@@ -181,6 +181,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Client)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_PCP)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)

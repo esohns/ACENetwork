@@ -68,6 +68,11 @@ struct Net_SocketConfigurationBase
 #endif // ACE_WIN32 || ACE_WIN64
    , linger (NET_SOCKET_DEFAULT_LINGER)
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+   , reuseAddress (NET_SOCKET_DEFAULT_REUSEADDR)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+   , reusePort (NET_SOCKET_DEFAULT_REUSEPORT)
+#endif // ACE_WIN32 || ACE_WIN64
    , domain (PF_INET)
    , type (SOCK_STREAM)
    , protocol (IPPROTO_TCP)
@@ -91,7 +96,12 @@ struct Net_SocketConfigurationBase
 #endif // ACE_WIN32 || ACE_WIN64
   // *TODO*: win32 udp sockets do not linger
   bool         linger;
-  bool         useLoopBackDevice;   // (if any)
+  bool         useLoopBackDevice; // (if any)
+  bool         reuseAddress;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  bool         reusePort;
+#endif // ACE_WIN32 || ACE_WIN64
 
   int          domain;   // socket(3) parameter
   int          type;     // socket(3) parameter

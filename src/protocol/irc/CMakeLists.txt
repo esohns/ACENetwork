@@ -25,21 +25,23 @@ endif ()
 #add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+# target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
 
- if (DHCLIENT_SUPPORT)
+ #if (DHCLIENT_SUPPORT)
  #  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
  #                              $<BUILD_INTERFACE:/usr/include/bind-export>)
-  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC ${BIND9_CFLAGS})
- endif (DHCLIENT_SUPPORT)
+ # target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC ${BIND9_CFLAGS})
+ #endif (DHCLIENT_SUPPORT)
 
- target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
+# target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
 #                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/${BUILD_PATH_SUFFIX}>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/3rd_party/bison>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
@@ -58,12 +60,14 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src/modules/stat>)
 elseif (WIN32)
- target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+# target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
 #                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACE_TAO/ACE>)
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/${BUILD_PATH_SUFFIX}>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/3rd_party/bison>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
@@ -72,7 +76,7 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/parser>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
@@ -83,7 +87,6 @@ elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party>)
 endif ()
-#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../..>)
 target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
@@ -135,10 +138,7 @@ set (source_files
      irc_stream.inl
      irc_stream_common.h
      irc_tools.cpp
-     irc_tools.h
-     location.hh
-     position.hh
-     stack.hh)
+     irc_tools.h)
 set (script_files
      scripts/bisector.l
      scripts/scanner.l
@@ -235,9 +235,6 @@ install (FILES
          irc_stream.inl
          irc_stream_common.h
          irc_tools.h
-         location.hh
-         position.hh
-         stack.hh
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_IRC
          EXPORT ${PROJECT_NAME}Targets

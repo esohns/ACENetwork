@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_STREAM_H
-#define NET_STREAM_H
+#ifndef TEST_U_STREAM_T_H
+#define TEST_U_STREAM_T_H
 
 #include <string>
 
@@ -51,7 +51,8 @@ class Test_U_SessionMessage;
 
 extern const char stream_name_string_[];
 
-class Test_U_Stream
+template <typename ConnectionManagerType>
+class Test_U_Stream_T
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
                                         stream_name_string_,
@@ -69,7 +70,7 @@ class Test_U_Stream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        Test_U_TCPConnectionManager_t,
+                                        ConnectionManagerType,
                                         struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -89,12 +90,12 @@ class Test_U_Stream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        Test_U_TCPConnectionManager_t,
+                                        ConnectionManagerType,
                                         struct Stream_UserData> inherited;
 
  public:
-  Test_U_Stream ();
-  virtual ~Test_U_Stream ();
+  Test_U_Stream_T ();
+  inline virtual ~Test_U_Stream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: layout
@@ -108,12 +109,15 @@ class Test_U_Stream
   virtual bool initialize (const CONFIGURATION_T&,
 #else
   virtual bool initialize (const typename inherited::CONFIGURATION_T&,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                            ACE_HANDLE); // socket handle
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T (const Test_U_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T& operator= (const Test_U_Stream_T&))
 };
+
+// include template definition
+#include "test_u_stream.inl"
 
 #endif
