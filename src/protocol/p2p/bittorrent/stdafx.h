@@ -35,7 +35,7 @@
 //#define ACE_LACKS_STROPTS_H
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
-//#include "ace/Log_Msg.h"
+#include "ace/Log_Msg.h"
 //#include "ace/OS.h"
 //#include "ace/Synch_Traits.h"
 
@@ -56,7 +56,7 @@
 #include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "stream_common.h"
+#include "stream_common.h"
 #include "stream_macros.h"
 
 // Local Header Files
@@ -64,7 +64,7 @@
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "net_common.h"
+#include "net_common.h"
 #include "net_macros.h"
 
-//#include "bittorrent_common.h"
+#include "bittorrent_common.h"

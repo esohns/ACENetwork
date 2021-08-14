@@ -647,7 +647,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         if (ACE_OS::strcmp (interface_identifier.c_str (),
 #else
-        if (ACE_OS::strcmp ((*iterator_2).second->interfaceIdentifier.c_str (),
+        if (ACE_OS::strcmp (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str (),
 #endif // ACE_WIN32 || ACE_WIN64
                             g_value_get_string (&value)) == 0)
         {
@@ -2340,7 +2340,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   if (!about_dialog)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to glade_xml_get_widget(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to gtk_builder_get_object(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (TEST_U_UI_GTK_DIALOG_ABOUT_NAME)));
     return TRUE; // propagate
   } // end IF

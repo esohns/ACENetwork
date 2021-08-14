@@ -1389,7 +1389,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   int result = -1;
   bool cancel_b = false;
-  bool close_socket_b = false;
+//  bool close_socket_b = false;
 
   // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
   //                   gone away, i.e. no new data will be accepted by the

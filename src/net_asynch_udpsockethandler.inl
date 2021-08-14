@@ -308,7 +308,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                 writeHandle_));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened write socket (handle: 0x%@)\n"),
+                ACE_TEXT ("%d: opened write socket (handle: %d)\n"),
                 handle,
                 writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1205,7 +1205,7 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
                 writeHandle_));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened write socket (handle: 0x%@)\n"),
+                ACE_TEXT ("%d: opened write socket (handle: %d)\n"),
                 handle,
                 writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64

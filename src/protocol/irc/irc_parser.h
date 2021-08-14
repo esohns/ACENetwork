@@ -823,4 +823,3 @@ void IRC_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 
 
 #endif // !YY_YY_IRC_PARSER_H_INCLUDED
-

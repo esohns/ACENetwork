@@ -130,10 +130,6 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
-  //std::cout << ACE_TEXT_ALWAYS_CHAR ("-b          : request broadcast replies [")
-  //          << PCP_DEFAULT_FLAGS_BROADCAST
-  //          << ACE_TEXT_ALWAYS_CHAR ("])")
-  //          << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
             << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
@@ -180,14 +176,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
 #endif // ACE_WIN32 || ACE_WIN64
-  //std::cout << ACE_TEXT_ALWAYS_CHAR ("-o          : use loopback [")
-  //          << NET_INTERFACE_DEFAULT_USE_LOOPBACK
-  //          << ACE_TEXT_ALWAYS_CHAR ("]")
-  //          << std::endl;
-  //std::cout << ACE_TEXT_ALWAYS_CHAR ("-q          : send request on offer [")
-  //          << TEST_U_DEFAULT_PCP_SEND_REQUEST_ON_OFFER
-  //          << ACE_TEXT_ALWAYS_CHAR ("]")
-  //          << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r          : use reactor [")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -562,36 +550,6 @@ do_work (//bool requestBroadcastReplies_in,
 
   int result = -1;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#if defined (_DEBUG)
-//  Common_Tools::printCapabilities ();
-#endif // _DEBUG
-  if (!Common_Tools::hasCapability (CAP_NET_BIND_SERVICE))
-    if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
-    {
-      char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
-      if (!capability_name_string_p)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::cap_to_name(%d): \"%m\", continuing\n"),
-                    CAP_NET_BIND_SERVICE));
-
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setCapability(\"%s\"): \"%m\", returning\n"),
-                  ACE_TEXT (capability_name_string_p)));
-
-      // clean up
-      result = ::cap_free (capability_name_string_p);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::cap_free(): \"%m\", continuing\n")));
-
-      return;
-    } // end IF
-  ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
-//  Common_Tools::printPriviledges ();
-#endif // ACE_WIN32 || ACE_WIN64
-
   // step0b: initialize random number generator
   Common_Tools::initialize (true); // initialize random number generation
 
@@ -689,8 +647,8 @@ do_work (//bool requestBroadcastReplies_in,
     interface_identifier =
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
 #endif // ACE_WIN32 || ACE_WIN64
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   if (InlineIsEqualGUID (interface_identifier, GUID_NULL))
 #else
@@ -707,14 +665,18 @@ do_work (//bool requestBroadcastReplies_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   if (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
+                                                 interface_address,
+                                                 gateway_address))
 #else
   if (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                               interface_address,
+                                               gateway_address))
 #endif // _WIN32_WINNT_VISTA
 #else
   if (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
-#endif // ACE_WIN32 || ACE_WIN64
                                                interface_address,
                                                gateway_address))
+#endif // ACE_WIN32 || ACE_WIN64
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -869,7 +831,6 @@ do_work (//bool requestBroadcastReplies_in,
   event_dispatch_state_s.configuration = &configuration_in.dispatchConfiguration;
 
   ACE_Time_Value deadline = ACE_Time_Value::zero;
-  PCPClient_IConnector_t* iconnector_p = NULL;
   PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
@@ -877,9 +838,7 @@ do_work (//bool requestBroadcastReplies_in,
   ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
 
   PCPClient_IConnection_t* iconnection_p = NULL;
-  PCPClient_IOutboundStreamConnection_t* istream_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
   Test_U_Message* message_p = NULL;
 
   // step0c: initialize connection manager

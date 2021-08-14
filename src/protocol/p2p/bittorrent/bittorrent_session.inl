@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <algorithm>
 #include <functional>
 #include <random>
 #include <vector>
@@ -3259,8 +3260,9 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
          ++i)
       if (!BitTorrent_Tools::havePiece (i, (*iterator).second))
         doesnt_have_a.push_back (i);
+    struct net_bittorrent_piece_index_remove_predicate predicate_s;
     std::remove_if (missing_pieces_a.begin (), missing_pieces_a.end (),
-                    std::bind2nd (struct net_bittorrent_piece_index_remove_predicate (),
+                    std::bind2nd (predicate_s,
                                   doesnt_have_a));
     ACE_ASSERT (!missing_pieces_a.empty ());
     BitTorrent_PiecesIterator_t iterator_2;

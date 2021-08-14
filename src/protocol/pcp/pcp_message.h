@@ -28,6 +28,7 @@
 #include "stream_data_message_base.h"
 
 #include "pcp_common.h"
+#include "pcp_tools.h"
 
 // forward declaration(s)
 class ACE_Allocator;

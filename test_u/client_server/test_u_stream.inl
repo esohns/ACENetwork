@@ -77,7 +77,11 @@ Test_U_Stream_T<ConnectionManagerType>::load (Stream_ILayout* layout_inout,
 
 template <typename ConnectionManagerType>
 bool
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 Test_U_Stream_T<ConnectionManagerType>::initialize (const CONFIGURATION_T& configuration_in,
+#else
+Test_U_Stream_T<ConnectionManagerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+#endif // ACE_WIN32 || ACE_WIN64
                                                     ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::initialize"));
@@ -93,7 +97,7 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const CONFIGURATION_T& confi
   //Test_U_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -104,7 +108,7 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const CONFIGURATION_T& confi
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -169,7 +173,7 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const CONFIGURATION_T& confi
 
 error:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
 
   return false;

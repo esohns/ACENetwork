@@ -23,6 +23,7 @@
 #include "common_time_common.h"
 
 #include "net_common.h"
+#include "net_common_tools.h"
 #include "net_defines.h"
 
 template <typename AddressType,

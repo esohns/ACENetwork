@@ -28,39 +28,36 @@ endif ()
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
-# if (DHCLIENT_SUPPORT)
-#  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-#                              $<BUILD_INTERFACE:/usr/include/bind-export>)
-#  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${BIND9_CFLAGS})
-# endif (DHCLIENT_SUPPORT)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FLEX_INCLUDE_DIRS}>)
 
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
 #                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/math>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/timer>)
  # *TODO*: remove ASAP
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/ui>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/ui>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src>)
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/dec>)
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/lib>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/dec>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/lib>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/net>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
@@ -72,27 +69,27 @@ elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:$ENV{LIB_ROOT}/openssl/include>)
 
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACE_TAO/ACE>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACE_TAO/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src>)
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/log>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/log>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/parser>)
  # *TODO*: remove ASAP
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/ui>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/ui>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src>)
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/dec>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/dec>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/net>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC

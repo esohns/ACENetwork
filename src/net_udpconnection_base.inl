@@ -628,7 +628,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
 
   if (likely (!messageBlock_in.length ()))
   {
-    if (unlikely (!initiate_read ()))
+    if (unlikely (!this->initiate_read ()))
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

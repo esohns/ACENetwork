@@ -1595,7 +1595,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   if (!about_dialog)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to glade_xml_get_widget(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to gtk_builder_get_object(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (TEST_I_UI_GTK_DIALOG_ABOUT_NAME)));
     return TRUE; // propagate
   } // end IF
