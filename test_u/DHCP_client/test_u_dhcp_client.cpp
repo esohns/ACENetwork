@@ -570,21 +570,12 @@ do_work (bool requestBroadcastReplies_in,
     if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
     {
       char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
-      if (!capability_name_string_p)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::cap_to_name(%d): \"%m\", continuing\n"),
-                    CAP_NET_BIND_SERVICE));
-
+      ACE_ASSERT (capability_name_string_p);
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Tools::setCapability(\"%s\"): \"%m\", returning\n"),
                   ACE_TEXT (capability_name_string_p)));
-
-      // clean up
       result = ::cap_free (capability_name_string_p);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::cap_free(): \"%m\", continuing\n")));
-
+      ACE_UNUSED_ARG (result);
       return;
     } // end IF
   ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));

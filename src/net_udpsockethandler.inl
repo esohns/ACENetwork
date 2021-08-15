@@ -92,7 +92,8 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (arg_in);
 
-  static ACE_INET_Addr inet_addr_sap_any (ACE_sap_any_cast (const ACE_INET_Addr&));
+  static ACE_INET_Addr inet_addr_sap_any =
+      ACE_sap_any_cast (ACE_INET_Addr&);
   ConfigurationType* configuration_p = NULL;
   ACE_INET_Addr source_SAP;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
@@ -198,17 +199,32 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_LINUX)
   port_number =
       (configuration_p->writeOnly ? (configuration_p->sourcePort ? source_SAP
-                                                                               : inet_addr_sap_any)
-                                         : configuration_p->listenAddress).get_port_number ();
+                                                                 : inet_addr_sap_any)
+                                  : configuration_p->listenAddress).get_port_number ();
   // (temporarily) elevate privileges to open system sockets
   if (unlikely (!configuration_p->writeOnly &&
                 (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (!Common_Tools::switchUser (0))
+    if (!Common_Tools::hasCapability (CAP_NET_BIND_SERVICE))
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
-      goto error;
+      if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
+      {
+        char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
+        ACE_ASSERT (capability_name_string_p);
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Common_Tools::setCapability(\"%s\"): \"%m\", returning\n"),
+                    ACE_TEXT (capability_name_string_p)));
+        result = ::cap_free (capability_name_string_p);
+        ACE_UNUSED_ARG (result);
+        if (!Common_Tools::switchUser (0))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
+          goto error;
+        } // end IF
+      } // end IF
+      else
+        ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
     } // end IF
     handle_privileges = true;
   } // end IF
@@ -217,9 +233,9 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     inherited2::peer_.open ((configuration_p->writeOnly ? (configuration_p->sourcePort ? source_SAP
                                                                                        : inet_addr_sap_any)
                                                         : configuration_p->listenAddress), // local SAP
-                            ACE_PROTOCOL_FAMILY_INET,                                                    // protocol family
-                            0,                                                                           // protocol
-                            1);                                                                          // reuse_addr
+                            ACE_PROTOCOL_FAMILY_INET,                                      // protocol family
+                            0,                                                             // protocol
+                            configuration_p->reuseAddress);                                // reuse_addr
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -231,7 +247,10 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 #if defined (ACE_LINUX)
   if (handle_privileges)
+  {
+    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE);
     Common_Tools::switchUser (static_cast<uid_t> (-1));
+  } // end IF
 #endif // ACE_LINUX
   handle = inherited2::peer_.get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -581,12 +600,16 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 
       if (likely (handle_in != ACE_INVALID_HANDLE))
       {
-        //result = inherited2::peer_.close ();
-        result = inherited2::close ();
+        result = inherited2::peer_.close ();
+//        result = inherited2::close ();
         if (unlikely (result == -1))
-          ACE_DEBUG ((LM_ERROR,
-                      //ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
-                      ACE_TEXT ("failed to ACE_Svc_Handler::close (): %d, continuing\n")));
+        {
+          int error = ACE_OS::last_error ();
+          if (error != EBADF) // 9: local close()
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_SOCK_IO::close (): \"%m\", continuing\n")));
+                        //ACE_TEXT ("failed to ACE_Svc_Handler::close (): \"%m\", continuing\n")));
+        } // end IF
       } // end IF
 
 //      ACE_Reactor* reactor_p = inherited2::reactor ();
@@ -1135,8 +1158,13 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       {
         result = inherited2::peer_.close ();
         if (unlikely (result == -1))
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
+        {
+          int error = ACE_OS::last_error ();
+          if (error != EBADF) // 9: local close()
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_SOCK_IO::close (): \"%m\", continuing\n")));
+                        //ACE_TEXT ("failed to ACE_Svc_Handler::close (): \"%m\", continuing\n")));
+        } // end IF
       } // end IF
 
 //      ACE_Reactor* reactor_p = inherited2::reactor ();
@@ -1372,7 +1400,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   { ACE_ASSERT (writeHandle_ == ACE_INVALID_HANDLE);
     writeHandle_ = ACE_OS::socket (AF_INET,    // family
                                    SOCK_DGRAM, // type
-                                   PF_INET);   // protocol
+                                   0);         // protocol
     if (unlikely (writeHandle_ == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1380,7 +1408,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                   AF_INET, SOCK_DGRAM));
 
       // clean up
-      result = inherited2::close ();
+      result = inherited2::peer_.close ();
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to SocketType::close(): \"%m\", continuing\n")));
@@ -1682,8 +1710,13 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       {
         result = inherited2::peer_.close ();
         if (unlikely (result == -1))
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SOCK_IO::close (): %d, continuing\n")));
+        {
+          int error = ACE_OS::last_error ();
+          if (error != EBADF) // 9: local close()
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_SOCK_IO::close (): \"%m\", continuing\n")));
+                        //ACE_TEXT ("failed to ACE_Svc_Handler::close (): \"%m\", continuing\n")));
+        } // end IF
       } // end IF
 
 //      ACE_Reactor* reactor_p = inherited2::reactor ();

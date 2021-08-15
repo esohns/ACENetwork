@@ -3815,8 +3815,8 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
   if (unlikely (socket_handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,%d): \"%m\", aborting\n"),
-                ACE_ADDRESS_FAMILY_INET, SOCK_DGRAM, 0));
+                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
+                ACE_ADDRESS_FAMILY_INET, SOCK_DGRAM));
     return false;
   } // end IF
 

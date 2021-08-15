@@ -30,96 +30,96 @@
 
 //#include "net_module_runtimestatistic.h"
 
-#include "dhcp_codes.h"
-#include "dhcp_common.h"
-#include "dhcp_configuration.h"
-//#include "dhcp_module_bisector.h"
-#include "dhcp_module_parser.h"
-#include "dhcp_module_streamer.h"
-//#include "dhcp_stream_common.h"
+#include "pcp_codes.h"
+#include "pcp_common.h"
+#include "pcp_configuration.h"
+//#include "pcp_module_bisector.h"
+#include "pcp_module_parser.h"
+#include "pcp_module_streamer.h"
+//#include "pcp_stream_common.h"
 
 // forward declarations
-class DHCP_SessionMessage;
+class PCP_SessionMessage;
 template <typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename SessionMessageType>
-class DHCP_Message_T;
-typedef DHCP_Message_T<Stream_AllocatorConfiguration,
-                       DHCP_ControlMessage_t,
-                       DHCP_SessionMessage> DHCP_Message_t;
-//struct DHCP_StreamSessionData;
-//struct DHCP_StreamState;
+class PCP_Message_T;
+typedef PCP_Message_T<Stream_AllocatorConfiguration,
+                      PCP_ControlMessage_t,
+                      PCP_SessionMessage> PCP_Message_t;
+//struct PCP_StreamSessionData;
+//struct PCP_StreamState;
 
-typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
+typedef PCP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
-                             DHCP_ModuleHandlerConfiguration,
+                             PCP_ModuleHandlerConfiguration,
                              ACE_Message_Block,
-                             DHCP_Message_t,
-                             DHCP_SessionMessage> DHCP_Module_Parser;
-typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
+                             PCP_Message_t,
+                             PCP_SessionMessage> PCP_Module_Parser;
+typedef PCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-                               DHCP_ModuleHandlerConfiguration,
+                               PCP_ModuleHandlerConfiguration,
                                ACE_Message_Block,
-                               DHCP_Message_t,
-                               DHCP_SessionMessage> DHCP_Module_Streamer;
+                               PCP_Message_t,
+                               PCP_SessionMessage> PCP_Module_Streamer;
 
 typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          DHCP_ModuleHandlerConfiguration,
+                                          PCP_ModuleHandlerConfiguration,
                                           ACE_Message_Block,
-                                          DHCP_Message_t,
-                                          DHCP_SessionMessage,
-                                          DHCP_MessageType_t,
-                                          DHCP_RuntimeStatistic_t> DHCP_Module_Statistic_ReaderTask_t;
+                                          PCP_Message_t,
+                                          PCP_SessionMessage,
+                                          PCP_MessageType_t,
+                                          PCP_RuntimeStatistic_t> PCP_Module_Statistic_ReaderTask_t;
 typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          DHCP_ModuleHandlerConfiguration,
+                                          PCP_ModuleHandlerConfiguration,
                                           ACE_Message_Block,
-                                          DHCP_Message_t,
-                                          DHCP_SessionMessage,
-                                          DHCP_MessageType_t,
-                                          DHCP_RuntimeStatistic_t> DHCP_Module_Statistic_WriterTask_t;
+                                          PCP_Message_t,
+                                          PCP_SessionMessage,
+                                          PCP_MessageType_t,
+                                          PCP_RuntimeStatistic_t> PCP_Module_Statistic_WriterTask_t;
 
-//typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
+//typedef PCP_Module_Streamer_T<ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
-//                              DHCP_SessionMessage,
-//                              DHCP_Message> DHCP_Module_Streamer_t;
-//typedef DHCP_Module_Bisector_T<ACE_SYNCH_MUTEX,
+//                              PCP_SessionMessage,
+//                              PCP_Message> PCP_Module_Streamer_t;
+//typedef PCP_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                              ///////////
 //                              ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
-//                              DHCP_SessionMessage,
-//                              DHCP_Message_t,
+//                              PCP_SessionMessage,
+//                              PCP_Message_t,
 //                              ///////////
-//                              DHCP_ModuleHandlerConfiguration,
+//                              PCP_ModuleHandlerConfiguration,
 //                              ///////////
-//                              DHCP_StreamState,
+//                              PCP_StreamState,
 //                              ///////////
-//                              DHCP_Stream_SessionData,
-//                              DHCP_Stream_SessionData_t,
+//                              PCP_Stream_SessionData,
+//                              PCP_Stream_SessionData_t,
 //                              ///////////
-//                              DHCP_RuntimeStatistic_t> DHCP_Module_Bisector_t;
+//                              PCP_RuntimeStatistic_t> PCP_Module_Bisector_t;
 
 // declare module(s)
 //DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                    // task synch type
 //                              Common_TimePolicy_t,             // time policy
 //                              Stream_ModuleConfiguration,      // module configuration type
-//                              DHCP_ModuleHandlerConfiguration, // module handler configuration type
-//                              DHCP_Module_Parser);             // writer type
+//                              PCP_ModuleHandlerConfiguration, // module handler configuration type
+//                              PCP_Module_Parser);             // writer type
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                    // task synch type
                           Common_TimePolicy_t,             // time policy
                           Stream_ModuleConfiguration,      // module configuration type
-                          DHCP_ModuleHandlerConfiguration, // module handler configuration type
-                          DHCP_Module_Streamer,            // reader type
-                          DHCP_Module_Parser,              // writer type
-                          DHCP_Module_Marshal);            // name
+                          PCP_ModuleHandlerConfiguration, // module handler configuration type
+                          PCP_Module_Streamer,            // reader type
+                          PCP_Module_Parser,              // writer type
+                          PCP_Module_Marshal);            // name
 
 DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                       // task synch type
                           Common_TimePolicy_t,                // time policy type
                           Stream_ModuleConfiguration,         // module configuration type
-                          DHCP_ModuleHandlerConfiguration,    // module handler configuration type
-                          DHCP_Module_Statistic_ReaderTask_t, // reader type
-                          DHCP_Module_Statistic_WriterTask_t, // writer type
-                          DHCP_Module_RuntimeStatistic);      // name
+                          PCP_ModuleHandlerConfiguration,    // module handler configuration type
+                          PCP_Module_Statistic_ReaderTask_t, // reader type
+                          PCP_Module_Statistic_WriterTask_t, // writer type
+                          PCP_Module_RuntimeStatistic);      // name
 
 #endif

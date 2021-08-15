@@ -1721,12 +1721,70 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
-
-    // connect (unicast)
     PCPClient_InboundConnector_t connector (true);
     PCPClient_InboundAsynchConnector_t asynch_connector (true);
     PCPClient_InboundConnectorMcast_t connector_mcast (true);
     PCPClient_InboundAsynchConnectorMcast_t asynch_connector_mcast (true);
+
+    // *IMPORTANT NOTE*: bind()ing is weird. On Windows systems, the FIRST bound
+    //                   socket will receive the inbound data. On Linux, it is
+    //                   the LAST...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    // connect outbound (?)
+    if (unlikely (!data_p->connection))
+    {
+      PCPClient_OutboundConnector_t connector (true);
+      PCPClient_OutboundAsynchConnector_t asynch_connector (true);
+      iterator_3 =
+        data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+      ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
+      ACE_HANDLE handle = ACE_INVALID_HANDLE;
+      if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+        handle =
+          Net_Client_Common_Tools::connect<ACE_INET_Addr,
+                                           PCPClient_OutboundConnector_t,
+                                           PCPClient_ConnectionConfiguration,
+                                           struct Net_UserData,
+                                           PCPClient_ConnectionManager_t> (connector,
+                                                                           *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                           data_p->configuration->userData,
+                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
+                                                                           true,
+                                                                           true);
+      else
+        handle =
+          Net_Client_Common_Tools::connect<ACE_INET_Addr,
+                                           PCPClient_OutboundAsynchConnector_t,
+                                           PCPClient_ConnectionConfiguration,
+                                           struct Net_UserData,
+                                           PCPClient_ConnectionManager_t> (asynch_connector,
+                                                                           *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                           data_p->configuration->userData,
+                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
+                                                                           true,
+                                                                           true);
+      if (unlikely (handle == ACE_INVALID_HANDLE))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to connect to %s, returning\n"),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
+        goto continue_;
+      } // end IF
+      data_p->connection =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
+#else
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
+#endif // ACE_WIN32 || ACE_WIN64
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("%u: connected to %s\n"),
+      //            data_p->connection->id (),
+      //            ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
+    } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
+
+    // connect (unicast)
     iterator_3 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
@@ -1820,6 +1878,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
 //#endif // ACE_WIN32 || ACE_WIN64
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     // connect outbound (?)
     if (unlikely (!data_p->connection))
     {
@@ -1871,6 +1930,8 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       //            data_p->connection->id (),
       //            ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
     } // end IF
+#else
+#endif // ACE_WIN32 || ACE_WIN64
 
     failed = false;
 

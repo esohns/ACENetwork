@@ -212,7 +212,14 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
 
   // step1: initialize/tweak socket
-  result = inherited::open (configuration_p);
+  if (unlikely (!inherited::initialize (configuration_p->socketConfiguration)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to Net_SocketHandlerBase_T::initialize(): \"%m\", aborting\n"),
+                id ()));
+    goto error;
+  } // end IF
+  result = inherited::open (&configuration_p->socketConfiguration);
   if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();
