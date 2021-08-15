@@ -27,7 +27,6 @@
 #include "ace/OS.h"
 
 #include "common_process_tools.h"
-#include "common_tools.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -46,7 +45,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
   string_buffer = ACE_TEXT_ALWAYS_CHAR ("version: \t");
   string_buffer += PCP_Tools::VersionToString (record_in.version);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
-  string_buffer = ACE_TEXT_ALWAYS_CHAR ("opcode: \t");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("opcode: \t");
   string_buffer +=
     PCP_Tools::OpcodeToString (static_cast<enum PCP_Codes::OpcodeType> (record_in.opcode & 0x7F));
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
@@ -56,9 +55,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("result code: \t");
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-  converter.clear ();
-  converter << static_cast<unsigned int> (record_in.result_code);
-  string_buffer += converter.str ();
+  string_buffer += PCP_Tools::ResultCodeToString (record_in.result_code);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("lifetime: \t");
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
@@ -71,15 +68,17 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
   converter.clear ();
   converter << record_in.epoch_time;
   string_buffer += converter.str ();
-  string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("reserved_2: \t");
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << record_in.reserved_2;
   string_buffer += converter.str ();
-  string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   switch (record_in.opcode)
   {
+    case PCP_Codes::PCP_OPCODE_ANNOUNCE:
+      break;
     case PCP_Codes::PCP_OPCODE_MAP:
     {
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("nonce: \t");
@@ -178,6 +177,22 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
       string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
       break;
     }
+    case PCP_Codes::PCP_OPCODE_AUTHENTICATION:
+    {
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("session id: \t");
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter << record_in.authentication.session_id;
+      string_buffer += converter.str ();
+      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("sequence number: \t");
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter << record_in.authentication.sequence_number;
+      string_buffer += converter.str ();
+      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      break;
+    }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -212,6 +227,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
     {
       case PCP_Codes::PCP_OPTION_THIRD_PARTY:
       {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
         string_buffer +=
           Net_Common_Tools::IPAddressToString ((*iterator).third_party.address,
                                                true,   // address only
@@ -226,6 +242,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
       }
       case PCP_Codes::PCP_OPTION_FILTER:
       {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter.clear ();
         converter << (*iterator).filter.reserved;
@@ -246,6 +263,116 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
                                                true,   // address only
                                                false); // do not resolve
         string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_NONCE: // rfc7652
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).nonce.nonce;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).authentication_tag.session_id;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).authentication_tag.sequence_number;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).authentication_tag.key_id;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\t\"");
+        for (unsigned int i = 0;
+             i < static_cast<unsigned int> ((*iterator).length - 12);
+             ++i)
+          string_buffer += (*iterator).authentication_tag.data[i];
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).pa_authentication_tag.key_id;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\t\"");
+        for (unsigned int i = 0;
+             i < static_cast<unsigned int> ((*iterator).length - 4);
+             ++i)
+          string_buffer += (*iterator).pa_authentication_tag.data[i];
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_EAP_PAYLOAD:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t\"");
+        for (unsigned int i = 0;
+             i < static_cast<unsigned int> ((*iterator).length);
+             ++i)
+          string_buffer += (*iterator).eap_payload.data[i];
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_PSEUDO_RANDOM_FUNCTION:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).pseudo_random_function.id;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_MAC_ALGORITHM:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).mac_algorithm.id;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_SESSION_LIFETIME:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).session_lifetime.lifetime;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_RECEIVED_PAK:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).received_pak.sequence_number;
+        string_buffer += converter.str ();
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_ID_INDICATOR:
+      {
+        string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t\"");
+        for (unsigned int i = 0;
+             i < static_cast<unsigned int> ((*iterator).length);
+             ++i)
+          string_buffer += (*iterator).id_indicator.data[i];
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
         break;
       }
       default:
@@ -305,6 +432,8 @@ PCP_Tools::OpcodeToString (PCP_Opcode_t opcode_in)
       result = ACE_TEXT_ALWAYS_CHAR ("MAP"); break;
     case PCP_Codes::PCP_OPCODE_PEER:
       result = ACE_TEXT_ALWAYS_CHAR ("PEER"); break;
+    case PCP_Codes::PCP_OPCODE_AUTHENTICATION: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -355,6 +484,26 @@ PCP_Tools::ResultCodeToString (PCP_ResultCode_t resultCode_in)
       result = ACE_TEXT_ALWAYS_CHAR ("ADDRESS_MISMATCH"); break;
     case PCP_Codes::PCP_RESULTCODE_EXCESSIVE_REMOTE_PEERS:
       result = ACE_TEXT_ALWAYS_CHAR ("EXCESSIVE_REMOTE_PEERS"); break;
+    case PCP_Codes::PCP_RESULTCODE_INITIATION: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("INITIATION"); break;
+    case PCP_Codes::PCP_RESULTCODE_AUTHENTICATION_REQUIRED: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION_REQUIRED"); break;
+    case PCP_Codes::PCP_RESULTCODE_AUTHENTICATION_FAILED: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION_FAILED"); break;
+    case PCP_Codes::PCP_RESULTCODE_AUTHENTICATION_SUCCEEDED: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION_SUCCEEDED"); break;
+    case PCP_Codes::PCP_RESULTCODE_AUTHORIZATION_FAILED: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHORIZATION_FAILED"); break;
+    case PCP_Codes::PCP_RESULTCODE_SESSION_TERMINATED: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("SESSION_TERMINATED"); break;
+    case PCP_Codes::PCP_RESULTCODE_UNKNOWN_SESSION_ID: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("UNKNOWN_SESSION_ID"); break;
+    case PCP_Codes::PCP_RESULTCODE_DOWNGRADE_ATTACK_DETECTED: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("DOWNGRADE_ATTACK_DETECTED"); break;
+    case PCP_Codes::PCP_RESULTCODE_AUTHENTICATION_REQUEST: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION_REQUEST"); break;
+    case PCP_Codes::PCP_RESULTCODE_AUTHENTICATION_REPLY: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION_REPLY"); break;
     case PCP_Codes::PCP_RESULTCODE_STANDARDS_ACTION_BEGIN:
     // *TODO*
     case PCP_Codes::PCP_RESULTCODE_STANDARDS_ACTION_END:
@@ -397,6 +546,24 @@ PCP_Tools::OptionToString (PCP_Option_t option_in)
       result = ACE_TEXT_ALWAYS_CHAR ("PREFER_FAILURE"); break;
     case PCP_Codes::PCP_OPTION_FILTER:
       result = ACE_TEXT_ALWAYS_CHAR ("FILTER"); break;
+    case PCP_Codes::PCP_OPTION_NONCE: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("NONCE"); break;
+    case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION_TAG"); break;
+    case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("PA_AUTHENTICATION_TAG"); break;
+    case PCP_Codes::PCP_OPTION_EAP_PAYLOAD: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("EAP_PAYLOAD"); break;
+    case PCP_Codes::PCP_OPTION_PSEUDO_RANDOM_FUNCTION: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("PSEUDO_RANDOM_FUNCTION"); break;
+    case PCP_Codes::PCP_OPTION_MAC_ALGORITHM: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("MAC_ALGORITHM"); break;
+    case PCP_Codes::PCP_OPTION_SESSION_LIFETIME: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("SESSION_LIFETIME"); break;
+    case PCP_Codes::PCP_OPTION_RECEIVED_PAK: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("RECEIVED_PAK"); break;
+    case PCP_Codes::PCP_OPTION_ID_INDICATOR: // rfc7652
+      result = ACE_TEXT_ALWAYS_CHAR ("ID_INDICATOR"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -424,12 +591,4 @@ PCP_Tools::mapAddress (const ACE_INET_Addr& address_in,
     ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (ip_address)
                                            : ip_address);
   *reinterpret_cast<ACE_UINT32*> (&mappedAddress_inout[12]) = ip_address;
-}
-
-ACE_UINT64
-PCP_Tools::generateNonce ()
-{
-  NETWORK_TRACE (ACE_TEXT ("PCP_Tools::generateNonce"));
-
-  return static_cast<ACE_UINT64> (ACE_OS::rand_r (&Common_Tools::randomSeed));
 }

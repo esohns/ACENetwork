@@ -62,6 +62,8 @@ typedef PCP_Codes::OpcodeType PCP_Opcode_t;
 typedef PCP_Codes::ResultCodeType PCP_ResultCode_t;
 typedef PCP_Codes::OptionType PCP_Option_t;
 
+/////////////////////////////////////////
+
 struct PCPOpcodeMapData
 {
   ACE_UINT64    nonce;
@@ -85,14 +87,25 @@ struct PCPOpcodePeerData
   ACE_INET_Addr remote_peer_address;
 };
 
+//struct PCPOpcodeAnnounceData
+//{};
+
+// rfc7652
+struct PCPOpcodeAuthenticationData
+{
+  ACE_UINT32 session_id;
+  ACE_UINT32 sequence_number;
+};
+
+/////////////////////////////////////////
+
 struct PCPOptionThirdParty
 {
   ACE_INET_Addr address;
 };
 
-struct PCPOptionPreferFailure
-{
-};
+//struct PCPOptionPreferFailure
+//{};
 
 struct PCPOptionFilter
 {
@@ -101,6 +114,58 @@ struct PCPOptionFilter
   ACE_UINT16    remote_peer_port; // 0: all ports
   ACE_INET_Addr remote_peer_address;
 };
+
+// rfc7652
+struct PCPOptionNonce
+{
+  ACE_UINT32 nonce;
+};
+
+struct PCPOptionAuthenticationTag
+{
+  ACE_UINT32 session_id;
+  ACE_UINT32 sequence_number;
+  ACE_UINT32 key_id;
+  ACE_UINT8* data; // variable-length
+};
+
+struct PCPOptionPAAuthenticationTag
+{
+  ACE_UINT32 key_id;
+  ACE_UINT8* data; // variable-length
+};
+
+struct PCPOptionEAPPayload
+{
+  ACE_UINT8* data; // variable-length
+};
+
+struct PCPOptionPseudoRandomFunction
+{
+  ACE_UINT32 id; // see rfc7296, rfc4868
+};
+
+struct PCPOptionMACAlgorithm
+{
+  ACE_UINT32 id; // see rfc7296, rfc4868
+};
+
+struct PCPOptionSessionLifetime
+{
+  ACE_UINT32 lifetime;
+};
+
+struct PCPOptionReceivedPAK
+{
+  ACE_UINT32 sequence_number;
+};
+
+struct PCPOptionIdIndicator
+{
+  ACE_UINT8* data; // utf8, rfc7613 // variable-length
+};
+
+/////////////////////////////////////////
 
 struct PCPOption
 {
@@ -122,6 +187,24 @@ struct PCPOption
         break;
       case PCP_Codes::PCP_OPTION_FILTER:
         filter = option_in.filter;  break;
+      case PCP_Codes::PCP_OPTION_NONCE: // rfc7652
+        nonce = option_in.nonce;  break;
+      case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG: // rfc7652
+        authentication_tag = option_in.authentication_tag;  break;
+      case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG: // rfc7652
+        pa_authentication_tag = option_in.pa_authentication_tag;  break;
+      case PCP_Codes::PCP_OPTION_EAP_PAYLOAD: // rfc7652
+        eap_payload = option_in.eap_payload;  break;
+      case PCP_Codes::PCP_OPTION_PSEUDO_RANDOM_FUNCTION: // rfc7652
+        pseudo_random_function = option_in.pseudo_random_function;  break;
+      case PCP_Codes::PCP_OPTION_MAC_ALGORITHM: // rfc7652
+        mac_algorithm = option_in.mac_algorithm;  break;
+      case PCP_Codes::PCP_OPTION_SESSION_LIFETIME: // rfc7652
+        session_lifetime = option_in.session_lifetime;  break;
+      case PCP_Codes::PCP_OPTION_RECEIVED_PAK: // rfc7652
+        received_pak = option_in.received_pak;  break;
+      case PCP_Codes::PCP_OPTION_ID_INDICATOR: // rfc7652
+        id_indicator = option_in.id_indicator;  break;
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -145,6 +228,24 @@ struct PCPOption
         break;
       case PCP_Codes::PCP_OPTION_FILTER:
         filter = rhs_in.filter;  break;
+      case PCP_Codes::PCP_OPTION_NONCE: // rfc7652
+        nonce = rhs_in.nonce;  break;
+      case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG: // rfc7652
+        authentication_tag = rhs_in.authentication_tag;  break;
+      case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG: // rfc7652
+        pa_authentication_tag = rhs_in.pa_authentication_tag;  break;
+      case PCP_Codes::PCP_OPTION_EAP_PAYLOAD: // rfc7652
+        eap_payload = rhs_in.eap_payload;  break;
+      case PCP_Codes::PCP_OPTION_PSEUDO_RANDOM_FUNCTION: // rfc7652
+        pseudo_random_function = rhs_in.pseudo_random_function;  break;
+      case PCP_Codes::PCP_OPTION_MAC_ALGORITHM: // rfc7652
+        mac_algorithm = rhs_in.mac_algorithm;  break;
+      case PCP_Codes::PCP_OPTION_SESSION_LIFETIME: // rfc7652
+        session_lifetime = rhs_in.session_lifetime;  break;
+      case PCP_Codes::PCP_OPTION_RECEIVED_PAK: // rfc7652
+        received_pak = rhs_in.received_pak;  break;
+      case PCP_Codes::PCP_OPTION_ID_INDICATOR: // rfc7652
+        id_indicator = rhs_in.id_indicator;  break;
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -157,14 +258,23 @@ struct PCPOption
     return *this;
   }
 
-  enum PCP_Codes::OptionType      code;
-  ACE_UINT8                       reserved;
-  ACE_UINT16                      length;
+  enum PCP_Codes::OptionType             code;
+  ACE_UINT8                              reserved;
+  ACE_UINT16                             length;
   union
   {
-    struct PCPOptionThirdParty    third_party;
-    struct PCPOptionPreferFailure prefer_failure;
-    struct PCPOptionFilter        filter;
+    struct PCPOptionThirdParty           third_party;
+//    struct PCPOptionPreferFailure        prefer_failure;
+    struct PCPOptionFilter               filter;
+    struct PCPOptionNonce                nonce; // rfc7652
+    struct PCPOptionAuthenticationTag    authentication_tag; // rfc7652
+    struct PCPOptionPAAuthenticationTag  pa_authentication_tag; // rfc7652
+    struct PCPOptionEAPPayload           eap_payload; // rfc7652
+    struct PCPOptionPseudoRandomFunction pseudo_random_function; // rfc7652
+    struct PCPOptionMACAlgorithm         mac_algorithm; // rfc7652
+    struct PCPOptionSessionLifetime      session_lifetime; // rfc7652
+    struct PCPOptionReceivedPAK          received_pak; // rfc7652
+    struct PCPOptionIdIndicator          id_indicator; // rfc7652
   };
 };
 
@@ -199,7 +309,9 @@ struct PCP_Record
       case PCP_Codes::PCP_OPCODE_PEER:
         peer = record_in.peer; break;
       case PCP_Codes::PCP_OPCODE_ANNOUNCE:
-        break; // *TODO*
+        break;
+      case PCP_Codes::PCP_OPCODE_AUTHENTICATION: // rfc7652
+        authentication = record_in.authentication; break;
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -227,7 +339,9 @@ struct PCP_Record
       case PCP_Codes::PCP_OPCODE_PEER:
         peer = rhs_in.peer; break;
       case PCP_Codes::PCP_OPCODE_ANNOUNCE:
-        break; // *TODO*
+        break;
+      case PCP_Codes::PCP_OPCODE_AUTHENTICATION: // rfc7652
+        authentication = rhs_in.authentication; break;
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -241,21 +355,23 @@ struct PCP_Record
     return *this;
   }
 
-  enum PCP_Codes::VersionType    version;
+  enum PCP_Codes::VersionType          version;
   // *NOTE*: this contains the (MSB) 'R'-bit
-  ACE_UINT8                      opcode;
-  ACE_UINT8                      reserved; // 16 bits in request
-  enum PCP_Codes::ResultCodeType result_code; // response only !
-  ACE_UINT32                     lifetime; // second(s): 0: remove mapping
-  ACE_UINT32                     epoch_time; // response only !
-  ACE_UINT32                     reserved_2; // response only !
-  ACE_INET_Addr                  client_address; // request only !
+  ACE_UINT8                            opcode;
+  ACE_UINT8                            reserved; // 16 bits in request
+  enum PCP_Codes::ResultCodeType       result_code; // response only // // rfc7652: request/response
+  ACE_UINT32                           lifetime; // second(s): 0: remove mapping
+  ACE_UINT32                           epoch_time; // response only
+  ACE_UINT32                           reserved_2; // response only
+  ACE_INET_Addr                        client_address; // request only
   union
   {
-    struct PCPOpcodeMapData      map;
-    struct PCPOpcodePeerData     peer;
+    struct PCPOpcodeMapData            map;
+    struct PCPOpcodePeerData           peer;
+//    struct PCPOpcodeAnnounceData       announce;
+    struct PCPOpcodeAuthenticationData authentication;
   };
-  PCP_Options_t                  options;
+  PCP_Options_t                        options;
 };
 
 struct PCP_MessageData

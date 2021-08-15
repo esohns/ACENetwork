@@ -27,6 +27,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "common_tools.h"
+
 #include "net_defines.h"
 
 #include "pcp_codes.h"
@@ -46,7 +48,7 @@ class PCP_Tools
   inline static bool isRequest (const struct PCP_Record& record_in) { return (record_in.opcode & 0x80); }
   static void mapAddress (const ACE_INET_Addr&, // address
                           ACE_UINT8[]);         // return value: mapped address
-  static ACE_UINT64 generateNonce ();
+  inline static ACE_UINT64 generateNonce () { return static_cast<ACE_UINT64> (ACE_OS::rand_r (&Common_Tools::randomSeed)); }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (PCP_Tools ())

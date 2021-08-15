@@ -673,7 +673,7 @@ void yyfree ( void * , yyscan_t yyscanner );
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
 #define version 1
-#define op 2
+#define opcode_ 2
 #define reserved 3
 #define result_code 4
 #define lifetime 5
@@ -694,20 +694,34 @@ void yyfree ( void * , yyscan_t yyscanner );
 #define opcode_specific_response_data_peer_remote_peer_port 20
 #define opcode_specific_response_data_peer_reserved_2 21
 #define opcode_specific_response_data_peer_remote_peer_ip_address 22
-#define option_code 23
-#define option_reserved 24
-#define option_length 25
-#define option_third_party_address 26
-#define option_filter_reserved 27
-#define option_filter_prefix_length 28
-#define option_filter_remote_peer_port 29
-#define option_filter_remote_peer_address 30
-#define option_padding 31
+#define opcode_specific_response_data_authentication 23
+#define opcode_specific_response_data_authentication_sequence_number 24
+#define option_code 25
+#define option_reserved 26
+#define option_length 27
+#define option_third_party_address 28
+#define option_filter_reserved 29
+#define option_filter_prefix_length 30
+#define option_filter_remote_peer_port 31
+#define option_filter_remote_peer_address 32
+#define option_nonce_nonce 33
+#define option_authentication_tag_session_id 34
+#define option_authentication_tag_sequence_number 35
+#define option_authentication_tag_key_id 36
+#define option_authentication_tag_data 37
+#define option_pa_authentication_tag_key_id 38
+#define option_pa_authentication_tag_data 39
+#define option_eap_payload_data 40
+#define option_pseudo_random_function_id 41
+#define option_mac_algorithm_id 42
+#define option_session_lifetime_lifetime 43
+#define option_received_pak_sequence_number 44
+#define option_id_indicator_data 45
+#define option_padding 46
 
 #endif
 
 
-    
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
  * down here because we want the user's section 1 to have been scanned first.
@@ -719,7 +733,6 @@ void yyfree ( void * , yyscan_t yyscanner );
 /* %if-c++-only */
 /* %endif */
 #endif
-    
 
 
 

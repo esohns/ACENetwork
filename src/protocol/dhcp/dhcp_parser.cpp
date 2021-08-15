@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.7.4.  */
 
 /* Skeleton implementation for Bison GLR parsers in C
 
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,11 +32,15 @@
 
 /* C GLR parser skeleton written by Paul Hilfinger.  */
 
-/* Identify Bison output.  */
-#define YYBISON 1
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
-/* Bison version.  */
-#define YYBISON_VERSION "3.0.4"
+/* Identify Bison output, and Bison version.  */
+#define YYBISON 30704
+
+/* Bison version string.  */
+#define YYBISON_VERSION "3.7.4"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "glr.c"
@@ -47,7 +51,6 @@
 
 /* "%code top" blocks.  */
 
-
 #include "stdafx.h"
 
 
@@ -55,28 +58,61 @@
 
 
 
-/* First part of user declarations.  */
-
-
-
-# ifndef YY_NULLPTR
-#  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULLPTR nullptr
+# ifndef YY_CAST
+#  ifdef __cplusplus
+#   define YY_CAST(Type, Val) static_cast<Type> (Val)
+#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
 #  else
-#   define YY_NULLPTR 0
+#   define YY_CAST(Type, Val) ((Type) (Val))
+#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
+#  endif
+# endif
+# ifndef YY_NULLPTR
+#  if defined __cplusplus
+#   if 201103L <= __cplusplus
+#    define YY_NULLPTR nullptr
+#   else
+#    define YY_NULLPTR 0
+#   endif
+#  else
+#   define YY_NULLPTR ((void*)0)
 #  endif
 # endif
 
-#include "ace/Synch.h"
 #include "dhcp_parser.h"
 
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 1
-#endif
+/* Symbol kind.  */
+enum yysymbol_kind_t
+{
+  YYSYMBOL_YYEMPTY = -2,
+  YYSYMBOL_YYEOF = 0,                      /* "end"  */
+  YYSYMBOL_YYerror = 1,                    /* error  */
+  YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
+  YYSYMBOL_OP = 3,                         /* "op"  */
+  YYSYMBOL_HTYPE = 4,                      /* "htype"  */
+  YYSYMBOL_HLEN = 5,                       /* "hlen"  */
+  YYSYMBOL_HOPS = 6,                       /* "hops"  */
+  YYSYMBOL_XID = 7,                        /* "xid"  */
+  YYSYMBOL_SECS = 8,                       /* "secs"  */
+  YYSYMBOL_FLAGS = 9,                      /* "flags"  */
+  YYSYMBOL_CIADDR = 10,                    /* "ciaddr"  */
+  YYSYMBOL_YIADDR = 11,                    /* "yiaddr"  */
+  YYSYMBOL_SIADDR = 12,                    /* "siaddr"  */
+  YYSYMBOL_GIADDR = 13,                    /* "giaddr"  */
+  YYSYMBOL_CHADDR = 14,                    /* "chaddr"  */
+  YYSYMBOL_SNAME = 15,                     /* "sname"  */
+  YYSYMBOL_FILE_ = 16,                     /* "file"  */
+  YYSYMBOL_COOKIE = 17,                    /* "cookie"  */
+  YYSYMBOL_OPTION_TAG = 18,                /* "tag"  */
+  YYSYMBOL_OPTION_VALUE = 19,              /* "value"  */
+  YYSYMBOL_YYACCEPT = 20,                  /* $accept  */
+  YYSYMBOL_message = 21,                   /* message  */
+  YYSYMBOL_header = 22,                    /* header  */
+  YYSYMBOL_options = 23,                   /* options  */
+  YYSYMBOL_option = 24                     /* option  */
+};
+typedef enum yysymbol_kind_t yysymbol_kind_t;
+
 
 /* Default (constant) value used for initialization for null
    right-hand sides.  Unlike the standard yacc.c template, here we set
@@ -89,11 +125,8 @@ static YYLTYPE yyloc_default
 # endif
 ;
 
-/* Copy the second part of user declarations.  */
-
 
 /* Unqualified %code blocks.  */
-
 
 // *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
 #if defined (YYDEBUG)
@@ -131,10 +164,107 @@ using namespace std;
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 
 
-
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef short
+# undef short
+#endif
+
+/* On compilers that do not define __PTRDIFF_MAX__ etc., make sure
+   <limits.h> and (if available) <stdint.h> are included
+   so that the code can choose integer types of a good width.  */
+
+#ifndef __PTRDIFF_MAX__
+# include <limits.h> /* INFRINGES ON USER NAME SPACE */
+# if defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
+#  include <stdint.h> /* INFRINGES ON USER NAME SPACE */
+#  define YY_STDINT_H
+# endif
+#endif
+
+/* Narrow types that promote to a signed type and that can represent a
+   signed or unsigned integer of at least N bits.  In tables they can
+   save space and decrease cache pressure.  Promoting to a signed type
+   helps avoid bugs in integer arithmetic.  */
+
+#ifdef __INT_LEAST8_MAX__
+typedef __INT_LEAST8_TYPE__ yytype_int8;
+#elif defined YY_STDINT_H
+typedef int_least8_t yytype_int8;
+#else
+typedef signed char yytype_int8;
+#endif
+
+#ifdef __INT_LEAST16_MAX__
+typedef __INT_LEAST16_TYPE__ yytype_int16;
+#elif defined YY_STDINT_H
+typedef int_least16_t yytype_int16;
+#else
+typedef short yytype_int16;
+#endif
+
+#if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
+typedef __UINT_LEAST8_TYPE__ yytype_uint8;
+#elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
+       && UINT_LEAST8_MAX <= INT_MAX)
+typedef uint_least8_t yytype_uint8;
+#elif !defined __UINT_LEAST8_MAX__ && UCHAR_MAX <= INT_MAX
+typedef unsigned char yytype_uint8;
+#else
+typedef short yytype_uint8;
+#endif
+
+#if defined __UINT_LEAST16_MAX__ && __UINT_LEAST16_MAX__ <= __INT_MAX__
+typedef __UINT_LEAST16_TYPE__ yytype_uint16;
+#elif (!defined __UINT_LEAST16_MAX__ && defined YY_STDINT_H \
+       && UINT_LEAST16_MAX <= INT_MAX)
+typedef uint_least16_t yytype_uint16;
+#elif !defined __UINT_LEAST16_MAX__ && USHRT_MAX <= INT_MAX
+typedef unsigned short yytype_uint16;
+#else
+typedef int yytype_uint16;
+#endif
+#ifndef YYPTRDIFF_T
+# if defined __PTRDIFF_TYPE__ && defined __PTRDIFF_MAX__
+#  define YYPTRDIFF_T __PTRDIFF_TYPE__
+#  define YYPTRDIFF_MAXIMUM __PTRDIFF_MAX__
+# elif defined PTRDIFF_MAX
+#  ifndef ptrdiff_t
+#   include <stddef.h> /* INFRINGES ON USER NAME SPACE */
+#  endif
+#  define YYPTRDIFF_T ptrdiff_t
+#  define YYPTRDIFF_MAXIMUM PTRDIFF_MAX
+# else
+#  define YYPTRDIFF_T long
+#  define YYPTRDIFF_MAXIMUM LONG_MAX
+# endif
+#endif
+
+#ifndef YYSIZE_T
+# ifdef __SIZE_TYPE__
+#  define YYSIZE_T __SIZE_TYPE__
+# elif defined size_t
+#  define YYSIZE_T size_t
+# elif defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
+#  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
+#  define YYSIZE_T size_t
+# else
+#  define YYSIZE_T unsigned
+# endif
+#endif
+
+#define YYSIZE_MAXIMUM                                  \
+  YY_CAST (YYPTRDIFF_T,                                 \
+           (YYPTRDIFF_MAXIMUM < YY_CAST (YYSIZE_T, -1)  \
+            ? YYPTRDIFF_MAXIMUM                         \
+            : YY_CAST (YYSIZE_T, -1)))
+
+#define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
+
 
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
@@ -148,6 +278,7 @@ using namespace std;
 # endif
 #endif
 
+
 #ifndef YYFREE
 # define YYFREE free
 #endif
@@ -158,48 +289,64 @@ using namespace std;
 # define YYREALLOC realloc
 #endif
 
-#define YYSIZEMAX ((size_t) -1)
-
 #ifdef __cplusplus
-   typedef bool yybool;
+  typedef bool yybool;
+# define yytrue true
+# define yyfalse false
 #else
-   typedef unsigned char yybool;
+  /* When we move to stdbool, get rid of the various casts to yybool.  */
+  typedef signed char yybool;
+# define yytrue 1
+# define yyfalse 0
 #endif
-#define yytrue 1
-#define yyfalse 0
 
 #ifndef YYSETJMP
 # include <setjmp.h>
 # define YYJMP_BUF jmp_buf
 # define YYSETJMP(Env) setjmp (Env)
-/* Pacify clang.  */
-# define YYLONGJMP(Env, Val) (longjmp (Env, Val), YYASSERT (0))
-#endif
-
-#ifndef YY_ATTRIBUTE
-# if (defined __GNUC__                                               \
-      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
-     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
-#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
-# else
-#  define YY_ATTRIBUTE(Spec) /* empty */
-# endif
+/* Pacify Clang and ICC.  */
+# define YYLONGJMP(Env, Val)                    \
+ do {                                           \
+   longjmp (Env, Val);                          \
+   YY_ASSERT (0);                               \
+ } while (yyfalse)
 #endif
 
 #ifndef YY_ATTRIBUTE_PURE
-# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
+# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
+# else
+#  define YY_ATTRIBUTE_PURE
+# endif
 #endif
 
 #ifndef YY_ATTRIBUTE_UNUSED
-# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
+# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
+#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
+# else
+#  define YY_ATTRIBUTE_UNUSED
+# endif
 #endif
 
-#if !defined _Noreturn \
-     && (!defined __STDC_VERSION__ || __STDC_VERSION__ < 201112)
-# if defined _MSC_VER && 1200 <= _MSC_VER
+/* The _Noreturn keyword of C11.  */
+#ifndef _Noreturn
+# if (defined __cplusplus \
+      && ((201103 <= __cplusplus && !(__GNUC__ == 4 && __GNUC_MINOR__ == 7)) \
+          || (defined _MSC_VER && 1900 <= _MSC_VER)))
+#  define _Noreturn [[noreturn]]
+# elif (!defined __cplusplus                     \
+        && (201112 <= (defined __STDC_VERSION__ ? __STDC_VERSION__ : 0)  \
+            || 4 < __GNUC__ + (7 <= __GNUC_MINOR__) \
+            || (defined __apple_build_version__ \
+                ? 6000000 <= __apple_build_version__ \
+                : 3 < __clang_major__ + (5 <= __clang_minor__))))
+   /* _Noreturn works as-is.  */
+# elif 2 < __GNUC__ + (8 <= __GNUC_MINOR__) || 0x5110 <= __SUNPRO_C
+#  define _Noreturn __attribute__ ((__noreturn__))
+# elif 1200 <= (defined _MSC_VER ? _MSC_VER : 0)
 #  define _Noreturn __declspec (noreturn)
 # else
-#  define _Noreturn YY_ATTRIBUTE ((__noreturn__))
+#  define _Noreturn
 # endif
 #endif
 
@@ -210,13 +357,13 @@ using namespace std;
 # define YYUSE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
+#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
-    _Pragma ("GCC diagnostic push") \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
 # define YY_INITIAL_VALUE(Value) Value
@@ -229,10 +376,20 @@ using namespace std;
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
-
-#ifndef YYASSERT
-# define YYASSERT(Condition) ((void) ((Condition) || (abort (), 0)))
+#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
+# define YY_IGNORE_USELESS_CAST_BEGIN                          \
+    _Pragma ("GCC diagnostic push")                            \
+    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
+# define YY_IGNORE_USELESS_CAST_END            \
+    _Pragma ("GCC diagnostic pop")
 #endif
+#ifndef YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_BEGIN
+# define YY_IGNORE_USELESS_CAST_END
+#endif
+
+
+#define YY_ASSERT(E) ((void) (0 && (E)))
 
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  5
@@ -245,7 +402,7 @@ using namespace std;
 #define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  7
-/* YYNRULES -- Number of states.  */
+/* YYNSTATES -- Number of states.  */
 #define YYNSTATES  24
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
 #define YYMAXRHS 14
@@ -253,15 +410,19 @@ using namespace std;
    accessed by $0, $-1, etc., in any rule.  */
 #define YYMAXLEFT 0
 
-/* YYTRANSLATE(X) -- Bison symbol number corresponding to X.  */
-#define YYUNDEFTOK  2
+/* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   274
 
-#define YYTRANSLATE(YYX)                                                \
-  ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+/* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
+   as returned by yylex, with out-of-bounds checking.  */
+#define YYTRANSLATE(YYX)                                \
+  (0 <= (YYX) && (YYX) <= YYMAXUTOK                     \
+   ? YY_CAST (yysymbol_kind_t, yytranslate[YYX])        \
+   : YYSYMBOL_YYUNDEF)
 
-/* YYTRANSLATE[YYLEX] -- Bison symbol number corresponding to YYLEX.  */
-static const unsigned char yytranslate[] =
+/* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
+   as returned by yylex.  */
+static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -295,31 +456,18 @@ static const unsigned char yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const unsigned short int yyrline[] =
+static const yytype_int16 yyrline[] =
 {
        0,   204,   204,   211,   277,   278,   279,   282
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 1
-/* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
-static const char *const yytname[] =
-{
-  "\"end\"", "error", "$undefined", "\"op\"", "\"htype\"", "\"hlen\"",
-  "\"hops\"", "\"xid\"", "\"secs\"", "\"flags\"", "\"ciaddr\"",
-  "\"yiaddr\"", "\"siaddr\"", "\"giaddr\"", "\"chaddr\"", "\"sname\"",
-  "\"file\"", "\"cookie\"", "\"tag\"", "\"value\"", "$accept", "message",
-  "header", "options", "option", YY_NULLPTR
-};
-#endif
-
-#define YYPACT_NINF -15
-#define YYTABLE_NINF -1
+#define YYPACT_NINF (-15)
+#define YYTABLE_NINF (-1)
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
-static const signed char yypact[] =
+static const yytype_int8 yypact[] =
 {
       -3,    -2,     1,   -14,    -1,   -15,   -13,     0,   -12,   -15,
      -13,     2,   -15,   -15,     3,     4,     5,     6,    -4,     7,
@@ -329,7 +477,7 @@ static const signed char yypact[] =
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
      Performed when YYTABLE does not specify something else to do.  Zero
      means the default is an error.  */
-static const unsigned char yydefact[] =
+static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     1,     4,     0,     6,     2,
        4,     0,     7,     5,     0,     0,     0,     0,     0,     0,
@@ -337,13 +485,13 @@ static const unsigned char yydefact[] =
 };
 
   /* YYPGOTO[NTERM-NUM].  */
-static const signed char yypgoto[] =
+static const yytype_int8 yypgoto[] =
 {
      -15,   -15,   -15,    11,   -15
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
-static const signed char yydefgoto[] =
+static const yytype_int8 yydefgoto[] =
 {
       -1,     2,     3,     9,    10
 };
@@ -351,14 +499,14 @@ static const signed char yydefgoto[] =
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const unsigned char yytable[] =
+static const yytype_int8 yytable[] =
 {
        1,     5,     4,     6,     7,     8,    11,    12,    19,    14,
       22,    15,     0,    16,     0,    17,     0,    18,     0,     0,
       20,    13,    21,     0,     0,    23
 };
 
-static const signed char yycheck[] =
+static const yytype_int8 yycheck[] =
 {
        3,     0,     4,    17,     5,    18,     6,    19,    12,     7,
       15,     8,    -1,     9,    -1,    10,    -1,    11,    -1,    -1,
@@ -367,7 +515,7 @@ static const signed char yycheck[] =
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
-static const unsigned char yystos[] =
+static const yytype_int8 yystos[] =
 {
        0,     3,    21,    22,     4,     0,    17,     5,    18,    23,
       24,     6,    19,    23,     7,     8,     9,    10,    11,    12,
@@ -375,26 +523,26 @@ static const unsigned char yystos[] =
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const unsigned char yyr1[] =
+static const yytype_int8 yyr1[] =
 {
        0,    20,    21,    22,    23,    23,    24,    24
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const unsigned char yyr2[] =
+static const yytype_int8 yyr2[] =
 {
        0,     2,     3,    14,     0,     2,     1,     2
 };
 
 
 /* YYDPREC[RULE-NUM] -- Dynamic precedence of rule #RULE-NUM (0 if none).  */
-static const unsigned char yydprec[] =
+static const yytype_int8 yydprec[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYMERGER[RULE-NUM] -- Index of merging function for rule #RULE-NUM.  */
-static const unsigned char yymerger[] =
+static const yytype_int8 yymerger[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0
 };
@@ -410,7 +558,7 @@ static const yybool yyimmediate[] =
    list of conflicting reductions corresponding to action entry for
    state STATE-NUM in yytable.  0 means no conflicts.  The list in
    yyconfl is terminated by a rule number of 0.  */
-static const unsigned char yyconflp[] =
+static const yytype_int8 yyconflp[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
@@ -419,13 +567,10 @@ static const unsigned char yyconflp[] =
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
    0, pointed into by YYCONFLP.  */
-static const short int yyconfl[] =
+static const short yyconfl[] =
 {
        0
 };
-
-/* Error token number */
-#define YYTERROR 1
 
 
 /* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
@@ -466,8 +611,7 @@ static const short int yyconfl[] =
 #define yylloc (yystackp->yyloc)
 
 
-static const int YYEOF = 0;
-static const int YYEMPTY = -2;
+enum { YYENOMEM = -2 };
 
 typedef enum { yyok, yyaccept, yyabort, yyerr } YYRESULTTAG;
 
@@ -477,262 +621,6 @@ typedef enum { yyok, yyaccept, yyabort, yyerr } YYRESULTTAG;
     if (yychk_flag != yyok)                     \
       return yychk_flag;                        \
   } while (0)
-
-#if YYDEBUG
-
-# ifndef YYFPRINTF
-#  define YYFPRINTF fprintf
-# endif
-
-
-/* YY_LOCATION_PRINT -- Print the location on the stream.
-   This macro was not mandated originally: define only if we know
-   we won't break user code: when these are the locations we know.  */
-
-#ifndef YY_LOCATION_PRINT
-# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
-
-/* Print *YYLOCP on YYO.  Private, do not rely on its existence. */
-
-YY_ATTRIBUTE_UNUSED
-static unsigned
-yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
-{
-  unsigned res = 0;
-  int end_col = 0 != yylocp->last_column ? yylocp->last_column - 1 : 0;
-  if (0 <= yylocp->first_line)
-    {
-      res += YYFPRINTF (yyo, "%d", yylocp->first_line);
-      if (0 <= yylocp->first_column)
-        res += YYFPRINTF (yyo, ".%d", yylocp->first_column);
-    }
-  if (0 <= yylocp->last_line)
-    {
-      if (yylocp->first_line < yylocp->last_line)
-        {
-          res += YYFPRINTF (yyo, "-%d", yylocp->last_line);
-          if (0 <= end_col)
-            res += YYFPRINTF (yyo, ".%d", end_col);
-        }
-      else if (0 <= end_col && yylocp->first_column < end_col)
-        res += YYFPRINTF (yyo, "-%d", end_col);
-    }
-  return res;
- }
-
-#  define YY_LOCATION_PRINT(File, Loc)          \
-  yy_location_print_ (File, &(Loc))
-
-# else
-#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-# endif
-#endif
-
-
-# define YYDPRINTF(Args)                        \
-  do {                                          \
-    if (yydebug)                                \
-      YYFPRINTF Args;                           \
-  } while (0)
-
-
-/*----------------------------------------.
-| Print this symbol's value on YYOUTPUT.  |
-`----------------------------------------*/
-
-static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
-{
-  FILE *yyo = yyoutput;
-  YYUSE (yyo);
-  YYUSE (yylocationp);
-  YYUSE (driver);
-  YYUSE (yyscanner);
-  if (!yyvaluep)
-    return;
-  switch (yytype)
-    {
-          case 0: /* "end"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 3: /* "op"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 4: /* "htype"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 5: /* "hlen"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 6: /* "hops"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 7: /* "xid"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 8: /* "secs"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 9: /* "flags"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 10: /* "ciaddr"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 11: /* "yiaddr"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 12: /* "siaddr"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 13: /* "giaddr"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 14: /* "chaddr"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), Net_Common_Tools::LinkLayerAddressToString (((*yyvaluep).aval)).c_str ()); }
-
-        break;
-
-    case 15: /* "sname"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-
-        break;
-
-    case 16: /* "file"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-
-        break;
-
-    case 17: /* "cookie"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 18: /* "tag"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 19: /* "value"  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
-
-        break;
-
-    case 21: /* message  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 22: /* header  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 23: /* options  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-    case 24: /* option  */
-
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
-
-        break;
-
-
-      default:
-        break;
-    }
-}
-
-
-/*--------------------------------.
-| Print this symbol on YYOUTPUT.  |
-`--------------------------------*/
-
-static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
-{
-  YYFPRINTF (yyoutput, "%s %s (",
-             yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
-
-  YY_LOCATION_PRINT (yyoutput, *yylocationp);
-  YYFPRINTF (yyoutput, ": ");
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, yylocationp, driver, yyscanner);
-  YYFPRINTF (yyoutput, ")");
-}
-
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)                  \
-  do {                                                                  \
-    if (yydebug)                                                        \
-      {                                                                 \
-        YYFPRINTF (stderr, "%s ", Title);                               \
-        yy_symbol_print (stderr, Type, Value, Location, driver, yyscanner);        \
-        YYFPRINTF (stderr, "\n");                                       \
-      }                                                                 \
-  } while (0)
-
-/* Nonzero means print parse trace.  It is left uninitialized so that
-   multiple parsers can coexist.  */
-int yydebug;
-
-struct yyGLRStack;
-static void yypstack (struct yyGLRStack* yystackp, size_t yyk)
-  YY_ATTRIBUTE_UNUSED;
-static void yypdumpstack (struct yyGLRStack* yystackp)
-  YY_ATTRIBUTE_UNUSED;
-
-#else /* !YYDEBUG */
-
-# define YYDPRINTF(Args)
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
-
-#endif /* !YYDEBUG */
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
 #ifndef YYINITDEPTH
@@ -775,90 +663,14 @@ static void yypdumpstack (struct yyGLRStack* yystackp)
   } while (0)
 #endif
 
+/** State numbers. */
+typedef int yy_state_t;
 
-#if YYERROR_VERBOSE
-
-# ifndef yystpcpy
-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
-#   define yystpcpy stpcpy
-#  else
-/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-   YYDEST.  */
-static char *
-yystpcpy (char *yydest, const char *yysrc)
-{
-  char *yyd = yydest;
-  const char *yys = yysrc;
-
-  while ((*yyd++ = *yys++) != '\0')
-    continue;
-
-  return yyd - 1;
-}
-#  endif
-# endif
-
-# ifndef yytnamerr
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
-static size_t
-yytnamerr (char *yyres, const char *yystr)
-{
-  if (*yystr == '"')
-    {
-      size_t yyn = 0;
-      char const *yyp = yystr;
-
-      for (;;)
-        switch (*++yyp)
-          {
-          case '\'':
-          case ',':
-            goto do_not_strip_quotes;
-
-          case '\\':
-            if (*++yyp != '\\')
-              goto do_not_strip_quotes;
-            /* Fall through.  */
-          default:
-            if (yyres)
-              yyres[yyn] = *yyp;
-            yyn++;
-            break;
-
-          case '"':
-            if (yyres)
-              yyres[yyn] = '\0';
-            return yyn;
-          }
-    do_not_strip_quotes: ;
-    }
-
-  if (! yyres)
-    return strlen (yystr);
-
-  return yystpcpy (yyres, yystr) - yyres;
-}
-# endif
-
-#endif /* !YYERROR_VERBOSE */
-
-/** State numbers, as in LALR(1) machine */
-typedef int yyStateNum;
-
-/** Rule numbers, as in LALR(1) machine */
+/** Rule numbers. */
 typedef int yyRuleNum;
 
-/** Grammar symbol */
-typedef int yySymbol;
-
-/** Item references, as in LALR(1) machine */
-typedef short int yyItemNum;
+/** Item references. */
+typedef short yyItemNum;
 
 typedef struct yyGLRState yyGLRState;
 typedef struct yyGLRStateSet yyGLRStateSet;
@@ -873,14 +685,14 @@ struct yyGLRState {
    *  yyfirstVal applies.  */
   yybool yyresolved;
   /** Number of corresponding LALR(1) machine state.  */
-  yyStateNum yylrState;
+  yy_state_t yylrState;
   /** Preceding state in this stack */
   yyGLRState* yypred;
   /** Source position of the last token produced by my symbol */
-  size_t yyposn;
+  YYPTRDIFF_T yyposn;
   union {
     /** First in a chain of alternative reductions producing the
-     *  non-terminal corresponding to this state, threaded through
+     *  nonterminal corresponding to this state, threaded through
      *  yynext.  */
     yySemanticOption* yyfirstVal;
     /** Semantic value for this state.  */
@@ -897,7 +709,8 @@ struct yyGLRStateSet {
    *  operation, yylookaheadNeeds[0] is not maintained since it would merely
    *  duplicate yychar != YYEMPTY.  */
   yybool* yylookaheadNeeds;
-  size_t yysize, yycapacity;
+  YYPTRDIFF_T yysize;
+  YYPTRDIFF_T yycapacity;
 };
 
 struct yySemanticOption {
@@ -936,7 +749,7 @@ struct yyGLRStack {
   YYJMP_BUF yyexception_buffer;
   yyGLRStackItem* yyitems;
   yyGLRStackItem* yynextFree;
-  size_t yyspaceLeft;
+  YYPTRDIFF_T yyspaceLeft;
   yyGLRState* yysplitPoint;
   yyGLRState* yylastDeleted;
   yyGLRStateSet yytops;
@@ -946,7 +759,7 @@ struct yyGLRStack {
 static void yyexpandGLRStack (yyGLRStack* yystackp);
 #endif
 
-static _Noreturn void
+_Noreturn static void
 yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, DHCP_ParserDriver* driver, yyscan_t yyscanner, const char* yymsg)
 {
   if (yymsg != YY_NULLPTR)
@@ -954,23 +767,344 @@ yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, DHCP_ParserDriver* driver, yyscan
   YYLONGJMP (yystackp->yyexception_buffer, 1);
 }
 
-static _Noreturn void
+_Noreturn static void
 yyMemoryExhausted (yyGLRStack* yystackp)
 {
   YYLONGJMP (yystackp->yyexception_buffer, 2);
 }
 
-#if YYDEBUG || YYERROR_VERBOSE
-/** A printable representation of TOKEN.  */
-static inline const char*
-yytokenName (yySymbol yytoken)
+/** Accessing symbol of state YYSTATE.  */
+static inline yysymbol_kind_t
+yy_accessing_symbol (yy_state_t yystate)
 {
-  if (yytoken == YYEMPTY)
-    return "";
+  return YY_CAST (yysymbol_kind_t, yystos[yystate]);
+}
 
-  return yytname[yytoken];
+#if 1
+/* The user-facing name of the symbol whose (internal) number is
+   YYSYMBOL.  No bounds checking.  */
+static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
+
+/* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
+   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
+static const char *const yytname[] =
+{
+  "\"end\"", "error", "\"invalid token\"", "\"op\"", "\"htype\"",
+  "\"hlen\"", "\"hops\"", "\"xid\"", "\"secs\"", "\"flags\"", "\"ciaddr\"",
+  "\"yiaddr\"", "\"siaddr\"", "\"giaddr\"", "\"chaddr\"", "\"sname\"",
+  "\"file\"", "\"cookie\"", "\"tag\"", "\"value\"", "$accept", "message",
+  "header", "options", "option", YY_NULLPTR
+};
+
+static const char *
+yysymbol_name (yysymbol_kind_t yysymbol)
+{
+  return yytname[yysymbol];
 }
 #endif
+
+#if YYDEBUG
+
+# ifndef YYFPRINTF
+#  define YYFPRINTF fprintf
+# endif
+
+# define YY_FPRINTF                             \
+  YY_IGNORE_USELESS_CAST_BEGIN YY_FPRINTF_
+
+# define YY_FPRINTF_(Args)                      \
+  do {                                          \
+    YYFPRINTF Args;                             \
+    YY_IGNORE_USELESS_CAST_END                  \
+  } while (0)
+
+# define YY_DPRINTF                             \
+  YY_IGNORE_USELESS_CAST_BEGIN YY_DPRINTF_
+
+# define YY_DPRINTF_(Args)                      \
+  do {                                          \
+    if (yydebug)                                \
+      YYFPRINTF Args;                           \
+    YY_IGNORE_USELESS_CAST_END                  \
+  } while (0)
+
+
+/* YY_LOCATION_PRINT -- Print the location on the stream.
+   This macro was not mandated originally: define only if we know
+   we won't break user code: when these are the locations we know.  */
+
+# ifndef YY_LOCATION_PRINT
+#  if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+
+/* Print *YYLOCP on YYO.  Private, do not rely on its existence. */
+
+YY_ATTRIBUTE_UNUSED
+static int
+yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
+{
+  int res = 0;
+  int end_col = 0 != yylocp->last_column ? yylocp->last_column - 1 : 0;
+  if (0 <= yylocp->first_line)
+    {
+      res += YYFPRINTF (yyo, "%d", yylocp->first_line);
+      if (0 <= yylocp->first_column)
+        res += YYFPRINTF (yyo, ".%d", yylocp->first_column);
+    }
+  if (0 <= yylocp->last_line)
+    {
+      if (yylocp->first_line < yylocp->last_line)
+        {
+          res += YYFPRINTF (yyo, "-%d", yylocp->last_line);
+          if (0 <= end_col)
+            res += YYFPRINTF (yyo, ".%d", end_col);
+        }
+      else if (0 <= end_col && yylocp->first_column < end_col)
+        res += YYFPRINTF (yyo, "-%d", end_col);
+    }
+  return res;
+ }
+
+#   define YY_LOCATION_PRINT(File, Loc)          \
+  yy_location_print_ (File, &(Loc))
+
+#  else
+#   define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+#  endif
+# endif /* !defined YY_LOCATION_PRINT */
+
+
+
+/*-----------------------------------.
+| Print this symbol's value on YYO.  |
+`-----------------------------------*/
+
+static void
+yy_symbol_value_print (FILE *yyo,
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
+{
+  FILE *yyoutput = yyo;
+  YYUSE (yyoutput);
+  YYUSE (yylocationp);
+  YYUSE (driver);
+  YYUSE (yyscanner);
+  if (!yyvaluep)
+    return;
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  switch (yykind)
+    {
+    case YYSYMBOL_YYEOF: /* "end"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OP: /* "op"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_HTYPE: /* "htype"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_HLEN: /* "hlen"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_HOPS: /* "hops"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_XID: /* "xid"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_SECS: /* "secs"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_FLAGS: /* "flags"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_CIADDR: /* "ciaddr"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_YIADDR: /* "yiaddr"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_SIADDR: /* "siaddr"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_GIADDR: /* "giaddr"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_CHADDR: /* "chaddr"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), Net_Common_Tools::LinkLayerAddressToString (((*yyvaluep).aval), NET_LINKLAYER_802_3).c_str ()); }
+        break;
+
+    case YYSYMBOL_SNAME: /* "sname"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+        break;
+
+    case YYSYMBOL_FILE_: /* "file"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+        break;
+
+    case YYSYMBOL_COOKIE: /* "cookie"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_TAG: /* "tag"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_VALUE: /* "value"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*((*yyvaluep).sval)).c_str ()); }
+        break;
+
+    case YYSYMBOL_message: /* message  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_header: /* header  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_options: /* options  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option: /* option  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), ((*yyvaluep).ival)); }
+        break;
+
+      default:
+        break;
+    }
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
+}
+
+
+/*---------------------------.
+| Print this symbol on YYO.  |
+`---------------------------*/
+
+static void
+yy_symbol_print (FILE *yyo,
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
+{
+  YYFPRINTF (yyo, "%s %s (",
+             yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
+
+  YY_LOCATION_PRINT (yyo, *yylocationp);
+  YYFPRINTF (yyo, ": ");
+  yy_symbol_value_print (yyo, yykind, yyvaluep, yylocationp, driver, yyscanner);
+  YYFPRINTF (yyo, ")");
+}
+
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                  \
+  do {                                                                  \
+    if (yydebug)                                                        \
+      {                                                                 \
+        YY_FPRINTF ((stderr, "%s ", Title));                            \
+        yy_symbol_print (stderr, Kind, Value, Location, driver, yyscanner);        \
+        YY_FPRINTF ((stderr, "\n"));                                    \
+      }                                                                 \
+  } while (0)
+
+/* Nonzero means print parse trace.  It is left uninitialized so that
+   multiple parsers can coexist.  */
+int yydebug;
+
+static void yypstack (yyGLRStack* yystackp, YYPTRDIFF_T yyk)
+  YY_ATTRIBUTE_UNUSED;
+static void yypdumpstack (yyGLRStack* yystackp)
+  YY_ATTRIBUTE_UNUSED;
+
+#else /* !YYDEBUG */
+
+# define YY_DPRINTF(Args) do {} while (yyfalse)
+# define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
+
+#endif /* !YYDEBUG */
+
+#ifndef yystrlen
+# define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
+#endif
+
+#ifndef yystpcpy
+# if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
+#  define yystpcpy stpcpy
+# else
+/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
+   YYDEST.  */
+static char *
+yystpcpy (char *yydest, const char *yysrc)
+{
+  char *yyd = yydest;
+  const char *yys = yysrc;
+
+  while ((*yyd++ = *yys++) != '\0')
+    continue;
+
+  return yyd - 1;
+}
+# endif
+#endif
+
+#ifndef yytnamerr
+/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
+   quotes and backslashes, so that it's suitable for yyerror.  The
+   heuristic is that double-quoting is unnecessary unless the string
+   contains an apostrophe, a comma, or backslash (other than
+   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
+   null, do not copy; instead, return the length of what the result
+   would have been.  */
+static YYPTRDIFF_T
+yytnamerr (char *yyres, const char *yystr)
+{
+  if (*yystr == '"')
+    {
+      YYPTRDIFF_T yyn = 0;
+      char const *yyp = yystr;
+
+      for (;;)
+        switch (*++yyp)
+          {
+          case '\'':
+          case ',':
+            goto do_not_strip_quotes;
+
+          case '\\':
+            if (*++yyp != '\\')
+              goto do_not_strip_quotes;
+            else
+              goto append;
+
+          append:
+          default:
+            if (yyres)
+              yyres[yyn] = *yyp;
+            yyn++;
+            break;
+
+          case '"':
+            if (yyres)
+              yyres[yyn] = '\0';
+            return yyn;
+          }
+    do_not_strip_quotes: ;
+    }
+
+  if (yyres)
+    return yystpcpy (yyres, yystr) - yyres;
+  else
+    return yystrlen (yystr);
+}
+#endif
+
 
 /** Fill in YYVSP[YYLOW1 .. YYLOW0-1] from the chain of states starting
  *  at YYVSP[YYLOW0].yystate.yypred.  Leaves YYVSP[YYLOW1].yystate.yypred
@@ -998,6 +1132,33 @@ yyfillin (yyGLRStackItem *yyvsp, int yylow0, int yylow1)
     }
 }
 
+
+/** If yychar is empty, fetch the next token.  */
+static inline yysymbol_kind_t
+yygetToken (int *yycharp, yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
+{
+  yysymbol_kind_t yytoken;
+  YYUSE (driver);
+  YYUSE (yyscanner);
+  if (*yycharp == YYEMPTY)
+    {
+      YY_DPRINTF ((stderr, "Reading a token\n"));
+      *yycharp = yylex (&yylval, &yylloc, driver, yyscanner);
+    }
+  if (*yycharp <= END)
+    {
+      *yycharp = END;
+      yytoken = YYSYMBOL_YYEOF;
+      YY_DPRINTF ((stderr, "Now at end of input.\n"));
+    }
+  else
+    {
+      yytoken = YYTRANSLATE (*yycharp);
+      YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
+    }
+  return yytoken;
+}
+
 /* Do nothing if YYNORMAL or if *YYLOW <= YYLOW1.  Otherwise, fill in
  * YYVSP[YYLOW1 .. *YYLOW-1] as in yyfillin and set *YYLOW = YYLOW1.
  * For convenience, always return YYLOW1.  */
@@ -1020,11 +1181,11 @@ yyfill (yyGLRStackItem *yyvsp, int *yylow, int yylow1, yybool yynormal)
  *  (@$).  Returns yyok for normal return, yyaccept for YYACCEPT,
  *  yyerr for YYERROR, yyabort for YYABORT.  */
 static YYRESULTTAG
-yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
+yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
               yyGLRStack* yystackp,
               YYSTYPE* yyvalp, YYLTYPE *yylocp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
-  yybool yynormal YY_ATTRIBUTE_UNUSED = (yystackp->yysplitPoint == YY_NULLPTR);
+  yybool yynormal YY_ATTRIBUTE_UNUSED = yystackp->yysplitPoint == YY_NULLPTR;
   int yylow;
   YYUSE (yyvalp);
   YYUSE (yylocp);
@@ -1044,7 +1205,7 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
 # undef yyclearin
 # define yyclearin (yychar = YYEMPTY)
 # undef YYFILL
-# define YYFILL(N) yyfill (yyvsp, &yylow, N, yynormal)
+# define YYFILL(N) yyfill (yyvsp, &yylow, (N), yynormal)
 # undef YYBACKUP
 # define YYBACKUP(Token, Value)                                              \
   return yyerror (yylocp, driver, yyscanner, YY_("syntax error: cannot back up")),     \
@@ -1055,114 +1216,105 @@ yyuserAction (yyRuleNum yyn, size_t yyrhslen, yyGLRStackItem* yyvsp,
     *yyvalp = yyval_default;
   else
     *yyvalp = yyvsp[YYFILL (1-yyrhslen)].yystate.yysemantics.yysval;
+  /* Default location. */
   YYLLOC_DEFAULT ((*yylocp), (yyvsp - yyrhslen), yyrhslen);
   yystackp->yyerror_range[1].yystate.yyloc = *yylocp;
 
   switch (yyn)
     {
-        case 2:
-
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + 4 + 308;
-                                                       driver->record_->cookie = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival);
+  case 2: /* message: header "cookie" options  */
+                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + 4 + 308;
+                                                       driver->record_->cookie = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set cookie: %d\n"),
 //                                                                   driver->record_->cookie));
                                                        ACE_ASSERT (driver->record_->cookie == DHCP_MAGIC_COOKIE);
                                                      }
-
     break;
 
-  case 3:
-
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-13)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-12)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-11)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-7)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.ival) + 16 + 64 + 128;
+  case 3: /* header: "op" "htype" "hlen" "hops" "xid" "secs" "flags" "ciaddr" "yiaddr" "siaddr" "giaddr" "chaddr" "sname" "file"  */
+                                                                                                                                { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-13)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-12)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-11)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-7)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.ival) + 16 + 64 + 128;
                                                        driver->record_->op =
-                                                           static_cast <DHCP_Codes::OpType> ((((yyGLRStackItem const *)yyvsp)[YYFILL (-13)].yystate.yysemantics.yysval.ival));
+                                                           static_cast <DHCP_Codes::OpType> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-13)].yystate.yysemantics.yysval.ival));
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set op: \"%s\"\n"),
 //                                                                   ACE_TEXT (DHCP_Tools::Op2String (driver->record_->op).c_str ())));
-                                                       driver->record_->htype = (((yyGLRStackItem const *)yyvsp)[YYFILL (-12)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->htype = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-12)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set htype: %d\n"),
 //                                                                   static_cast<int> (driver->record_->htype)));
-                                                       driver->record_->hlen = (((yyGLRStackItem const *)yyvsp)[YYFILL (-11)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->hlen = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-11)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set hlen: %d\n"),
 //                                                                   static_cast<int> (driver->record_->hlen)));
-                                                       driver->record_->hops = (((yyGLRStackItem const *)yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->hops = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set hops: %d\n"),
 //                                                                   static_cast<int> (driver->record_->hops)));
                                                        driver->record_->xid =
-                                                         ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((((yyGLRStackItem const *)yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival)) : (((yyGLRStackItem const *)yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival));
+                                                         ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival)) : (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-9)].yystate.yysemantics.yysval.ival));
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set xid: %d\n"),
 //                                                                   driver->record_->xid));
-                                                       driver->record_->secs = (((yyGLRStackItem const *)yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->secs = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival);
                                                        if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
                                                          ACE_SWAP_WORD (driver->record_->secs);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set secs: %d\n"),
 //                                                                   static_cast<int> (driver->record_->secs)));
-                                                       driver->record_->flags = (((yyGLRStackItem const *)yyvsp)[YYFILL (-7)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->flags = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-7)].yystate.yysemantics.yysval.ival);
                                                        if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
                                                          ACE_SWAP_WORD (driver->record_->flags);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set flags: %d\n"),
 //                                                                   static_cast<int> (driver->record_->flags)));
-                                                       driver->record_->ciaddr = (((yyGLRStackItem const *)yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->ciaddr = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set ciaddr: \"%s\"\n"),
 //                                                                   ACE_TEXT (Net_Tools::IP2String (driver->record_->ciaddr).c_str ())));
-                                                       driver->record_->yiaddr = (((yyGLRStackItem const *)yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->yiaddr = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-5)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set yiaddr: \"%s\"\n"),
 //                                                                   ACE_TEXT (Net_Tools::IP2String (driver->record_->yiaddr).c_str ())));
-                                                       driver->record_->siaddr = (((yyGLRStackItem const *)yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->siaddr = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set siaddr: \"%s\"\n"),
 //                                                                   ACE_TEXT (Net_Tools::IP2String (driver->record_->siaddr).c_str ())));
-                                                       driver->record_->giaddr = (((yyGLRStackItem const *)yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.ival);
+                                                       driver->record_->giaddr = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-3)].yystate.yysemantics.yysval.ival);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set giaddr: \"%s\"\n"),
 //                                                                   ACE_TEXT (Net_Tools::IP2String (driver->record_->giaddr).c_str ())));
-                                                       ACE_OS::memcpy (driver->record_->chaddr, (((yyGLRStackItem const *)yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.aval), DHCP_CHADDR_SIZE);
+                                                       ACE_OS::memcpy (driver->record_->chaddr, (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.aval), DHCP_CHADDR_SIZE);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set chaddr: %s\n"),
-//                                                                   ACE_TEXT (Net_Common_Tools::MACAddress2String (driver->record_->chaddr).c_str ())));
-                                                       ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
-                                                       driver->record_->sname = *(((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval);
+//                                                                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (driver->record_->chaddr).c_str ())));
+                                                       ACE_ASSERT ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval));
+                                                       driver->record_->sname = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.sval);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set sname: \"%s\"\n"),
 //                                                                   ACE_TEXT (driver->record_->sname.c_str ())));
-                                                       ACE_ASSERT ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval));
-                                                       driver->record_->file = *(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval);
+                                                       ACE_ASSERT ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval));
+                                                       driver->record_->file = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set file: \"%s\"\n"),
 //                                                                   ACE_TEXT (driver->record_->file.c_str ())));
                                                      }
-
     break;
 
-  case 5:
-
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
-
+  case 5: /* options: option options  */
+                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 6:
-
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
-                                                       if ((((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) == 255)
+  case 6: /* option: "tag"  */
+                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
+                                                       if ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival) == 255)
                                                          YYACCEPT; }
-
     break;
 
-  case 7:
-
-    { ((*yyvalp).ival) = (((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + 1 + (*(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size ();
-                                                       driver->record_->options.insert (std::make_pair (static_cast<unsigned char> ((((yyGLRStackItem const *)yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival)),
-                                                                                                        *(((yyGLRStackItem const *)yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval))); }
-
+  case 7: /* option: "tag" "value"  */
+                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + 1 + (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)).size ();
+                                                       driver->record_->options.insert (std::make_pair (static_cast<unsigned char> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival)),
+                                                                                                        *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval))); }
     break;
 
 
@@ -1201,7 +1353,8 @@ yyuserMerge (int yyn, YYSTYPE* yy0, YYSTYPE* yy1)
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
+yydestruct (const char *yymsg,
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
@@ -1209,29 +1362,22 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, YYLTYPE *yylocatio
   YYUSE (yyscanner);
   if (!yymsg)
     yymsg = "Deleting";
-  YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
+  YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  switch (yytype)
+  switch (yykind)
     {
-          case 15: /* "sname"  */
-
-      { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-
+    case YYSYMBOL_SNAME: /* "sname"  */
+                          { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
         break;
 
-    case 16: /* "file"  */
-
-      { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-
+    case YYSYMBOL_FILE_: /* "file"  */
+                          { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
         break;
 
-    case 19: /* "value"  */
-
-      { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
-
+    case YYSYMBOL_OPTION_VALUE: /* "value"  */
+                          { delete ((*yyvaluep).sval); ((*yyvaluep).sval) = NULL; }
         break;
-
 
       default:
         break;
@@ -1250,7 +1396,7 @@ static void
 yydestroyGLRState (char const *yymsg, yyGLRState *yys, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
   if (yys->yyresolved)
-    yydestruct (yymsg, yystos[yys->yylrState],
+    yydestruct (yymsg, yy_accessing_symbol (yys->yylrState),
                 &yys->yysemantics.yysval, &yys->yyloc, driver, yyscanner);
   else
     {
@@ -1258,10 +1404,10 @@ yydestroyGLRState (char const *yymsg, yyGLRState *yys, DHCP_ParserDriver* driver
       if (yydebug)
         {
           if (yys->yysemantics.yyfirstVal)
-            YYFPRINTF (stderr, "%s unresolved", yymsg);
+            YY_FPRINTF ((stderr, "%s unresolved", yymsg));
           else
-            YYFPRINTF (stderr, "%s incomplete", yymsg);
-          YY_SYMBOL_PRINT ("", yystos[yys->yylrState], YY_NULLPTR, &yys->yyloc);
+            YY_FPRINTF ((stderr, "%s incomplete", yymsg));
+          YY_SYMBOL_PRINT ("", yy_accessing_symbol (yys->yylrState), YY_NULLPTR, &yys->yyloc);
         }
 #endif
 
@@ -1279,34 +1425,34 @@ yydestroyGLRState (char const *yymsg, yyGLRState *yys, DHCP_ParserDriver* driver
 }
 
 /** Left-hand-side symbol for rule #YYRULE.  */
-static inline yySymbol
+static inline yysymbol_kind_t
 yylhsNonterm (yyRuleNum yyrule)
 {
-  return yyr1[yyrule];
+  return YY_CAST (yysymbol_kind_t, yyr1[yyrule]);
 }
 
-#define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-15)))
+#define yypact_value_is_default(Yyn) \
+  ((Yyn) == YYPACT_NINF)
 
 /** True iff LR state YYSTATE has only a default reduction (regardless
  *  of token).  */
 static inline yybool
-yyisDefaultedState (yyStateNum yystate)
+yyisDefaultedState (yy_state_t yystate)
 {
   return yypact_value_is_default (yypact[yystate]);
 }
 
 /** The default reduction for YYSTATE, assuming it has one.  */
 static inline yyRuleNum
-yydefaultAction (yyStateNum yystate)
+yydefaultAction (yy_state_t yystate)
 {
   return yydefact[yystate];
 }
 
-#define yytable_value_is_error(Yytable_value) \
+#define yytable_value_is_error(Yyn) \
   0
 
-/** Set *YYACTION to the action to take in YYSTATE on seeing YYTOKEN.
+/** The action to take in YYSTATE on seeing YYTOKEN.
  *  Result R means
  *    R < 0:  Reduce on rule -R.
  *    R = 0:  Error.
@@ -1314,26 +1460,31 @@ yydefaultAction (yyStateNum yystate)
  *  Set *YYCONFLICTS to a pointer into yyconfl to a 0-terminated list
  *  of conflicting reductions.
  */
-static inline void
-yygetLRActions (yyStateNum yystate, int yytoken,
-                int* yyaction, const short int** yyconflicts)
+static inline int
+yygetLRActions (yy_state_t yystate, yysymbol_kind_t yytoken, const short** yyconflicts)
 {
   int yyindex = yypact[yystate] + yytoken;
-  if (yypact_value_is_default (yypact[yystate])
-      || yyindex < 0 || YYLAST < yyindex || yycheck[yyindex] != yytoken)
+  if (yytoken == YYSYMBOL_YYerror)
     {
-      *yyaction = -yydefact[yystate];
+      // This is the error token.
       *yyconflicts = yyconfl;
+      return 0;
+    }
+  else if (yyisDefaultedState (yystate)
+           || yyindex < 0 || YYLAST < yyindex || yycheck[yyindex] != yytoken)
+    {
+      *yyconflicts = yyconfl;
+      return -yydefact[yystate];
     }
   else if (! yytable_value_is_error (yytable[yyindex]))
     {
-      *yyaction = yytable[yyindex];
       *yyconflicts = yyconfl + yyconflp[yyindex];
+      return yytable[yyindex];
     }
   else
     {
-      *yyaction = 0;
       *yyconflicts = yyconfl + yyconflp[yyindex];
+      return 0;
     }
 }
 
@@ -1341,8 +1492,8 @@ yygetLRActions (yyStateNum yystate, int yytoken,
  * \param yystate   the current state
  * \param yysym     the nonterminal to push on the stack
  */
-static inline yyStateNum
-yyLRgotoState (yyStateNum yystate, yySymbol yysym)
+static inline yy_state_t
+yyLRgotoState (yy_state_t yystate, yysymbol_kind_t yysym)
 {
   int yyr = yypgoto[yysym - YYNTOKENS] + yystate;
   if (0 <= yyr && yyr <= YYLAST && yycheck[yyr] == yystate)
@@ -1385,12 +1536,12 @@ yynewGLRStackItem (yyGLRStack* yystackp, yybool yyisState)
  *  alternative actions for YYSTATE.  Assumes that YYRHS comes from
  *  stack #YYK of *YYSTACKP. */
 static void
-yyaddDeferredAction (yyGLRStack* yystackp, size_t yyk, yyGLRState* yystate,
+yyaddDeferredAction (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yyGLRState* yystate,
                      yyGLRState* yyrhs, yyRuleNum yyrule)
 {
   yySemanticOption* yynewOption =
     &yynewGLRStackItem (yystackp, yyfalse)->yyoption;
-  YYASSERT (!yynewOption->yyisState);
+  YY_ASSERT (!yynewOption->yyisState);
   yynewOption->yystate = yyrhs;
   yynewOption->yyrule = yyrule;
   if (yystackp->yytops.yylookaheadNeeds[yyk])
@@ -1415,17 +1566,25 @@ yyinitStateSet (yyGLRStateSet* yyset)
 {
   yyset->yysize = 1;
   yyset->yycapacity = 16;
-  yyset->yystates = (yyGLRState**) YYMALLOC (16 * sizeof yyset->yystates[0]);
+  yyset->yystates
+    = YY_CAST (yyGLRState**,
+               YYMALLOC (YY_CAST (YYSIZE_T, yyset->yycapacity)
+                         * sizeof yyset->yystates[0]));
   if (! yyset->yystates)
     return yyfalse;
   yyset->yystates[0] = YY_NULLPTR;
-  yyset->yylookaheadNeeds =
-    (yybool*) YYMALLOC (16 * sizeof yyset->yylookaheadNeeds[0]);
+  yyset->yylookaheadNeeds
+    = YY_CAST (yybool*,
+               YYMALLOC (YY_CAST (YYSIZE_T, yyset->yycapacity)
+                         * sizeof yyset->yylookaheadNeeds[0]));
   if (! yyset->yylookaheadNeeds)
     {
       YYFREE (yyset->yystates);
       return yyfalse;
     }
+  memset (yyset->yylookaheadNeeds,
+          0,
+          YY_CAST (YYSIZE_T, yyset->yycapacity) * sizeof yyset->yylookaheadNeeds[0]);
   return yytrue;
 }
 
@@ -1438,13 +1597,15 @@ static void yyfreeStateSet (yyGLRStateSet* yyset)
 /** Initialize *YYSTACKP to a single empty stack, with total maximum
  *  capacity for all stacks of YYSIZE.  */
 static yybool
-yyinitGLRStack (yyGLRStack* yystackp, size_t yysize)
+yyinitGLRStack (yyGLRStack* yystackp, YYPTRDIFF_T yysize)
 {
   yystackp->yyerrState = 0;
   yynerrs = 0;
   yystackp->yyspaceLeft = yysize;
-  yystackp->yyitems =
-    (yyGLRStackItem*) YYMALLOC (yysize * sizeof yystackp->yynextFree[0]);
+  yystackp->yyitems
+    = YY_CAST (yyGLRStackItem*,
+               YYMALLOC (YY_CAST (YYSIZE_T, yysize)
+                         * sizeof yystackp->yynextFree[0]));
   if (!yystackp->yyitems)
     return yyfalse;
   yystackp->yynextFree = yystackp->yyitems;
@@ -1455,8 +1616,9 @@ yyinitGLRStack (yyGLRStack* yystackp, size_t yysize)
 
 
 #if YYSTACKEXPANDABLE
-# define YYRELOC(YYFROMITEMS,YYTOITEMS,YYX,YYTYPE) \
-  &((YYTOITEMS) - ((YYFROMITEMS) - (yyGLRStackItem*) (YYX)))->YYTYPE
+# define YYRELOC(YYFROMITEMS, YYTOITEMS, YYX, YYTYPE)                   \
+  &((YYTOITEMS)                                                         \
+    - ((YYFROMITEMS) - YY_REINTERPRET_CAST (yyGLRStackItem*, (YYX))))->YYTYPE
 
 /** If *YYSTACKP is expandable, extend it.  WARNING: Pointers into the
     stack from outside should be considered invalid after this call.
@@ -1468,15 +1630,18 @@ yyexpandGLRStack (yyGLRStack* yystackp)
 {
   yyGLRStackItem* yynewItems;
   yyGLRStackItem* yyp0, *yyp1;
-  size_t yynewSize;
-  size_t yyn;
-  size_t yysize = yystackp->yynextFree - yystackp->yyitems;
+  YYPTRDIFF_T yynewSize;
+  YYPTRDIFF_T yyn;
+  YYPTRDIFF_T yysize = yystackp->yynextFree - yystackp->yyitems;
   if (YYMAXDEPTH - YYHEADROOM < yysize)
     yyMemoryExhausted (yystackp);
   yynewSize = 2*yysize;
   if (YYMAXDEPTH < yynewSize)
     yynewSize = YYMAXDEPTH;
-  yynewItems = (yyGLRStackItem*) YYMALLOC (yynewSize * sizeof yynewItems[0]);
+  yynewItems
+    = YY_CAST (yyGLRStackItem*,
+               YYMALLOC (YY_CAST (YYSIZE_T, yynewSize)
+                         * sizeof yynewItems[0]));
   if (! yynewItems)
     yyMemoryExhausted (yystackp);
   for (yyp0 = yystackp->yyitems, yyp1 = yynewItems, yyn = yysize;
@@ -1484,7 +1649,7 @@ yyexpandGLRStack (yyGLRStack* yystackp)
        yyn -= 1, yyp0 += 1, yyp1 += 1)
     {
       *yyp1 = *yyp0;
-      if (*(yybool *) yyp0)
+      if (*YY_REINTERPRET_CAST (yybool *, yyp0))
         {
           yyGLRState* yys0 = &yyp0->yystate;
           yyGLRState* yys1 = &yyp1->yystate;
@@ -1540,7 +1705,7 @@ yyupdateSplit (yyGLRStack* yystackp, yyGLRState* yys)
 
 /** Invalidate stack #YYK in *YYSTACKP.  */
 static inline void
-yymarkStackDeleted (yyGLRStack* yystackp, size_t yyk)
+yymarkStackDeleted (yyGLRStack* yystackp, YYPTRDIFF_T yyk)
 {
   if (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
     yystackp->yylastDeleted = yystackp->yytops.yystates[yyk];
@@ -1557,23 +1722,21 @@ yyundeleteLastStack (yyGLRStack* yystackp)
     return;
   yystackp->yytops.yystates[0] = yystackp->yylastDeleted;
   yystackp->yytops.yysize = 1;
-  YYDPRINTF ((stderr, "Restoring last deleted stack as stack #0.\n"));
+  YY_DPRINTF ((stderr, "Restoring last deleted stack as stack #0.\n"));
   yystackp->yylastDeleted = YY_NULLPTR;
 }
 
 static inline void
 yyremoveDeletes (yyGLRStack* yystackp)
 {
-  size_t yyi, yyj;
+  YYPTRDIFF_T yyi, yyj;
   yyi = yyj = 0;
   while (yyj < yystackp->yytops.yysize)
     {
       if (yystackp->yytops.yystates[yyi] == YY_NULLPTR)
         {
           if (yyi == yyj)
-            {
-              YYDPRINTF ((stderr, "Removing dead stacks.\n"));
-            }
+            YY_DPRINTF ((stderr, "Removing dead stacks.\n"));
           yystackp->yytops.yysize -= 1;
         }
       else
@@ -1587,10 +1750,8 @@ yyremoveDeletes (yyGLRStack* yystackp)
           yystackp->yytops.yylookaheadNeeds[yyj] =
             yystackp->yytops.yylookaheadNeeds[yyi];
           if (yyj != yyi)
-            {
-              YYDPRINTF ((stderr, "Rename stack %lu -> %lu.\n",
-                          (unsigned long int) yyi, (unsigned long int) yyj));
-            }
+            YY_DPRINTF ((stderr, "Rename stack %ld -> %ld.\n",
+                        YY_CAST (long, yyi), YY_CAST (long, yyj)));
           yyj += 1;
         }
       yyi += 1;
@@ -1601,8 +1762,8 @@ yyremoveDeletes (yyGLRStack* yystackp)
  * state YYLRSTATE, at input position YYPOSN, with (resolved) semantic
  * value *YYVALP and source location *YYLOCP.  */
 static inline void
-yyglrShift (yyGLRStack* yystackp, size_t yyk, yyStateNum yylrState,
-            size_t yyposn,
+yyglrShift (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yy_state_t yylrState,
+            YYPTRDIFF_T yyposn,
             YYSTYPE* yyvalp, YYLTYPE* yylocp)
 {
   yyGLRState* yynewState = &yynewGLRStackItem (yystackp, yytrue)->yystate;
@@ -1622,11 +1783,11 @@ yyglrShift (yyGLRStack* yystackp, size_t yyk, yyStateNum yylrState,
  *  state YYLRSTATE, at input position YYPOSN, with the (unresolved)
  *  semantic value of YYRHS under the action for YYRULE.  */
 static inline void
-yyglrShiftDefer (yyGLRStack* yystackp, size_t yyk, yyStateNum yylrState,
-                 size_t yyposn, yyGLRState* yyrhs, yyRuleNum yyrule)
+yyglrShiftDefer (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yy_state_t yylrState,
+                 YYPTRDIFF_T yyposn, yyGLRState* yyrhs, yyRuleNum yyrule)
 {
   yyGLRState* yynewState = &yynewGLRStackItem (yystackp, yytrue)->yystate;
-  YYASSERT (yynewState->yyisState);
+  YY_ASSERT (yynewState->yyisState);
 
   yynewState->yylrState = yylrState;
   yynewState->yyposn = yyposn;
@@ -1643,38 +1804,37 @@ yyglrShiftDefer (yyGLRStack* yystackp, size_t yyk, yyStateNum yylrState,
 # define YY_REDUCE_PRINT(Args)
 #else
 # define YY_REDUCE_PRINT(Args)          \
-do {                                    \
-  if (yydebug)                          \
-    yy_reduce_print Args;               \
-} while (0)
+  do {                                  \
+    if (yydebug)                        \
+      yy_reduce_print Args;             \
+  } while (0)
 
 /*----------------------------------------------------------------------.
 | Report that stack #YYK of *YYSTACKP is going to be reduced by YYRULE. |
 `----------------------------------------------------------------------*/
 
 static inline void
-yy_reduce_print (int yynormal, yyGLRStackItem* yyvsp, size_t yyk,
+yy_reduce_print (yybool yynormal, yyGLRStackItem* yyvsp, YYPTRDIFF_T yyk,
                  yyRuleNum yyrule, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
   int yylow = 1;
   int yyi;
-  YYFPRINTF (stderr, "Reducing stack %lu by rule %d (line %lu):\n",
-             (unsigned long int) yyk, yyrule - 1,
-             (unsigned long int) yyrline[yyrule]);
+  YY_FPRINTF ((stderr, "Reducing stack %ld by rule %d (line %d):\n",
+               YY_CAST (long, yyk), yyrule - 1, yyrline[yyrule]));
   if (! yynormal)
     yyfillin (yyvsp, 1, -yynrhs);
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
+      YY_FPRINTF ((stderr, "   $%d = ", yyi + 1));
       yy_symbol_print (stderr,
-                       yystos[yyvsp[yyi - yynrhs + 1].yystate.yylrState],
-                       &yyvsp[yyi - yynrhs + 1].yystate.yysemantics.yysval
-                       , &(((yyGLRStackItem const *)yyvsp)[YYFILL ((yyi + 1) - (yynrhs))].yystate.yyloc)                       , driver, yyscanner);
+                       yy_accessing_symbol (yyvsp[yyi - yynrhs + 1].yystate.yylrState),
+                       &yyvsp[yyi - yynrhs + 1].yystate.yysemantics.yysval,
+                       &(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL ((yyi + 1) - (yynrhs))].yystate.yyloc)                       , driver, yyscanner);
       if (!yyvsp[yyi - yynrhs + 1].yystate.yyresolved)
-        YYFPRINTF (stderr, " (unresolved)");
-      YYFPRINTF (stderr, "\n");
+        YY_FPRINTF ((stderr, " (unresolved)"));
+      YY_FPRINTF ((stderr, "\n"));
     }
 }
 #endif
@@ -1686,7 +1846,7 @@ yy_reduce_print (int yynormal, yyGLRStackItem* yyvsp, size_t yyk,
  *  and *YYLOCP to the computed location (if any).  Return value is as
  *  for userAction.  */
 static inline YYRESULTTAG
-yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
+yydoAction (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yyRuleNum yyrule,
             YYSTYPE* yyvalp, YYLTYPE *yylocp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
@@ -1694,33 +1854,33 @@ yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
   if (yystackp->yysplitPoint == YY_NULLPTR)
     {
       /* Standard special case: single stack.  */
-      yyGLRStackItem* yyrhs = (yyGLRStackItem*) yystackp->yytops.yystates[yyk];
-      YYASSERT (yyk == 0);
+      yyGLRStackItem* yyrhs
+        = YY_REINTERPRET_CAST (yyGLRStackItem*, yystackp->yytops.yystates[yyk]);
+      YY_ASSERT (yyk == 0);
       yystackp->yynextFree -= yynrhs;
       yystackp->yyspaceLeft += yynrhs;
       yystackp->yytops.yystates[0] = & yystackp->yynextFree[-1].yystate;
-      YY_REDUCE_PRINT ((1, yyrhs, yyk, yyrule, driver, yyscanner));
+      YY_REDUCE_PRINT ((yytrue, yyrhs, yyk, yyrule, driver, yyscanner));
       return yyuserAction (yyrule, yynrhs, yyrhs, yystackp,
                            yyvalp, yylocp, driver, yyscanner);
     }
   else
     {
-      int yyi;
-      yyGLRState* yys;
       yyGLRStackItem yyrhsVals[YYMAXRHS + YYMAXLEFT + 1];
-      yys = yyrhsVals[YYMAXRHS + YYMAXLEFT].yystate.yypred
+      yyGLRState* yys = yyrhsVals[YYMAXRHS + YYMAXLEFT].yystate.yypred
         = yystackp->yytops.yystates[yyk];
+      int yyi;
       if (yynrhs == 0)
         /* Set default location.  */
         yyrhsVals[YYMAXRHS + YYMAXLEFT - 1].yystate.yyloc = yys->yyloc;
       for (yyi = 0; yyi < yynrhs; yyi += 1)
         {
           yys = yys->yypred;
-          YYASSERT (yys);
+          YY_ASSERT (yys);
         }
       yyupdateSplit (yystackp, yys);
       yystackp->yytops.yystates[yyk] = yys;
-      YY_REDUCE_PRINT ((0, yyrhsVals + YYMAXRHS + YYMAXLEFT - 1, yyk, yyrule, driver, yyscanner));
+      YY_REDUCE_PRINT ((yyfalse, yyrhsVals + YYMAXRHS + YYMAXLEFT - 1, yyk, yyrule, driver, yyscanner));
       return yyuserAction (yyrule, yynrhs, yyrhsVals + YYMAXRHS + YYMAXLEFT - 1,
                            yystackp, yyvalp, yylocp, driver, yyscanner);
     }
@@ -1738,10 +1898,10 @@ yydoAction (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
  *  added to the options for the existing state's semantic value.
  */
 static inline YYRESULTTAG
-yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
+yyglrReduce (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yyRuleNum yyrule,
              yybool yyforceEval, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
-  size_t yyposn = yystackp->yytops.yystates[yyk]->yyposn;
+  YYPTRDIFF_T yyposn = yystackp->yytops.yystates[yyk]->yyposn;
 
   if (yyforceEval || yystackp->yysplitPoint == YY_NULLPTR)
     {
@@ -1750,13 +1910,12 @@ yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
 
       YYRESULTTAG yyflag = yydoAction (yystackp, yyk, yyrule, &yysval, &yyloc, driver, yyscanner);
       if (yyflag == yyerr && yystackp->yysplitPoint != YY_NULLPTR)
-        {
-          YYDPRINTF ((stderr, "Parse on stack %lu rejected by rule #%d.\n",
-                     (unsigned long int) yyk, yyrule - 1));
-        }
+        YY_DPRINTF ((stderr,
+                     "Parse on stack %ld rejected by rule %d (line %d).\n",
+                     YY_CAST (long, yyk), yyrule - 1, yyrline[yyrule - 1]));
       if (yyflag != yyok)
         return yyflag;
-      YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyrule], &yysval, &yyloc);
+      YY_SYMBOL_PRINT ("-> $$ =", yylhsNonterm (yyrule), &yysval, &yyloc);
       yyglrShift (yystackp, yyk,
                   yyLRgotoState (yystackp->yytops.yystates[yyk]->yylrState,
                                  yylhsNonterm (yyrule)),
@@ -1764,23 +1923,24 @@ yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
     }
   else
     {
-      size_t yyi;
+      YYPTRDIFF_T yyi;
       int yyn;
       yyGLRState* yys, *yys0 = yystackp->yytops.yystates[yyk];
-      yyStateNum yynewLRState;
+      yy_state_t yynewLRState;
 
       for (yys = yystackp->yytops.yystates[yyk], yyn = yyrhsLength (yyrule);
            0 < yyn; yyn -= 1)
         {
           yys = yys->yypred;
-          YYASSERT (yys);
+          YY_ASSERT (yys);
         }
       yyupdateSplit (yystackp, yys);
       yynewLRState = yyLRgotoState (yys->yylrState, yylhsNonterm (yyrule));
-      YYDPRINTF ((stderr,
-                  "Reduced stack %lu by rule #%d; action deferred.  "
-                  "Now in state %d.\n",
-                  (unsigned long int) yyk, yyrule - 1, yynewLRState));
+      YY_DPRINTF ((stderr,
+                   "Reduced stack %ld by rule %d (line %d); action deferred.  "
+                   "Now in state %d.\n",
+                   YY_CAST (long, yyk), yyrule - 1, yyrline[yyrule - 1],
+                   yynewLRState));
       for (yyi = 0; yyi < yystackp->yytops.yysize; yyi += 1)
         if (yyi != yyk && yystackp->yytops.yystates[yyi] != YY_NULLPTR)
           {
@@ -1792,9 +1952,8 @@ yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
                   {
                     yyaddDeferredAction (yystackp, yyk, yyp, yys0, yyrule);
                     yymarkStackDeleted (yystackp, yyk);
-                    YYDPRINTF ((stderr, "Merging stack %lu into stack %lu.\n",
-                                (unsigned long int) yyk,
-                                (unsigned long int) yyi));
+                    YY_DPRINTF ((stderr, "Merging stack %ld into stack %ld.\n",
+                                 YY_CAST (long, yyk), YY_CAST (long, yyi)));
                     return yyok;
                   }
                 yyp = yyp->yypred;
@@ -1806,48 +1965,50 @@ yyglrReduce (yyGLRStack* yystackp, size_t yyk, yyRuleNum yyrule,
   return yyok;
 }
 
-static size_t
-yysplitStack (yyGLRStack* yystackp, size_t yyk)
+static YYPTRDIFF_T
+yysplitStack (yyGLRStack* yystackp, YYPTRDIFF_T yyk)
 {
   if (yystackp->yysplitPoint == YY_NULLPTR)
     {
-      YYASSERT (yyk == 0);
+      YY_ASSERT (yyk == 0);
       yystackp->yysplitPoint = yystackp->yytops.yystates[yyk];
     }
-  if (yystackp->yytops.yysize >= yystackp->yytops.yycapacity)
+  if (yystackp->yytops.yycapacity <= yystackp->yytops.yysize)
     {
-      yyGLRState** yynewStates;
-      yybool* yynewLookaheadNeeds;
-
-      yynewStates = YY_NULLPTR;
-
-      if (yystackp->yytops.yycapacity
-          > (YYSIZEMAX / (2 * sizeof yynewStates[0])))
+      YYPTRDIFF_T state_size = YYSIZEOF (yystackp->yytops.yystates[0]);
+      YYPTRDIFF_T half_max_capacity = YYSIZE_MAXIMUM / 2 / state_size;
+      if (half_max_capacity < yystackp->yytops.yycapacity)
         yyMemoryExhausted (yystackp);
       yystackp->yytops.yycapacity *= 2;
 
-      yynewStates =
-        (yyGLRState**) YYREALLOC (yystackp->yytops.yystates,
-                                  (yystackp->yytops.yycapacity
-                                   * sizeof yynewStates[0]));
-      if (yynewStates == YY_NULLPTR)
-        yyMemoryExhausted (yystackp);
-      yystackp->yytops.yystates = yynewStates;
+      {
+        yyGLRState** yynewStates
+          = YY_CAST (yyGLRState**,
+                     YYREALLOC (yystackp->yytops.yystates,
+                                (YY_CAST (YYSIZE_T, yystackp->yytops.yycapacity)
+                                 * sizeof yynewStates[0])));
+        if (yynewStates == YY_NULLPTR)
+          yyMemoryExhausted (yystackp);
+        yystackp->yytops.yystates = yynewStates;
+      }
 
-      yynewLookaheadNeeds =
-        (yybool*) YYREALLOC (yystackp->yytops.yylookaheadNeeds,
-                             (yystackp->yytops.yycapacity
-                              * sizeof yynewLookaheadNeeds[0]));
-      if (yynewLookaheadNeeds == YY_NULLPTR)
-        yyMemoryExhausted (yystackp);
-      yystackp->yytops.yylookaheadNeeds = yynewLookaheadNeeds;
+      {
+        yybool* yynewLookaheadNeeds
+          = YY_CAST (yybool*,
+                     YYREALLOC (yystackp->yytops.yylookaheadNeeds,
+                                (YY_CAST (YYSIZE_T, yystackp->yytops.yycapacity)
+                                 * sizeof yynewLookaheadNeeds[0])));
+        if (yynewLookaheadNeeds == YY_NULLPTR)
+          yyMemoryExhausted (yystackp);
+        yystackp->yytops.yylookaheadNeeds = yynewLookaheadNeeds;
+      }
     }
   yystackp->yytops.yystates[yystackp->yytops.yysize]
     = yystackp->yytops.yystates[yyk];
   yystackp->yytops.yylookaheadNeeds[yystackp->yytops.yysize]
     = yystackp->yytops.yylookaheadNeeds[yyk];
   yystackp->yytops.yysize += 1;
-  return yystackp->yytops.yysize-1;
+  return yystackp->yytops.yysize - 1;
 }
 
 /** True iff YYY0 and YYY1 represent identical options at the top level.
@@ -1881,7 +2042,7 @@ yymergeOptionSets (yySemanticOption* yyy0, yySemanticOption* yyy1)
   int yyn;
   for (yys0 = yyy0->yystate, yys1 = yyy1->yystate,
        yyn = yyrhsLength (yyy0->yyrule);
-       yyn > 0;
+       0 < yyn;
        yys0 = yys0->yypred, yys1 = yys1->yypred, yyn -= 1)
     {
       if (yys0 == yys1)
@@ -1963,7 +2124,7 @@ yyresolveStates (yyGLRState* yys, int yyn,
 {
   if (0 < yyn)
     {
-      YYASSERT (yys->yypred);
+      YY_ASSERT (yys->yypred);
       YYCHK (yyresolveStates (yys->yypred, yyn-1, yystackp, driver, yyscanner));
       if (! yys->yyresolved)
         YYCHK (yyresolveValue (yys, yystackp, driver, yyscanner));
@@ -2034,26 +2195,26 @@ yyreportTree (yySemanticOption* yyx, int yyindent)
     yystates[0] = yys;
 
   if (yyx->yystate->yyposn < yys->yyposn + 1)
-    YYFPRINTF (stderr, "%*s%s -> <Rule %d, empty>\n",
-               yyindent, "", yytokenName (yylhsNonterm (yyx->yyrule)),
-               yyx->yyrule - 1);
+    YY_FPRINTF ((stderr, "%*s%s -> <Rule %d, empty>\n",
+                 yyindent, "", yysymbol_name (yylhsNonterm (yyx->yyrule)),
+                 yyx->yyrule - 1));
   else
-    YYFPRINTF (stderr, "%*s%s -> <Rule %d, tokens %lu .. %lu>\n",
-               yyindent, "", yytokenName (yylhsNonterm (yyx->yyrule)),
-               yyx->yyrule - 1, (unsigned long int) (yys->yyposn + 1),
-               (unsigned long int) yyx->yystate->yyposn);
+    YY_FPRINTF ((stderr, "%*s%s -> <Rule %d, tokens %ld .. %ld>\n",
+                 yyindent, "", yysymbol_name (yylhsNonterm (yyx->yyrule)),
+                 yyx->yyrule - 1, YY_CAST (long, yys->yyposn + 1),
+                 YY_CAST (long, yyx->yystate->yyposn)));
   for (yyi = 1; yyi <= yynrhs; yyi += 1)
     {
       if (yystates[yyi]->yyresolved)
         {
           if (yystates[yyi-1]->yyposn+1 > yystates[yyi]->yyposn)
-            YYFPRINTF (stderr, "%*s%s <empty>\n", yyindent+2, "",
-                       yytokenName (yystos[yystates[yyi]->yylrState]));
+            YY_FPRINTF ((stderr, "%*s%s <empty>\n", yyindent+2, "",
+                         yysymbol_name (yy_accessing_symbol (yystates[yyi]->yylrState))));
           else
-            YYFPRINTF (stderr, "%*s%s <tokens %lu .. %lu>\n", yyindent+2, "",
-                       yytokenName (yystos[yystates[yyi]->yylrState]),
-                       (unsigned long int) (yystates[yyi-1]->yyposn + 1),
-                       (unsigned long int) yystates[yyi]->yyposn);
+            YY_FPRINTF ((stderr, "%*s%s <tokens %ld .. %ld>\n", yyindent+2, "",
+                         yysymbol_name (yy_accessing_symbol (yystates[yyi]->yylrState)),
+                         YY_CAST (long, yystates[yyi-1]->yyposn + 1),
+                         YY_CAST (long, yystates[yyi]->yyposn)));
         }
       else
         yyreportTree (yystates[yyi]->yysemantics.yyfirstVal, yyindent+2);
@@ -2069,12 +2230,12 @@ yyreportAmbiguity (yySemanticOption* yyx0,
   YYUSE (yyx1);
 
 #if YYDEBUG
-  YYFPRINTF (stderr, "Ambiguity detected.\n");
-  YYFPRINTF (stderr, "Option 1,\n");
+  YY_FPRINTF ((stderr, "Ambiguity detected.\n"));
+  YY_FPRINTF ((stderr, "Option 1,\n"));
   yyreportTree (yyx0, 2);
-  YYFPRINTF (stderr, "\nOption 2,\n");
+  YY_FPRINTF ((stderr, "\nOption 2,\n"));
   yyreportTree (yyx1, 2);
-  YYFPRINTF (stderr, "\n");
+  YY_FPRINTF ((stderr, "\n"));
 #endif
 
   yyerror (yylocp, driver, yyscanner, YY_("syntax is ambiguous"));
@@ -2085,7 +2246,7 @@ yyreportAmbiguity (yySemanticOption* yyx0,
  *  ending at YYS1.  Has no effect on previously resolved states.
  *  The first semantic option of a state is always chosen.  */
 static void
-yyresolveLocations (yyGLRState* yys1, int yyn1,
+yyresolveLocations (yyGLRState *yys1, int yyn1,
                     yyGLRStack *yystackp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
   if (0 < yyn1)
@@ -2096,9 +2257,9 @@ yyresolveLocations (yyGLRState* yys1, int yyn1,
           yyGLRStackItem yyrhsloc[1 + YYMAXRHS];
           int yynrhs;
           yySemanticOption *yyoption = yys1->yysemantics.yyfirstVal;
-          YYASSERT (yyoption != YY_NULLPTR);
+          YY_ASSERT (yyoption);
           yynrhs = yyrhsLength (yyoption->yyrule);
-          if (yynrhs > 0)
+          if (0 < yynrhs)
             {
               yyGLRState *yys;
               int yyn;
@@ -2121,18 +2282,7 @@ yyresolveLocations (yyGLRState* yys1, int yyn1,
               yyGLRState *yyprevious = yyoption->yystate;
               yyrhsloc[0].yystate.yyloc = yyprevious->yyloc;
             }
-          {
-            int yychar_current = yychar;
-            YYSTYPE yylval_current = yylval;
-            YYLTYPE yylloc_current = yylloc;
-            yychar = yyoption->yyrawchar;
-            yylval = yyoption->yyval;
-            yylloc = yyoption->yyloc;
-            YYLLOC_DEFAULT ((yys1->yyloc), yyrhsloc, yynrhs);
-            yychar = yychar_current;
-            yylval = yylval_current;
-            yylloc = yylloc_current;
-          }
+          YYLLOC_DEFAULT ((yys1->yyloc), yyrhsloc, yynrhs);
         }
     }
 }
@@ -2182,7 +2332,7 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, DHCP_ParserDriver* driver
               yymerge = yyfalse;
               break;
             default:
-              /* This cannot happen so it is not worth a YYASSERT (yyfalse),
+              /* This cannot happen so it is not worth a YY_ASSERT (yyfalse),
                  but some compilers complain if the default case is
                  omitted.  */
               break;
@@ -2207,7 +2357,7 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, DHCP_ParserDriver* driver
                 if (yyflag != yyok)
                   {
                     yydestruct ("Cleanup: discarding incompletely merged value for",
-                                yystos[yys->yylrState],
+                                yy_accessing_symbol (yys->yylrState),
                                 &yysval, yylocp, driver, yyscanner);
                     break;
                   }
@@ -2260,7 +2410,7 @@ yycompressStack (yyGLRStack* yystackp)
     yyp->yypred = yyr;
 
   yystackp->yyspaceLeft += yystackp->yynextFree - yystackp->yyitems;
-  yystackp->yynextFree = ((yyGLRStackItem*) yystackp->yysplitPoint) + 1;
+  yystackp->yynextFree = YY_REINTERPRET_CAST (yyGLRStackItem*, yystackp->yysplitPoint) + 1;
   yystackp->yyspaceLeft -= yystackp->yynextFree - yystackp->yyitems;
   yystackp->yysplitPoint = YY_NULLPTR;
   yystackp->yylastDeleted = YY_NULLPTR;
@@ -2277,16 +2427,16 @@ yycompressStack (yyGLRStack* yystackp)
 }
 
 static YYRESULTTAG
-yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
-                   size_t yyposn, YYLTYPE *yylocp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
+yyprocessOneStack (yyGLRStack* yystackp, YYPTRDIFF_T yyk,
+                   YYPTRDIFF_T yyposn, YYLTYPE *yylocp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
   while (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
     {
-      yyStateNum yystate = yystackp->yytops.yystates[yyk]->yylrState;
-      YYDPRINTF ((stderr, "Stack %lu Entering state %d\n",
-                  (unsigned long int) yyk, yystate));
+      yy_state_t yystate = yystackp->yytops.yystates[yyk]->yylrState;
+      YY_DPRINTF ((stderr, "Stack %ld Entering state %d\n",
+                   YY_CAST (long, yyk), yystate));
 
-      YYASSERT (yystate != YYFINAL);
+      YY_ASSERT (yystate != YYFINAL);
 
       if (yyisDefaultedState (yystate))
         {
@@ -2294,18 +2444,17 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
           yyRuleNum yyrule = yydefaultAction (yystate);
           if (yyrule == 0)
             {
-              YYDPRINTF ((stderr, "Stack %lu dies.\n",
-                          (unsigned long int) yyk));
+              YY_DPRINTF ((stderr, "Stack %ld dies.\n", YY_CAST (long, yyk)));
               yymarkStackDeleted (yystackp, yyk);
               return yyok;
             }
           yyflag = yyglrReduce (yystackp, yyk, yyrule, yyimmediate[yyrule], driver, yyscanner);
           if (yyflag == yyerr)
             {
-              YYDPRINTF ((stderr,
-                          "Stack %lu dies "
-                          "(predicate failure or explicit user error).\n",
-                          (unsigned long int) yyk));
+              YY_DPRINTF ((stderr,
+                           "Stack %ld dies "
+                           "(predicate failure or explicit user error).\n",
+                           YY_CAST (long, yyk)));
               yymarkStackDeleted (yystackp, yyk);
               return yyok;
             }
@@ -2314,37 +2463,17 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
         }
       else
         {
-          yySymbol yytoken;
-          int yyaction;
-          const short int* yyconflicts;
-
+          yysymbol_kind_t yytoken = yygetToken (&yychar, yystackp, driver, yyscanner);
+          const short* yyconflicts;
+          const int yyaction = yygetLRActions (yystate, yytoken, &yyconflicts);
           yystackp->yytops.yylookaheadNeeds[yyk] = yytrue;
-          if (yychar == YYEMPTY)
-            {
-              YYDPRINTF ((stderr, "Reading a token: "));
-              yychar = yylex (&yylval, &yylloc, driver, yyscanner);
-            }
 
-          if (yychar <= YYEOF)
-            {
-              yychar = yytoken = YYEOF;
-              YYDPRINTF ((stderr, "Now at end of input.\n"));
-            }
-          else
-            {
-              yytoken = YYTRANSLATE (yychar);
-              YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
-            }
-
-          yygetLRActions (yystate, yytoken, &yyaction, &yyconflicts);
-
-          while (*yyconflicts != 0)
+          for (/* nothing */; *yyconflicts; yyconflicts += 1)
             {
               YYRESULTTAG yyflag;
-              size_t yynewStack = yysplitStack (yystackp, yyk);
-              YYDPRINTF ((stderr, "Splitting off stack %lu from %lu.\n",
-                          (unsigned long int) yynewStack,
-                          (unsigned long int) yyk));
+              YYPTRDIFF_T yynewStack = yysplitStack (yystackp, yyk);
+              YY_DPRINTF ((stderr, "Splitting off stack %ld from %ld.\n",
+                           YY_CAST (long, yynewStack), YY_CAST (long, yyk)));
               yyflag = yyglrReduce (yystackp, yynewStack,
                                     *yyconflicts,
                                     yyimmediate[*yyconflicts], driver, yyscanner);
@@ -2353,21 +2482,18 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
                                           yyposn, yylocp, driver, yyscanner));
               else if (yyflag == yyerr)
                 {
-                  YYDPRINTF ((stderr, "Stack %lu dies.\n",
-                              (unsigned long int) yynewStack));
+                  YY_DPRINTF ((stderr, "Stack %ld dies.\n", YY_CAST (long, yynewStack)));
                   yymarkStackDeleted (yystackp, yynewStack);
                 }
               else
                 return yyflag;
-              yyconflicts += 1;
             }
 
           if (yyisShiftAction (yyaction))
             break;
           else if (yyisErrorAction (yyaction))
             {
-              YYDPRINTF ((stderr, "Stack %lu dies.\n",
-                          (unsigned long int) yyk));
+              YY_DPRINTF ((stderr, "Stack %ld dies.\n", YY_CAST (long, yyk)));
               yymarkStackDeleted (yystackp, yyk);
               break;
             }
@@ -2377,10 +2503,10 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
                                                 yyimmediate[-yyaction], driver, yyscanner);
               if (yyflag == yyerr)
                 {
-                  YYDPRINTF ((stderr,
-                              "Stack %lu dies "
-                              "(predicate failure or explicit user error).\n",
-                              (unsigned long int) yyk));
+                  YY_DPRINTF ((stderr,
+                               "Stack %ld dies "
+                               "(predicate failure or explicit user error).\n",
+                               YY_CAST (long, yyk)));
                   yymarkStackDeleted (yystackp, yyk);
                   break;
                 }
@@ -2392,29 +2518,51 @@ yyprocessOneStack (yyGLRStack* yystackp, size_t yyk,
   return yyok;
 }
 
-static void
-yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
+/* Put in YYARG at most YYARGN of the expected tokens given the
+   current YYSTACKP, and return the number of tokens stored in YYARG.  If
+   YYARG is null, return the number of expected tokens (guaranteed to
+   be less than YYNTOKENS).  */
+static int
+yypcontext_expected_tokens (const yyGLRStack* yystackp,
+                            yysymbol_kind_t yyarg[], int yyargn)
 {
-  if (yystackp->yyerrState != 0)
-    return;
-#if ! YYERROR_VERBOSE
-  yyerror (&yylloc, driver, yyscanner, YY_("syntax error"));
-#else
-  {
-  yySymbol yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
-  size_t yysize0 = yytnamerr (YY_NULLPTR, yytokenName (yytoken));
-  size_t yysize = yysize0;
-  yybool yysize_overflow = yyfalse;
-  char* yymsg = YY_NULLPTR;
-  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-  /* Internationalized format string. */
-  const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat. */
-  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-  /* Number of reported tokens (one for the "unexpected", one per
-     "expected").  */
+  /* Actual size of YYARG. */
   int yycount = 0;
+  int yyn = yypact[yystackp->yytops.yystates[0]->yylrState];
+  if (!yypact_value_is_default (yyn))
+    {
+      /* Start YYX at -YYN if negative to avoid negative indexes in
+         YYCHECK.  In other words, skip the first -YYN actions for
+         this state because they are default actions.  */
+      int yyxbegin = yyn < 0 ? -yyn : 0;
+      /* Stay within bounds of both yycheck and yytname.  */
+      int yychecklim = YYLAST - yyn + 1;
+      int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+      int yyx;
+      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+        if (yycheck[yyx + yyn] == yyx && yyx != YYSYMBOL_YYerror
+            && !yytable_value_is_error (yytable[yyx + yyn]))
+          {
+            if (!yyarg)
+              ++yycount;
+            else if (yycount == yyargn)
+              return 0;
+            else
+              yyarg[yycount++] = YY_CAST (yysymbol_kind_t, yyx);
+          }
+    }
+  if (yyarg && yycount == 0 && 0 < yyargn)
+    yyarg[0] = YYSYMBOL_YYEMPTY;
+  return yycount;
+}
 
+static int
+yy_syntax_error_arguments (const yyGLRStack* yystackp,
+                           yysymbol_kind_t yyarg[], int yyargn)
+{
+  yysymbol_kind_t yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
+  /* Actual size of YYARG. */
+  int yycount = 0;
   /* There are many possibilities here to consider:
      - If this state is a consistent state with a default action, then
        the only way this function was invoked is if the default action
@@ -2428,7 +2576,12 @@ yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t y
      - Don't assume there isn't a lookahead just because this state is a
        consistent state with a default action.  There might have been a
        previous inconsistent state, consistent state with a non-default
-       action, or user semantic action that manipulated yychar.
+       action, or user semantic action that manipulated yychar.b4_lac_if([
+       In the first two cases, it might appear that the current syntax
+       error should have been detected in the previous state when yy_lac
+       was invoked.  However, at that time, there might have been a
+       different syntax error that discarded a different initial context
+       during error recovery, leaving behind the current lookahead.], [
      - Of course, the expected token list depends on states to have
        correct lookahead information, and it depends on the parser not
        to perform extra reductions after fetching a lookahead from the
@@ -2436,41 +2589,48 @@ yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t y
        (from LALR or IELR) and default reductions corrupt the expected
        token list.  However, the list is correct for canonical LR with
        one exception: it will still contain any token that will not be
-       accepted due to an error action in a later state.
+       accepted due to an error action in a later state.])
   */
-  if (yytoken != YYEMPTY)
+  if (yytoken != YYSYMBOL_YYEMPTY)
     {
-      int yyn = yypact[yystackp->yytops.yystates[0]->yylrState];
-      yyarg[yycount++] = yytokenName (yytoken);
-      if (!yypact_value_is_default (yyn))
-        {
-          /* Start YYX at -YYN if negative to avoid negative indexes in
-             YYCHECK.  In other words, skip the first -YYN actions for this
-             state because they are default actions.  */
-          int yyxbegin = yyn < 0 ? -yyn : 0;
-          /* Stay within bounds of both yycheck and yytname.  */
-          int yychecklim = YYLAST - yyn + 1;
-          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-          int yyx;
-          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
-                && !yytable_value_is_error (yytable[yyx + yyn]))
-              {
-                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                  {
-                    yycount = 1;
-                    yysize = yysize0;
-                    break;
-                  }
-                yyarg[yycount++] = yytokenName (yyx);
-                {
-                  size_t yysz = yysize + yytnamerr (YY_NULLPTR, yytokenName (yyx));
-                  yysize_overflow |= yysz < yysize;
-                  yysize = yysz;
-                }
-              }
-        }
+      int yyn;
+      if (yyarg)
+        yyarg[yycount] = yytoken;
+      ++yycount;
+      yyn = yypcontext_expected_tokens (yystackp,
+                                        yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+      if (yyn == YYENOMEM)
+        return YYENOMEM;
+      else
+        yycount += yyn;
     }
+  return yycount;
+}
+
+
+
+static void
+yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
+{
+  if (yystackp->yyerrState != 0)
+    return;
+  {
+  yybool yysize_overflow = yyfalse;
+  char* yymsg = YY_NULLPTR;
+  enum { YYARGS_MAX = 5 };
+  /* Internationalized format string. */
+  const char *yyformat = YY_NULLPTR;
+  /* Arguments of yyformat: reported tokens (one for the "unexpected",
+     one per "expected"). */
+  yysymbol_kind_t yyarg[YYARGS_MAX];
+  /* Cumulated lengths of YYARG.  */
+  YYPTRDIFF_T yysize = 0;
+
+  /* Actual size of YYARG. */
+  int yycount
+    = yy_syntax_error_arguments (yystackp, yyarg, YYARGS_MAX);
+  if (yycount == YYENOMEM)
+    yyMemoryExhausted (yystackp);
 
   switch (yycount)
     {
@@ -2478,6 +2638,7 @@ yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t y
       case N:                           \
         yyformat = S;                   \
       break
+    default: /* Avoid compiler warnings. */
       YYCASE_(0, YY_("syntax error"));
       YYCASE_(1, YY_("syntax error, unexpected %s"));
       YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
@@ -2487,14 +2648,24 @@ yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t y
 #undef YYCASE_
     }
 
+  /* Compute error message size.  Don't count the "%s"s, but reserve
+     room for the terminator.  */
+  yysize = yystrlen (yyformat) - 2 * yycount + 1;
   {
-    size_t yysz = yysize + strlen (yyformat);
-    yysize_overflow |= yysz < yysize;
-    yysize = yysz;
+    int yyi;
+    for (yyi = 0; yyi < yycount; ++yyi)
+      {
+        YYPTRDIFF_T yysz
+          = yytnamerr (YY_NULLPTR, yytname[yyarg[yyi]]);
+        if (YYSIZE_MAXIMUM - yysize < yysz)
+          yysize_overflow = yytrue;
+        else
+          yysize += yysz;
+      }
   }
 
   if (!yysize_overflow)
-    yymsg = (char *) YYMALLOC (yysize);
+    yymsg = YY_CAST (char *, YYMALLOC (YY_CAST (YYSIZE_T, yysize)));
 
   if (yymsg)
     {
@@ -2504,13 +2675,13 @@ yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t y
         {
           if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
             {
-              yyp += yytnamerr (yyp, yyarg[yyi++]);
+              yyp += yytnamerr (yyp, yytname[yyarg[yyi++]]);
               yyformat += 2;
             }
           else
             {
-              yyp++;
-              yyformat++;
+              ++yyp;
+              ++yyformat;
             }
         }
       yyerror (&yylloc, driver, yyscanner, yymsg);
@@ -2522,7 +2693,6 @@ yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t y
       yyMemoryExhausted (yystackp);
     }
   }
-#endif /* YYERROR_VERBOSE */
   yynerrs += 1;
 }
 
@@ -2532,16 +2702,14 @@ yyreportSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t y
 static void
 yyrecoverSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t yyscanner)
 {
-  size_t yyk;
-  int yyj;
-
   if (yystackp->yyerrState == 3)
     /* We just shifted the error token and (perhaps) took some
        reductions.  Skip tokens until we can proceed.  */
     while (yytrue)
       {
-        yySymbol yytoken;
-        if (yychar == YYEOF)
+        yysymbol_kind_t yytoken;
+        int yyj;
+        if (yychar == END)
           yyFail (yystackp, &yylloc, driver, yyscanner, YY_NULLPTR);
         if (yychar != YYEMPTY)
           {
@@ -2555,19 +2723,9 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t 
             yytoken = YYTRANSLATE (yychar);
             yydestruct ("Error: discarding",
                         yytoken, &yylval, &yylloc, driver, yyscanner);
+            yychar = YYEMPTY;
           }
-        YYDPRINTF ((stderr, "Reading a token: "));
-        yychar = yylex (&yylval, &yylloc, driver, yyscanner);
-        if (yychar <= YYEOF)
-          {
-            yychar = yytoken = YYEOF;
-            YYDPRINTF ((stderr, "Now at end of input.\n"));
-          }
-        else
-          {
-            yytoken = YYTRANSLATE (yychar);
-            YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
-          }
+        yytoken = yygetToken (&yychar, yystackp, driver, yyscanner);
         yyj = yypact[yystackp->yytops.yystates[0]->yylrState];
         if (yypact_value_is_default (yyj))
           return;
@@ -2582,36 +2740,40 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, DHCP_ParserDriver* driver, yyscan_t 
       }
 
   /* Reduce to one stack.  */
-  for (yyk = 0; yyk < yystackp->yytops.yysize; yyk += 1)
-    if (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
-      break;
-  if (yyk >= yystackp->yytops.yysize)
-    yyFail (yystackp, &yylloc, driver, yyscanner, YY_NULLPTR);
-  for (yyk += 1; yyk < yystackp->yytops.yysize; yyk += 1)
-    yymarkStackDeleted (yystackp, yyk);
-  yyremoveDeletes (yystackp);
-  yycompressStack (yystackp);
+  {
+    YYPTRDIFF_T yyk;
+    for (yyk = 0; yyk < yystackp->yytops.yysize; yyk += 1)
+      if (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
+        break;
+    if (yyk >= yystackp->yytops.yysize)
+      yyFail (yystackp, &yylloc, driver, yyscanner, YY_NULLPTR);
+    for (yyk += 1; yyk < yystackp->yytops.yysize; yyk += 1)
+      yymarkStackDeleted (yystackp, yyk);
+    yyremoveDeletes (yystackp);
+    yycompressStack (yystackp);
+  }
 
-  /* Now pop stack until we find a state that shifts the error token.  */
+  /* Pop stack until we find a state that shifts the error token.  */
   yystackp->yyerrState = 3;
   while (yystackp->yytops.yystates[0] != YY_NULLPTR)
     {
       yyGLRState *yys = yystackp->yytops.yystates[0];
-      yyj = yypact[yys->yylrState];
+      int yyj = yypact[yys->yylrState];
       if (! yypact_value_is_default (yyj))
         {
-          yyj += YYTERROR;
-          if (0 <= yyj && yyj <= YYLAST && yycheck[yyj] == YYTERROR
+          yyj += YYSYMBOL_YYerror;
+          if (0 <= yyj && yyj <= YYLAST && yycheck[yyj] == YYSYMBOL_YYerror
               && yyisShiftAction (yytable[yyj]))
             {
               /* Shift the error token.  */
+              int yyaction = yytable[yyj];
               /* First adjust its location.*/
               YYLTYPE yyerrloc;
               yystackp->yyerror_range[2].yystate.yyloc = yylloc;
               YYLLOC_DEFAULT (yyerrloc, (yystackp->yyerror_range), 2);
-              YY_SYMBOL_PRINT ("Shifting", yystos[yytable[yyj]],
+              YY_SYMBOL_PRINT ("Shifting", yy_accessing_symbol (yyaction),
                                &yylval, &yyerrloc);
-              yyglrShift (yystackp, 0, yytable[yyj],
+              yyglrShift (yystackp, 0, yyaction,
                           yys->yyposn, &yylval, &yyerrloc);
               yys = yystackp->yytops.yystates[0];
               break;
@@ -2654,16 +2816,15 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
   int yyresult;
   yyGLRStack yystack;
   yyGLRStack* const yystackp = &yystack;
-  size_t yyposn;
+  YYPTRDIFF_T yyposn;
 
-  YYDPRINTF ((stderr, "Starting parse\n"));
+  YY_DPRINTF ((stderr, "Starting parse\n"));
 
   yychar = YYEMPTY;
   yylval = yyval_default;
   yylloc = yyloc_default;
 
   /* User initialization code.  */
-
 {
   // initialize the location
   //@$.initialize (YY_NULLPTR, 1, 1);
@@ -2672,8 +2833,8 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
 
   // initialize the token value container
 //  $$.aval = {};
-  (yylval).ival = 0;
-  (yylval).sval = NULL;
+  yylval.ival = 0;
+  yylval.sval = NULL;
 }
 
 
@@ -2695,23 +2856,19 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
       /* For efficiency, we have two loops, the first of which is
          specialized to deterministic operation (single stack, no
          potential ambiguity).  */
-      /* Standard mode */
+      /* Standard mode. */
       while (yytrue)
         {
-          yyRuleNum yyrule;
-          int yyaction;
-          const short int* yyconflicts;
-
-          yyStateNum yystate = yystack.yytops.yystates[0]->yylrState;
-          YYDPRINTF ((stderr, "Entering state %d\n", yystate));
+          yy_state_t yystate = yystack.yytops.yystates[0]->yylrState;
+          YY_DPRINTF ((stderr, "Entering state %d\n", yystate));
           if (yystate == YYFINAL)
             goto yyacceptlab;
           if (yyisDefaultedState (yystate))
             {
-              yyrule = yydefaultAction (yystate);
+              yyRuleNum yyrule = yydefaultAction (yystate);
               if (yyrule == 0)
                 {
-               yystack.yyerror_range[1].yystate.yyloc = yylloc;
+                  yystack.yyerror_range[1].yystate.yyloc = yylloc;
                   yyreportSyntaxError (&yystack, driver, yyscanner);
                   goto yyuser_error;
                 }
@@ -2719,26 +2876,11 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
             }
           else
             {
-              yySymbol yytoken;
-              if (yychar == YYEMPTY)
-                {
-                  YYDPRINTF ((stderr, "Reading a token: "));
-                  yychar = yylex (&yylval, &yylloc, driver, yyscanner);
-                }
-
-              if (yychar <= YYEOF)
-                {
-                  yychar = yytoken = YYEOF;
-                  YYDPRINTF ((stderr, "Now at end of input.\n"));
-                }
-              else
-                {
-                  yytoken = YYTRANSLATE (yychar);
-                  YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
-                }
-
-              yygetLRActions (yystate, yytoken, &yyaction, &yyconflicts);
-              if (*yyconflicts != 0)
+              yysymbol_kind_t yytoken = yygetToken (&yychar, yystackp, driver, yyscanner);
+              const short* yyconflicts;
+              int yyaction = yygetLRActions (yystate, yytoken, &yyconflicts);
+              if (*yyconflicts)
+                /* Enter nondeterministic mode.  */
                 break;
               if (yyisShiftAction (yyaction))
                 {
@@ -2751,8 +2893,11 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
                 }
               else if (yyisErrorAction (yyaction))
                 {
-               yystack.yyerror_range[1].yystate.yyloc = yylloc;
-                  yyreportSyntaxError (&yystack, driver, yyscanner);
+                  yystack.yyerror_range[1].yystate.yyloc = yylloc;
+                  /* Issue an error message unless the scanner already
+                     did. */
+                  if (yychar != YYerror)
+                    yyreportSyntaxError (&yystack, driver, yyscanner);
                   goto yyuser_error;
                 }
               else
@@ -2760,10 +2905,11 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
             }
         }
 
+      /* Nondeterministic mode. */
       while (yytrue)
         {
-          yySymbol yytoken_to_shift;
-          size_t yys;
+          yysymbol_kind_t yytoken_to_shift;
+          YYPTRDIFF_T yys;
 
           for (yys = 0; yys < yystack.yytops.yysize; yys += 1)
             yystackp->yytops.yylookaheadNeeds[yys] = yychar != YYEMPTY;
@@ -2796,8 +2942,8 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
               if (yystack.yytops.yysize == 0)
                 yyFail (&yystack, &yylloc, driver, yyscanner, YY_("syntax error"));
               YYCHK1 (yyresolveStack (&yystack, driver, yyscanner));
-              YYDPRINTF ((stderr, "Returning to deterministic operation.\n"));
-           yystack.yyerror_range[1].yystate.yyloc = yylloc;
+              YY_DPRINTF ((stderr, "Returning to deterministic operation.\n"));
+              yystack.yyerror_range[1].yystate.yyloc = yylloc;
               yyreportSyntaxError (&yystack, driver, yyscanner);
               goto yyuser_error;
             }
@@ -2812,25 +2958,24 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
           yyposn += 1;
           for (yys = 0; yys < yystack.yytops.yysize; yys += 1)
             {
-              int yyaction;
-              const short int* yyconflicts;
-              yyStateNum yystate = yystack.yytops.yystates[yys]->yylrState;
-              yygetLRActions (yystate, yytoken_to_shift, &yyaction,
+              yy_state_t yystate = yystack.yytops.yystates[yys]->yylrState;
+              const short* yyconflicts;
+              int yyaction = yygetLRActions (yystate, yytoken_to_shift,
                               &yyconflicts);
               /* Note that yyconflicts were handled by yyprocessOneStack.  */
-              YYDPRINTF ((stderr, "On stack %lu, ", (unsigned long int) yys));
+              YY_DPRINTF ((stderr, "On stack %ld, ", YY_CAST (long, yys)));
               YY_SYMBOL_PRINT ("shifting", yytoken_to_shift, &yylval, &yylloc);
               yyglrShift (&yystack, yys, yyaction, yyposn,
                           &yylval, &yylloc);
-              YYDPRINTF ((stderr, "Stack %lu now in state #%d\n",
-                          (unsigned long int) yys,
-                          yystack.yytops.yystates[yys]->yylrState));
+              YY_DPRINTF ((stderr, "Stack %ld now in state #%d\n",
+                           YY_CAST (long, yys),
+                           yystack.yytops.yystates[yys]->yylrState));
             }
 
           if (yystack.yytops.yysize == 1)
             {
               YYCHK1 (yyresolveStack (&yystack, driver, yyscanner));
-              YYDPRINTF ((stderr, "Returning to deterministic operation.\n"));
+              YY_DPRINTF ((stderr, "Returning to deterministic operation.\n"));
               yycompressStack (&yystack);
               break;
             }
@@ -2846,7 +2991,7 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
   goto yyreturn;
 
  yybuglab:
-  YYASSERT (yyfalse);
+  YY_ASSERT (yyfalse);
   goto yyabortlab;
 
  yyabortlab:
@@ -2871,16 +3016,16 @@ yyparse (DHCP_ParserDriver* driver, yyscan_t yyscanner)
       yyGLRState** yystates = yystack.yytops.yystates;
       if (yystates)
         {
-          size_t yysize = yystack.yytops.yysize;
-          size_t yyk;
+          YYPTRDIFF_T yysize = yystack.yytops.yysize;
+          YYPTRDIFF_T yyk;
           for (yyk = 0; yyk < yysize; yyk += 1)
             if (yystates[yyk])
               {
                 while (yystates[yyk])
                   {
                     yyGLRState *yys = yystates[yyk];
-                 yystack.yyerror_range[1].yystate.yyloc = yys->yyloc;
-                  if (yys->yypred != YY_NULLPTR)
+                    yystack.yyerror_range[1].yystate.yyloc = yys->yyloc;
+                    if (yys->yypred != YY_NULLPTR)
                       yydestroyGLRState ("Cleanup: popping", yys, driver, yyscanner);
                     yystates[yyk] = yys->yypred;
                     yystack.yynextFree -= 1;
@@ -2903,70 +3048,74 @@ yy_yypstack (yyGLRState* yys)
   if (yys->yypred)
     {
       yy_yypstack (yys->yypred);
-      YYFPRINTF (stderr, " -> ");
+      YY_FPRINTF ((stderr, " -> "));
     }
-  YYFPRINTF (stderr, "%d@%lu", yys->yylrState,
-             (unsigned long int) yys->yyposn);
+  YY_FPRINTF ((stderr, "%d@%ld", yys->yylrState, YY_CAST (long, yys->yyposn)));
 }
 
 static void
 yypstates (yyGLRState* yyst)
 {
   if (yyst == YY_NULLPTR)
-    YYFPRINTF (stderr, "<null>");
+    YY_FPRINTF ((stderr, "<null>"));
   else
     yy_yypstack (yyst);
-  YYFPRINTF (stderr, "\n");
+  YY_FPRINTF ((stderr, "\n"));
 }
 
 static void
-yypstack (yyGLRStack* yystackp, size_t yyk)
+yypstack (yyGLRStack* yystackp, YYPTRDIFF_T yyk)
 {
   yypstates (yystackp->yytops.yystates[yyk]);
 }
 
-#define YYINDEX(YYX)                                                         \
-    ((YYX) == YY_NULLPTR ? -1 : (yyGLRStackItem*) (YYX) - yystackp->yyitems)
-
-
 static void
 yypdumpstack (yyGLRStack* yystackp)
 {
+#define YYINDEX(YYX)                                                    \
+  YY_CAST (long,                                                        \
+           ((YYX)                                                       \
+            ? YY_REINTERPRET_CAST (yyGLRStackItem*, (YYX)) - yystackp->yyitems \
+            : -1))
+
   yyGLRStackItem* yyp;
-  size_t yyi;
   for (yyp = yystackp->yyitems; yyp < yystackp->yynextFree; yyp += 1)
     {
-      YYFPRINTF (stderr, "%3lu. ",
-                 (unsigned long int) (yyp - yystackp->yyitems));
-      if (*(yybool *) yyp)
+      YY_FPRINTF ((stderr, "%3ld. ",
+                   YY_CAST (long, yyp - yystackp->yyitems)));
+      if (*YY_REINTERPRET_CAST (yybool *, yyp))
         {
-          YYASSERT (yyp->yystate.yyisState);
-          YYASSERT (yyp->yyoption.yyisState);
-          YYFPRINTF (stderr, "Res: %d, LR State: %d, posn: %lu, pred: %ld",
-                     yyp->yystate.yyresolved, yyp->yystate.yylrState,
-                     (unsigned long int) yyp->yystate.yyposn,
-                     (long int) YYINDEX (yyp->yystate.yypred));
+          YY_ASSERT (yyp->yystate.yyisState);
+          YY_ASSERT (yyp->yyoption.yyisState);
+          YY_FPRINTF ((stderr, "Res: %d, LR State: %d, posn: %ld, pred: %ld",
+                       yyp->yystate.yyresolved, yyp->yystate.yylrState,
+                       YY_CAST (long, yyp->yystate.yyposn),
+                       YYINDEX (yyp->yystate.yypred)));
           if (! yyp->yystate.yyresolved)
-            YYFPRINTF (stderr, ", firstVal: %ld",
-                       (long int) YYINDEX (yyp->yystate
-                                             .yysemantics.yyfirstVal));
+            YY_FPRINTF ((stderr, ", firstVal: %ld",
+                         YYINDEX (yyp->yystate.yysemantics.yyfirstVal)));
         }
       else
         {
-          YYASSERT (!yyp->yystate.yyisState);
-          YYASSERT (!yyp->yyoption.yyisState);
-          YYFPRINTF (stderr, "Option. rule: %d, state: %ld, next: %ld",
-                     yyp->yyoption.yyrule - 1,
-                     (long int) YYINDEX (yyp->yyoption.yystate),
-                     (long int) YYINDEX (yyp->yyoption.yynext));
+          YY_ASSERT (!yyp->yystate.yyisState);
+          YY_ASSERT (!yyp->yyoption.yyisState);
+          YY_FPRINTF ((stderr, "Option. rule: %d, state: %ld, next: %ld",
+                       yyp->yyoption.yyrule - 1,
+                       YYINDEX (yyp->yyoption.yystate),
+                       YYINDEX (yyp->yyoption.yynext)));
         }
-      YYFPRINTF (stderr, "\n");
+      YY_FPRINTF ((stderr, "\n"));
     }
-  YYFPRINTF (stderr, "Tops:");
-  for (yyi = 0; yyi < yystackp->yytops.yysize; yyi += 1)
-    YYFPRINTF (stderr, "%lu: %ld; ", (unsigned long int) yyi,
-               (long int) YYINDEX (yystackp->yytops.yystates[yyi]));
-  YYFPRINTF (stderr, "\n");
+
+  YY_FPRINTF ((stderr, "Tops:"));
+  {
+    YYPTRDIFF_T yyi;
+    for (yyi = 0; yyi < yystackp->yytops.yysize; yyi += 1)
+      YY_FPRINTF ((stderr, "%ld: %ld; ", YY_CAST (long, yyi),
+                   YYINDEX (yystackp->yytops.yystates[yyi])));
+    YY_FPRINTF ((stderr, "\n"));
+  }
+#undef YYINDEX
 }
 #endif
 
@@ -3092,4 +3241,3 @@ yyerror (YYLTYPE* location_in,
 //    }
 //  } // end SWITCH
 //}
-

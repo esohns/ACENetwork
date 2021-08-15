@@ -189,7 +189,7 @@ using namespace std;
 /* %printer                  { yyoutput << $$; } <*>; */
 /* %printer                  { yyoutput << *$$; } <sval>
 %printer                  { debug_stream () << $$; }  <ival> */
-%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), Net_Common_Tools::MACAddressToString ($$).c_str ()); } <aval>
+%printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), Net_Common_Tools::LinkLayerAddressToString ($$, NET_LINKLAYER_802_3).c_str ()); } <aval>
 %printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); }                                                 <ival>
 %printer                  { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (*$$).c_str ()); }                                     <sval>
 //%destructor               { ACE_OS::memset ($$, 0, 16); } <aval>

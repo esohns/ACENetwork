@@ -80,7 +80,7 @@ OCTET          [\x00-\xFF]
 /* NUL            [\x00] */
 
 %s             version
-%s             op
+%s             opcode_
 %s             reserved
 %s             result_code
 %s             lifetime
@@ -101,6 +101,10 @@ OCTET          [\x00-\xFF]
 %s             opcode_specific_response_data_peer_remote_peer_port
 %s             opcode_specific_response_data_peer_reserved_2
 %s             opcode_specific_response_data_peer_remote_peer_ip_address
+/* rfc7652 */
+%s             opcode_specific_response_data_authentication
+%s             opcode_specific_response_data_authentication_sequence_number
+/* rfc7652 /END */
 %s             option_code
 %s             option_reserved
 %s             option_length
@@ -109,6 +113,21 @@ OCTET          [\x00-\xFF]
 %s             option_filter_prefix_length
 %s             option_filter_remote_peer_port
 %s             option_filter_remote_peer_address
+/* rfc7652 */
+%s             option_nonce_nonce
+%s             option_authentication_tag_session_id
+%s             option_authentication_tag_sequence_number
+%s             option_authentication_tag_key_id
+%s             option_authentication_tag_data
+%s             option_pa_authentication_tag_key_id
+%s             option_pa_authentication_tag_data
+%s             option_eap_payload_data
+%s             option_pseudo_random_function_id
+%s             option_mac_algorithm_id
+%s             option_session_lifetime_lifetime
+%s             option_received_pak_sequence_number
+%s             option_id_indicator_data
+/* rfc7652 /END */
 %s             option_padding
 
 %{
@@ -126,8 +145,6 @@ OCTET          [\x00-\xFF]
 %{
   //yylloc->step ();
   yy_flex_debug = driver->getDebugScanner ();
-
-  unsigned int padding_bytes = 0;
 %}
 
 <INITIAL>{
@@ -140,18 +157,20 @@ OCTET          [\x00-\xFF]
 {OCTET}{1}                 { driver->offset_ += yyleng;
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
-                             BEGIN(op);
+                             BEGIN(opcode_);
                              return yytokentype::VERSION;
                              /* return yy::PCP_Parser::token::VERSION; */ }
 } // end <version>
-<op>{
+<opcode_>{
 {OCTET}{1}                 { driver->offset_ += yyleng;
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
+                             ACE_ASSERT (yylval->ival & 0x80); // response bit set
+                             yylval->ival = yylval->ival & 0x7f; // clear the bit
                              BEGIN(reserved);
                              return yytokentype::OPCODE;
                              /* return yy::PCP_Parser::token::OPCODE; */ }
-} // end <op>
+} // end <opcode>
 <reserved>{
 {OCTET}{1}                 { driver->offset_ += yyleng;
                              yylval->ival =
@@ -211,6 +230,8 @@ OCTET          [\x00-\xFF]
                                  BEGIN(opcode_specific_response_data_peer); break;
                                case PCP_Codes::PCP_OPCODE_ANNOUNCE:
                                  BEGIN(option_code); break;
+                               case PCP_Codes::PCP_OPCODE_AUTHENTICATION:
+                                 BEGIN(opcode_specific_response_data_authentication); break;
                                default:
                                {
                                  ACE_DEBUG ((LM_ERROR,
@@ -398,6 +419,29 @@ OCTET          [\x00-\xFF]
                              /* return yy::PCP_Parser::token::OPTION_PEER_REMOTE_PEER_IP_ADDRESS; */ }
 } // end <opcode_specific_response_data_peer_remote_peer_ip_address>
 
+<opcode_specific_response_data_authentication>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(opcode_specific_response_data_authentication);
+                             return yytokentype::OPTION_AUTHENTICATION_SESSION_ID;
+                             /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_SESSION_ID; */ }
+} // end <opcode_specific_response_data_authentication>
+<opcode_specific_response_data_authentication_sequence_number>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_code);
+                             return yytokentype::OPTION_AUTHENTICATION_SEQUENCE_NUMBER;
+                             /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_SEQUENCE_NUMBER; */ }
+} // end <opcode_specific_response_data_authentication_sequence_number>
+
 <option_code>{
 {OCTET}{1}                 { driver->offset_ += yyleng;
                              yylval->ival =
@@ -430,6 +474,24 @@ OCTET          [\x00-\xFF]
                                  BEGIN(option_code); break;
                                case PCP_Codes::PCP_OPTION_FILTER:
                                  BEGIN(option_filter_reserved); break;
+                               case PCP_Codes::PCP_OPTION_NONCE: // rfc7652
+                                 BEGIN(option_nonce_nonce); break;
+                               case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG: // rfc7652
+                                 BEGIN(option_authentication_tag_session_id); break;
+                               case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG: // rfc7652
+                                 BEGIN(option_pa_authentication_tag_key_id); break;
+                               case PCP_Codes::PCP_OPTION_EAP_PAYLOAD: // rfc7652
+                                 BEGIN(option_eap_payload_data); break;
+                               case PCP_Codes::PCP_OPTION_PSEUDO_RANDOM_FUNCTION: // rfc7652
+                                 BEGIN(option_pseudo_random_function_id); break;
+                               case PCP_Codes::PCP_OPTION_MAC_ALGORITHM: // rfc7652
+                                 BEGIN(option_mac_algorithm_id); break;
+                               case PCP_Codes::PCP_OPTION_SESSION_LIFETIME: // rfc7652
+                                 BEGIN(option_session_lifetime_lifetime); break;
+                               case PCP_Codes::PCP_OPTION_RECEIVED_PAK: // rfc7652
+                                 BEGIN(option_received_pak_sequence_number); break;
+                               case PCP_Codes::PCP_OPTION_ID_INDICATOR: // rfc7652
+                                 BEGIN(option_id_indicator_data); break;
                                default:
                                {
                                  ACE_DEBUG ((LM_ERROR,
@@ -441,6 +503,7 @@ OCTET          [\x00-\xFF]
                              return yytokentype::OPTION_LENGTH;
                              /* return yy::PCP_Parser::token::OPTION_LENGTH; */ }
 } // end <option_length>
+
 <option_third_party_address>{
 {OCTET}{16}                { driver->offset_ += yyleng;
                              yylval->ival =
@@ -452,6 +515,7 @@ OCTET          [\x00-\xFF]
                              return yytokentype::OPTION_THIRD_PARTY_ADDRESS;
                              /* return yy::PCP_Parser::token::OPTION_THIRD_PARTY_ADDRESS; */ }
 } // end <option_third_party_address>
+
 <option_filter_reserved>{
 {OCTET}{1}                 { driver->offset_ += yyleng;
                              yylval->ival =
@@ -490,16 +554,222 @@ OCTET          [\x00-\xFF]
                              return yytokentype::OPTION_FILTER_REMOTE_PEER_IP_ADDRESS;
                              /* return yy::PCP_Parser::token::OPTION_FILTER_REMOTE_PEER_IP_ADDRESS; */ }
 } // end <option_filter_remote_peer_address>
+
+<option_nonce_nonce>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_code);
+                             return yytokentype::OPTION_NONCE_NONCE;
+                             /* return yy::PCP_Parser::token::OPTION_NONCE_NONCE; */ }
+} // end <option_nonce_nonce>
+
+<option_authentication_tag_session_id>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_authentication_tag_sequence_number);
+                             return yytokentype::OPTION_AUTHENTICATION_TAG_SESSION_ID;
+                             /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_TAG_SESSION_ID; */ }
+} // option_authentication_tag_session_id
+<option_authentication_tag_sequence_number>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_authentication_tag_key_id);
+                             return yytokentype::OPTION_AUTHENTICATION_TAG_SEQUENCE_NUMBER;
+                             /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_TAG_SEQUENCE_NUMBER; */ }
+} // option_authentication_tag_session_id
+<option_authentication_tag_key_id>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_authentication_tag_data);
+                             return yytokentype::OPTION_AUTHENTICATION_TAG_KEY_ID;
+                             /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_TAG_KEY_ID; */ }
+} // option_authentication_tag_key_id
+<option_authentication_tag_data>{
+{OCTET}{1}                 { const struct PCPOption& option_r = driver->record_->options.back ();
+                             unsigned int bytes_to_read = option_r.length - 12 - 1;
+                             driver->offset_ += option_r.length - 12;
+                             ACE_NEW_NORETURN (yylval->aval,
+                                               ACE_UINT8[bytes_to_read]);
+                             ACE_ASSERT (yylval->aval);
+                             yylval->aval[0] =
+                                 *reinterpret_cast<unsigned char*> (yytext);
+                             for (unsigned int i = 0;
+                                  i < bytes_to_read;
+                                  ++i)
+                               yylval->aval[i + 1] = yyinput (yyscanner);
+                             unsigned int padding_bytes = option_r.length % 4;
+                             if (padding_bytes)
+                             {
+                               driver->padding_ = 4 - padding_bytes;
+                               BEGIN(option_padding);
+                             } // end IF
+                             else
+                               BEGIN(option_code);
+                             return yytokentype::OPTION_AUTHENTICATION_TAG_DATA;
+                             /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_TAG_DATA; */ }
+} // option_authentication_tag_data
+
+<option_pa_authentication_tag_key_id>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_pa_authentication_tag_data);
+                             return yytokentype::OPTION_PA_AUTHENTICATION_TAG_KEY_ID;
+                             /* return yy::PCP_Parser::token::OPTION_PA_AUTHENTICATION_TAG_KEY_ID; */ }
+} // option_pa_authentication_tag_key_id
+<option_pa_authentication_tag_data>{
+{OCTET}{1}                 { const struct PCPOption& option_r = driver->record_->options.back ();
+                             unsigned int bytes_to_read = option_r.length - 4 - 1;
+                             driver->offset_ += option_r.length - 4;
+                             ACE_NEW_NORETURN (yylval->aval,
+                                               ACE_UINT8[bytes_to_read]);
+                             ACE_ASSERT (yylval->aval);
+                             yylval->aval[0] =
+                                 *reinterpret_cast<unsigned char*> (yytext);
+                             for (unsigned int i = 0;
+                                  i < bytes_to_read;
+                                  ++i)
+                               yylval->aval[i + 1] = yyinput (yyscanner);
+                             unsigned int padding_bytes = option_r.length % 4;
+                             if (padding_bytes)
+                             {
+                               driver->padding_ = 4 - padding_bytes;
+                               BEGIN(option_padding);
+                             } // end IF
+                             else
+                               BEGIN(option_code);
+                             return yytokentype::OPTION_PA_AUTHENTICATION_TAG_DATA;
+                             /* return yy::PCP_Parser::token::OPTION_PA_AUTHENTICATION_TAG_DATA; */ }
+} // option_pa_authentication_tag_data
+
+<option_eap_payload_data>{
+{OCTET}{1}                 { const struct PCPOption& option_r = driver->record_->options.back ();
+                             unsigned int bytes_to_read = option_r.length - 1;
+                             driver->offset_ += option_r.length;
+                             ACE_NEW_NORETURN (yylval->aval,
+                                               ACE_UINT8[bytes_to_read]);
+                             ACE_ASSERT (yylval->aval);
+                             yylval->aval[0] =
+                                 *reinterpret_cast<unsigned char*> (yytext);
+                             for (unsigned int i = 0;
+                                  i < bytes_to_read;
+                                  ++i)
+                               yylval->aval[i + 1] = yyinput (yyscanner);
+                             unsigned int padding_bytes = option_r.length % 4;
+                             if (padding_bytes)
+                             {
+                               driver->padding_ = 4 - padding_bytes;
+                               BEGIN(option_padding);
+                             } // end IF
+                             else
+                               BEGIN(option_code);
+                             return yytokentype::OPTION_EAP_PAYLOAD_DATA;
+                             /* return yy::PCP_Parser::token::OPTION_EAP_PAYLOAD_DATA; */ }
+} // option_eap_payload_data
+
+<option_pseudo_random_function_id>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_code);
+                             return yytokentype::OPTION_PSEUDO_RANDOM_FUNCTION_ID;
+                             /* return yy::PCP_Parser::token::OPTION_PSEUDO_RANDOM_FUNCTION_ID; */ }
+} // option_pseudo_random_function_id
+
+<option_mac_algorithm_id>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_code);
+                             return yytokentype::OPTION_MAC_ALGORITHM_ID;
+                             /* return yy::PCP_Parser::token::OPTION_MAC_ALGORITHM_ID; */ }
+} // option_mac_algorithm_id
+
+<option_session_lifetime_lifetime>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_code);
+                             return yytokentype::OPTION_SESSION_LIFETIME_LIFETIME;
+                             /* return yy::PCP_Parser::token::OPTION_SESSION_LIFETIME_LIFETIME; */ }
+} // option_session_lifetime_lifetime
+
+<option_received_pak_sequence_number>{
+{OCTET}{4}                 { driver->offset_ += yyleng;
+                             yylval->ival =
+                                 *reinterpret_cast<ACE_UINT32*> (yytext);
+                             yylval->ival =
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                                                        : yylval->ival);
+                             BEGIN(option_code);
+                             return yytokentype::OPTION_RECEIVED_PAK_SEQUENCE_NUMBER;
+                             /* return yy::PCP_Parser::token::OPTION_RECEIVED_PAK_SEQUENCE_NUMBER; */ }
+} // option_received_pak_sequence_number
+
+<option_id_indicator_data>{
+{OCTET}{1}                 { const struct PCPOption& option_r = driver->record_->options.back ();
+                             unsigned int bytes_to_read = option_r.length - 1;
+                             driver->offset_ += option_r.length;
+                             ACE_NEW_NORETURN (yylval->aval,
+                                               ACE_UINT8[bytes_to_read]);
+                             ACE_ASSERT (yylval->aval);
+                             yylval->aval[0] =
+                                 *reinterpret_cast<unsigned char*> (yytext);
+                             for (unsigned int i = 0;
+                                  i < bytes_to_read;
+                                  ++i)
+                               yylval->aval[i + 1] = yyinput (yyscanner);
+                             unsigned int padding_bytes = option_r.length % 4;
+                             if (padding_bytes)
+                             {
+                               driver->padding_ = 4 - padding_bytes;
+                               BEGIN(option_padding);
+                             } // end IF
+                             else
+                               BEGIN(option_code);
+                             return yytokentype::OPTION_ID_INDICATOR_DATA;
+                             /* return yy::PCP_Parser::token::OPTION_ID_INDICATOR_DATA; */ }
+} // option_id_indicator_data
+
 <option_padding>{
-{OCTET}{1}                 { driver->offset_ += yyleng;
-                             ACE_ASSERT (padding_bytes);
-                             --padding_bytes;
+{OCTET}{1}                 { driver->offset_ += driver->padding_;
+                             ACE_ASSERT (driver->padding_);
+                             --driver->padding_;
                              char c;
                              for (unsigned int i = 0;
-                                  i < padding_bytes;
+                                  i < driver->padding_;
                                   ++i)
                                c = yyinput (yyscanner);
                              ACE_UNUSED_ARG (c);
+                             driver->padding_ = 0;
                              BEGIN(option_code); }
 } // end <option_padding>
 <<EOF>>                    { yyterminate(); }

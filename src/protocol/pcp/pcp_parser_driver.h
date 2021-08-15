@@ -75,6 +75,8 @@ class PCP_ParserDriver
   // target
   struct PCP_Record*                 record_;
 
+  unsigned int                       padding_;
+
  private:
   ACE_UNIMPLEMENTED_FUNC (PCP_ParserDriver ())
   ACE_UNIMPLEMENTED_FUNC (PCP_ParserDriver (const PCP_ParserDriver&))

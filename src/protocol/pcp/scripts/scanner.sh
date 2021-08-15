@@ -36,7 +36,7 @@ flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_L}\", aborting" && exit 1
 
 # append to list
-FILES="${FILES} dhcp_scanner.cpp dhcp_scanner.h"
+FILES="${FILES} pcp_scanner.cpp pcp_scanner.h"
 
 # move the files into the project directory
 for FILE in $FILES

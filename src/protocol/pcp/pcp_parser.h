@@ -44,28 +44,6 @@ extern int yydebug;
 #include <cstdio>
 #include <string>
 
-//enum yytokentype
-//{
-//  END = 0,
-//  OP = 258,
-//  HTYPE = 259,
-//  HLEN = 260,
-//  HOPS = 261,
-//  XID = 262,
-//  SECS = 263,
-//  FLAGS = 264,
-//  CIADDR = 265,
-//  YIADDR = 266,
-//  SIADDR = 267,
-//  GIADDR = 268,
-//  CHADDR = 269,
-//  SNAME = 270,
-//  FILE_ = 271,
-//  COOKIE = 272,
-//  OPTION_KEY = 273,
-//  OPTION_VALUE = 274
-//};
-//#define YYTOKENTYPE
 class PCP_ParserDriver;
 //class PCP_Scanner;
 struct YYLTYPE;
@@ -74,6 +52,7 @@ struct YYLTYPE;
 union yytoken
 {
   ACE_UINT32 ival;
+  ACE_UINT8* aval;
 };
 typedef yytoken yytoken_t;
 #define YYSTYPE yytoken_t
@@ -119,14 +98,29 @@ extern int yyparse (PCP_ParserDriver*, yyscan_t);
     OPTION_PEER_REMOTE_PEER_PORT = 277, /* "option_peer_remote_port"  */
     OPTION_PEER_RESERVED_2 = 278,  /* "option_peer_reserved_2"  */
     OPTION_PEER_REMOTE_PEER_IP_ADDRESS = 279, /* "option_peer_remote_peer_address"  */
-    OPTION_CODE = 280,             /* "option_code"  */
-    OPTION_RESERVED = 281,         /* "option_reserved"  */
-    OPTION_LENGTH = 282,           /* "option_length"  */
-    OPTION_THIRD_PARTY_ADDRESS = 283, /* "option_third_party_address"  */
-    OPTION_FILTER_RESERVED = 284,  /* "option_filter_reserved"  */
-    OPTION_FILTER_PREFIX_LENGTH = 285, /* "option_filter_prefix_length"  */
-    OPTION_FILTER_REMOTE_PEER_PORT = 286, /* "option_filter_remote_peer_port"  */
-    OPTION_FILTER_REMOTE_PEER_IP_ADDRESS = 287 /* "option_filter_remote_peer_address"  */
+    OPTION_AUTHENTICATION_SESSION_ID = 280, /* "option_authentication_session_id"  */
+    OPTION_AUTHENTICATION_SEQUENCE_NUMBER = 281, /* "option_authentication_sequence_number"  */
+    OPTION_CODE = 282,             /* "option_code"  */
+    OPTION_RESERVED = 283,         /* "option_reserved"  */
+    OPTION_LENGTH = 284,           /* "option_length"  */
+    OPTION_THIRD_PARTY_ADDRESS = 285, /* "option_third_party_address"  */
+    OPTION_FILTER_RESERVED = 286,  /* "option_filter_reserved"  */
+    OPTION_FILTER_PREFIX_LENGTH = 287, /* "option_filter_prefix_length"  */
+    OPTION_FILTER_REMOTE_PEER_PORT = 288, /* "option_filter_remote_peer_port"  */
+    OPTION_FILTER_REMOTE_PEER_IP_ADDRESS = 289, /* "option_filter_remote_peer_address"  */
+    OPTION_NONCE_NONCE = 290,      /* "option_nonce_nonce"  */
+    OPTION_AUTHENTICATION_TAG_SESSION_ID = 291, /* "option_authentication_tag_session_id"  */
+    OPTION_AUTHENTICATION_TAG_SEQUENCE_NUMBER = 292, /* "option_authentication_tag_sequence_number"  */
+    OPTION_AUTHENTICATION_TAG_KEY_ID = 293, /* "option_authentication_tag_key_id"  */
+    OPTION_AUTHENTICATION_TAG_DATA = 294, /* "option_authentication_tag_data"  */
+    OPTION_PA_AUTHENTICATION_TAG_KEY_ID = 295, /* "option_pa_authentication_tag_key_id"  */
+    OPTION_PA_AUTHENTICATION_TAG_DATA = 296, /* "option_pa_authentication_tag_data"  */
+    OPTION_EAP_PAYLOAD_DATA = 297, /* "option_eap_payload_data"  */
+    OPTION_PSEUDO_RANDOM_FUNCTION_ID = 298, /* "option_pseudo_random_function_id"  */
+    OPTION_MAC_ALGORITHM_ID = 299, /* "option_mac_algorithm_id"  */
+    OPTION_SESSION_LIFETIME_LIFETIME = 300, /* "option_session_lifetime_lifetime"  */
+    OPTION_RECEIVED_PAK_SEQUENCE_NUMBER = 301, /* "option_received_pak_sequence_number"  */
+    OPTION_ID_INDICATOR_DATA = 302 /* "option_id_indicator_data"  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -136,7 +130,8 @@ extern int yyparse (PCP_ParserDriver*, yyscan_t);
 union YYSTYPE
 {
 
-  unsigned int ival;
+  ACE_UINT32 ival;
+  ACE_UINT8* aval;
 
 
 };

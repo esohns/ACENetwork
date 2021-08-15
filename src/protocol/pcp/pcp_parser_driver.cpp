@@ -38,6 +38,7 @@ PCP_ParserDriver::PCP_ParserDriver (bool traceScanning_in,
  : fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
+ , padding_ (0)
  , trace_ (traceParsing_in)
 //, parser_ (this,               // driver
 //           &numberOfMessages_, // counter

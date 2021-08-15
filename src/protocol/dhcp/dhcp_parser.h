@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.7.4.  */
 
 /* Skeleton interface for Bison GLR parsers in C
 
-   Copyright (C) 2002-2015 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-
 
 #include <cstdio>
 #include <string>
@@ -91,39 +90,40 @@ extern int yyparse (DHCP_ParserDriver*, yyscan_t);
 //extern void yyprint (FILE*, yytokentype, YYSTYPE);
 
 
-
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    END = 0,
-    OP = 258,
-    HTYPE = 259,
-    HLEN = 260,
-    HOPS = 261,
-    XID = 262,
-    SECS = 263,
-    FLAGS = 264,
-    CIADDR = 265,
-    YIADDR = 266,
-    SIADDR = 267,
-    GIADDR = 268,
-    CHADDR = 269,
-    SNAME = 270,
-    FILE_ = 271,
-    COOKIE = 272,
-    OPTION_TAG = 273,
-    OPTION_VALUE = 274
+    YYEMPTY = -2,
+    END = 0,                       /* "end"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    OP = 258,                      /* "op"  */
+    HTYPE = 259,                   /* "htype"  */
+    HLEN = 260,                    /* "hlen"  */
+    HOPS = 261,                    /* "hops"  */
+    XID = 262,                     /* "xid"  */
+    SECS = 263,                    /* "secs"  */
+    FLAGS = 264,                   /* "flags"  */
+    CIADDR = 265,                  /* "ciaddr"  */
+    YIADDR = 266,                  /* "yiaddr"  */
+    SIADDR = 267,                  /* "siaddr"  */
+    GIADDR = 268,                  /* "giaddr"  */
+    CHADDR = 269,                  /* "chaddr"  */
+    SNAME = 270,                   /* "sname"  */
+    FILE_ = 271,                   /* "file"  */
+    COOKIE = 272,                  /* "cookie"  */
+    OPTION_TAG = 273,              /* "tag"  */
+    OPTION_VALUE = 274             /* "value"  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-
 
   unsigned char aval[16];
   int           ival;
@@ -131,7 +131,6 @@ union YYSTYPE
 
 
 };
-
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

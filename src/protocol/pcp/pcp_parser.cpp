@@ -110,50 +110,80 @@ enum yysymbol_kind_t
   YYSYMBOL_OPTION_PEER_REMOTE_PEER_PORT = 22, /* "option_peer_remote_port"  */
   YYSYMBOL_OPTION_PEER_RESERVED_2 = 23,    /* "option_peer_reserved_2"  */
   YYSYMBOL_OPTION_PEER_REMOTE_PEER_IP_ADDRESS = 24, /* "option_peer_remote_peer_address"  */
-  YYSYMBOL_OPTION_CODE = 25,               /* "option_code"  */
-  YYSYMBOL_OPTION_RESERVED = 26,           /* "option_reserved"  */
-  YYSYMBOL_OPTION_LENGTH = 27,             /* "option_length"  */
-  YYSYMBOL_OPTION_THIRD_PARTY_ADDRESS = 28, /* "option_third_party_address"  */
-  YYSYMBOL_OPTION_FILTER_RESERVED = 29,    /* "option_filter_reserved"  */
-  YYSYMBOL_OPTION_FILTER_PREFIX_LENGTH = 30, /* "option_filter_prefix_length"  */
-  YYSYMBOL_OPTION_FILTER_REMOTE_PEER_PORT = 31, /* "option_filter_remote_peer_port"  */
-  YYSYMBOL_OPTION_FILTER_REMOTE_PEER_IP_ADDRESS = 32, /* "option_filter_remote_peer_address"  */
-  YYSYMBOL_YYACCEPT = 33,                  /* $accept  */
-  YYSYMBOL_message = 34,                   /* message  */
-  YYSYMBOL_header = 35,                    /* header  */
-  YYSYMBOL_36_1 = 36,                      /* $@1  */
-  YYSYMBOL_37_2 = 37,                      /* $@2  */
-  YYSYMBOL_38_3 = 38,                      /* $@3  */
-  YYSYMBOL_39_4 = 39,                      /* $@4  */
-  YYSYMBOL_40_5 = 40,                      /* $@5  */
-  YYSYMBOL_41_6 = 41,                      /* $@6  */
-  YYSYMBOL_opcode_specific = 42,           /* opcode_specific  */
-  YYSYMBOL_opcode_specific_map = 43,       /* opcode_specific_map  */
-  YYSYMBOL_44_7 = 44,                      /* $@7  */
-  YYSYMBOL_45_8 = 45,                      /* $@8  */
-  YYSYMBOL_46_9 = 46,                      /* $@9  */
-  YYSYMBOL_47_10 = 47,                     /* $@10  */
-  YYSYMBOL_48_11 = 48,                     /* $@11  */
-  YYSYMBOL_opcode_specific_peer = 49,      /* opcode_specific_peer  */
-  YYSYMBOL_50_12 = 50,                     /* $@12  */
-  YYSYMBOL_51_13 = 51,                     /* $@13  */
-  YYSYMBOL_52_14 = 52,                     /* $@14  */
-  YYSYMBOL_53_15 = 53,                     /* $@15  */
-  YYSYMBOL_54_16 = 54,                     /* $@16  */
-  YYSYMBOL_55_17 = 55,                     /* $@17  */
-  YYSYMBOL_56_18 = 56,                     /* $@18  */
-  YYSYMBOL_57_19 = 57,                     /* $@19  */
-  YYSYMBOL_options = 58,                   /* options  */
-  YYSYMBOL_option = 59,                    /* option  */
-  YYSYMBOL_60_20 = 60,                     /* $@20  */
-  YYSYMBOL_61_21 = 61,                     /* $@21  */
-  YYSYMBOL_62_22 = 62,                     /* $@22  */
-  YYSYMBOL_option_data = 63,               /* option_data  */
-  YYSYMBOL_option_data_third_party = 64,   /* option_data_third_party  */
-  YYSYMBOL_option_data_filter = 65,        /* option_data_filter  */
-  YYSYMBOL_66_23 = 66,                     /* $@23  */
-  YYSYMBOL_67_24 = 67,                     /* $@24  */
-  YYSYMBOL_68_25 = 68                      /* $@25  */
+  YYSYMBOL_OPTION_AUTHENTICATION_SESSION_ID = 25, /* "option_authentication_session_id"  */
+  YYSYMBOL_OPTION_AUTHENTICATION_SEQUENCE_NUMBER = 26, /* "option_authentication_sequence_number"  */
+  YYSYMBOL_OPTION_CODE = 27,               /* "option_code"  */
+  YYSYMBOL_OPTION_RESERVED = 28,           /* "option_reserved"  */
+  YYSYMBOL_OPTION_LENGTH = 29,             /* "option_length"  */
+  YYSYMBOL_OPTION_THIRD_PARTY_ADDRESS = 30, /* "option_third_party_address"  */
+  YYSYMBOL_OPTION_FILTER_RESERVED = 31,    /* "option_filter_reserved"  */
+  YYSYMBOL_OPTION_FILTER_PREFIX_LENGTH = 32, /* "option_filter_prefix_length"  */
+  YYSYMBOL_OPTION_FILTER_REMOTE_PEER_PORT = 33, /* "option_filter_remote_peer_port"  */
+  YYSYMBOL_OPTION_FILTER_REMOTE_PEER_IP_ADDRESS = 34, /* "option_filter_remote_peer_address"  */
+  YYSYMBOL_OPTION_NONCE_NONCE = 35,        /* "option_nonce_nonce"  */
+  YYSYMBOL_OPTION_AUTHENTICATION_TAG_SESSION_ID = 36, /* "option_authentication_tag_session_id"  */
+  YYSYMBOL_OPTION_AUTHENTICATION_TAG_SEQUENCE_NUMBER = 37, /* "option_authentication_tag_sequence_number"  */
+  YYSYMBOL_OPTION_AUTHENTICATION_TAG_KEY_ID = 38, /* "option_authentication_tag_key_id"  */
+  YYSYMBOL_OPTION_AUTHENTICATION_TAG_DATA = 39, /* "option_authentication_tag_data"  */
+  YYSYMBOL_OPTION_PA_AUTHENTICATION_TAG_KEY_ID = 40, /* "option_pa_authentication_tag_key_id"  */
+  YYSYMBOL_OPTION_PA_AUTHENTICATION_TAG_DATA = 41, /* "option_pa_authentication_tag_data"  */
+  YYSYMBOL_OPTION_EAP_PAYLOAD_DATA = 42,   /* "option_eap_payload_data"  */
+  YYSYMBOL_OPTION_PSEUDO_RANDOM_FUNCTION_ID = 43, /* "option_pseudo_random_function_id"  */
+  YYSYMBOL_OPTION_MAC_ALGORITHM_ID = 44,   /* "option_mac_algorithm_id"  */
+  YYSYMBOL_OPTION_SESSION_LIFETIME_LIFETIME = 45, /* "option_session_lifetime_lifetime"  */
+  YYSYMBOL_OPTION_RECEIVED_PAK_SEQUENCE_NUMBER = 46, /* "option_received_pak_sequence_number"  */
+  YYSYMBOL_OPTION_ID_INDICATOR_DATA = 47,  /* "option_id_indicator_data"  */
+  YYSYMBOL_YYACCEPT = 48,                  /* $accept  */
+  YYSYMBOL_message = 49,                   /* message  */
+  YYSYMBOL_header = 50,                    /* header  */
+  YYSYMBOL_51_1 = 51,                      /* $@1  */
+  YYSYMBOL_52_2 = 52,                      /* $@2  */
+  YYSYMBOL_53_3 = 53,                      /* $@3  */
+  YYSYMBOL_54_4 = 54,                      /* $@4  */
+  YYSYMBOL_55_5 = 55,                      /* $@5  */
+  YYSYMBOL_56_6 = 56,                      /* $@6  */
+  YYSYMBOL_opcode_specific = 57,           /* opcode_specific  */
+  YYSYMBOL_opcode_specific_map = 58,       /* opcode_specific_map  */
+  YYSYMBOL_59_7 = 59,                      /* $@7  */
+  YYSYMBOL_60_8 = 60,                      /* $@8  */
+  YYSYMBOL_61_9 = 61,                      /* $@9  */
+  YYSYMBOL_62_10 = 62,                     /* $@10  */
+  YYSYMBOL_63_11 = 63,                     /* $@11  */
+  YYSYMBOL_opcode_specific_peer = 64,      /* opcode_specific_peer  */
+  YYSYMBOL_65_12 = 65,                     /* $@12  */
+  YYSYMBOL_66_13 = 66,                     /* $@13  */
+  YYSYMBOL_67_14 = 67,                     /* $@14  */
+  YYSYMBOL_68_15 = 68,                     /* $@15  */
+  YYSYMBOL_69_16 = 69,                     /* $@16  */
+  YYSYMBOL_70_17 = 70,                     /* $@17  */
+  YYSYMBOL_71_18 = 71,                     /* $@18  */
+  YYSYMBOL_72_19 = 72,                     /* $@19  */
+  YYSYMBOL_opcode_specific_authentication = 73, /* opcode_specific_authentication  */
+  YYSYMBOL_74_20 = 74,                     /* $@20  */
+  YYSYMBOL_options = 75,                   /* options  */
+  YYSYMBOL_option = 76,                    /* option  */
+  YYSYMBOL_77_21 = 77,                     /* $@21  */
+  YYSYMBOL_78_22 = 78,                     /* $@22  */
+  YYSYMBOL_79_23 = 79,                     /* $@23  */
+  YYSYMBOL_option_data = 80,               /* option_data  */
+  YYSYMBOL_option_data_third_party = 81,   /* option_data_third_party  */
+  YYSYMBOL_option_data_filter = 82,        /* option_data_filter  */
+  YYSYMBOL_83_24 = 83,                     /* $@24  */
+  YYSYMBOL_84_25 = 84,                     /* $@25  */
+  YYSYMBOL_85_26 = 85,                     /* $@26  */
+  YYSYMBOL_option_data_nonce = 86,         /* option_data_nonce  */
+  YYSYMBOL_option_data_authentication_tag = 87, /* option_data_authentication_tag  */
+  YYSYMBOL_88_27 = 88,                     /* $@27  */
+  YYSYMBOL_89_28 = 89,                     /* $@28  */
+  YYSYMBOL_90_29 = 90,                     /* $@29  */
+  YYSYMBOL_option_data_pa_authentication_tag = 91, /* option_data_pa_authentication_tag  */
+  YYSYMBOL_92_30 = 92,                     /* $@30  */
+  YYSYMBOL_option_data_eap_payload = 93,   /* option_data_eap_payload  */
+  YYSYMBOL_option_data_pseudo_random_function = 94, /* option_data_pseudo_random_function  */
+  YYSYMBOL_option_data_mac_algorithm = 95, /* option_data_mac_algorithm  */
+  YYSYMBOL_option_data_session_lifetime = 96, /* option_data_session_lifetime  */
+  YYSYMBOL_option_data_received_pak = 97,  /* option_data_received_pak  */
+  YYSYMBOL_option_data_id_indicator = 98   /* option_data_id_indicator  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -434,16 +464,16 @@ typedef int yytype_uint16;
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  5
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   38
+#define YYLAST   50
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  33
+#define YYNTOKENS  48
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  36
+#define YYNNTS  51
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  41
+#define YYNRULES  66
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  68
+#define YYNSTATES  98
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
 #define YYMAXRHS 17
 /* YYMAXLEFT -- Maximum number of symbols to the left of a handle
@@ -451,7 +481,7 @@ typedef int yytype_uint16;
 #define YYMAXLEFT 0
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   287
+#define YYMAXUTOK   302
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
@@ -492,35 +522,42 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   205,   205,   206,   208,   209,   210,   212,   213,   206,
-     216,   217,   218,   219,   220,   221,   222,   223,   219,   239,
-     240,   241,   242,   243,   244,   258,   259,   239,   275,   276,
-     277,   280,   282,   277,   285,   286,   287,   288,   304,   306,
-     308,   304
+       0,   203,   203,   204,   206,   207,   208,   210,   211,   204,
+     214,   215,   216,   217,   218,   219,   220,   221,   222,   218,
+     238,   239,   240,   241,   242,   243,   257,   258,   238,   274,
+     274,   277,   278,   279,   282,   284,   279,   287,   288,   289,
+     290,   291,   292,   293,   294,   295,   296,   297,   298,   299,
+     315,   317,   319,   315,   337,   340,   342,   344,   340,   349,
+     349,   354,   357,   360,   363,   366,   369
 };
 #endif
 
-#define YYPACT_NINF (-28)
+#define YYPACT_NINF (-31)
 #define YYTABLE_NINF (-1)
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       0,   -28,     4,   -10,     1,   -28,   -28,   -28,   -18,   -28,
-     -28,   -28,    -3,    -8,   -28,   -28,   -18,     5,   -28,   -28,
-     -15,   -28,   -28,     2,    -6,   -28,     7,   -28,   -28,   -12,
-     -28,     3,    -2,   -28,    11,   -28,   -28,   -27,   -28,     6,
-      -1,   -28,   -28,   -28,   -28,   -28,    13,   -28,   -28,    -7,
-     -28,     9,     8,   -28,    16,   -28,   -28,    -9,   -28,    10,
-     -28,   -28,    -5,    12,   -28,   -28,    14,   -28
+      -1,   -31,     4,    -7,     3,   -31,   -31,   -31,   -31,   -19,
+     -31,   -31,   -31,   -31,     0,     2,    -6,   -31,   -31,   -19,
+      16,   -31,   -31,   -31,    -5,   -31,   -31,    10,     6,   -31,
+      19,   -31,   -31,    -3,   -31,    14,     9,   -31,    22,   -31,
+     -31,   -30,   -31,    17,    12,   -31,   -31,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,    25,   -31,
+     -31,    -2,     1,    -4,   -31,    20,    13,   -31,   -31,   -31,
+      27,   -31,   -31,     7,     5,   -31,    23,   -31,   -31,   -31,
+       8,    11,    18,   -31,   -31,   -31,    15,   -31
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -528,31 +565,38 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     3,     0,    12,     0,     1,    13,    19,    29,    10,
-      11,     4,     0,     0,    30,     2,    29,     0,    14,    20,
-       0,    28,     5,     0,     0,    31,     0,    15,    21,     0,
-       6,     0,     0,    32,     0,    16,    22,    36,     7,     0,
-       0,    37,    38,    33,    34,    35,     0,    17,    23,     0,
-       8,     0,     0,    39,     0,    18,    24,     0,     9,     0,
-      40,    25,     0,     0,    41,    26,     0,    27
+       0,     3,     0,    13,     0,     1,    14,    20,    29,    32,
+      10,    11,    12,     4,     0,     0,     0,    33,     2,    32,
+       0,    15,    21,    30,     0,    31,     5,     0,     0,    34,
+       0,    16,    22,     0,     6,     0,     0,    35,     0,    17,
+      23,    48,     7,     0,     0,    49,    50,    54,    55,    59,
+      61,    62,    63,    64,    65,    66,    36,    37,    38,    39,
+      40,    41,    42,    43,    44,    45,    46,    47,     0,    18,
+      24,     0,     0,     0,     8,     0,     0,    51,    56,    60,
+       0,    19,    25,     0,     0,     9,     0,    52,    57,    26,
+       0,     0,     0,    53,    58,    27,     0,    28
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -28,   -28,   -28,   -28,   -28,   -28,   -28,   -28,   -28,   -28,
-     -28,   -28,   -28,   -28,   -28,   -28,   -28,   -28,   -28,   -28,
-     -28,   -28,   -28,   -28,   -28,    15,   -28,   -28,   -28,   -28,
-     -28,   -28,   -28,   -28,   -28,   -28
+     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,   -31,   -31,   -31,    28,   -31,   -31,
+     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,
+     -31
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     4,    17,    26,    34,    46,    54,     8,
-       9,    12,    23,    31,    39,    51,    10,    13,    24,    32,
-      40,    52,    59,    63,    66,    15,    16,    20,    29,    37,
-      43,    44,    45,    49,    57,    62
+      -1,     2,     3,     4,    20,    30,    38,    68,    80,     9,
+      10,    14,    27,    35,    43,    75,    11,    15,    28,    36,
+      44,    76,    86,    92,    96,    12,    16,    18,    19,    24,
+      33,    41,    56,    57,    58,    71,    83,    90,    59,    60,
+      72,    84,    91,    61,    73,    62,    63,    64,    65,    66,
+      67
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -560,51 +604,62 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       6,    41,    42,     1,     5,    11,     7,    14,    18,    19,
-      22,    25,    28,    30,    27,    33,    35,    36,    38,    48,
-      47,    50,    60,    53,    55,    58,     0,    64,     0,    56,
-       0,    21,    61,     0,     0,    65,     0,     0,    67
+      45,    46,     1,     6,     5,    47,    48,    13,    17,     7,
+      49,    21,    50,    51,    52,    53,    54,    55,     8,    22,
+      23,    26,    31,    29,    32,    34,    37,    39,    40,    42,
+      77,    69,    70,    74,    82,    81,    85,    79,    78,    97,
+      87,    95,    93,    88,     0,    89,     0,    25,     0,     0,
+      94
 };
 
 static const yytype_int8 yycheck[] =
 {
-      10,    28,    29,     3,     0,     4,    16,    25,    11,    17,
-       5,    26,    18,     6,    12,    27,    13,    19,     7,    20,
-      14,     8,    31,    30,    15,     9,    -1,    32,    -1,    21,
-      -1,    16,    22,    -1,    -1,    23,    -1,    -1,    24
+      30,    31,     3,    10,     0,    35,    36,     4,    27,    16,
+      40,    11,    42,    43,    44,    45,    46,    47,    25,    17,
+      26,     5,    12,    28,    18,     6,    29,    13,    19,     7,
+      32,    14,    20,     8,    21,    15,     9,    41,    37,    24,
+      33,    23,    34,    38,    -1,    22,    -1,    19,    -1,    -1,
+      39
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    34,    35,    36,     0,    10,    16,    42,    43,
-      49,     4,    44,    50,    25,    58,    59,    37,    11,    17,
-      60,    58,     5,    45,    51,    26,    38,    12,    18,    61,
-       6,    46,    52,    27,    39,    13,    19,    62,     7,    47,
-      53,    28,    29,    63,    64,    65,    40,    14,    20,    66,
-       8,    48,    54,    30,    41,    15,    21,    67,     9,    55,
-      31,    22,    68,    56,    32,    23,    57,    24
+       0,     3,    49,    50,    51,     0,    10,    16,    25,    57,
+      58,    64,    73,     4,    59,    65,    74,    27,    75,    76,
+      52,    11,    17,    26,    77,    75,     5,    60,    66,    28,
+      53,    12,    18,    78,     6,    61,    67,    29,    54,    13,
+      19,    79,     7,    62,    68,    30,    31,    35,    36,    40,
+      42,    43,    44,    45,    46,    47,    80,    81,    82,    86,
+      87,    91,    93,    94,    95,    96,    97,    98,    55,    14,
+      20,    83,    88,    92,     8,    63,    69,    32,    37,    41,
+      56,    15,    21,    84,    89,     9,    70,    33,    38,    22,
+      85,    90,    71,    34,    39,    23,    72,    24
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    33,    34,    36,    37,    38,    39,    40,    41,    35,
-      42,    42,    42,    44,    45,    46,    47,    48,    43,    50,
-      51,    52,    53,    54,    55,    56,    57,    49,    58,    58,
-      60,    61,    62,    59,    63,    63,    63,    64,    66,    67,
-      68,    65
+       0,    48,    49,    51,    52,    53,    54,    55,    56,    50,
+      57,    57,    57,    57,    59,    60,    61,    62,    63,    58,
+      65,    66,    67,    68,    69,    70,    71,    72,    64,    74,
+      73,    75,    75,    77,    78,    79,    76,    80,    80,    80,
+      80,    80,    80,    80,    80,    80,    80,    80,    80,    81,
+      83,    84,    85,    82,    86,    88,    89,    90,    87,    92,
+      91,    93,    94,    95,    96,    97,    98
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     3,     0,     0,     0,     0,     0,     0,    13,
-       1,     1,     0,     0,     0,     0,     0,     0,    11,     0,
-       0,     0,     0,     0,     0,     0,     0,    17,     2,     0,
-       0,     0,     0,     7,     1,     1,     0,     1,     0,     0,
-       0,     7
+       1,     1,     1,     0,     0,     0,     0,     0,     0,    11,
+       0,     0,     0,     0,     0,     0,     0,     0,    17,     0,
+       3,     2,     0,     0,     0,     0,     7,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1,     0,     1,
+       0,     0,     0,     7,     1,     0,     0,     0,     7,     0,
+       3,     1,     1,     1,     1,     1,     1
 };
 
 
@@ -615,7 +670,9 @@ static const yytype_int8 yydprec[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYMERGER[RULE-NUM] -- Index of merging function for rule #RULE-NUM.  */
@@ -625,7 +682,9 @@ static const yytype_int8 yymerger[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYIMMEDIATE[RULE-NUM] -- True iff rule #RULE-NUM is not to be deferred, as
@@ -636,7 +695,9 @@ static const yybool yyimmediate[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0
 };
 
 /* YYCONFLP[YYPACT[STATE-NUM]] -- Pointer into YYCONFL of start of
@@ -648,7 +709,9 @@ static const yytype_int8 yyconflp[] =
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
@@ -886,17 +949,34 @@ static const char *const yytname[] =
   "\"option_peer_assigned_external_port\"",
   "\"option_peer_assigned_external_ip_address\"",
   "\"option_peer_remote_port\"", "\"option_peer_reserved_2\"",
-  "\"option_peer_remote_peer_address\"", "\"option_code\"",
+  "\"option_peer_remote_peer_address\"",
+  "\"option_authentication_session_id\"",
+  "\"option_authentication_sequence_number\"", "\"option_code\"",
   "\"option_reserved\"", "\"option_length\"",
   "\"option_third_party_address\"", "\"option_filter_reserved\"",
   "\"option_filter_prefix_length\"", "\"option_filter_remote_peer_port\"",
-  "\"option_filter_remote_peer_address\"", "$accept", "message", "header",
-  "$@1", "$@2", "$@3", "$@4", "$@5", "$@6", "opcode_specific",
+  "\"option_filter_remote_peer_address\"", "\"option_nonce_nonce\"",
+  "\"option_authentication_tag_session_id\"",
+  "\"option_authentication_tag_sequence_number\"",
+  "\"option_authentication_tag_key_id\"",
+  "\"option_authentication_tag_data\"",
+  "\"option_pa_authentication_tag_key_id\"",
+  "\"option_pa_authentication_tag_data\"", "\"option_eap_payload_data\"",
+  "\"option_pseudo_random_function_id\"", "\"option_mac_algorithm_id\"",
+  "\"option_session_lifetime_lifetime\"",
+  "\"option_received_pak_sequence_number\"",
+  "\"option_id_indicator_data\"", "$accept", "message", "header", "$@1",
+  "$@2", "$@3", "$@4", "$@5", "$@6", "opcode_specific",
   "opcode_specific_map", "$@7", "$@8", "$@9", "$@10", "$@11",
   "opcode_specific_peer", "$@12", "$@13", "$@14", "$@15", "$@16", "$@17",
-  "$@18", "$@19", "options", "option", "$@20", "$@21", "$@22",
-  "option_data", "option_data_third_party", "option_data_filter", "$@23",
-  "$@24", "$@25", YY_NULLPTR
+  "$@18", "$@19", "opcode_specific_authentication", "$@20", "options",
+  "option", "$@21", "$@22", "$@23", "option_data",
+  "option_data_third_party", "option_data_filter", "$@24", "$@25", "$@26",
+  "option_data_nonce", "option_data_authentication_tag", "$@27", "$@28",
+  "$@29", "option_data_pa_authentication_tag", "$@30",
+  "option_data_eap_payload", "option_data_pseudo_random_function",
+  "option_data_mac_algorithm", "option_data_session_lifetime",
+  "option_data_received_pak", "option_data_id_indicator", YY_NULLPTR
 };
 
 static const char *
@@ -1087,6 +1167,14 @@ yy_symbol_value_print (FILE *yyo,
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
         break;
 
+    case YYSYMBOL_OPTION_AUTHENTICATION_SESSION_ID: /* "option_authentication_session_id"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_SEQUENCE_NUMBER: /* "option_authentication_sequence_number"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
     case YYSYMBOL_OPTION_CODE: /* "option_code"  */
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
         break;
@@ -1119,6 +1207,58 @@ yy_symbol_value_print (FILE *yyo,
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
         break;
 
+    case YYSYMBOL_OPTION_NONCE_NONCE: /* "option_nonce_nonce"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_SESSION_ID: /* "option_authentication_tag_session_id"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_SEQUENCE_NUMBER: /* "option_authentication_tag_sequence_number"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_KEY_ID: /* "option_authentication_tag_key_id"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_DATA: /* "option_authentication_tag_data"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (((*yyvaluep).aval))); }
+        break;
+
+    case YYSYMBOL_OPTION_PA_AUTHENTICATION_TAG_KEY_ID: /* "option_pa_authentication_tag_key_id"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_PA_AUTHENTICATION_TAG_DATA: /* "option_pa_authentication_tag_data"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (((*yyvaluep).aval))); }
+        break;
+
+    case YYSYMBOL_OPTION_EAP_PAYLOAD_DATA: /* "option_eap_payload_data"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (((*yyvaluep).aval))); }
+        break;
+
+    case YYSYMBOL_OPTION_PSEUDO_RANDOM_FUNCTION_ID: /* "option_pseudo_random_function_id"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_MAC_ALGORITHM_ID: /* "option_mac_algorithm_id"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_SESSION_LIFETIME_LIFETIME: /* "option_session_lifetime_lifetime"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_RECEIVED_PAK_SEQUENCE_NUMBER: /* "option_received_pak_sequence_number"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_OPTION_ID_INDICATOR_DATA: /* "option_id_indicator_data"  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), (((*yyvaluep).aval))); }
+        break;
+
     case YYSYMBOL_message: /* message  */
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
         break;
@@ -1139,6 +1279,10 @@ yy_symbol_value_print (FILE *yyo,
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
         break;
 
+    case YYSYMBOL_opcode_specific_authentication: /* opcode_specific_authentication  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
     case YYSYMBOL_options: /* options  */
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
         break;
@@ -1156,6 +1300,42 @@ yy_symbol_value_print (FILE *yyo,
         break;
 
     case YYSYMBOL_option_data_filter: /* option_data_filter  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_nonce: /* option_data_nonce  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_authentication_tag: /* option_data_authentication_tag  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_pa_authentication_tag: /* option_data_pa_authentication_tag  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_eap_payload: /* option_data_eap_payload  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_pseudo_random_function: /* option_data_pseudo_random_function  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_mac_algorithm: /* option_data_mac_algorithm  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_session_lifetime: /* option_data_session_lifetime  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_received_pak: /* option_data_received_pak  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_option_data_id_indicator: /* option_data_id_indicator  */
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %u"), ((*yyvaluep).ival)); }
         break;
 
@@ -1444,31 +1624,35 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 12: /* opcode_specific: %empty  */
+  case 12: /* opcode_specific: opcode_specific_authentication  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 13: /* opcode_specific: %empty  */
                                                                     { ((*yyvalp).ival) = 0; }
     break;
 
-  case 13: /* $@7: %empty  */
+  case 14: /* $@7: %empty  */
                                                                     { driver->record_->map.nonce = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 14: /* $@8: %empty  */
+  case 15: /* $@8: %empty  */
                                                                     { driver->record_->map.protocol = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 15: /* $@9: %empty  */
+  case 16: /* $@9: %empty  */
                                                                     { driver->record_->map.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 16: /* $@10: %empty  */
+  case 17: /* $@10: %empty  */
                                                                     { driver->record_->map.internal_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 17: /* $@11: %empty  */
+  case 18: /* $@11: %empty  */
                                                                     { driver->record_->map.external_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 18: /* opcode_specific_map: "option_map_nonce" $@7 "option_map_protocol" $@8 "option_map_reserved" $@9 "option_map_internal_port" $@10 "option_map_assigned_external_port" $@11 "option_map_assigned_external_ip_address"  */
+  case 19: /* opcode_specific_map: "option_map_nonce" $@7 "option_map_protocol" $@8 "option_map_reserved" $@9 "option_map_internal_port" $@10 "option_map_assigned_external_port" $@11 "option_map_assigned_external_ip_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
                                                                       int result =
                                                                         driver->record_->map.external_address.set (driver->record_->map.external_port,
@@ -1486,27 +1670,27 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                                     }
     break;
 
-  case 19: /* $@12: %empty  */
+  case 20: /* $@12: %empty  */
                                                                     { driver->record_->peer.nonce = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 20: /* $@13: %empty  */
+  case 21: /* $@13: %empty  */
                                                                     { driver->record_->peer.protocol = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 21: /* $@14: %empty  */
+  case 22: /* $@14: %empty  */
                                                                     { driver->record_->peer.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 22: /* $@15: %empty  */
+  case 23: /* $@15: %empty  */
                                                                     { driver->record_->peer.internal_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 23: /* $@16: %empty  */
+  case 24: /* $@16: %empty  */
                                                                     { driver->record_->peer.external_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 24: /* $@17: %empty  */
+  case 25: /* $@17: %empty  */
                                                                     { int result =
                                                                       driver->record_->peer.external_address.set (driver->record_->peer.external_port,
                                                                                                                   (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival),
@@ -1523,15 +1707,15 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                                     }
     break;
 
-  case 25: /* $@18: %empty  */
+  case 26: /* $@18: %empty  */
                                                                     { driver->record_->peer.remote_peer_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 26: /* $@19: %empty  */
+  case 27: /* $@19: %empty  */
                                                                     { driver->record_->peer.reserved_2 = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 27: /* opcode_specific_peer: "option_peer_nonce" $@12 "option_peer_protocol" $@13 "option_peer_reserved" $@14 "option_peer_internal_port" $@15 "option_peer_assigned_external_port" $@16 "option_peer_assigned_external_ip_address" $@17 "option_peer_remote_port" $@18 "option_peer_reserved_2" $@19 "option_peer_remote_peer_address"  */
+  case 28: /* opcode_specific_peer: "option_peer_nonce" $@12 "option_peer_protocol" $@13 "option_peer_reserved" $@14 "option_peer_internal_port" $@15 "option_peer_assigned_external_port" $@16 "option_peer_assigned_external_ip_address" $@17 "option_peer_remote_port" $@18 "option_peer_reserved_2" $@19 "option_peer_remote_peer_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-16)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-14)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-12)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
                                                                       int result =
                                                                         driver->record_->peer.remote_peer_address.set (driver->record_->peer.remote_peer_port,
@@ -1549,47 +1733,92 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                                     }
     break;
 
-  case 28: /* options: option options  */
+  case 29: /* $@20: %empty  */
+                                                                    { driver->record_->authentication.session_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 30: /* opcode_specific_authentication: "option_authentication_session_id" $@20 "option_authentication_sequence_number"  */
+                                                                        { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
+                                                                          driver->record_->authentication.sequence_number = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 31: /* options: option options  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 29: /* options: %empty  */
+  case 32: /* options: %empty  */
                                                                     { ((*yyvalp).ival) = 0; }
     break;
 
-  case 30: /* $@20: %empty  */
+  case 33: /* $@21: %empty  */
                                                                     { struct PCPOption option_s;
                                                                       option_s.code = static_cast<enum PCP_Codes::OptionType> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival));
                                                                       driver->record_->options.push_back (option_s); }
     break;
 
-  case 31: /* $@21: %empty  */
+  case 34: /* $@22: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
                                                                       option_r.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 32: /* $@22: %empty  */
+  case 35: /* $@23: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
                                                                       option_r.length = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 33: /* option: "option_code" $@20 "option_reserved" $@21 "option_length" $@22 option_data  */
+  case 36: /* option: "option_code" $@21 "option_reserved" $@22 "option_length" $@23 option_data  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 34: /* option_data: option_data_third_party  */
+  case 37: /* option_data: option_data_third_party  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 35: /* option_data: option_data_filter  */
+  case 38: /* option_data: option_data_filter  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 36: /* option_data: %empty  */
+  case 39: /* option_data: option_data_nonce  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 40: /* option_data: option_data_authentication_tag  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 41: /* option_data: option_data_pa_authentication_tag  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 42: /* option_data: option_data_eap_payload  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 43: /* option_data: option_data_pseudo_random_function  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 44: /* option_data: option_data_mac_algorithm  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 45: /* option_data: option_data_session_lifetime  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 46: /* option_data: option_data_received_pak  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 47: /* option_data: option_data_id_indicator  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 48: /* option_data: %empty  */
                                                                     { ((*yyvalp).ival) = 0; }
     break;
 
-  case 37: /* option_data_third_party: "option_third_party_address"  */
+  case 49: /* option_data_third_party: "option_third_party_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
                                                                       int result =
@@ -1608,22 +1837,22 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                                     }
     break;
 
-  case 38: /* $@23: %empty  */
+  case 50: /* $@24: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
                                                                       option_r.filter.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 39: /* $@24: %empty  */
+  case 51: /* $@25: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
                                                                       option_r.filter.prefix_length = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 40: /* $@25: %empty  */
+  case 52: /* $@26: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
                                                                       option_r.filter.remote_peer_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
     break;
 
-  case 41: /* option_data_filter: "option_filter_reserved" $@23 "option_filter_prefix_length" $@24 "option_filter_remote_peer_port" $@25 "option_filter_remote_peer_address"  */
+  case 53: /* option_data_filter: "option_filter_reserved" $@24 "option_filter_prefix_length" $@25 "option_filter_remote_peer_port" $@26 "option_filter_remote_peer_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
                                                                       int result =
@@ -1640,6 +1869,80 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
+    break;
+
+  case 54: /* option_data_nonce: "option_nonce_nonce"  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
+                                                                      struct PCPOption& option_r = driver->record_->options.back ();
+                                                                      option_r.nonce.nonce = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 55: /* $@27: %empty  */
+                                                                       { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
+                                                                         option_r.authentication_tag.session_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 56: /* $@28: %empty  */
+                                                                            { struct PCPOption& option_r = driver->record_->options.back ();
+                                                                              option_r.authentication_tag.sequence_number = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 57: /* $@29: %empty  */
+                                                                    { struct PCPOption& option_r = driver->record_->options.back ();
+                                                                      option_r.authentication_tag.key_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 58: /* option_data_authentication_tag: "option_authentication_tag_session_id" $@27 "option_authentication_tag_sequence_number" $@28 "option_authentication_tag_key_id" $@29 "option_authentication_tag_data"  */
+                                                                    { struct PCPOption& option_r = driver->record_->options.back ();
+                                                                      ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (option_r.length - 12);
+                                                                      option_r.authentication_tag.data = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.aval); }
+    break;
+
+  case 59: /* $@30: %empty  */
+                                                                         { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
+                                                                           option_r.pa_authentication_tag.key_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 60: /* option_data_pa_authentication_tag: "option_pa_authentication_tag_key_id" $@30 "option_pa_authentication_tag_data"  */
+                                                                       { struct PCPOption& option_r = driver->record_->options.back ();
+                                                                         ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (option_r.length - 4);
+                                                                         option_r.pa_authentication_tag.data = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.aval); }
+    break;
+
+  case 61: /* option_data_eap_payload: "option_eap_payload_data"  */
+                                                                    { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
+                                                                      ((*yyvalp).ival) = option_r.length;
+                                                                      option_r.eap_payload.data = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.aval); }
+    break;
+
+  case 62: /* option_data_pseudo_random_function: "option_pseudo_random_function_id"  */
+                                                                       { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
+                                                                         struct PCPOption& option_r = driver->record_->options.back ();
+                                                                         option_r.pseudo_random_function.id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 63: /* option_data_mac_algorithm: "option_mac_algorithm_id"  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
+                                                                      struct PCPOption& option_r = driver->record_->options.back ();
+                                                                      option_r.mac_algorithm.id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 64: /* option_data_session_lifetime: "option_session_lifetime_lifetime"  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
+                                                                      struct PCPOption& option_r = driver->record_->options.back ();
+                                                                      option_r.session_lifetime.lifetime = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 65: /* option_data_received_pak: "option_received_pak_sequence_number"  */
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
+                                                                      struct PCPOption& option_r = driver->record_->options.back ();
+                                                                      option_r.received_pak.sequence_number = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+    break;
+
+  case 66: /* option_data_id_indicator: "option_id_indicator_data"  */
+                                                                    { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
+                                                                      ((*yyvalp).ival) = option_r.length;
+                                                                      option_r.id_indicator.data = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.aval); }
     break;
 
 
@@ -1784,6 +2087,14 @@ yydestruct (const char *yymsg,
                           { ((*yyvaluep).ival) = 0; }
         break;
 
+    case YYSYMBOL_OPTION_AUTHENTICATION_SESSION_ID: /* "option_authentication_session_id"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_SEQUENCE_NUMBER: /* "option_authentication_sequence_number"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
     case YYSYMBOL_OPTION_CODE: /* "option_code"  */
                           { ((*yyvaluep).ival) = 0; }
         break;
@@ -1816,6 +2127,58 @@ yydestruct (const char *yymsg,
                           { ((*yyvaluep).ival) = 0; }
         break;
 
+    case YYSYMBOL_OPTION_NONCE_NONCE: /* "option_nonce_nonce"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_SESSION_ID: /* "option_authentication_tag_session_id"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_SEQUENCE_NUMBER: /* "option_authentication_tag_sequence_number"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_KEY_ID: /* "option_authentication_tag_key_id"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_AUTHENTICATION_TAG_DATA: /* "option_authentication_tag_data"  */
+                          { delete[] ((*yyvaluep).aval); ((*yyvaluep).aval) = NULL; }
+        break;
+
+    case YYSYMBOL_OPTION_PA_AUTHENTICATION_TAG_KEY_ID: /* "option_pa_authentication_tag_key_id"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_PA_AUTHENTICATION_TAG_DATA: /* "option_pa_authentication_tag_data"  */
+                          { delete[] ((*yyvaluep).aval); ((*yyvaluep).aval) = NULL; }
+        break;
+
+    case YYSYMBOL_OPTION_EAP_PAYLOAD_DATA: /* "option_eap_payload_data"  */
+                          { delete[] ((*yyvaluep).aval); ((*yyvaluep).aval) = NULL; }
+        break;
+
+    case YYSYMBOL_OPTION_PSEUDO_RANDOM_FUNCTION_ID: /* "option_pseudo_random_function_id"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_MAC_ALGORITHM_ID: /* "option_mac_algorithm_id"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_SESSION_LIFETIME_LIFETIME: /* "option_session_lifetime_lifetime"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_RECEIVED_PAK_SEQUENCE_NUMBER: /* "option_received_pak_sequence_number"  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_OPTION_ID_INDICATOR_DATA: /* "option_id_indicator_data"  */
+                          { delete[] ((*yyvaluep).aval); ((*yyvaluep).aval) = NULL; }
+        break;
+
     case YYSYMBOL_message: /* message  */
                           { ((*yyvaluep).ival) = 0; }
         break;
@@ -1836,6 +2199,10 @@ yydestruct (const char *yymsg,
                           { ((*yyvaluep).ival) = 0; }
         break;
 
+    case YYSYMBOL_opcode_specific_authentication: /* opcode_specific_authentication  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
     case YYSYMBOL_options: /* options  */
                           { ((*yyvaluep).ival) = 0; }
         break;
@@ -1853,6 +2220,42 @@ yydestruct (const char *yymsg,
         break;
 
     case YYSYMBOL_option_data_filter: /* option_data_filter  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_nonce: /* option_data_nonce  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_authentication_tag: /* option_data_authentication_tag  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_pa_authentication_tag: /* option_data_pa_authentication_tag  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_eap_payload: /* option_data_eap_payload  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_pseudo_random_function: /* option_data_pseudo_random_function  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_mac_algorithm: /* option_data_mac_algorithm  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_session_lifetime: /* option_data_session_lifetime  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_received_pak: /* option_data_received_pak  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_option_data_id_indicator: /* option_data_id_indicator  */
                           { ((*yyvaluep).ival) = 0; }
         break;
 
