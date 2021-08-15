@@ -64,6 +64,7 @@
 #include "pcp_common.h"
 #include "pcp_configuration.h"
 #include "pcp_defines.h"
+#include "pcp_isession.h"
 
 #include "test_u_common.h"
 #include "test_u_stream_common.h"
@@ -74,22 +75,8 @@
 #endif // GUI_SUPPORT
 
 #include "test_u_connection_common.h"
+#include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
-
-//struct PCPClient_MessageData
-//{
-//  PCPClient_MessageData ()
-//   : record (NULL)
-//  {}
-//  ~PCPClient_MessageData ()
-//  {
-//    if (record)
-//      delete record;
-//  }
-//
-//  struct PCP_Record* record;
-//};
-//typedef Stream_DataBase_T<struct PCPClient_MessageData> PCPClient_MessageData_t;
 
 struct PCP_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
@@ -102,11 +89,6 @@ struct PCPClient_SessionData
   PCPClient_SessionData ()
    : Test_U_StreamSessionData ()
    , connection (NULL) // outbound
-   , nonce (0)
-   , serverAddress (static_cast<u_short> (0),
-                    static_cast<ACE_UINT32> (INADDR_ANY))
-   , targetFileName ()
-   , timeStamp (ACE_Time_Value::zero)
    //, userData (NULL)
   {}
   struct PCPClient_SessionData& operator= (struct PCPClient_SessionData& rhs_in)
@@ -120,10 +102,7 @@ struct PCPClient_SessionData
   }
 
   PCPClient_IConnection_t* connection;          // RELEASE
-  ACE_UINT64               nonce;               // session nonce
-  ACE_INET_Addr            serverAddress;
   std::string              targetFileName;      // file writer module
-  ACE_Time_Value           timeStamp;           // lease timeout
 
   //struct Stream_UserData*   userData;
 };
@@ -301,14 +280,20 @@ struct PCPClient_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE
-   , connection (NULL)
+   , externalAddress ()
+   , gatewayAddress ()
+   , interfaceAddress ()
    , progressData ()
+   , session (NULL)
    , subscribers ()
   {}
 
   struct PCPClient_Configuration*  configuration;
-  PCPClient_IOutboundConnection_t* connection;
+  ACE_INET_Addr                    externalAddress;
+  ACE_INET_Addr                    gatewayAddress;
+  ACE_INET_Addr                    interfaceAddress;
   struct PCPClient_UI_ProgressData progressData;
+  PCP_ISession_t*                  session;
   PCPClient_Subscribers_t          subscribers;
 };
 

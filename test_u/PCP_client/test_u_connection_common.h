@@ -54,18 +54,13 @@
 #include "pcp_common.h"
 #include "pcp_configuration.h"
 
-//#include "test_u_common.h"
-
 // forward declarations
 class Test_U_InboundConnectionStream;
 class Test_U_OutboundConnectionStream;
 class PCPClient_ConnectionConfiguration;
 
-//extern const char stream_name_string_[];
-//struct PCPClient_StreamConfiguration;
 struct PCPClient_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<//stream_name_string_,
-                               struct PCP_StreamConfiguration,
+typedef Stream_Configuration_T<struct PCP_StreamConfiguration,
                                struct PCPClient_ModuleHandlerConfiguration> PCPClient_StreamConfiguration_t;
 class PCPClient_ConnectionConfiguration
  : public Net_StreamConnectionConfiguration_T<PCPClient_StreamConfiguration_t,
@@ -76,15 +71,12 @@ class PCPClient_ConnectionConfiguration
    : Net_StreamConnectionConfiguration_T ()
   {}
 };
-//typedef std::map<std::string,
-//                 PCPClient_ConnectionConfiguration> PCPClient_ConnectionConfigurations_t;
-//typedef PCPClient_ConnectionConfigurations_t::iterator PCPClient_ConnectionConfigurationIterator_t;
 
 //////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct PCP_ConnectionState,
-                          PCP_Statistic_t> PCPClient_IOutboundConnection_t;
+                          PCP_Statistic_t> PCPClient_IConnection_t;
 
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 PCPClient_ConnectionConfiguration,

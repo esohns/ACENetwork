@@ -21,67 +21,31 @@
 #ifndef PCP_NETWORK_H
 #define PCP_NETWORK_H
 
-#include <string>
-
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
-#include "stream_common.h"
-
-#include "net_asynch_tcpsockethandler.h"
-#include "net_configuration.h"
+#include "net_common.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-#include "net_stream_asynch_tcpsocket_base.h"
-#include "net_stream_tcpsocket_base.h"
-#include "net_tcpsockethandler.h"
-#include "net_tcpconnection_base.h"
-
-#include "net_client_asynchconnector.h"
-#include "net_client_connector.h"
 
 #include "pcp_common.h"
-#include "pcp_configuration.h"
-//#include "pcp_stream.h"
-#include "pcp_stream_common.h"
 
-/////////////////////////////////////////
+struct PCP_SessionState
+{
+  PCP_SessionState ()
+   : nonce (0)
+   , serverAddress (static_cast<u_short> (0),
+                    static_cast<ACE_UINT32> (INADDR_ANY))
+   , timeStamp (ACE_Time_Value::zero)
+  {}
 
-//typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_t,
-//                                  ACE_INET_Addr,
-//                                  struct PCP_ConnectionConfiguration,
-//                                  struct PCP_ConnectionState,
-//                                  PCP_Statistic_t,
-//                                  PCP_Stream_t,
-//                                  struct Net_UserData,
-//                                  struct Stream_ModuleConfiguration,
-//                                  struct PCP_ModuleHandlerConfiguration> PCP_TCPHandler_t;
-//typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_t,
-//                                        ACE_INET_Addr,
-//                                        struct PCP_ConnectionConfiguration,
-//                                        struct PCP_ConnectionState,
-//                                        PCP_Statistic_t,
-//                                        PCP_Stream_t,
-//                                        struct Net_UserData,
-//                                        struct Stream_ModuleConfiguration,
-//                                        struct PCP_ModuleHandlerConfiguration> PCP_AsynchTCPHandler_t;
-//typedef Net_TCPConnectionBase_T<PCP_TCPHandler_t,
-//                                struct PCP_ConnectionConfiguration,
-//                                struct PCP_ConnectionState,
-//                                PCP_Statistic_t,
-//                                PCP_Stream_t,
-//                                struct PCP_SocketHandlerConfiguration,
-//                                struct Net_UserData> PCP_TCPConnection_t;
-//typedef Net_AsynchTCPConnectionBase_T<PCP_AsynchTCPHandler_t,
-//                                      struct PCP_ConnectionConfiguration,
-//                                      struct PCP_ConnectionState,
-//                                      PCP_Statistic_t,
-//                                      PCP_Stream_t,
-//                                      struct PCP_SocketHandlerConfiguration,
-//                                      struct Net_UserData> PCP_AsynchTCPConnection_t;
+  ACE_UINT64     nonce;         // session nonce
+  ACE_INET_Addr  serverAddress;
+  ACE_Time_Value timeStamp;     // (mapping-) timeout
+};
 
 /////////////////////////////////////////
 
@@ -93,34 +57,11 @@ typedef Net_ISocketConnection_T<ACE_INET_Addr,
                                 struct PCP_ConnectionState,
                                 PCP_Statistic_t,
                                 struct PCP_SocketHandlerConfiguration> PCP_ISocketConnection_t;
-//typedef Net_ISession_T<ACE_INET_Addr,
-//                       struct Net_SocketConfiguration,
-//                       struct PCP_ConnectionConfiguration,
-//                       struct PCP_ConnectionState,
-//                       PCP_Statistic_t,
-//                       PCP_Stream> PCP_ISession_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
                          struct PCP_SocketHandlerConfiguration> PCP_IConnector_t;
-//typedef Net_Client_Connector_T<PCP_TCPConnection_t,
-//                               ACE_SOCK_CONNECTOR,
-//                               ACE_INET_Addr,
-//                               struct PCP_ConnectionConfiguration,
-//                               struct PCP_ConnectionState,
-//                               PCP_Statistic_t,
-//                               PCP_Stream_t,
-//                               struct PCP_SocketHandlerConfiguration,
-//                               struct Net_UserData> PCP_Connector_t;
-//typedef Net_Client_AsynchConnector_T<PCP_AsynchTCPConnection_t,
-//                                     ACE_INET_Addr,
-//                                     struct PCP_ConnectionConfiguration,
-//                                     struct PCP_ConnectionState,
-//                                     PCP_Statistic_t,
-//                                     PCP_Stream_t,
-//                                     struct PCP_SocketHandlerConfiguration,
-//                                     struct Net_UserData> PCP_AsynchConnector_t;
 
 /////////////////////////////////////////
 

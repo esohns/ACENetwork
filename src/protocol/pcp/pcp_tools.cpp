@@ -592,3 +592,10 @@ PCP_Tools::mapAddress (const ACE_INET_Addr& address_in,
                                            : ip_address);
   *reinterpret_cast<ACE_UINT32*> (&mappedAddress_inout[12]) = ip_address;
 }
+
+void
+PCP_Tools::free (struct PCP_Record& record_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("PCP_Tools::free"));
+
+}

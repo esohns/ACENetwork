@@ -106,7 +106,7 @@
                       <object class="GtkHBox" id="hbox_server">
                         <property name="visible">True</property>
                         <child>
-                          <object class="GtkEntry" id="entry_server">
+                          <object class="GtkEntry" id="entry_server_address">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_markup">PCP server address</property>
@@ -117,7 +117,7 @@
                             <property name="shadow_type">etched-in</property>
                             <property name="caps_lock_warning">False</property>
                             <property name="primary_icon_stock">gtk-network</property>
-                            <signal name="changed" handler="entry_server_changed_cb"/>
+                            <signal name="changed" handler="entry_server_address_changed_cb"/>
                           </object>
                           <packing>
                             <property name="position">0</property>
@@ -507,7 +507,7 @@
       <action-widget response="0">button_clear</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkAboutDialog" id="aboutdialog">
+  <object class="GtkAboutDialog" id="dialog_about">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">About</property>
     <property name="resizable">False</property>

@@ -84,6 +84,7 @@ set (source_files
      pcp_codes.h
      pcp_defines.h
 #     pcp_exports.h
+     pcp_isession.h
      pcp_message.cpp
      pcp_message.h
      pcp_parser.cpp
@@ -105,6 +106,9 @@ set (source_files
      pcp_module_streamer.h
      pcp_module_streamer.inl
      pcp_network.h
+     pcp_session.cpp
+     pcp_session.h
+     pcp_session.inl
      pcp_sessionmessage.cpp
      pcp_sessionmessage.h
      pcp_sessionmessage.inl
@@ -191,6 +195,7 @@ install (FILES
          pcp_configuration.h
          pcp_defines.h
 #         pcp_exports.h
+         pcp_isession.h
          pcp_message.h
          pcp_parser.h
          pcp_parser_driver.h
@@ -204,6 +209,8 @@ install (FILES
          pcp_module_streamer.h
          pcp_module_streamer.inl
          pcp_network.h
+         pcp_session.h
+         pcp_session.inl
          pcp_sessionmessage.h
          pcp_sessionmessage.inl
          pcp_stream.h

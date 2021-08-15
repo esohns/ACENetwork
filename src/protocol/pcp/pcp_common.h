@@ -389,15 +389,7 @@ struct PCP_ConnectionState
 {
   PCP_ConnectionState ()
    : Net_StreamConnectionState ()
-   , nonce (0)
-   , serverAddress (static_cast<u_short> (0),
-                    static_cast<ACE_UINT32> (INADDR_ANY))
-   , timeStamp (ACE_Time_Value::zero)
   {}
-
-  ACE_UINT64     nonce;         // session nonce
-  ACE_INET_Addr  serverAddress;
-  ACE_Time_Value timeStamp;     // (mapping-) timeout
 };
 
 #endif

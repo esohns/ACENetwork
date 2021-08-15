@@ -29,8 +29,10 @@
 #include "net_iconnectionmanager.h"
 
 #include "pcp_common.h"
+#include "pcp_session.h"
 
 #include "test_u_connection_common.h"
+#include "test_u_message.h"
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
@@ -47,5 +49,16 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
 
 typedef ACE_Singleton<PCPClient_ConnectionManager_t,
                       ACE_SYNCH_MUTEX> PCPCLIENT_CONNECTIONMANAGER_SINGLETON;
+
+//////////////////////////////////////////
+
+// session
+typedef PCP_ISession_T<struct PCP_SessionState,
+                       PCPClient_ConnectionConfiguration> PCP_ISession_t;
+
+typedef PCP_Session_T<struct PCP_SessionState,
+                      PCPClient_ConnectionConfiguration,
+                      PCPClient_ConnectionManager_t,
+                      Test_U_Message> PCP_Session_t;
 
 #endif

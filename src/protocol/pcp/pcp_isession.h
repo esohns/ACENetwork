@@ -18,45 +18,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PCP_TOOLS_H
-#define PCP_TOOLS_H
+#ifndef PCP_ISESSION_T_H
+#define PCP_ISESSION_T_H
 
-#include <string>
-
-#include "ace/Basic_Types.h"
-#include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-#include "common_tools.h"
+#include "common_iget.h"
 
-#include "net_defines.h"
-
-#include "pcp_codes.h"
 #include "pcp_common.h"
+#include "pcp_network.h"
 
-class PCP_Tools
+template <typename StateType,
+          typename ConnectionConfigurationType>
+class PCP_ISession_T
+ : public Common_IGetR_T<StateType>
 {
  public:
-  // debug info
-  static std::string dump (const struct PCP_Record&);
+  inline virtual ~PCP_ISession_T () {}
 
-  static std::string VersionToString (PCP_Version_t);
-  static std::string OpcodeToString (PCP_Opcode_t);
-  static std::string ResultCodeToString (PCP_ResultCode_t);
-  static std::string OptionToString (PCP_Option_t);
+  virtual void initialize (const ConnectionConfigurationType&,
+                           PCP_IConnection_t*) = 0;
 
-  inline static bool isRequest (const struct PCP_Record& record_in) { return (record_in.opcode & 0x80); }
-  static void mapAddress (const ACE_INET_Addr&, // address
-                          ACE_UINT8[]);         // return value: mapped address
-  inline static ACE_UINT64 generateNonce () { return static_cast<ACE_UINT64> (ACE_OS::rand_r (&Common_Tools::randomSeed)); }
+  // API
+  virtual void announce () = 0;
+  // *TODO*: support filter option
+  virtual void map (const ACE_INET_Addr&,      // external address
+                    const ACE_INET_Addr&) = 0; // internal address
+  virtual void peer (const ACE_INET_Addr&,      // external address
+                     const ACE_INET_Addr&,      // internal address
+                     const ACE_INET_Addr&) = 0; // remote peer address
+  virtual void authenticate () = 0;
 
-  static void free (struct PCP_Record&);
+  ////////////////////////////////////////
+  // callbacks
+  // *TODO*: make these 'private'
 
- private:
-  ACE_UNIMPLEMENTED_FUNC (PCP_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (~PCP_Tools ())
-  ACE_UNIMPLEMENTED_FUNC (PCP_Tools (const PCP_Tools&))
-  ACE_UNIMPLEMENTED_FUNC (PCP_Tools& operator= (const PCP_Tools&))
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void notify (struct PCP_Record*&) = 0; // response record
 };
 
 #endif

@@ -19,4 +19,4 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "irc_session.h"
+#include "pcp_session.h"

@@ -18,118 +18,51 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef IRC_SESSION_H
-#define IRC_SESSION_H
+#ifndef PCP_SESSION_H
+#define PCP_SESSION_H
 
-#include <string>
-
-#include "ace/Asynch_Connector.h"
-#include "ace/config-macros.h"
-#include "ace/Connector.h"
 #include "ace/Global_Macros.h"
-#include "ace/SOCK_Connector.h"
-#include "ace/Synch_Traits.h"
 
-#include "stream_common.h"
+#include "pcp_isession.h"
 
-#include "net_iconnection.h"
-
-#include "irc_network.h"
-#include "irc_record.h"
-
-// forward declarations
-class ACE_Message_Block;
-
-template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename SessionMessageType,
-          typename SocketHandlerConfigurationType,
-          typename ModuleHandlerConfigurationType,
-          typename StateType, // ui state (curses/gtk/...) *TODO*: to be removed
-          ///////////////////////////////
-          // *TODO*: remove these ASAP
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType,
-          typename LogOutputType> // *NOTE*: needs to inherit from ACE_FILE_IO
-class IRC_Session_T
- : public ConnectionType
- //, virtual public Net_ISession_T<ACE_INET_Addr,
- //                                Net_SocketConfiguration,
- //                                IRC_Client_Configuration,
- //                                Stream_Statistic,
- //                                IRC_Client_Stream,
- //                                IRC_Client_ConnectionState>
- , public NotificationType
+template <typename StateType,
+          typename ConnectionConfigurationType, // outbound-
+          typename ConnectionManagerType,       // (outbound-)
+          typename MessageType>
+class PCP_Session_T
+ : public PCP_ISession_T<StateType,
+                         ConnectionConfigurationType>
 {
- friend class ACE_Connector<IRC_Session_T<ConnectionType,
-                                          SessionDataType,
-                                          NotificationType,
-                                          ConfigurationType,
-                                          SessionMessageType,
-                                          SocketHandlerConfigurationType,
-                                          ModuleHandlerConfigurationType,
-                                          StateType,
-                                          ConnectionManagerType,
-                                          InputHandlerType,
-                                          InputHandlerConfigurationType,
-                                          LogOutputType>,
-                            ACE_SOCK_CONNECTOR>;
- friend class ACE_Asynch_Connector<IRC_Session_T<ConnectionType,
-                                                 SessionDataType,
-                                                 NotificationType,
-                                                 ConfigurationType,
-                                                 SessionMessageType,
-                                                 SocketHandlerConfigurationType,
-                                                 ModuleHandlerConfigurationType,
-                                                 StateType,
-                                                 ConnectionManagerType,
-                                                 InputHandlerType,
-                                                 InputHandlerConfigurationType,
-                                                 LogOutputType> >;
-
  public:
-  IRC_Session_T (ConnectionManagerType* = NULL, // connection manager handle
-                 unsigned int = 0);             // statistic collecting interval (second(s)) [0: off]
-  virtual ~IRC_Session_T ();
+  PCP_Session_T ();
+  virtual ~PCP_Session_T ();
 
-  // implement Net_ISession_T
-  //virtual const IRC_SessionState& state () const;
+  // implement PCP_ISession_T
+  inline virtual const StateType& getR () const { return state_; }
+  virtual void initialize (const ConnectionConfigurationType&,
+                           PCP_IConnection_t*);
 
-  // implement Common_INotify_T
-  virtual void start (const SessionDataType&);
-  virtual void notify (const IRC_Record&);
-  virtual void notify (const SessionMessageType&);
-  virtual void end ();
-
-  // override some task-based members
-  // *TODO*: make these private
-  virtual int open (void* = NULL); // arg
-  virtual void open (ACE_HANDLE,          // (socket) handle
-                     ACE_Message_Block&); // initial data (if any)
+  virtual void announce ();
+  virtual void map (const ACE_INET_Addr&,  // external address
+                    const ACE_INET_Addr&); // internal address
+  virtual void peer (const ACE_INET_Addr&,  // external address
+                     const ACE_INET_Addr&,  // internal address
+                     const ACE_INET_Addr&); // remote peer address
+  virtual void authenticate ();
 
  private:
-  typedef ConnectionType inherited;
+  ACE_UNIMPLEMENTED_FUNC (PCP_Session_T (const PCP_Session_T&))
+  ACE_UNIMPLEMENTED_FUNC (PCP_Session_T& operator= (const PCP_Session_T&))
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Session_T (const IRC_Session_T&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Session_T& operator= (const IRC_Session_T&))
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void notify (struct PCP_Record*&); // response record
 
-  void error (const IRC_Record&);
-  void log (const IRC_Record&);
-  void log (const std::string&,  // channel (empty ? server log : channel)
-            const std::string&); // text
-
-  bool              close_;
-  InputHandlerType* inputHandler_;
-  bool              logToFile_;
-  LogOutputType     output_;
-  bool              shutDownOnEnd_;
-  StateType*        UIState_;
+  ConnectionConfigurationType* configuration_;
+  PCP_IConnection_t*           connection_;
+  StateType                    state_;
 };
 
-// include template implementation
-#include "irc_session.inl"
+// include template definition
+#include "pcp_session.inl"
 
 #endif
