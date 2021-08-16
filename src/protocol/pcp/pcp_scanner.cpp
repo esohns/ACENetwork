@@ -10461,11 +10461,11 @@ static const yy_state_type yy_NUL_trans[302] =
 
 static const flex_int32_t yy_rule_linenum[49] =
     {   0,
-      152,  158,  166,  176,  184,  192,  203,  214,  249,  266,
-      274,  286,  297,  308,  320,  337,  345,  357,  368,  379,
-      390,  401,  412,  424,  435,  447,  455,  463,  509,  521,
-      529,  537,  548,  560,  572,  583,  594,  605,  630,  641,
-      666,  691,  703,  715,  727,  739,  764,  777
+      152,  158,  166,  176,  184,  192,  203,  214,  243,  254,
+      262,  274,  285,  296,  308,  319,  327,  339,  350,  361,
+      372,  383,  394,  406,  417,  429,  437,  445,  491,  503,
+      511,  519,  530,  542,  554,  565,  576,  587,  612,  623,
+      648,  673,  685,  697,  709,  721,  746,  759
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -10625,6 +10625,7 @@ static const flex_int32_t yy_rule_linenum[49] =
 
 
 
+    
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
  * down here because we want the user's section 1 to have been scanned first.
@@ -10636,6 +10637,7 @@ static const flex_int32_t yy_rule_linenum[49] =
 /* %if-c++-only */
 /* %endif */
 #endif
+    
 
 
 
@@ -11239,15 +11241,9 @@ case 8:
 YY_RULE_SETUP
 { driver->offset_ += yyleng;
                              yylval->ival =
-                                 (*reinterpret_cast<unsigned char*> (yytext + 8) << 24);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 9) << 16);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 10) << 8);
-                             yylval->ival |=
-                                 *reinterpret_cast<unsigned char*> (yytext + 11);
+                                 *reinterpret_cast<ACE_UINT64*> (yytext + (12 - sizeof (ACE_UINT64)));
                              yylval->ival =
-                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (yylval->ival)
                                                                         : yylval->ival);
                              switch (driver->record_->opcode)
                              {
@@ -11277,15 +11273,9 @@ case 9:
 YY_RULE_SETUP
 { driver->offset_ += yyleng;
                              yylval->ival =
-                                 (*reinterpret_cast<unsigned char*> (yytext + 8) << 24);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 9) << 16);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 10) << 8);
-                             yylval->ival |=
-                                 *reinterpret_cast<unsigned char*> (yytext + 11);
+                                 *reinterpret_cast<ACE_UINT64*> (yytext + (12 - sizeof (ACE_UINT64)));
                              yylval->ival =
-                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (yylval->ival)
                                                                         : yylval->ival);
                              BEGIN(opcode_specific_response_data_map_protocol);
                              return yytokentype::OPTION_MAP_NONCE;
@@ -11371,15 +11361,9 @@ case 15:
 YY_RULE_SETUP
 { driver->offset_ += yyleng;
                              yylval->ival =
-                                 (*reinterpret_cast<unsigned char*> (yytext + 8) << 24);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 9) << 16);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 10) << 8);
-                             yylval->ival |=
-                                 *reinterpret_cast<unsigned char*> (yytext + 11);
+                                 *reinterpret_cast<ACE_UINT64*> (yytext + (12 - sizeof (ACE_UINT64)));
                              yylval->ival =
-                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (yylval->ival)
                                                                         : yylval->ival);
                              BEGIN(opcode_specific_response_data_peer_protocol);
                              return yytokentype::OPTION_PEER_NONCE;
@@ -11393,7 +11377,7 @@ YY_RULE_SETUP
 { driver->offset_ += yyleng;
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
-                             BEGIN(opcode_specific_response_data_map_reserved);
+                             BEGIN(opcode_specific_response_data_peer_reserved);
                              return yytokentype::OPTION_PEER_PROTOCOL;
                              /* return yy::PCP_Parser::token::OPTION_PEER_PROTOCOL; */ }
 	YY_BREAK
@@ -11514,7 +11498,7 @@ YY_RULE_SETUP
                              yylval->ival =
                                  ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
                                                                         : yylval->ival);
-                             BEGIN(opcode_specific_response_data_authentication);
+                             BEGIN(opcode_specific_response_data_authentication_sequence_number);
                              return yytokentype::OPTION_AUTHENTICATION_SESSION_ID;
                              /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_SESSION_ID; */ }
 	YY_BREAK

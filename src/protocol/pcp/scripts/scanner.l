@@ -212,15 +212,9 @@ OCTET          [\x00-\xFF]
 <reserved_2>{
 {OCTET}{12}                { driver->offset_ += yyleng;
                              yylval->ival =
-                                 (*reinterpret_cast<unsigned char*> (yytext + 8) << 24);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 9) << 16);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 10) << 8);
-                             yylval->ival |=
-                                 *reinterpret_cast<unsigned char*> (yytext + 11);
+                                 *reinterpret_cast<ACE_UINT64*> (yytext + (12 - sizeof (ACE_UINT64)));
                              yylval->ival =
-                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (yylval->ival)
                                                                         : yylval->ival);
                              switch (driver->record_->opcode)
                              {
@@ -247,15 +241,9 @@ OCTET          [\x00-\xFF]
 <opcode_specific_response_data_map>{
 {OCTET}{12}                { driver->offset_ += yyleng;
                              yylval->ival =
-                                 (*reinterpret_cast<unsigned char*> (yytext + 8) << 24);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 9) << 16);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 10) << 8);
-                             yylval->ival |=
-                                 *reinterpret_cast<unsigned char*> (yytext + 11);
+                                 *reinterpret_cast<ACE_UINT64*> (yytext + (12 - sizeof (ACE_UINT64)));
                              yylval->ival =
-                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (yylval->ival)
                                                                         : yylval->ival);
                              BEGIN(opcode_specific_response_data_map_protocol);
                              return yytokentype::OPTION_MAP_NONCE;
@@ -318,15 +306,9 @@ OCTET          [\x00-\xFF]
 <opcode_specific_response_data_peer>{
 {OCTET}{12}                { driver->offset_ += yyleng;
                              yylval->ival =
-                                 (*reinterpret_cast<unsigned char*> (yytext + 8) << 24);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 9) << 16);
-                             yylval->ival |=
-                                 (*reinterpret_cast<unsigned char*> (yytext + 10) << 8);
-                             yylval->ival |=
-                                 *reinterpret_cast<unsigned char*> (yytext + 11);
+                                 *reinterpret_cast<ACE_UINT64*> (yytext + (12 - sizeof (ACE_UINT64)));
                              yylval->ival =
-                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
+                                 ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (yylval->ival)
                                                                         : yylval->ival);
                              BEGIN(opcode_specific_response_data_peer_protocol);
                              return yytokentype::OPTION_PEER_NONCE;
@@ -336,7 +318,7 @@ OCTET          [\x00-\xFF]
 {OCTET}{1}                 { driver->offset_ += yyleng;
                              yylval->ival =
                                  *reinterpret_cast<unsigned char*> (yytext);
-                             BEGIN(opcode_specific_response_data_map_reserved);
+                             BEGIN(opcode_specific_response_data_peer_reserved);
                              return yytokentype::OPTION_PEER_PROTOCOL;
                              /* return yy::PCP_Parser::token::OPTION_PEER_PROTOCOL; */ }
 } // end <opcode_specific_response_data_peer_protocol>
@@ -426,7 +408,7 @@ OCTET          [\x00-\xFF]
                              yylval->ival =
                                  ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (yylval->ival)
                                                                         : yylval->ival);
-                             BEGIN(opcode_specific_response_data_authentication);
+                             BEGIN(opcode_specific_response_data_authentication_sequence_number);
                              return yytokentype::OPTION_AUTHENTICATION_SESSION_ID;
                              /* return yy::PCP_Parser::token::OPTION_AUTHENTICATION_SESSION_ID; */ }
 } // end <opcode_specific_response_data_authentication>

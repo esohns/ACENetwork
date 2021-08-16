@@ -8,6 +8,8 @@
 // *NOTE*: work around quirky MSVC...
 #define NOMINMAX
 
+#include "targetver.h"
+
 // Windows Header Files
 #include <windows.h>
 #endif
@@ -20,7 +22,6 @@
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
 
 #if defined (VALGRIND_SUPPORT)
 #include "valgrind/valgrind.h"
@@ -49,10 +50,6 @@
 
 #include "net_common.h"
 #include "net_macros.h"
-
-#if defined (_MSC_VER)
-#include "targetver.h"
-#endif // _MSC_VER
 
 // *TODO*: reference additional headers your program requires here
 #include "test_u_HTTP_decoder_common.h"

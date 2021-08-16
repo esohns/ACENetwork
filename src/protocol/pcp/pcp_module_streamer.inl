@@ -97,11 +97,41 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
                          sizeof (ACE_UINT8));
   if (result == -1)
     goto error;
-  result =
-    message_inout->copy (reinterpret_cast<const char*> (&short_i), // 0
-                         sizeof (ACE_UINT16));
-  if (result == -1)
-    goto error;
+  switch (data_r.opcode)
+  {
+    case PCP_Codes::PCP_OPCODE_ANNOUNCE:
+    case PCP_Codes::PCP_OPCODE_MAP:
+    case PCP_Codes::PCP_OPCODE_PEER:
+    {
+      result =
+        message_inout->copy (reinterpret_cast<const char*> (&short_i), // 0
+                             sizeof (ACE_UINT16));
+      if (result == -1)
+        goto error;
+      break;
+    }
+    case PCP_Codes::PCP_OPCODE_AUTHENTICATION:
+    {
+      result =
+        message_inout->copy (reinterpret_cast<const char*> (&short_i), // 0
+                             sizeof (ACE_UINT8));
+      if (result == -1)
+        goto error;
+      result =
+        message_inout->copy (reinterpret_cast<const char*> (&data_r.result_code),
+                             sizeof (ACE_UINT8));
+      if (result == -1)
+        goto error;
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown opcode (was: %d), aborting\n"),
+                  data_r.opcode));
+      goto error;
+    }
+  } // end SWITCH
   int_i = data_r.lifetime;
   int_i =
     ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (int_i) : int_i);
@@ -119,14 +149,16 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
     goto error;
   switch (data_r.opcode)
   {
+    case PCP_Codes::PCP_OPCODE_ANNOUNCE:
+      break;
     case PCP_Codes::PCP_OPCODE_MAP:
     {
       ACE_OS::memset (nonce_a, 0, sizeof (ACE_UINT8[PCP_NONCE_BYTES]));
       unsigned int offset_i =
         sizeof (ACE_UINT8[PCP_NONCE_BYTES]) - sizeof (ACE_UINT64);
-      ACE_UINT64 int64_i = data_r.map.nonce;
-        //((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONGLONG (data_r.map.nonce)
-        //                                       : data_r.map.nonce);
+      ACE_UINT64 int64_i =
+        ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (data_r.map.nonce)
+                                               : data_r.map.nonce);
       ACE_OS::memcpy (nonce_a + offset_i, &int64_i, sizeof (ACE_UINT64));
       result =
         message_inout->copy (reinterpret_cast<const char*> (&nonce_a[0]),
@@ -159,7 +191,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
                              sizeof (ACE_UINT16));
       if (result == -1)
         goto error;
-      PCP_Tools::mapAddress (data_r.map.external_address,
+      PCP_Tools::mapAddress (*data_r.map.external_address,
                              address_a);
       result =
         message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
@@ -173,9 +205,9 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
       ACE_OS::memset (nonce_a, 0, sizeof (ACE_UINT8[PCP_NONCE_BYTES]));
       unsigned int offset_i =
         sizeof (ACE_UINT8[PCP_NONCE_BYTES]) - sizeof (ACE_UINT64);
-      ACE_UINT64 int64_i = data_r.peer.nonce;
-        //((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONGLONG (data_r.map.nonce)
-        //                                       : data_r.map.nonce);
+      ACE_UINT64 int64_i =
+        ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG_LONG (data_r.map.nonce)
+                                               : data_r.map.nonce);
       ACE_OS::memcpy (nonce_a + offset_i, &int64_i, sizeof (ACE_UINT64));
       result =
         message_inout->copy (reinterpret_cast<const char*> (&nonce_a[0]),
@@ -208,7 +240,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
                              sizeof (ACE_UINT16));
       if (result == -1)
         goto error;
-      PCP_Tools::mapAddress (data_r.peer.external_address,
+      PCP_Tools::mapAddress (*data_r.peer.external_address,
                              address_a);
       result =
         message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
@@ -228,7 +260,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
                              sizeof (ACE_UINT16));
       if (result == -1)
         goto error;
-      PCP_Tools::mapAddress (data_r.peer.remote_peer_address,
+      PCP_Tools::mapAddress (*data_r.peer.remote_peer_address,
                              address_a);
       result =
         message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
@@ -237,8 +269,26 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
         goto error;
       break;
     }
-    case PCP_Codes::PCP_OPCODE_ANNOUNCE:
+    case PCP_Codes::PCP_OPCODE_AUTHENTICATION:
+    {
+      int_i = data_r.authentication.session_id;
+      int_i =
+        ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (int_i) : int_i);
+      result =
+        message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                             sizeof (ACE_UINT32));
+      if (result == -1)
+        goto error;
+      int_i = data_r.authentication.sequence_number;
+      int_i =
+        ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (int_i) : int_i);
+      result =
+        message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                             sizeof (ACE_UINT32));
+      if (result == -1)
+        goto error;
       break;
+    }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -247,7 +297,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
       goto error;
     }
   } // end SWITCH
-  for (PCP_OptionsIterator_t iterator = data_r.options.begin ();
+  for (PCP_OptionsConstIterator_t iterator = data_r.options.begin ();
        iterator != data_r.options.end ();
        ++iterator)
   {
@@ -273,7 +323,7 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
     {
       case PCP_Codes::PCP_OPTION_THIRD_PARTY:
       {
-        PCP_Tools::mapAddress ((*iterator).third_party.address,
+        PCP_Tools::mapAddress (*(*iterator).third_party.address,
                                address_a);
         result =
           message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
@@ -304,11 +354,139 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
                                 sizeof (ACE_UINT16));
         if (result == -1)
           goto error;
-        PCP_Tools::mapAddress ((*iterator).filter.remote_peer_address,
+        PCP_Tools::mapAddress (*(*iterator).filter.remote_peer_address,
                                address_a);
         result =
           message_inout->copy (reinterpret_cast<const char*> (&address_a[0]),
                                sizeof (ACE_UINT8[NET_ADDRESS_IPV6_ADDRESS_BYTES]));
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_NONCE:
+      {
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).nonce.nonce)
+                                                 : (*iterator).nonce.nonce);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG:
+      {
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).authentication_tag.session_id)
+                                                 : (*iterator).authentication_tag.session_id);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).authentication_tag.sequence_number)
+                                                 : (*iterator).authentication_tag.sequence_number);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).authentication_tag.key_id)
+                                                 : (*iterator).authentication_tag.key_id);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        result =
+          message_inout->copy (reinterpret_cast<const char*> ((*iterator).authentication_tag.data),
+                               (*iterator).length - 12);
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG:
+      {
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).pa_authentication_tag.key_id)
+                                                 : (*iterator).pa_authentication_tag.key_id);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        result =
+          message_inout->copy (reinterpret_cast<const char*> ((*iterator).pa_authentication_tag.data),
+                               (*iterator).length - 4);
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_EAP_PAYLOAD:
+      {
+        result =
+          message_inout->copy (reinterpret_cast<const char*> ((*iterator).eap_payload.data),
+                               (*iterator).length);
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_PSEUDO_RANDOM_FUNCTION:
+      {
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).pseudo_random_function.id)
+                                                 : (*iterator).pseudo_random_function.id);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_MAC_ALGORITHM:
+      {
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).mac_algorithm.id)
+                                                 : (*iterator).mac_algorithm.id);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_SESSION_LIFETIME:
+      {
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).session_lifetime.lifetime)
+                                                 : (*iterator).session_lifetime.lifetime);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_RECEIVED_PAK:
+      {
+        int_i =
+          ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG ((*iterator).received_pak.sequence_number)
+                                                 : (*iterator).received_pak.sequence_number);
+        result =
+          message_inout->copy (reinterpret_cast<const char*> (&int_i),
+                               sizeof (ACE_UINT32));
+        if (result == -1)
+          goto error;
+        break;
+      }
+      case PCP_Codes::PCP_OPTION_ID_INDICATOR:
+      {
+        result =
+          message_inout->copy (reinterpret_cast<const char*> ((*iterator).id_indicator.data),
+                               (*iterator).length);
         if (result == -1)
           goto error;
         break;

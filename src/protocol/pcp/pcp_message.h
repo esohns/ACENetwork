@@ -81,7 +81,7 @@ class PCP_Message_T
                          MessageType> OWN_TYPE_T;
 
   PCP_Message_T (unsigned int); // size
-  inline virtual ~PCP_Message_T () {}
+  inline virtual ~PCP_Message_T () { PCP_Tools::free (inherited::data_);  }
 
   virtual PCP_Opcode_t command () const; // return value: message type
   inline static std::string CommandToString (PCP_Opcode_t opcode_in) { return PCP_Tools::OpcodeToString (opcode_in); }

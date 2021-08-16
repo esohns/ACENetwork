@@ -50,6 +50,9 @@ class PCP_Tools
                           ACE_UINT8[]);         // return value: mapped address
   inline static ACE_UINT64 generateNonce () { return static_cast<ACE_UINT64> (ACE_OS::rand_r (&Common_Tools::randomSeed)); }
 
+  // *NOTE*: removes any references to dynamic data
+  static void clear (struct PCP_Record&);
+  // *NOTE*: free any dynamic data
   static void free (struct PCP_Record&);
 
  private:

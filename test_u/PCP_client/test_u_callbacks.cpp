@@ -306,6 +306,19 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (HTTP_DEFAULT_SERVER_PORT));
 
+  entry_p =
+      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_REMOTE_PEER_ADDRESS_NAME)));
+  ACE_ASSERT (entry_p);
+  ACE_INET_Addr remote_peer_address = ACE_sap_any_cast(ACE_INET_Addr&);
+  gtk_entry_set_text (entry_p,
+                      Net_Common_Tools::IPAddressToString (remote_peer_address, true, false).c_str ());
+  spin_button_p =
+      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_REMOTE_PEER_PORT_NAME)));
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_value (spin_button_p, 0);
+
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
@@ -423,17 +436,17 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result_2);
 
   // step6b: connect custom signals
-  //gtk_builder_connect_signals ((*iterator).second.second,
-  //                             userData_in);
-  GObject* object_p =
-      gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME));
-  ACE_ASSERT (object_p);
-  result_2 = g_signal_connect (object_p,
-                               ACE_TEXT_ALWAYS_CHAR ("toggled"),
-                               G_CALLBACK (toggleaction_listen_toggled_cb),
+  gtk_builder_connect_signals ((*iterator).second.second,
                                userData_in);
-  ACE_ASSERT (result_2);
+  //GObject* object_p =
+  //    gtk_builder_get_object ((*iterator).second.second,
+  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 = g_signal_connect (object_p,
+  //                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
+  //                             G_CALLBACK (toggleaction_listen_toggled_cb),
+  //                             userData_in);
+  //ACE_ASSERT (result_2);
   //object_p =
   //    gtk_builder_get_object ((*iterator).second.second,
   //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_REPORT_NAME));
@@ -444,120 +457,109 @@ idle_initialize_UI_cb (gpointer userData_in)
   //                             userData_in);
   //ACE_ASSERT (result_2);
 
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_MAP_NAME));
-  ACE_ASSERT (object_p);
-  result_2 = g_signal_connect (object_p,
-                               ACE_TEXT_ALWAYS_CHAR ("activate"),
-                               G_CALLBACK (action_map_activate_cb),
-                               userData_in);
-  ACE_ASSERT (result_2);
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PEER_NAME));
-  ACE_ASSERT (object_p);
-  result_2 = g_signal_connect (object_p,
-                               ACE_TEXT_ALWAYS_CHAR ("activate"),
-                               G_CALLBACK (action_peer_activate_cb),
-                               userData_in);
-  ACE_ASSERT (result_2);
-  object_p =
-      gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_ANNOUNCE_NAME));
-  ACE_ASSERT (object_p);
-  result_2 = g_signal_connect (object_p,
-                               ACE_TEXT_ALWAYS_CHAR ("activate"),
-                               G_CALLBACK (action_announce_activate_cb),
-                               userData_in);
-  ACE_ASSERT (result_2);
-
-  object_p =
-      gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_COMBOBOX_INTERFACE_NAME));
-  ACE_ASSERT (object_p);
-  result_2 =
-      g_signal_connect (object_p,
-                        ACE_TEXT_ALWAYS_CHAR ("changed"),
-                        G_CALLBACK (combobox_interface_changed_cb),
-                        userData_in);
-  ACE_ASSERT (result_2);
-
-  object_p =
-      gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME));
-  ACE_ASSERT (object_p);
-  result_2 =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("value-changed"),
-                      G_CALLBACK (spinbutton_server_port_value_changed_cb),
-                      userData_in);
-  ACE_ASSERT (result_2);
-
   //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_BROADCAST_NAME));
+  //  gtk_builder_get_object ((*iterator).second.second,
+  //                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_MAP_NAME));
   //ACE_ASSERT (object_p);
-  //result_2 =
-  //    g_signal_connect (object_p,
-  //                      ACE_TEXT_ALWAYS_CHAR ("toggled"),
-  //                      G_CALLBACK (checkbutton_broadcast_toggled_cb),
-  //                      userData_in);
+  //result_2 = g_signal_connect (object_p,
+  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
+  //                             G_CALLBACK (action_map_activate_cb),
+  //                             userData_in);
+  //ACE_ASSERT (result_2);
+  //object_p =
+  //  gtk_builder_get_object ((*iterator).second.second,
+  //                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PEER_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 = g_signal_connect (object_p,
+  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
+  //                             G_CALLBACK (action_peer_activate_cb),
+  //                             userData_in);
   //ACE_ASSERT (result_2);
   //object_p =
   //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_REQUEST_NAME));
+  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_ANNOUNCE_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 = g_signal_connect (object_p,
+  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
+  //                             G_CALLBACK (action_announce_activate_cb),
+  //                             userData_in);
+  //ACE_ASSERT (result_2);
+  //object_p =
+  //    gtk_builder_get_object ((*iterator).second.second,
+  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_AUTHENTICATE_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 = g_signal_connect (object_p,
+  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
+  //                             G_CALLBACK (action_authenticate_activate_cb),
+  //                             userData_in);
+  //ACE_ASSERT (result_2);
+
+  //object_p =
+  //    gtk_builder_get_object ((*iterator).second.second,
+  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_COMBOBOX_INTERFACE_NAME));
   //ACE_ASSERT (object_p);
   //result_2 =
   //    g_signal_connect (object_p,
-  //                      ACE_TEXT_ALWAYS_CHAR ("toggled"),
-  //                      G_CALLBACK (checkbutton_request_toggled_cb),
+  //                      ACE_TEXT_ALWAYS_CHAR ("changed"),
+  //                      G_CALLBACK (combobox_interface_changed_cb),
   //                      userData_in);
   //ACE_ASSERT (result_2);
 
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR(TEST_U_UI_GTK_TEXTVIEW_NAME));
-  ACE_ASSERT (object_p);
-  result_2 = g_signal_connect (object_p,
-                               ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
-                               G_CALLBACK (textview_size_allocate_cb),
-                               userData_in);
-  ACE_ASSERT (result_2);
+  //object_p =
+  //    gtk_builder_get_object ((*iterator).second.second,
+  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 =
+  //  g_signal_connect (object_p,
+  //                    ACE_TEXT_ALWAYS_CHAR ("value-changed"),
+  //                    G_CALLBACK (spinbutton_server_port_value_changed_cb),
+  //                    userData_in);
+  //ACE_ASSERT (result_2);
+
+
+  //object_p =
+  //  gtk_builder_get_object ((*iterator).second.second,
+  //                          ACE_TEXT_ALWAYS_CHAR(TEST_U_UI_GTK_TEXTVIEW_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 = g_signal_connect (object_p,
+  //                             ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
+  //                             G_CALLBACK (textview_size_allocate_cb),
+  //                             userData_in);
+  //ACE_ASSERT (result_2);
 
   //-------------------------------------
 
-  object_p =
-    gtk_builder_get_object ((*iterator).second.second,
-                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_CLEAR_NAME));
-  ACE_ASSERT (object_p);
-  result_2 =
-    g_signal_connect (object_p,
-                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                      G_CALLBACK (button_clear_clicked_cb),
-                      userData_in);
-  ACE_ASSERT (result_2);
-  object_p =
-      gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_ABOUT_NAME));
-  ACE_ASSERT (object_p);
-  result_2 =
-      g_signal_connect (object_p,
-                        ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                        G_CALLBACK (button_about_clicked_cb),
-                        userData_in);
-  ACE_ASSERT (result_2);
-  object_p =
-      gtk_builder_get_object ((*iterator).second.second,
-                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_QUIT_NAME));
-  ACE_ASSERT (object_p);
-  result_2 =
-      g_signal_connect (object_p,
-                        ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                        G_CALLBACK (button_quit_clicked_cb),
-                        userData_in);
-  ACE_ASSERT (result_2);
-  ACE_UNUSED_ARG (result_2);
+  //object_p =
+  //  gtk_builder_get_object ((*iterator).second.second,
+  //                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_CLEAR_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 =
+  //  g_signal_connect (object_p,
+  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
+  //                    G_CALLBACK (button_clear_clicked_cb),
+  //                    userData_in);
+  //ACE_ASSERT (result_2);
+  //object_p =
+  //    gtk_builder_get_object ((*iterator).second.second,
+  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_ABOUT_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 =
+  //    g_signal_connect (object_p,
+  //                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
+  //                      G_CALLBACK (button_about_clicked_cb),
+  //                      userData_in);
+  //ACE_ASSERT (result_2);
+  //object_p =
+  //    gtk_builder_get_object ((*iterator).second.second,
+  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_QUIT_NAME));
+  //ACE_ASSERT (object_p);
+  //result_2 =
+  //    g_signal_connect (object_p,
+  //                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
+  //                      G_CALLBACK (button_quit_clicked_cb),
+  //                      userData_in);
+  //ACE_ASSERT (result_2);
+  //ACE_UNUSED_ARG (result_2);
 
   //   // step8: use correct screen
   //   if (parentWidget_in)
@@ -1092,6 +1094,39 @@ extern "C"
 {
 #endif /* __cplusplus */
 void
+action_announce_activate_cb (GtkAction* action_in,
+                             gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::action_announce_activate_cb"));
+
+  ACE_UNUSED_ARG (action_in);
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct PCPClient_UI_CBData* data_p =
+    static_cast<struct PCPClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  // retrieve port number
+  GtkSpinButton* spin_button_p =
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
+  ACE_ASSERT (spin_button_p);
+  Net_ConnectionConfigurationsIterator_t iterator_3 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+  ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
+  NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
+                                                                                                      1); // encode
+
+  ACE_ASSERT (data_p->session);
+  data_p->session->announce ();
+} // action_announce_activate_cb
+
+void
 action_map_activate_cb (GtkAction* action_in,
                         gpointer userData_in)
 {
@@ -1286,10 +1321,10 @@ action_peer_activate_cb (GtkAction* action_in,
 } // action_peer_activate_cb
 
 void
-action_announce_activate_cb (GtkAction* action_in,
-                             gpointer userData_in)
+action_authenticate_activate_cb (GtkAction* action_in,
+                                 gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::action_announce_activate_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::action_authenticate_activate_cb"));
 
   ACE_UNUSED_ARG (action_in);
 
@@ -1315,8 +1350,8 @@ action_announce_activate_cb (GtkAction* action_in,
                                                                                                       1); // encode
 
   ACE_ASSERT (data_p->session);
-  data_p->session->announce ();
-} // action_announce_activate_cb
+  data_p->session->authenticate ();
+} // action_authenticate_activate_cb
 
 void
 action_report_activate_cb (GtkAction* action_in,
@@ -1514,6 +1549,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     PCPClient_InboundAsynchConnector_t asynch_connector (true);
     PCPClient_InboundConnectorMcast_t connector_mcast (true);
     PCPClient_InboundAsynchConnectorMcast_t asynch_connector_mcast (true);
+    PCPClient_IConnection_t* iconnection_p = NULL;
 
     // *IMPORTANT NOTE*: bind()ing is weird. On Windows systems, the FIRST bound
     //                   socket will receive the inbound data. On Linux, it is
@@ -1523,7 +1559,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     // connect outbound (?)
     if (unlikely (!data_p->session))
     {
-      PCPClient_IConnection_t* iconnection_p = NULL;
       PCPClient_OutboundConnector_t connector (true);
       PCPClient_OutboundAsynchConnector_t asynch_connector (true);
       iterator_3 =
@@ -1716,7 +1751,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
         goto continue_;
       } // end IF
-      data_p->connection =
+      iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else

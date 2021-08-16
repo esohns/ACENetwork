@@ -78,6 +78,20 @@
                         <property name="position">3</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkButton" id="button_authenticate">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="related_action">action_authenticate</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="relief">half</property>
+                        <property name="focus_on_click">False</property>
+                      </object>
+                      <packing>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">0</property>
@@ -87,6 +101,33 @@
                   <object class="GtkVBox" id="vbox_options">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkTable" id="table_options">
+                        <property name="visible">True</property>
+                        <property name="n_columns">2</property>
+                        <property name="homogeneous">True</property>
+                        <child>
+                          <object class="GtkCheckButton" id="checkbutton_asynch">
+                            <property name="label" translatable="yes">asynch</property>
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">False</property>
+                            <property name="receives_default">False</property>
+                            <property name="relief">half</property>
+                            <property name="focus_on_click">False</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                        </child>
+                        <child>
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
                     <child>
                       <object class="GtkComboBox" id="combobox_interface">
                         <property name="visible">True</property>
@@ -99,7 +140,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">0</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -145,33 +186,6 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkTable" id="table_options">
-                        <property name="visible">True</property>
-                        <property name="n_columns">2</property>
-                        <property name="homogeneous">True</property>
-                        <child>
-                          <object class="GtkCheckButton" id="checkbutton_asynch">
-                            <property name="label" translatable="yes">asynch</property>
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">False</property>
-                            <property name="receives_default">False</property>
-                            <property name="relief">half</property>
-                            <property name="focus_on_click">False</property>
-                            <property name="draw_indicator">True</property>
-                          </object>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
@@ -198,6 +212,7 @@
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">localhost</property>
+                            <property name="shadow_type">etched-in</property>
                             <property name="caps_lock_warning">False</property>
                             <property name="primary_icon_stock">gtk-network</property>
                             <signal name="changed" handler="entry_external_address_changed_cb"/>
@@ -244,6 +259,7 @@
                             <property name="has_frame">False</property>
                             <property name="invisible_char">&#x25CF;</property>
                             <property name="text" translatable="yes">localhost</property>
+                            <property name="shadow_type">etched-in</property>
                             <property name="caps_lock_warning">False</property>
                             <property name="primary_icon_stock">gtk-network</property>
                           </object>
@@ -274,6 +290,51 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHBox" id="hbox_mapping_3">
+                        <property name="visible">True</property>
+                        <child>
+                          <object class="GtkEntry" id="entry_remote_peer_address">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_markup">remote peer address</property>
+                            <property name="tooltip_text" translatable="yes">remote peer address</property>
+                            <property name="has_frame">False</property>
+                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="text" translatable="yes">localhost</property>
+                            <property name="shadow_type">etched-in</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="primary_icon_stock">gtk-network</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="spinbutton_remote_peer_port">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_markup">remote peer port</property>
+                            <property name="tooltip_text" translatable="yes">remote peer port</property>
+                            <property name="has_frame">False</property>
+                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="primary_icon_stock">gtk-connect</property>
+                            <property name="adjustment">adjustment_remote_peer_port</property>
+                            <property name="numeric">True</property>
+                            <property name="wrap">True</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -384,6 +445,7 @@
                             <property name="cursor_visible">False</property>
                             <property name="buffer">textbuffer</property>
                             <property name="accepts_tab">False</property>
+                            <signal name="size_allocate" handler="textview_size_allocate_cb"/>
                           </object>
                         </child>
                       </object>
@@ -627,6 +689,20 @@
   </object>
   <object class="GtkAdjustment" id="adjustment_internal_port">
     <property name="value">80</property>
+    <property name="lower">1</property>
+    <property name="upper">65535</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">100</property>
+    <property name="page_size">10</property>
+  </object>
+  <object class="GtkAction" id="action_authenticate">
+    <property name="label">Authenticate</property>
+    <property name="short_label">Authenticate</property>
+    <property name="tooltip">Authenticate</property>
+    <property name="stock_id">gtk-page-setup</property>
+    <signal name="activate" handler="action_authenticate_activate_cb"/>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_remote_peer_port">
     <property name="lower">1</property>
     <property name="upper">65535</property>
     <property name="step_increment">1</property>

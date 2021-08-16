@@ -51,7 +51,7 @@ struct YYLTYPE;
 
 union yytoken
 {
-  ACE_UINT32 ival;
+  ACE_UINT64 ival;
   ACE_UINT8* aval;
 };
 typedef yytoken yytoken_t;
@@ -130,7 +130,7 @@ extern int yyparse (PCP_ParserDriver*, yyscan_t);
 union YYSTYPE
 {
 
-  ACE_UINT32 ival;
+  ACE_UINT64 ival;
   ACE_UINT8* aval;
 
 

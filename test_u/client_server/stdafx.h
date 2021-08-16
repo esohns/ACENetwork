@@ -8,6 +8,8 @@
 // *NOTE*: work around quirky MSVC...
 #define NOMINMAX
 
+#include "targetver.h"
+
 // Windows Header Files
 #include <windows.h>
 #endif
@@ -48,10 +50,6 @@
 
 #include "net_common.h"
 #include "net_macros.h"
-
-#if defined (_MSC_VER)
-#include "targetver.h"
-#endif // _MSC_VER
 
 // *TODO*: reference additional headers your program requires here
 #include "net_client_common.h"

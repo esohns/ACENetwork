@@ -23,7 +23,6 @@
 
 #define TEST_U_DEFAULT_GTK_RC_FILE                        "resources.rc"
 #define TEST_U_DEFAULT_GLADE_FILE                         "test_u.glade"
-#define TEST_U_DEFAULT_OUTPUT_FILE                        "output.txt"
 #define TEST_U_THREAD_NAME                                "stream processor"
 
 //---------------------------------------
@@ -32,12 +31,12 @@
 #define TEST_U_UI_GTK_ACTION_ANNOUNCE_NAME                "action_announce"
 #define TEST_U_UI_GTK_ACTION_MAP_NAME                     "action_map"
 #define TEST_U_UI_GTK_ACTION_PEER_NAME                    "action_peer"
+#define TEST_U_UI_GTK_ACTION_AUTHENTICATE_NAME            "action_authenticate"
 //#define TEST_U_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"
 #define TEST_U_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
 #define TEST_U_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
 #define TEST_U_UI_GTK_BUTTON_CLEAR_NAME                   "button_clear"
 //#define TEST_U_UI_GTK_BUTTON_REPORT_NAME                  "report"
-//#define TEST_U_UI_GTK_BUTTON_SEND_NAME                    "send"
 #define TEST_U_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
 #define TEST_U_UI_GTK_CHECKBUTTON_ASYNCH_NAME             "checkbutton_asynch"
 #define TEST_U_UI_GTK_COMBOBOX_INTERFACE_NAME             "combobox_interface"
@@ -66,16 +65,10 @@
 #define TEST_U_UI_GTK_STATUSBAR_NAME                      "statusbar"
 //#define TEST_U_UI_GTK_TABLE_OPTIONS_NAME                  "table_options"
 #define TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME            "toggleaction_listen"
-//#define TEST_U_UI_GTK_TOGGLEBUTTON_LISTEN_NAME            "listen"
 #define TEST_U_UI_GTK_TEXTVIEW_NAME                       "textview"
 
 // GTK progress/status bar
 #define TEST_U_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL         27 // ms (?)
 #define TEST_U_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION       "Stream::main"
-
-//---------------------------------------
-
-//// send DHCPREQUEST on DHCPOFFER ?
-//#define TEST_U_DEFAULT_PCP_SEND_REQUEST_ON_OFFER         false
 
 #endif

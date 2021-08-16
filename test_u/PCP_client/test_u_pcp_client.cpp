@@ -149,13 +149,6 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  std::string output_file = path;
-  output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  output_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-f[[PATH]]  : (output) file name [")
-            << output_file
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
 #if defined (GUI_SUPPORT)
   std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -208,7 +201,6 @@ do_processArguments (int argc_in,
                      std::string& GtkRcFileName_out,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-                     std::string& fileName_out,
 #if defined (GUI_SUPPORT)
                      std::string& UIDefinitonFileName_out,
 #endif // GUI_SUPPORT
@@ -249,9 +241,6 @@ do_processArguments (int argc_in,
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GTK_RC_FILE);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  fileName_out = path;
-  fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  fileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
 #if defined (GUI_SUPPORT)
   UIDefinitonFileName_out = configuration_path;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -284,22 +273,22 @@ do_processArguments (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("de:f::g::lrs:tvx:"),
+                              ACE_TEXT ("de:g::lrs:tvx:"),
 #else
-                              ACE_TEXT ("df::g::lrs:tvx:"),
+                              ACE_TEXT ("dg::lrs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("df::lrs:tvx:"),
+                              ACE_TEXT ("dlrs:tvx:"),
 #endif // GUI_SUPPORT
 #else
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("de:f::g::ln::rs:tvx:"),
+                              ACE_TEXT ("de:g::ln::rs:tvx:"),
 #else
-                              ACE_TEXT ("df::g::ln::rs:tvx:"),
+                              ACE_TEXT ("dg::ln::rs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("df::ln::rs:tvx:"),
+                              ACE_TEXT ("dln::rs:tvx:"),
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                               1,                         // skip command name
@@ -332,15 +321,6 @@ do_processArguments (int argc_in,
       }
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-      case 'f':
-      {
-        ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
-        if (opt_arg)
-          fileName_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
-        else
-          fileName_out.clear ();
-        break;
-      }
 #if defined (GUI_SUPPORT)
       case 'g':
       {
@@ -519,7 +499,6 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 void
 do_work (//bool requestBroadcastReplies_in,
          bool debugParser_in,
-         const std::string& fileName_in,
 #if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFileName_in,
 #endif // GUI_SUPPORT
@@ -682,17 +661,18 @@ do_work (//bool requestBroadcastReplies_in,
   interface_address.set_port_number (PCP_DEFAULT_CLIENT_PORT,
                                      1);
   ACE_INET_Addr external_address;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!Net_Common_Tools::interfaceToExternalIPAddress (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interface_identifier)),
-                                                       external_address))
-#else
   if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
                                                        external_address))
-#endif // ACE_WIN32 || ACE_WIN64
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), returning\n"),
                 ACE_TEXT (interface_identifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
 #if defined (GUI_SUPPORT)
@@ -780,7 +760,6 @@ do_work (//bool requestBroadcastReplies_in,
   modulehandler_configuration.lock = &state_r.subscribersLock;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  modulehandler_configuration.targetFileName = fileName_in;
 
   stream_configuration.allocatorConfiguration =
       &configuration_in.allocatorConfiguration;
@@ -1365,9 +1344,6 @@ ACE_TMAIN (int argc_in,
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GTK_RC_FILE);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  std::string output_file = path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
 #if defined (GUI_SUPPORT)
   std::string ui_definition_file = configuration_path;
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1405,7 +1381,6 @@ ACE_TMAIN (int argc_in,
                             gtk_rc_file,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-                            output_file,
 #if defined (GUI_SUPPORT)
                             ui_definition_file,
 #endif // GUI_SUPPORT
@@ -1703,7 +1678,6 @@ ACE_TMAIN (int argc_in,
   // step2: do actual work
   do_work (//request_broadcast_replies,
            debug_parser,
-           output_file,
 #if defined (GUI_SUPPORT)
            ui_definition_file,
 #endif // GUI_SUPPORT

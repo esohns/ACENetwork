@@ -86,39 +86,39 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
       converter.clear ();
       converter << record_in.map.nonce;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("protocol: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter << record_in.map.protocol;
+      converter << static_cast<ACE_UINT16> (record_in.map.protocol);
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("reserved: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.map.reserved;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("internal port: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.map.internal_port;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("external port: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.map.external_port;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("external address: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       string_buffer +=
-        Net_Common_Tools::IPAddressToString (record_in.map.external_address,
+        Net_Common_Tools::IPAddressToString (*record_in.map.external_address,
                                              true,   // address only
                                              false); // do not resolve
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       break;
     }
     case PCP_Codes::PCP_OPCODE_PEER:
@@ -128,53 +128,53 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
       converter.clear ();
       converter << record_in.peer.nonce;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("protocol: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter << record_in.peer.protocol;
+      converter << static_cast<ACE_UINT16> (record_in.peer.protocol);
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("reserved: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.peer.reserved;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("internal port: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.peer.internal_port;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("external port: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.peer.external_port;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("external address: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       string_buffer +=
-        Net_Common_Tools::IPAddressToString (record_in.peer.external_address,
+        Net_Common_Tools::IPAddressToString (*record_in.peer.external_address,
                                              true,   // address only
                                              false); // do not resolve
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("remote peer port: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.peer.remote_peer_port;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("remote peer address: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       string_buffer +=
-        Net_Common_Tools::IPAddressToString (record_in.peer.remote_peer_address,
+        Net_Common_Tools::IPAddressToString (*record_in.peer.remote_peer_address,
                                              true,   // address only
                                              false); // do not resolve
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       break;
     }
     case PCP_Codes::PCP_OPCODE_AUTHENTICATION:
@@ -184,13 +184,13 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
       converter.clear ();
       converter << record_in.authentication.session_id;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       string_buffer += ACE_TEXT_ALWAYS_CHAR ("sequence number: \t");
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       converter << record_in.authentication.sequence_number;
       string_buffer += converter.str ();
-      string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
+      string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
       break;
     }
     default:
@@ -207,7 +207,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
   converter << record_in.options.size ();
   string_buffer += converter.str ();
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("):\n");
-  for (PCP_OptionsIterator_t iterator = record_in.options.begin ();
+  for (PCP_OptionsConstIterator_t iterator = record_in.options.begin ();
        iterator != record_in.options.end ();
        ++iterator)
   {
@@ -216,7 +216,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
     string_buffer += ACE_TEXT_ALWAYS_CHAR (": \t");
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter.clear ();
-    converter << (*iterator).reserved;
+    converter << static_cast<ACE_UINT16> ((*iterator).reserved);
     string_buffer += converter.str ();
     string_buffer += ACE_TEXT_ALWAYS_CHAR ("\t");
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
@@ -229,17 +229,13 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
       {
         string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
         string_buffer +=
-          Net_Common_Tools::IPAddressToString ((*iterator).third_party.address,
+          Net_Common_Tools::IPAddressToString (*(*iterator).third_party.address,
                                                true,   // address only
                                                false); // do not resolve
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
       }
       case PCP_Codes::PCP_OPTION_PREFER_FAILURE:
-      {
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
-      }
       case PCP_Codes::PCP_OPTION_FILTER:
       {
         string_buffer += ACE_TEXT_ALWAYS_CHAR (" \t");
@@ -259,10 +255,9 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
         string_buffer += converter.str ();
         string_buffer += ACE_TEXT_ALWAYS_CHAR ("\t");
         string_buffer +=
-          Net_Common_Tools::IPAddressToString ((*iterator).filter.remote_peer_address,
+          Net_Common_Tools::IPAddressToString (*(*iterator).filter.remote_peer_address,
                                                true,   // address only
                                                false); // do not resolve
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
       }
       case PCP_Codes::PCP_OPTION_NONCE: // rfc7652
@@ -272,7 +267,6 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
         converter.clear ();
         converter << (*iterator).nonce.nonce;
         string_buffer += converter.str ();
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
       }
       case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG:
@@ -297,7 +291,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
              i < static_cast<unsigned int> ((*iterator).length - 12);
              ++i)
           string_buffer += (*iterator).authentication_tag.data[i];
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
         break;
       }
       case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG:
@@ -312,7 +306,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
              i < static_cast<unsigned int> ((*iterator).length - 4);
              ++i)
           string_buffer += (*iterator).pa_authentication_tag.data[i];
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
         break;
       }
       case PCP_Codes::PCP_OPTION_EAP_PAYLOAD:
@@ -322,7 +316,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
              i < static_cast<unsigned int> ((*iterator).length);
              ++i)
           string_buffer += (*iterator).eap_payload.data[i];
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
         break;
       }
       case PCP_Codes::PCP_OPTION_PSEUDO_RANDOM_FUNCTION:
@@ -332,7 +326,6 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
         converter.clear ();
         converter << (*iterator).pseudo_random_function.id;
         string_buffer += converter.str ();
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
       }
       case PCP_Codes::PCP_OPTION_MAC_ALGORITHM:
@@ -342,7 +335,6 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
         converter.clear ();
         converter << (*iterator).mac_algorithm.id;
         string_buffer += converter.str ();
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
       }
       case PCP_Codes::PCP_OPTION_SESSION_LIFETIME:
@@ -352,7 +344,6 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
         converter.clear ();
         converter << (*iterator).session_lifetime.lifetime;
         string_buffer += converter.str ();
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
       }
       case PCP_Codes::PCP_OPTION_RECEIVED_PAK:
@@ -362,7 +353,6 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
         converter.clear ();
         converter << (*iterator).received_pak.sequence_number;
         string_buffer += converter.str ();
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
         break;
       }
       case PCP_Codes::PCP_OPTION_ID_INDICATOR:
@@ -372,7 +362,7 @@ PCP_Tools::dump (const struct PCP_Record& record_in)
              i < static_cast<unsigned int> ((*iterator).length);
              ++i)
           string_buffer += (*iterator).id_indicator.data[i];
-        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        string_buffer += ACE_TEXT_ALWAYS_CHAR ("\"");
         break;
       }
       default:
@@ -594,8 +584,114 @@ PCP_Tools::mapAddress (const ACE_INET_Addr& address_in,
 }
 
 void
+PCP_Tools::clear (struct PCP_Record& record_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("PCP_Tools::clear"));
+
+  switch (record_in.opcode)
+  {
+    case PCP_Codes::PCP_OPCODE_MAP:
+      record_in.map.external_address = NULL;
+      break;
+    case PCP_Codes::PCP_OPCODE_PEER:
+      record_in.peer.external_address = NULL;
+      record_in.peer.remote_peer_address = NULL;
+      break;
+    default:
+      break;
+  } // end SWITCH
+
+  // *NOTE*: there is dynamic data in options
+  //         - THIRD_PARTY, FILTER
+  //         - AUTHENTICATION_TAG, PA_AUTHENTICATION_TAG
+  //         - EAP_PAYLOAD, ID_INDICATOR only
+  for (PCP_OptionsIterator_t iterator = record_in.options.begin ();
+       iterator != record_in.options.end ();
+       ++iterator)
+  {
+    switch ((*iterator).code)
+    {
+      case PCP_Codes::PCP_OPTION_THIRD_PARTY:
+        (*iterator).third_party.address = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_FILTER:
+        (*iterator).filter.remote_peer_address = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG:
+        (*iterator).authentication_tag.data = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG:
+        (*iterator).pa_authentication_tag.data = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_EAP_PAYLOAD:
+        (*iterator).eap_payload.data = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_ID_INDICATOR:
+        (*iterator).id_indicator.data = NULL;
+        break;
+      default:
+        break;
+    } // end SWITCH
+  } // end FOR
+}
+
+void
 PCP_Tools::free (struct PCP_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("PCP_Tools::free"));
 
+  switch (record_in.opcode)
+  {
+    case PCP_Codes::PCP_OPCODE_MAP:
+      delete record_in.map.external_address;
+      record_in.map.external_address = NULL;
+      break;
+    case PCP_Codes::PCP_OPCODE_PEER:
+      delete record_in.peer.external_address;
+      record_in.peer.external_address = NULL;
+      delete record_in.peer.remote_peer_address;
+      record_in.peer.remote_peer_address = NULL;
+      break;
+    default:
+      break;
+  } // end SWITCH
+
+  // *NOTE*: there is dynamic data in options
+  //         - THIRD_PARTY, FILTER
+  //         - AUTHENTICATION_TAG, PA_AUTHENTICATION_TAG
+  //         - EAP_PAYLOAD, ID_INDICATOR only
+  for (PCP_OptionsIterator_t iterator = record_in.options.begin ();
+       iterator != record_in.options.end ();
+       ++iterator)
+  {
+    switch ((*iterator).code)
+    {
+      case PCP_Codes::PCP_OPTION_THIRD_PARTY:
+        delete (*iterator).third_party.address;
+        (*iterator).third_party.address = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_FILTER:
+        delete (*iterator).filter.remote_peer_address;
+        (*iterator).filter.remote_peer_address = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_AUTHENTICATION_TAG:
+        delete [] (*iterator).authentication_tag.data;
+        (*iterator).authentication_tag.data = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_PA_AUTHENTICATION_TAG:
+        delete [] (*iterator).pa_authentication_tag.data;
+        (*iterator).pa_authentication_tag.data = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_EAP_PAYLOAD:
+        delete [] (*iterator).eap_payload.data;
+        (*iterator).eap_payload.data = NULL;
+        break;
+      case PCP_Codes::PCP_OPTION_ID_INDICATOR:
+        delete [] (*iterator).id_indicator.data;
+        (*iterator).id_indicator.data = NULL;
+        break;
+      default:
+        break;
+    } // end SWITCH
+  } // end FOR
 }

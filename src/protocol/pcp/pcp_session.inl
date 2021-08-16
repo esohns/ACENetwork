@@ -219,7 +219,9 @@ allocate:
   PCP_record.map.protocol = IPPROTO_TCP;
   PCP_record.map.internal_port = internalAddress_in.get_port_number ();
   PCP_record.map.external_port = externalAddress_in.get_port_number ();
-  PCP_record.map.external_address = externalAddress_in;
+  ACE_NEW_NORETURN (PCP_record.map.external_address,
+                    ACE_INET_Addr (externalAddress_in));
+  ACE_ASSERT (PCP_record.map.external_address);
   //struct PCPOption filter_option_s;
   //filter_option_s.code = PCP_Codes::PCP_OPTION_FILTER;
   //filter_option_s.length = 20;
@@ -303,9 +305,13 @@ allocate:
   PCP_record.peer.protocol = IPPROTO_TCP;
   PCP_record.peer.internal_port = internalAddress_in.get_port_number ();
   PCP_record.peer.external_port = externalAddress_in.get_port_number ();
-  PCP_record.peer.external_address = externalAddress_in;
+  ACE_NEW_NORETURN (PCP_record.peer.external_address,
+                    ACE_INET_Addr (externalAddress_in));
+  ACE_ASSERT (PCP_record.peer.external_address);
   PCP_record.peer.remote_peer_port = remotePeerAddress_in.get_port_number ();
-  PCP_record.peer.remote_peer_address = remotePeerAddress_in;
+  ACE_NEW_NORETURN (PCP_record.peer.remote_peer_address,
+                    ACE_INET_Addr (remotePeerAddress_in));
+  ACE_ASSERT (PCP_record.peer.remote_peer_address);
   //struct PCPOption option_s;
   //option_s.code = PCP_Codes::PCP_OPTION_THIRD_PARTY;
   //option_s.length = 16;
@@ -332,6 +338,66 @@ PCP_Session_T<StateType,
 {
   NETWORK_TRACE (ACE_TEXT ("PCP_Session_T::authenticate"));
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->messageAllocator);
+  ACE_ASSERT (connection_);
+
+  // step1: allocate buffer
+  size_t pdu_size_i =
+    configuration_->allocatorConfiguration->defaultBufferSize +
+    configuration_->allocatorConfiguration->paddingBytes;
+  MessageType* message_p = NULL;
+allocate:
+  message_p =
+    static_cast<MessageType*> (configuration_->messageAllocator->malloc (pdu_size_i));
+  // keep retrying ?
+  if (!message_p &&
+      !configuration_->messageAllocator->block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate MessageType: \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  // step2: configure message
+  struct PCP_Record PCP_record;
+  PCP_record.version = PCP_Codes::PCP_VERSION_2;
+  PCP_record.opcode = PCP_Codes::PCP_OPCODE_AUTHENTICATION;
+  PCP_record.result_code = PCP_Codes::PCP_RESULTCODE_INITIATION;
+//  PCP_record.lifetime = 0;
+  std::string device_identifier_string =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    Net_Common_Tools::interfaceToString (configuration_->socketConfiguration.interfaceIdentifier);
+#else
+    configuration_->socketConfiguration.interfaceIdentifier;
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_INET_Addr gateway_address;
+  if (!Net_Common_Tools::interfaceToIPAddress (device_identifier_string,
+                                               PCP_record.client_address,
+                                               gateway_address))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT (device_identifier_string.c_str ())));
+    message_p->release ();
+    return;
+  } // end IF
+//  PCP_record.authentication.session_id = 0;
+//  PCP_record.authentication.sequence_number = 0;
+  struct PCPOption option_s;
+  option_s.code = PCP_Codes::PCP_OPTION_NONCE;
+  option_s.length = 4;
+  option_s.nonce.nonce = static_cast<ACE_UINT32> (PCP_Tools::generateNonce ());
+  PCP_record.options.push_back (option_s);
+  message_p->initialize (PCP_record,
+                         message_p->sessionId (),
+                         NULL);
+
+  ACE_Message_Block* message_block_p = message_p;
+  connection_->send (message_block_p);
 }
 
 template <typename StateType,

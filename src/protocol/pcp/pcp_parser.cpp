@@ -533,11 +533,11 @@ static const yytype_int16 yyrline[] =
 {
        0,   203,   203,   204,   206,   207,   208,   210,   211,   204,
      214,   215,   216,   217,   218,   219,   220,   221,   222,   218,
-     238,   239,   240,   241,   242,   243,   257,   258,   238,   274,
-     274,   277,   278,   279,   282,   284,   279,   287,   288,   289,
-     290,   291,   292,   293,   294,   295,   296,   297,   298,   299,
-     315,   317,   319,   315,   337,   340,   342,   344,   340,   349,
-     349,   354,   357,   360,   363,   366,   369
+     234,   235,   236,   237,   238,   239,   249,   250,   234,   262,
+     262,   265,   266,   267,   270,   272,   267,   275,   276,   277,
+     278,   279,   280,   281,   282,   283,   284,   285,   286,   287,
+     299,   301,   303,   299,   317,   320,   322,   324,   320,   329,
+     329,   334,   337,   340,   343,   346,   349
 };
 #endif
 
@@ -1591,11 +1591,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 4: /* $@2: %empty  */
-                                                                    { driver->record_->opcode = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->opcode = static_cast<ACE_UINT8> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 5: /* $@3: %empty  */
-                                                                    { driver->record_->reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->reserved = static_cast<ACE_UINT8> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 6: /* $@4: %empty  */
@@ -1604,16 +1604,16 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 7: /* $@5: %empty  */
-                                                                    { driver->record_->lifetime = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->lifetime = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 8: /* $@6: %empty  */
-                                                                    { driver->record_->epoch_time = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->epoch_time = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 9: /* header: "version" $@1 "opcode" $@2 "reserved" $@3 "result_code" $@4 "lifetime" $@5 "epoch_time" $@6 "reserved_2"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-12)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
-                                                                      driver->record_->reserved_2 = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      driver->record_->reserved_2 = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 10: /* opcode_specific: opcode_specific_map  */
@@ -1637,34 +1637,30 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 15: /* $@8: %empty  */
-                                                                    { driver->record_->map.protocol = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->map.protocol = static_cast<ACE_UINT8> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 16: /* $@9: %empty  */
-                                                                    { driver->record_->map.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->map.reserved = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 17: /* $@10: %empty  */
-                                                                    { driver->record_->map.internal_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->map.internal_port = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 18: /* $@11: %empty  */
-                                                                    { driver->record_->map.external_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->map.external_port = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 19: /* opcode_specific_map: "option_map_nonce" $@7 "option_map_protocol" $@8 "option_map_reserved" $@9 "option_map_internal_port" $@10 "option_map_assigned_external_port" $@11 "option_map_assigned_external_ip_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
-                                                                      int result =
-                                                                        driver->record_->map.external_address.set (driver->record_->map.external_port,
-                                                                                                                   (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival),
-                                                                                                                   1,
-                                                                                                                   AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (driver->record_->map.external_address,
+                                                                                        ACE_INET_Addr (driver->record_->map.external_port,
+                                                                                                       static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival))));
+                                                                      if (!driver->record_->map.external_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    driver->record_->map.external_port,
-                                                                                    (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
@@ -1675,71 +1671,63 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 21: /* $@13: %empty  */
-                                                                    { driver->record_->peer.protocol = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->peer.protocol = static_cast<ACE_UINT8> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 22: /* $@14: %empty  */
-                                                                    { driver->record_->peer.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->peer.reserved = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 23: /* $@15: %empty  */
-                                                                    { driver->record_->peer.internal_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->peer.internal_port = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 24: /* $@16: %empty  */
-                                                                    { driver->record_->peer.external_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->peer.external_port = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 25: /* $@17: %empty  */
-                                                                    { int result =
-                                                                      driver->record_->peer.external_address.set (driver->record_->peer.external_port,
-                                                                                                                  (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival),
-                                                                                                                  1,
-                                                                                                                  AF_INET);
-                                                                      if (result == -1)
+                                                                    { ACE_NEW_NORETURN (driver->record_->peer.external_address,
+                                                                                        ACE_INET_Addr (driver->record_->peer.external_port,
+                                                                                                       static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival))));
+                                                                      if (!driver->record_->peer.external_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    driver->record_->peer.external_port,
-                                                                                    (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
     break;
 
   case 26: /* $@18: %empty  */
-                                                                    { driver->record_->peer.remote_peer_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->peer.remote_peer_port = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 27: /* $@19: %empty  */
-                                                                    { driver->record_->peer.reserved_2 = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->peer.reserved_2 = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 28: /* opcode_specific_peer: "option_peer_nonce" $@12 "option_peer_protocol" $@13 "option_peer_reserved" $@14 "option_peer_internal_port" $@15 "option_peer_assigned_external_port" $@16 "option_peer_assigned_external_ip_address" $@17 "option_peer_remote_port" $@18 "option_peer_reserved_2" $@19 "option_peer_remote_peer_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-16)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-14)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-12)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-10)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-8)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
-                                                                      int result =
-                                                                        driver->record_->peer.remote_peer_address.set (driver->record_->peer.remote_peer_port,
-                                                                                                                       (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival),
-                                                                                                                       1,
-                                                                                                                       AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (driver->record_->peer.remote_peer_address,
+                                                                                        ACE_INET_Addr (driver->record_->peer.remote_peer_port,
+                                                                                                       static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival))));
+                                                                      if (!driver->record_->peer.remote_peer_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    driver->record_->peer.remote_peer_port,
-                                                                                    (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
     break;
 
   case 29: /* $@20: %empty  */
-                                                                    { driver->record_->authentication.session_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                    { driver->record_->authentication.session_id = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 30: /* opcode_specific_authentication: "option_authentication_session_id" $@20 "option_authentication_sequence_number"  */
                                                                         { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
-                                                                          driver->record_->authentication.sequence_number = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                          driver->record_->authentication.sequence_number = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 31: /* options: option options  */
@@ -1758,12 +1746,12 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 34: /* $@22: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.reserved = static_cast<ACE_UINT8> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 35: /* $@23: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.length = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.length = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 36: /* option: "option_code" $@21 "option_reserved" $@22 "option_length" $@23 option_data  */
@@ -1821,17 +1809,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 49: /* option_data_third_party: "option_third_party_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      int result =
-                                                                        option_r.third_party.address.set (0,
-                                                                                                          (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival),
-                                                                                                          0,
-                                                                                                          AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (option_r.third_party.address,
+                                                                                        ACE_INET_Addr (static_cast<u_short> (0),
+                                                                                                       static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival))));
+                                                                      if (!option_r.third_party.address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    0,
-                                                                                    (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
@@ -1839,33 +1823,29 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 50: /* $@24: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.filter.reserved = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.filter.reserved = static_cast<ACE_UINT8> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 51: /* $@25: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.filter.prefix_length = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.filter.prefix_length = static_cast<ACE_UINT8> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 52: /* $@26: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.filter.remote_peer_port = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.filter.remote_peer_port = static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 53: /* option_data_filter: "option_filter_reserved" $@24 "option_filter_prefix_length" $@25 "option_filter_remote_peer_port" $@26 "option_filter_remote_peer_address"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-6)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-4)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yysval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival);
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      int result =
-                                                                        option_r.filter.remote_peer_address.set (option_r.filter.remote_peer_port,
-                                                                                                                 (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival),
-                                                                                                                 0,
-                                                                                                                 AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (option_r.filter.remote_peer_address,
+                                                                                        ACE_INET_Addr (option_r.filter.remote_peer_port,
+                                                                                                       static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival))));
+                                                                      if (!option_r.filter.remote_peer_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    option_r.filter.remote_peer_port,
-                                                                                    (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
@@ -1874,22 +1854,22 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 54: /* option_data_nonce: "option_nonce_nonce"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.nonce.nonce = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.nonce.nonce = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 55: /* $@27: %empty  */
                                                                        { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
-                                                                         option_r.authentication_tag.session_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                         option_r.authentication_tag.session_id = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 56: /* $@28: %empty  */
                                                                             { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                              option_r.authentication_tag.sequence_number = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                              option_r.authentication_tag.sequence_number = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 57: /* $@29: %empty  */
                                                                     { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.authentication_tag.key_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.authentication_tag.key_id = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 58: /* option_data_authentication_tag: "option_authentication_tag_session_id" $@27 "option_authentication_tag_sequence_number" $@28 "option_authentication_tag_key_id" $@29 "option_authentication_tag_data"  */
@@ -1900,7 +1880,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 59: /* $@30: %empty  */
                                                                          { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
-                                                                           option_r.pa_authentication_tag.key_id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                           option_r.pa_authentication_tag.key_id = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 60: /* option_data_pa_authentication_tag: "option_pa_authentication_tag_key_id" $@30 "option_pa_authentication_tag_data"  */
@@ -1918,25 +1898,25 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   case 62: /* option_data_pseudo_random_function: "option_pseudo_random_function_id"  */
                                                                        { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
                                                                          struct PCPOption& option_r = driver->record_->options.back ();
-                                                                         option_r.pseudo_random_function.id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                         option_r.pseudo_random_function.id = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 63: /* option_data_mac_algorithm: "option_mac_algorithm_id"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.mac_algorithm.id = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.mac_algorithm.id = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 64: /* option_data_session_lifetime: "option_session_lifetime_lifetime"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.session_lifetime.lifetime = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.session_lifetime.lifetime = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 65: /* option_data_received_pak: "option_received_pak_sequence_number"  */
                                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.received_pak.sequence_number = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival); }
+                                                                      option_r.received_pak.sequence_number = static_cast<ACE_UINT32> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 66: /* option_data_id_indicator: "option_id_indicator_data"  */

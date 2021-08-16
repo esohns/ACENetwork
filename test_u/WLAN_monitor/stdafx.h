@@ -22,7 +22,6 @@
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
 
 #if defined (VALGRIND_SUPPORT)
 #include "valgrind/valgrind.h"
@@ -48,10 +47,6 @@
 #endif // HAVE_CONFIG_H
 #include "net_common.h"
 #include "net_macros.h"
-
-#if defined (_MSC_VER)
-#include "targetver.h"
-#endif // _MSC_VER
 
 // *TODO*: reference additional headers your program requires here
 #include "wlan_monitor_common.h"

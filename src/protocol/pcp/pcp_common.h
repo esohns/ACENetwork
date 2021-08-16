@@ -64,31 +64,31 @@ typedef PCP_Codes::OptionType PCP_Option_t;
 
 /////////////////////////////////////////
 
+//struct PCPOpcodeAnnounceData
+//{};
+
 struct PCPOpcodeMapData
 {
-  ACE_UINT64    nonce;
-  ACE_UINT8     protocol;
-  ACE_UINT32    reserved;
-  ACE_UINT16    internal_port;
-  ACE_UINT16    external_port;
-  ACE_INET_Addr external_address;
+  ACE_UINT64     nonce;
+  ACE_UINT8      protocol;
+  ACE_UINT32     reserved;
+  ACE_UINT16     internal_port;
+  ACE_UINT16     external_port;
+  ACE_INET_Addr* external_address;
 };
 
 struct PCPOpcodePeerData
 {
-  ACE_UINT64    nonce;
-  ACE_UINT8     protocol;
-  ACE_UINT32    reserved;
-  ACE_UINT16    internal_port;
-  ACE_UINT16    external_port;
-  ACE_INET_Addr external_address;
-  ACE_UINT16    remote_peer_port;
-  ACE_UINT16    reserved_2;
-  ACE_INET_Addr remote_peer_address;
+  ACE_UINT64     nonce;
+  ACE_UINT8      protocol;
+  ACE_UINT32     reserved;
+  ACE_UINT16     internal_port;
+  ACE_UINT16     external_port;
+  ACE_INET_Addr* external_address;
+  ACE_UINT16     remote_peer_port;
+  ACE_UINT16     reserved_2;
+  ACE_INET_Addr* remote_peer_address;
 };
-
-//struct PCPOpcodeAnnounceData
-//{};
 
 // rfc7652
 struct PCPOpcodeAuthenticationData
@@ -101,7 +101,7 @@ struct PCPOpcodeAuthenticationData
 
 struct PCPOptionThirdParty
 {
-  ACE_INET_Addr address;
+  ACE_INET_Addr* address;
 };
 
 //struct PCPOptionPreferFailure
@@ -109,10 +109,10 @@ struct PCPOptionThirdParty
 
 struct PCPOptionFilter
 {
-  ACE_UINT8     reserved;
-  ACE_UINT8     prefix_length; // IPv4: 96-128, IPv6: 0-128, 0: delete set filters
-  ACE_UINT16    remote_peer_port; // 0: all ports
-  ACE_INET_Addr remote_peer_address;
+  ACE_UINT8      reserved;
+  ACE_UINT8      prefix_length; // IPv4: 96-128, IPv6: 0-128, 0: delete set filters
+  ACE_UINT16     remote_peer_port; // 0: all ports
+  ACE_INET_Addr* remote_peer_address;
 };
 
 // rfc7652
@@ -279,7 +279,8 @@ struct PCPOption
 };
 
 typedef std::vector<struct PCPOption> PCP_Options_t;
-typedef PCP_Options_t::const_iterator PCP_OptionsIterator_t;
+typedef PCP_Options_t::iterator PCP_OptionsIterator_t;
+typedef PCP_Options_t::const_iterator PCP_OptionsConstIterator_t;
 struct PCP_Record
 {
   PCP_Record ()

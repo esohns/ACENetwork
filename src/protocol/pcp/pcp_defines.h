@@ -54,6 +54,6 @@
 #define PCP_MESSAGE_SIZE                                 1100
 
 #define PCP_DEFAULT_MAP_LIFETIME_S                       3600 // seconds {0: delete mapping}
-#define PCP_NONCE_BYTES                                    12
+#define PCP_NONCE_BYTES                                  12
 
 #endif

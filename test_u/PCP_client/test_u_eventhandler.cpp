@@ -21,18 +21,14 @@
 
 #include "test_u_eventhandler.h"
 
-#include "ace/Guard_T.h"
-#include "ace/Synch_Traits.h"
-
-#include "stream_session_message_base.h"
-
-#include "net_macros.h"
-
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "gtk/gtk.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
+#include "ace/Guard_T.h"
+#include "ace/Synch_Traits.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -40,12 +36,17 @@
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
+//#include "stream_session_message_base.h"
+
+#include "net_macros.h"
+
+#include "pcp_tools.h"
+
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "test_u_callbacks.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-
 #include "test_u_defines.h"
 
 #if defined (GUI_SUPPORT)
@@ -175,6 +176,20 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
+#endif // GUI_SUPPORT
+
+  struct PCP_Record& record_r =
+      const_cast<struct PCP_Record&> (message_in.getR ());
+
+#if defined (GUI_SUPPORT)
+  struct PCP_Record* record_p = NULL;
+  ACE_NEW_NORETURN (record_p,
+                    struct PCP_Record);
+  ACE_ASSERT (record_p);
+  *record_p = record_r;
+  PCP_Tools::clear (record_r); // remove any references to dynamic data
+  ACE_ASSERT (CBData_->session);
+  CBData_->session->notify (record_p);
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)

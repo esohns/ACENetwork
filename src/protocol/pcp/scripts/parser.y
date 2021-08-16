@@ -58,7 +58,7 @@ struct YYLTYPE;
 
 union yytoken
 {
-  ACE_UINT32 ival;
+  ACE_UINT64 ival;
   ACE_UINT8* aval;
 };
 typedef yytoken yytoken_t;
@@ -96,7 +96,7 @@ extern int yyparse (PCP_ParserDriver*, yyscan_t);
 // symbols
 %union
 {
-  ACE_UINT32 ival;
+  ACE_UINT64 ival;
   ACE_UINT8* aval;
 };
 /* %token <int>         INTEGER; */
@@ -203,86 +203,74 @@ using namespace std;
 message:                 header opcode_specific options             { $$ = $1 + $2 + $3; }
 header:                  "version"                                  { driver->record_->version =
                                                                         static_cast<enum PCP_Codes::VersionType> ($1); }
-                         "opcode"                                   { driver->record_->opcode = $3; }
-                         "reserved"                                 { driver->record_->reserved = $5; }
+                         "opcode"                                   { driver->record_->opcode = static_cast<ACE_UINT8> ($3); }
+                         "reserved"                                 { driver->record_->reserved = static_cast<ACE_UINT8> ($5); }
                          "result_code"                              { driver->record_->result_code =
                                                                         static_cast<enum PCP_Codes::ResultCodeType> ($7); }
-                         "lifetime"                                 { driver->record_->lifetime = $9; }
-                         "epoch_time"                               { driver->record_->epoch_time = $11; }
+                         "lifetime"                                 { driver->record_->lifetime = static_cast<ACE_UINT32> ($9); }
+                         "epoch_time"                               { driver->record_->epoch_time = static_cast<ACE_UINT32> ($11); }
                          "reserved_2"                               { $$ = $1 + $3 + $5 + $7 + $9 + $11 + $13;
-                                                                      driver->record_->reserved_2 = $13; }
+                                                                      driver->record_->reserved_2 = static_cast<ACE_UINT32> ($13); }
 opcode_specific:         opcode_specific_map                        { $$ = $1; }
                          | opcode_specific_peer                     { $$ = $1; }
                          | opcode_specific_authentication           { $$ = $1; } // rfc7652
                          | /* empty */                              { $$ = 0; }
 opcode_specific_map:     "option_map_nonce"                         { driver->record_->map.nonce = $1; }
-                         "option_map_protocol"                      { driver->record_->map.protocol = $3; }
-                         "option_map_reserved"                      { driver->record_->map.reserved = $5; }
-                         "option_map_internal_port"                 { driver->record_->map.internal_port = $7; }
-                         "option_map_assigned_external_port"        { driver->record_->map.external_port = $9; }
+                         "option_map_protocol"                      { driver->record_->map.protocol = static_cast<ACE_UINT8> ($3); }
+                         "option_map_reserved"                      { driver->record_->map.reserved = static_cast<ACE_UINT32> ($5); }
+                         "option_map_internal_port"                 { driver->record_->map.internal_port = static_cast<ACE_UINT16> ($7); }
+                         "option_map_assigned_external_port"        { driver->record_->map.external_port = static_cast<ACE_UINT16> ($9); }
                          "option_map_assigned_external_ip_address"  { $$ = $1 + $3 + $5 + $7 + $9 + $11;
-                                                                      int result =
-                                                                        driver->record_->map.external_address.set (driver->record_->map.external_port,
-                                                                                                                   $11,
-                                                                                                                   1,
-                                                                                                                   AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (driver->record_->map.external_address,
+                                                                                        ACE_INET_Addr (driver->record_->map.external_port,
+                                                                                                       static_cast<ACE_UINT32> ($11)));
+                                                                      if (!driver->record_->map.external_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    driver->record_->map.external_port,
-                                                                                    $11));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
 opcode_specific_peer:    "option_peer_nonce"                        { driver->record_->peer.nonce = $1; }
-                         "option_peer_protocol"                     { driver->record_->peer.protocol = $3; }
-                         "option_peer_reserved"                     { driver->record_->peer.reserved = $5; }
-                         "option_peer_internal_port"                { driver->record_->peer.internal_port = $7; }
-                         "option_peer_assigned_external_port"       { driver->record_->peer.external_port = $9; }
-                         "option_peer_assigned_external_ip_address" { int result =
-                                                                      driver->record_->peer.external_address.set (driver->record_->peer.external_port,
-                                                                                                                  $11,
-                                                                                                                  1,
-                                                                                                                  AF_INET);
-                                                                      if (result == -1)
+                         "option_peer_protocol"                     { driver->record_->peer.protocol = static_cast<ACE_UINT8> ($3); }
+                         "option_peer_reserved"                     { driver->record_->peer.reserved = static_cast<ACE_UINT32> ($5); }
+                         "option_peer_internal_port"                { driver->record_->peer.internal_port = static_cast<ACE_UINT16> ($7); }
+                         "option_peer_assigned_external_port"       { driver->record_->peer.external_port = static_cast<ACE_UINT16> ($9); }
+                         "option_peer_assigned_external_ip_address" { ACE_NEW_NORETURN (driver->record_->peer.external_address,
+                                                                                        ACE_INET_Addr (driver->record_->peer.external_port,
+                                                                                                       static_cast<ACE_UINT32> ($11)));
+                                                                      if (!driver->record_->peer.external_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    driver->record_->peer.external_port,
-                                                                                    $11));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
-                         "option_peer_remote_port"                  { driver->record_->peer.remote_peer_port = $13; }
-                         "option_peer_reserved_2"                   { driver->record_->peer.reserved_2 = $15; }
+                         "option_peer_remote_port"                  { driver->record_->peer.remote_peer_port = static_cast<ACE_UINT16> ($13); }
+                         "option_peer_reserved_2"                   { driver->record_->peer.reserved_2 = static_cast<ACE_UINT16> ($15); }
                          "option_peer_remote_peer_address"          { $$ = $1 + $3 + $5 + $7 + $9 + $11 + $13 + $15 + $17;
-                                                                      int result =
-                                                                        driver->record_->peer.remote_peer_address.set (driver->record_->peer.remote_peer_port,
-                                                                                                                       $17,
-                                                                                                                       1,
-                                                                                                                       AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (driver->record_->peer.remote_peer_address,
+                                                                                        ACE_INET_Addr (driver->record_->peer.remote_peer_port,
+                                                                                                       static_cast<ACE_UINT32> ($17)));
+                                                                      if (!driver->record_->peer.remote_peer_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    driver->record_->peer.remote_peer_port,
-                                                                                    $17));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
-opcode_specific_authentication: "option_authentication_session_id"  { driver->record_->authentication.session_id = $1; } // rfc7652
+opcode_specific_authentication: "option_authentication_session_id"  { driver->record_->authentication.session_id = static_cast<ACE_UINT32> ($1); } // rfc7652
                                 "option_authentication_sequence_number" { $$ = $1 + $3; // rfc7652
-                                                                          driver->record_->authentication.sequence_number = $3; }
+                                                                          driver->record_->authentication.sequence_number = static_cast<ACE_UINT32> ($3); }
 options:                 option options                             { $$ = $1 + $2; }
                          | /* empty */                              { $$ = 0; }
 option:                  "option_code"                              { struct PCPOption option_s;
                                                                       option_s.code = static_cast<enum PCP_Codes::OptionType> ($1);
                                                                       driver->record_->options.push_back (option_s); }
                          "option_reserved"                          { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.reserved = $3; }
+                                                                      option_r.reserved = static_cast<ACE_UINT8> ($3); }
                          "option_length"                            { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.length = $5; }
+                                                                      option_r.length = static_cast<ACE_UINT16> ($5); }
                          option_data                                { $$ = $1 + $3 + $5 + $7; }
 option_data:             option_data_third_party                    { $$ = $1; }
                          | option_data_filter                       { $$ = $1; }
@@ -298,56 +286,48 @@ option_data:             option_data_third_party                    { $$ = $1; }
                          | /* empty */                              { $$ = 0; }
 option_data_third_party: "option_third_party_address"               { $$ = $1;
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      int result =
-                                                                        option_r.third_party.address.set (0,
-                                                                                                          $1,
-                                                                                                          0,
-                                                                                                          AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (option_r.third_party.address,
+                                                                                        ACE_INET_Addr (static_cast<u_short> (0),
+                                                                                                       static_cast<ACE_UINT32> ($1)));
+                                                                      if (!option_r.third_party.address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    0,
-                                                                                    $1));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
 option_data_filter:      "option_filter_reserved"                   { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.filter.reserved = $1; }
+                                                                      option_r.filter.reserved = static_cast<ACE_UINT8> ($1); }
                          "option_filter_prefix_length"              { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.filter.prefix_length = $3; }
+                                                                      option_r.filter.prefix_length = static_cast<ACE_UINT8> ($3); }
                          "option_filter_remote_peer_port"           { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.filter.remote_peer_port = $5; }
+                                                                      option_r.filter.remote_peer_port = static_cast<ACE_UINT16> ($5); }
                          "option_filter_remote_peer_address"        { $$ = $1 + $3 + $5 + $7;
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      int result =
-                                                                        option_r.filter.remote_peer_address.set (option_r.filter.remote_peer_port,
-                                                                                                                 $7,
-                                                                                                                 0,
-                                                                                                                 AF_INET);
-                                                                      if (result == -1)
+                                                                      ACE_NEW_NORETURN (option_r.filter.remote_peer_address,
+                                                                                        ACE_INET_Addr (option_r.filter.remote_peer_port,
+                                                                                                       static_cast<ACE_UINT32> ($7)));
+                                                                      if (!option_r.filter.remote_peer_address)
                                                                       {
-                                                                        ACE_DEBUG ((LM_ERROR,
-                                                                                    ACE_TEXT ("failed to ACE_INET_Addr::set(%u,%u): \"%m\", aborting\n"),
-                                                                                    option_r.filter.remote_peer_port,
-                                                                                    $7));
+                                                                        ACE_DEBUG ((LM_CRITICAL,
+                                                                                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
                                                                         YYABORT;
                                                                       } // end IF
                                                                     }
 option_data_nonce:       "option_nonce_nonce"                       { $$ = $1; // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.nonce.nonce = $1; }
+                                                                      option_r.nonce.nonce = static_cast<ACE_UINT32> ($1); }
 option_data_authentication_tag: "option_authentication_tag_session_id" { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
-                                                                         option_r.authentication_tag.session_id = $1; }
+                                                                         option_r.authentication_tag.session_id = static_cast<ACE_UINT32> ($1); }
                                 "option_authentication_tag_sequence_number" { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                              option_r.authentication_tag.sequence_number = $3; }
+                                                                              option_r.authentication_tag.sequence_number = static_cast<ACE_UINT32> ($3); }
                                 "option_authentication_tag_key_id"  { struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.authentication_tag.key_id = $5; }
+                                                                      option_r.authentication_tag.key_id = static_cast<ACE_UINT32> ($5); }
                                 "option_authentication_tag_data"    { struct PCPOption& option_r = driver->record_->options.back ();
                                                                       $$ = $1 + $3 + $5 + (option_r.length - 12);
                                                                       option_r.authentication_tag.data = $7; }
 option_data_pa_authentication_tag: "option_pa_authentication_tag_key_id" { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
-                                                                           option_r.pa_authentication_tag.key_id = $1; }
+                                                                           option_r.pa_authentication_tag.key_id = static_cast<ACE_UINT32> ($1); }
                                    "option_pa_authentication_tag_data" { struct PCPOption& option_r = driver->record_->options.back ();
                                                                          $$ = $1 + (option_r.length - 4);
                                                                          option_r.pa_authentication_tag.data = $3; }
@@ -356,16 +336,16 @@ option_data_eap_payload: "option_eap_payload_data"                  { struct PCP
                                                                       option_r.eap_payload.data = $1; }
 option_data_pseudo_random_function: "option_pseudo_random_function_id" { $$ = $1; // rfc7652
                                                                          struct PCPOption& option_r = driver->record_->options.back ();
-                                                                         option_r.pseudo_random_function.id = $1; }
+                                                                         option_r.pseudo_random_function.id = static_cast<ACE_UINT32> ($1); }
 option_data_mac_algorithm: "option_mac_algorithm_id"                { $$ = $1; // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.mac_algorithm.id = $1; }
+                                                                      option_r.mac_algorithm.id = static_cast<ACE_UINT32> ($1); }
 option_data_session_lifetime: "option_session_lifetime_lifetime"    { $$ = $1; // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.session_lifetime.lifetime = $1; }
+                                                                      option_r.session_lifetime.lifetime = static_cast<ACE_UINT32> ($1); }
 option_data_received_pak: "option_received_pak_sequence_number"     { $$ = $1; // rfc7652
                                                                       struct PCPOption& option_r = driver->record_->options.back ();
-                                                                      option_r.received_pak.sequence_number = $1; }
+                                                                      option_r.received_pak.sequence_number = static_cast<ACE_UINT32> ($1); }
 option_data_id_indicator: "option_id_indicator_data"                { struct PCPOption& option_r = driver->record_->options.back (); // rfc7652
                                                                       $$ = option_r.length;
                                                                       option_r.id_indicator.data = $1; }
