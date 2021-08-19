@@ -1,0 +1,111 @@
+name: continuous integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+      
+ build:
+  strategy:
+   matrix:
+    os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+    platform: ['x86', 'x64']
+    exclude:
+     - os: 'ubuntu-latest'
+       platform: 'x86'
+     - os: 'windows-latest'
+     - os: 'macos-latest'
+
+  # The CMake configure and build commands are platform agnostic and should work equally
+  # well on Windows or Mac.  You can convert this to a matrix build if you need
+  # cross-platform coverage.
+  # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  runs-on: ${{matrix.os}}
+
+  steps:
+   - name: Checkout
+     uses: actions/checkout@v2
+
+   - name: Checkout submodules
+     run: git submodule update --init --recursive
+
+   - name: Install dependencies (packages)
+     uses: ./.github/actions/install_deps
+     with:
+      os: ${{matrix.os}}
+
+   - name: Install dependencies (ACE)
+     uses: ./.github/actions/install_ACE
+     with:
+      os: ${{matrix.os}}
+
+   - name: Remove Common link
+     run: sudo rm -f modules/Common
+   - name: Checkout (Common)
+     uses: actions/checkout@v2
+     with:
+      repository: esohns/Common
+      path: modules/Common
+   - name: Add Common link
+     run: |
+          cd ..
+          sudo ln -s ACENetwork/modules/Common Common
+          cd ${{github.workspace}}
+
+   - name: Configure CMake (Common)
+     run: |
+          cd modules/Common
+          git submodule update --init --recursive
+          cmake -B ${{github.workspace}}/modules/Common/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          cd ${{github.workspace}}
+
+   - name: Remove ACEStream link
+     run: sudo rm -f modules/ACEStream
+   - name: Checkout (ACEStream)
+     uses: actions/checkout@v2
+     with:
+      repository: esohns/ACEStream
+      path: modules/ACEStream
+   - name: Add ACEStream link
+     run: |
+          cd ..
+          sudo ln -s ACENetwork/modules/Common ACEStream
+          cd ${{github.workspace}}
+
+   - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
+     run: |
+          cd modules/ACEStream
+          git apply scripts/github_repo_build.patch
+          cd ${{github.workspace}}
+
+   - name: Generate LibreOffice headers
+     run: |
+          cd modules/ACEStream/scripts
+          chmod u+x make_oo_headers.sh
+          sudo ./make_oo_headers.sh
+          cd ${{github.workspace}}
+
+   - name: Configure CMake (ACEStream)
+     run: |
+          cd modules/ACEStream
+          git submodule update --init --recursive
+          cmake -B ${{github.workspace}}/modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          cd ${{github.workspace}}
+
+   - name: Configure CMake
+     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+   - name: Build
+     run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+   - name: Test
+     working-directory: ${{github.workspace}}/build
+     run: ctest -C ${{env.BUILD_TYPE}}
+

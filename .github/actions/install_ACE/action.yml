@@ -1,0 +1,18 @@
+name: 'install_ACE'
+description: 'install ACE on the runner'
+inputs:
+ os:  # id of input
+  description: 'runner OS'
+  required: true
+runs:
+ using: "composite"
+ steps:
+  - run: sudo apt-get install libace-dev libace-ssl-dev libacexml-dev libace-xml-utils-dev
+    shell: bash
+#    if: inputs.os == 'ubuntu-latest'
+#  - run:
+#    shell: bash
+#    if: inputs.os == 'windows-latest'
+#  - run:
+#   shell: bash
+#   if: inputs.os == 'macos-latest'

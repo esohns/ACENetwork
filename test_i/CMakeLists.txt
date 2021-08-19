@@ -1,9 +1,9 @@
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/Threads.cmake)
+include (Threads)
 
-include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/SSLConfig.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/NetlinkConfig.cmake)
+include (SSLConfig)
+include (NetlinkConfig)
 
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/ACE.cmake)
+include (ACE)
 
 option (BUILD_TEST_I "build test_i" OFF)
 
@@ -11,13 +11,18 @@ option (BUILD_TEST_I "build test_i" OFF)
 option (GUI_SUPPORT "enable graphical user interface support" ON)
 if (GUI_SUPPORT)
  add_definitions (-DGUI_SUPPORT)
- include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/Macros.cmake)
- include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/PreUIFramework.cmake)
- include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetUIFramework.cmake)
+ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts")
+# include (Macros)
+ include (PreUIFramework)
+ include (SetUIFramework)
 
  if (CURSES_USE)
  elseif (GTK_USE)
-  include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetGTKVersion.cmake)
+  include (SetGTKVersion)
+
+  if (CMAKE_BUILD_TYPE STREQUAL Debug)
+   add_definitions (-DG_ERRORCHECK_MUTEXES)
+  endif (CMAKE_BUILD_TYPE STREQUAL Debug)
  elseif (WXWIDGETS_USE)
   message (STATUS "wxWidgets_DEFINITIONS: ${wxWidgets_DEFINITIONS}")
   message (STATUS "wxWidgets_DEFINITIONS_DEBUG: ${wxWidgets_DEFINITIONS_DEBUG}")
