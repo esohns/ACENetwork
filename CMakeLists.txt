@@ -1,7 +1,6 @@
 ﻿include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/VersionConfig.cmake)
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts;${CMAKE_CURRENT_SOURCE_DIR}/scripts")
-
 include (Configuration)
 include (Macros)
 include (OS)
@@ -33,17 +32,6 @@ if (UNIX)
  endif (CCACHE_PROGRAM)
 endif (UNIX)
 
-# version
-set (VERSION_MAJOR 0)
-set (VERSION_MINOR 0)
-set (VERSION_MICRO 1)
-set (VERSION_DEVEL devel)
-set (VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO})
-if (VERSION_DEVEL)
- unset (VERSION)
- set (VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}-${VERSION_DEVEL})
-endif ()
-
 # build type
 #variable_watch (CMAKE_BUILD_TYPE)
 # *NOTE*: iff the user specifies -DCMAKE_BUILD_TYPE on the command line, take
@@ -53,7 +41,7 @@ endif ()
 set (BUILD_TYPE_CACHE_STRING "choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
 if (DEFINED CMAKE_BUILD_TYPE)
  set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING ${BUILD_TYPE_CACHE_STRING})
-else ()
+elseif (NOT CMAKE_CONFIGURATION_TYPES)
  set (CMAKE_BUILD_TYPE Debug CACHE STRING ${BUILD_TYPE_CACHE_STRING})
 endif ()
 
@@ -61,12 +49,13 @@ endif ()
 cmake_policy (SET CMP0048 NEW) # allow project VERSION
 #cmake_policy (SET CMP0056 OLD) # honor per-config flags in try_compile()
 #cmake_policy (SET CMP0066 OLD) # honor per-config flags in try_compile()
-project (ACENetwork
+project (${PROJECT_NAME}
          VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
          LANGUAGES CXX C)
 
 # directories
 # override the installation directories ?
+#set (CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION OFF)
 if (UNIX)
  include (GNUInstallDirs)
 # set (INSTALL_SHARE_DIR "share" CACHE PATH "Installation directory for shared files")
@@ -82,11 +71,19 @@ endif ()
 set (INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
 
 # make relative paths absolute (needed later on)
-foreach (path LIB BIN INCLUDE CMAKE)
+foreach (path BIN CMAKE SHARE INCLUDE LIB)
  set (var INSTALL_${path}_DIR)
- if (NOT IS_ABSOLUTE "${${var}}")
-  set (${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+# if (NOT IS_ABSOLUTE "${${var}}")
+ string (TOLOWER "${path}" RELATIVE_INSTALL_PATH)
+
+ if (UNIX)
+  set (${var} "${CMAKE_INSTALL_PREFIX}/${RELATIVE_INSTALL_PATH}")
+ elseif (WIN32)
+  set (${var} ${RELATIVE_INSTALL_PATH})
  endif ()
+# message (STATUS "set \"${var}\" to \"${${var}}\"")
+
+#endif ()
 endforeach ()
 
 # project options
@@ -102,7 +99,7 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
  add_definitions (-D_DEBUG)
  if (WIN32)
   add_definitions (-D_ITERATOR_DEBUG_LEVEL=2)
- endif ()
+ endif (WIN32)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _DEBUG)
  if (DEBUG_DEBUGGER AND
      NOT DEFINED IN_CPACK)
@@ -118,6 +115,12 @@ elseif (CMAKE_BUILD_TYPE STREQUAL Release)
   add_definitions (-D_ITERATOR_DEBUG_LEVEL=0)
  endif ()
 endif ()
+if (MSVC)
+ remove_definitions (/DWINVER)
+ remove_definitions (/D_WIN32_WINNT)
+endif (MSVC)
+
+include (FindPkgConfig)
 
 option (TRACING "enable tracing" OFF)
 if (TRACING)
@@ -130,7 +133,6 @@ endif ()
 
 option (VALGRIND_SUPPORT "enable valgrind support" OFF)
 include (CheckIncludeFiles)
-include (FindPkgConfig)
 if (VALGRIND_SUPPORT)
  check_include_files (valgrind/valgrind.h HAVE_VALGRIND_H)
 #  include (CheckLibraryExists)
@@ -151,8 +153,8 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _GNU_SOURCE)
 elseif (MSVC)
  add_compile_options (/MP)
-# add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-# add_definitions (-D_WINSOCK_DEPRECATED_NO_WARNINGS)
+ add_definitions (-D_CRT_SECURE_NO_WARNINGS)
+ add_definitions (-D_WINSOCK_DEPRECATED_NO_WARNINGS)
 
  set (MSVC_INCREMENTAL_YES_FLAG "/INCREMENTAL:NO")
  foreach (FLAG_TYPE EXE MODULE SHARED STATIC)
@@ -174,11 +176,17 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
 endif ()
 
 ################################################################################
-
-list (APPEND CMAKE_MODULE_PATH "$ENV{LIB_ROOT}/cotire/CMake")
-#list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+if (DEFINED ENV{LIB_ROOT})
+ file (TO_CMAKE_PATH "$ENV{LIB_ROOT}/cotire/CMake" COTIRE_PATH)
+else ()
+  set (COTIRE_PATH "modules/cotire/CMake")
+endif (DEFINED ENV{LIB_ROOT})
+list (APPEND CMAKE_MODULE_PATH "${COTIRE_PATH}")
+cmake_policy (SET CMP0011 NEW)
 include (cotire)
 set_directory_properties (PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
+#list (APPEND CMAKE_MODULE_PATH "$ENV{LIB_ROOT}/cmake-precompiled-header")
+#include (PrecompiledHeader)
 
 ################################################################################
 
@@ -193,23 +201,37 @@ export (PACKAGE ${PROJECT_NAME})
 
 # Create the ACENetworkConfig.cmake and ACENetworkConfigVersion.cmake files
 # *NOTE*: see: https://cmake.org/Wiki/CMake/Tutorials/How_to_create_a_ProjectConfig.cmake_file
-file (RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
+#file (RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
 # ... for the build tree
 set (CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+if (UNIX)
+ set (NEWLINE_STYLE UNIX)
+elseif (WIN32)
+ set (NEWLINE_STYLE WIN32)
+else ()
+ set (NEWLINE_STYLE UNIX)
+endif ()
 configure_file (${PROJECT_NAME}Config.cmake.in
-                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" @ONLY)
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+                @ONLY
+                NEWLINE_STYLE ${NEWLINE_STYLE})
 # ... for the install tree
 set (CONF_INCLUDE_DIRS "\${ACENetwork_CMAKE_DIR}/${REL_INCLUDE_DIR}")
 configure_file (${PROJECT_NAME}Config.cmake.in
-                "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake" @ONLY)
+                "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
+                @ONLY
+                NEWLINE_STYLE ${NEWLINE_STYLE})
 # ... for both
 configure_file (${PROJECT_NAME}ConfigVersion.cmake.in
-                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+                @ONLY
+                NEWLINE_STYLE ${NEWLINE_STYLE})
 
 set (PACKAGE ${PROJECT_NAME})
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake.in
                 ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h
-                @ONLY)
+                @ONLY
+                NEWLINE_STYLE ${NEWLINE_STYLE})
 #add_custom_target (${PROJECT_NAME}_config)
 #set_target_properties (${PROJECT_NAME}_config PROPERTIES
 #                       PUBLIC_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h")
@@ -218,10 +240,12 @@ add_definitions (-DHAVE_CONFIG_H)
 
 ################################################################################
 
-# Install the libACENetworkConfig.cmake and libACENetworkConfigVersion.cmake
+# Install the ACENetworkConfig.cmake and ACENetworkConfigVersion.cmake
 install (FILES
          "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
          "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+#         "${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
+#         "${PROJECT_NAME}ConfigVersion.cmake"
          DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 # Install the export set for use with the install-tree
 install (EXPORT ${PROJECT_NAME}Targets
@@ -232,16 +256,20 @@ install (FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h"
          COMPONENT dev)
 
 ################################################################################
-
-list (APPEND CMAKE_MODULE_PATH "$ENV{LIB_ROOT}/cmake-modules")
-include (UseBackportedModules)
+if (DEFINED ENV{LIB_ROOT})
+ file (TO_CMAKE_PATH "$ENV{LIB_ROOT}/cmake-modules" CMAKE_MODULES_PATH)
+else ()
+  set (CMAKE_MODULES_PATH "modules/cmake-modules")
+endif (DEFINED ENV{LIB_ROOT})
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_MODULES_PATH}")
+#include (UseBackportedModules)
 cmake_policy (SET CMP0026 OLD)
 cmake_policy (SET CMP0053 OLD)
 include (CreateLaunchers)
 
 # enable (unit/integration) tests
 #include (CTest)
-enable_testing ()
+#enable_testing ()
 
 ################################################################################
 
