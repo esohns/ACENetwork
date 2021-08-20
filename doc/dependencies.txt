@@ -22,7 +22,7 @@ test_u:
 test_i:
 
 * Ubuntu 19.10 ('sudo apt install')
-src:           libnl-3-dev flex-devel isc-dhcp-dev libjson-c-dev libkrb5-dev
-               libisc-export1100 libisccfg-export163 libirs-export161
+src:           libnl-3-dev libfl-dev isc-dhcp-dev libjson-c-dev libkrb5-dev
+               libisc-export1105 libisccfg-export163 libirs-export161
 src/protocols: libiw-dev libnl-3-dev libnl-genl-3-dev libnm-dev
 
