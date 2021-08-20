@@ -1,10 +1,12 @@
-﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/PreXMLImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/SetXMLImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/dhcp/scripts/PreDHCPClientImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/dhcp/scripts/SetDHCPClientImplementation.cmake)
-option (NETLINK_SUPPORT "enable netlink support" ON)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../src/wlan/scripts/PreMonitorImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../src/wlan/scripts/SetMonitorImplementation.cmake)
+﻿set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts")
+include (PreXMLImplementation)
+include (SetXMLImplementation)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/dhcp/scripts")
+include (PreDHCPClientImplementation)
+include (SetDHCPClientImplementation)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../src/wlan/scripts")
+include (PreMonitorImplementation)
+include (SetMonitorImplementation)
 
 if (UNIX)
  include (CheckLibraryExists)
@@ -13,94 +15,54 @@ if (UNIX)
  find_package (Threads)
 endif (UNIX)
 
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES ace build/linux/ace
-                DOC "searching for ${ACE_LIB_FILE}")
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}")
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-#else ()
- #message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
-endif ()
-
 set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)
-# message ("CMAKE_FIND_ROOT_PATH is ${CMAKE_FIND_ROOT_PATH}")
  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_XML_LIB_FILE}"
-               NO_DEFAULT_PATH)
-# else ()
-#  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-#                DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
-# endif ()
+               PATHS ENV{ACE_ROOT}/ACEXML ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML
+               PATH_SUFFIXES lib common
+               DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
 elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
+# *TODO*: this does not work
+ set (LIB_FILE_SUFFIX "")
+ if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  set (LIB_FILE_SUFFIX "d")
  endif ()
  unset (ACE_XML_LIB_FILE)
  set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               PATHS ENV ACE_ROOT
+               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_XML_LIB_FILE}")
+               DOC "searching for ${ACE_XML_LIB_FILE}"
+               NO_DEFAULT_PATH)
 endif ()
-#if (NOT EXISTS ACE_XML_LIBRARY)
 if (NOT ACE_XML_LIBRARY)
- message (FATAL_ERROR "Could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
-else ()
- #message (STATUS "Found ACEXML library \"${ACE_XML_LIBRARY}\"")
+ message (FATAL_ERROR "could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
 endif ()
+
 set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
 if (UNIX)
-# message ("CMAKE_FIND_ROOT_PATH is ${CMAKE_FIND_ROOT_PATH}")
  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
-               NO_DEFAULT_PATH)
-# else ()
-#  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-#                DOC "searching for ${ACE_XML_PARSER_LIB_FILE} (system paths)")
-# endif ()
+               PATHS ENV{ACE_ROOT}/ACEXML/parser ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML/parser
+               PATH_SUFFIXES lib parser
+               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}")
 elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
+# *TODO*: this does not work
+ set (LIB_FILE_SUFFIX "")
+ if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  set (LIB_FILE_SUFFIX "d")
  endif ()
  unset (ACE_XML_PARSER_LIB_FILE)
  set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               PATHS ENV ACE_ROOT
+               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}")
+               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
+               NO_DEFAULT_PATH)
 endif ()
-#if (NOT EXISTS ACE_XML_PARSER_LIBRARY)
 if (NOT ACE_XML_PARSER_LIBRARY)
- message (FATAL_ERROR "Could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
-else ()
- #message (STATUS "Found ACEXML parser library \"${ACE_XML_PARSER_LIBRARY}\"")
+ message (FATAL_ERROR "could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
 endif ()
 
 if (UNIX)
@@ -174,24 +136,15 @@ if (UNIX)
 #  include_directories (/usr/include/dhcp)
  endif (DHCLIENT_USE)
 
- # include_directories (/usr/local/src/ACE_wrappers)
- include_directories ($ENV{LIB_ROOT}/ACE_TAO/ACE)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src)
  if (DBUS_USE)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/dbus)
+  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus)
  endif (DBUS_USE)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/signal)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/timer)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src)
 elseif (WIN32)
- if (DEFINED ENV{ACE_ROOT})
-  include_directories ($ENV{ACE_ROOT})
- else ()
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
- endif (DEFINED ENV{ACE_ROOT})
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -202,10 +155,10 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
 endif ()
+include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/wlan)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
 set (EXECUTABLE wlan_monitor)
@@ -292,6 +245,9 @@ endif (WIN32)
 add_dependencies (${EXECUTABLE} ACEStream)
 
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
+if (DHCLIENT_USE)
+ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
+endif (DHCLIENT_USE)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
@@ -351,7 +307,9 @@ endif ()
 target_link_libraries (${EXECUTABLE} CommonXML)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
+if (DHCLIENT_USE)
+ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
+endif (DHCLIENT_USE)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
@@ -359,23 +317,26 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
 if (UNIX)
 # target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
 
- target_link_libraries (${EXECUTABLE} ${PKG_LIBXML_LIBRARIES})
+ if (DHCLIENT_USE)
 # target_link_libraries (${EXECUTABLE} ${JSON_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${DHCPCTL_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${DHCPCTL_LIBRARY})
 # target_link_libraries (${EXECUTABLE} ${DHCP_LIBRARY})
 # target_link_libraries (${EXECUTABLE} -Wl,--start-group ${OMAPI_LIBRARY} ${ISC_LIBRARY} ${DNS_LIBRARY} -Wl,--end-group)
- target_link_libraries (${EXECUTABLE} ${OMAPI_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${IRS_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${DNS_LIBRARY})
- target_link_libraries (${EXECUTABLE} -Wl,--start-group ${DNS_LIBRARY} ${GSS_KRB5_LIBRARY} ${KRB5_LIBRARY} -Wl,--end-group)
- target_link_libraries (${EXECUTABLE} ${KRB5_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${ISC_CFG_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${ISC_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${PKG_SSL_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${GEOIP_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${OMAPI_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${IRS_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${DNS_LIBRARY})
+  target_link_libraries (${EXECUTABLE} -Wl,--start-group ${DNS_LIBRARY} ${GSS_KRB5_LIBRARY} ${KRB5_LIBRARY} -Wl,--end-group)
+  target_link_libraries (${EXECUTABLE} ${KRB5_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${ISC_CFG_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${ISC_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${PKG_SSL_LIBRARIES})
+  target_link_libraries (${EXECUTABLE} ${GEOIP_LIBRARY})
 # target_link_libraries (${EXECUTABLE} ${GSS_LIBRARY})
+ endif (DHCLIENT_USE)
 
-  if (NL80211_USE)
+ target_link_libraries (${EXECUTABLE} ${PKG_LIBXML_LIBRARIES})
+
+ if (NL80211_USE)
   target_link_libraries (${EXECUTABLE} CommonDBus)
  elseif (DBUS_USE)
   target_link_libraries (${EXECUTABLE} CommonDBus)
@@ -384,7 +345,7 @@ endif (UNIX)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 cotire (${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE}

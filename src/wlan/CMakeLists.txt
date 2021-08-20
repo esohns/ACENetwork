@@ -1,7 +1,9 @@
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/PreXMLImplementation.cmake)
-#include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/SetXMLImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/PreMonitorImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/SetMonitorImplementation.cmake)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts")
+include (PreXMLImplementation)
+#include (SetXMLImplementation)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+include (PreMonitorImplementation)
+include (SetMonitorImplementation)
 
 add_library (${PROJECT_NAME}_WLAN STATIC "")
 
@@ -77,10 +79,6 @@ if (UNIX)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
-#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
-
- target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/cmake>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src>)
@@ -112,14 +110,6 @@ elseif (WIN32)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               $<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIR}>)
  endif (LIBXML2_SUPPORT)
-
- if (DEFINED ENV{ACE_ROOT})
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
- else ()
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE>)
- endif (DEFINED ENV{ACE_ROOT})
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/cmake>)
@@ -240,7 +230,7 @@ target_sources (${PROJECT_NAME}_WLAN
 add_dependencies (${PROJECT_NAME}_WLAN Common)
 if (UNIX)
  if (NL80211_SUPPORT)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+#  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   add_dependencies (${PROJECT_NAME}_WLAN CommonDBus)
