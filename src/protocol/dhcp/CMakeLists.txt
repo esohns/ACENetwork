@@ -1,4 +1,6 @@
-﻿set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/scripts")
+﻿# *TODO*: this should not be necessary...
+include (OS)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 include (PreDHCPClientImplementation)
 include (SetDHCPClientImplementation)
 

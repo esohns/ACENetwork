@@ -1,6 +1,8 @@
 ﻿set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts")
 include (PreXMLImplementation)
 include (SetXMLImplementation)
+# *TODO*: this should not be necessary...
+include (OS)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/dhcp/scripts")
 include (PreDHCPClientImplementation)
 include (SetDHCPClientImplementation)

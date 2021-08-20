@@ -359,7 +359,7 @@ if (GUI_SUPPORT)
  file (TO_NATIVE_PATH "${ui_definition_file}" ui_definition_file)
 # message (STATUS "ui_definition_file: ${ui_definition_file}")
  string (REGEX REPLACE "\\\\" "/" ui_definition_file "${ui_definition_file}")
- message (STATUS "ui_definition_file: ${ui_definition_file}")
+# message (STATUS "ui_definition_file: ${ui_definition_file}")
  set (ARGS "-g.\\\\${ui_definition_file} ${ARGS}")
 
  if (GTK_USE)
