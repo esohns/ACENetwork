@@ -30,10 +30,9 @@ message (STATUS "SSL_LIBRARIES \"${SSL_LIBRARIES}\")")
 if (UNIX)
  set (ACE_SSL_LIB_FILE libACE_SSL.so)
  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               PATHS $ENV{ACE_ROOT}
+               PATHS $ENV{ACE_ROOT} ${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE
                PATH_SUFFIXES lib
-               DOC "searching for ${ACE_SSL_LIB_FILE}"
-               NO_DEFAULT_PATH)
+               DOC "searching for ${ACE_SSL_LIB_FILE}")
 elseif (WIN32)
  if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set (LIB_FILE_SUFFIX d)

@@ -1,17 +1,11 @@
-﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../../scripts/SSLConfig.cmake)
+﻿include (SSLConfig)
 
 set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-#  message (STATUS "ACE_ROOT: \"$ENV{ACE_ROOT}\"")
-  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
-                PATHS ENV{ACE_ROOT}
-                PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE /usr/local/src/ACE_wrappers/ACEXML
-#                PATHS ENV{ACE_ROOT}
-                PATH_SUFFIXES lib common
-                DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
- endif ()
+ find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
+               PATHS ENV{ACE_ROOT}/ACEXML ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML
+               PATH_SUFFIXES lib common
+               DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
 elseif (WIN32)
 # *TODO*: this does not work
  set (LIB_FILE_SUFFIX "")
@@ -22,35 +16,21 @@ elseif (WIN32)
  unset (ACE_XML_LIB_FILE)
  set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE
+               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_XML_LIB_FILE}"
                NO_DEFAULT_PATH)
 endif ()
-#if (NOT EXISTS ACE_LIBRARY)
 if (NOT ACE_XML_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
 endif ()
 
 set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
 if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local/src/ACE_wrappers/ACEXML/parser
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib parser
-                DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
-                NO_DEFAULT_PATH)
- else ()
-  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
-                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../../ACE_TAO/ACE /usr/local
-#                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_XML_PARSER_LIB_FILE} (system paths)")
- endif ()
+ find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+               PATHS ENV{ACE_ROOT}/ACEXML/parser ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML/parser
+               PATH_SUFFIXES lib parser
+               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}")
 elseif (WIN32)
 # *TODO*: this does not work
  set (LIB_FILE_SUFFIX "")
@@ -61,13 +41,11 @@ elseif (WIN32)
  unset (ACE_XML_PARSER_LIB_FILE)
  set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATHS $ENV{LIB_ROOT}/ACE_TAO/ACE
+               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
                NO_DEFAULT_PATH)
 endif ()
-#if (NOT EXISTS ACE_LIBRARY)
 if (NOT ACE_XML_PARSER_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
 endif ()

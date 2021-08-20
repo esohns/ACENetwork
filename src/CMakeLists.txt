@@ -1,9 +1,9 @@
-﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/Threads.cmake)
+﻿include (Threads)
 
-include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/SSLConfig.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../scripts/NetlinkConfig.cmake)
+include (SSLConfig)
+include (NetlinkConfig)
 
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/scripts/ACE.cmake)
+include (ACE)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
