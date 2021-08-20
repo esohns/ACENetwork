@@ -1,4 +1,7 @@
-﻿include (Threads)
+﻿# configure C/C++ exceptions
+include (SetCppExceptions)
+
+include (Threads)
 
 include (SSLConfig)
 include (NetlinkConfig)
@@ -41,17 +44,6 @@ add_definitions (-DHAVE_CONFIG_H)
 
 # ........................................
 
-if (WIN32)
- add_definitions (-DWIN32)
- add_definitions (-D_USE_32BIT_TIME_T)
- set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # C++ exception handling
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd") # multithreaded debug dll
- else ()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD")  # multithreaded dll
- endif ()
-endif ()
-
 if (UNIX)
  if(CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
@@ -88,26 +80,22 @@ if (UNIX)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
-#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/${BUILD_PATH_SUFFIX}>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/parser>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/timer>)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src>)
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/parser>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src/modules/lib>)
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/timer>)
-
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/cmake>)
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src>)
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src/modules/lib>)
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src/modules/stat>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src/modules/stat>)
 elseif (WIN32)
  if (SSL_SUPPORT)
   if (DEFINED ENV{SSL_ROOT})
@@ -119,16 +107,8 @@ elseif (WIN32)
   endif (DEFINED ENV{SSL_ROOT})
  endif (SSL_SUPPORT)
 
- if (DEFINED ENV{ACE_ROOT})
-  target_include_directories (${PROJECT_NAME} PUBLIC
-                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
- else ()
-  target_include_directories (${PROJECT_NAME} PUBLIC
-                              $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
- endif (DEFINED ENV{ACE_ROOT})
-
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src>)
  target_include_directories (${PROJECT_NAME} PUBLIC
@@ -139,7 +119,7 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/xml>)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/3rd_party/tree>)
  target_include_directories (${PROJECT_NAME} PUBLIC
@@ -303,8 +283,8 @@ add_dependencies (${PROJECT_NAME} Common)
 
 add_dependencies (${PROJECT_NAME} ACEStream)
 
-set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
-set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
+#set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
+#set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 if (UNIX)
 # if (DHCLIENT_SUPPORT)
