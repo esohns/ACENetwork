@@ -51,8 +51,8 @@ endif (UNIX)
 #add_definitions (-DCOMMONXML_HAS_DLL)
 
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+# target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
 
  if (NL80211_SUPPORT)
   if (PKG_LIBNL3_FOUND)
@@ -79,30 +79,30 @@ if (UNIX)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src>)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/dbus>)
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus>)
  endif (DBUS_SUPPORT)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/error>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/error>)
  if (NL80211_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/math>)
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/math>)
  endif (NL80211_SUPPORT)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/timer>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml>)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib>)
 elseif (WIN32)
  if (LIBXML2_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
@@ -112,7 +112,7 @@ elseif (WIN32)
  endif (LIBXML2_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
@@ -125,7 +125,7 @@ elseif (WIN32)
  endif (LIBXML2_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
@@ -287,7 +287,7 @@ set (include_files
      net_wlan_common.h
      net_wlan_configuration.h
      net_wlan_defines.h
-     net_wlan_exports.h
+#     net_wlan_exports.h
      net_wlan_imanager.h
      net_wlan_imonitor.h
      net_wlan_inetmonitor.h
@@ -299,11 +299,34 @@ set (include_files
      net_wlan_monitor_common.h
      net_wlan_monitor_statemachine.h
      net_wlan_tools.h)
-if (WIN32)
+if (UNIX)
  set (include_files
       ${include_files}
+      net_wlan_dhcp_common.h)
+ if (WEXT_SUPPORT)
+  set (include_files
+       ${include_files}
+       net_wlan_monitor_wext.inl
+       net_wlan_tools_linux_wext.cpp)
+ endif (WEXT_SUPPORT)
+ if (NL80211_SUPPORT)
+  set (include_files
+       ${include_files}
+       net_wlan_monitor_nl80211.inl
+       net_wlan_tools_linux_nl80211.cpp)
+ endif (NL80211_SUPPORT)
+ if (DBUS_SUPPORT)
+  set (include_files
+       ${include_files}
+       net_wlan_monitor_dbus.inl
+       net_wlan_tools_linux_dbus.cpp)
+ endif (DBUS_SUPPORT)
+elseif (WIN32)
+ set (include_files
+      ${include_files}
+      net_wlan_monitor_win32_wlanapi.inl
       net_wlan_profile_xml_handler.h)
-endif (WIN32)
+endif ()
 
 install (FILES
          ${include_files}

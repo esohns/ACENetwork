@@ -1,6 +1,4 @@
-﻿#option (GTK3_SUPPORT "enable Gtk3 support" ON)
-
-if (UNIX)
+﻿if (UNIX)
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
@@ -8,37 +6,7 @@ if (UNIX)
 # check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
 endif ()
 
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES ace build/linux/ace
-                DOC "searching for ${ACE_LIB_FILE}")
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}")
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-endif ()
-
 #include (FindPkgConfig)
-#pkg_check_modules (PKGACE REQUIRED ACE)
-
-include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
 # *NOTE*: Common requires libcap
@@ -99,19 +67,16 @@ if (UNIX)
   endif (CURSES_USE)
  endif (GUI_SUPPORT)
 
-# include_directories (/usr/local/src/ACE_wrappers)
- include_directories ($ENV{LIB_ROOT}/ACE_TAO/ACE)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/log)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/signal)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/timer)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/misc)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/misc)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/net)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/stat)
 elseif (WIN32)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
 
@@ -120,8 +85,6 @@ elseif (WIN32)
 #   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
 #  endif (CURSES_USE)
 # endif (GUI_SUPPORT)
-
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
@@ -140,8 +103,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/irc)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 ########### next target ###############
 set (EXECUTABLE IRC_client)
@@ -195,10 +158,6 @@ set (${EXECUTABLE}_INI
 
 #set_source_files_properties(${IRC_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
-if (UNIX)
- add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif (UNIX)
-
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE}_EXE_SRCS}
@@ -247,7 +206,7 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 cotire (${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE}

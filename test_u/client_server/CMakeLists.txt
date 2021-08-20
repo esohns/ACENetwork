@@ -61,9 +61,6 @@ if (UNIX)
  endif (NETLINK_SUPPORT)
 # include_directories (${PKG_DBUS_INCLUDE_DIRS})
 
-# include_directories (/usr/local/src/ACE_wrappers)
- include_directories ($ENV{LIB_ROOT}/ACE_TAO/ACE)
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -77,18 +74,15 @@ if (UNIX)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
 
-# include_directories ($ENV{ACE_ROOT})
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
-
  # *TODO*: repair pkgconfig support
 # gtk
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/atk-1.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gdk-pixbuf-2.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/cairo)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/pango-1.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0/include)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/glib-2.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gtk-3.0)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/atk-1.0)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gdk-pixbuf-2.0)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/cairo)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/pango-1.0)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0/include)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/glib-2.0)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gtk-3.0)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglarea)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
@@ -213,7 +207,7 @@ target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Test_U)
 
 # add PCH
 set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 cotire (${EXECUTABLE_SOURCE})
 
 install (TARGETS ${EXECUTABLE_SOURCE}

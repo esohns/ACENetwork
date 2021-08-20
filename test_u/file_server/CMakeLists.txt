@@ -5,45 +5,6 @@
  find_package (Threads)
 endif (UNIX)
 
-set (ACE_LIB_FILE libACE.so)
-if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES ace build/linux/ace
-                DOC "searching for ${ACE_LIB_FILE}")
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
- unset (ACE_LIB_FILE)
- set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_LIB_FILE}")
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
-else ()
- #message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
-endif ()
-
-if (UNIX)
-# *NOTE*: Common requires libcap
-# pkg_check_modules (PKG_CAP REQUIRED libcap)
-# if (DBUS_SUPPORT)
-#  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-# endif ()
-# pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
-endif ()
-# *TODO*: repair WIN32 pkgconfig support
-
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
@@ -86,9 +47,6 @@ add_definitions (-DACENETWORK_HAS_DLL)
 if (UNIX)
 # include_directories (${PKG_CAP_INCLUDE_DIRS})
  include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
-
-# include_directories (/usr/local/src/ACE_wrappers)
- include_directories ($ENV{LIB_ROOT}/ACE_TAO/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
@@ -175,10 +133,6 @@ if (GUI_SUPPORT)
  endif (GTK_USE)
 endif (GUI_SUPPORT)
 
-if (UNIX)
- add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif (UNIX)
-
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${file_server_SRCS}
@@ -239,7 +193,7 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 cotire (${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE}

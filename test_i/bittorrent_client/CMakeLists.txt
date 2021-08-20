@@ -74,29 +74,22 @@ if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
 # include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
 
- # include_directories (/usr/local/src/ACE_wrappers)
- include_directories ($ENV{LIB_ROOT}/ACE_TAO/ACE)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/log)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/signal)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/timer)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dev)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/misc)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dev)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/misc)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/net)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/stat)
 elseif (WIN32)
  if (SSL_SUPPORT)
   include_directories (${SSL_INCLUDE_DIRS})
  endif (SSL_SUPPORT)
-
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
@@ -122,8 +115,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/p2p/bittorrent)
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 #message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}/../..\"")
 
 ########### next target ###############
@@ -163,10 +156,6 @@ if (GUI_SUPPORT)
 endif (GUI_SUPPORT)
 
 #set_source_files_properties(${bittorrent_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
-
-if (UNIX)
- add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif (UNIX)
 
 set (EXECUTABLE bittorrent_client)
 add_executable (${EXECUTABLE}
@@ -239,7 +228,7 @@ endif (WIN32)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 cotire (${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE}
