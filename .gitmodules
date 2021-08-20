@@ -1,4 +1,0 @@
-[submodule "cotire"]
-	path = modules/cotire
-	url = https://github.com/sakra/cotire.git
-	
