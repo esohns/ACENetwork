@@ -28,10 +28,6 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-#add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-#add_definitions (-DNET_HAS_DLL)
-
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${BIND9_CFLAGS})
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC /usr/include/bind9)
@@ -52,6 +48,8 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src/modules/stat>)
 elseif (WIN32)
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/3rd_party/msvc>)
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC

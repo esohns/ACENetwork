@@ -36,11 +36,7 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
-#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
-
- target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
@@ -49,7 +45,7 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/timer>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
@@ -61,21 +57,21 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src/modules/stat>)
 elseif (WIN32)
- target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/antlr4/runtime/Cpp/runtime/src>)
+# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/antlr4/runtime/Cpp/runtime/src>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/3rd_party/msvc>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/parser>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
@@ -182,10 +178,6 @@ target_sources (${PROJECT_NAME}_Protocol_HTTP
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DHTTP_BUILD_DLL)
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLang")
- add_compile_options (-std=c++11 -fPIC)
-endif ()
 
 if (WIN32)
 ## *NOTE*: generate .def file and export all symbols on Windows

@@ -51,9 +51,6 @@ if (NOT EXISTS ${ACENetwork_DIR})
 endif ()
 add_definitions (-DACENETWORK_HAS_DLL)
 
-#add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-
 if (UNIX)
 # include_directories (${PKG_CAP_INCLUDE_DIRS})
  if (NETLINK_SUPPORT)
@@ -73,17 +70,6 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
-
- # *TODO*: repair pkgconfig support
-# gtk
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/atk-1.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gdk-pixbuf-2.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/cairo)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/pango-1.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0/include)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/glib-2.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gtk-3.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglarea)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
@@ -208,7 +194,9 @@ target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Test_U)
 # add PCH
 set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 #set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${EXECUTABLE_SOURCE})
+if (UNIX)
+ cotire (${EXECUTABLE_SOURCE})
+endif (UNIX)
 
 install (TARGETS ${EXECUTABLE_SOURCE}
          EXPORT ${PROJECT_NAME}Targets
@@ -316,7 +304,7 @@ if (UNIX)
 # set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS -nostartfiles)
 elseif (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+# set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
 
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream)
@@ -332,7 +320,7 @@ target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Test_U)
 # add PCH
 set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${EXECUTABLE_TARGET})
+#cotire (${EXECUTABLE_TARGET})
 
 install (TARGETS ${EXECUTABLE_TARGET}
          EXPORT ${PROJECT_NAME}Targets

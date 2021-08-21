@@ -66,13 +66,8 @@ if (NOT EXISTS ${ACENetwork_DIR})
  message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
 endif ()
 
-#add_definitions (-DHAVE_CONFIG_H)
-#add_definitions (-DIRC_HAS_DLL)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
-# include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/log)
@@ -229,7 +224,9 @@ endif (WIN32)
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 #set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${EXECUTABLE})
+if (UNIX)
+ cotire (${EXECUTABLE})
+endif (UNIX)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -341,7 +338,7 @@ target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
 # add PCH
 set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${EXECUTABLE_GUI})
+#cotire (${EXECUTABLE_GUI})
 
 install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets

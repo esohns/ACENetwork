@@ -23,9 +23,11 @@
 
 #include "ace/Global_Macros.h"
 
-//#include "stream_control_message.h"
+#include "stream_cachedmessageallocator.h"
+#include "stream_control_message.h"
 #include "stream_data_base.h"
 #include "stream_data_message_base.h"
+#include "stream_messageallocatorheap_base.h"
 
 #include "http_message.h"
 
@@ -44,11 +46,12 @@ class BitTorrent_SessionMessage_T;
 //          typename ControlMessageType,
 //          typename DataMessageType,
 //          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class Stream_CachedMessageAllocator_T;
 
 struct BitTorrent_PeerMessageData
 {
@@ -185,13 +188,13 @@ class BitTorrent_TrackerMessage_T
   //                                                                           UserDataType>,
   //                                               BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
   //                                                                           UserDataType> >;
-  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               struct Common_AllocatorConfiguration,
-                                               Stream_ControlMessage_t,
-                                               BitTorrent_TrackerMessage_T<SessionDataType,
-                                                                           UserDataType>,
-                                               BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
-                                                                           UserDataType> >;
+  //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+  //                                             struct Common_AllocatorConfiguration,
+  //                                             Stream_ControlMessage_t,
+  //                                             BitTorrent_TrackerMessage_T<SessionDataType,
+  //                                                                         UserDataType>,
+  //                                             BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
+  //                                                                         UserDataType> >;
 
  public:
   // *NOTE*: to be used by message allocators
