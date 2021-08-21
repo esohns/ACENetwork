@@ -561,7 +561,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   peer_modulehandler_configuration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
 
-  struct BitTorrent_Client_PeerStreamConfiguration peer_stream_configuration;
+  struct BitTorrent_PeerStreamConfiguration peer_stream_configuration;
   peer_stream_configuration.messageAllocator = &peer_message_allocator;
   configuration_in.peerStreamConfiguration.initialize (module_configuration,
                                                        peer_modulehandler_configuration,
@@ -576,7 +576,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   tracker_modulehandler_configuration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
 
-  struct BitTorrent_Client_TrackerStreamConfiguration tracker_stream_configuration;
+  struct BitTorrent_TrackerStreamConfiguration tracker_stream_configuration;
   tracker_stream_configuration.messageAllocator = &tracker_message_allocator;
   configuration_in.trackerStreamConfiguration.initialize (module_configuration,
                                                           tracker_modulehandler_configuration,

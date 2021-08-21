@@ -67,6 +67,8 @@ template <typename PeerHandlerConfigurationType, // socket-
           typename ConfigurationType,
           typename StateType,
           ////////////////////////////////
+          typename PeerStreamUserDataType,
+          typename TrackerStreamUserDataType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
           ////////////////////////////////
@@ -163,7 +165,7 @@ class BitTorrent_Session_T
                                           typename PeerStreamType::SESSION_MESSAGE_T,
                                           Stream_SessionId_t,
                                           typename PeerStreamType::SESSION_DATA_T,
-                                          PeerUserDataType> PEER_MESSAGEHANDLER_T;
+                                          PeerStreamUserDataType> PEER_MESSAGEHANDLER_T;
   typedef Stream_Module_MessageHandlerA_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           TrackerModuleHandlerConfigurationType,
@@ -172,7 +174,7 @@ class BitTorrent_Session_T
                                           typename TrackerStreamType::SESSION_MESSAGE_T,
                                           Stream_SessionId_t,
                                           typename TrackerStreamType::SESSION_DATA_T,
-                                          TrackerUserDataType> TRACKER_MESSAGEHANDLER_T;
+                                          TrackerStreamUserDataType> TRACKER_MESSAGEHANDLER_T;
   typedef Stream_StreamModuleInputOnlyA_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
                                           Stream_SessionId_t,
@@ -195,7 +197,7 @@ class BitTorrent_Session_T
                                           TRACKER_MESSAGEHANDLER_T> TRACKER_MESSAGEHANDLER_MODULE_T;
 
   typedef BitTorrent_PeerStreamHandler_T<typename PeerStreamType::SESSION_DATA_T,
-                                         PeerUserDataType,
+                                         PeerStreamUserDataType,
                                          typename inherited::ISESSION_T
 #if defined (GUI_SUPPORT)
                                          ,CBDataType> PEER_HANDLER_T;
@@ -203,7 +205,7 @@ class BitTorrent_Session_T
                                          > PEER_HANDLER_T;
 #endif // GUI_SUPPORT
   typedef BitTorrent_TrackerStreamHandler_T<typename TrackerStreamType::SESSION_DATA_T,
-                                            TrackerUserDataType,
+                                            TrackerStreamUserDataType,
                                             typename inherited::ISESSION_T
 #if defined (GUI_SUPPORT)
                                             ,CBDataType> TRACKER_HANDLER_T;

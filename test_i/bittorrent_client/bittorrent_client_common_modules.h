@@ -75,7 +75,7 @@ typedef BitTorrent_Module_ParserH_T<ACE_MT_SYNCH,
                                     BitTorrent_Client_PeerSessionData_t,
                                     struct Stream_Statistic,
                                     Common_Timer_Manager_t,
-                                    struct Net_UserData> BitTorrent_Client_Parser_t;
+                                    struct Stream_UserData> BitTorrent_Client_Parser_t;
 
 DATASTREAM_MODULE_DUPLEX (struct BitTorrent_Client_PeerSessionData,                // session data
                           enum Stream_SessionMessageType,                          // session event type

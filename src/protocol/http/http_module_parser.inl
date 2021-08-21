@@ -158,6 +158,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   int result = -1;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
+  typename SessionMessageType::DATA_T* session_data_container_p =
+    inherited::sessionData_;
 
   // initialize return value(s)
   passMessageDownstream_out = false;
@@ -177,15 +179,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
            message_p->cont ();
            message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
       message_p->cont (message_inout);
-
-      //// just signal the parser (see below for an explanation)
-      //result = condition_.broadcast ();
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
-      //              inherited::mod_->name ()));
     } // end ELSE
-
     message_p = headFragment_;
   } // end lock scope
   ACE_ASSERT (message_p);
@@ -237,6 +231,18 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     } // end IF
     headFragment_ = NULL;
   } // end lock scope
+
+  // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
+  //                   that the complete document data has arrived
+  if (likely (session_data_container_p))
+    session_data_container_p->increase ();
+  if (unlikely (!inherited::putSessionMessage (STREAM_SESSION_MESSAGE_STEP,
+                                               session_data_container_p,
+                                               NULL)))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
+                inherited::name (),
+                STREAM_SESSION_MESSAGE_STEP));
 
 continue_:
 error:
