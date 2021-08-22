@@ -561,9 +561,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
-  ACE_thread_t thread_id = 0;
-  timer_manager_p->start (thread_id);
-  ACE_UNUSED_ARG (thread_id);
+  timer_manager_p->start (NULL);
 
   // step4: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
@@ -603,9 +601,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
 
-  thread_id = 0;
-  gtk_manager_p->start (thread_id);
-  ACE_UNUSED_ARG (thread_id);
+  gtk_manager_p->start (NULL);
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
   if (result == -1)

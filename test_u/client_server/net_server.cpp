@@ -785,17 +785,16 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step3: initialize connection manager
   struct Net_UserData user_data;
-  ACE_thread_t thread_id = 0;
   connection_manager_p->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*connection_configuration_p,
                              NULL);
-  connection_manager_p->start (thread_id);
+  connection_manager_p->start (NULL);
   connection_manager_2->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->set (*connection_configuration_p_2,
                              NULL);
-  connection_manager_2->start (thread_id);
+  connection_manager_2->start (NULL);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
   // reactor/proactor event loop:
@@ -833,8 +832,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GTK_USE)
-    gtk_manager_p->start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
+    gtk_manager_p->start (NULL);
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
     result = ACE_OS::sleep (timeout);
@@ -1029,29 +1027,27 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end SWITCH
   if (listener_p)
   {
-    ACE_thread_t thread_id = 0;
-    listener_p->start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
-    if (!listener_p->isRunning ())
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start listener, returning\n")));
-
-      Common_Tools::finalizeEventDispatch (useReactor_in,
-                                           !useReactor_in,
-                                           (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                                          : event_dispatch_state_s.proactorGroupId));
-#if defined (GUI_SUPPORT)
-      if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-        gtk_manager_p->stop (true, true, true);
-#else
-        ;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-      Common_Timer_Tools::finalize ();
-      return;
-    } // end IF
+    listener_p->start (NULL);
+//    if (!listener_p->isRunning ())
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to start listener, returning\n")));
+//
+//      Common_Tools::finalizeEventDispatch (useReactor_in,
+//                                           !useReactor_in,
+//                                           (useReactor_in ? event_dispatch_state_s.reactorGroupId
+//                                                          : event_dispatch_state_s.proactorGroupId));
+//#if defined (GUI_SUPPORT)
+//      if (!UIDefinitionFile_in.empty ())
+//#if defined (GTK_USE)
+//        gtk_manager_p->stop (true, true, true);
+//#else
+//        ;
+//#endif // GTK_USE
+//#endif // GUI_SUPPORT
+//      Common_Timer_Tools::finalize ();
+//      return;
+//    } // end IF
   } // end IF
 
   if (useReactor_in)

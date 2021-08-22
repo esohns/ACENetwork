@@ -590,9 +590,7 @@ do_work (bool autoAssociate_in,
 
   // step1: initialize regular (global) statistic reporting ?
   timer_manager_p->initialize (configuration_in.timerConfiguration);
-  ACE_thread_t thread_id = 0;
-  timer_manager_p->start (thread_id);
-  ACE_UNUSED_ARG (thread_id);
+  timer_manager_p->start (NULL);
   ACE_ASSERT (timer_manager_p->isRunning ());
 
 //  if (statisticReportingInterval_in)
@@ -682,9 +680,7 @@ do_work (bool autoAssociate_in,
 
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
-    thread_id = 0;
-    gtk_manager_p->start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
+    gtk_manager_p->start (NULL);
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
     result = ACE_OS::sleep (timeout);
@@ -711,20 +707,18 @@ do_work (bool autoAssociate_in,
       goto error;
     } // end IF
 
-    thread_id = 0;
-    iwlanmonitor_p->start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
-    if (!iwlanmonitor_p->isRunning ())
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start WLAN monitor, aborting\n")));
-      goto error;
-    } // end IF
+    iwlanmonitor_p->start (NULL);
+    //if (!iwlanmonitor_p->isRunning ())
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to start WLAN monitor, aborting\n")));
+    //  goto error;
+    //} // end IF
 #if defined (GUI_SUPPORT)
   } // end ELSE
 #endif // GUI_SUPPORT
 
-  iwlanmonitor_p->wait (false); // wait for message queue ?
+  //iwlanmonitor_p->wait (false); // wait for message queue ?
 
 //  if (!useUDP_in)
 //    Common_Tools::dispatchEvents (useReactor_in,

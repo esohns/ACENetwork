@@ -702,7 +702,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   } // end IF
 
   // step6b: (try to) connect to the torrent tracker
-  bittorrent_control.start (thread_id);
+  bittorrent_control.start (NULL);
 
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)

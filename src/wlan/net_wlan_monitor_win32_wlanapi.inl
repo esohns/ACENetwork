@@ -63,11 +63,11 @@ Net_WLAN_Monitor_T<//AddressType,
                    ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
-                   UserDataType>::start (ACE_thread_t& threadId_out)
+                   UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
 
-  ACE_UNUSED_ARG (threadId_out);
+  ACE_UNUSED_ARG (timeout_in);
 
   // sanity check(s)
   if (unlikely (!inherited::isInitialized_))
@@ -140,15 +140,9 @@ Net_WLAN_Monitor_T<//AddressType,
                    ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
-                   UserDataType>::stop (bool waitForCompletion_in,
-                                        bool highPriority_in,
-                                        bool lockedAccess_in)
+                   UserDataType>::stop ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
-
-  ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (highPriority_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
   if (unlikely (!inherited::isActive_))

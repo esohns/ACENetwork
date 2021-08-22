@@ -155,9 +155,7 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
     } // end IF
 
     // step4: stop monitor
-    inherited::configuration_->monitor->stop (false, // wait ?
-                                              true,  // high priority ?
-                                              true); // locked access ?
+    inherited::configuration_->monitor->stop ();
 
 //    // step1: stop GTK event processing ?
 //    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,

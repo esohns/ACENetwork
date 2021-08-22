@@ -75,10 +75,9 @@ class Net_Server_AsynchListener_T
 
   // implement Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
-  virtual void start (ACE_thread_t&); // return value: thread handle (if any)
-  virtual void stop (bool = true,  // wait for completion ?
-                     bool = true,  // high priority ?
-                     bool = true); // locked access ?
+  virtual void start (ACE_Time_Value*); // N/A
+  virtual void stop ();
+  inline virtual bool isShuttingDown () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual bool isRunning () const { return isListening_; }
 
   // *NOTE*: handlers receive the configuration object via

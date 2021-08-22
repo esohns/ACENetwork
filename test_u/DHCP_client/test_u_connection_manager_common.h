@@ -32,8 +32,7 @@
 
 #include "test_u_connection_common.h"
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  DHCPClient_ConnectionConfiguration,
                                  struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,

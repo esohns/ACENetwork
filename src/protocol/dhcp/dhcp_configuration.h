@@ -53,8 +53,7 @@ struct DHCP_Stream_SessionData;
 //                          struct DHCP_ConnectionState,
 //                          DHCP_Statistic_t,
 //                          DHCP_Stream> DHCP_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct DHCP_ConnectionConfiguration,
                                  struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,

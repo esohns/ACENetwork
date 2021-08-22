@@ -34,8 +34,7 @@
 #include "test_u_connection_common.h"
 #include "test_u_message.h"
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  PCPClient_ConnectionConfiguration,
                                  struct PCP_ConnectionState,
                                  PCP_Statistic_t,

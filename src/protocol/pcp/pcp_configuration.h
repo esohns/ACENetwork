@@ -53,8 +53,7 @@ struct PCP_Stream_SessionData;
 //                          struct PCP_ConnectionState,
 //                          PCP_Statistic_t,
 //                          PCP_Stream> PCP_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct PCP_ConnectionConfiguration,
                                  struct PCP_ConnectionState,
                                  PCP_Statistic_t,

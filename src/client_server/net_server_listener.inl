@@ -114,9 +114,7 @@ Net_Server_Listener_T<HandlerType,
 
   ACE_DEBUG ((LM_WARNING,
               ACE_TEXT ("failed to accept connection, continuing\n")));
-#if defined (_DEBUG)
   inherited::dump ();
-#endif // _DEBUG
 
   // *NOTE*: remain registered with the reactor
   return 0;
@@ -136,12 +134,11 @@ Net_Server_Listener_T<HandlerType,
                       ConfigurationType,
                       StateType,
                       StreamType,
-                      UserDataType>::start (ACE_thread_t& threadId_out)
+                      UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::start"));
 
-  // initialize return value(s)
-  threadId_out = 0;
+  ACE_UNUSED_ARG (timeout_in);
 
   int result = -1;
 
@@ -193,10 +190,8 @@ Net_Server_Listener_T<HandlerType,
                   ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
       return;
     } // end IF
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("resumed listening...\n")));
-#endif // _DEBUG
 
     isSuspended_ = false;
     isListening_ = true;
@@ -266,15 +261,9 @@ Net_Server_Listener_T<HandlerType,
                       ConfigurationType,
                       StateType,
                       StreamType,
-                      UserDataType>::stop (bool waitForCompletion_in,
-                                           bool highPriority_in,
-                                           bool lockedAccess_in)
+                      UserDataType>::stop ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::stop"));
-
-  ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (highPriority_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
   if (unlikely (!isListening_))

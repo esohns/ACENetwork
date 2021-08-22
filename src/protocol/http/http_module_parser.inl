@@ -496,25 +496,6 @@ error:
   inherited2::record_ = NULL;
 }
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-void
-HTTP_Module_Parser_T<ACE_SYNCH_USE,
-                     TimePolicyType,
-                     ConfigurationType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType>::chunk (unsigned int size_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::chunk"));
-
-  chunks_.push_back (std::make_pair (inherited2::offset (), size_in));
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <ACE_SYNCH_DECL,
@@ -866,7 +847,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     case STREAM_SESSION_MESSAGE_END:
     {
       // *NOTE*: only process the first 'session end' message (see above: 2566)
-      { ACE_Guard<typename inherited::ITASKCONTROL_T::MUTEX_T> aGuard (inherited::lock_);
+      { ACE_GUARD (typename inherited::MUTEX_T, aGuard, inherited::lock_);
         if (inherited::sessionEndProcessed_)
           break; // done
         inherited::sessionEndProcessed_ = true;
@@ -1146,39 +1127,4 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   inherited2::finished_ = true;
 error:
   inherited2::record_ = NULL;
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConfigurationType,
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename TimerManagerType,
-          typename UserDataType>
-void
-HTTP_Module_ParserH_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType,
-                      TimerManagerType,
-                      UserDataType>::chunk (unsigned int size_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::chunk"));
-
-  chunks_.push_back (std::make_pair (inherited2::offset (), size_in));
 }

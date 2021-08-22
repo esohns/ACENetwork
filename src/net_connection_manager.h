@@ -44,8 +44,7 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename UserDataType>
 class Net_Connection_Manager_T
- : public Net_IConnectionManager_T<ACE_SYNCH_USE,
-                                   AddressType,
+ : public Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -66,14 +65,12 @@ class Net_Connection_Manager_T
   typedef ConfigurationType CONFIGURATION_T;
   typedef StateType STATE_T;
   typedef UserDataType USERDATA_T;
-  typedef Net_IConnectionManager_T<ACE_SYNCH_USE,
-                                   AddressType,
+  typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> INTERFACE_T;
   typedef Net_IConnection_T<AddressType,
-                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef ACE_Singleton<Net_Connection_Manager_T<ACE_SYNCH_USE,
@@ -88,15 +85,16 @@ class Net_Connection_Manager_T
   void initialize (unsigned int,           // maximum number of concurrent connections
                    const ACE_Time_Value&); // connection 'visit' interval
 
+  bool lock (bool = true); // block ?
+  int unlock (bool = false); // unblock ?
+
   // implement (part of) Net_IConnectionManager_T
-  virtual bool lock (bool = true); // block ?
-  virtual int unlock (bool = false); // unblock ?
-  inline virtual const typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T& getR_2 () const { static typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T dummy;  ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
-  virtual void start (ACE_thread_t&); // N/A
+  inline virtual bool isRunning () const { return isActive_; }
+  inline virtual bool isShuttingDown () { return !isRunning (); }
+  virtual void start (ACE_Time_Value* = NULL); // N/A
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true,  // high priority ?
                      bool = true); // locked access ?
-  inline virtual bool isRunning () const { return isActive_; }
   virtual void wait (bool = true) const; // N/A
   virtual void dump_state () const;
   virtual void abort (enum Net_Connection_AbortStrategy); // strategy
@@ -146,7 +144,7 @@ class Net_Connection_Manager_T
   typedef ACE_DLList_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
   typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
-  // override/hide (part of) Common_ITask_T/Common_ITaskControl
+  // override/hide (part of) Common_IAsynchTask
   inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 

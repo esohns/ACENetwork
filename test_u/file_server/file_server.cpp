@@ -703,8 +703,7 @@ do_work (
   } // end IF
 
   timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start (thread_id);
-  ACE_UNUSED_ARG (thread_id);
+  timer_manager_p->start (NULL);
 
   // step1: initialize regular (global) statistic reporting
   if (statisticReportingInterval_in)
@@ -836,9 +835,7 @@ do_work (
 
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
-    ACE_thread_t thread_id = 0;
-    gtk_manager_p->start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
+    gtk_manager_p->start (NULL);
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
     result = ACE_OS::sleep (timeout);
@@ -983,16 +980,14 @@ do_work (
     } // end IF
     else
     {
-      ACE_thread_t thread_id = 0;
-      configuration.listener->start (thread_id);
-      ACE_UNUSED_ARG (thread_id);
-      if (!configuration.listener->isRunning ())
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
-                    listeningPortNumber_in));
-        goto error;
-      } // end IF
+      configuration.listener->start (NULL);
+      //if (!configuration.listener->isRunning ())
+      //{
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
+      //              listeningPortNumber_in));
+      //  goto error;
+      //} // end IF
     } // end ELSE
 #if defined (GUI_SUPPORT)
   } // end IF
@@ -1052,7 +1047,7 @@ error:
                                          group_id);
   if (configuration.listener &&
       !useUDP_in)
-    configuration.listener->stop (true, true, true);
+    configuration.listener->stop ();
 }
 
 void

@@ -124,8 +124,7 @@ typedef Net_IConnector_T<ACE_INET_Addr,
 
 /////////////////////////////////////////
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct DHCP_ConnectionConfiguration,
                                  struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,

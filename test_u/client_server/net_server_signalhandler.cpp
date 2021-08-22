@@ -139,10 +139,10 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     if (inherited::configuration_->TCPListener)
     {
       try {
-        inherited::configuration_->TCPListener->stop (false, true, true);
+        inherited::configuration_->TCPListener->stop ();
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
+                    ACE_TEXT ("caught exception in Common_ITask::stop(), returning\n")));
         return;
       }
     } // end IF
@@ -150,10 +150,10 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     if (inherited::configuration_->SSLListener)
     {
       try {
-        inherited::configuration_->SSLListener->stop (false, true, true);
+        inherited::configuration_->SSLListener->stop ();
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IControl::stop(), returning\n")));
+                    ACE_TEXT ("caught exception in Common_ITask::stop(), returning\n")));
         return;
       }
     } // end IF

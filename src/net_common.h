@@ -329,8 +329,6 @@ struct Net_StreamConnectionState
 typedef std::set<Net_ConnectionId_t> Net_ConnectionIds_t;
 typedef Net_ConnectionIds_t::iterator Net_ConnectionIdsIterator_t;
 
-typedef Net_IConnectionManagerBase_T<ACE_MT_SYNCH> Net_IConnectionManagerBase_t;
-
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct Net_StreamConnectionState,
                           struct Net_StreamStatistic> Net_IINETConnection_t;

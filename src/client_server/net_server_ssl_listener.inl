@@ -112,9 +112,7 @@ Net_Server_SSL_Listener_T<HandlerType,
 
   ACE_DEBUG ((LM_WARNING,
               ACE_TEXT ("failed to accept connection, continuing\n")));
-#if defined (_DEBUG)
   inherited::dump ();
-#endif // _DEBUG
 
   // *NOTE*: remain registered with the reactor
   return 0;
@@ -134,12 +132,11 @@ Net_Server_SSL_Listener_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StreamType,
-                          UserDataType>::start (ACE_thread_t& threadId_out)
+                          UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::start"));
 
-  // initialize return value(s)
-  threadId_out = 0;
+  ACE_UNUSED_ARG (timeout_in);
 
   int result = -1;
 
@@ -191,10 +188,8 @@ Net_Server_SSL_Listener_T<HandlerType,
                   ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
       return;
     } // end IF
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("resumed listening...\n")));
-#endif // _DEBUG
 
     isSuspended_ = false;
     isListening_ = true;
@@ -236,7 +231,6 @@ Net_Server_SSL_Listener_T<HandlerType,
     return;
   } // end IF
   isOpen_ = true;
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
@@ -248,7 +242,6 @@ Net_Server_SSL_Listener_T<HandlerType,
               inherited::get_handle (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 
   isListening_ = true;
 }
@@ -267,18 +260,13 @@ Net_Server_SSL_Listener_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StreamType,
-                          UserDataType>::stop (bool waitForCompletion_in,
-                                               bool highPriority_in,
-                                               bool lockedAccess_in)
+                          UserDataType>::stop ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::stop"));
 
-  ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (highPriority_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
-
   // sanity check(s)
-  if (!isListening_) return; // nothing to do
+  if (!isListening_)
+    return; // nothing to do
   ACE_ASSERT (isOpen_);
 
   int result = inherited::suspend ();
@@ -289,10 +277,8 @@ Net_Server_SSL_Listener_T<HandlerType,
     return;
   } // end IF
   isSuspended_ = true;
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("suspended listening...\n")));
-#endif // _DEBUG
 
   isListening_ = false;
 }

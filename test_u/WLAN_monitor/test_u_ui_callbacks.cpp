@@ -1026,15 +1026,13 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
       goto error;
     } // end IF
 
-    ACE_thread_t thread_id = 0;
     try {
-      ui_cb_data_p->monitor->start (thread_id);
+      ui_cb_data_p->monitor->start (NULL);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask_T::start(): \"%m\", aborting\n")));
       goto error;
     } // end catch
-    ACE_UNUSED_ARG (thread_id);
 
     // start progress reporting
     ACE_ASSERT (!ui_cb_data_p->progressData.eventSourceId);
@@ -1062,12 +1060,10 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                           GTK_STOCK_MEDIA_PLAY);
 
     try {
-      ui_cb_data_p->monitor->stop (true,  // wait ?
-                                   true,  // high priority ?
-                                   true); // locked access ?
+      ui_cb_data_p->monitor->stop ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Common_ITask_T::stop(): \"%m\", aborting\n")));
+                  ACE_TEXT ("caught exception in Common_ITask::stop(): \"%m\", aborting\n")));
       goto error;
     } // end catch
 
@@ -1140,11 +1136,11 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // *NOTE*: when monitoring, the signal quality display is handled in the
     //         callbacks
-    if (!ui_cb_data_p->monitor->isRunning ())
-    {
-      gtk_widget_set_visible (GTK_WIDGET (scale_p),
-                              TRUE);
-    } // end IF
+    //if (!ui_cb_data_p->monitor->isRunning ())
+    //{
+    //  gtk_widget_set_visible (GTK_WIDGET (scale_p),
+    //                          TRUE);
+    //} // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -1216,11 +1212,11 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // *NOTE*: when monitoring, the signal quality display is handled in the
     //         callbacks
-    if (!ui_cb_data_p->monitor->isRunning ())
-    {
-      gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
-                                FALSE);
-    } // end IF
+    //if (!ui_cb_data_p->monitor->isRunning ())
+    //{
+    //  gtk_widget_set_sensitive (GTK_WIDGET (scale_p),
+    //                            FALSE);
+    //} // end IF
   } // end ELSE
 //  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
 //                            !is_active);
@@ -1570,7 +1566,7 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   {
     // the selected SSID is not the configured SSID
 
-    if (!ui_cb_data_p->monitor->isRunning () ||
+    if (//!ui_cb_data_p->monitor->isRunning () ||
         ui_cb_data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
     { // not active or configured
       // --> update configuration

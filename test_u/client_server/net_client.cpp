@@ -653,14 +653,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //	config.currentStatistics = {};
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
-  ACE_thread_t thread_id = 0;
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
   Common_Timer_Tools::configuration_.publishSeconds = true;
   timer_manager_p->initialize (Common_Timer_Tools::configuration_);
-  timer_manager_p->start (thread_id);
+  timer_manager_p->start (NULL);
   //    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
   Common_Timer_Tools::initialize ();
 
@@ -769,12 +768,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (tcp_connection_configuration,
                              NULL);
-  connection_manager_p->start (thread_id);
+  connection_manager_p->start (NULL);
   connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->set (udp_connection_configuration,
                              NULL);
-  connection_manager_2->start (thread_id);
+  connection_manager_2->start (NULL);
 
   // step0e: initialize action timer
   ACE_INET_Addr peer_address (serverPortNumber_in,
@@ -892,9 +891,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
 
-    ACE_thread_t thread_id = 0;
-    gtk_manager_p->start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
+    gtk_manager_p->start (NULL);
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
     result = ACE_OS::sleep (timeout);

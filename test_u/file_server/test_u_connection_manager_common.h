@@ -32,8 +32,7 @@
 #include "test_u_connection_common.h"
 #include "file_server_connection_common.h"
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  FileServer_TCPConnectionConfiguration,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
@@ -45,8 +44,7 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  Net_StreamStatistic_t,
                                  struct Net_UserData> FileServer_TCPConnectionManager_t;
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  FileServer_UDPConnectionConfiguration,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,

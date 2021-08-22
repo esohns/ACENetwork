@@ -535,12 +535,11 @@ Net_Server_AsynchListener_T<HandlerType,
                             ConfigurationType,
                             StateType,
                             StreamType,
-                            UserDataType>::start (ACE_thread_t& threadId_out)
+                            UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::start"));
 
-  // initialize return value(s)
-  threadId_out = 0;
+  ACE_UNUSED_ARG (timeout_in);
 
   int result = -1;
 
@@ -618,15 +617,9 @@ Net_Server_AsynchListener_T<HandlerType,
                             ConfigurationType,
                             StateType,
                             StreamType,
-                            UserDataType>::stop (bool waitForCompletion_in,
-                                                 bool highPriority_in,
-                                                 bool lockedAccess_in)
+                            UserDataType>::stop ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::stop"));
-
-  ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (highPriority_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
 
   if (unlikely (!isListening_))
     return; // nothing to do

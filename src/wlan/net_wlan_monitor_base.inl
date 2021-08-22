@@ -320,8 +320,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   if (unlikely (isInitialized_))
   {
     if (isActive_)
-      stop (true,  // wait ?
-            true); // N/A
+      stop ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
@@ -708,8 +707,7 @@ continue_:
   if (likely (isActive_))
   {
     restart_b = true;
-    stop (true,  // wait ?
-          true); // N/A
+    stop ();
   } // end IF
   ACE_ASSERT (!isActive_);
 
@@ -729,9 +727,7 @@ continue_:
     initialize (*configuration_);
 #endif // ACE_WIN32 || ACE_WIN64
 
-    ACE_thread_t thread_id = 0;
-    start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
+    start (NULL);
   } // end IF
 
   return true;
@@ -803,8 +799,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   if (likely (isActive_))
   {
     restart_b = true;
-    stop (true,  // wait ?
-          true); // N/A
+    stop ();
   } // end IF
   ACE_ASSERT (!isActive_);
 
@@ -855,11 +850,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   } // end IF
 
   if (restart_b)
-  {
-    ACE_thread_t thread_id = 0;
-    start (thread_id);
-    ACE_UNUSED_ARG (thread_id);
-  } // end IF
+    start (NULL);
 }
 
 template <typename AddressType,

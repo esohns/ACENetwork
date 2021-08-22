@@ -22,26 +22,22 @@
 #define NET_CONTROLLER_BASE_H
 
 #include "ace/Global_Macros.h"
-#include "ace/Synch_Traits.h"
 
 #include "common_itask.h"
 
 class Net_Controller_Base
- : public Common_ITask_T<ACE_MT_SYNCH,
-                         Common_ILock_T<ACE_MT_SYNCH> >
+ : public Common_ITask
 {
-  typedef Common_ITask_T<ACE_MT_SYNCH,
-                         Common_ILock_T<ACE_MT_SYNCH> > inherited;
-
  public:
   Net_Controller_Base ();
   virtual ~Net_Controller_Base ();
 
-  // implement Common_ITask_T
-  virtual void start ();
-  virtual void stop (bool = true,  // wait for completion ?
-                     bool = true); // locked access ?
-  virtual bool isRunning () const;
+  // implement Common_ITask
+  virtual void start (ACE_Time_Value*); // N/A
+  virtual void stop ();
+  inline virtual bool isShuttingDown () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+
+  inline virtual bool isRunning () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Controller_Base (const Net_Controller_Base&));

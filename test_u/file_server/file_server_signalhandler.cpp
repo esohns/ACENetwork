@@ -135,7 +135,7 @@ FileServer_SignalHandler::handle (const struct Common_Signal& signal_in)
     if (inherited::configuration_->listener)
     {
       try {
-        inherited::configuration_->listener->stop (true, true, true);
+        inherited::configuration_->listener->stop ();
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_ITask::stop(), returning\n")));

@@ -519,9 +519,11 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::start (ACE_thread_t&)
+                         UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
+
+  ACE_UNUSED_ARG (timeout_in);
 
   int result = -1;
   Common_ITimer_Manager_t* timer_interface_p =
@@ -551,12 +553,10 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                 &resetTimeoutInterval_));
     return;
   } // end IF
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("scheduled visitor interval timer (id: %d, interval: %#T)\n"),
               resetTimeoutHandlerId_,
               &resetTimeoutInterval_));
-#endif // _DEBUG
 
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
     isActive_ = true;

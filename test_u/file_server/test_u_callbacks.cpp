@@ -867,15 +867,13 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (frame_p);
     gtk_widget_set_sensitive (GTK_WIDGET (frame_p), false);
 
-    ACE_thread_t thread_id = 0;
     try {
-      data_p->configuration->listener->start (thread_id);
+      data_p->configuration->listener->start (NULL);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Test_U_Server_IListener::start(): \"%m\", aborting\n")));
       goto error;
     } // end catch
-    ACE_UNUSED_ARG (thread_id);
   } // end IF
   else
   {
@@ -886,7 +884,7 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
     gtk_widget_set_sensitive (GTK_WIDGET (frame_p), true);
 
     try {
-      data_p->configuration->listener->stop (true, true, true);
+      data_p->configuration->listener->stop ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_Server_IListener::stop(): \"%m\", aborting\n")));

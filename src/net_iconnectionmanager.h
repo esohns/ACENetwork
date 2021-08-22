@@ -24,24 +24,18 @@
 #include "ace/Global_Macros.h"
 
 #include "common_idumpstate.h"
-#include "common_ilock.h"
 #include "common_isubscribe.h"
-#include "common_itaskcontrol.h"
+
+#include "common_itask.h"
 
 #include "net_common.h"
 #include "net_iconnection.h"
 
-template <ACE_SYNCH_DECL>
-class Net_IConnectionManagerBase_T
- : public Common_ITaskControl_T<ACE_SYNCH_USE,
-                                Common_ILock_T<ACE_SYNCH_USE> >
+class Net_IConnectionManagerBase
+ : public Common_IAsynchTask
  , public Common_IDumpState
 {
  public:
-  // convenient types
-  typedef Common_ITaskControl_T<ACE_SYNCH_USE,
-                                Common_ILock_T<ACE_SYNCH_USE> > ITASKCONTROL_T;
-
   virtual void abort (enum Net_Connection_AbortStrategy) = 0;
   virtual void abort (bool = false) = 0; // wait for completion ? (see wait())
 
@@ -54,27 +48,23 @@ class Net_IConnectionManagerBase_T
 
 //////////////////////////////////////////
 
-template <ACE_SYNCH_DECL,
-          typename AddressType,
+template <typename AddressType,
           typename ConfigurationType, // connection-
           typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_IConnectionManager_T
- : public Net_IConnectionManagerBase_T<ACE_SYNCH_USE>
+ : public Net_IConnectionManagerBase
  , public Common_IRegister_T<Net_IConnection_T<AddressType,
-                                               //ConfigurationType,
                                                StateType,
                                                StatisticContainerType> >
  , public Common_IStatistic_T<StatisticContainerType>
 {
  public:
   // convenience types
-  typedef Net_IConnectionManagerBase_T<ACE_SYNCH_USE> BASE_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef Net_IConnection_T<AddressType,
-                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> CONNECTION_T;
   typedef Common_IStatistic_T<StatisticContainerType> ISTATISTIC_T;

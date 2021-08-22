@@ -99,7 +99,7 @@ class HTTP_Module_Parser_T
   virtual void record (struct HTTP_Record*&); // data record
   inline virtual unsigned int currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); }; // current chunk size
   inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  virtual void chunk (unsigned int); // size
+  inline virtual void chunk (unsigned int size_in) { chunks_.push_back (std::make_pair (inherited2::offset (), size_in)); }
 
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
@@ -224,7 +224,7 @@ class HTTP_Module_ParserH_T
   virtual void record (struct HTTP_Record*&); // data record
   inline virtual unsigned int currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); }; // current chunk size
   inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  virtual void chunk (unsigned int); // size
+  inline virtual void chunk (unsigned int size_in) { chunks_.push_back (std::make_pair (inherited2::offset (), size_in)); }
 
   // convenience types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;

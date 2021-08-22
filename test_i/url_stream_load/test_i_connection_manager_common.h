@@ -39,8 +39,7 @@
 // forward declarations
 struct Test_I_UserData;
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
@@ -57,12 +56,11 @@ typedef ACE_Singleton<Test_I_ConnectionManager_t,
 
 //////////////////////////////////////////
 
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                ACE_INET_Addr,
-                                Test_I_URLStreamLoad_ConnectionConfiguration_2_t,
-                                struct HTTP_ConnectionState,
-                                HTTP_Statistic_t,
-                                struct Net_UserData> Test_I_IConnectionManager_2_t;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 Test_I_URLStreamLoad_ConnectionConfiguration_2_t,
+                                 struct HTTP_ConnectionState,
+                                 HTTP_Statistic_t,
+                                 struct Net_UserData> Test_I_IConnectionManager_2_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                 ACE_INET_Addr,
                                 Test_I_URLStreamLoad_ConnectionConfiguration_2_t,

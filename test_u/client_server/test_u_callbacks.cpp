@@ -1239,7 +1239,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     {
       case NET_TRANSPORTLAYER_TCP:
       { ACE_ASSERT (configuration_p->TCPListener);
-        configuration_p->TCPListener->start (thread_id);
+        configuration_p->TCPListener->start (NULL);
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
@@ -1262,7 +1262,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
       {
 #if defined (SSL_SUPPORT)
         ACE_ASSERT (configuration_p->SSLListener);
-        configuration_p->SSLListener->start (thread_id);
+        configuration_p->SSLListener->start (NULL);
 #endif // SSL_SUPPORT
         break;
       }
@@ -1282,7 +1282,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     {
       case NET_TRANSPORTLAYER_TCP:
       { ACE_ASSERT (configuration_p->TCPListener);
-        configuration_p->TCPListener->stop (true, true, true);
+        configuration_p->TCPListener->stop ();
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
@@ -1311,7 +1311,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
       {
 #if defined (SSL_SUPPORT)
         ACE_ASSERT (configuration_p->SSLListener);
-        configuration_p->SSLListener->stop (true, true, true);
+        configuration_p->SSLListener->stop ();
 #endif // SSL_SUPPORT
         break;
       }

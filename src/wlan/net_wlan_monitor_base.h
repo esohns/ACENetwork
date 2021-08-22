@@ -119,7 +119,6 @@ class Net_WLAN_Monitor_Base_T
 
   virtual ~Net_WLAN_Monitor_Base_T ();
 
-  // override (part of) Common_ITaskControl_T
   inline bool isRunning () const { return isActive_; }
 
   // implement Net_IWLANMonitor_T

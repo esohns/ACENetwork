@@ -111,11 +111,9 @@ class Test_U_ConnectionConfiguration
   {}
 };
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          //Test_U_ConnectionConfiguration,
                           struct Net_StreamConnectionState,
                           HTTP_Statistic_t> Test_U_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Test_U_ConnectionConfiguration,
                                  struct Net_StreamConnectionState,
                                  HTTP_Statistic_t,
