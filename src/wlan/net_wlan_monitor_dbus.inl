@@ -95,8 +95,8 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (inherited::isActive_))
   { ACE_ASSERT (connection_);
     dbus_connection_close (connection_);
-    inherited::stop (true,   // wait ?
-                     false); // high priority ?
+    stop (true,   // wait ?
+          false); // high priority ?
   } // end IF
   if (unlikely (connection_))
     dbus_connection_unref (connection_);
@@ -293,8 +293,8 @@ Net_WLAN_Monitor_T<AddressType,
   if (!inherited::isActive_)
     return;
 
-  inherited::stop (waitForCompletion_in,
-                   highPriority_in);
+  inherited::STATEMACHINE_T::stop (waitForCompletion_in,
+                                   highPriority_in);
 //  deviceDBusObjectPath_.resize (0);
 
   inherited::isActive_ = false;
@@ -586,7 +586,7 @@ Net_WLAN_Monitor_T<AddressType,
 
   DBusDispatchStatus dispatch_status = DBUS_DISPATCH_COMPLETE;
 
-  { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, inherited::lock_, -1);
     if (inherited::dispatchStarted_)
       goto monitor_thread;
     inherited::dispatchStarted_ = true;
@@ -625,7 +625,7 @@ Net_WLAN_Monitor_T<AddressType,
   // clean up
   dbus_connection_unref (connection_);
   connection_ = NULL;
-  { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, inherited::lock_, -1);
     inherited::dispatchStarted_ = false;
   } // end lock scope
 

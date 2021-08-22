@@ -508,7 +508,6 @@ do_work (
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
-  ACE_thread_t thread_id = 0;
   struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
   struct Common_EventDispatchState event_dispatch_state_s;
   struct Common_TimerConfiguration timer_configuration;

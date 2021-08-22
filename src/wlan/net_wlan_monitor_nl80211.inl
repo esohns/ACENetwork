@@ -607,8 +607,8 @@ Net_WLAN_Monitor_T<AddressType,
   } // end IF
 
   inherited::isActive_ = false;
-  inherited::stop (waitForCompletion_in,
-                   highPriority_in);
+  inherited::STATEMACHINE_T::stop (waitForCompletion_in,
+                                   highPriority_in);
 }
 
 template <typename AddressType,
@@ -1243,7 +1243,7 @@ Net_WLAN_Monitor_T<AddressType,
   int result = -1;
   int error = 0;
 
-  { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, inherited::lock_, -1);
     if (!inherited::dispatchStarted_)
     {
       inherited::dispatchStarted_ = true;
@@ -1311,7 +1311,7 @@ Net_WLAN_Monitor_T<AddressType,
 
   nl_close (inherited::socketHandle_); //nl_socket_free (inherited::socketHandle_); inherited::socketHandle_ = NULL;
 
-  { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, inherited::lock_, -1);
     inherited::dispatchStarted_ = false;
   } // end lock scope
 

@@ -189,7 +189,7 @@ template <typename AddressType,
           typename ConfigurationType>
 class Net_WLAN_IMonitor_T
  : public Net_WLAN_IMonitorBase
- , public Common_ITask
+ , virtual public Common_ITask
  , public Common_IGetR_4_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_ISubscribe_T<Net_WLAN_IMonitorCB>

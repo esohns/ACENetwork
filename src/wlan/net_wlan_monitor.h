@@ -509,10 +509,10 @@ class Net_WLAN_Monitor_T<AddressType,
 //#if defined (WEXT_SUPPORT)
 //  inline virtual const ACE_HANDLE get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
 //#endif // WEXT_SUPPORT
-//#if defined (NL80211_SUPPORT)
-//  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-//  inline virtual const int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
-//#endif // NL80211_SUPPORT
+#if defined (NL80211_SUPPORT)
+  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+  inline virtual const int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+#endif // NL80211_SUPPORT
 
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR (""))); }
 
