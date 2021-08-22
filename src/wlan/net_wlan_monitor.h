@@ -43,6 +43,7 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
+#include "ace/Time_Value.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
@@ -161,7 +162,7 @@ class Net_WLAN_Monitor_T<//AddressType,
   inline virtual ~Net_WLAN_Monitor_T () {}
 
   // override (part of) Common_ITask
-  virtual bool start (ACE_Time_Value*); // N/A
+  virtual bool start (ACE_Time_Value* = NULL); // N/A
   virtual void stop (bool = true,  // N/A
                      bool = true); // N/A
 //  inline bool isRunning () const { return isActive_; }
@@ -233,12 +234,10 @@ class Net_WLAN_Monitor_T<AddressType,
  public:
   inline virtual ~Net_WLAN_Monitor_T () {}
 
-  // override (part of) Common_ITaskControl_T
-  virtual void start ();
+  // implement (part of) Common_ITask
+  virtual bool start (ACE_Time_Value* = NULL);
   virtual void stop (bool = true,  // wait for completion ?
-                     bool = true,  // high priority ?
-                     bool = true); // locked access ?
-//  inline bool isRunning () const { return isActive_; }
+                     bool = true); // high priority ?
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
@@ -273,6 +272,9 @@ class Net_WLAN_Monitor_T<AddressType,
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
 
   ////////////////////////////////////////
+
+  // hide (part of) Common_ITask
+  inline bool isRunning () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
 
   // override some ACE_Event_Handler methods
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -376,8 +378,7 @@ class Net_WLAN_Monitor_T<AddressType,
  public:
   virtual ~Net_WLAN_Monitor_T ();
 
-  // override (part of) Common_ITaskControl_T
-//  inline virtual bool isRunning () const { return isActive_; }
+  // implement (part of) Common_ITask
   virtual bool start (ACE_Time_Value* = NULL); // N/A
   virtual void stop (bool = true,  // N/A
                      bool = true); // N/A
@@ -386,15 +387,15 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual bool initialize (const ConfigurationType&); // configuration handle
   inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::socketHandle_); return inherited::socketHandle_; }
   inline virtual const int get_3 () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
-  // *TODO*: remove these ASAP
-#if defined (WEXT_SUPPORT)
-  inline virtual const ACE_HANDLE get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
-#endif // WEXT_SUPPORT
-#if defined (DBUS_SUPPORT)
-  inline virtual const struct DBusConnection* const getP_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-  inline virtual const std::string& get1RR_2 (const std::string&) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR ("")); ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");) }
-  inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-#endif // DBUS_SUPPORT
+//  // *TODO*: remove these ASAP
+//#if defined (WEXT_SUPPORT)
+//  inline virtual const ACE_HANDLE get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
+//#endif // WEXT_SUPPORT
+//#if defined (DBUS_SUPPORT)
+//  inline virtual const struct DBusConnection* const getP_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+//  inline virtual const std::string& get1RR_2 (const std::string&) const { static std::string dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
+//  inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+//#endif // DBUS_SUPPORT
 
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, inherited::familyId_); }
 
@@ -426,6 +427,7 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // hide (part of) Common_ITask
   inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual bool isRunning () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void wait (bool = true) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
@@ -492,12 +494,10 @@ class Net_WLAN_Monitor_T<AddressType,
  public:
   virtual ~Net_WLAN_Monitor_T ();
 
-  // override (part of) Common_ITaskControl_T
-  virtual void start ();
+  // implement (part of) Common_ITask
+  virtual bool start (ACE_Time_Value* = NULL);
   virtual void stop (bool = true,  // wait for completion ?
-                     bool = true,  // high priority ?
-                     bool = true); // locked access ?
-//  inline bool isRunning () const { return isActive_; }
+                     bool = true); // high priority ?
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
@@ -509,10 +509,10 @@ class Net_WLAN_Monitor_T<AddressType,
 //#if defined (WEXT_SUPPORT)
 //  inline virtual const ACE_HANDLE get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
 //#endif // WEXT_SUPPORT
-#if defined (NL80211_SUPPORT)
-  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-  inline virtual const int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
-#endif // NL80211_SUPPORT
+//#if defined (NL80211_SUPPORT)
+//  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+//  inline virtual const int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+//#endif // NL80211_SUPPORT
 
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR (""))); }
 
@@ -554,6 +554,14 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override some ACE_Task_Base methods
   virtual int svc (void);
+
+  // hide (part of) Common_ITask
+  inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual bool isRunning () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual void wait (bool = true) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 #endif /* DBUS_SUPPORT */
 #endif /* ACE_WIN32 || ACE_WIN64 || ACE_LINUX */

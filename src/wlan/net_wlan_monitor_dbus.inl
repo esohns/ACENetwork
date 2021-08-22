@@ -52,7 +52,7 @@ extern "C"
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
-#include "net_wlan_common.h"
+//#include "net_wlan_common.h"
 #include "net_wlan_defines.h"
 #include "net_wlan_tools.h"
 
@@ -95,9 +95,8 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (inherited::isActive_))
   { ACE_ASSERT (connection_);
     dbus_connection_close (connection_);
-    inherited::stop (true,  // wait ?
-                     false, // high priority ?
-                     true); // locked access ?
+    inherited::stop (true,   // wait ?
+                     false); // high priority ?
   } // end IF
   if (unlikely (connection_))
     dbus_connection_unref (connection_);
@@ -108,28 +107,30 @@ template <typename AddressType,
           ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename UserDataType>
-void
+bool
 Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_DBUS,
-                   UserDataType>::start ()
+                   UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
+
+  ACE_UNUSED_ARG (timeout_in);
 
   // sanity check(s)
   if (unlikely (!inherited::isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return false;
   } // end IF
   if (unlikely (inherited::isActive_))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("already started, returning\n")));
-    return;
+    return true;
   } // end IF
   ACE_ASSERT (inherited::configuration_);
 
@@ -152,10 +153,10 @@ Net_WLAN_Monitor_T<AddressType,
                 dbus_error_is_set (&error_s)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_bus_get_private(DBUS_BUS_SYSTEM): \"%s\", returning\n"),
+                ACE_TEXT ("failed to dbus_bus_get_private(DBUS_BUS_SYSTEM): \"%s\", aborting\n"),
                 ACE_TEXT (error_s.message)));
     dbus_error_free (&error_s);
-    return;
+    return false;
   } // end IF
   dbus_connection_set_exit_on_disconnect (connection_,
                                           false);
@@ -198,7 +199,7 @@ Net_WLAN_Monitor_T<AddressType,
                                              NULL)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_connection_add_filter(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to dbus_connection_add_filter(): \"%m\", aborting\n")));
     goto error;
   } // end IF
   // *NOTE*: according to the API documentation, this call should block until
@@ -212,7 +213,7 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (dbus_error_is_set (&error_s)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_bus_add_match(): \"%s\", returning\n"),
+                ACE_TEXT ("failed to dbus_bus_add_match(): \"%s\", aborting\n"),
                 ACE_TEXT (error_s.message)));
     dbus_error_free (&error_s);
     goto error;
@@ -249,7 +250,7 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (!inherited::isRunning ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
   dbus_connection_flush (connection_);
@@ -264,10 +265,12 @@ error:
     connection_ = NULL;
   } // end IF
 
-  return;
+  return false;
 
 continue_:
   inherited::isActive_ = true;
+
+  return true;
 }
 
 template <typename AddressType,
@@ -282,8 +285,7 @@ Net_WLAN_Monitor_T<AddressType,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_DBUS,
                    UserDataType>::stop (bool waitForCompletion_in,
-                                        bool highPriority_in,
-                                        bool lockedAccess_in)
+                                        bool highPriority_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
 
@@ -292,8 +294,7 @@ Net_WLAN_Monitor_T<AddressType,
     return;
 
   inherited::stop (waitForCompletion_in,
-                   highPriority_in,
-                   lockedAccess_in);
+                   highPriority_in);
 //  deviceDBusObjectPath_.resize (0);
 
   inherited::isActive_ = false;

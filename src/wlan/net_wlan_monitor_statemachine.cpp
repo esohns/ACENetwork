@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "net_wlan_monitor_statemachine.h"
 
 #include "ace/Guard_T.h"
