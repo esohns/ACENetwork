@@ -176,28 +176,30 @@ template <typename AddressType,
           ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename UserDataType>
-void
+bool
 Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_NL80211,
-                   UserDataType>::start (ACE_thread_t&)
+                   UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
+
+  ACE_UNUSED_ARG (timeout_in);
 
   // sanity check(s)
   if (unlikely (!inherited::isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return false;
   } // end IF
   if (unlikely (inherited::isActive_))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("already started, returning\n")));
-    return;
+    return true;
   } // end IF
 
   // sanity check(s)
@@ -224,7 +226,7 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (controlId_ < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genl_ctrl_resolve(%@,\"%s\"): \"%s\", returning\n"),
+                ACE_TEXT ("failed to genl_ctrl_resolve(%@,\"%s\"): \"%s\", aborting\n"),
                 inherited::socketHandle_,
                 ACE_TEXT (NET_WLAN_MONITOR_NL80211_CONTROL_NAME_STRING),
                 ACE_TEXT (nl_geterror (controlId_))));
@@ -239,7 +241,7 @@ continue_:
                                                    features_)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::getWiPhyFeatures(\"%s\",\"%s\",%@,%d), returning\n"),
+                ACE_TEXT ("failed to Net_WLAN_Tools::getWiPhyFeatures(\"%s\",\"%s\",%@,%d), aborting\n"),
                 ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
                 ACE_TEXT (inherited::configuration_->wiPhyIdentifier.c_str ()),
                 inherited::socketHandle_,
@@ -271,7 +273,7 @@ continue_:
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", returning\n")));
+                ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", aborting\n")));
     goto error;
   } // end IF
   if (unlikely (!genlmsg_put (message_p,
@@ -284,7 +286,7 @@ continue_:
                               0)))                // interface version
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genlmsg_put (): \"%m\", returning\n")));
+                ACE_TEXT ("failed to genlmsg_put (): \"%m\", aborting\n")));
     goto error;
   } // end IF
   NLA_PUT_STRING (message_p,
@@ -294,7 +296,7 @@ continue_:
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_send_auto(%@): \"%s\", returning\n"),
+                ACE_TEXT ("failed to nl_send_auto(%@): \"%s\", aborting\n"),
                 inherited::socketHandle_,
                 ACE_TEXT (nl_geterror (result))));
     goto error;
@@ -332,7 +334,7 @@ continue_:
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
+                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", aborting\n"),
                 inherited::socketHandle_,
                 ACE_TEXT (nl_geterror ((result < 0) ? result : error_))));
     goto error;
@@ -356,18 +358,16 @@ continue_:
     if (unlikely (result < 0))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_socket_add_memberships(%@,%d): \"%s\", returning\n"),
+                  ACE_TEXT ("failed to nl_socket_add_memberships(%@,%d): \"%s\", aborting\n"),
                   inherited::socketHandle_,
                   (*iterator).second,
                   ACE_TEXT (nl_geterror (result))));
       goto error;
     } // end IF
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("subscribed to nl80211 multicast group \"%s\" (id: %u)\n"),
                 ACE_TEXT ((*iterator).first.c_str ()),
                 static_cast<ACE_UINT32> ((*iterator).second)));
-#endif
   } // end FOR
 
   /* disable sequence checking for multicast messages */
@@ -408,7 +408,7 @@ continue_3:
       if (unlikely (result == -1))
       {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", returning\n"),
+                    ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", aborting\n"),
                     socket_handle_h));
         goto error;
       } // end IF
@@ -416,7 +416,7 @@ continue_3:
       if (unlikely (!initiate_read_stream (inherited::configuration_->defaultBufferSize)))
       {
         ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_WLAN_Monitor_T::initiate_read_stream(%u), returning\n"),
+                    ACE_TEXT ("failed to Net_WLAN_Monitor_T::initiate_read_stream(%u), aborting\n"),
                     inherited::configuration_->defaultBufferSize));
         goto error;
       } // end IF
@@ -441,7 +441,7 @@ continue_3:
       if (unlikely (result == -1))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Reactor::register_handler(%d,0x%@,ACE_Event_Handler::READ_MASK): \"%m\", returning\n"),
+                    ACE_TEXT ("failed to ACE_Reactor::register_handler(%d,0x%@,ACE_Event_Handler::READ_MASK): \"%m\", aborting\n"),
                     socket_handle_h,
                     this));
         goto error;
@@ -451,7 +451,7 @@ continue_3:
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unkown dispatch type (was: %d), returning\n"),
+                  ACE_TEXT ("invalid/unkown dispatch type (was: %d), aborting\n"),
                   inherited::configuration_->dispatch));
       goto error;
     }
@@ -469,7 +469,7 @@ continue_3:
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
   do
@@ -483,7 +483,7 @@ continue_3:
   if (unlikely (!inherited::TASK_T::isRunning ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
 
@@ -492,7 +492,7 @@ continue_3:
   inherited::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
   inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
 
-  return;
+  return true;
 
 error:
 nla_put_failure:
@@ -538,6 +538,7 @@ nla_put_failure:
   } // end IF
   if (message_p)
     nlmsg_free (message_p);
+  return false;
 }
 
 template <typename AddressType,
@@ -552,13 +553,9 @@ Net_WLAN_Monitor_T<AddressType,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_NL80211,
                    UserDataType>::stop (bool waitForCompletion_in,
-                                        bool highPriority_in,
-                                        bool lockedAccess_in)
+                                        bool highPriority_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
-
-  ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
   if (unlikely (!inherited::isActive_))
@@ -611,8 +608,7 @@ Net_WLAN_Monitor_T<AddressType,
 
   inherited::isActive_ = false;
   inherited::stop (waitForCompletion_in,
-                   highPriority_in,
-                   lockedAccess_in);
+                   highPriority_in);
 }
 
 template <typename AddressType,

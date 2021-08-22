@@ -172,9 +172,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // WLANAPI_SUPPORT
 #else
   if (unlikely (isActive_))
-    inherited::stop (true,  // wait ?
-                     false, // high priority ?
-                     true); // locked access ?
+    inherited::stop (true,   // wait ?
+                     false); // high priority ?
 
 #if defined (WEXT_SUPPORT)
   int result = -1;
@@ -943,7 +942,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
          )
 #else
-          || inherited::hasShutDown ())
+          || inherited::isShuttingDown ())
 #endif // ACE_WIN32 || ACE_WIN64
       {
         inherited::change (NET_WLAN_MONITOR_STATE_INITIALIZED);

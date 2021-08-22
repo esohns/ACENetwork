@@ -297,9 +297,9 @@ class Net_WLAN_Monitor_Base_T
   // hide/override (part of) Common_(Asynch)TaskBase_T
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
-  using inherited::lock;
-  using inherited::unlock;
-  using inherited::getR_2;
+//  using inherited::lock;
+//  using inherited::unlock;
+//  using inherited::getR_2;
   inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 #endif // ACE_WIN32 || ACE_WIN64
   inline virtual void wait () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

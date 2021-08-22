@@ -377,11 +377,10 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual ~Net_WLAN_Monitor_T ();
 
   // override (part of) Common_ITaskControl_T
-  virtual void start (ACE_thread_t&); // N/A
-  virtual void stop (bool = true,  // wait for completion ?
-                     bool = true,  // high priority ?
-                     bool = true); // locked access ?
-//  inline bool isRunning () const { return isActive_; }
+//  inline virtual bool isRunning () const { return isActive_; }
+  virtual bool start (ACE_Time_Value* = NULL); // N/A
+  virtual void stop (bool = true,  // N/A
+                     bool = true); // N/A
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
@@ -424,6 +423,13 @@ class Net_WLAN_Monitor_T<AddressType,
   // override some ACE_Event_Handler/ACE_Handler methods
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&);
+
+  // hide (part of) Common_ITask
+  inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual void wait (bool = true) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // override some ACE_Task_Base methods
   virtual int svc (void);

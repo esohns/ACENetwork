@@ -144,9 +144,7 @@ target_sources (${PROJECT_NAME}_Client
 # add PCH
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 #set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-if (UNIX)
- cotire (${PROJECT_NAME}_Client)
-endif (UNIX)
+#cotire (${PROJECT_NAME}_Client)
 
 ############## next target ################
 
@@ -195,8 +193,8 @@ endif ()
 #set_target_properties (${PROJECT_NAME}_Server PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 # add PCH
-set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 #cotire (${PROJECT_NAME}_Server)
 
 # add all targets to the build-tree export set

@@ -52,7 +52,6 @@ class Net_WLAN_MonitorStateMachine
  : public Common_StateMachineAsynch_T<network_wlan_statemachine_monitor_name_string_,
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Common_ILock_T<ACE_MT_SYNCH>,
                                       enum Net_WLAN_MonitorState>
 #endif // ACE_WIN32 || ACE_WIN64
 {
@@ -65,7 +64,6 @@ class Net_WLAN_MonitorStateMachine
   typedef Common_StateMachineAsynch_T<network_wlan_statemachine_monitor_name_string_,
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      Common_ILock_T<ACE_MT_SYNCH>,
                                       enum Net_WLAN_MonitorState> inherited;
 #endif // ACE_WIN32 || ACE_WIN64
 
