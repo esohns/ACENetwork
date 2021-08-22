@@ -77,8 +77,7 @@ struct IRC_StreamState
 
 //////////////////////////////////////////
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct IRC_Stream_SessionData,
+typedef Stream_ISessionDataNotify_T<struct IRC_Stream_SessionData,
                                     enum Stream_SessionMessageType,
                                     IRC_Message,
                                     IRC_SessionMessage_t> IRC_ISessionNotify_t;

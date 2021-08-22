@@ -1304,8 +1304,7 @@ allocate:
 
   timer_manager_p->stop ();
   connection_manager_p->stop (false,  // wait ?
-                              true,   // high priority ?
-                              true);  // locked access ?
+                              true);  // high priority ?
   connection_manager_p->abort (false); // wait ?
   (*iterator_2).second.second.connection->decrease ();
   if (iconnection_p)

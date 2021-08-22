@@ -385,16 +385,14 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       case NET_TRANSPORTLAYER_SSL:
       {
         iconnection_manager_p->stop (false, // wait for completion ?
-                                     true,  // high priority ?
-                                     true); // locked access ?
+                                     true); // high priority ?
         iconnection_manager_p->abort ();
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
       {
         iconnection_manager_2->stop (false, // wait for completion ?
-                                     true,  // high priority ?
-                                     true); // locked access ?
+                                     true); // high priority ?
         iconnection_manager_2->abort ();
         break;
       }

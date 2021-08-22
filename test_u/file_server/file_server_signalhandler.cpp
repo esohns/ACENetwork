@@ -165,7 +165,7 @@ FileServer_SignalHandler::handle (const struct Common_Signal& signal_in)
     } // end IF
 
     // step3: stop accepting connections, abort open connections
-    iconnection_manager_p->stop (false, true, true);
+    iconnection_manager_p->stop (false, true);
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)

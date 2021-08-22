@@ -173,9 +173,8 @@ done_connect:
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
       // step1: stop GTK event dispatch ?
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
-                                                          true,   // high priority ?
-                                                          true);  // locked access ?
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+                                                          true); // high priority ?
 #elif defined (CURSES_USE)
         if (inherited::configuration_->cursesState)
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);

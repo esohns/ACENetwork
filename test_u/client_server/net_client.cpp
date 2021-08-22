@@ -918,9 +918,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       Common_Timer_Tools::finalize ();
       timer_manager_p->stop ();
 #if defined (GTK_USE)
-      gtk_manager_p->stop (true,  // wait ?
-                           true,  // high priority ?
-                           true); // locked access ?
+      gtk_manager_p->stop (true, true);
 #endif // GTK_USE
       return;
     } // end IF
@@ -949,9 +947,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
-      gtk_manager_p->stop (true,  // wait ?
-                           true,  // high priority ?
-                           true); // locked access ?
+      gtk_manager_p->stop (true, true);
 #else
       ;
 #endif // GTK_USE
@@ -1050,9 +1046,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
-        gtk_manager_p->stop (true,  // wait ?
-                             true,  // high priority ?
-                             true); // locked access ?
+        gtk_manager_p->stop (true, true);
 #else
         ;
 #endif // GTK_USE

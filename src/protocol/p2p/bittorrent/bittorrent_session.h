@@ -163,7 +163,6 @@ class BitTorrent_Session_T
                                           typename PeerStreamType::CONTROL_MESSAGE_T,
                                           typename PeerStreamType::MESSAGE_T,
                                           typename PeerStreamType::SESSION_MESSAGE_T,
-                                          Stream_SessionId_t,
                                           typename PeerStreamType::SESSION_DATA_T,
                                           PeerStreamUserDataType> PEER_MESSAGEHANDLER_T;
   typedef Stream_Module_MessageHandlerA_T<ACE_MT_SYNCH,
@@ -172,12 +171,10 @@ class BitTorrent_Session_T
                                           typename TrackerStreamType::CONTROL_MESSAGE_T,
                                           typename TrackerStreamType::MESSAGE_T,
                                           typename TrackerStreamType::SESSION_MESSAGE_T,
-                                          Stream_SessionId_t,
                                           typename TrackerStreamType::SESSION_DATA_T,
                                           TrackerStreamUserDataType> TRACKER_MESSAGEHANDLER_T;
   typedef Stream_StreamModuleInputOnlyA_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          Stream_SessionId_t,
                                           typename PeerStreamType::SESSION_DATA_T,
                                           enum Stream_SessionMessageType,
                                           struct Stream_ModuleConfiguration,
@@ -187,7 +184,6 @@ class BitTorrent_Session_T
                                           PEER_MESSAGEHANDLER_T> PEER_MESSAGEHANDLER_MODULE_T;
   typedef Stream_StreamModuleInputOnlyA_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          Stream_SessionId_t,
                                           typename TrackerStreamType::SESSION_DATA_T,
                                           enum Stream_SessionMessageType,
                                           struct Stream_ModuleConfiguration,

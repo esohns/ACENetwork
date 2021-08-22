@@ -46,8 +46,7 @@ struct PCP_Record;
 class PCP_SessionMessage;
 struct PCP_Stream_SessionData;
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct PCP_Stream_SessionData,
+typedef Stream_ISessionDataNotify_T<struct PCP_Stream_SessionData,
                                     enum Stream_SessionMessageType,
                                     struct PCP_Record,
                                     PCP_SessionMessage> PCP_ISessionNotify_t;

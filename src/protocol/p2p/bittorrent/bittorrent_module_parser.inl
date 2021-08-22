@@ -188,9 +188,8 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
                            timeout_in);
 
   if (unlikely (stop))
-   inherited::stop (false, // don't wait
-                    false, // high priority ?
-                    true); // N/A
+   inherited::stop (false,  // don't wait
+                    false); // high priority ?
 
   return result;
 }

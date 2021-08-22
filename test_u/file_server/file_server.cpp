@@ -1036,7 +1036,7 @@ error:
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
-    gtk_manager_p->stop (true, true, true);
+    gtk_manager_p->stop (true, true);
 #else
     ;
 #endif // GTK_USE

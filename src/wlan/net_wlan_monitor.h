@@ -161,9 +161,9 @@ class Net_WLAN_Monitor_T<//AddressType,
   inline virtual ~Net_WLAN_Monitor_T () {}
 
   // override (part of) Common_ITask
-  inline virtual bool isShuttingDown () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
-  virtual void start (ACE_Time_Value*); // N/A
-  virtual void stop ();
+  virtual bool start (ACE_Time_Value*); // N/A
+  virtual void stop (bool = true,  // N/A
+                     bool = true); // N/A
 //  inline bool isRunning () const { return isActive_; }
 
   // override (part of) Net_IWLANMonitor_T
@@ -188,6 +188,12 @@ class Net_WLAN_Monitor_T<//AddressType,
 
   // implement (part of) Common_IStateMachine_T
 //  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+
+  // hide (part of) Common_ITask
+  inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)

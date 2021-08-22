@@ -135,8 +135,7 @@ typedef Stream_SessionData_T<struct DHCPClient_SessionData> DHCPClient_SessionDa
 
 class Test_U_Message;
 class Test_U_SessionMessage;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct DHCPClient_SessionData,
+typedef Stream_ISessionDataNotify_T<struct DHCPClient_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> DHCPClient_ISessionNotify_t;

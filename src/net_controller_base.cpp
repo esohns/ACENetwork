@@ -31,7 +31,7 @@ Net_Controller_Base::Net_Controller_Base ()
 
 }
 
-void
+bool
 Net_Controller_Base::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Controller_Base::start"));
@@ -40,10 +40,13 @@ Net_Controller_Base::start (ACE_Time_Value* timeout_in)
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%D: starting\n")));
+
+  return true;
 }
 
 void
-Net_Controller_Base::stop ()
+Net_Controller_Base::stop (bool,
+                           bool)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Controller_Base::stop"));
 

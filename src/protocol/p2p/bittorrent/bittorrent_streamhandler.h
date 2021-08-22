@@ -53,8 +53,7 @@ template <typename SessionDataType,     // not (!) reference-counted
           >
 #endif // GUI_SUPPORT
 class BitTorrent_PeerStreamHandler_T
- : public Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                      SessionDataType,
+ : public Stream_ISessionDataNotify_T<SessionDataType,
                                       enum Stream_SessionMessageType,
                                       BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
                                                            UserDataType>,
@@ -114,8 +113,7 @@ template <typename SessionDataType,     // not (!) reference-counted
           >
 #endif // GUI_SUPPORT
 class BitTorrent_TrackerStreamHandler_T
- : public Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                      SessionDataType,
+ : public Stream_ISessionDataNotify_T<SessionDataType,
                                       enum Stream_SessionMessageType,
                                       BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
                                                                   UserDataType>,

@@ -43,7 +43,6 @@ class Test_U_Module_EventHandler
                                          Stream_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
-                                         Stream_SessionId_t,
                                          struct Test_U_StreamSessionData,
                                          struct Stream_UserData>
 {
@@ -53,7 +52,6 @@ class Test_U_Module_EventHandler
                                          Stream_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
-                                         Stream_SessionId_t,
                                          struct Test_U_StreamSessionData,
                                          struct Stream_UserData> inherited;
 

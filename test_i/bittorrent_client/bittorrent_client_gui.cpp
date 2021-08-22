@@ -638,9 +638,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
     // clean up
     timer_manager_p->stop ();
 #if defined (GTK_USE)
-    gtk_manager_p->stop (true,  // wait ?
-                         true,  // high priority ?
-                         true); // locked access ?
+    gtk_manager_p->stop (true, true);
 #endif // GTK_USE
 
     return;

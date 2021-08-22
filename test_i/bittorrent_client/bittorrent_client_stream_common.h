@@ -103,13 +103,11 @@ typedef BitTorrent_SessionMessage_T<struct BitTorrent_Client_PeerSessionData,
 typedef BitTorrent_SessionMessage_T<struct BitTorrent_Client_TrackerSessionData,
                                     struct Stream_UserData> BitTorrent_Client_TrackerSessionMessage_t;
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct BitTorrent_Client_PeerSessionData,
+typedef Stream_ISessionDataNotify_T<struct BitTorrent_Client_PeerSessionData,
                                     enum Stream_SessionMessageType,
                                     BitTorrent_Client_PeerMessage_t,
                                     BitTorrent_Client_PeerSessionMessage_t> BitTorrent_Client_IPeerNotify_t;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct BitTorrent_Client_TrackerSessionData,
+typedef Stream_ISessionDataNotify_T<struct BitTorrent_Client_TrackerSessionData,
                                     enum Stream_SessionMessageType,
                                     BitTorrent_Client_TrackerMessage_t,
                                     BitTorrent_Client_TrackerSessionMessage_t> BitTorrent_Client_ITrackerNotify_t;

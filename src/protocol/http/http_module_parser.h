@@ -55,7 +55,6 @@ class HTTP_Module_Parser_T
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
-                                  Stream_SessionId_t,
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   struct Stream_UserData>
@@ -67,7 +66,6 @@ class HTTP_Module_Parser_T
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
-                                  Stream_SessionId_t,
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   struct Stream_UserData> inherited;

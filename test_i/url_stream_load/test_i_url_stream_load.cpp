@@ -841,13 +841,11 @@ do_work (bool debugParser_in,
 
   // step3: clean up
   connection_manager_p->stop (false, // wait ?
-                              true,  // high priority ?
-                              true); // locked access ?
+                              true); // high priority ?
   connection_manager_p->abort (false);
   connection_manager_p->wait ();
   connection_manager_2->stop (false, // wait ?
-                              true,  // high priority ?
-                              true); // locked access ?
+                              true); // high priority ?
   connection_manager_2->abort ();
   connection_manager_2->wait ();
 
@@ -899,8 +897,7 @@ clean:
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true,  // wait ?
-                                                        true,  // high priority ?
-                                                        true); // locked access ?
+                                                        true); // high priority ?
 #else
     ;
 #endif // GTK_USE

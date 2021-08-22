@@ -111,8 +111,7 @@ typedef Stream_SessionData_T<struct PCPClient_SessionData> PCPClient_SessionData
 
 class Test_U_Message;
 class Test_U_SessionMessage;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct PCPClient_SessionData,
+typedef Stream_ISessionDataNotify_T<struct PCPClient_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> PCPClient_ISessionNotify_t;

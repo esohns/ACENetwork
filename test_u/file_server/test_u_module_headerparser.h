@@ -45,24 +45,20 @@ class Test_U_Message;
 class Test_U_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct FileServer_ModuleHandlerConfiguration,
                                  Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData>
 {
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct FileServer_ModuleHandlerConfiguration,
                                  Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData> inherited;

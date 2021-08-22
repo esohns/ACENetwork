@@ -93,8 +93,7 @@ struct IRC_Client_StreamState
 //                 struct IRC_Client_ConnectionConfiguration> IRC_Client_ConnectionConfigurations_t;
 //typedef IRC_Client_ConnectionConfigurations_t::iterator IRC_Client_ConnectionConfigurationIterator_t;
 //typedef Stream_INotify_T<enum Stream_SessionMessageType> IRC_Client_IStreamNotify_t;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct IRC_Client_SessionData,
+typedef Stream_ISessionDataNotify_T<struct IRC_Client_SessionData,
                                     enum Stream_SessionMessageType,
                                     IRC_Message,
                                     IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;

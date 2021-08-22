@@ -42,8 +42,7 @@ class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
 //struct HTTP_Stream_UserData;
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct HTTP_Stream_SessionData,
+typedef Stream_ISessionDataNotify_T<struct HTTP_Stream_SessionData,
                                     enum Stream_SessionMessageType,
                                     struct HTTP_Record,
                                     HTTP_SessionMessage> HTTP_ISessionNotify_t;

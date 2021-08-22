@@ -57,7 +57,6 @@ class BitTorrent_Module_PeerParser_T
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
-                                  Stream_SessionId_t,
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType>
@@ -69,7 +68,6 @@ class BitTorrent_Module_PeerParser_T
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
-                                  Stream_SessionId_t,
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType> inherited;
@@ -257,7 +255,6 @@ class BitTorrent_Module_TrackerParser_T
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
-                                  Stream_SessionId_t,
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType>
@@ -269,7 +266,6 @@ class BitTorrent_Module_TrackerParser_T
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
-                                  Stream_SessionId_t,
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   UserDataType> inherited;

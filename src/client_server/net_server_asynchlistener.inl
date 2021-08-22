@@ -529,7 +529,7 @@ template <typename HandlerType,
           typename StateType,
           typename StreamType,
           typename UserDataType>
-void
+bool
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
@@ -547,11 +547,11 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return false;
   } // end IF
   if (unlikely (isListening_))
-    return; // nothing to do
+    return true; // nothing to do
 
   // not running --> start listening
 
@@ -569,8 +569,8 @@ Net_Server_AsynchListener_T<HandlerType,
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to AddressType::set(): \"%m\", returning\n")));
-      return;
+                  ACE_TEXT ("failed to AddressType::set(): \"%m\", aborting\n")));
+      return false;
     } // end IF
   } // end IF
   result =
@@ -586,9 +586,9 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", returning\n"),
+                ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
-    return;
+    return false;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
@@ -603,6 +603,8 @@ Net_Server_AsynchListener_T<HandlerType,
 #endif // ACE_WIN32 || ACE_WIN64
 
   isListening_ = true;
+
+  return true;
 }
 
 template <typename HandlerType,
@@ -617,7 +619,8 @@ Net_Server_AsynchListener_T<HandlerType,
                             ConfigurationType,
                             StateType,
                             StreamType,
-                            UserDataType>::stop ()
+                            UserDataType>::stop (bool,
+                                                 bool)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::stop"));
 

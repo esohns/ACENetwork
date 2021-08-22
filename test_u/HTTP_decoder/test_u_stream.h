@@ -176,7 +176,6 @@ class Test_U_Stream_T
                                        struct Stream_UserData> READER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,                             // task synch type
                                 Common_TimePolicy_t,                      // time policy
-                                Stream_SessionId_t,                       // session id type
                                 struct Test_U_HTTPDecoder_SessionData,    // session data type
                                 enum Stream_SessionMessageType,           // session event type
                                 struct Stream_ModuleConfiguration,        // module configuration type

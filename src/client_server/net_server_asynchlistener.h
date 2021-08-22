@@ -75,10 +75,11 @@ class Net_Server_AsynchListener_T
 
   // implement Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
-  virtual void start (ACE_Time_Value*); // N/A
-  virtual void stop ();
-  inline virtual bool isShuttingDown () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual bool isRunning () const { return isListening_; }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  virtual bool start (ACE_Time_Value*); // N/A
+  virtual void stop (bool = true,  // N/A
+                     bool = true); // N/A
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
@@ -106,11 +107,10 @@ class Net_Server_AsynchListener_T
   virtual ~Net_Server_AsynchListener_T ();
 
   // implement (part of) Net_IListener_T
-  inline virtual bool lock (bool = true) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
-  inline virtual int unlock (bool = false) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
-  inline virtual const ACE_SYNCH_MUTEX& getR_2 () const { static ACE_SYNCH_MUTEX dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
-  inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void wait (bool = true) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // implement (part of) Common_IControl_T
   inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

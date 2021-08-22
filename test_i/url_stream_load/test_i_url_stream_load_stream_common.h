@@ -138,8 +138,7 @@ struct Test_I_URLStreamLoad_SessionData
 };
 typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData> Test_I_URLStreamLoad_SessionData_t;
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_I_URLStreamLoad_SessionData,
+typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_I_Message,
                                     Test_I_SessionMessage> Test_I_ISessionNotify_t;
@@ -244,8 +243,7 @@ struct Test_I_URLStreamLoad_SessionData_2
 };
 typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData_2> Test_I_URLStreamLoad_SessionData_2_t;
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_I_URLStreamLoad_SessionData_2,
+typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData_2,
                                     enum Stream_SessionMessageType,
                                     Test_I_Message,
                                     Test_I_SessionMessage_2> Test_I_ISessionNotify_2_t;

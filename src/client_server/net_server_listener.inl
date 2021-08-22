@@ -127,7 +127,7 @@ template <typename HandlerType,
           typename StateType,
           typename StreamType,
           typename UserDataType>
-void
+bool
 Net_Server_Listener_T<HandlerType,
                       AcceptorType,
                       AddressType,
@@ -146,11 +146,11 @@ Net_Server_Listener_T<HandlerType,
   if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return false;
   } // end IF
   if (unlikely (isListening_))
-    return; // nothing to do
+    return true; // nothing to do
 
   if (unlikely (hasChanged_))
   {
@@ -159,7 +159,7 @@ Net_Server_Listener_T<HandlerType,
     hasChanged_ = false;
 
     if (isSuspended_)
-      stop ();
+      stop (true, true);
 
     if (isOpen_)
     {
@@ -167,10 +167,10 @@ Net_Server_Listener_T<HandlerType,
       if (unlikely (result == -1))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
+                    ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", aborting\n")));
         isOpen_ = false;
         isListening_ = false;
-        return;
+        return false;
       } // end IF
       isOpen_ = false;
     } // end IF
@@ -187,8 +187,8 @@ Net_Server_Listener_T<HandlerType,
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", returning\n")));
-      return;
+                  ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", aborting\n")));
+      return false;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("resumed listening...\n")));
@@ -196,7 +196,7 @@ Net_Server_Listener_T<HandlerType,
     isSuspended_ = false;
     isListening_ = true;
 
-    return;
+    return true;
   } // end IF
 
   // not running --> start listening
@@ -214,8 +214,8 @@ Net_Server_Listener_T<HandlerType,
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to AddressType::set(): \"%m\", returning\n")));
-      return;
+                  ACE_TEXT ("failed to AddressType::set(): \"%m\", aborting\n")));
+      return false;
     } // end IF
   } // end IF
   result =
@@ -228,8 +228,8 @@ Net_Server_Listener_T<HandlerType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
-    return;
+                ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", aborting\n")));
+    return false;
   } // end IF
   isOpen_ = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -245,6 +245,8 @@ Net_Server_Listener_T<HandlerType,
 #endif // ACE_WIN32 || ACE_WIN64
 
   isListening_ = true;
+
+  return true;
 }
 
 template <typename HandlerType,
@@ -261,7 +263,8 @@ Net_Server_Listener_T<HandlerType,
                       ConfigurationType,
                       StateType,
                       StreamType,
-                      UserDataType>::stop ()
+                      UserDataType>::stop (bool,
+                                           bool)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::stop"));
 

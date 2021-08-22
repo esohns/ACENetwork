@@ -629,8 +629,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
     gtk_manager_p->stop (true,  // wait ?
-                         true,  // high priority ?
-                         true); // locked access ?
+                         true); // high priority ?
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

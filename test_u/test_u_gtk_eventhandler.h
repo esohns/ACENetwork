@@ -27,16 +27,14 @@
 
 #include "stream_isessionnotify.h"
 
-template <typename SessionIdType,
-          typename SessionDataType,
+template <typename SessionDataType,
           typename SessionEventType,
           typename MessageType,
           typename SessionMessageType,
           typename CallbackDataType>
 class Test_U_GTK_EventHandler_T
  : public Comon_UI_GTK_EventHandler_T<CallbackDataType>
- , public Stream_ISessionDataNotify_T<SessionIdType,
-                                      SessionDataType,
+ , public Stream_ISessionDataNotify_T<SessionDataType,
                                       SessionEventType,
                                       MessageType,
                                       SessionMessageType>
@@ -48,14 +46,14 @@ class Test_U_GTK_EventHandler_T
   inline virtual ~Test_U_GTK_EventHandler_T () {}
 
   // implement Stream_ISessionDataNotify_T
-  virtual void start (SessionIdType,           // session id
+  virtual void start (Stream_SessionId_t,      // session id
                       const SessionDataType&); // session data
-  virtual void notify (SessionIdType,            // session id
+  virtual void notify (Stream_SessionId_t,       // session id
                        const SessionEventType&); // event (state/status change, ...)
-  virtual void end (SessionIdType); // session id
-  virtual void notify (SessionIdType,       // session id
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,  // session id
                        const MessageType&); // (protocol) data
-  virtual void notify (SessionIdType,              // session id
+  virtual void notify (Stream_SessionId_t,         // session id
                        const SessionMessageType&); // session message
 
  private:

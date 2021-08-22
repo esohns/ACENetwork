@@ -32,7 +32,7 @@
 #include "net_iconnection.h"
 
 class Net_IConnectionManagerBase
- : public Common_IAsynchTask
+ : public Common_ITask
  , public Common_IDumpState
 {
  public:

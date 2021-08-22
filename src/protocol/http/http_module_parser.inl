@@ -847,7 +847,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     case STREAM_SESSION_MESSAGE_END:
     {
       // *NOTE*: only process the first 'session end' message (see above: 2566)
-      { ACE_GUARD (typename inherited::MUTEX_T, aGuard, inherited::lock_);
+      { ACE_GUARD (ACE_Thread_Mutex, aGuard, inherited::lock_);
         if (inherited::sessionEndProcessed_)
           break; // done
         inherited::sessionEndProcessed_ = true;

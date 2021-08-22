@@ -1039,8 +1039,7 @@ button_quit_clicked_cb (GtkButton* button_in,
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
-                                                      true,  // high priority ?
-                                                      true); // locked access ?
+                                                      true); // high priority ?
 } // button_quit_clicked_cb
 #ifdef __cplusplus
 }

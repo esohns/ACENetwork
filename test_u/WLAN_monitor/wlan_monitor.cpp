@@ -741,9 +741,7 @@ error:
   if (!UIDefinitionFile_in.empty ())
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-    gtk_manager_p->stop (true,  // wait ?
-                         true,  // high priority ?
-                         true); // locked access ?
+    gtk_manager_p->stop (true, true);
 #else
     ;
 #endif // GTK_USE

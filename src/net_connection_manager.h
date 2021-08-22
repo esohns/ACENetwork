@@ -90,11 +90,10 @@ class Net_Connection_Manager_T
 
   // implement (part of) Net_IConnectionManager_T
   inline virtual bool isRunning () const { return isActive_; }
-  inline virtual bool isShuttingDown () { return !isRunning (); }
-  virtual void start (ACE_Time_Value* = NULL); // N/A
+  inline virtual bool isShuttingDown () const { return !isRunning (); }
+  virtual bool start (ACE_Time_Value* = NULL); // N/A
   virtual void stop (bool = true,  // wait for completion ?
-                     bool = true,  // high priority ?
-                     bool = true); // locked access ?
+                     bool = true); // N/A
   virtual void wait (bool = true) const; // N/A
   virtual void dump_state () const;
   virtual void abort (enum Net_Connection_AbortStrategy); // strategy
@@ -144,9 +143,10 @@ class Net_Connection_Manager_T
   typedef ACE_DLList_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
   typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
-  // override/hide (part of) Common_IAsynchTask
-  inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  // override/hide (part of) Common_ITask
+  inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held
@@ -172,7 +172,7 @@ class Net_Connection_Manager_T
   bool                                  isActive_;
   bool                                  isInitialized_;
   // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
-  mutable ACE_Recursive_Thread_Mutex    lock_;
+  mutable ACE_SYNCH_RECURSIVE_MUTEX     lock_;
   unsigned int                          maximumNumberOfConnections_;
 
   ConfigurationType*                    configuration_; // default-

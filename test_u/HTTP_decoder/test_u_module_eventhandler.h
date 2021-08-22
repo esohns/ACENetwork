@@ -39,24 +39,20 @@
 class Test_U_Module_EventHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
                                  Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData>
 {
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
                                  Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData> inherited;

@@ -29,8 +29,6 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Thread_Mutex.h"
 
-#include "common_ilock.h"
-
 #include "common_task_ex.h"
 
 #include "common_time_common.h"
@@ -55,13 +53,11 @@ template <typename SessionAsynchType,
 class BitTorrent_Control_T
  : public Common_Task_Ex_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
-                           Common_ILock_T<ACE_MT_SYNCH>,
                            struct BitTorrent_Control_Event>
  , public BitTorrent_IControl_T<SessionInterfaceType>
 {
   typedef Common_Task_Ex_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
-                           Common_ILock_T<ACE_MT_SYNCH>,
                            struct BitTorrent_Control_Event> inherited;
 
  public:
@@ -70,12 +66,11 @@ class BitTorrent_Control_T
   typedef typename SESSIONS_T::iterator SESSIONS_ITERATOR_T;
 
   BitTorrent_Control_T (SessionConfigurationType*);
-  inline virtual ~BitTorrent_Control_T () { stop (true, true, true); }
+  inline virtual ~BitTorrent_Control_T () { stop (true, true); }
 
-  // override Common_ITaskControl_T
+  // override Common_ITask
   virtual void stop (bool = true,  // wait for completion ?
-                     bool = true,  // high priority ? (i.e. do not wait for queued messages)
-                     bool = true); // locked access ?
+                     bool = true); // high priority ? (i.e. do not wait for queued messages)
   virtual void wait (bool = true) const; // wait for the message queue ? : worker thread(s) only
 
   // implement Common_ITaskHandler_T

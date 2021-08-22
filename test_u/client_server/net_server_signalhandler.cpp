@@ -181,9 +181,9 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_2 = TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_2);
 
-    iconnection_manager_p->stop (false, true, true);
+    iconnection_manager_p->stop (false, true);
     iconnection_manager_p->abort ();
-    iconnection_manager_2->stop (false, true, true);
+    iconnection_manager_2->stop (false, true);
     iconnection_manager_2->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)

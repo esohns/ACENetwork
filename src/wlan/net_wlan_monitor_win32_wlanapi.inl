@@ -58,7 +58,7 @@ Net_WLAN_Monitor_T<//AddressType,
 template <//typename AddressType,
           typename ConfigurationType,
           typename UserDataType>
-void
+bool
 Net_WLAN_Monitor_T<//AddressType,
                    ACE_INET_Addr,
                    ConfigurationType,
@@ -73,14 +73,14 @@ Net_WLAN_Monitor_T<//AddressType,
   if (unlikely (!inherited::isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return false;
   } // end IF
   if (unlikely (inherited::isActive_))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("already started, returning\n")));
-    return;
+    return true;
   } // end IF
   ACE_ASSERT (inherited::configuration_);
 
@@ -90,8 +90,8 @@ Net_WLAN_Monitor_T<//AddressType,
   if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientHandle_)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), returning\n")));
-    return;
+                ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), aborting\n")));
+    return false;
   } // end IF
   ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
 
@@ -124,12 +124,14 @@ error:
     Net_WLAN_Tools::initialize (inherited::clientHandle_);
   inherited::clientHandle_ = ACE_INVALID_HANDLE;
 
-  return;
+  return false;
 
 continue_:
   inherited::isActive_ = true;
 
   inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
+
+  return true;
 }
 
 template <//typename AddressType,
@@ -140,7 +142,8 @@ Net_WLAN_Monitor_T<//AddressType,
                    ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
-                   UserDataType>::stop ()
+                   UserDataType>::stop (bool,
+                                        bool)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
 

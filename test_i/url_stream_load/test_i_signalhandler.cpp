@@ -149,15 +149,13 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
         TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
     iconnection_manager_p->stop (false, // wait ?
-                                 true,  // high priority ?
-                                 true); // locked access ?
+                                 true); // high priority ?
     iconnection_manager_p->abort ();
     Test_I_IConnectionManager_2_t* iconnection_manager_2 =
       TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
     ACE_ASSERT (iconnection_manager_2);
     iconnection_manager_2->stop (false, // wait ?
-                                 true,  // high priority ?
-                                 true); // locked access ?
+                                 true); // high priority ?
     iconnection_manager_2->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)

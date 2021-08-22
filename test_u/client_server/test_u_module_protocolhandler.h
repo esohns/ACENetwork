@@ -24,8 +24,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_ilock.h"
-
 #include "common_itimerhandler.h"
 #include "common_time_common.h"
 #include "common_timer_handler.h"
@@ -48,12 +46,10 @@ extern const char libacenetwork_default_test_u_protocolhandler_module_name_strin
 class Test_U_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct ClientServer_ModuleHandlerConfiguration,
                                  Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData>
@@ -61,12 +57,10 @@ class Test_U_Module_ProtocolHandler
 {
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Common_ILock_T<ACE_MT_SYNCH>,
                                  struct ClientServer_ModuleHandlerConfiguration,
                                  Stream_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData> inherited;

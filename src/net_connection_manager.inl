@@ -513,7 +513,7 @@ template <ACE_SYNCH_DECL,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-void
+bool
 Net_Connection_Manager_T<ACE_SYNCH_USE,
                          AddressType,
                          ConfigurationType,
@@ -549,18 +549,20 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   if (unlikely (resetTimeoutHandlerId_ == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_ITimer::schedule_timer(%#T): \"%m\", returning\n"),
+                ACE_TEXT ("failed to Common_ITimer::schedule_timer(%#T): \"%m\", aborting\n"),
                 &resetTimeoutInterval_));
-    return;
+    return false;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("scheduled visitor interval timer (id: %d, interval: %#T)\n"),
               resetTimeoutHandlerId_,
               &resetTimeoutInterval_));
 
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
     isActive_ = true;
   } // end lock scope
+
+  return true;
 }
 
 template <ACE_SYNCH_DECL,
@@ -576,32 +578,13 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          StateType,
                          StatisticContainerType,
                          UserDataType>::stop (bool waitForCompletion_in,
-                                              bool highPriority_in,
-                                              bool lockedAccess_in)
+                                              bool)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
 
-  ACE_UNUSED_ARG (highPriority_in);
-
-  int result = -1;
-
-  if (lockedAccess_in)
-  {
-    result = lock_.acquire ();
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::acquire(): \"%m\", continuing\n")));
-  } // end IF
-
-  isActive_ = false;
-
-  if (lockedAccess_in)
-  {
-    result = lock_.release ();
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::release(): \"%m\", continuing\n")));
-  } // end IF
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
+    isActive_ = false;
+  } // end lock scope
 
   if (waitForCompletion_in)
     wait (true); // N/A

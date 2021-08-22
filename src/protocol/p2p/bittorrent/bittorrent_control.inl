@@ -323,7 +323,6 @@ error:
   } // end lock scope
   if (stop_b)
     stop (false,
-          true,
           true);
   if (istream_connection_p)
     istream_connection_p->decrease ();
@@ -565,8 +564,7 @@ BitTorrent_Control_T<SessionAsynchType,
                      SessionConfigurationType,
                      SessionInterfaceType,
                      SessionStateType>::stop (bool waitForCompletion_in,
-                                              bool highPriority_in,
-                                              bool lockedAccess_in)
+                                              bool highPriority_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::stop"));
 
@@ -588,8 +586,7 @@ BitTorrent_Control_T<SessionAsynchType,
 
   // stop worker thread
   inherited::stop (false,
-                   highPriority_in,
-                   lockedAccess_in);
+                   highPriority_in);
 
   if (waitForCompletion_in)
     wait ();
@@ -693,7 +690,6 @@ BitTorrent_Control_T<SessionAsynchType,
                       ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
 
         stop (false,
-              true,
               true);
       } // end lock scope
       break;

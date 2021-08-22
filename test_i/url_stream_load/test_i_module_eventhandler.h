@@ -41,7 +41,6 @@ class Test_I_Module_EventHandler
                                          Stream_ControlMessage_t,
                                          Test_I_Message,
                                          Test_I_SessionMessage,
-                                         Stream_SessionId_t,
                                          struct Test_I_URLStreamLoad_SessionData,
                                          struct Stream_UserData>
 {
@@ -51,7 +50,6 @@ class Test_I_Module_EventHandler
                                          Stream_ControlMessage_t,
                                          Test_I_Message,
                                          Test_I_SessionMessage,
-                                         Stream_SessionId_t,
                                          struct Test_I_URLStreamLoad_SessionData,
                                          struct Stream_UserData> inherited;
 
@@ -86,7 +84,6 @@ class Test_I_Module_EventHandler_2
                                          Stream_ControlMessage_t,
                                          Test_I_Message,
                                          Test_I_SessionMessage_2,
-                                         Stream_SessionId_t,
                                          struct Test_I_URLStreamLoad_SessionData_2,
                                          struct Stream_UserData>
 {
@@ -96,7 +93,6 @@ class Test_I_Module_EventHandler_2
                                          Stream_ControlMessage_t,
                                          Test_I_Message,
                                          Test_I_SessionMessage_2,
-                                         Stream_SessionId_t,
                                          struct Test_I_URLStreamLoad_SessionData_2,
                                          struct Stream_UserData> inherited;
 

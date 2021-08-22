@@ -28,14 +28,12 @@
 #include "stream_common.h"
 #include "stream_macros.h"
 
-template <typename SessionIdType,
-          typename SessionDataType,
+template <typename SessionDataType,
           typename SessionEventType,
           typename MessageType,
           typename SessionMessageType,
           typename CallbackDataType>
-Test_U_GTK_EventHandler_T<SessionIdType,
-                          SessionDataType,
+Test_U_GTK_EventHandler_T<SessionDataType,
                           SessionEventType,
                           MessageType,
                           SessionMessageType,
@@ -47,19 +45,17 @@ Test_U_GTK_EventHandler_T<SessionIdType,
 
 }
 
-template <typename SessionIdType,
-          typename SessionDataType,
+template <typename SessionDataType,
           typename SessionEventType,
           typename MessageType,
           typename SessionMessageType,
           typename CallbackDataType>
 void
-Test_U_GTK_EventHandler_T<SessionIdType,
-                          SessionDataType,
+Test_U_GTK_EventHandler_T<SessionDataType,
                           SessionEventType,
                           MessageType,
                           SessionMessageType,
-                          CallbackDataType>::start (SessionIdType sessionId_in,
+                          CallbackDataType>::start (Stream_SessionId_t sessionId_in,
                                                     const SessionDataType& sessionData_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_GTK_EventHandler_T::start"));
@@ -77,20 +73,18 @@ Test_U_GTK_EventHandler_T<SessionIdType,
   } // end lock scope
 }
 
-template <typename SessionIdType,
-          typename SessionDataType,
+template <typename SessionDataType,
           typename SessionEventType,
           typename MessageType,
           typename SessionMessageType,
           typename CallbackDataType>
 void
-Test_U_GTK_EventHandler_T<SessionIdType,
-                          SessionDataType,
+Test_U_GTK_EventHandler_T<SessionDataType,
                           SessionEventType,
                           MessageType,
                           SessionMessageType,
-                          CallbackDataType>::notify (SessionIdType sessionId_in,
-                                                    const SessionEventType& sessionEvent_in)
+                          CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                     const SessionEventType& sessionEvent_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_GTK_EventHandler_T::notify"));
 
@@ -103,19 +97,17 @@ Test_U_GTK_EventHandler_T<SessionIdType,
   ACE_NOTREACHED (return;)
 }
 
-template <typename SessionIdType,
-          typename SessionDataType,
+template <typename SessionDataType,
           typename SessionEventType,
           typename MessageType,
           typename SessionMessageType,
           typename CallbackDataType>
 void
-Test_U_GTK_EventHandler_T<SessionIdType,
-                          SessionDataType,
+Test_U_GTK_EventHandler_T<SessionDataType,
                           SessionEventType,
                           MessageType,
                           SessionMessageType,
-                          CallbackDataType>::end (SessionIdType sessionId_in)
+                          CallbackDataType>::end (Stream_SessionId_t sessionId_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_GTK_EventHandler_T::end"));
 
@@ -145,20 +137,18 @@ Test_U_GTK_EventHandler_T<SessionIdType,
     sessionData_ = NULL;
 }
 
-template <typename SessionIdType,
-          typename SessionDataType,
+template <typename SessionDataType,
           typename SessionEventType,
           typename MessageType,
           typename SessionMessageType,
           typename CallbackDataType>
 void
-Test_U_GTK_EventHandler_T<SessionIdType,
-                          SessionDataType,
+Test_U_GTK_EventHandler_T<SessionDataType,
                           SessionEventType,
                           MessageType,
                           SessionMessageType,
-                          CallbackDataType>::notify (SessionIdType sessionId_in,
-                                                    const MessageType& message_in)
+                          CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                     const MessageType& message_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_GTK_EventHandler_T::notify"));
 
@@ -184,20 +174,19 @@ Test_U_GTK_EventHandler_T<SessionIdType,
     inherited::CBData_->eventStack.push_back (COMMON_UI_EVENT_DATA);
   } // end lock scope
 }
-template <typename SessionIdType,
-          typename SessionDataType,
+
+template <typename SessionDataType,
           typename SessionEventType,
           typename MessageType,
           typename SessionMessageType,
           typename CallbackDataType>
 void
-Test_U_GTK_EventHandler_T<SessionIdType,
-                          SessionDataType,
+Test_U_GTK_EventHandler_T<SessionDataType,
                           SessionEventType,
                           MessageType,
                           SessionMessageType,
-                          CallbackDataType>::notify (SessionIdType sessionId_in,
-                                                    const SessionMessageType& sessionMessage_in)
+                          CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                     const SessionMessageType& sessionMessage_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_GTK_EventHandler_T::notify"));
 

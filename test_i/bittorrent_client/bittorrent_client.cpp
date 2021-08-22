@@ -780,8 +780,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
       goto clean;
     }
     bittorrent_control.stop (true,  // wait ?
-                             true,  // high priority ?
-                             true); // locked access ?
+                             true); // high priority ?
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("session complete...\n")));

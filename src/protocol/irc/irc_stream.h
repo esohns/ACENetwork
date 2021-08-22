@@ -154,7 +154,6 @@ class IRC_Stream_T
                                 UserDataType> BISECTOR_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,             // session id type
                                 SessionDataType,                // session data type
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
@@ -172,7 +171,6 @@ class IRC_Stream_T
                               SessionMessageType> PARSER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         Stream_SessionId_t,             // session id type
                                          SessionDataType,                // session data type
                                          enum Stream_SessionMessageType, // session event type
                                          struct Stream_ModuleConfiguration,
@@ -205,7 +203,6 @@ class IRC_Stream_T
                                                         SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,             // session id type
                                 SessionDataType,                // session data type
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,

@@ -24,8 +24,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_ilock.h"
-
 #include "stream_task_base_synch.h"
 
 //extern NET_PROTOCOL_PCP_Export const char libacenetwork_protocol_default_pcp_streamer_module_name_string[];
@@ -42,24 +40,20 @@ template <typename SynchStrategyType,
 class PCP_Module_Streamer_T
  : public Stream_TaskBaseSynch_T<SynchStrategyType,
                                  TimePolicyType,
-                                 Common_ILock_T<SynchStrategyType>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData>
 {
   typedef Stream_TaskBaseSynch_T<SynchStrategyType,
                                  TimePolicyType,
-                                 Common_ILock_T<SynchStrategyType>,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType,
-                                 Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData> inherited;

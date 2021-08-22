@@ -59,7 +59,6 @@ class IRC_Client_Module_IRCHandler
                                          Stream_ControlMessage_t,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
-                                         Stream_SessionId_t,
                                          struct IRC_Client_SessionData,
                                          struct IRC_Client_UserData>
  , public IRC_StateMachine_Registration
@@ -71,7 +70,6 @@ class IRC_Client_Module_IRCHandler
                                          Stream_ControlMessage_t,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
-                                         Stream_SessionId_t,
                                          struct IRC_Client_SessionData,
                                          struct IRC_Client_UserData> inherited;
   typedef IRC_StateMachine_Registration inherited2;

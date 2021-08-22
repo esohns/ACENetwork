@@ -107,13 +107,11 @@ struct Common_UI_State;
 
 enum Stream_StateMachine_ControlState;
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct BitTorrent_PeerSessionData,
+typedef Stream_ISessionDataNotify_T<struct BitTorrent_PeerSessionData,
                                     enum Stream_SessionMessageType,
                                     BitTorrent_Message_t,
                                     BitTorrent_PeerSessionMessage_t> BitTorrent_IPeerNotify_t;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct BitTorrent_TrackerSessionData,
+typedef Stream_ISessionDataNotify_T<struct BitTorrent_TrackerSessionData,
                                     enum Stream_SessionMessageType,
                                     BitTorrent_TrackerMessage_t,
                                     BitTorrent_TrackerSessionMessage_t> BitTorrent_ITrackerNotify_t;
@@ -283,7 +281,6 @@ typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Stream_ControlMessage_t,
                                        BitTorrent_Message_t,
                                        BitTorrent_PeerSessionMessage_t,
-                                       Stream_SessionId_t,
                                        struct BitTorrent_PeerSessionData,
                                        struct Stream_UserData> BitTorrent_PeerHandler_t;
 extern const char libacenetwork_default_bittorrent_handler_module_name_string[];
@@ -303,7 +300,6 @@ typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Stream_ControlMessage_t,
                                        BitTorrent_TrackerMessage_t,
                                        BitTorrent_TrackerSessionMessage_t,
-                                       Stream_SessionId_t,
                                        struct BitTorrent_TrackerSessionData,
                                        struct Stream_UserData> BitTorrent_TrackerHandler_t;
 

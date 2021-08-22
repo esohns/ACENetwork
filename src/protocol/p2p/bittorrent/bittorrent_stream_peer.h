@@ -181,7 +181,6 @@ class BitTorrent_PeerStream_T
                                          UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,             // session id type
                                 SessionDataType,                // session data type
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
@@ -224,7 +223,6 @@ class BitTorrent_PeerStream_T
                                                         SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,                // session id type
                                 SessionDataType,                   // session data type
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,

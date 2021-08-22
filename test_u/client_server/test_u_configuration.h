@@ -74,8 +74,7 @@ struct Test_U_ProtocolConfiguration
   enum Net_TransportLayerType transportLayer;
 };
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_StreamSessionData,
+typedef Stream_ISessionDataNotify_T<struct Test_U_StreamSessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> Test_U_ISessionNotify_t;
