@@ -19,11 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 //#include "IRC_client_sessionmessage.h"
 #include "IRC_client_module_IRChandler.h"
 
-//#include <iostream>
+#include <iostream>
 #include <sstream>
 
 #include "ace/iosfwd.h"
