@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef PCP_STREAM_H
-#define PCP_STREAM_H
+#ifndef SMTP_STREAM_H
+#define SMTP_STREAM_H
 
 #include <string>
 
@@ -36,17 +36,17 @@
 #include "stream_stat_common.h"
 #include "stream_stat_statistic_report.h"
 
-#include "pcp_common.h"
-//#include "pcp_module_bisector.h"
-//#include "pcp_exports.h"
-#include "pcp_module_parser.h"
-#include "pcp_module_streamer.h"
-#include "pcp_stream_common.h"
+#include "smtp_common.h"
+//#include "smtp_module_bisector.h"
+//#include "smtp_exports.h"
+#include "smtp_module_parser.h"
+#include "smtp_module_streamer.h"
+//#include "smtp_stream_common.h"
 
-//extern NET_PROTOCOL_PCP_Export const char libacenetwork_default_pcp_marshal_module_name_string[];
-extern const char libacenetwork_default_pcp_marshal_module_name_string[];
-//extern NET_PROTOCOL_PCP_Export const char libacenetwork_default_pcp_stream_name_string[];
-extern const char libacenetwork_default_pcp_stream_name_string[];
+//extern NET_PROTOCOL_SMTP_Export const char libacenetwork_default_smtp_marshal_module_name_string[];
+extern const char libacenetwork_default_smtp_marshal_module_name_string[];
+//extern NET_PROTOCOL_SMTP_Export const char libacenetwork_default_smtp_stream_name_string[];
+extern const char libacenetwork_default_smtp_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -63,10 +63,10 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
-class PCP_Stream_T
+class SMTP_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        libacenetwork_default_pcp_stream_name_string,
+                        libacenetwork_default_smtp_stream_name_string,
                         int,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -82,7 +82,7 @@ class PCP_Stream_T
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        libacenetwork_default_pcp_stream_name_string,
+                        libacenetwork_default_smtp_stream_name_string,
                         int,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -97,8 +97,8 @@ class PCP_Stream_T
                         SessionMessageType> inherited;
 
  public:
-  PCP_Stream_T ();
-  inline virtual ~PCP_Stream_T () { inherited::shutdown (); }
+  SMTP_Stream_T ();
+  inline virtual ~SMTP_Stream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: layout
@@ -110,7 +110,7 @@ class PCP_Stream_T
   virtual bool initialize (const CONFIGURATION_T&); // configuration
 #else
   virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to rntimeStatistic_
@@ -119,33 +119,23 @@ class PCP_Stream_T
   virtual void report () const;
 
  private:
-  typedef PCP_Module_Streamer_T<ACE_MT_SYNCH,
+  typedef SMTP_Module_Streamer_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType> STREAMER_T;
-  //typedef PCP_Module_Bisector_T<ACE_SYNCH_MUTEX,
-  //                               ACE_MT_SYNCH,
-  //                               Common_TimePolicy_t,
-  //                               SessionMessageType,
-  //                               ProtocolMessageType,
-  //                               ModuleHandlerConfigurationType,
-  //                               StreamStateType,
-  //                               SessionDataType,
-  //                               SessionDataContainerType,
-  //                               StatisticContainerType> BISECTOR_T;
-  //typedef PCP_Module_Parser_T<ACE_MT_SYNCH,
+  //typedef SMTP_Module_Parser_T<ACE_MT_SYNCH,
   //                             Common_TimePolicy_t,
   //                             SessionMessageType,
   //                             ProtocolMessageType> PARSER_T;
-  typedef PCP_Module_ParserH_T<ACE_MT_SYNCH,
+  typedef SMTP_Module_ParserH_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ControlMessageType,
                                 DataMessageType,
                                 SessionMessageType,
                                 ModuleHandlerConfigurationType,
-                                int,
+                                enum Stream_ControlType,
                                 enum Stream_SessionMessageType,
                                 StreamStateType,
                                 SessionDataType,
@@ -169,7 +159,7 @@ class PCP_Stream_T
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
-                                libacenetwork_default_pcp_marshal_module_name_string,
+                                libacenetwork_default_smtp_marshal_module_name_string,
                                 Stream_INotify_t,                  // stream notification interface type
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
@@ -180,9 +170,9 @@ class PCP_Stream_T
                                                         ControlMessageType,
                                                         DataMessageType,
                                                         SessionMessageType,
-                                                        PCP_Opcode_t,
-                                                        PCP_Statistic_t,
-                                                        StatisticHandlerType,
+                                                        SMTP_Code_t,
+                                                        SMTP_Statistic_t,
+                                                        Common_Timer_Manager_t,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
@@ -191,9 +181,9 @@ class PCP_Stream_T
                                                         ControlMessageType,
                                                         DataMessageType,
                                                         SessionMessageType,
-                                                        PCP_Opcode_t,
-                                                        PCP_Statistic_t,
-                                                        StatisticHandlerType,
+                                                        SMTP_Code_t,
+                                                        SMTP_Statistic_t,
+                                                        Common_Timer_Manager_t,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
@@ -207,8 +197,8 @@ class PCP_Stream_T
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
-  ACE_UNIMPLEMENTED_FUNC (PCP_Stream_T (const PCP_Stream_T&))
-  ACE_UNIMPLEMENTED_FUNC (PCP_Stream_T& operator= (const PCP_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (SMTP_Stream_T (const SMTP_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (SMTP_Stream_T& operator= (const SMTP_Stream_T&))
 
   // modules
   //MODULE_PARSER_T    parser_;
@@ -217,6 +207,6 @@ class PCP_Stream_T
 };
 
 // include template definition
-#include "pcp_stream.inl"
+#include "smtp_stream.inl"
 
 #endif

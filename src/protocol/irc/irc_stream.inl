@@ -80,6 +80,40 @@ IRC_Stream_T<StreamStateType,
              DataMessageType,
              SessionMessageType,
              ConnectionManagerType,
+             UserDataType>::load (Stream_ILayout* layout_inout,
+                                  bool& deleteModules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::load"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+  ACE_NOTREACHED (return false;)
+}
+
+template <typename StreamStateType,
+          typename ConfigurationType,
+          typename StatisticContainerType,
+          typename TimerManagerType,
+          typename ModuleHandlerConfigurationType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConnectionManagerType,
+          typename UserDataType>
+bool
+IRC_Stream_T<StreamStateType,
+             ConfigurationType,
+             StatisticContainerType,
+             TimerManagerType,
+             ModuleHandlerConfigurationType,
+             SessionDataType,
+             SessionDataContainerType,
+             ControlMessageType,
+             DataMessageType,
+             SessionMessageType,
+             ConnectionManagerType,
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
              UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
