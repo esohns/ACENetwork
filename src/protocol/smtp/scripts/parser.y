@@ -51,7 +51,7 @@
 #include <cstdio>
 #include <string>
 
-class SMTP_ParserDriver;
+class SMTP_IParser;
 //class SMTP_Scanner;
 struct YYLTYPE;
 //union YYSTYPE;
@@ -67,19 +67,19 @@ typedef yytoken yytoken_t;
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
-extern void yyerror (YYLTYPE*, SMTP_ParserDriver*, yyscan_t, const char*);
-extern int yyparse (SMTP_ParserDriver*, yyscan_t);
+extern void yyerror (YYLTYPE*, SMTP_IParser*, yyscan_t, const char*);
+extern int yyparse (SMTP_IParser*, yyscan_t);
 
 #undef YYPRINT
 //extern void yyprint (FILE*, yytokentype, YYSTYPE);
 }
 
 // calling conventions / parameter passing
-%parse-param              { SMTP_ParserDriver* driver }
+%parse-param              { SMTP_IParser* driver }
 %parse-param              { yyscan_t yyscanner }
 /* %lex-param                { YYSTYPE* yylval } */
 /* %lex-param                { YYLTYPE* yylloc } */
-%lex-param                { SMTP_ParserDriver* driver }
+%lex-param                { SMTP_IParser* driver }
 %lex-param                { yyscan_t yyscanner }
 
 %initial-action
@@ -153,7 +153,7 @@ using namespace std;
 %%
 %start                   message;
 
-message:                 "reply_code"                               { driver->record_->code = static_cast<SMTP_Code_t> ($1); }
+message:                 "reply_code"                               { driver->current ().code = static_cast<SMTP_Code_t> ($1); }
                          text_lines "reply_end"                     { $$ = 3 + $3;
                                                                       YYACCEPT; }
 text_lines:              text_line text_lines                       { $$ = $1 + $2; }
@@ -161,9 +161,9 @@ text_lines:              text_line text_lines                       { $$ = $1 + 
 text_line:               multi_text_line
                          | final_text_line                          { $$ = $1; }
 multi_text_line:         "reply_code" "text"                        { $$ = 3 + 1 + $2->length () + 2;
-                                                                      driver->record_->text.push_back (*$2); }
+                                                                      driver->current ().text.push_back (*$2); }
 final_text_line:         "text"                                     { $$ = 1 + $1->length () + 2;
-                                                                      driver->record_->text.push_back (*$1); }
+                                                                      driver->current ().text.push_back (*$1); }
 %%
 
 /* void
@@ -185,7 +185,7 @@ yy::SMTP_Parser::set (yyscan_t context_in)
 
 void
 yyerror (YYLTYPE* location_in,
-         SMTP_ParserDriver* driver_in,
+         SMTP_IParser* driver_in,
          yyscan_t context_in,
          const char* message_in)
 {

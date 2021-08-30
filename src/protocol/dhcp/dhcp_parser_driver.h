@@ -54,7 +54,7 @@ class DHCP_ParserDriver
   virtual ~DHCP_ParserDriver ();
 
   // target data, needs to be set before invoking parse() !
-  bool initialize (const struct Common_ParserConfiguration&);
+  bool initialize (const struct Common_FlexBisonParserConfiguration&);
 
   bool parse (ACE_Message_Block*); // data
 
@@ -69,11 +69,11 @@ class DHCP_ParserDriver
   bool getDebugScanner () const;
 
   // *NOTE*: current (unscanned) data fragment
-  ACE_Message_Block*                 fragment_;
-  unsigned int                       offset_; // parsed entity bytes
+  ACE_Message_Block*                          fragment_;
+  unsigned int                                offset_; // parsed entity bytes
 
   // target
-  DHCP_Record*                       record_;
+  struct DHCP_Record*                         record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (DHCP_ParserDriver ())
@@ -87,21 +87,21 @@ class DHCP_ParserDriver
   bool scan_begin ();
   void scan_end ();
 
-  struct Common_ParserConfiguration* configuration_;
+  struct Common_FlexBisonParserConfiguration* configuration_;
 
   // context
-  bool                               trace_;
+  bool                                        trace_;
 
   //// parser
   //yy::DHCP_Parser    parser_;
 
   // scanner
-  yyscan_t                           scannerState_;
-  YY_BUFFER_STATE                    bufferState_;
-  ACE_Message_Queue_Base*            messageQueue_;
-  bool                               useYYScanBuffer_;
+  yyscan_t                                    scannerState_;
+  YY_BUFFER_STATE                             bufferState_;
+  ACE_Message_Queue_Base*                     messageQueue_;
+  bool                                        useYYScanBuffer_;
 
-  bool                               initialized_;
+  bool                                        initialized_;
 };
 
 #endif

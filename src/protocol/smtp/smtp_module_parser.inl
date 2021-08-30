@@ -45,9 +45,6 @@ SMTP_Module_Parser_T<ACE_SYNCH_USE,
                      SessionMessageType>::SMTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
- , driver_ (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
-            COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
- , isDriverInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Parser_T::SMTP_Module_Parser_T"));
 
@@ -59,137 +56,39 @@ template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
-bool
-SMTP_Module_Parser_T<ACE_SYNCH_USE,
-                     TimePolicyType,
-                     ConfigurationType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType>::initialize (const ConfigurationType& configuration_in,
-                                                      Stream_IAllocator* allocator_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Parser_T::initialize"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.parserConfiguration);
-
-  if (inherited::isInitialized_)
-  {
-    isDriverInitialized_ = false;
-  } // end IF
-
-  // initialize driver
-  isDriverInitialized_ =
-      driver_.initialize (*configuration_in.parserConfiguration);
-  if (!isDriverInitialized_)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to initialize parser driver, aborting\n"),
-                inherited::mod_->name ()));
-    return false;
-  } // end IF
-
-  return inherited::initialize (configuration_in,
-                                allocator_in);
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
 void
 SMTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
-                                                             bool& passMessageDownstream_out)
+                     SessionMessageType>::record (struct SMTP_Record*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Parser_T::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Parser_T::record"));
 
-  SMTP_Record* record_p = NULL;
+  // sanity check(s)
+  ACE_ASSERT (record_inout);
+  ACE_ASSERT (record_inout == inherited::record_);
+  ACE_ASSERT (headFragment_);
+  ACE_ASSERT (!headFragment_->isInitialized ());
 
-  // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT ((message_inout->capacity () -
-               message_inout->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
-  *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
-  *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
-  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
+  DataMessageType* message_p = NULL;
 
-//  DATA_CONTAINER_T& data_container_r =
-//    const_cast<DATA_CONTAINER_T&> (message_inout->get ());
-//  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
-  DATA_T& data_r = const_cast<DATA_T&> (message_inout->getR ());
-//  if (!data_r.DHCPRecord)
-//  {
-//    ACE_NEW_NORETURN (data_r.DHCPRecord,
-//                      SMTP_Record ());
-//    if (!data_r.DHCPRecord)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate memory, returning\n")));
-//      return;
-//    } // end IF
-//  } // end IF
-//  record_p = data_r.DHCPRecord;
-  record_p = &data_r;
-
-  // set target record
-  driver_.record_ = record_p;
-
-  // OK: parse this message
-  ACE_ASSERT (isDriverInitialized_);
-
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-//              message_p->id (),
-//              message_p->length ()));
-
-  if (!driver_.parse (message_inout))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SMTP_ParserDriver::parse() (message ID: %d), returning\n"),
-                message_inout->id ()));
-    return;
-  } // end IF
-  message_inout->rd_ptr (message_inout->base ());
-  message_inout->initialize (*record_p,
-                             message_inout->id (),
+  headFragment_->initialize (*record_inout,
+                             headFragment_->sessionId (),
                              NULL);
-  //isDriverInitialized_ = false;
-}
+  delete record_inout; record_inout = NULL;
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-void
-SMTP_Module_Parser_T<ACE_SYNCH_USE,
-                     TimePolicyType,
-                     ConfigurationType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Parser_T::handleSessionMessage"));
-
-  // don't care (implies yes per default, if part of a stream)
-  ACE_UNUSED_ARG (passMessageDownstream_out);
-
+  // make sure the whole fragment chain references the same data record
   // sanity check(s)
-  ACE_ASSERT (message_inout);
-
-  //switch (message_inout->type ())
-  //{
-  //  default:
-  //    break;
-  //} // end SWITCH
+  message_p = static_cast<DataMessageType*> (headFragment_->cont ());
+  while (message_p)
+  {
+    message_p->initialize (const_cast<typename DataMessageType::DATA_T&> (headFragment_->getR ()),
+                           headFragment_->sessionId (),
+                           NULL);
+    message_p = static_cast<DataMessageType*> (message_p->cont ());
+  } // end WHILE
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,8 +104,7 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename StatisticContainerType>
 SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
@@ -218,21 +116,15 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      StatisticHandlerType>::SMTP_Module_ParserH_T (ISTREAM_T* stream_in,
+                      StatisticContainerType>::SMTP_Module_ParserH_T (ISTREAM_T* stream_in)
 #else
-                      StatisticHandlerType>::SMTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in,
+                      StatisticContainerType>::SMTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
-                                                                    bool autoStart_in,
-                                                                    bool generateSessionMessages_in)
  : inherited (stream_in,
-              autoStart_in,
-              STREAM_HEADMODULECONCURRENCY_PASSIVE,
-              generateSessionMessages_in)
- , driver_ (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
-            COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
- , isDriverInitialized_ (false)
+              false,
+              STREAM_HEADMODULECONCURRENCY_CONCURRENT,
+              true)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::SMTP_Module_ParserH_T"));
 
@@ -249,9 +141,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename StatisticHandlerType>
-bool
+          typename StatisticContainerType>
+void
 SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
@@ -263,33 +154,33 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      StatisticHandlerType>::initialize (const ConfigurationType& configuration_in,
-                                                         Stream_IAllocator* allocator_in)
+                      StatisticContainerType>::record (struct SMTP_Record*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::initialize"));
-
-//  bool result = false;
+  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::record"));
 
   // sanity check(s)
-  ACE_ASSERT (configuration_in.parserConfiguration);
+  ACE_ASSERT (record_inout);
+  ACE_ASSERT (record_inout == inherited::record_);
+  ACE_ASSERT (headFragment_);
+  ACE_ASSERT (!headFragment_->isInitialized ());
 
-  if (inherited::isInitialized_)
+  DataMessageType* message_p = NULL;
+
+  headFragment_->initialize (*record_inout,
+                             headFragment_->sessionId (),
+                             NULL);
+  delete record_inout; record_inout = NULL;
+
+  // make sure the whole fragment chain references the same data record
+  // sanity check(s)
+  message_p = static_cast<DataMessageType*> (headFragment_->cont ());
+  while (message_p)
   {
-    isDriverInitialized_ = false;
-  } // end IF
-
-  isDriverInitialized_ =
-      driver_.initialize (*configuration_in.parserConfiguration);
-  if (!isDriverInitialized_)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize parser driver: \"%m\", aborting\n")));
-    return false;
-  } // end IF
-
-  return inherited::initialize (configuration_in,
-                                allocator_in);
+    message_p->initialize (const_cast<typename DataMessageType::DATA_T&> (headFragment_->getR ()),
+                           headFragment_->sessionId (),
+                           NULL);
+    message_p = static_cast<DataMessageType*> (message_p->cont ());
+  } // end WHILE
 }
 
 template <ACE_SYNCH_DECL,
@@ -303,133 +194,7 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename StatisticHandlerType>
-void
-SMTP_Module_ParserH_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType,
-                      StatisticHandlerType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::handleDataMessage"));
-
-//  int result = -1;
-  struct SMTP_Record* record_p = NULL;
-
-  // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT ((message_inout->capacity () -
-               message_inout->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
-  *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
-  *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
-  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
-
-//  DATA_CONTAINER_T& data_container_r =
-//    const_cast<DATA_CONTAINER_T&> (message_inout->get ());
-//  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
-  DATA_T& data_r = const_cast<DATA_T&> (message_inout->getR ());
-  record_p = &data_r;
-
-  // set target record
-  driver_.record_ = record_p;
-
-  // OK: parse this message
-  ACE_ASSERT (isDriverInitialized_);
-
-  //  ACE_DEBUG ((LM_DEBUG,
-  //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-  //              message_p->id (),
-  //              message_p->length ()));
-
-  if (!driver_.parse (message_inout))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SMTP_ParserDriver::parse() (message ID: %d), returning\n"),
-                message_inout->id ()));
-    return;
-  } // end IF
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConfigurationType,
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename StatisticHandlerType>
-void
-SMTP_Module_ParserH_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType,
-                      StatisticHandlerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                   bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::handleSessionMessage"));
-
-  // don't care (implies yes per default, if part of a stream)
-  ACE_UNUSED_ARG (passMessageDownstream_out);
-
-  switch (message_inout->type ())
-  {
-    case STREAM_SESSION_MESSAGE_BEGIN:
-    {
-      //const SessionDataContainerType& session_data_container_r =
-      //    message_inout->getR ();
-      //const SessionDataType& session_data_r = session_data_container_r.getR ();
-      //ACE_ASSERT (inherited::streamState_);
-      //ACE_ASSERT (inherited::streamState_->sessionData);
-      //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (*(inherited::streamState_->currentSessionData->lock));
-      //inherited::streamState_->sessionData->sessionId =
-      //    session_data_r.sessionId;
-
-      // start profile timer...
-      //profile_.start ();
-
-      break;
-    }
-    case STREAM_SESSION_MESSAGE_END:
-    default:
-      break;
-  } // end SWITCH
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConfigurationType,
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename StatisticContainerType>
 bool
 SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -442,8 +207,7 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType,
-                      StatisticHandlerType>::collect (StatisticContainerType& data_out)
+                      StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::collect"));
 
@@ -474,8 +238,7 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
 //          typename ConfigurationType,
 //          typename StreamStateType,
 //          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
+//          typename SessionDataContainerType>
 //void
 //SMTP_Module_ParserH_T<ACE_SYNCH_USE,
 //                     TaskSynchType,
@@ -485,8 +248,7 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
 //                     ConfigurationType,
 //                     StreamStateType,
 //                     SessionDataType,
-//                     SessionDataContainerType,
-//                     StatisticContainerType>::report () const
+//                     SessionDataContainerType>::report () const
 //{
 //  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::report"));
 //

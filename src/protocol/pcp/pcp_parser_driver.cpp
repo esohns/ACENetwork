@@ -78,7 +78,7 @@ PCP_ParserDriver::~PCP_ParserDriver ()
 }
 
 bool
-PCP_ParserDriver::initialize (const struct Common_ParserConfiguration& configuration_in)
+PCP_ParserDriver::initialize (const struct Common_FlexBisonParserConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("PCP_ParserDriver::initialize"));
 
@@ -106,7 +106,7 @@ PCP_ParserDriver::initialize (const struct Common_ParserConfiguration& configura
   } // end IF
 
   configuration_ =
-      &const_cast<struct Common_ParserConfiguration&> (configuration_in);
+      &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
   trace_ = configuration_->debugScanner;
 
   messageQueue_ = configuration_->messageQueue;

@@ -100,13 +100,11 @@ BitTorrent_ParserDriver::error (const yy::location& location_in,
 //}
 
 bool
-BitTorrent_ParserDriver::initialize (yyscan_t& state_inout, struct Common_ScannerState* scannerState_in)
+BitTorrent_ParserDriver::initialize (yyscan_t& state_inout, BitTorrent_IParser_t* extra_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::initialize"));
 
-  ACE_UNUSED_ARG (scannerState_in);
-
-  int result = BitTorrent_Scanner_lex_init_extra (this, &state_inout);
+  int result = BitTorrent_Scanner_lex_init_extra (extra_in, &state_inout);
 
   inherited::parser_.set (state_inout);
 

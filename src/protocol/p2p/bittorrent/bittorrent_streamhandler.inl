@@ -711,7 +711,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   } // end SWITCH
 
   // parse bencoded record
-  struct Common_ParserConfiguration parser_configuration = *configuration_;
+  struct Common_FlexBisonParserConfiguration parser_configuration = *configuration_;
   parser_configuration.block = false;
   parser_configuration.messageQueue = NULL;
   PARSER_T parser (parser_configuration.debugScanner,

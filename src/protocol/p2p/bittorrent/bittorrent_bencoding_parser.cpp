@@ -1383,9 +1383,12 @@ yy::BitTorrent_Bencoding_Parser::set (yyscan_t context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Parser::set"));
 
-  struct Common_ScannerState& state_r =
-      const_cast<struct Common_ScannerState&> (scanner->getR ());
-  state_r.lexState = context_in;
+  // sanity check(s)
+  ACE_ASSERT (scanner);
+
+  struct Common_FlexScannerState& state_r =
+      const_cast<struct Common_FlexScannerState&> (scanner->getR ());
+  state_r.context = context_in;
 }
 
 /*void

@@ -74,7 +74,7 @@
 %parse-param              { M3U_IScanner_t* iscanner }
 // *NOTE*: cannot use %initial-action, as it is scoped
 %lex-param                { M3U_IParser* iparser }
-%lex-param                { yyscan_t iscanner->getR ().lexState }
+%lex-param                { yyscan_t iscanner->getR ().context }
 
 %initial-action
 {

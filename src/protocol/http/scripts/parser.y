@@ -59,7 +59,7 @@
 #include <cstdio>
 #include <string>
 
-#include "common_iscanner.h"
+#include "common_iparser.h"
 
 /* enum yytokentype
 {

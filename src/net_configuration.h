@@ -75,8 +75,8 @@ struct Net_SessionConfiguration
    , parserConfiguration (NULL)
   {}
 
-  enum Common_EventDispatchType      dispatch;
-  struct Common_ParserConfiguration* parserConfiguration;
+  enum Common_EventDispatchType               dispatch;
+  struct Common_FlexBisonParserConfiguration* parserConfiguration;
 };
 
 //template <typename ConnectionConfigurationType,

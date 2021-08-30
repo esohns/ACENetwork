@@ -734,7 +734,7 @@ static void yyexpandGLRStack (yyGLRStack* yystackp);
 #endif
 
 _Noreturn static void
-yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, SMTP_ParserDriver* driver, yyscan_t yyscanner, const char* yymsg)
+yyFail (yyGLRStack* yystackp, YYLTYPE *yylocp, SMTP_IParser* driver, yyscan_t yyscanner, const char* yymsg)
 {
   if (yymsg != YY_NULLPTR)
     yyerror (yylocp, driver, yyscanner, yymsg);
@@ -852,7 +852,7 @@ yy_location_print_ (FILE *yyo, YYLTYPE const * const yylocp)
 
 static void
 yy_symbol_value_print (FILE *yyo,
-                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                       yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   FILE *yyoutput = yyo;
   YYUSE (yyoutput);
@@ -913,7 +913,7 @@ yy_symbol_value_print (FILE *yyo,
 
 static void
 yy_symbol_print (FILE *yyo,
-                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                 yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, YYLTYPE const * const yylocationp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   YYFPRINTF (yyo, "%s %s (",
              yykind < YYNTOKENS ? "token" : "nterm", yysymbol_name (yykind));
@@ -1055,7 +1055,7 @@ yyfillin (yyGLRStackItem *yyvsp, int yylow0, int yylow1)
 
 /** If yychar is empty, fetch the next token.  */
 static inline yysymbol_kind_t
-yygetToken (int *yycharp, yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+yygetToken (int *yycharp, yyGLRStack* yystackp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   yysymbol_kind_t yytoken;
   YYUSE (driver);
@@ -1103,7 +1103,7 @@ yyfill (yyGLRStackItem *yyvsp, int *yylow, int yylow1, yybool yynormal)
 static YYRESULTTAG
 yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
               yyGLRStack* yystackp,
-              YYSTYPE* yyvalp, YYLTYPE *yylocp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+              YYSTYPE* yyvalp, YYLTYPE *yylocp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   yybool yynormal YY_ATTRIBUTE_UNUSED = yystackp->yysplitPoint == YY_NULLPTR;
   int yylow;
@@ -1143,7 +1143,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   switch (yyn)
     {
   case 2: /* $@1: %empty  */
-                                                                    { driver->record_->code = static_cast<SMTP_Code_t> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
+                                                                    { driver->current ().code = static_cast<SMTP_Code_t> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.ival)); }
     break;
 
   case 3: /* message: "reply_code" $@1 text_lines "reply_end"  */
@@ -1165,12 +1165,12 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 8: /* multi_text_line: "reply_code" "text"  */
                                                                     { ((*yyvalp).ival) = 3 + 1 + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)->length () + 2;
-                                                                      driver->record_->text.push_back (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)); }
+                                                                      driver->current ().text.push_back (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)); }
     break;
 
   case 9: /* final_text_line: "text"  */
                                                                     { ((*yyvalp).ival) = 1 + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)->length () + 2;
-                                                                      driver->record_->text.push_back (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)); }
+                                                                      driver->current ().text.push_back (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yysval.sval)); }
     break;
 
 
@@ -1210,7 +1210,7 @@ yyuserMerge (int yyn, YYSTYPE* yy0, YYSTYPE* yy1)
 
 static void
 yydestruct (const char *yymsg,
-            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+            yysymbol_kind_t yykind, YYSTYPE *yyvaluep, YYLTYPE *yylocationp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   YYUSE (yyvaluep);
   YYUSE (yylocationp);
@@ -1273,7 +1273,7 @@ yyrhsLength (yyRuleNum yyrule)
 }
 
 static void
-yydestroyGLRState (char const *yymsg, yyGLRState *yys, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+yydestroyGLRState (char const *yymsg, yyGLRState *yys, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   if (yys->yyresolved)
     yydestruct (yymsg, yy_accessing_symbol (yys->yylrState),
@@ -1695,7 +1695,7 @@ yyglrShiftDefer (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yy_state_t yylrState,
 
 static inline void
 yy_reduce_print (yybool yynormal, yyGLRStackItem* yyvsp, YYPTRDIFF_T yyk,
-                 yyRuleNum yyrule, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                 yyRuleNum yyrule, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
   int yylow = 1;
@@ -1727,7 +1727,7 @@ yy_reduce_print (yybool yynormal, yyGLRStackItem* yyvsp, YYPTRDIFF_T yyk,
  *  for userAction.  */
 static inline YYRESULTTAG
 yydoAction (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yyRuleNum yyrule,
-            YYSTYPE* yyvalp, YYLTYPE *yylocp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+            YYSTYPE* yyvalp, YYLTYPE *yylocp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   int yynrhs = yyrhsLength (yyrule);
 
@@ -1779,7 +1779,7 @@ yydoAction (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yyRuleNum yyrule,
  */
 static inline YYRESULTTAG
 yyglrReduce (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yyRuleNum yyrule,
-             yybool yyforceEval, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+             yybool yyforceEval, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   YYPTRDIFF_T yyposn = yystackp->yytops.yystates[yyk]->yyposn;
 
@@ -1990,7 +1990,7 @@ yypreference (yySemanticOption* y0, yySemanticOption* y1)
 }
 
 static YYRESULTTAG yyresolveValue (yyGLRState* yys,
-                                   yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner);
+                                   yyGLRStack* yystackp, SMTP_IParser* driver, yyscan_t yyscanner);
 
 
 /** Resolve the previous YYN states starting at and including state YYS
@@ -2000,7 +2000,7 @@ static YYRESULTTAG yyresolveValue (yyGLRState* yys,
  *  data so that yydestroyGLRState can be invoked if necessary.  */
 static YYRESULTTAG
 yyresolveStates (yyGLRState* yys, int yyn,
-                 yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                 yyGLRStack* yystackp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   if (0 < yyn)
     {
@@ -2019,7 +2019,7 @@ yyresolveStates (yyGLRState* yys, int yyn,
  *  semantic values if invoked).  */
 static YYRESULTTAG
 yyresolveAction (yySemanticOption* yyopt, yyGLRStack* yystackp,
-                 YYSTYPE* yyvalp, YYLTYPE *yylocp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                 YYSTYPE* yyvalp, YYLTYPE *yylocp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   yyGLRStackItem yyrhsVals[YYMAXRHS + YYMAXLEFT + 1];
   int yynrhs = yyrhsLength (yyopt->yyrule);
@@ -2104,7 +2104,7 @@ yyreportTree (yySemanticOption* yyx, int yyindent)
 
 static YYRESULTTAG
 yyreportAmbiguity (yySemanticOption* yyx0,
-                   yySemanticOption* yyx1, YYLTYPE *yylocp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                   yySemanticOption* yyx1, YYLTYPE *yylocp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   YYUSE (yyx0);
   YYUSE (yyx1);
@@ -2127,7 +2127,7 @@ yyreportAmbiguity (yySemanticOption* yyx0,
  *  The first semantic option of a state is always chosen.  */
 static void
 yyresolveLocations (yyGLRState *yys1, int yyn1,
-                    yyGLRStack *yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                    yyGLRStack *yystackp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   if (0 < yyn1)
     {
@@ -2175,7 +2175,7 @@ yyresolveLocations (yyGLRState *yys1, int yyn1,
  *  result = yyok, YYS has been left with consistent data so that
  *  yydestroyGLRState can be invoked if necessary.  */
 static YYRESULTTAG
-yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   yySemanticOption* yyoptionList = yys->yysemantics.yyfirstVal;
   yySemanticOption* yybest = yyoptionList;
@@ -2259,7 +2259,7 @@ yyresolveValue (yyGLRState* yys, yyGLRStack* yystackp, SMTP_ParserDriver* driver
 }
 
 static YYRESULTTAG
-yyresolveStack (yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+yyresolveStack (yyGLRStack* yystackp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   if (yystackp->yysplitPoint != YY_NULLPTR)
     {
@@ -2308,7 +2308,7 @@ yycompressStack (yyGLRStack* yystackp)
 
 static YYRESULTTAG
 yyprocessOneStack (yyGLRStack* yystackp, YYPTRDIFF_T yyk,
-                   YYPTRDIFF_T yyposn, YYLTYPE *yylocp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+                   YYPTRDIFF_T yyposn, YYLTYPE *yylocp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   while (yystackp->yytops.yystates[yyk] != YY_NULLPTR)
     {
@@ -2490,7 +2490,7 @@ yy_syntax_error_arguments (const yyGLRStack* yystackp,
 
 
 static void
-yyreportSyntaxError (yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+yyreportSyntaxError (yyGLRStack* yystackp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   if (yystackp->yyerrState != 0)
     return;
@@ -2580,7 +2580,7 @@ yyreportSyntaxError (yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t y
    yylval, and yylloc are the syntactic category, semantic value, and location
    of the lookahead.  */
 static void
-yyrecoverSyntaxError (yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t yyscanner)
+yyrecoverSyntaxError (yyGLRStack* yystackp, SMTP_IParser* driver, yyscan_t yyscanner)
 {
   if (yystackp->yyerrState == 3)
     /* We just shifted the error token and (perhaps) took some
@@ -2691,7 +2691,7 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, SMTP_ParserDriver* driver, yyscan_t 
 `----------*/
 
 int
-yyparse (SMTP_ParserDriver* driver, yyscan_t yyscanner)
+yyparse (SMTP_IParser* driver, yyscan_t yyscanner)
 {
   int yyresult;
   yyGLRStack yystack;
@@ -3026,7 +3026,7 @@ yy::SMTP_Parser::set (yyscan_t context_in)
 
 void
 yyerror (YYLTYPE* location_in,
-         SMTP_ParserDriver* driver_in,
+         SMTP_IParser* driver_in,
          yyscan_t context_in,
          const char* message_in)
 {

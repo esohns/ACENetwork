@@ -36,19 +36,19 @@
 #include "bittorrent_iparser.h"
 
 class BitTorrent_Bencoding_ParserDriver
- : public Common_CppParserBase_T<struct Common_ParserConfiguration,
+ : public Common_CppParserBase_T<struct Common_FlexBisonParserConfiguration,
                                  BitTorrent_Bencoding_Scanner,
-                                 struct Common_ScannerState,
+                                 struct Common_FlexScannerState,
                                  yy::BitTorrent_Bencoding_Parser,
                                  BitTorrent_Bencoding_IParser,
-                                 std::string>
+                                 BitTorrent_Bencoding_IParser>
 {
-  typedef Common_CppParserBase_T<struct Common_ParserConfiguration,
+  typedef Common_CppParserBase_T<struct Common_FlexBisonParserConfiguration,
                                  BitTorrent_Bencoding_Scanner,
-                                 struct Common_ScannerState,
+                                 struct Common_FlexScannerState,
                                  yy::BitTorrent_Bencoding_Parser,
                                  BitTorrent_Bencoding_IParser,
-                                 std::string> inherited;
+                                 BitTorrent_Bencoding_IParser> inherited;
 
  public:
   BitTorrent_Bencoding_ParserDriver (bool,  // debug scanning ?
@@ -56,12 +56,12 @@ class BitTorrent_Bencoding_ParserDriver
   inline virtual ~BitTorrent_Bencoding_ParserDriver () {}
 
   // convenient types
-  typedef Common_CppParserBase_T<struct Common_ParserConfiguration,
+  typedef Common_CppParserBase_T<struct Common_FlexBisonParserConfiguration,
                                  BitTorrent_Bencoding_Scanner,
-                                 struct Common_ScannerState,
+                                 struct Common_FlexScannerState,
                                  yy::BitTorrent_Bencoding_Parser,
                                  BitTorrent_Bencoding_IParser,
-                                 std::string> PARSER_BASE_T;
+                                 BitTorrent_Bencoding_IParser> PARSER_BASE_T;
 
   // implement (part of) BitTorrent_Bencoding_IParser
   using PARSER_BASE_T::buffer;

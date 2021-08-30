@@ -72,12 +72,12 @@ class BitTorrent_Bencoding_Scanner
   // *NOTE*: to be invoked by the scanner (ONLY !)
   inline virtual void offset (unsigned int offset_in) { ACE_ASSERT (parser_); parser_->offset (offset_in); }
   inline virtual void error (const std::string& errorString_in) { ACE_ASSERT (parser_); parser_->error (yy::location (), errorString_in); }
-  inline virtual const struct Common_ScannerState& getR () const { return state_; }
+  inline virtual const struct Common_FlexScannerState& getR () const { return state_; }
   inline virtual const BitTorrent_Bencoding_IParser* const getP_2 () const { return parser_; }
   inline virtual void setP (BitTorrent_Bencoding_IParser* parser_in) { parser_ = parser_in; }
   inline virtual void debug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void reset () { inherited::yylineno = 1; }
-  inline virtual bool initialize (yyscan_t&, struct Common_ScannerState*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual bool initialize (yyscan_t&, BitTorrent_Bencoding_IParser*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool lex () {ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual struct yy_buffer_state* create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
@@ -93,8 +93,8 @@ class BitTorrent_Bencoding_Scanner
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_Scanner (const BitTorrent_Bencoding_Scanner&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_Scanner& operator= (const BitTorrent_Bencoding_Scanner&))
 
-  BitTorrent_Bencoding_IParser* parser_;
-  struct Common_ScannerState    state_;
+  BitTorrent_Bencoding_IParser*  parser_;
+  struct Common_FlexScannerState state_;
 };
 
 #endif

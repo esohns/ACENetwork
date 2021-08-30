@@ -31,18 +31,18 @@
 #include "common_parser_common.h"
 
 class BitTorrent_Bencoding_IParser
- : public Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+ : public Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
                                      struct Bencoding_Element>
- , virtual public Common_ILexScanner_T<struct Common_ScannerState,
+ , virtual public Common_ILexScanner_T<struct Common_FlexScannerState,
                                        BitTorrent_Bencoding_IParser>
 // , public Common_IGet_T<Bencoding_Dictionary_t>
 // , public Common_IGet_T<Bencoding_List_t>
 {
  public:
   // convenient types
-  typedef Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+  typedef Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
                                      struct Bencoding_Element> IPARSER_T;
-  typedef Common_ILexScanner_T<struct Common_ScannerState,
+  typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                                BitTorrent_Bencoding_IParser> ISCANNER_T;
 
   using IPARSER_T::error;
@@ -58,16 +58,16 @@ class BitTorrent_Bencoding_IParser
 
 template <typename RecordType>
 class BitTorrent_IParser_T
- : public Common_IYaccStreamParser_T<struct Common_ParserConfiguration,
+ : public Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
                                      RecordType>
- , virtual public Common_ILexScanner_T<struct Common_ScannerState,
+ , virtual public Common_ILexScanner_T<struct Common_FlexScannerState,
                                        BitTorrent_IParser_T<RecordType> >
 {
  public:
   // convenient types
-  typedef Common_IYaccStreamParser_T<struct Common_ParserConfiguration,
+  typedef Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
                                      RecordType> IPARSER_T;
-  typedef Common_ILexScanner_T<struct Common_ScannerState,
+  typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                                BitTorrent_IParser_T<RecordType> > ISCANNER_T;
 
   using IPARSER_T::error;
@@ -81,11 +81,11 @@ class BitTorrent_IParser_T
 
 //////////////////////////////////////////
 
-typedef Common_ILexScanner_T<struct Common_ScannerState,
+typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                              BitTorrent_Bencoding_IParser> BitTorrent_Bencoding_IScanner_t;
 
 typedef BitTorrent_IParser_T<struct BitTorrent_PeerRecord> BitTorrent_IParser_t;
-typedef Common_ILexScanner_T<struct Common_ScannerState,
+typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                              BitTorrent_IParser_t> BitTorrent_IScanner_t;
 
 #endif

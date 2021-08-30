@@ -78,7 +78,7 @@ DHCP_ParserDriver::~DHCP_ParserDriver ()
 }
 
 bool
-DHCP_ParserDriver::initialize (const struct Common_ParserConfiguration& configuration_in)
+DHCP_ParserDriver::initialize (const struct Common_FlexBisonParserConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_ParserDriver::initialize"));
 
@@ -106,7 +106,7 @@ DHCP_ParserDriver::initialize (const struct Common_ParserConfiguration& configur
   } // end IF
 
   configuration_ =
-      &const_cast<struct Common_ParserConfiguration&> (configuration_in);
+      &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
   trace_ = configuration_->debugScanner;
 
   messageQueue_ = configuration_->messageQueue;

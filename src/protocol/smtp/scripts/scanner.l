@@ -6,20 +6,27 @@
 yy::SMTP_Parser::token_type                                     \
 SMTP_Scanner_lex (yy::SMTP_Parser::semantic_type* yylval_param, \
                   yy::SMTP_Parser::location_type* yylloc_param, \
-                  SMTP_ParserDriver* driver,                    \
+                  SMTP_IParser* driver,                         \
                   yyscan_t yyscanner) */
 /* yytokentype */
-#define YY_DECL                              \
-int                                          \
-SMTP_Scanner_lex (YYSTYPE* yylval_param,     \
-                  YYLTYPE* yylloc_param,     \
-                  SMTP_ParserDriver* driver, \
+#define YY_DECL                          \
+int                                      \
+SMTP_Scanner_lex (YYSTYPE* yylval_param, \
+                  YYLTYPE* yylloc_param, \
+                  SMTP_IParser* driver,  \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 extern YY_DECL;
 
-extern int SMTP_Scanner_reset (yyscan_t);
-extern void SMTP_Scanner_set_column (int, yyscan_t);
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+int SMTP_Scanner_reset (yyscan_t);
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+//extern void SMTP_Scanner_set_column (int, yyscan_t);
 
 //using namespace yy;
 //#define YYLTYPE SMTP_Parser::location_type
@@ -35,7 +42,7 @@ extern void SMTP_Scanner_set_column (int, yyscan_t);
 #include "net_macros.h"
 
 #include "smtp_common.h"
-#include "smtp_parser_driver.h"
+#include "smtp_iparser.h"
 
 /* *NOTE*: instead of the default (int), this yylex returns token_type.
            Unfortunately, yyterminate by default returns 0, which is not of
@@ -67,7 +74,7 @@ extern void SMTP_Scanner_set_column (int, yyscan_t);
 /* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
                      ansi-definitions, ansi-prototypes, header-file extra-type'
 */
-%option extra-type="SMTP_ParserDriver*"
+%option extra-type="SMTP_IParser*"
 /* %option nounput */
 
 /* *NOTE*: see RFC 1531 page 13ff. */
@@ -98,7 +105,6 @@ SPACE          \x20
 %%
 %{
   //yylloc->step ();
-  yy_flex_debug = driver->getDebugScanner ();
   std::istringstream converter;
 %}
 
@@ -109,7 +115,7 @@ SPACE          \x20
                              yyless (0); }
 } // end <INITIAL>
 <reply_code>{
-{DIGIT}{3}                 { driver->offset_ += yyleng;
+{DIGIT}{3}                 { driver->offset (yyleng);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
@@ -120,16 +126,16 @@ SPACE          \x20
 } // end <reply_code>
 <text_begin>{
 {CRLF}                     { // *NOTE*: this is a protocol violation
-                             driver->offset_ += yyleng;
+                             driver->offset (yyleng);
                              return yytokentype::REPLY;
                              /* return yy::SMTP_Parser::token::REPLY; */ }
-{MINUS}                    { driver->offset_ += yyleng;
+{MINUS}                    { driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              BEGIN(multiline_text);
                            }
-{SPACE}                    { driver->offset_ += yyleng;
+{SPACE}                    { driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -137,21 +143,21 @@ SPACE          \x20
                            }
 } // end <text_begin>
 <multiline_text>{
-{CRLF}                     { driver->offset_ += yyleng;
+{CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY_TEXT;
                              /* return yy::SMTP_Parser::token::REPLY_TEXT; */ }
-{OCTET}*/{CRLF}            { driver->offset_ += yyleng;
+{OCTET}*/{CRLF}            { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                            }
 } // end <multiline_text>
 <text>{
-{CRLF}                     { driver->offset_ += yyleng;
+{CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY;
                              /* return yy::SMTP_Parser::token::REPLY; */ }
-{OCTET}*/{CRLF}            { driver->offset_ += yyleng;
+{OCTET}*/{CRLF}            { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT;
@@ -163,7 +169,7 @@ SPACE          \x20
                              ACE_ASSERT (false);
 
                              // debug info
-                             std::string error_message =
+                             std::string error_messa  ge =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");
                              error_message += yytext[0];
                              error_message += ACE_TEXT_ALWAYS_CHAR ("\", aborting");
@@ -171,19 +177,84 @@ SPACE          \x20
                              yyterminate(); }
 %%
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
 int
 SMTP_Scanner_reset (yyscan_t yyscanner)
 {
   NETWORK_TRACE (ACE_TEXT ("::SMTP_Scanner_reset"));
 
   struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  SMTP_ParserDriver* driver = SMTP_Scanner_get_extra (yyscanner);
-
-  // sanity check(s)
-  ACE_ASSERT (driver);
-  ACE_ASSERT (driver->fragment_);
+  SMTP_IParser* driver_p = SMTP_Scanner_get_extra (yyscanner);
+  ACE_ASSERT (driver_p);
 
   BEGIN(INITIAL);
 
   return 0;
 }
+
+int
+SMTP_Scanner_wrap (yyscan_t yyscanner)
+{
+  NETWORK_TRACE (ACE_TEXT ("::SMTP_Scanner_wrap"));
+
+  // sanity check(s)
+  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+  ACE_ASSERT (yyg);
+  SMTP_IParser* driver_p = SMTP_Scanner_get_extra (yyscanner);
+  ACE_ASSERT (driver_p);
+
+  if (!driver_p->isBlocking ())
+    return 1; // not enough data, cannot proceed
+//  if (driver_p->hasFinished ())
+//  {
+//    BEGIN(INITIAL);
+7/    return 1; // done
+77  } // end IF
+
+  // *NOTE*: there is more data
+  // 1. gobble/save the rest
+  // 2. switch buffers
+  // 3. unput the rest
+  // 4. continue scanning
+
+  // step1
+  //std::string the_rest;
+  //the_rest.append (yytext, yyleng);
+//  for (char c = yyinput (yyscanner);
+//       c != EOF;
+//       c = yyinput (yyscanner));
+  //yyg->yy_c_buf_p += yyleng;
+  //yyg->yy_hold_char = *yyg->yy_c_buf_p;
+  //if (yy_flex_debug)
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("the rest: \"%s\" (%d byte(s))\n"),
+  //              ACE_TEXT (the_rest.c_str ()),
+  //              the_rest.size ()));
+
+  // step2
+  if (!driver_p->switchBuffer ())
+  {
+    // *NOTE*: most probable reason: received session end message
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
+    return 1;
+  } // end IF
+
+  // step3
+  //for (std::string::reverse_iterator iterator = the_rest.rbegin ();
+  //     iterator != the_rest.rend ();
+  //     ++iterator)
+  //  unput (*iterator);
+
+  // step4
+  //yyg->yy_did_buffer_switch_on_eof = 1;
+  // yymore ();
+
+  return 0;
+}
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */

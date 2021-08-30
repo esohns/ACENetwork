@@ -44,18 +44,18 @@ typedef std::vector<struct M3U_Element> M3U_Playlist_t;
 typedef M3U_Playlist_t::const_iterator M3U_PlaylistIterator_t;
 
 class M3U_IParser
- : public Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+ : public Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
                                      M3U_Playlist_t>
- , virtual public Common_ILexScanner_T<struct Common_ScannerState,
+ , virtual public Common_ILexScanner_T<struct Common_FlexScannerState,
                                        M3U_IParser>
  , public Common_ISetP_T<M3U_Playlist_t>
  , public Common_ISetP_2_T<struct M3U_Element>
 {
  public:
   // convenient types
-  typedef Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+  typedef Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
                                      M3U_Playlist_t> IPARSER_T;
-  typedef Common_ILexScanner_T<struct Common_ScannerState,
+  typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                                M3U_IParser> ISCANNER_T;
 
   using IPARSER_T::error;
@@ -69,7 +69,7 @@ class M3U_IParser
 ////////////////////////////////////////////
 
 typedef M3U_IParser M3U_IParser_t;
-typedef Common_ILexScanner_T<struct Common_ScannerState,
+typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                              M3U_IParser_t> M3U_IScanner_t;
 
 #endif

@@ -35,25 +35,25 @@
 #include "bittorrent_scanner.h"
 
 class BitTorrent_ParserDriver
- : public Common_ParserBase_T<struct Common_ParserConfiguration,
+ : public Common_ParserBase_T<struct Common_FlexBisonParserConfiguration,
                               yy::BitTorrent_Parser,
                               BitTorrent_IParser_t,
-                              std::string>
+                              BitTorrent_IParser_t>
 {
-  typedef Common_ParserBase_T<struct Common_ParserConfiguration,
+  typedef Common_ParserBase_T<struct Common_FlexBisonParserConfiguration,
                               yy::BitTorrent_Parser,
                               BitTorrent_IParser_t,
-                              std::string> inherited;
+                              BitTorrent_IParser_t> inherited;
 
  public:
   BitTorrent_ParserDriver ();
   inline virtual ~BitTorrent_ParserDriver () {}
 
   // convenient types
-  typedef Common_ParserBase_T<struct Common_ParserConfiguration,
+  typedef Common_ParserBase_T<struct Common_FlexBisonParserConfiguration,
                               yy::BitTorrent_Parser,
                               BitTorrent_IParser_t,
-                              std::string> PARSER_BASE_T;
+                              BitTorrent_IParser_t> PARSER_BASE_T;
 
   // implement (part of) BitTorrent_IParser
   using PARSER_BASE_T::initialize;
@@ -84,12 +84,12 @@ class BitTorrent_ParserDriver
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver& operator= (const BitTorrent_ParserDriver&))
 
   // implement Common_ILexScanner_T
-  inline virtual const Common_ScannerState& getR () const { static Common_ScannerState dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
+  inline virtual const Common_FlexScannerState& getR () const { static Common_FlexScannerState dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
   inline virtual const BitTorrent_IParser_t* const getP () const { return this; }
   inline virtual void setP (BitTorrent_IParser_t*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { BitTorrent_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); }
-  inline virtual void reset () { BitTorrent_Scanner_set_lineno (1, inherited::scannerState_.lexState); BitTorrent_Scanner_set_column (1, inherited::scannerState_.lexState); }
-  virtual bool initialize (yyscan_t&, struct Common_ScannerState*);
+  inline virtual void reset () { BitTorrent_Scanner_set_lineno (1, inherited::scannerState_.context); BitTorrent_Scanner_set_column (1, inherited::scannerState_.context); }
+  virtual bool initialize (yyscan_t&, BitTorrent_IParser_t*);
   inline virtual void finalize (yyscan_t& state_inout) { int result = BitTorrent_Scanner_lex_destroy (state_inout); ACE_UNUSED_ARG (result); state_inout = NULL; }
   virtual struct yy_buffer_state* create (yyscan_t, // state handle
                                           char*,    // buffer handle

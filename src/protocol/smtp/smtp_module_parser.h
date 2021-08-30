@@ -28,8 +28,10 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_headmoduletask_base.h"
-#include "stream_task_base_synch.h"
 
+#include "stream_misc_parser.h"
+
+#include "smtp_common.h"
 #include "smtp_defines.h"
 #include "smtp_parser_driver.h"
 
@@ -48,24 +50,22 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType>
 class SMTP_Module_Parser_T
- : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+ : public Stream_Module_Parser_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
+                                 SMTP_ParserDriver_T<SessionMessageType>,
                                  struct Stream_UserData>
 {
-  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+  typedef Stream_Module_Parser_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
+                                 SMTP_ParserDriver_T<SessionMessageType>,
                                  struct Stream_UserData> inherited;
 
  public:
@@ -77,27 +77,13 @@ class SMTP_Module_Parser_T
 #endif // ACE_WIN32 || ACE_WIN64
   inline virtual ~SMTP_Module_Parser_T () {}
 
-  // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&,
-                           Stream_IAllocator* = NULL);
-
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);            // return value: pass message downstream ?
-  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
-                                     bool&);               // return value: pass message downstream ?
-
  private:
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_Parser_T (const SMTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_Parser_T& operator= (const SMTP_Module_Parser_T&))
 
-  // convenient types
-  typedef typename DataMessageType::DATA_T DATA_T;
-
-  // driver
-  SMTP_ParserDriver driver_;
-  bool              isDriverInitialized_;
+  // implement (part of) SMTP_IParser
+  virtual void record (struct SMTP_Record*&); // data record
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,76 +103,66 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename StatisticContainerType>
 class SMTP_Module_ParserH_T
- : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      Common_Timer_Manager_t,
-                                      struct Stream_UserData>
+ : public Stream_Module_ParserH_T<ACE_SYNCH_USE,
+                                  TimePolicyType,
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType,
+                                  ConfigurationType,
+                                  StreamControlType,
+                                  StreamNotificationType,
+                                  StreamStateType,
+                                  SessionDataType,
+                                  SessionDataContainerType,
+                                  StatisticContainerType,
+                                  Common_Timer_Manager_t,
+                                  struct Stream_UserData,
+                                  SMTP_ParserDriver_T<SessionMessageType> >
 {
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      Common_Timer_Manager_t,
-                                      struct Stream_UserData> inherited;
+  typedef Stream_Module_ParserH_T <ACE_SYNCH_USE,
+                                   TimePolicyType,
+                                   ControlMessageType,
+                                   DataMessageType,
+                                   SessionMessageType,
+                                   ConfigurationType,
+                                   StreamControlType,
+                                   StreamNotificationType,
+                                   StreamStateType,
+                                   SessionDataType,
+                                   SessionDataContainerType,
+                                   StatisticContainerType,
+                                   Common_Timer_Manager_t,
+                                   struct Stream_UserData,
+                                   SMTP_ParserDriver_T<SessionMessageType> > inherited;
 
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  SMTP_Module_ParserH_T (ISTREAM_T*,                     // stream handle
+  SMTP_Module_ParserH_T (ISTREAM_T*);                     // stream handle
 #else
-  SMTP_Module_ParserH_T (typename inherited::ISTREAM_T*, // stream handle
+  SMTP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle
 #endif // ACE_WIN32 || ACE_WIN64
-                         bool = false,                   // auto-start ?
-                         bool = true);                   // generate session messages ?
   inline virtual ~SMTP_Module_ParserH_T () {}
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                    TimePolicyType,
-                                    ControlMessageType,
-                                    DataMessageType,
-                                    SessionMessageType,
-                                    ConfigurationType,
-                                    StreamControlType,
-                                    StreamNotificationType,
-                                    StreamStateType,
-                                    SessionDataType,
-                                    SessionDataContainerType,
-                                    StatisticContainerType,
-                                    Common_Timer_Manager_t,
-                                    struct Stream_UserData>::initialize;
-
-  // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&,
-                           Stream_IAllocator* = NULL);
-
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);                // return value: pass message downstream ?
-  virtual void handleSessionMessage (SessionMessageType*&, // session message handle
-                                     bool&);               // return value: pass message downstream ?
+  using Stream_Module_ParserH_T<ACE_SYNCH_USE,
+                                TimePolicyType,
+                                ControlMessageType,
+                                DataMessageType,
+                                SessionMessageType,
+                                ConfigurationType,
+                                StreamControlType,
+                                StreamNotificationType,
+                                StreamStateType,
+                                SessionDataType,
+                                SessionDataContainerType,
+                                StatisticContainerType,
+                                Common_Timer_Manager_t,
+                                struct Stream_UserData,
+                                SMTP_ParserDriver_T<SessionMessageType> >::initialize;
 
   // implement Common_IStatistic
   // *NOTE*: this reuses the interface to implement timer-based data collection
@@ -198,13 +174,8 @@ class SMTP_Module_ParserH_T
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_ParserH_T (const SMTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_ParserH_T& operator= (const SMTP_Module_ParserH_T&))
 
-  // convenience types
-  //typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
-  typedef typename DataMessageType::DATA_T DATA_T;
-
-  // driver
-  SMTP_ParserDriver driver_;
-  bool              isDriverInitialized_;
+  // implement (part of) SMTP_IParser
+  virtual void record (struct SMTP_Record*&); // data record
 };
 
 // include template definition

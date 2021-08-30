@@ -72,6 +72,7 @@ set (source_files
      smtp_configuration.h
      smtp_defines.h
 #     smtp_exports.h
+     smtp_iparser.h
      smtp_message.cpp
      smtp_message.h
      smtp_message.inl
@@ -89,6 +90,7 @@ set (source_files
      smtp_parser.h
      smtp_parser_driver.cpp
      smtp_parser_driver.h
+     smtp_parser_driver.inl
      smtp_scanner.cpp
      smtp_scanner.h
      smtp_sessionmessage.cpp
@@ -176,6 +178,7 @@ install (FILES
          smtp_configuration.h
          smtp_defines.h
     #     smtp_exports.h
+         smtp_iparser.h
          smtp_message.h
          smtp_message.inl
          smtp_module_parser.h
@@ -187,6 +190,7 @@ install (FILES
          smtp_network.h
          smtp_parser.h
          smtp_parser_driver.h
+         smtp_parser_driver.inl
          smtp_scanner.h
          smtp_sessionmessage.h
          smtp_sessionmessage.inl

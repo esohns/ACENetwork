@@ -1,4 +1,4 @@
-﻿/***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -17,6 +17,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "stdafx.h"
 
-#include "smtp_parser_driver.h"
+#ifndef SMTP_IPARSER_H
+#define SMTP_IPARSER_H
+
+#include "common_parser_common.h"
+
+#include "common_iscanner.h"
+#include "common_iparser.h"
+
+#include "smtp_common.h"
+
+class SMTP_IParser
+ : public Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct SMTP_Record>
+ , public Common_ILexScanner_T<struct Common_FlexScannerState,
+                               SMTP_IParser>
+{
+ public:
+  // convenient types
+  typedef Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct SMTP_Record> IPARSER_T;
+
+  using IPARSER_T::error;
+};
+
+#endif

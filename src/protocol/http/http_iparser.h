@@ -31,14 +31,14 @@
 #include "http_common.h"
 
 class HTTP_IParser
- : public Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+ : public Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
                                      struct HTTP_Record>
- , public Common_ILexScanner_T<struct Common_ScannerState,
+ , public Common_ILexScanner_T<struct Common_FlexScannerState,
                                HTTP_IParser>
 {
  public:
   // convenient types
-  typedef Common_IYaccRecordParser_T<struct Common_ParserConfiguration,
+  typedef Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
                                      struct HTTP_Record> IPARSER_T;
 
   using IPARSER_T::error;

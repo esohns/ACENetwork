@@ -337,7 +337,7 @@ BitTorrent_Tools::MetaInfoToLength (const Bencoding_Dictionary_t& metaInfo_in)
 }
 
 bool
-BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& configuration_in,
+BitTorrent_Tools::parseMetaInfoFile (const struct Common_FlexBisonParserConfiguration& configuration_in,
                                      const std::string& metaInfoFileName_in,
                                      Bencoding_Dictionary_t*& metaInfo_out)
 {
@@ -354,7 +354,7 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   BitTorrent_Bencoding_ParserDriver parser (configuration_in.debugScanner,
                                             configuration_in.debugParser);
 
-  const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
+  const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in).block =
     false;
   if (!parser.initialize (configuration_in))
   {
@@ -362,7 +362,7 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
                 ACE_TEXT ("failed to initialize parser, aborting\n")));
     return false;
   } // end IF
-  const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
+  const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in).block =
     block_in_parse;
 
   // slurp the whole file

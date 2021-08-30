@@ -44,7 +44,7 @@ extern int yydebug;
 #include <cstdio>
 #include <string>
 
-class SMTP_ParserDriver;
+class SMTP_IParser;
 //class SMTP_Scanner;
 struct YYLTYPE;
 //union YYSTYPE;
@@ -60,8 +60,8 @@ typedef yytoken yytoken_t;
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
-extern void yyerror (YYLTYPE*, SMTP_ParserDriver*, yyscan_t, const char*);
-extern int yyparse (SMTP_ParserDriver*, yyscan_t);
+extern void yyerror (YYLTYPE*, SMTP_IParser*, yyscan_t, const char*);
+extern int yyparse (SMTP_IParser*, yyscan_t);
 
 #undef YYPRINT
 //extern void yyprint (FILE*, yytokentype, YYSTYPE);
@@ -114,6 +114,6 @@ struct YYLTYPE
 
 
 
-int yyparse (SMTP_ParserDriver* driver, yyscan_t yyscanner);
+int yyparse (SMTP_IParser* driver, yyscan_t yyscanner);
 
 #endif /* !YY_YY_SMTP_PARSER_H_INCLUDED  */

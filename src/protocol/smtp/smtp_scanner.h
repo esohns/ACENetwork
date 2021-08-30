@@ -9,20 +9,27 @@
 yy::SMTP_Parser::token_type                                     \
 SMTP_Scanner_lex (yy::SMTP_Parser::semantic_type* yylval_param, \
                   yy::SMTP_Parser::location_type* yylloc_param, \
-                  SMTP_ParserDriver* driver,                    \
+                  SMTP_IParser* driver,                         \
                   yyscan_t yyscanner) */
 /* yytokentype */
-#define YY_DECL                              \
-int                                          \
-SMTP_Scanner_lex (YYSTYPE* yylval_param,     \
-                  YYLTYPE* yylloc_param,     \
-                  SMTP_ParserDriver* driver, \
+#define YY_DECL                          \
+int                                      \
+SMTP_Scanner_lex (YYSTYPE* yylval_param, \
+                  YYLTYPE* yylloc_param, \
+                  SMTP_IParser* driver,  \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 extern YY_DECL;
 
-extern int SMTP_Scanner_reset (yyscan_t);
-extern void SMTP_Scanner_set_column (int, yyscan_t);
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+int SMTP_Scanner_reset (yyscan_t);
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+//extern void SMTP_Scanner_set_column (int, yyscan_t);
 
 //using namespace yy;
 //#define YYLTYPE SMTP_Parser::location_type
@@ -693,7 +700,7 @@ void yyfree ( void * , yyscan_t yyscanner );
 
 
 
-#define YY_EXTRA_TYPE SMTP_ParserDriver*
+#define YY_EXTRA_TYPE SMTP_IParser*
 
 
 /* %if-c-only Reentrant structure and macros (non-C++). */

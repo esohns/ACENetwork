@@ -110,13 +110,13 @@ struct IRC_Client_Configuration
   {}
 
   // ****************************** parser *************************************
-  struct Common_ParserConfiguration parserConfiguration;
+  struct Common_FlexBisonParserConfiguration parserConfiguration;
   // ****************************** socket *************************************
-  Net_ConnectionConfigurations_t    connectionConfigurations;
+  Net_ConnectionConfigurations_t             connectionConfigurations;
   // ****************************** stream *************************************
-  IRC_Client_StreamConfiguration_t  streamConfiguration;
+  IRC_Client_StreamConfiguration_t           streamConfiguration;
   // ***************************** protocol ************************************
-  struct IRC_ProtocolConfiguration  protocolConfiguration;
+  struct IRC_ProtocolConfiguration           protocolConfiguration;
   // ***************************************************************************
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)

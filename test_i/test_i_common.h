@@ -103,17 +103,17 @@ struct Test_I_Configuration
    , userData ()
   {}
 
-  struct Common_EventDispatchConfiguration dispatchConfiguration;
+  struct Common_EventDispatchConfiguration   dispatchConfiguration;
   // **************************** socket data **********************************
 //  Net_ConnectionConfigurations_t           connectionConfigurations;
   // **************************** parser data **********************************
-  struct Common_ParserConfiguration        parserConfiguration;
+  struct Common_FlexBisonParserConfiguration parserConfiguration;
   //// **************************** stream data **********************************
   //struct Test_I_StreamConfiguration        streamConfiguration;
   // **************************** signal data **********************************
-  struct Test_I_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct Test_I_SignalHandlerConfiguration   signalHandlerConfiguration;
 
-  struct Test_I_UserData                   userData;
+  struct Test_I_UserData                     userData;
 };
 
 //////////////////////////////////////////

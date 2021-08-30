@@ -48,9 +48,9 @@ class BitTorrent_Tools
   static std::string MetaInfoToInfoHash (const Bencoding_Dictionary_t&); // metainfo
   static unsigned int MetaInfoToLength (const Bencoding_Dictionary_t&); // metainfo
   // *IMPORTANT NOTE*: caller needs to free the return value (third argument)
-  static bool parseMetaInfoFile (const struct Common_ParserConfiguration&, // parser configuration
-                                 const std::string&,                       // metainfo (aka .bittorrent) file
-                                 Bencoding_Dictionary_t*&);                // return value: metainfo
+  static bool parseMetaInfoFile (const struct Common_FlexBisonParserConfiguration&, // parser configuration
+                                 const std::string&,                                // metainfo (aka .bittorrent) file
+                                 Bencoding_Dictionary_t*&);                         // return value: metainfo
 
   // *NOTE*: this follows the Azureus style (encode client and version
   //         information)

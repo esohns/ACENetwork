@@ -40,25 +40,25 @@ typedef void* yyscan_t;
 struct yy_buffer_state;
 
 class M3U_ParserDriver
- : public Common_ParserBase_T<struct Common_ParserConfiguration,
+ : public Common_ParserBase_T<struct Common_FlexBisonParserConfiguration,
                               yy::parser,
                               M3U_IParser_t,
-                              std::string>
+                              M3U_IParser_t>
 {
-  typedef Common_ParserBase_T<struct Common_ParserConfiguration,
+  typedef Common_ParserBase_T<struct Common_FlexBisonParserConfiguration,
                               yy::parser,
                               M3U_IParser_t,
-                              std::string> inherited;
+                              M3U_IParser_t> inherited;
 
  public:
   M3U_ParserDriver ();
   inline virtual ~M3U_ParserDriver () {}
 
   // convenient types
-  typedef Common_ParserBase_T<struct Common_ParserConfiguration,
+  typedef Common_ParserBase_T<struct Common_FlexBisonParserConfiguration,
                               yy::parser,
                               M3U_IParser_t,
-                              std::string> PARSER_BASE_T;
+                              M3U_IParser_t> PARSER_BASE_T;
 
   // implement (part of) Bencoding_IParser
   using PARSER_BASE_T::initialize;
@@ -92,8 +92,8 @@ class M3U_ParserDriver
   // implement Common_ILexScanner_T
   inline virtual const M3U_IParser_t* const getP_2 () const { return this; }
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { M3U_set_debug ((toggle_in ? 1 : 0), state_in); }
-  inline virtual void reset () { M3U_set_lineno (1, inherited::scannerState_.lexState); M3U_set_column (1, inherited::scannerState_.lexState); }
-  inline virtual bool initialize (yyscan_t& state_inout, struct Common_ScannerState* scannerState_in) { ACE_UNUSED_ARG (scannerState_in); return (M3U_lex_init_extra (this, &state_inout) == 0); }
+  inline virtual void reset () { M3U_set_lineno (1, inherited::scannerState_.context); M3U_set_column (1, inherited::scannerState_.context); }
+  inline virtual bool initialize (yyscan_t& state_inout, M3U_IParser_t* extra_in) { return (M3U_lex_init_extra (extra_in, &state_inout) == 0); }
   inline virtual void finalize (yyscan_t& state_inout) { int result = M3U_lex_destroy (state_inout); ACE_UNUSED_ARG (result); state_inout = NULL; }
   virtual struct yy_buffer_state* create (yyscan_t, // state handle
                                           char*,    // buffer handle

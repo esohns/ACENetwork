@@ -268,7 +268,7 @@ struct DHCPClient_Configuration
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t               connectionConfigurations;
   // **************************** parser data **********************************
-  struct Common_ParserConfiguration            parserConfiguration;
+  struct Common_FlexBisonParserConfiguration   parserConfiguration;
   // **************************** stream data **********************************
   DHCPClient_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************

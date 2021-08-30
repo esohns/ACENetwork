@@ -5,20 +5,27 @@
 yy::SMTP_Parser::token_type                                     \
 SMTP_Scanner_lex (yy::SMTP_Parser::semantic_type* yylval_param, \
                   yy::SMTP_Parser::location_type* yylloc_param, \
-                  SMTP_ParserDriver* driver,                    \
+                  SMTP_IParser* driver,                         \
                   yyscan_t yyscanner) */
 /* yytokentype */
-#define YY_DECL                              \
-int                                          \
-SMTP_Scanner_lex (YYSTYPE* yylval_param,     \
-                  YYLTYPE* yylloc_param,     \
-                  SMTP_ParserDriver* driver, \
+#define YY_DECL                          \
+int                                      \
+SMTP_Scanner_lex (YYSTYPE* yylval_param, \
+                  YYLTYPE* yylloc_param, \
+                  SMTP_IParser* driver,  \
                   yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 extern YY_DECL;
 
-extern int SMTP_Scanner_reset (yyscan_t);
-extern void SMTP_Scanner_set_column (int, yyscan_t);
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+int SMTP_Scanner_reset (yyscan_t);
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+//extern void SMTP_Scanner_set_column (int, yyscan_t);
 
 //using namespace yy;
 //#define YYLTYPE SMTP_Parser::location_type
@@ -1895,7 +1902,7 @@ static const yy_state_type yy_NUL_trans[33] =
 
 static const flex_int32_t yy_rule_linenum[11] =
     {   0,
-      107,  113,  123,  127,  133,  141,  145,  151,  155,  162
+      113,  119,  129,  133,  139,  147,  151,  157,  161,  168
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1914,7 +1921,7 @@ static const flex_int32_t yy_rule_linenum[11] =
 #include "net_macros.h"
 
 #include "smtp_common.h"
-#include "smtp_parser_driver.h"
+#include "smtp_iparser.h"
 
 /* *NOTE*: instead of the default (int), this yylex returns token_type.
            Unfortunately, yyterminate by default returns 0, which is not of
@@ -1979,7 +1986,7 @@ static const flex_int32_t yy_rule_linenum[11] =
 
 
 
-#define YY_EXTRA_TYPE SMTP_ParserDriver*
+#define YY_EXTRA_TYPE SMTP_IParser*
 
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
@@ -2400,7 +2407,6 @@ YY_DECL
 
 
   //yylloc->step ();
-  yy_flex_debug = driver->getDebugScanner ();
   std::istringstream converter;
 
 
@@ -2496,7 +2502,7 @@ YY_RULE_SETUP
 
 case 2:
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
+{ driver->offset (yyleng);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
@@ -2511,13 +2517,13 @@ case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
 { // *NOTE*: this is a protocol violation
-                             driver->offset_ += yyleng;
+                             driver->offset (yyleng);
                              return yytokentype::REPLY;
                              /* return yy::SMTP_Parser::token::REPLY; */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
+{ driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -2526,7 +2532,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
+{ driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -2538,7 +2544,7 @@ YY_RULE_SETUP
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
+{ driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY_TEXT;
                              /* return yy::SMTP_Parser::token::REPLY_TEXT; */ }
@@ -2550,7 +2556,7 @@ YY_LINENO_REWIND_TO(yy_cp - 2);
 yyg->yy_c_buf_p = yy_cp -= 2;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
+{ driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                            }
@@ -2560,7 +2566,7 @@ YY_RULE_SETUP
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
+{ driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY;
                              /* return yy::SMTP_Parser::token::REPLY; */ }
@@ -2572,7 +2578,7 @@ YY_LINENO_REWIND_TO(yy_cp - 2);
 yyg->yy_c_buf_p = yy_cp -= 2;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-{ driver->offset_ += yyleng;
+{ driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT;
@@ -4010,20 +4016,86 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
 int
 SMTP_Scanner_reset (yyscan_t yyscanner)
 {
   NETWORK_TRACE (ACE_TEXT ("::SMTP_Scanner_reset"));
 
-  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  SMTP_ParserDriver* driver = SMTP_Scanner_get_extra (yyscanner);
-
   // sanity check(s)
-  ACE_ASSERT (driver);
-  ACE_ASSERT (driver->fragment_);
+  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+  SMTP_IParser* driver_p = SMTP_Scanner_get_extra (yyscanner);
+  ACE_ASSERT (driver_p);
 
   BEGIN(INITIAL);
 
   return 0;
 }
+
+int
+SMTP_Scanner_wrap (yyscan_t yyscanner)
+{
+  NETWORK_TRACE (ACE_TEXT ("::SMTP_Scanner_wrap"));
+
+  // sanity check(s)
+  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+  ACE_ASSERT (yyg);
+  SMTP_IParser* driver_p = SMTP_Scanner_get_extra (yyscanner);
+  ACE_ASSERT (driver_p);
+
+  if (!driver_p->isBlocking ())
+    return 1; // not enough data, cannot proceed
+  //if (driver_p->hasFinished ())
+  //{
+  //  BEGIN(INITIAL);
+  //  return 1; // done
+  //} // end IF
+
+  // *NOTE*: there is more data
+  // 1. gobble/save the rest
+  // 2. switch buffers
+  // 3. unput the rest
+  // 4. continue scanning
+
+  // step1
+  //std::string the_rest;
+  //the_rest.append (yytext, yyleng);
+//  for (char c = yyinput (yyscanner);
+//       c != EOF;
+//       c = yyinput (yyscanner));
+  //yyg->yy_c_buf_p += yyleng;
+  //yyg->yy_hold_char = *yyg->yy_c_buf_p;
+  //if (yy_flex_debug)
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("the rest: \"%s\" (%d byte(s))\n"),
+  //              ACE_TEXT (the_rest.c_str ()),
+  //              the_rest.size ()));
+
+  // step2
+  if (!driver_p->switchBuffer ())
+  {
+    // *NOTE*: most probable reason: received session end message
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
+    return 1;
+  } // end IF
+
+  // step3
+  //for (std::string::reverse_iterator iterator = the_rest.rbegin ();
+  //     iterator != the_rest.rend ();
+  //     ++iterator)
+  //  unput (*iterator);
+
+  // step4
+  //yyg->yy_did_buffer_switch_on_eof = 1;
+  // yymore ();
+
+  return 0;
+}
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 

@@ -56,7 +56,7 @@ class HTTP_ParserDriver_T
   virtual ~HTTP_ParserDriver_T ();
 
   // implement (part of) HTTP_IParser
-  virtual bool initialize (const struct Common_ParserConfiguration&);
+  virtual bool initialize (const struct Common_FlexBisonParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
   inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); }
   inline virtual bool isBlocking () const { return blockInParse_; }
@@ -82,23 +82,23 @@ class HTTP_ParserDriver_T
   virtual void dump_state () const;
 
  protected:
-  struct Common_ParserConfiguration* configuration_;
-  bool                               finished_; // processed the whole entity ?
-  ACE_Message_Block*                 fragment_;
-  unsigned int                       offset_; // parsed entity bytes
-  struct HTTP_Record*                record_;
-  bool                               trace_;
+  struct Common_FlexBisonParserConfiguration* configuration_;
+  bool                                        finished_; // processed the whole entity ?
+  ACE_Message_Block*                          fragment_;
+  unsigned int                                offset_; // parsed entity bytes
+  struct HTTP_Record*                         record_;
+  bool                                        trace_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T (const HTTP_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T& operator= (const HTTP_ParserDriver_T&))
 
-  inline virtual const Common_ScannerState& getR () const { static Common_ScannerState dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
+  inline virtual const Common_FlexScannerState& getR () const { static Common_FlexScannerState dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
   inline virtual void setP (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { HTTP_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); }
   inline virtual void reset () { HTTP_Scanner_set_lineno (1, scannerState_); HTTP_Scanner_set_column (1, scannerState_); }
-  inline virtual bool initialize (yyscan_t&, struct Common_ScannerState*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual bool initialize (yyscan_t&, HTTP_IParser* extra_in) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual YY_BUFFER_STATE create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

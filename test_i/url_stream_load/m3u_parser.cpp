@@ -639,7 +639,7 @@ namespace yy {
         try
 #endif // YY_EXCEPTIONS
           {
-            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location, iparser, iscanner->getR ().lexState));
+            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location, iparser, iscanner->getR ().context));
           }
 #if YY_EXCEPTIONS
         catch (const syntax_error& yyexc)
