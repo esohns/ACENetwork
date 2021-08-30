@@ -121,10 +121,7 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
 #else
                       StatisticContainerType>::SMTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
- : inherited (stream_in,
-              false,
-              STREAM_HEADMODULECONCURRENCY_CONCURRENT,
-              true)
+ : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::SMTP_Module_ParserH_T"));
 

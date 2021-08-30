@@ -65,7 +65,10 @@ class SMTP_ParserDriver_T
   // implement Common_IYaccStreamParser_T
   inline virtual struct SMTP_Record& current () { ACE_ASSERT (record_); return *record_; }
   ////////////////////////////////////////
-  virtual void record (struct SMTP_Record*&); // data record
+  //virtual void record (struct SMTP_Record*&); // data record
+
+  // *TODO*: remove ASAP
+  inline virtual bool hasFinished () const { return true; }
 
   // implement Common_IScannerBase
   void error (const std::string&); // message
