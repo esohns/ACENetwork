@@ -48,6 +48,15 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
+//struct SMTP_MessageData
+// : SMTP_Record
+//{
+//  //SMTP_MessageData ()
+//  //  : SMTP_Record ()
+//  //{}
+//  //~SMTP_MessageData () {}
+//};
+typedef Stream_DataBase_T<struct SMTP_Record> SMTP_MessageData_t;
 struct SMTP_Stream_SessionData;
 typedef Stream_SessionData_T<struct SMTP_Stream_SessionData> SMTP_Stream_SessionData_t;
 template <//typename AllocatorType,
@@ -59,11 +68,11 @@ class SMTP_SessionMessage_T;
 
 template <typename MessageType = enum Stream_MessageType>
 class SMTP_Message_T
- : public Stream_DataMessageBase_T<struct SMTP_Record,
+ : public Stream_DataMessageBase_2<SMTP_MessageData_t,
                                    MessageType,
                                    SMTP_Code_t>
 {
-  typedef Stream_DataMessageBase_T<struct SMTP_Record,
+  typedef Stream_DataMessageBase_2<SMTP_MessageData_t,
                                    MessageType,
                                    SMTP_Code_t> inherited;
 

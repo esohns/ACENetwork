@@ -21,10 +21,15 @@
 #ifndef SMTP_STREAM_COMMON_H
 #define SMTP_STREAM_COMMON_H
 
+#include "ace/INET_Addr.h"
+
 #include "stream_common.h"
 #include "stream_configuration.h"
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
+
+#include "net_common.h"
+#include "net_iconnection.h"
 
 #include "smtp_common.h"
 #include "smtp_configuration.h"
@@ -32,28 +37,24 @@
 #include "smtp_sessionmessage.h"
 #include "smtp_stream.h"
 
-struct SMTP_MessageData
-  : SMTP_Record
-{
-  //SMTP_MessageData ()
-  //  : SMTP_Record ()
-  //{}
-  //~SMTP_MessageData () {}
-};
-typedef Stream_DataBase_T<struct SMTP_MessageData> SMTP_MessageData_t;
+// forward declarations
+struct SMTP_ConnectionState;
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          struct SMTP_ConnectionState,
+                          struct Net_StreamStatistic> SMTP_IConnection_t;
 
 struct SMTP_Stream_SessionData
  : Stream_SessionData
 {
   SMTP_Stream_SessionData ()
    : Stream_SessionData ()
-   , connectionState (NULL)
+   , connection (NULL)
    , statistic ()
   {}
 
-  struct SMTP_ConnectionState* connectionState;
+  SMTP_IConnection_t* connection;
 
-  SMTP_Statistic_t             statistic;
+  SMTP_Statistic_t    statistic;
 };
 typedef Stream_SessionData_T<struct SMTP_Stream_SessionData> SMTP_Stream_SessionData_t;
 
@@ -77,7 +78,7 @@ struct SMTP_StreamState
 };
 
 typedef SMTP_Stream_T<struct SMTP_StreamState,
-                      SMTP_StreamConfiguration_t,
+                      struct SMTP_StreamConfiguration,
                       SMTP_Statistic_t,
                       SMTP_StatisticHandler_t,
                       struct SMTP_ModuleHandlerConfiguration,

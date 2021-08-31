@@ -48,6 +48,6 @@
 #define SMTP_DEFAULT_PRINT_PROGRESSDOT                    false
 
 // protocol
-#define SMTP_DEFAULT_SERVER_PORT                          537 // TCP
+#define SMTP_DEFAULT_SERVER_PORT                          25 // TCP
 
 #endif

@@ -72,19 +72,33 @@ SMTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (headFragment_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
+  typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
 
-  headFragment_->initialize (*record_inout,
+  ACE_NEW_NORETURN (data_container_p,
+                    typename DataMessageType::DATA_T ());
+  if (!data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    delete record_inout; record_inout = NULL;
+    return;
+  } // end IF
+  data_container_p->setPR (record_inout);
+  ACE_ASSERT (!record_inout);
+  data_container_2 = data_container_p;
+  headFragment_->initialize (data_container_2,
                              headFragment_->sessionId (),
                              NULL);
-  delete record_inout; record_inout = NULL;
 
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
   message_p = static_cast<DataMessageType*> (headFragment_->cont ());
   while (message_p)
   {
-    message_p->initialize (const_cast<typename DataMessageType::DATA_T&> (headFragment_->getR ()),
+    data_container_p->increase ();
+    data_container_2 = data_container_p;
+    message_p->initialize (data_container_2,
                            headFragment_->sessionId (),
                            NULL);
     message_p = static_cast<DataMessageType*> (message_p->cont ());
@@ -161,19 +175,33 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_ASSERT (headFragment_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
+  typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
 
-  headFragment_->initialize (*record_inout,
+  ACE_NEW_NORETURN (data_container_p,
+                    typename DataMessageType::DATA_T ());
+  if (!data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    delete record_inout; record_inout = NULL;
+    return;
+  } // end IF
+  data_container_p->setPR (record_inout);
+  ACE_ASSERT (!record_inout);
+  data_container_2 = data_container_p;
+  headFragment_->initialize (data_container_2,
                              headFragment_->sessionId (),
                              NULL);
-  delete record_inout; record_inout = NULL;
 
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
   message_p = static_cast<DataMessageType*> (headFragment_->cont ());
   while (message_p)
   {
-    message_p->initialize (const_cast<typename DataMessageType::DATA_T&> (headFragment_->getR ()),
+    data_container_p->increase ();
+    data_container_2 = data_container_p;
+    message_p->initialize (data_container_2,
                            headFragment_->sessionId (),
                            NULL);
     message_p = static_cast<DataMessageType*> (message_p->cont ());

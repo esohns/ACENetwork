@@ -76,8 +76,9 @@ SMTP_Message_T<MessageType>::command () const
   // sanity check(s)
   if (!inherited::isInitialized_)
     return SMTP_Codes::SMTP_CODE_INVALID;
+  ACE_ASSERT (inherited::data_);
 
-  return inherited::data_.code;
+  return inherited::data_->getR ().code;
 }
 
 template <typename MessageType>
@@ -109,9 +110,10 @@ SMTP_Message_T<MessageType>::dump_state () const
               inherited::id (),
               inherited::total_length (),
               ACE_TEXT (info.c_str ())));
-  ACE_DEBUG ((LM_INFO,
-              ACE_TEXT ("\n%s"),
-              ACE_TEXT (SMTP_Tools::dump (inherited::data_).c_str ())));
+  if (inherited::data_)
+    ACE_DEBUG ((LM_INFO,
+                ACE_TEXT ("\n%s"),
+                ACE_TEXT (SMTP_Tools::dump (inherited::data_->getR ()).c_str ())));
 }
 
 template <typename MessageType>

@@ -45,15 +45,8 @@
 #include "smtp_configuration.h"
 #include "smtp_stream_common.h"
 
-class SMTP_ConnectionConfiguration
- : public Net_StreamConnectionConfiguration_T<SMTP_StreamConfiguration_t,
-                                              NET_TRANSPORTLAYER_TCP>
-{
- public:
-  SMTP_ConnectionConfiguration ()
-   : Net_StreamConnectionConfiguration_T ()
-  {}
-};
+typedef Net_StreamConnectionConfiguration_T<SMTP_StreamConfiguration_t,
+                                            NET_TRANSPORTLAYER_TCP> SMTP_ConnectionConfiguration_t;
 
 struct SMTP_ConnectionState
  : Net_StreamConnectionState
@@ -72,12 +65,12 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           struct SMTP_ConnectionState,
                           struct Net_StreamStatistic> SMTP_IConnection_t;
 typedef Net_ISocketConnection_T<ACE_INET_Addr,
-                                SMTP_ConnectionConfiguration,
+                                SMTP_ConnectionConfiguration_t,
                                 struct SMTP_ConnectionState,
                                 struct Net_StreamStatistic,
                                 struct SMTP_SocketHandlerConfiguration> SMTP_ISocketConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
-                                SMTP_ConnectionConfiguration,
+                                SMTP_ConnectionConfiguration_t,
                                 struct SMTP_ConnectionState,
                                 struct Net_StreamStatistic,
                                 Net_TCPSocketConfiguration_t,
@@ -86,7 +79,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_TCPSocketHandler_t,
-                                SMTP_ConnectionConfiguration,
+                                SMTP_ConnectionConfiguration_t,
                                 struct SMTP_ConnectionState,
                                 struct Net_StreamStatistic,
                                 SMTP_Stream_t,
@@ -94,7 +87,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
 #if defined (SSL_SUPPORT)
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_SSLSocketHandler_t,
-                                SMTP_ConnectionConfiguration,
+                                SMTP_ConnectionConfiguration_t,
                                 struct SMTP_ConnectionState,
                                 struct Net_StreamStatistic,
                                 SMTP_Stream_t,
@@ -102,7 +95,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
 #endif // SSL_SUPPORT
 
 typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
-                                      SMTP_ConnectionConfiguration,
+                                      SMTP_ConnectionConfiguration_t,
                                       struct SMTP_ConnectionState,
                                       struct Net_StreamStatistic,
                                       SMTP_Stream_t,
@@ -111,13 +104,13 @@ typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
 /////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         SMTP_ConnectionConfiguration> SMTP_IConnector_t;
+                         SMTP_ConnectionConfiguration_t> SMTP_IConnector_t;
 
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                SMTP_Connection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
-                               SMTP_ConnectionConfiguration,
+                               SMTP_ConnectionConfiguration_t,
                                struct SMTP_ConnectionState,
                                struct Net_StreamStatistic,
                                Net_TCPSocketConfiguration_t,
@@ -126,7 +119,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
 #if defined (SSL_SUPPORT)
 typedef Net_Client_SSL_Connector_T<SMTP_SSLConnection_t,
                                    ACE_SSL_SOCK_Connector,
-                                   SMTP_ConnectionConfiguration,
+                                   SMTP_ConnectionConfiguration_t,
                                    struct SMTP_ConnectionState,
                                    struct Net_StreamStatistic,
                                    SMTP_Stream_t,
@@ -135,7 +128,7 @@ typedef Net_Client_SSL_Connector_T<SMTP_SSLConnection_t,
 
 typedef Net_Client_AsynchConnector_T<SMTP_AsynchConnection_t,
                                      ACE_INET_Addr,
-                                     SMTP_ConnectionConfiguration,
+                                     SMTP_ConnectionConfiguration_t,
                                      struct SMTP_ConnectionState,
                                      struct Net_StreamStatistic,
                                      Net_TCPSocketConfiguration_t,
@@ -145,13 +138,13 @@ typedef Net_Client_AsynchConnector_T<SMTP_AsynchConnection_t,
 /////////////////////////////////////////
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 SMTP_ConnectionConfiguration,
+                                 SMTP_ConnectionConfiguration_t,
                                  struct SMTP_ConnectionState,
                                  struct Net_StreamStatistic,
                                  struct Net_UserData> SMTP_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 SMTP_ConnectionConfiguration,
+                                 SMTP_ConnectionConfiguration_t,
                                  struct SMTP_ConnectionState,
                                  struct Net_StreamStatistic,
                                  struct Net_UserData> SMTP_Connection_Manager_t;

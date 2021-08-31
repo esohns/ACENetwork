@@ -290,7 +290,7 @@ class Net_ConnectionConfiguration_T
 
 //////////////////////////////////////////
 
-template <typename StreamConfigurationType, // *NOTE*: connection-
+template <typename StreamConfigurationType, // *NOTE*: connection- (&& implements Stream_Configuration_T)
           enum Net_TransportLayerType TransportLayerType_e>
 class Net_StreamConnectionConfiguration_T
  : public Net_ConnectionConfiguration_T<TransportLayerType_e>

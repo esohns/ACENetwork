@@ -84,6 +84,8 @@ struct SMTP_Record
    , code (SMTP_Codes::SMTP_CODE_INVALID)
    , text ()
   {}
+  void operator+= (struct SMTP_Record rhs_in)
+  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   // request
   struct SMTP_Request       request;
