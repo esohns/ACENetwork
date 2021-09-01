@@ -75,7 +75,16 @@ struct SMTP_AllocatorConfiguration
 struct SMTP_ProtocolConfiguration
 {
   SMTP_ProtocolConfiguration ()
+   : domain (static_cast<u_short> (0),
+             ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST),
+             AF_INET)
+   , username ()
+   , password ()
   {}
+
+  ACE_INET_Addr domain; // i.e. external address
+  std::string   username;
+  std::string   password;
 };
 
 struct SMTP_ModuleHandlerConfiguration

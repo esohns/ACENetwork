@@ -90,6 +90,7 @@ SPACE          \x20
 %s             text_begin
 %s             text
 %s             multiline_text
+%s             multiline_text_cr
 
 %{
 /* handle locations */
@@ -143,15 +144,29 @@ SPACE          \x20
                            }
 } // end <text_begin>
 <multiline_text>{
+(\r)+                      { ACE_ASSERT (yylval->sval);
+                             yylval->sval->append (yytext, yyleng - 1);
+                             yyless (1);
+                             BEGIN(multiline_text_cr); }
 {CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY_TEXT;
                              /* return yy::SMTP_Parser::token::REPLY_TEXT; */ }
-{OCTET}*/{CRLF}            { driver->offset (yyleng);
+[^\r]+                     { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->assign (yytext);
-                           }
+                             yylval->sval->append (yytext);
+                             BEGIN(multiline_text_cr); }
 } // end <multiline_text>
+<multiline_text_cr>{
+\r                         { driver->offset (yyleng);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->append (yytext);
+                             BEGIN(multiline_text); }
+{CRLF}                     { driver->offset (yyleng);
+                             BEGIN(reply_code);
+                             return yytokentype::REPLY_TEXT;
+                             /* return yy::SMTP_Parser::token::REPLY_TEXT; */ }
+} // end <multiline_text_cr>
 <text>{
 {CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
@@ -169,7 +184,7 @@ SPACE          \x20
                              ACE_ASSERT (false);
 
                              // debug info
-                             std::string error_messa  ge =
+                             std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");
                              error_message += yytext[0];
                              error_message += ACE_TEXT_ALWAYS_CHAR ("\", aborting");
@@ -211,8 +226,8 @@ SMTP_Scanner_wrap (yyscan_t yyscanner)
 //  if (driver_p->hasFinished ())
 //  {
 //    BEGIN(INITIAL);
-7/    return 1; // done
-77  } // end IF
+//    return 1; // done
+//  } // end IF
 
   // *NOTE*: there is more data
   // 1. gobble/save the rest

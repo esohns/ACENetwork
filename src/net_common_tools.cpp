@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "net_common_tools.h"
 
 #include <regex>
@@ -2938,16 +2937,14 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
 
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     gateway_address_p = ip_adapter_addresses_2->FirstGatewayAddress;
-    ACE_ASSERT (gateway_address_p);
-    do
+    while (gateway_address_p)
     {
       socket_address_p = &gateway_address_p->Address;
       ACE_ASSERT (socket_address_p->lpSockaddr);
       if (socket_address_p->lpSockaddr->sa_family == AF_INET)
         break;
-
       gateway_address_p = gateway_address_p->Next;
-    } while (gateway_address_p);
+    } // end WHILE
     if (!gateway_address_p)
     {
       ACE_DEBUG ((LM_WARNING,
@@ -3352,7 +3349,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       do
       { // *TODO*: encapsulate this translation
         if ((type_in == NET_LINKLAYER_802_3) &&
-            ((ip_adapter_addresses_2->IfType != IF_TYPE_ETHERNET_CSMACD) ||
+            ((ip_adapter_addresses_2->IfType != IF_TYPE_ETHERNET_CSMACD) &&
              (ip_adapter_addresses_2->IfType != IF_TYPE_IS088023_CSMACD)))
           goto continue_;
         else if ((type_in == NET_LINKLAYER_PPP) &&
@@ -3428,6 +3425,7 @@ error:
                     ACE_TEXT (result.c_str ()),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address).c_str ())));
 #endif // _DEBUG
+        return result;
       } // end IF
 #else
       // *TODO*: this should work on most Unixy systems, but is a really bad
@@ -3669,8 +3667,8 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
 
   int result = -1;
   ACE_INET_Addr inet_address;
-  ACE_TCHAR buffer_a[HOST_NAME_MAX];
-  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
+  char buffer_a[HOST_NAME_MAX];
+  ACE_OS::memset (buffer_a, 0, sizeof (char[HOST_NAME_MAX]));
 
   // sanity check(s)
   ACE_ASSERT (hostName_inout.empty () || dottedDecimal_inout.empty ());
@@ -3690,16 +3688,20 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
       return false;
     } // end IF
     result = inet_address.get_host_name (buffer_a,
-                                         sizeof (ACE_TCHAR[HOST_NAME_MAX]));
-    if (unlikely (result == -1))
+                                         sizeof (char[HOST_NAME_MAX]));
+    hostName_inout = buffer_a;
+    if (unlikely ((result == -1) ||
+                  // *NOTE*: ACE_INET_Addr::get_host_name does not set NI_NAMEREQD for
+                  //         getnameinfo(), therefore check for dotted-decimal return value
+                  Net_Common_Tools::matchIPAddress (hostName_inout))
+       )
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(\"%s\"): \"%m\", aborting\n"),
                   ACE_TEXT (dottedDecimal_inout.c_str ())));
+      hostName_inout.clear ();
       return false;
     } // end IF
-
-    hostName_inout = buffer_a;
   } // end IF
   else
   { ACE_ASSERT (!hostName_inout.empty ());

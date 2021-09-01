@@ -26,8 +26,6 @@
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
 
-#include "stream_statemachine_control.h"
-
 #include "net_common.h"
 #include "net_connection_configuration.h"
 #include "net_connection_manager.h"
@@ -57,9 +55,15 @@ class Net_Client_SSL_Connector_T
   typedef ACE_INET_Addr ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
+  typedef UserDataType USERDATA_T;
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
-                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<ACE_INET_Addr,

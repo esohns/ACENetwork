@@ -22,6 +22,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_math_tools.h"
+
 #include "common_timer_manager_common.h"
 
 #include "net_defines.h"
@@ -37,19 +39,17 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionStateType,
-          typename ConnectionType>
+          typename ConnectionStateType>
 SMTP_Module_Send_T<ACE_SYNCH_USE,
                    TimePolicyType,
                    ControlMessageType,
                    DataMessageType,
                    SessionMessageType,
                    ConfigurationType,
-                   ConnectionStateType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                   ConnectionType>::SMTP_Module_Send_T (ISTREAM_T* stream_in)
+                   ConnectionStateType>::SMTP_Module_Send_T (ISTREAM_T* stream_in)
 #else
-                   ConnectionType>::SMTP_Module_Send_T (typename inherited::ISTREAM_T* stream_in)
+                   ConnectionStateType>::SMTP_Module_Send_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
@@ -63,8 +63,7 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionStateType,
-          typename ConnectionType>
+          typename ConnectionStateType>
 bool
 SMTP_Module_Send_T<ACE_SYNCH_USE,
                    TimePolicyType,
@@ -72,9 +71,8 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
                    DataMessageType,
                    SessionMessageType,
                    ConfigurationType,
-                   ConnectionStateType,
-                   ConnectionType>::initialize (const ConfigurationType& configuration_in,
-                                                Stream_IAllocator* allocator_in)
+                   ConnectionStateType>::initialize (const ConfigurationType& configuration_in,
+                                                     Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::initialize"));
 
@@ -95,8 +93,7 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionStateType,
-          typename ConnectionType>
+          typename ConnectionStateType>
 void
 SMTP_Module_Send_T<ACE_SYNCH_USE,
                    TimePolicyType,
@@ -104,9 +101,8 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
                    DataMessageType,
                    SessionMessageType,
                    ConfigurationType,
-                   ConnectionStateType,
-                   ConnectionType>::handleDataMessage (DataMessageType*& message_inout,
-                                                       bool& passMessageDownstream_out)
+                   ConnectionStateType>::handleDataMessage (DataMessageType*& message_inout,
+                                                            bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::handleDataMessage"));
 
@@ -116,36 +112,40 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->allocatorConfiguration);
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
+  ACE_ASSERT (inherited::configuration_->request);
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (message_inout->isInitialized ());
 
-  const typename DataMessageType::DATA_T& data_r = message_inout->getR ();
+  const typename DataMessageType::DATA_T& data_container_r =
+    message_inout->getR ();
+  const typename DataMessageType::DATA_T::DATA_T& data_r =
+    data_container_r.getR ();
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
     const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   int result = -1;
-  struct SMTP_Record record_s;
-  ACE_Message_Block* message_block_p = NULL;
+  //ACE_Message_Block* message_block_p = NULL;
   DataMessageType* message_p = NULL;
+  typename DataMessageType::DATA_T* data_container_2 = NULL;
+  typename DataMessageType::DATA_T::DATA_T* data_p = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (session_data_r.connection);
-
-  message_p = inherited::allocateMessage (inherited::configuration_->allocatorConfiguration->defaultBufferSize);
-  if (unlikely (!message_p))
+  ACE_NEW_NORETURN (data_p,
+                    typename DataMessageType::DATA_T::DATA_T ());
+  if (!data_p)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u): \"%m\", returning\n"),
-                inherited::mod_->name (),
-                inherited::configuration_->allocatorConfiguration->defaultBufferSize));
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("%s: failed to allocate memory: \"%m\", returning\n"),
+                inherited::mod_->name ()));
     return;
   } // end IF
 
-  ConnectionStateType& state_r =
-    const_cast<ConnectionStateType&> (session_data_r.connection->state ());
+  // sanity check(s)
+  ACE_ASSERT (!session_data_r.connectionStates.empty ());
+  ConnectionStateType* state_p =
+    static_cast<ConnectionStateType*> ((*session_data_r.connectionStates.begin ()).second);
 continue_:
-  switch (state_r.protocolState)
+  switch (state_p->protocolState)
   {
     case SMTP_STATE_INVALID:
     {
@@ -153,11 +153,12 @@ continue_:
         goto protocol_error;
 
       // --> greeting has been received; send MAIL command
-      state_r.protocolState = SMTP_STATE_GREETING_RECEIVED;
-      ++state_r.protocolState;
+      state_p->protocolState = SMTP_STATE_GREETING_RECEIVED;
+      ++state_p->protocolState;
 
-      record_s.request.command = SMTP_Codes::SMTP_COMMAND_EHLO;
-      record_s.request.address = inherited::configuration_->request.address;
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_EHLO;
+      data_p->request.domain =
+        inherited::configuration_->protocolConfiguration->domain;
       break;
     }
     case SMTP_STATE_EHLO_SENT:
@@ -165,12 +166,93 @@ continue_:
       if (!SMTP_Tools::isSuccess (data_r.code))
         goto protocol_error;
 
-      // --> EHLO has been sent; send MAIL
-      ++state_r.protocolState;
+      // --> EHLO has been sent; send AUTH/MAIL ?
+      ++state_p->protocolState;
 
-      record_s.request.command = SMTP_Codes::SMTP_COMMAND_MAIL;
-      record_s.request.from = inherited::configuration_->request.from;
-      record_s.request.parameters = inherited::configuration_->request.parameters;
+      // retrieve any supported authentication mechanisms
+      std::vector<std::string> authentication_mechanisms_a;
+      std::string authentication_mechanisms;
+      for (SMTP_TextConstIterator_t iterator = data_r.text.begin ();
+           iterator != data_r.text.end ();
+           ++iterator)
+      {
+        if ((*iterator).find (ACE_TEXT_ALWAYS_CHAR ("AUTH ")))
+          continue;
+        authentication_mechanisms = *iterator;
+        authentication_mechanisms.erase (0, 5);
+        std::istringstream string_stream (authentication_mechanisms);
+        std::string authentication_mechanism;
+        while (!string_stream.eof ())
+        {
+          std::getline (string_stream, authentication_mechanism, ' ');
+          authentication_mechanisms_a.push_back (authentication_mechanism);
+        } // end WHILE
+        break;
+      } // end FOR
+      if (authentication_mechanisms_a.empty ())
+        goto no_authentication_;
+
+      // try AUTH LOGIN ?
+      if (std::find (authentication_mechanisms_a.begin (),
+                     authentication_mechanisms_a.end (),
+                     ACE_TEXT_ALWAYS_CHAR ("LOGIN")) != authentication_mechanisms_a.end ())
+      {
+        // --> send AUTH [LOGIN]
+        // *TODO*: support more authentication mechanisms
+        data_p->request.command = SMTP_Codes::SMTP_COMMAND_AUTH;
+        break;
+      } // end IF
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("%s: no supported authentication mechanisms (was: %s), continuing\n"),
+                  inherited::mod_->name (),
+                  ACE_TEXT (authentication_mechanisms.c_str ())));
+
+no_authentication_:
+      // proceed without authentication
+      state_p->protocolState = SMTP_STATE_MAIL_SENT;
+
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_MAIL;
+      data_p->request.from = inherited::configuration_->request->from;
+      data_p->request.parameters = inherited::configuration_->request->parameters;
+      break;
+    }
+    case SMTP_STATE_AUTH_SENT:
+    {
+      if (data_r.code != SMTP_Codes::SMTP_CODE_SERVER_CHALLENGE)
+        goto protocol_error;
+
+      // --> AUTH has been sent; send [LOGIN] username
+      ++state_p->protocolState;
+
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_AUTH;
+      data_p->request.parameters.push_back (Common_Math_Tools::encodeBase64 (inherited::configuration_->protocolConfiguration->username.c_str (),
+                                                                             inherited::configuration_->protocolConfiguration->username.size ()));
+      break;
+    }
+    case SMTP_STATE_AUTH_LOGIN_USER_SENT:
+    {
+      if (data_r.code != SMTP_Codes::SMTP_CODE_SERVER_CHALLENGE)
+        goto protocol_error;
+
+      // --> AUTH [LOGIN] username has been sent; send [LOGIN] password
+      ++state_p->protocolState;
+
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_AUTH;
+      data_p->request.parameters.push_back (Common_Math_Tools::encodeBase64 (inherited::configuration_->protocolConfiguration->password.c_str (),
+                                                                             inherited::configuration_->protocolConfiguration->password.size ()));
+      break;
+    }
+    case SMTP_STATE_AUTH_LOGIN_PASSWORD_SENT:
+    {
+      if (!SMTP_Tools::isSuccess (data_r.code))
+        goto protocol_error;
+
+      // --> AUTH [LOGIN] password has been sent; send MAIL
+      ++state_p->protocolState; ++state_p->protocolState;
+
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_MAIL;
+      data_p->request.from = inherited::configuration_->request->from;
+      data_p->request.parameters = inherited::configuration_->request->parameters;
       break;
     }
     case SMTP_STATE_MAIL_SENT:
@@ -179,13 +261,13 @@ continue_:
         goto protocol_error;
 
       // --> MAIL has been sent; send RCPT(s)
-      ++state_r.protocolState;
+      ++state_p->protocolState;
 
-      record_s.request.command = SMTP_Codes::SMTP_COMMAND_RCPT;
-      ACE_ASSERT (!inherited::configuration_->request.to.empty ());
-      record_s.request.to.push_back (inherited::configuration_->request.to.front ());
-      record_s.request.parameters = inherited::configuration_->request.parameters;
-      inherited::configuration_->request.to.pop_front ();
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_RCPT;
+      ACE_ASSERT (!inherited::configuration_->request->to.empty ());
+      data_p->request.to.push_back (inherited::configuration_->request->to.front ());
+      data_p->request.parameters = inherited::configuration_->request->parameters;
+      inherited::configuration_->request->to.erase (inherited::configuration_->request->to.begin ());
       break;
     }
     case SMTP_STATE_RCPT_SENT:
@@ -195,38 +277,49 @@ continue_:
 
       // --> RCPT has been sent; send any other RCPT(s)
 
-      if (inherited::configuration_->request.to.empty ())
+      if (inherited::configuration_->request->to.empty ())
       {
         // --> RCPT(s) have been sent; send DATA
 
-        ++state_r.protocolState;
+        ++state_p->protocolState;
         goto continue_;
       } // end IF
 
-      record_s.request.command = SMTP_Codes::SMTP_COMMAND_RCPT;
-      record_s.request.to.push_back (inherited::configuration_->request.to.front ());
-      record_s.request.parameters = inherited::configuration_->request.parameters;
-      inherited::configuration_->request.to.pop_front ();
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_RCPT;
+      data_p->request.to.push_back (inherited::configuration_->request->to.front ());
+      data_p->request.parameters = inherited::configuration_->request->parameters;
+      inherited::configuration_->request->to.erase (inherited::configuration_->request->to.begin ());
       break;
     }
     case SMTP_STATE_RCPTS_SENT:
     {
       // --> RCPT(s) have been sent; send DATA
-      ++state_r.protocolState;
+      ++state_p->protocolState;
 
-      record_s.request.command = SMTP_Codes::SMTP_COMMAND_DATA;
-      record_s.request.data = inherited::configuration_->request.data;
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_DATA;
       break;
     }
     case SMTP_STATE_DATA_SENT:
     {
+      if (data_r.code != SMTP_Codes::SMTP_CODE_START_MAIL_INPUT)
+        goto protocol_error;
+
+      // --> DATA has been sent; send message data
+      ++state_p->protocolState;
+
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_DATA_2;
+      data_p->request.data = inherited::configuration_->request->data;
+      break;
+    }
+    case SMTP_STATE_DATA_2_SENT:
+    {
       if (!SMTP_Tools::isSuccess (data_r.code))
         goto protocol_error;
 
-      // --> DATA has been sent; send QUIT
-      ++state_r.protocolState;
+      // --> message has been sent; send QUIT
+      ++state_p->protocolState;
 
-      record_s.request.command = SMTP_Codes::SMTP_COMMAND_QUIT;
+      data_p->request.command = SMTP_Codes::SMTP_COMMAND_QUIT;
       break;
     }
     case SMTP_STATE_QUIT_SENT:
@@ -235,7 +328,7 @@ continue_:
         goto protocol_error;
 
       // --> QUIT has been sent; reset state
-      state_r.protocolState = SMTP_STATE_INVALID;
+      state_p->protocolState = SMTP_STATE_INVALID;
       message_p->release (); message_p = NULL;
       return;
     }
@@ -244,27 +337,48 @@ continue_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: invalid/unknown protocol state (was: \"%s\"), returning\n"),
                   inherited::mod_->name (),
-                  ACE_TEXT (SMTP_Tools::StateToString (state_r.protocolState).c_str ())));
-      message_p->release (); message_p = NULL;
+                  ACE_TEXT (SMTP_Tools::StateToString (state_p->protocolState).c_str ())));
       return;
     }
   } // end SWITCH
 
 //send:
-  message_p->initialize (record_s,
+  message_p = inherited::allocateMessage (inherited::configuration_->allocatorConfiguration->defaultBufferSize);
+  if (unlikely (!message_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u): \"%m\", returning\n"),
+                inherited::mod_->name (),
+                inherited::configuration_->allocatorConfiguration->defaultBufferSize));
+    --state_p->protocolState; // reset state
+    goto error;
+  } // end IF
+
+  ACE_NEW_NORETURN (data_container_2,
+                    typename DataMessageType::DATA_T ());
+  if (!data_container_2)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("%s: failed to allocate memory: \"%m\", returning\n"),
+                inherited::mod_->name ()));
+    --state_p->protocolState; // reset state
+    goto error;
+  } // end IF
+  data_container_2->setPR (data_p);
+  ACE_ASSERT (!data_p);
+  message_p->initialize (data_container_2,
                          message_p->id (),
                          NULL);
+  ACE_ASSERT (!data_container_2);
 
-  message_block_p = message_p;
-  result = inherited::reply (message_block_p);
+  result = inherited::reply (message_p);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_Task_T::reply(): \"%m\", returning\n"),
                 inherited::mod_->name ()));
-    message_block_p->release ();
-    --state_r.protocolState; // reset state
-    return;
+    --state_p->protocolState; // reset state
+    goto error;
   } // end IF
 
   return;
@@ -273,10 +387,16 @@ protocol_error:
   ACE_DEBUG ((LM_ERROR,
               ACE_TEXT ("%s[%s]: received error reply code (was: \"%s\"):\n%s\n, returning\n"),
               inherited::mod_->name (),
-              ACE_TEXT (SMTP_Tools::StateToString (state_r.protocolState).c_str ()),
+              ACE_TEXT (SMTP_Tools::StateToString (state_p->protocolState).c_str ()),
               ACE_TEXT (SMTP_Tools::CodeToString (data_r.code).c_str ()),
               ACE_TEXT (SMTP_Tools::dump (data_r).c_str ())));
-  message_p->release (); message_p = NULL;
+error:
+  if (data_p)
+    delete data_p;
+  if (data_container_2)
+    delete data_container_2;
+  if (message_p)
+    message_p->release ();
 }
 
 template <ACE_SYNCH_DECL,
@@ -285,8 +405,7 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConfigurationType,
-          typename ConnectionStateType,
-          typename ConnectionType>
+          typename ConnectionStateType>
 void
 SMTP_Module_Send_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -294,9 +413,8 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
                        DataMessageType,
                        SessionMessageType,
                        ConfigurationType,
-                       ConnectionStateType,
-                       ConnectionType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                              bool& passMessageDownstream_out)
+                       ConnectionStateType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                   bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::handleSessionMessage"));
 
@@ -305,157 +423,35 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (inherited::isInitialized_);
-  ACE_ASSERT (inherited::sessionData_);
-
-  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   switch (message_inout->type ())
   {
+    case STREAM_SESSION_MESSAGE_ABORT:
+    {
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_CONNECT:
+    { ACE_ASSERT (inherited::sessionData_);
+      typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
+      ACE_ASSERT (session_data_r.connection);
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_DISCONNECT:
+    {
+      break;
+    }
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      //ConnectionManagerType* connection_manager_p =
-      //  ConnectionManagerType::SINGLETON_T::instance ();
-      //ACE_ASSERT (connection_manager_p);
-      //bool clone_module = false;//, delete_module = false;
-      //typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
-      //bool reset_configuration = false;
-      //ACE_Time_Value deadline = ACE_Time_Value::zero;
-      //ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
-      //enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-
-      if (connection_)
-        goto continue_;
-      // *TODO*: remove type inferences
-      if (session_data_r.connection)
-      {
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("%s: using session connection\n"),
-                    inherited::mod_->name ()));
-
-        connection_ = session_data_r.connection;
-        connection_->increase ();
-        goto continue_;
-      } // end IF
-
-//      // step2a: set up the (broadcast) connection configuration
-//      iterator =
-//        inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
-//      if (iterator == inherited::configuration_->connectionConfigurations->end ())
-//        iterator =
-//          inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR ("In"));
-//      else
-//        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("%s: applying connection configuration\n"),
-//                    inherited::mod_->name ()));
-//      ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
-
-//      // step2aa: set up the socket configuration
-//      write_only = (*iterator).second->writeOnly;
-//      socket_configuration_p->writeOnly = true;
-
-//      // step2ab: set up the connection manager
-//      // *NOTE*: the stream configuration may contain a module handle that is
-//      //         meant to be the final module of 'this' processing stream. As
-//      //         the (possibly external) DHCP (broadcast) connection probably
-//      //         (!) is oblivious of 'this' pipeline, the connection probably
-//      //         (!) should not enqueue that same module again
-//      //         --> temporarily 'hide' the module handle, if any
-//      // *TODO*: this 'measure' diminishes the generic utility of this module
-//      //         --> to be removed ASAP
-//      // *TODO*: remove type inferences
-//      // sanity check(s)
-//      //ACE_ASSERT (inherited::configuration_->connectionConfiguration);
-//      ACE_ASSERT (inherited::configuration_->streamConfiguration);
-
-//      // *TODO*: remove type inferences
-//      clone_module =
-//          inherited::configuration_->streamConfiguration->configuration->cloneModule;
-//      delete_module =
-//          inherited::configuration_->streamConfiguration->configuration->deleteModule;
-//      module_p =
-//        inherited::configuration_->streamConfiguration->configuration->module;
-//      inherited::configuration_->streamConfiguration->configuration->cloneModule =
-//        false;
-//      inherited::configuration_->streamConfiguration->configuration->deleteModule =
-//        false;
-//      inherited::configuration_->streamConfiguration->configuration->module =
-//        NULL;
-//      reset_configuration = true;
-
-//      //connection_manager_p->set (*configuration_,
-//      //                           configuration_->userData);
-
-//      handle_ =
-//          this->connect (socket_configuration_p->peerAddress,
-//                         use_reactor);
-//      if (unlikely (broadcastConnectionHandle_ == ACE_INVALID_HANDLE))
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
-//                    inherited::mod_->name (),
-//                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
-//        goto error;
-//      } // end IF
-//      if (use_reactor)
-//        session_data_r.connection =
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
-//#else
-//            connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
-//#endif
-//      else
-//        session_data_r.connection =
-//            connection_manager_p->get (socket_configuration_p->peerAddress);
-//      if (unlikely (!session_data_r.connection))
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
-//                    inherited::mod_->name (),
-//                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
-//        goto error;
-//      } // end IF
-
-//      // step2e: reset the connection configuration
-//      socket_configuration_p->writeOnly = write_only;
-//      inherited::configuration_->streamConfiguration->configuration->cloneModule =
-//        clone_module;
-//      inherited::configuration_->streamConfiguration->configuration->deleteModule =
-//        delete_module;
-//      inherited::configuration_->streamConfiguration->configuration->module =
-//        module_p;
-
-      //connection_manager_p->set (*inherited::configuration_,
-      //                           inherited::configuration_->userData);
-
-continue_:
       break;
 
 //error:
-//      if (reset_configuration)
-//      {
-////        (*iterator_2).second->writeOnly = write_only;
-//        inherited::configuration_->streamConfiguration->configuration->cloneModule =
-//          clone_module;
-//        inherited::configuration_->streamConfiguration->configuration->module =
-//          module_p;
-//
-//        //connection_manager_p->set (*configuration_,
-//        //                           configuration_->userData);
-//      } // end IF
-
-//continue_2:
       this->notify (STREAM_SESSION_MESSAGE_ABORT);
 
       break;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      if (connection_)
-      {
-        connection_->decrease (); connection_ = NULL;
-      } // end IF
-
       break;
     }
     default:

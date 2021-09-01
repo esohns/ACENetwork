@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef SMTP_MODULE_DISCOVER_H
-#define SMTP_MODULE_DISCOVER_H
+#ifndef SMTP_MODULE_SEND_H
+#define SMTP_MODULE_SEND_H
 
 #include "ace/Global_Macros.h"
 
@@ -38,8 +38,7 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
-          typename ConnectionStateType,
-          typename ConnectionType>
+          typename ConnectionStateType>
 class SMTP_Module_Send_T
  : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,

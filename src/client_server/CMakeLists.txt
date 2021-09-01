@@ -113,6 +113,7 @@ set (source_files_client
      net_client_common.h
      net_client_common_tools.cpp
      net_client_common_tools.h
+     net_client_common_tools.inl
      net_client_connector.cpp
      net_client_connector.h
      net_client_connector.inl
@@ -208,6 +209,7 @@ install (FILES
          net_client_asynchconnector.h
          net_client_common.h
          net_client_common_tools.h
+         net_client_common_tools.inl
          net_client_connector.h
          net_client_defines.h
 #         net_client_exports.h

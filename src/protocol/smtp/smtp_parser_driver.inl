@@ -35,6 +35,8 @@ SMTP_ParserDriver_T<SessionMessageType>::SMTP_ParserDriver_T ()
  : fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
+ , configuration_ (NULL)
+ , finished_ (false)
 //, parser_ (this,               // driver
 //           &numberOfMessages_, // counter
 //           scannerState_)      // scanner
@@ -76,6 +78,7 @@ SMTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
     } // end IF
 
     configuration_ = NULL;
+    finished_ = false;
 
     if (bufferState_)
     { ACE_ASSERT (scannerState_);
@@ -130,71 +133,71 @@ SMTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
 
   // sanity check(s)
   ACE_ASSERT (initialized_);
+  ACE_ASSERT (!fragment_);
+  ACE_ASSERT (!record_);
   ACE_ASSERT (data_in);
+
+  ACE_NEW_NORETURN (record_,
+                    struct SMTP_Record ());
+  if (!record_)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, aborting\n")));
+    return false;
+  } // end IF
 
   // start with the first fragment...
   fragment_ = data_in;
-
-  // *NOTE*: parse ALL available message fragments
-  // *TODO*: yyrestart(), yy_create_buffer/yy_switch_to_buffer, YY_INPUT...
   if (!scan_begin ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SMTP_ParserDriver_T::scan_begin(), aborting\n")));
 
     // clean up
+    delete record_; record_ = NULL;
     fragment_ = NULL;
 
     return false;
   } // end IF
 
   // initialize scanner
+  offset_ = 0;
   SMTP_Scanner_set_column (1, scannerState_);
   SMTP_Scanner_set_lineno (1, scannerState_);
   int debug_level = 0;
 #if YYDEBUG
   //debug_level = parser_.debug_level ();
   debug_level = yydebug;
-#endif
-  ACE_UNUSED_ARG (debug_level);
+#endif // YYDEBUG
 
   // parse data fragment
+  ACE_ASSERT (!finished_);
   int result = -1;
-  try
-  {
+  try {
     //result = parser_.parse ();
     result = yyparse (this, scannerState_);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
   }
   switch (result)
   {
     case 0:
+    case 1: // *NOTE*: for some reason, YYACCEPT returns 1; *TODO*: find out why
+      ACE_ASSERT (record_);
+      record_ = NULL;
       break; // done
-    case 1:
     default:
-    { // *NOTE*: need more data
-//        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("failed to parse message fragment (result was: %d), aborting\n"),
-//                    result));
-
-//        // debug info
-//        if (debug_level)
-//        {
-//          try
-//          {
-//            record_->dump_state ();
-//          }
-//          catch (...)
-//          {
-//            ACE_DEBUG ((LM_ERROR,
-//                        ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
-//          }
-//        } // end IF
-
+    { // *NOTE*: need more data ?
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to parse message fragment (result was: %d), aborting\n"),
+                  result));
+      if (debug_level)
+      { ACE_ASSERT (record_);
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("%s\n"),
+                    ACE_TEXT (SMTP_Tools::dump (*record_).c_str ())));
+      } // end IF
       break;
     }
   } // end SWITCH
@@ -204,6 +207,10 @@ SMTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
 
   if (fragment_)
     fragment_ = NULL;
+  if (record_)
+  {
+    delete record_; record_ = NULL;
+  } // end IF
 
   return (result == 0);
 }
@@ -373,11 +380,11 @@ SMTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
-  bool done = false;
   SessionMessageType* session_message_p = NULL;
   Stream_SessionMessageType session_message_type =
       STREAM_SESSION_MESSAGE_INVALID;
-  bool is_data = false;
+  bool is_data_b = false;
+  bool requeue_b = true;
 
   // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
 
@@ -385,7 +392,7 @@ SMTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->block);
   ACE_ASSERT (configuration_->messageQueue);
-  ACE_ASSERT (fragment_);
+  ACE_ASSERT (!finished_);
 
   // 1. wait for data
   do
@@ -406,7 +413,11 @@ SMTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
     {
       case ACE_Message_Block::MB_DATA:
       case ACE_Message_Block::MB_PROTO:
-        is_data = true; break;
+        is_data_b = true;
+        break;
+      case ACE_Message_Block::MB_STOP:
+        finished_ = true; requeue_b = false;
+        break;
       case ACE_Message_Block::MB_USER:
       {
         session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
@@ -414,30 +425,36 @@ SMTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
         {
           session_message_type = session_message_p->type ();
           if (session_message_type == STREAM_SESSION_MESSAGE_END)
-            done = true; // session has finished --> abort
+            finished_ = true; // session has finished --> abort
         } // end IF
         break;
       }
       default:
         break;
     } // end SWITCH
-    if (is_data) break;
+    if (is_data_b)
+      break;
 
-    // requeue message
-    result = configuration_->messageQueue->enqueue_tail (message_block_p, NULL);
-    if (result == -1)
+    // requeue message ?
+    if (requeue_b)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", returning\n")));
-      return;
+      result = configuration_->messageQueue->enqueue_tail (message_block_p, NULL);
+      if (result == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", returning\n")));
+        message_block_p->release ();
+        return;
+      } // end IF
     } // end IF
-
+    else
+      message_block_p->release ();
     message_block_p = NULL;
-  } while (!done);
+  } while (!finished_);
 
   // 2. append data ?
   if (message_block_p)
-  {
+  { ACE_ASSERT (fragment_);
     ACE_Message_Block* message_block_2 = fragment_;
     for (;
          message_block_2->cont ();

@@ -29,8 +29,6 @@
 
 #include "common_timer_manager_common.h"
 
-#include "stream_statemachine_common.h"
-
 #include "net_common.h"
 #include "net_connection_configuration.h"
 #include "net_connection_manager.h"
@@ -62,9 +60,15 @@ class Net_Client_AsynchConnector_T
   typedef AddressType ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
+  typedef UserDataType USERDATA_T;
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   AddressType,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
 
   typedef Net_IConnection_T<AddressType,
-                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<AddressType,
@@ -95,6 +99,9 @@ class Net_Client_AsynchConnector_T
                     const ACE_Time_Value& = ACE_Time_Value::zero); // block : (relative-) timeout
   virtual void onConnect (ACE_HANDLE, // connect handle
                           int);       // success ? 0 : errno
+
+  // *TODO*: disambiguate connect() !!!
+  using ICONNECTOR_T::connect;
 
  protected:
   // override default connect strategy
@@ -173,6 +180,13 @@ class Net_Client_AsynchConnector_T<HandlerType,
   typedef ACE_INET_Addr ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
+  typedef UserDataType USERDATA_T;
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
                             //ConfigurationType,
@@ -274,6 +288,13 @@ class Net_Client_AsynchConnector_T<HandlerType,
   typedef Net_Netlink_Addr ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
+  typedef UserDataType USERDATA_T;
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   Net_Netlink_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
 
   typedef Net_IConnection_T<Net_Netlink_Addr,
                             StateType,

@@ -74,6 +74,7 @@ SMTP_Module_Parser_T<ACE_SYNCH_USE,
 
   typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
+  int result = -1;
 
   ACE_NEW_NORETURN (data_container_p,
                     typename DataMessageType::DATA_T ());
@@ -103,6 +104,16 @@ SMTP_Module_Parser_T<ACE_SYNCH_USE,
                            NULL);
     message_p = static_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
+
+  // push message downstream
+  result = inherited::put_next (headFragment_);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to put_next(): \"%m\", returning\n")));
+    message_p->release (); message_p = NULL;
+  } // end IF
+  headFragment_ = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

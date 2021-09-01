@@ -48,6 +48,8 @@
 #define SMTP_DEFAULT_PRINT_PROGRESSDOT                    false
 
 // protocol
-#define SMTP_DEFAULT_SERVER_PORT                          25 // TCP
+#define SMTP_DEFAULT_SERVER_PORT                          25  // TCP
+#define SMTP_DEFAULT_SERVER_PORT_2                        587 // TCP / STARTTLS
+#define SMTP_DEFAULT_TLS_SERVER_PORT                      465 // SMTPS
 
 #endif

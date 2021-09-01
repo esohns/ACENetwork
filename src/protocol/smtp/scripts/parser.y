@@ -155,6 +155,8 @@ using namespace std;
 
 message:                 "reply_code"                               { driver->current ().code = static_cast<SMTP_Code_t> ($1); }
                          text_lines "reply_end"                     { $$ = 3 + $3;
+                                                                      struct SMTP_Record* record_p = &driver->current ();
+                                                                      driver->record (record_p);
                                                                       YYACCEPT; }
 text_lines:              text_line text_lines                       { $$ = $1 + $2; }
                          | /* empty */                              { $$ = 2; }

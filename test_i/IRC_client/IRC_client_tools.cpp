@@ -299,7 +299,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   {
     // step0a: wait for the connection attempt to complete
     IRC_Client_IConnector_t::IASYNCH_CONNECTOR_T* iasynch_connector_p =
-      dynamic_cast<IRC_Client_IConnector_t::IASYNCH_CONNECTOR_T*> (&connector_in);
+      static_cast<IRC_Client_IConnector_t::IASYNCH_CONNECTOR_T*> (&connector_in);
     ACE_ASSERT (iasynch_connector_p);
     typename IRC_Client_AsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
     typename IRC_Client_AsynchConnector_t::ISTREAM_CONNECTION_T* istream_connection_p =

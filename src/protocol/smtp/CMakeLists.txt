@@ -156,6 +156,7 @@ elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ${ACE_LIBRARY})
 endif ()
 target_link_libraries (${PROJECT_NAME}_Protocol_SMTP Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_SMTP CommonMath)
 target_link_libraries (${PROJECT_NAME}_Protocol_SMTP CommonTimer)
 
 target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ACEStream)

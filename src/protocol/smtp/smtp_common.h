@@ -56,18 +56,18 @@ typedef SMTP_To_t::const_iterator SMTP_ToConstIterator_t;
 struct SMTP_Request
 {
   SMTP_Request ()
-    : address (static_cast<u_short> (0),
-               ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST),
-               AF_INET)
-    , command (SMTP_Codes::SMTP_COMMAND_INVALID)
-    , from ()
-    , parameters ()
-    , to ()
-    , data ()
+   : command (SMTP_Codes::SMTP_COMMAND_INVALID)
+   , domain (static_cast<u_short> (0),
+             ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST),
+             AF_INET)
+   , from ()
+   , parameters ()
+   , to ()
+   , data ()
   {}
 
-  ACE_INET_Addr     address;
   SMTP_Command_t    command;
+  ACE_INET_Addr     domain;
   std::string       from;
   SMTP_Parameters_t parameters;
   SMTP_To_t         to;
@@ -101,15 +101,45 @@ enum SMTP_ProtocolState
 {
   SMTP_STATE_GREETING_RECEIVED = 0,
   SMTP_STATE_EHLO_SENT,
+  SMTP_STATE_AUTH_SENT, // rfc4954
+  SMTP_STATE_AUTH_LOGIN_USER_SENT, // rfc4954
+  SMTP_STATE_AUTH_LOGIN_PASSWORD_SENT, // rfc4954
+  SMTP_STATE_AUTH_COMPLETE, // i.e. AUTH mechanism completed
   SMTP_STATE_MAIL_SENT,
   SMTP_STATE_RCPT_SENT,
   SMTP_STATE_RCPTS_SENT,
   SMTP_STATE_DATA_SENT,
+  SMTP_STATE_DATA_2_SENT, // i.e. message sent
   SMTP_STATE_QUIT_SENT,
   /////////////////////////////////////
   SMTP_STATE_MAX,
   SMTP_STATE_INVALID
 };
+
+inline enum SMTP_ProtocolState&
+operator++ (enum SMTP_ProtocolState& state_inout)
+{ ACE_ASSERT (state_inout != SMTP_STATE_MAX);
+  if (state_inout == SMTP_STATE_INVALID)
+  {
+    state_inout = SMTP_STATE_GREETING_RECEIVED;
+    return state_inout;
+  } // end IF
+
+  state_inout =
+    static_cast<enum SMTP_ProtocolState> ((static_cast<int> (state_inout) + 1) % SMTP_STATE_MAX);
+  return state_inout;
+}
+inline enum SMTP_ProtocolState&
+operator-- (enum SMTP_ProtocolState& state_inout)
+{ ACE_ASSERT (!((state_inout == SMTP_STATE_GREETING_RECEIVED) ||
+                (state_inout == SMTP_STATE_MAX)               ||
+                (state_inout == SMTP_STATE_INVALID)));
+  state_inout =
+    static_cast<enum SMTP_ProtocolState> ((static_cast<int> (state_inout) - 1));
+  return state_inout;
+}
+
+//////////////////////////////////////////
 
 typedef struct Stream_Statistic SMTP_Statistic_t;
 typedef Common_IStatistic_T<SMTP_Statistic_t> SMTP_IStatistic_t;

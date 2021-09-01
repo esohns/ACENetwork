@@ -26,16 +26,12 @@
 #include "net_common_tools.h"
 #include "net_defines.h"
 
-template <typename AddressType,
-          typename ConnectorType,
-          typename ConnectionConfigurationType,
-          typename UserDataType,
-          typename ConnectionManagerType>
+template <typename ConnectorType>
 ACE_HANDLE
 Net_Client_Common_Tools::connect (ConnectorType& connector_in,
-                                  const ConnectionConfigurationType& configuration_in,
-                                  const UserDataType& userData_in,
-                                  const AddressType& address_in,
+                                  const typename ConnectorType::CONFIGURATION_T& configuration_in,
+                                  const typename ConnectorType::USERDATA_T& userData_in,
+                                  const typename ConnectorType::ADDRESS_T& address_in,
                                   bool wait_in,
                                   bool isPeerAddress_in)
 {
@@ -43,16 +39,18 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
 
   ACE_HANDLE result = ACE_INVALID_HANDLE;
 
-  typename ConnectionManagerType::INTERFACE_T* iconnection_manager_p =
-    ConnectionManagerType::SINGLETON_T::instance ();
-  typename ConnectionManagerType::ICONNECTION_T* connection_p = NULL;
+  typename ConnectorType::CONNECTION_MANAGER_T::INTERFACE_T* iconnection_manager_p =
+    ConnectorType::CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  typename ConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* connection_p =
+    NULL;
+  typename ConnectorType::ICONNECTOR_T* iconnector_p = &connector_in;
 
   // step1: initialize the connection manager
   iconnection_manager_p->set (configuration_in,
-                              &const_cast<UserDataType&> (userData_in));
+                              &const_cast<typename ConnectorType::USERDATA_T&> (userData_in));
 
   // step2: initialize the connector
-  if (unlikely (!connector_in.initialize (configuration_in)))
+  if (unlikely (!iconnector_p->initialize (configuration_in)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, aborting\n")));
@@ -60,7 +58,7 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   } // end IF
 
   // step3: connect
-  result = connector_in.connect (address_in);
+  result = iconnector_p->connect (address_in);
   if (unlikely (result == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -71,7 +69,7 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   if (unlikely (!wait_in))
     return result;
 
-  if (unlikely (connector_in.useReactor ()))
+  if (unlikely (iconnector_p->useReactor ()))
   {
     connection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

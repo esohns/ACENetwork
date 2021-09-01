@@ -124,6 +124,7 @@ class SMTP_ParserDriver_T
   void scan_end ();
 
   struct Common_FlexBisonParserConfiguration* configuration_;
+  bool                                        finished_;
 
   //// parser
   //yy::SMTP_Parser    parser_;

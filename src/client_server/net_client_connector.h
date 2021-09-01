@@ -64,6 +64,13 @@ class Net_Client_Connector_T
   typedef AddressType ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
+  typedef UserDataType USERDATA_T;
+  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
+                                   AddressType,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
   typedef ACE_Connector<HandlerType,
                         ConnectorType> CONNECTOR_T;
 
@@ -155,6 +162,13 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef ACE_INET_Addr ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
+  typedef UserDataType USERDATA_T;
+  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
+                                   ACE_INET_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
                             //ConfigurationType,
@@ -267,6 +281,13 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef Net_Netlink_Addr ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
+  typedef UserDataType USERDATA_T;
+  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
+                                   Net_Netlink_Addr,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
 
   typedef Net_IConnection_T<Net_Netlink_Addr,
                             StateType,

@@ -922,26 +922,18 @@ do_work (//bool requestBroadcastReplies_in,
     PCPClient_OutboundAsynchConnector_t asynch_connector (true);
     if (useReactor_in)
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_OutboundConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (connector,
+        Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
                                                                          *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
                                                                          configuration_in.userData,
                                                                          NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
                                                                          true, true);
     else
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_OutboundAsynchConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (asynch_connector,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                         true, true);
+        Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
+                                                                               *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                               configuration_in.userData,
+                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
+                                                                               true, true);
     if (unlikely (handle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -979,26 +971,18 @@ do_work (//bool requestBroadcastReplies_in,
     PCPClient_InboundAsynchConnector_t asynch_connector_2 (true);
     if (useReactor_in)
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_InboundConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (connector_2,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                         true, false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundConnector_t> (connector_2,
+                                                                        *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                        configuration_in.userData,
+                                                                        NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                        true, false);
     else
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_InboundAsynchConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (asynch_connector_2,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                         true, false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnector_t> (asynch_connector_2,
+                                                                              *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                              configuration_in.userData,
+                                                                              NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                              true, false);
     if (handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1030,26 +1014,18 @@ do_work (//bool requestBroadcastReplies_in,
     PCPClient_InboundAsynchConnectorMcast_t asynch_connector_3 (true);
     if (useReactor_in)
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_InboundConnectorMcast_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (connector_3,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                         true, false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundConnectorMcast_t> (connector_3,
+                                                                             *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                             configuration_in.userData,
+                                                                             NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                             true, false);
     else
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_InboundAsynchConnectorMcast_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (asynch_connector_3,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                         true, false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnectorMcast_t> (asynch_connector_3,
+                                                                                   *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                                   configuration_in.userData,
+                                                                                   NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                                   true, false);
     if (handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1084,26 +1060,18 @@ do_work (//bool requestBroadcastReplies_in,
     PCPClient_OutboundAsynchConnector_t asynch_connector (true);
     if (useReactor_in)
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_OutboundConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (connector,
+        Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
                                                                          *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
                                                                          configuration_in.userData,
                                                                          NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
                                                                          true, true);
     else
       handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_OutboundAsynchConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (asynch_connector,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                         true, true);
+        Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
+                                                                               *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                               configuration_in.userData,
+                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
+                                                                               true, true);
     if (unlikely (handle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,

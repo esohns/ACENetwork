@@ -1567,11 +1567,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       ACE_HANDLE handle = ACE_INVALID_HANDLE;
       if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
         handle =
-          Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                           PCPClient_OutboundConnector_t,
-                                           PCPClient_ConnectionConfiguration,
-                                           struct Net_UserData,
-                                           PCPClient_ConnectionManager_t> (connector,
+          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
                                                                            *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                            data_p->configuration->userData,
                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
@@ -1579,16 +1575,12 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                            true);
       else
         handle =
-          Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                           PCPClient_OutboundAsynchConnector_t,
-                                           PCPClient_ConnectionConfiguration,
-                                           struct Net_UserData,
-                                           PCPClient_ConnectionManager_t> (asynch_connector,
-                                                                           *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                           data_p->configuration->userData,
-                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                           true,
-                                                                           true);
+          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
+                                                                                 *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                                 data_p->configuration->userData,
+                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
+                                                                                 true,
+                                                                                 true);
       if (unlikely (handle == ACE_INVALID_HANDLE))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1621,28 +1613,20 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_InboundConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (connector,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                         data_p->configuration->userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                                                         true,
-                                                                         false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundConnector_t> (connector,
+                                                                        *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                        data_p->configuration->userData,
+                                                                        NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                                                        true,
+                                                                        false);
     else
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                         PCPClient_InboundAsynchConnector_t,
-                                         PCPClient_ConnectionConfiguration,
-                                         struct Net_UserData,
-                                         PCPClient_ConnectionManager_t> (asynch_connector,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                         data_p->configuration->userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                                                         true,
-                                                                         false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnector_t> (asynch_connector,
+                                                                              *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                              data_p->configuration->userData,
+                                                                              NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                                                              true,
+                                                                              false);
     if (unlikely (data_p->configuration->handle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1668,28 +1652,20 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                          PCPClient_InboundConnectorMcast_t,
-                                          PCPClient_ConnectionConfiguration,
-                                          struct Net_UserData,
-                                          PCPClient_ConnectionManager_t> (connector_mcast,
-                                                                          *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                          data_p->configuration->userData,
-                                                                          NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                                                          true,
-                                                                          false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundConnectorMcast_t> (connector_mcast,
+                                                                             *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                             data_p->configuration->userData,
+                                                                             NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                                                             true,
+                                                                             false);
     else
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                          PCPClient_InboundAsynchConnectorMcast_t,
-                                          PCPClient_ConnectionConfiguration,
-                                          struct Net_UserData,
-                                          PCPClient_ConnectionManager_t> (asynch_connector_mcast,
-                                                                          *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                          data_p->configuration->userData,
-                                                                          NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                                                          true,
-                                                                          false);
+        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnectorMcast_t> (asynch_connector_mcast,
+                                                                                   *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                                   data_p->configuration->userData,
+                                                                                   NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                                                                   true,
+                                                                                   false);
     if (unlikely (data_p->configuration->multicastHandle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1722,11 +1698,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       ACE_HANDLE handle = ACE_INVALID_HANDLE;
       if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
         handle =
-          Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                           PCPClient_OutboundConnector_t,
-                                           PCPClient_ConnectionConfiguration,
-                                           struct Net_UserData,
-                                           PCPClient_ConnectionManager_t> (connector,
+          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
                                                                            *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                            data_p->configuration->userData,
                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
@@ -1734,16 +1706,12 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                            true);
       else
         handle =
-          Net_Client_Common_Tools::connect<ACE_INET_Addr,
-                                           PCPClient_OutboundAsynchConnector_t,
-                                           PCPClient_ConnectionConfiguration,
-                                           struct Net_UserData,
-                                           PCPClient_ConnectionManager_t> (asynch_connector,
-                                                                           *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                           data_p->configuration->userData,
-                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                           true,
-                                                                           true);
+          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
+                                                                                 *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                                 data_p->configuration->userData,
+                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
+                                                                                 true,
+                                                                                 true);
       if (unlikely (handle == ACE_INVALID_HANDLE))
       {
         ACE_DEBUG ((LM_ERROR,

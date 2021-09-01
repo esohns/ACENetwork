@@ -27,17 +27,13 @@
 class Net_Client_Common_Tools
 {
  public:
-  template <typename AddressType,
-            typename ConnectorType,
-            typename ConnectionConfigurationType,
-            typename UserDataType,
-            typename ConnectionManagerType>
+  template <typename ConnectorType>
   static ACE_HANDLE connect (ConnectorType&,
-                             const ConnectionConfigurationType&, // (connection-) configuration
-                             const UserDataType&,                // user data
-                             const AddressType&,                 // (peer) address
-                             bool = true,                        // wait ?
-                             bool = true);                       // peer address ? : local address
+                             const typename ConnectorType::CONFIGURATION_T&, // (connection-) configuration
+                             const typename ConnectorType::USERDATA_T&,      // user data
+                             const typename ConnectorType::ADDRESS_T&,       // (peer) address
+                             bool = true,                                    // wait ?
+                             bool = true);                                   // peer address ? : local address
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Common_Tools ())

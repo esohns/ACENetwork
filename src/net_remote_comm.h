@@ -23,6 +23,8 @@
 
 #include "ace/Global_Macros.h"
 
+// *TODO*: make this portable by considering host endianness !!!
+
 class Net_Remote_Comm
 {
  public:

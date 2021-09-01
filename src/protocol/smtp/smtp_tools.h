@@ -35,6 +35,8 @@ class SMTP_Tools
 
   static std::string CodeToString (SMTP_Code_t);
 
+  static std::string CommandToString (SMTP_Command_t);
+
   static std::string StateToString (enum SMTP_ProtocolState);
 
   inline static bool isSuccess (SMTP_Code_t code_in) { return ((code_in >= 200) && (code_in < 300)); }

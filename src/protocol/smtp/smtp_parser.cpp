@@ -438,7 +438,7 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   156,   156,   156,   159,   160,   161,   162,   163,   165
+       0,   156,   156,   156,   160,   161,   162,   163,   164,   166
 };
 #endif
 
@@ -1148,6 +1148,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 3: /* message: "reply_code" $@1 text_lines "reply_end"  */
                                                                     { ((*yyvalp).ival) = 3 + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yysval.ival);
+                                                                      struct SMTP_Record* record_p = &driver->current ();
+                                                                      driver->record (record_p);
                                                                       YYACCEPT; }
     break;
 
