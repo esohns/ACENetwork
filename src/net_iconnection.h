@@ -49,6 +49,7 @@ class Net_ISocketHandler
 {
  public:
   virtual ACE_Message_Block* allocateMessage (unsigned int) = 0; // requested size
+  virtual bool initiate_read () = 0;
 };
 
 class Net_IAsynchSocketHandler
@@ -73,8 +74,9 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType>
 class Net_IConnection_T
- : public virtual Common_IReferenceCount
- , public virtual Common_IStatistic_T<StatisticContainerType>
+ : virtual public Net_ISocketHandler // *TODO*: this is a mess !
+ , virtual public Common_IReferenceCount
+ , virtual public Common_IStatistic_T<StatisticContainerType>
  //, public Common_IInitialize_T<ConfigurationType>
  //, public Common_IGetR_T<ConfigurationType>
  , public virtual Common_IDumpState
@@ -130,12 +132,12 @@ template <typename AddressType,
           ////////////////////////////////
           typename HandlerConfigurationType> // socket-
 class Net_ISocketConnection_T
- : public virtual Net_IConnection_T<AddressType,
+ : virtual public Net_IConnection_T<AddressType,
                                     //ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
- , public virtual Net_ITransportLayer_T<HandlerConfigurationType>
- , public virtual Common_IInitialize_T<HandlerConfigurationType>
+ , virtual public Net_ITransportLayer_T<HandlerConfigurationType>
+ , virtual public Common_IInitialize_T<HandlerConfigurationType>
  , public Common_IGetR_2_T<HandlerConfigurationType>
 {
  public:
@@ -159,7 +161,7 @@ template <typename AddressType,
           typename StreamType,
           typename StreamStatusType>         // state machine-
 class Net_IStreamConnection_T
- : public virtual Net_ISocketConnection_T<AddressType,
+ : virtual public Net_ISocketConnection_T<AddressType,
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,

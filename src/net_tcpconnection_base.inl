@@ -113,7 +113,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
           (error != ENOTSOCK)     && // 88 : *TODO*
           (error != ECONNABORTED) && // 103: connection abort()ed locally
           (error != ECONNRESET))     // 104: connection reset by peer (read)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_(SSL_)SOCK_Stream::recv() (handle was: 0x%@): \"%m\", aborting\n"),
@@ -124,7 +124,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                     ACE_TEXT ("%u: failed to ACE_(SSL_)SOCK_Stream::recv() (handle was: %d): \"%m\", aborting\n"),
                     this->id (),
                     handle_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
       // *TODO*: remove type inference
       { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock, -1);
@@ -278,7 +278,7 @@ continue_:
                      (error != ENOTSOCK)     &&
                      (error != ECONNABORTED) && // <-- connection abort()ed locally
                      (error != ECONNRESET)))
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_SOCK_Stream::send_n() (handle was: 0x%@): \"%m\", aborting\n"),
@@ -289,7 +289,7 @@ continue_:
                     ACE_TEXT ("%u: failed to ACE_SOCK_Stream::send_n() (handle was: %d): \"%m\", aborting\n"),
                     this->id (),
                     handle_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       // *TODO*: remove type inference
       { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock, -1);
         if (likely (inherited::state_.status == NET_CONNECTION_STATUS_OK))
@@ -383,29 +383,8 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))
     goto error;
 
-  // step2: start reading (need to pass any data ?)
-  if (likely (!messageBlock_in.length ()))
-  {
-    if (unlikely (!inherited::initiate_read ()))
-    {
-      int error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ENXIO)                 && // 6    : happens on Win32
-          (error != EFAULT)                && // 14   : *TODO*: happens on Win32
-          (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
-          (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
-          (error != ENOTSOCK)              && // 10038: local close()
-          (error != ECONNRESET))              // 10054: reset by peer
-#else
-      if (error != ECONNRESET) // 104: reset by peer
-#endif
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
-                    this->id ()));
-      goto error;
-    } // end IF
-  } // end IF
-  else
+  // step2: process any data ?
+  if (unlikely (messageBlock_in.length ()))
   {
     ACE_Message_Block* duplicate_p = messageBlock_in.duplicate ();
     if (!duplicate_p)
@@ -437,14 +416,14 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
     // forward; update it to the beginning position
     duplicate_p->wr_ptr (duplicate_p->wr_ptr () - bytes_transferred);
     // invoke ourselves (see handle_read_stream())
-    fake_result_p->complete (duplicate_p->length (), // bytes read
-                             1,                      // success
-                             NULL,                   // ACT
-                             0);                     // error
+    fake_result_p->complete (bytes_transferred, // bytes read
+                             1,                 // success
+                             NULL,              // ACT
+                             0);                // error
 
     // clean up
     delete fake_result_p;
-  } // end ELSE
+  } // end IF
   ACE_ASSERT (this->count () >= 2); // connection manager, read operation
                                     //  (+ stream module(s))
 
@@ -537,7 +516,7 @@ send:
                                     NULL,                                 // asynchronous completion token
                                     0,                                    // priority
                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();

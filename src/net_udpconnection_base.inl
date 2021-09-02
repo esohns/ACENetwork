@@ -282,12 +282,12 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::address_).c_str ()),
                     message_block_p->length (),
                     handle_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       } // end IF
 #if defined (ACE_LINUX)
       if (inherited::errorQueue_)
         this->processErrorQueue ();
-#endif
+#endif // ACE_LINUX
       message_block_p->release (); message_block_p = NULL;
       result = -1; // <-- remove 'this' from dispatch
       break;
@@ -341,6 +341,32 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType>
+bool
+Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                        SocketHandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        UserDataType>::initiate_read ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::initiate_read"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
+    return true; // do nothing
+
+  return inherited::initiate_read ();
+}
+
+template <ACE_SYNCH_DECL,
+          typename SocketHandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType>
 void
 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         SocketHandlerType,
@@ -376,7 +402,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
       if (error != ENOTSOCK) // 10038: Win32: handle is not a socket (i.e. socket already closed)
 #else
       if (error != EBADF)    //     9: Linux: socket already closed
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
@@ -395,7 +421,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 #else
       if ((error != EBADF) &&  //   9: Linux: socket already closed
           (error != ENOTCONN)) // 107: Linux: not connected
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
     } // end IF
@@ -439,7 +465,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     this->id (), inherited::writeHandle_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   inherited::HANDLER_T::writeHandle_ = ACE_INVALID_HANDLE;
 
@@ -569,7 +595,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
     } // end SWITCH
   } // end FOR
 }
-#endif
+#endif // ACE_LINUX
 
 /////////////////////////////////////////
 
@@ -612,6 +638,10 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
+  {
+    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->delayRead);
+  } // end IF
 
   // step1: initialize asynchronous I/O
   inherited::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
@@ -620,34 +650,8 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))
     goto error;
 
-  // step2: start reading ? (need to pass any data ?)
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
-  { ACE_ASSERT (!messageBlock_in.length ());
-    goto continue_;
-  } // end IF
-
-  if (likely (!messageBlock_in.length ()))
-  {
-    if (unlikely (!this->initiate_read ()))
-    {
-      int error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ENXIO)                 && // 6    : happens on Win32
-          (error != EFAULT)                && // 14   : *TODO*: happens on Win32
-          (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
-          (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
-          (error != ENOTSOCK)              && // 10038: local close()
-          (error != ECONNRESET))              // 10054: reset by peer
-#else
-      if (error != ECONNRESET) // 104: reset by peer
-#endif // ACE_WIN32 || ACE_WIN64
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
-                    this->id ()));
-      goto error;
-    } // end IF
-  } // end IF
-  else
+  // step2: process any data ?
+  if (unlikely (messageBlock_in.length ()))
   {
     ACE_Message_Block* duplicate_p = messageBlock_in.duplicate ();
     if (!duplicate_p)
@@ -659,19 +663,21 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     // fake a result to emulate regular behavior
     ACE_Proactor* proactor_p = inherited::proactor ();
     ACE_ASSERT (proactor_p);
-    ACE_Asynch_Read_Stream_Result_Impl* fake_result_p =
-        proactor_p->create_asynch_read_stream_result (inherited::proxy (),                            // handler proxy
-                                                      handle_in,                                      // socket handle
-                                                      *duplicate_p,                                   // buffer
-                                                      static_cast<u_long> (duplicate_p->capacity ()), // (maximum) #bytes to read
-                                                      NULL,                                           // ACT
-                                                      ACE_INVALID_HANDLE,                             // event
-                                                      0,                                              // priority
-                                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);           // signal number
+    ACE_Asynch_Read_Dgram_Result_Impl* fake_result_p =
+        proactor_p->create_asynch_read_dgram_result (inherited::proxy (),                  // handler proxy
+                                                     handle_in,                            // socket handle
+                                                     duplicate_p,                          // buffer
+                                                     duplicate_p->size (),                 // (maximum) #bytes to read
+                                                     0,                                    // flags
+                                                     PF_INET,                              // protocol family
+                                                     NULL,                                 // ACT
+                                                     ACE_INVALID_HANDLE,                   // event
+                                                     0,                                    // priority
+                                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
     if (!fake_result_p)
     {
       ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_stream_result: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_dgram_result: \"%m\", aborting\n")));
       goto error;
     } // end IF
     size_t bytes_transferred = duplicate_p->length ();
@@ -679,10 +685,10 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     // forward; update it to the beginning position
     duplicate_p->wr_ptr (duplicate_p->wr_ptr () - bytes_transferred);
     // invoke ourselves (see handle_read_stream())
-    fake_result_p->complete (duplicate_p->length (), // bytes read
-                             1,                      // success
-                             NULL,                   // ACT
-                             0);                     // error
+    fake_result_p->complete (bytes_transferred, // bytes read
+                             1,                 // success
+                             NULL,              // ACT
+                             0);                // error
 
     // clean up
     delete fake_result_p;
@@ -855,6 +861,30 @@ template <typename SocketHandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType>
+bool
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              UserDataType>::initiate_read ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::initiate_read"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
+    return true; // do nothing
+
+  return inherited::initiate_read ();
+}
+
+template <typename SocketHandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType>
 void
 Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               ConfigurationType,
@@ -889,7 +919,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
       if (error != ENOTSOCK) // 10038: Win32: handle is not a socket (i.e. socket already closed)
 #else
       if (error != EBADF)    //     9: Linux: socket already closed
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
@@ -908,7 +938,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
 #else
       if ((error != EBADF) &&  //   9: Linux: socket already closed
           (error != ENOTCONN)) // 107: Linux: not connected
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
     } // end IF
@@ -951,7 +981,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                   ACE_TEXT ("%u: failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                   this->id (),
                   handle_h, ACE_Event_Handler::SIGNAL_MASK));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   result = inherited::SOCKET_T::close ();
   if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
@@ -969,7 +999,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     this->id (), inherited::writeHandle_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     inherited::writeHandle_ = ACE_INVALID_HANDLE;
   } // end IF
 

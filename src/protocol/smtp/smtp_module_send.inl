@@ -52,6 +52,7 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
                    ConnectionStateType>::SMTP_Module_Send_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
+ , connection_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::SMTP_Module_Send_T"));
 
@@ -64,27 +65,20 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType,
           typename ConfigurationType,
           typename ConnectionStateType>
-bool
 SMTP_Module_Send_T<ACE_SYNCH_USE,
                    TimePolicyType,
                    ControlMessageType,
                    DataMessageType,
                    SessionMessageType,
                    ConfigurationType,
-                   ConnectionStateType>::initialize (const ConfigurationType& configuration_in,
-                                                     Stream_IAllocator* allocator_in)
+                   ConnectionStateType>::~SMTP_Module_Send_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::~SMTP_Module_Send_T"));
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.protocolConfiguration);
-
-  if (unlikely (inherited::isInitialized_))
+  if (unlikely (connection_))
   {
+    connection_->decrease (); connection_ = NULL;
   } // end IF
-
-  return inherited::initialize (configuration_in,
-                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -114,6 +108,7 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
   ACE_ASSERT (inherited::configuration_->request);
   ACE_ASSERT (inherited::sessionData_);
+  ACE_ASSERT (connection_);
   ACE_ASSERT (message_inout->isInitialized ());
 
   const typename DataMessageType::DATA_T& data_container_r =
@@ -125,7 +120,6 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
     const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   int result = -1;
-  //ACE_Message_Block* message_block_p = NULL;
   DataMessageType* message_p = NULL;
   typename DataMessageType::DATA_T* data_container_2 = NULL;
   typename DataMessageType::DATA_T::DATA_T* data_p = NULL;
@@ -140,12 +134,10 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
     return;
   } // end IF
 
-  // sanity check(s)
-  ACE_ASSERT (!session_data_r.connectionStates.empty ());
-  ConnectionStateType* state_p =
-    static_cast<ConnectionStateType*> ((*session_data_r.connectionStates.begin ()).second);
+  ConnectionStateType& state_r =
+    const_cast<ConnectionStateType&> (connection_->state ());
 continue_:
-  switch (state_p->protocolState)
+  switch (state_r.protocolState)
   {
     case SMTP_STATE_INVALID:
     {
@@ -153,8 +145,8 @@ continue_:
         goto protocol_error;
 
       // --> greeting has been received; send MAIL command
-      state_p->protocolState = SMTP_STATE_GREETING_RECEIVED;
-      ++state_p->protocolState;
+      state_r.protocolState = SMTP_STATE_GREETING_RECEIVED;
+      ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_EHLO;
       data_p->request.domain =
@@ -167,7 +159,7 @@ continue_:
         goto protocol_error;
 
       // --> EHLO has been sent; send AUTH/MAIL ?
-      ++state_p->protocolState;
+      ++state_r.protocolState;
 
       // retrieve any supported authentication mechanisms
       std::vector<std::string> authentication_mechanisms_a;
@@ -209,7 +201,7 @@ continue_:
 
 no_authentication_:
       // proceed without authentication
-      state_p->protocolState = SMTP_STATE_MAIL_SENT;
+      state_r.protocolState = SMTP_STATE_MAIL_SENT;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_MAIL;
       data_p->request.from = inherited::configuration_->request->from;
@@ -222,7 +214,7 @@ no_authentication_:
         goto protocol_error;
 
       // --> AUTH has been sent; send [LOGIN] username
-      ++state_p->protocolState;
+      ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_AUTH;
       data_p->request.parameters.push_back (Common_Math_Tools::encodeBase64 (inherited::configuration_->protocolConfiguration->username.c_str (),
@@ -235,7 +227,7 @@ no_authentication_:
         goto protocol_error;
 
       // --> AUTH [LOGIN] username has been sent; send [LOGIN] password
-      ++state_p->protocolState;
+      ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_AUTH;
       data_p->request.parameters.push_back (Common_Math_Tools::encodeBase64 (inherited::configuration_->protocolConfiguration->password.c_str (),
@@ -248,7 +240,7 @@ no_authentication_:
         goto protocol_error;
 
       // --> AUTH [LOGIN] password has been sent; send MAIL
-      ++state_p->protocolState; ++state_p->protocolState;
+      ++state_r.protocolState; ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_MAIL;
       data_p->request.from = inherited::configuration_->request->from;
@@ -261,7 +253,7 @@ no_authentication_:
         goto protocol_error;
 
       // --> MAIL has been sent; send RCPT(s)
-      ++state_p->protocolState;
+      ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_RCPT;
       ACE_ASSERT (!inherited::configuration_->request->to.empty ());
@@ -281,7 +273,7 @@ no_authentication_:
       {
         // --> RCPT(s) have been sent; send DATA
 
-        ++state_p->protocolState;
+        ++state_r.protocolState;
         goto continue_;
       } // end IF
 
@@ -294,7 +286,7 @@ no_authentication_:
     case SMTP_STATE_RCPTS_SENT:
     {
       // --> RCPT(s) have been sent; send DATA
-      ++state_p->protocolState;
+      ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_DATA;
       break;
@@ -305,7 +297,7 @@ no_authentication_:
         goto protocol_error;
 
       // --> DATA has been sent; send message data
-      ++state_p->protocolState;
+      ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_DATA_2;
       data_p->request.data = inherited::configuration_->request->data;
@@ -317,7 +309,7 @@ no_authentication_:
         goto protocol_error;
 
       // --> message has been sent; send QUIT
-      ++state_p->protocolState;
+      ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_QUIT;
       break;
@@ -328,8 +320,8 @@ no_authentication_:
         goto protocol_error;
 
       // --> QUIT has been sent; reset state
-      state_p->protocolState = SMTP_STATE_INVALID;
-      message_p->release (); message_p = NULL;
+      state_r.protocolState = SMTP_STATE_INVALID;
+      delete data_p; data_p = NULL;
       return;
     }
     default:
@@ -337,7 +329,8 @@ no_authentication_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: invalid/unknown protocol state (was: \"%s\"), returning\n"),
                   inherited::mod_->name (),
-                  ACE_TEXT (SMTP_Tools::StateToString (state_p->protocolState).c_str ())));
+                  ACE_TEXT (SMTP_Tools::StateToString (state_r.protocolState).c_str ())));
+      delete data_p; data_p = NULL;
       return;
     }
   } // end SWITCH
@@ -350,7 +343,7 @@ no_authentication_:
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u): \"%m\", returning\n"),
                 inherited::mod_->name (),
                 inherited::configuration_->allocatorConfiguration->defaultBufferSize));
-    --state_p->protocolState; // reset state
+    --state_r.protocolState; // reset state
     goto error;
   } // end IF
 
@@ -361,7 +354,7 @@ no_authentication_:
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("%s: failed to allocate memory: \"%m\", returning\n"),
                 inherited::mod_->name ()));
-    --state_p->protocolState; // reset state
+    --state_r.protocolState; // reset state
     goto error;
   } // end IF
   data_container_2->setPR (data_p);
@@ -377,7 +370,7 @@ no_authentication_:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_Task_T::reply(): \"%m\", returning\n"),
                 inherited::mod_->name ()));
-    --state_p->protocolState; // reset state
+    --state_r.protocolState; // reset state
     goto error;
   } // end IF
 
@@ -387,7 +380,7 @@ protocol_error:
   ACE_DEBUG ((LM_ERROR,
               ACE_TEXT ("%s[%s]: received error reply code (was: \"%s\"):\n%s\n, returning\n"),
               inherited::mod_->name (),
-              ACE_TEXT (SMTP_Tools::StateToString (state_p->protocolState).c_str ()),
+              ACE_TEXT (SMTP_Tools::StateToString (state_r.protocolState).c_str ()),
               ACE_TEXT (SMTP_Tools::CodeToString (data_r.code).c_str ()),
               ACE_TEXT (SMTP_Tools::dump (data_r).c_str ())));
 error:
@@ -434,7 +427,12 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
     { ACE_ASSERT (inherited::sessionData_);
       typename SessionMessageType::DATA_T::DATA_T& session_data_r =
         const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
+      // sanity check(s)
       ACE_ASSERT (session_data_r.connection);
+      ACE_ASSERT (!connection_);
+
+      connection_ = session_data_r.connection;
+      connection_->increase ();
       break;
     }
     case STREAM_SESSION_MESSAGE_DISCONNECT:
@@ -452,6 +450,10 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
     }
     case STREAM_SESSION_MESSAGE_END:
     {
+      if (likely (connection_))
+      {
+        connection_->decrease (); connection_ = NULL;
+      } // end IF
       break;
     }
     default:

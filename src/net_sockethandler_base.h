@@ -44,7 +44,7 @@ class Net_SocketHandlerBase_T
  protected:
   Net_SocketHandlerBase_T ();
 
-  // implement Net_ISocketHandler
+  // implement (part of) Net_ISocketHandler
   virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
   // *TODO*: remove this ASAP

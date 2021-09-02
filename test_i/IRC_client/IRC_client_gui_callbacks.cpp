@@ -190,7 +190,7 @@ connection_setup_function (void* arg_in)
   const Stream_Module_t* module_p = NULL;
   const Stream_Module_t* current_p = NULL;
   Stream_Module_t* tail_p = NULL;
-  IRC_Client_Connection_Manager_t::CONNECTION_T* connection_2 = NULL;
+  IRC_Client_Connection_Manager_t::ICONNECTION_T* connection_2 = NULL;
   unsigned short current_port = 0;
   int result_3 = -1;
   bool done = false;

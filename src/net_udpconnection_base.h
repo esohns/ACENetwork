@@ -114,6 +114,7 @@ class Net_UDPConnectionBase_T
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
 
   // implement (part of) Net_IStreamConnection_T
+  virtual bool initiate_read ();
   // *IMPORTANT NOTE*: for write-only connections, this returns the outbound
   //                   socket handle, else the inbound socket handle
   virtual void info (ACE_HANDLE&,           // return value: handle
@@ -206,7 +207,8 @@ class Net_AsynchUDPConnectionBase_T
   // *NOTE*: send stream data to the peer
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
 
-  // implement (part of) Net_IStreamConnection_T
+  // override (part of) Net_IStreamConnection_T
+  virtual bool initiate_read ();
   // *IMPORTANT NOTE*: for write-only connections, this returns the outbound
   //                   socket handle, else the inbound socket handle
   virtual void info (ACE_HANDLE&,           // return value: handle
@@ -225,9 +227,6 @@ class Net_AsynchUDPConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T& operator= (const Net_AsynchUDPConnectionBase_T&))
 
   //using inherited2::initialize;
-
-  // override (part of) Net_IAsynchSocketHandler
-  //virtual bool initiate_read ();
 
   // helper method(s)
 #if defined (ACE_LINUX)

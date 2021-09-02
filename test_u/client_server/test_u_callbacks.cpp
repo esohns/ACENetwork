@@ -922,8 +922,8 @@ button_ping_clicked_cb (GtkWidget* widget_in,
 #endif
 
   Net_IPing* iping_p = NULL;
-  Test_U_TCPConnectionManager_t::CONNECTION_T* connection_base_p = NULL;
-  Test_U_UDPConnectionManager_t::CONNECTION_T* connection_base_2 = NULL;
+  Test_U_TCPConnectionManager_t::ICONNECTION_T* connection_base_p = NULL;
+  Test_U_UDPConnectionManager_t::ICONNECTION_T* connection_base_2 = NULL;
   switch (data_p->configuration->protocolConfiguration.transportLayer)
   {
     case NET_TRANSPORTLAYER_TCP:
@@ -1296,7 +1296,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
         typename Test_U_UDPConnectionManager_t::INTERFACE_T* connection_manager_p =
           TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
         ACE_ASSERT (connection_manager_p);
-        typename Test_U_UDPConnectionManager_t::CONNECTION_T* connection_p =
+        typename Test_U_UDPConnectionManager_t::ICONNECTION_T* connection_p =
           connection_manager_p->get (connection_configuration_p->socketConfiguration.listenAddress,
                                      false);
         ACE_ASSERT (connection_p);

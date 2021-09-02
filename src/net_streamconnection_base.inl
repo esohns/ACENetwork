@@ -230,13 +230,27 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
   inherited2::state_.handle = inherited::get_handle ();
 
-  // step2: initialize/start stream
-  // step2a: connect the stream head message queue with the reactor notification
-  //         pipe ?
+  // step2: register with the connection manager ?
+  if (likely (inherited2::isManaged_))
+  {
+    if (unlikely (!inherited2::register_ ()))
+    {
+      // *NOTE*: (most probably) maximum number of connections has been reached
+      //ACE_DEBUG ((LM_ERROR,
+      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+      goto error;
+    } // end IF
+    handle_manager = true;
+  } // end IF
+
+  // step3: initialize/start stream
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_ == configuration_p);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration->configuration_);
   //if (!inherited2::configuration_->useThreadPerConnection)
+  // step3a: connect the stream head message queue with the reactor notification
+  //         pipe
   inherited2::configuration_->streamConfiguration->configuration_->notificationStrategy =
     static_cast<HandlerType*> (this);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
@@ -258,7 +272,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     goto error;
   } // end IF
 
-  // update session data
+  // step3b: update session data
   // *TODO*: remove type inferences
   session_data_container_p = &stream_.getR_2 ();
   ACE_ASSERT (session_data_container_p);
@@ -270,7 +284,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                                                              &(inherited2::state_)));
   } // end lock scope
 
-  // step2d: start stream
+  // step3d: start stream
   stream_.start ();
   if (unlikely (!stream_.isRunning ()))
   {
@@ -281,26 +295,17 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
   handle_stream = true;
 
-  if (unlikely (!inherited::registerWithReactor ()))
+  // step4: start receiving ?
+  if (likely (!inherited2::configuration_->delayRead))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to register with the reactor, aborting\n"),
-                id ()));
-    goto error;
-  } // end IF
-  handle_reactor = true;
-
-  // step3: register with the connection manager ?
-  if (likely (inherited2::isManaged_))
-  {
-    if (unlikely (!inherited2::register_ ()))
+    if (unlikely (!inherited::registerWithReactor ()))
     {
-      // *NOTE*: (most probably) maximum number of connections has been reached
-      //ACE_DEBUG ((LM_ERROR,
-      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to register with the reactor, aborting\n"),
+                  id ()));
       goto error;
     } // end IF
-    handle_manager = true;
+    handle_reactor = true;
   } // end IF
 
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
@@ -312,12 +317,10 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 error:
   if (handle_reactor)
     inherited::deregisterFromReactor ();
-
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
                   false, // wait for upstream (if any) ?
                   true); // locked access ?
-
   if (handle_manager)
     inherited2::deregister ();
 
@@ -659,7 +662,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
               id (), handle,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 template <ACE_SYNCH_DECL,
@@ -841,7 +844,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     Net_Common_Tools::setNoDelay (handle, true);
     Net_Common_Tools::setNoDelay (handle, no_delay);
   } // end IF
-#endif
+#endif // ACE_LINUX
 }
 
 template <ACE_SYNCH_DECL,
@@ -1262,12 +1265,15 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *NOTE*: handle_in is ACE_INVALID_HANDLE for UDP connections
   //ACE_ASSERT (handle_in == ACE_INVALID_HANDLE);
 
+  bool handle_read = false;
   bool handle_manager = false;
   bool handle_stream = false;
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
     NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   AddressType local_SAP, peer_SAP;
+
+  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
 
   // *NOTE*: act() has been called already, Net_ConnectionBase has been
   //         initialized
@@ -1301,55 +1307,62 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     handle_manager = true;
   } // end IF
 
-  // step2: initialize/start stream
+  // step3: initialize/start stream
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
-  // step2a: connect the stream head message queue with this handler; the queue
-  //         will forward outbound data to handle_output ()
-  //inherited2::configuration_->streamConfiguration->configuration->notificationStrategy =
-  //  this;
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock ());
-    if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
-                                       inherited2::state_.handle)))
+  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
+                                      inherited2::state_.handle)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
+                id (),
+                ACE_TEXT (stream_.name ().c_str ())));
+    goto error;
+  } // end IF
+  if (unlikely (!stream_.initialize_2 (this,
+                                        ACE_TEXT_ALWAYS_CHAR ("ACE_Stream_Head"))))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
+                id (),
+                ACE_TEXT (stream_.name ().c_str ())));
+    goto error;
+  } // end IF
+
+  // step3b: update session data
+  // *TODO*: remove type inferences
+  session_data_container_p = &stream_.getR_2 ();
+  session_data_p =
+    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
+  ACE_ASSERT (session_data_p->lock);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
+    session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
+                                                            &(inherited2::state_)));
+  } // end lock scope
+
+  // step3c: start stream
+  stream_.start ();
+  if (unlikely (!stream_.isRunning ()))
+  { // already closed ?
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
+                id ()));
+    goto error;
+  } // end IF
+  handle_stream = true;
+
+  // step4: start receiving ?
+  if (likely (!inherited2::configuration_->delayRead))
+  {
+    if (unlikely (!initiate_read ()))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
-                  id (),
-                  ACE_TEXT (stream_.name ().c_str ())));
-      goto error;
-    } // end IF
-    if (unlikely (!stream_.initialize_2 (this,
-                                         ACE_TEXT_ALWAYS_CHAR ("ACE_Stream_Head"))))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
-                  id (),
-                  ACE_TEXT (stream_.name ().c_str ())));
-      goto error;
-    } // end IF
-
-    // step2b: update session data
-    // *TODO*: remove type inferences
-    session_data_container_p = &stream_.getR_2 ();
-    session_data_p =
-      &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
-    ACE_ASSERT (session_data_p->lock);
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
-      session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
-                                                              &(inherited2::state_)));
-    } // end lock scope
-
-    // step2c: start stream
-    stream_.start ();
-    if (unlikely (!stream_.isRunning ()))
-    { // already closed ?
-      ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
+                  ACE_TEXT ("%u: failed to Net_ISocketHandler::initiate_read(), aborting\n"),
                   id ()));
       goto error;
     } // end IF
-  } // end lock scope
-  handle_stream = true;
+    handle_read = true;
+  } // end IF
 
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
@@ -1358,17 +1371,17 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   return;
 
 error:
-  inherited2::state_.handle = ACE_INVALID_HANDLE;
-  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
-
+  if (handle_read)
+    cancel ();
   if (handle_stream)
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock ());
     stream_.stop (true,  // wait for completion ?
+                  false, // wait for upstream (if any) ?
                   true); // locked access ?
-  } // end IF / lock scope
-
   if (handle_manager)
     inherited2::deregister ();
+
+  inherited2::state_.handle = ACE_INVALID_HANDLE;
+  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 }
 
 template <typename HandlerType,
@@ -1530,7 +1543,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
               id (), handle,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 template <typename HandlerType,
@@ -1643,7 +1656,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     Net_Common_Tools::setNoDelay (handle, true);
     Net_Common_Tools::setNoDelay (handle, no_delay);
   } // end IF
-#endif
+#endif // ACE_LINUX
 }
 
 template <typename HandlerType,
@@ -2024,7 +2037,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                   ACE_TEXT ("%u: failed to read from input stream (handle was: %d): \"%s\", continuing\n"),
                   id (), result_in.handle (),
                   ACE::sock_error (static_cast<int> (error))));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   bytes_transferred_i = result_in.bytes_transferred ();
@@ -2050,7 +2063,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     ACE_TEXT ("%u: failed to read from input stream (handle was: %d): \"%s\", returning\n"),
                     id (), result_in.handle (),
                     ACE::sock_error (static_cast<int> (error))));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
     // *** GOOD CASES ***
@@ -2157,7 +2170,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         (error != ECONNREFUSED))              // 111: happens on Linux
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -2171,7 +2184,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                   id (),
                   result_in.handle (),
                   ACE::sock_error (static_cast<int> (error))));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   bytes_transferred_i = result_in.bytes_transferred ();
@@ -2190,7 +2203,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       if (unlikely ((error != EBADF)                   && // 9  : local close (), happens on Linux
                     (error != EPIPE)                   && // 32 :
                     (error != ECONNREFUSED)))             // 111:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("%u: failed to read from input stream (0x%@): \"%s\", aborting\n"),
@@ -2203,7 +2216,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     id (),
                     result_in.handle (),
                     ACE::sock_error (static_cast<int> (error))));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     }
     // *** GOOD CASES ***

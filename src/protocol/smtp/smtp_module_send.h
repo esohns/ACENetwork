@@ -27,6 +27,8 @@
 
 #include "stream_task_base_synch.h"
 
+#include "smtp_network.h"
+
 extern const char libacenetwork_protocol_default_smtp_send_module_name_string[];
 
 template <ACE_SYNCH_DECL,
@@ -67,12 +69,11 @@ class SMTP_Module_Send_T
 #else
   SMTP_Module_Send_T (typename inherited::ISTREAM_T*); // stream handle
 #endif // ACE_WIN32 || ACE_WIN64
-  inline virtual ~SMTP_Module_Send_T () {}
+  virtual ~SMTP_Module_Send_T ();
 
   // override (part of) Stream_IModuleHandler_T
-  //virtual const ConfigurationType& get () const;
-  virtual bool initialize (const ConfigurationType&,
-                           Stream_IAllocator* = NULL);
+  //virtual bool initialize (const ConfigurationType&,
+  //                         Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -84,6 +85,8 @@ class SMTP_Module_Send_T
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_Send_T ())
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_Send_T (const SMTP_Module_Send_T&))
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_Send_T& operator= (const SMTP_Module_Send_T&))
+
+  SMTP_IConnection_t* connection_;
 };
 
 // include template definition

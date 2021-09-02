@@ -83,7 +83,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
                   configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     if (unlikely (!Net_Common_Tools::setSocketBuffer (handle,
                                                       SO_SNDBUF,
@@ -99,7 +99,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
                   configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
 
@@ -117,7 +117,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
                 (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return -1;
   } // end IF
   if (unlikely (!Net_Common_Tools::setKeepAlive (handle,
@@ -133,7 +133,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
                 (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return -1;
   } // end IF
   if (unlikely (!Net_Common_Tools::setLinger (handle,
@@ -150,7 +150,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
                 (configuration_p->linger ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return -1;
   } // end IF
 
@@ -240,7 +240,6 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                         mask_in));
         } // end IF
       } // end IF
-
       break;
     }
     default:
@@ -256,8 +255,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %d) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
   } // end SWITCH

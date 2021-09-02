@@ -300,10 +300,20 @@ class Net_StreamConnectionConfiguration_T
  public:
   Net_StreamConnectionConfiguration_T ()
    : inherited ()
+   , delayRead (false)
    , streamConfiguration (NULL)
   {}
   //inline virtual ~Net_StreamConnectionConfiguration_T () {}
 
+  // *IMPORTANT NOTE*: this delays setting up the receiving procedure
+  //                   (i.e. registering with the reactor, starting asynch
+  //                   receive) so that 'downstream' can 'link' before data
+  //                   starts arriving. This is useful when the server starts
+  //                   to send data immediately on a successful connect by the
+  //                   client: no data is lost
+  // *NOTE*: that Stream_Module_Net_IO_Stream_T automatically calls
+  //         initiate_read() in its onLink() implementation
+  bool                     delayRead;
   StreamConfigurationType* streamConfiguration;
 };
 

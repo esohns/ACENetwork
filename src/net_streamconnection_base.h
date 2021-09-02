@@ -113,8 +113,8 @@ class Net_StreamConnectionBase_T
   using inherited2::initialize;
 
   // implement (part of) Net_IStreamConnection_T
-  //inline virtual unsigned int increase () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::increase (); }
-  //inline virtual unsigned int decrease () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::decrease (); }
+  inline virtual bool initiate_read () { return inherited::registerWithReactor (); }
+
   virtual bool collect (StatisticContainerType&);
   inline virtual void report () const { stream_.report (); }
   //using CONNECTION_BASE_T::getR;

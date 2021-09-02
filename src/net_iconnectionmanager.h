@@ -66,7 +66,7 @@ class Net_IConnectionManager_T
   typedef ConfigurationType CONFIGURATION_T;
   typedef Net_IConnection_T<AddressType,
                             StateType,
-                            StatisticContainerType> CONNECTION_T;
+                            StatisticContainerType> ICONNECTION_T;
   typedef Common_IStatistic_T<StatisticContainerType> ISTATISTIC_T;
 
   virtual void set (const ConfigurationType&, // connection handler (default)
@@ -77,11 +77,11 @@ class Net_IConnectionManager_T
                     UserDataType*&) = 0;  // return value: (stream) user data
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
-  virtual CONNECTION_T* operator[] (unsigned int) const = 0; // index
-  virtual CONNECTION_T* get (Net_ConnectionId_t) const = 0; // id
-  virtual CONNECTION_T* get (const AddressType&,     // address
+  virtual ICONNECTION_T* operator[] (unsigned int) const = 0; // index
+  virtual ICONNECTION_T* get (Net_ConnectionId_t) const = 0; // id
+  virtual ICONNECTION_T* get (const AddressType&,     // address
                              bool = true) const = 0; // peer address ? : local address
-  virtual CONNECTION_T* get (ACE_HANDLE) const = 0; // socket handle
+  virtual ICONNECTION_T* get (ACE_HANDLE) const = 0; // socket handle
 };
 
 #endif
