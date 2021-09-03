@@ -1372,7 +1372,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
 error:
   if (handle_read)
-    cancel ();
+    this->cancel ();
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
                   false, // wait for upstream (if any) ?

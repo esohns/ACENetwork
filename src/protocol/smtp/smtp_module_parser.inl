@@ -69,8 +69,8 @@ SMTP_Module_Parser_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (record_inout);
   ACE_ASSERT (record_inout == inherited::record_);
-  ACE_ASSERT (headFragment_);
-  ACE_ASSERT (!headFragment_->isInitialized ());
+  ACE_ASSERT (inherited::headFragment_);
+  ACE_ASSERT (!inherited::headFragment_->isInitialized ());
 
   typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
@@ -88,32 +88,33 @@ SMTP_Module_Parser_T<ACE_SYNCH_USE,
   data_container_p->setPR (record_inout);
   ACE_ASSERT (!record_inout);
   data_container_2 = data_container_p;
-  headFragment_->initialize (data_container_2,
-                             headFragment_->sessionId (),
-                             NULL);
+  inherited::headFragment_->initialize (data_container_2,
+                                        inherited::headFragment_->sessionId (),
+                                        NULL);
 
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
-  message_p = static_cast<DataMessageType*> (headFragment_->cont ());
+  message_p =
+      static_cast<DataMessageType*> (inherited::headFragment_->cont ());
   while (message_p)
   {
     data_container_p->increase ();
     data_container_2 = data_container_p;
     message_p->initialize (data_container_2,
-                           headFragment_->sessionId (),
+                           inherited::headFragment_->sessionId (),
                            NULL);
     message_p = static_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
   // push message downstream
-  result = inherited::put_next (headFragment_);
+  result = inherited::put_next (inherited::headFragment_);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to put_next(): \"%m\", returning\n")));
     message_p->release (); message_p = NULL;
   } // end IF
-  headFragment_ = NULL;
+  inherited::headFragment_ = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -183,8 +184,8 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (record_inout);
   ACE_ASSERT (record_inout == inherited::record_);
-  ACE_ASSERT (headFragment_);
-  ACE_ASSERT (!headFragment_->isInitialized ());
+  ACE_ASSERT (inherited::headFragment_);
+  ACE_ASSERT (!inherited::headFragment_->isInitialized ());
 
   typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
@@ -201,19 +202,19 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
   data_container_p->setPR (record_inout);
   ACE_ASSERT (!record_inout);
   data_container_2 = data_container_p;
-  headFragment_->initialize (data_container_2,
-                             headFragment_->sessionId (),
-                             NULL);
+  inherited::headFragment_->initialize (data_container_2,
+                                        inherited::headFragment_->sessionId (),
+                                        NULL);
 
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
-  message_p = static_cast<DataMessageType*> (headFragment_->cont ());
+  message_p = static_cast<DataMessageType*> (inherited::headFragment_->cont ());
   while (message_p)
   {
     data_container_p->increase ();
     data_container_2 = data_container_p;
     message_p->initialize (data_container_2,
-                           headFragment_->sessionId (),
+                           inherited::headFragment_->sessionId (),
                            NULL);
     message_p = static_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
