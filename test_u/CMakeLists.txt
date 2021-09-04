@@ -1,4 +1,4 @@
-﻿include (Threads)
+include (Threads)
 
 include (SSLConfig)
 include (NetlinkConfig)

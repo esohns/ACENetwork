@@ -1,4 +1,4 @@
-﻿/* config.h.cmake.in */
+/* config.h.cmake.in */
 
 /* Name of package */
 /* #undef  */

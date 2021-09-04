@@ -1,4 +1,4 @@
-﻿include (SSLConfig)
+include (SSLConfig)
 
 set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)

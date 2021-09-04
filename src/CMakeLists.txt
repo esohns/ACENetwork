@@ -1,4 +1,4 @@
-﻿# configure C/C++ exceptions
+# configure C/C++ exceptions
 include (SetCppExceptions)
 
 include (Threads)

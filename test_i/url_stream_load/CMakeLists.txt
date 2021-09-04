@@ -1,4 +1,4 @@
-﻿include (FindPkgConfig)
+include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
 # *NOTE*: Common requires libcap

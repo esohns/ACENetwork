@@ -1,4 +1,4 @@
-﻿# disable GUI support
+# disable GUI support
 is_UI_graphical (${UI_FRAMEWORK})
 if (NOT UI_FRAMEWORK STREQUAL "")
 

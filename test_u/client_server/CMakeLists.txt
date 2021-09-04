@@ -1,4 +1,4 @@
-﻿if (UNIX)
+if (UNIX)
  if (NETLINK_SUPPORT)
   include_directories (${PKG_LIBNL_INCLUDE_DIRS})
   add_definitions (-DNETLINK_SUPPORT)

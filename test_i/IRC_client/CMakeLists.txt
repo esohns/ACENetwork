@@ -1,4 +1,4 @@
-﻿if (UNIX)
+if (UNIX)
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)

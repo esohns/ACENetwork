@@ -1,4 +1,4 @@
-﻿add_library (${PROJECT_NAME}_Protocol_SMTP STATIC "")
+add_library (${PROJECT_NAME}_Protocol_SMTP STATIC "")
 
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
