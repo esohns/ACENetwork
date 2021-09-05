@@ -5,13 +5,6 @@ include (Configuration)
 include (Macros)
 include (OS)
 
-include (PreToolChain)
-include (SetToolChain)
-include (ToolChain)
-# *NOTE*: or use the cmake.exe '-T' option instead
-include (SetTargetPlatform)
-include (TargetPlatform)
-
 cmake_minimum_required (VERSION 2.8)
 
 cmake_policy (SET CMP0069 NEW) # IPO is enforced when enabled
@@ -45,6 +38,8 @@ elseif (NOT CMAKE_CONFIGURATION_TYPES)
  set (CMAKE_BUILD_TYPE Debug CACHE STRING ${BUILD_TYPE_CACHE_STRING})
 endif ()
 
+include (PrePreToolChain)
+
 # project
 cmake_policy (SET CMP0048 NEW) # allow project VERSION
 #cmake_policy (SET CMP0056 OLD) # honor per-config flags in try_compile()
@@ -52,6 +47,13 @@ cmake_policy (SET CMP0048 NEW) # allow project VERSION
 project (${PROJECT_NAME}
          VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
          LANGUAGES CXX C)
+
+include (PreToolChain)
+include (SetToolChain)
+include (ToolChain)
+# *NOTE*: or use the cmake.exe '-T' option instead
+include (SetTargetPlatform)
+include (TargetPlatform)
 
 # directories
 # override the installation directories ?

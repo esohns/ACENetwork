@@ -65,15 +65,15 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DSTREAM_HAS_DLL)
 
-find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-              REQUIRED
-              CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
-              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-              NO_DEFAULT_PATH)
-if (NOT EXISTS ${ACENetwork_DIR})
- message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-endif ()
+#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+#              REQUIRED
+#              CONFIG
+#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
+#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
+#              NO_DEFAULT_PATH)
+#if (NOT EXISTS ${ACENetwork_DIR})
+# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
+#endif ()
 
 #add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
@@ -245,9 +245,9 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${LIBXML2_LIBRARY})
 endif ()
 
-if (WIN32)
- target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-endif (WIN32)
+#if (WIN32)
+# target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
+#endif (WIN32)
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
 target_link_libraries (${EXECUTABLE} CommonSignal)

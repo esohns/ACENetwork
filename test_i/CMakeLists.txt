@@ -59,7 +59,7 @@ if (UNIX)
 elseif (WIN32)
 endif ()
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -69,6 +69,16 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
+endif ()
+
+find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+              REQUIRED
+              CONFIG
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATH_SUFFIXES ACEStream/${BUILD_PATH_SUFFIX}
+              NO_DEFAULT_PATH)
+if (NOT EXISTS ${ACEStream_DIR})
+ message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
 if (UNIX)
@@ -104,12 +114,12 @@ if (UNIX)
   endif ()
  endif (GUI_SUPPORT)
 
- target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
+# target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
 #                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
@@ -153,16 +163,16 @@ elseif (WIN32)
   endif ()
  endif (GUI_SUPPORT)
 
- if (DEFINED ENV{ACE_ROOT})
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
- else ()
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
- endif (DEFINED ENV{ACE_ROOT})
+# if (DEFINED ENV{ACE_ROOT})
+#  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+#                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
+# else ()
+#  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+#                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
+# endif (DEFINED ENV{ACE_ROOT})
 
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
@@ -186,7 +196,7 @@ elseif (WIN32)
  endif (GUI_SUPPORT)
 endif ()
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/cmake>)
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/${BUILD_PATH_SUFFIX}>)
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src>)
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
