@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "irc_record.h"
 
 #include "ace/Log_Msg.h"

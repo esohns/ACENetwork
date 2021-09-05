@@ -33,8 +33,9 @@ extern const char libacenetwork_protocol_default_irc_bisector_module_name_string
 
 //// define/declare the lexer's prototype (see irc_bisector.h)
 typedef void* yyscan_t;
+struct yy_buffer_state;
 //IRC_Export int IRC_Bisector_lex (yyscan_t);
-int IRC_Bisector_lex (yyscan_t);
+//int IRC_Bisector_lex (yyscan_t);
 //// *TODO*: this should be part of irc_bisector.h
 //#define YY_DECL extern int IRC_Bisector_lex (yyscan_t)
 //YY_DECL;
@@ -152,13 +153,13 @@ class IRC_Module_Bisector_T
   void scan_end ();
 
   // scanner
-  YY_BUFFER_STATE    bufferState_;
-  yyscan_t           context_;
-  unsigned int       numberOfFrames_;
+  struct yy_buffer_state* bufferState_;
+  yyscan_t                context_;
+  unsigned int            numberOfFrames_;
 
   // message buffer(s)
-  ACE_Message_Block* buffer_; // <-- continuation chain
-  unsigned int       messageLength_;
+  ACE_Message_Block*      buffer_; // <-- continuation chain
+  unsigned int            messageLength_;
 };
 
 // include template definition

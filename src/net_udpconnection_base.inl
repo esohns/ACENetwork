@@ -694,8 +694,8 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     delete fake_result_p;
   } // end ELSE
 
-continue_:
-  ACE_ASSERT (this->count () >= 2); // connection manager, read operation
+//continue_:
+  ACE_ASSERT (this->count () >= 2); // connection manager, read operation (?)
                                     // (+ stream module(s))
 
   if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
