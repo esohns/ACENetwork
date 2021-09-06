@@ -10,34 +10,32 @@ include (ACE)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-#message (STATUS "BUILD_PATH_SUFFIX: ${BUILD_PATH_SUFFIX}")
+message (STATUS "BUILD_PATH_SUFFIX: ${BUILD_PATH_SUFFIX}")
 #message (STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 #if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
  # stand-alone build
 # message ("stand-alone build")
-#if (WIN32)
- find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-               REQUIRED
-               CONFIG
-               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-               PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
-               NO_DEFAULT_PATH)
- if (NOT EXISTS ${Common_DIR})
-  message (FATAL_ERROR "could not find package \"Common\", aborting")
- endif ()
- add_definitions (-DCOMMON_HAS_DLL)
+find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+              REQUIRED
+              CONFIG
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
+              NO_DEFAULT_PATH)
+if (NOT EXISTS ${Common_DIR})
+ message (FATAL_ERROR "could not find package \"Common\", aborting")
+endif ()
+add_definitions (-DCOMMON_HAS_DLL)
 
- find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-               REQUIRED
-               CONFIG
-               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-               PATH_SUFFIXES ACEStream/${BUILD_PATH_SUFFIX}
-               NO_DEFAULT_PATH)
- if (NOT EXISTS ${ACEStream_DIR})
-  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
- endif ()
- add_definitions (-DSTREAM_HAS_DLL)
-#endif ()
+find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+              REQUIRED
+              CONFIG
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATH_SUFFIXES ACEStream/${BUILD_PATH_SUFFIX}
+              NO_DEFAULT_PATH)
+if (NOT EXISTS ${ACEStream_DIR})
+ message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
+endif ()
+add_definitions (-DSTREAM_HAS_DLL)
 
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)

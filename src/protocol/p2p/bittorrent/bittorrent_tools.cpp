@@ -749,6 +749,7 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
                 ACE_TEXT (filename.c_str ())));
     result_3 = false;
   } // end IF
+  ACE_UNUSED_ARG (result);
   result_2 = stream.close ();
   if (result_2 == -1)
   {

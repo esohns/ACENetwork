@@ -112,16 +112,16 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DACESTREAM_HAS_DLL)
 
-find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-              REQUIRED
-              CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
-              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-              NO_DEFAULT_PATH)
-if (NOT EXISTS ${ACENetwork_DIR})
- message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-endif ()
-add_definitions (-DACENETWORK_HAS_DLL)
+#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+#              REQUIRED
+#              CONFIG
+#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
+#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
+#              NO_DEFAULT_PATH)
+#if (NOT EXISTS ${ACENetwork_DIR})
+# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
+#endif ()
+#add_definitions (-DACENETWORK_HAS_DLL)
 
 #add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)

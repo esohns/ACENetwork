@@ -73,19 +73,19 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 add_definitions (-DSTREAM_HAS_DLL)
-add_definitions (-DSTREAM_DEC_HAS_DLL)
+#add_definitions (-DSTREAM_DEC_HAS_DLL)
 
-find_package (${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-              REQUIRED
-              CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
-              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-              NO_DEFAULT_PATH)
-if (NOT EXISTS ${ACENetwork_DIR})
- message (FATAL_ERROR "could not find package \"${PROJECT_NAME}\", aborting")
-endif ()
-add_definitions (-DNET_HAS_DLL)
-add_definitions (-DHTTP_HAS_DLL)
+#find_package (${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+#              REQUIRED
+#              CONFIG
+#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
+#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
+#              NO_DEFAULT_PATH)
+#if (NOT EXISTS ${ACENetwork_DIR})
+# message (FATAL_ERROR "could not find package \"${PROJECT_NAME}\", aborting")
+#endif ()
+#add_definitions (-DNET_HAS_DLL)
+#add_definitions (-DHTTP_HAS_DLL)
 
 #add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)

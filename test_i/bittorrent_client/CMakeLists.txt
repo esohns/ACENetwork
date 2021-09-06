@@ -56,15 +56,15 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-              REQUIRED
-              CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
-              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-              NO_DEFAULT_PATH)
-if (NOT EXISTS ${ACENetwork_DIR})
- message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-endif ()
+#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+#              REQUIRED
+#              CONFIG
+#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
+#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
+#              NO_DEFAULT_PATH)
+#if (NOT EXISTS ${ACENetwork_DIR})
+# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
+#endif ()
 
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
