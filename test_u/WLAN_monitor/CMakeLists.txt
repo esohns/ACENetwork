@@ -17,56 +17,6 @@ if (UNIX)
  find_package (Threads)
 endif (UNIX)
 
-set (ACE_XML_LIB_FILE libACEXML.so)
-if (UNIX)
- find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               PATHS ENV{ACE_ROOT}/ACEXML ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML
-               PATH_SUFFIXES lib common
-               DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
-elseif (WIN32)
-# *TODO*: this does not work
- set (LIB_FILE_SUFFIX "")
- if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  set (LIB_FILE_SUFFIX "d")
- endif ()
- unset (ACE_XML_LIB_FILE)
- set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_XML_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-if (NOT ACE_XML_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
-endif ()
-
-set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
-if (UNIX)
- find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               PATHS ENV{ACE_ROOT}/ACEXML/parser ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML/parser
-               PATH_SUFFIXES lib parser
-               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}")
-elseif (WIN32)
-# *TODO*: this does not work
- set (LIB_FILE_SUFFIX "")
- if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  set (LIB_FILE_SUFFIX "d")
- endif ()
- unset (ACE_XML_PARSER_LIB_FILE)
- set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-if (NOT ACE_XML_PARSER_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
-endif ()
-
 if (UNIX)
 # *NOTE*: Common requires libcap
 # pkg_check_modules (PKG_CAP REQUIRED libcap)
@@ -86,7 +36,7 @@ if (UNIX)
 endif (UNIX)
 # *TODO*: repair WIN32 pkgconfig support
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -153,7 +103,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/cmake)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/${BUILD_PATH_SUFFIX})
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
 endif ()
@@ -193,7 +143,7 @@ if (GUI_SUPPORT)
 endif (GUI_SUPPORT)
 
 if (UNIX)
- add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+# add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
 endif (UNIX)
 
 set (ui_definition_file "")
@@ -304,7 +254,7 @@ target_link_libraries (${EXECUTABLE} CommonSignal)
 target_link_libraries (${EXECUTABLE} CommonTimer)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
 target_link_libraries (${EXECUTABLE} CommonXML)
 

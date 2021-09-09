@@ -1,56 +1,6 @@
 include (SSLConfig)
 
-set (ACE_XML_LIB_FILE libACEXML.so)
-if (UNIX)
- find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               PATHS ENV{ACE_ROOT}/ACEXML ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML
-               PATH_SUFFIXES lib common
-               DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
-elseif (WIN32)
-# *TODO*: this does not work
- set (LIB_FILE_SUFFIX "")
- if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  set (LIB_FILE_SUFFIX "d")
- endif ()
- unset (ACE_XML_LIB_FILE)
- set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_XML_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-if (NOT ACE_XML_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
-endif ()
-
-set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
-if (UNIX)
- find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               PATHS ENV{ACE_ROOT}/ACEXML/parser ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE/ACEXML/parser
-               PATH_SUFFIXES lib parser
-               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}")
-elseif (WIN32)
-# *TODO*: this does not work
- set (LIB_FILE_SUFFIX "")
- if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  set (LIB_FILE_SUFFIX "d")
- endif ()
- unset (ACE_XML_PARSER_LIB_FILE)
- set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               PATHS ENV ACE_ROOT $ENV{LIB_ROOT}/ACE_TAO/ACE
-               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
-               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-if (NOT ACE_XML_PARSER_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
-endif ()
-
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -97,7 +47,7 @@ if (UNIX)
 # endif ()
  include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
 
- include_directories (/usr/local/src/ACE_wrappers)
+# include_directories (/usr/local/src/ACE_wrappers)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
@@ -171,7 +121,7 @@ set (HTTP_decoder_SRCS
 #  test_u_template_instantiations.cpp
 
 if (UNIX)
- add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+# add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
 endif (UNIX)
 
 #string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
@@ -185,7 +135,7 @@ if (WIN32 AND NOT BUILD_TEST_U)
 endif ()
 
 if (WIN32)
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
 endif (WIN32)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
@@ -224,7 +174,7 @@ if (SSL_SUPPORT)
 endif (SSL_SUPPORT)
 
 if (WIN32)
- target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
+# target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 endif (WIN32)
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
@@ -262,9 +212,9 @@ if (UNIX)
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../pdcurses/win32
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
                                               /usr/local/lib
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/HTTP_decoder
                          ENVIRONMENT foo=bar)
@@ -285,16 +235,16 @@ elseif (WIN32)
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                                               G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/image/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/math/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dev/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/vis/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/dhcp/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/err/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/image/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/math/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/dec/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/vis/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/protocol/dhcp/${CMAKE_BUILD_TYPE}
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/HTTP_decoder
                          ENVIRONMENT foo=bar)
 endif ()

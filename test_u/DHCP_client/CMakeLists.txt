@@ -5,7 +5,7 @@ if (UNIX)
  find_package (Threads)
 endif (UNIX)
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -159,7 +159,7 @@ if (UNIX)
 # set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS -nostartfiles)
 elseif (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
 
 if (UNIX)
@@ -222,11 +222,11 @@ if (WIN32)
                 H:/software/Development/dll/libgcc_s_dw2-1.dll
                 H:/software/Development/dll/libexpat-1.dll
                 H:/software/Development/dll/libiconv-2.dll
-                ${Common_DIR}/src/Debug/Common.dll
-                ${Common_DIR}/src/ui/Debug/CommonUI.dll
-                ${ACEStream_DIR}/src/Debug/ACEStream.dll
-                ${ACENetwork_DIR}/src/Debug/ACENetwork.dll
-                ${ACENetwork_DIR}/src/protocol/dhcp/Debug/ACENetwork_Protocol_DHCP.dll
+                ${Common_DIR}/src/${CMAKE_BUILD_TYPE}/Common.dll
+                ${Common_DIR}/src/ui/${CMAKE_BUILD_TYPE}/CommonUI.dll
+                ${ACEStream_DIR}/src/${CMAKE_BUILD_TYPE}/ACEStream.dll
+                ${ACENetwork_DIR}/src/${CMAKE_BUILD_TYPE}/ACENetwork.dll
+                ${ACENetwork_DIR}/src/protocol/dhcp/${CMAKE_BUILD_TYPE}/ACENetwork_Protocol_DHCP.dll
           DESTINATION bin COMPONENT bin)
  install (FILES etc/test_u.glade
           DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
@@ -243,9 +243,9 @@ if (UNIX)
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../pdcurses/win32
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
                                               /usr/local/lib
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/DHCP_client
                          ENVIRONMENT foo=bar)
@@ -262,16 +262,16 @@ elseif (WIN32)
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                                               G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/image/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/math/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dev/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/vis/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/dhcp/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/err/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/image/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/math/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/dec/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/vis/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
+                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/protocol/dhcp/${CMAKE_BUILD_TYPE}
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/DHCP_client
                          ENVIRONMENT foo=bar)
 endif ()
