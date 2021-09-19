@@ -24,8 +24,9 @@ elseif (WIN32)
  set (SSL_FOUND TRUE CACHE BOOL "found SSL") # *NOTE*: it lives under $ENV{LIB_ROOT}/openssl
  set (SSL_INCLUDE_DIRS $ENV{LIB_ROOT}/openssl/include CACHE STRING "SSL include directories")
  set (SSL_LIBRARIES $ENV{LIB_ROOT}/openssl/libcrypto.lib;$ENV{LIB_ROOT}/openssl/libssl.lib CACHE STRING "SSL libraries")
+ set (SSL_LIB_DIR "$ENV{LIB_ROOT}/openssl")
 endif ()
-message (STATUS "SSL_LIBRARIES \"${SSL_LIBRARIES}\")")
+#message (STATUS "SSL_LIBRARIES \"${SSL_LIBRARIES}\")")
 
 if (UNIX)
  set (ACE_SSL_LIB_FILE libACE_SSL.so)
