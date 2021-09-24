@@ -1,52 +1,14 @@
-include (FindPkgConfig)
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
-if (UNIX)
-# *NOTE*: Common requires libcap
- pkg_check_modules (PKG_CAP REQUIRED libcap)
-# if (SSL_SUPPORT)
-#  pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
-# endif ()
- #pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
- pkg_check_modules (PKG_LIBXML2 REQUIRED libxml-2.0)
-# pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
- pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
-# *TODO*: repair WIN32 pkgconfig support
-elseif (WIN32)
-# *TODO*: repair pkgconfig support
- unset (LIBXML2_LIB_FILE)
- set (LIBXML2_LIB_FILE libxml2.lib)
- find_library (LIBXML2_LIBRARY ${LIBXML2_LIB_FILE}
-               PATHS $ENV{LIB_ROOT}/libxml2
-#               PATH_SUFFIXES win32/bin.msvc
-               PATH_SUFFIXES lib
-               DOC "searching for \"${LIBXML2_LIB_FILE}\""
-               NO_DEFAULT_PATH)
- if (NOT LIBXML2_LIBRARY)
-  message (FATAL_ERROR "could not find libxml2 (was: \"${LIBXML2_LIB_FILE}\"), aborting")
- endif ()
-# find_library (CURSES_LIBRARY pdcurses.lib
-#               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-#               PATH_SUFFIXES win32
-#               DOC "searching for pdcurses.lib")
-# find_library (PANEL_LIBRARY panel.lib
-#               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-#               PATH_SUFFIXES win32
-#               DOC "searching for panel.lib")
-# if (NOT CURSES_LIBRARY)
-#  message (FATAL_ERROR "could not find pdcurses.lib, aborting")
-# endif ()
-# if (NOT PANEL_LIBRARY)
-#  message (FATAL_ERROR "could not find panel.lib, aborting")
-# endif ()
-endif ()
-#if (NOT EXISTS PDCURSES_LIBRARY)
+include (ffmpeg)
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
+include (PreXMLImplementation)
+
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
               PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${Common_DIR})
@@ -57,7 +19,7 @@ add_definitions (-DCOMMON_HAS_DLL)
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
               PATH_SUFFIXES ACEStream/${BUILD_PATH_SUFFIX}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACEStream_DIR})
@@ -65,27 +27,16 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DSTREAM_HAS_DLL)
 
-#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
-#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${ACENetwork_DIR})
-# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-#endif ()
-
-#add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-add_definitions (-DFFMPEG_SUPPORT)
-
+if (FFMPEG_SUPPORT)
+ include_directories (${ffmpeg_INCLUDE_DIRS})
+endif (FFMPEG_SUPPORT)
+if (LIBXML2_SUPPORT)
+ include_directories (${LIBXML2_INCLUDE_DIRS})
+endif (LIBXML2_SUPPORT)
+if (SSL_SUPPORT)
+ include_directories (${SSL_INCLUDE_DIRS})
+endif (SSL_SUPPORT)
 if (UNIX)
- include_directories (${PKG_CAP_INCLUDE_DIRS})
- include_directories (${PKG_LIBXML2_INCLUDE_DIRS})
- include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
-
- #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -101,15 +52,7 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net/protocols/http)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
- if (SSL_SUPPORT)
-  include_directories (${SSL_INCLUDE_DIRS})
- endif (SSL_SUPPORT)
  include_directories ("$ENV{PROGRAMFILES}/Microsoft SDKs/Windows/v7.0/Samples/multimedia/directshow/baseclasses")
- #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libiconv-1.9.2-1/include)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.4/include)
 
 # *TODO*: repair pkgconfig support
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
@@ -135,10 +78,6 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
-
-if (SSL_SUPPORT)
- add_definitions (-DSSL_SUPPORT)
-endif (SSL_SUPPORT)
 
 ############## next target ################
 set (EXECUTABLE url_stream_load)
@@ -188,9 +127,9 @@ set (${EXECUTABLE}_EXE_CFG
      etc/test_i.glade
      etc/resources.rc)
 
-if (UNIX)
- add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif (UNIX)
+#if (UNIX)
+# add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+#endif (UNIX)
 
 #string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
 add_executable (${EXECUTABLE}
@@ -200,7 +139,7 @@ add_executable (${EXECUTABLE}
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 if (WIN32 AND NOT BUILD_TEST_I)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
-endif ()
+endif (WIN32 AND NOT BUILD_TEST_I)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -214,61 +153,49 @@ add_dependencies (${EXECUTABLE} ACEStream_Network_Protocol_HTTPGet)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
-target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-if (WIN32)
- ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
-# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
-
-if (SSL_SUPPORT)
- target_link_libraries (${EXECUTABLE} $ENV{LIB_ROOT}/openssl/libssl.lib)
-endif (SSL_SUPPORT)
-endif (WIN32)
-target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
-if (SSL_SUPPORT)
- target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
-endif (SSL_SUPPORT)
 if (UNIX)
- if (SSL_SUPPORT)
-  target_link_libraries (${EXECUTABLE} ${SSL_LIBRARIES})
- endif (SSL_SUPPORT)
- target_link_libraries (${EXECUTABLE} ${PKG_LIBXML2_LIBRARIES})
-
- target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
-
- target_link_libraries (${EXECUTABLE} X11)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+endif (UNIX)
+if (FFMPEG_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${ffmpeg_LIBRARIES})
+endif (FFMPEG_SUPPORT)
+if (LIBXML2_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
+endif (LIBXML2_SUPPORT)
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${SSL_LIBRARIES})
+ target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_SSL_LIBRARY})
+endif (SSL_SUPPORT)
+target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
+if (UNIX)
+# target_link_libraries (${EXECUTABLE} PUBLIC X11)
 elseif (WIN32)
  set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
 
- target_link_libraries (${EXECUTABLE} mfplat.lib)
-
- target_link_libraries (${EXECUTABLE} ${LIBXML2_LIBRARY})
+ target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
 endif ()
 
-#if (WIN32)
-# target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-#endif (WIN32)
-target_link_libraries (${EXECUTABLE} Common)
-target_link_libraries (${EXECUTABLE} CommonLog)
-target_link_libraries (${EXECUTABLE} CommonSignal)
-target_link_libraries (${EXECUTABLE} CommonTimer)
+target_link_libraries (${EXECUTABLE} PUBLIC Common)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonLog)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonSignal)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 
-target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACEStream_Device)
-target_link_libraries (${EXECUTABLE} ACEStream_Decoder)
-target_link_libraries (${EXECUTABLE} ACEStream_HTML)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
 if (WIN32)
- target_link_libraries (${EXECUTABLE} ACEStream_MediaFramework)
+ target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
 endif (WIN32)
-target_link_libraries (${EXECUTABLE} ACEStream_Miscellaneous)
-target_link_libraries (${EXECUTABLE} ACEStream_Network)
-target_link_libraries (${EXECUTABLE} ACEStream_Network_Protocol_HTTPGet)
-target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network_Protocol_HTTPGet)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
 
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
 
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -279,8 +206,7 @@ install (TARGETS ${EXECUTABLE}
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
 if (WIN32)
- get_filename_component (ACE_LIB_PATH ${ACE_LIBRARY}
-                         DIRECTORY)
+ get_filename_component (ACE_LIB_PATH ${ACE_LIBRARY} DIRECTORY)
  set (ACE_DLL_FILE ACE${LIB_FILE_SUFFIX}.dll)
  set (ACE_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_DLL_FILE})
  install (FILES ${ACE_DLL_FQPATH}

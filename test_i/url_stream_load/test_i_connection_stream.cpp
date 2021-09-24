@@ -23,6 +23,13 @@
 
 #include "ace/Log_Msg.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (FFMPEG_SUPPORT)
+#include "stream_lib_ffmpeg_common.h"
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "net_macros.h"
 
 #include "test_i_message.h"
@@ -270,7 +277,13 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   Stream_Module_t* module_p = NULL;
 //  Test_I_Net_Writer_t* netIO_impl_p = NULL;
   Test_I_HTTPParser* parser_impl_p = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _AMMediaType media_type_s;
+#else
+#if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_VideoMediaType media_type_s;
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -297,8 +310,11 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   //session_data_p->sessionID = configuration_in.sessionID;
   session_data_p->targetFileName = (*iterator).second.second.targetFileName;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  media_type_s.resolution.cx = 320;
-  media_type_s.resolution.cy = 240;
+  Common_Image_Resolution_t resolution_s;
+  resolution_s.cx = 320;
+  resolution_s.cy = 240;
+  Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
+                                                         media_type_s);
 #else
   media_type_s.resolution.width = 320;
   media_type_s.resolution.height = 240;

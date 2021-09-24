@@ -59,7 +59,12 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (FFMPEG_SUPPORT)
 #include "stream_lib_ffmpeg_common.h"
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_module_htmlparser.h"
 
@@ -203,14 +208,26 @@ struct Test_I_URLStreamLoad_StreamState
 struct Test_I_URLStreamLoad_StreamState_2;
 struct Test_I_URLStreamLoad_SessionData_2
  : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                                 struct _AMMediaType,
+#else
+#if defined (FFMPEG_SUPPORT)
                                  struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
                                  struct Test_I_URLStreamLoad_StreamState_2,
                                  struct Stream_Statistic,
                                  struct Stream_UserData>
 {
   Test_I_URLStreamLoad_SessionData_2 ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                                   struct _AMMediaType,
+#else
+#if defined (FFMPEG_SUPPORT)
                                    struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
                                    struct Test_I_URLStreamLoad_StreamState_2,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
@@ -224,7 +241,13 @@ struct Test_I_URLStreamLoad_SessionData_2
   struct Test_I_URLStreamLoad_SessionData_2& operator= (struct Test_I_URLStreamLoad_SessionData_2& rhs_in)
   {
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                                  struct _AMMediaType,
+#else
+#if defined (FFMPEG_SUPPORT)
                                   struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
                                   struct Test_I_URLStreamLoad_StreamState_2,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator= (rhs_in);
@@ -255,7 +278,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
 {
   Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 ()
    : HTTP_ModuleHandlerConfiguration ()
+#if defined (FFMPEG_SUPPORT)
    , codecId (AV_CODEC_ID_NONE)
+#endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
    , program (1)
    , streamType (27) // H264
@@ -273,14 +298,22 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
     inbound = true;
   }
 
+#if defined (FFMPEG_SUPPORT)
   enum AVCodecID                  codecId;
+#endif // FFMPEG_SUPPORT
   Net_ConnectionConfigurations_t* connectionConfigurations;
   unsigned int                    program;                  // MPEG TS decoder module
   unsigned int                    streamType;               // MPEG TS decoder module
   Test_I_ISessionNotify_2_t*      subscriber;
   Test_I_Subscribers_2_t*         subscribers;
   std::string                     targetFileName; // dump module
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _AMMediaType             outputFormat;
+#else
+#if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat;
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GdkWindow*                      window;

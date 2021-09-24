@@ -30,12 +30,16 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
-#include "stream_dec_libav_decoder.h"
+//#if defined (FFMPEG_SUPPORT)
+//#include "stream_dec_libav_decoder.h"
+//#endif // FFMPEG_SUPPORT
 #include "stream_dec_mpeg_ts_decoder.h"
 
 #include "stream_file_sink.h"
 
-#include "stream_lib_ffmpeg_common.h"
+//#if defined (FFMPEG_SUPPORT)
+//#include "stream_lib_ffmpeg_common.h"
+//#endif // FFMPEG_SUPPORT
 
 #include "stream_stat_statistic_report.h"
 

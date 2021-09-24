@@ -25,6 +25,12 @@
 #include <string>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+// *NOTE*: uuids.h doesn't have double include protection
+#if defined (UUIDS_H)
+#else
+#define UUIDS_H
+#include "uuids.h"
+#endif // UUIDS_H
 #elif defined (ACE_LINUX)
 #include <sys/capability.h>
 #include <linux/capability.h>
@@ -642,12 +648,20 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.allocatorConfiguration =
     &allocator_configuration;
   modulehandler_configuration_2.closeAfterReception = true;
+#if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_2.codecId = AV_CODEC_ID_H263;
+#endif // FFMPEG_SUPPORT
   modulehandler_configuration_2.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_2.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  modulehandler_configuration_2.outputFormat.subtype = MEDIASUBTYPE_RGB24;
+#else
+#if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_2.outputFormat.format = AV_PIX_FMT_RGB24;
+#endif // FFMPEG_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_2.parserConfiguration =
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration_2.statisticReportingInterval =
