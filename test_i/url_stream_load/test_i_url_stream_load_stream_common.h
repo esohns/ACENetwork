@@ -26,7 +26,17 @@
 #include <set>
 #include <string>
 
-#include "libxml/tree.h"
+//#include "libxml/tree.h"
+
+#if defined (FFMPEG_SUPPORT)
+#ifdef __cplusplus
+extern "C"
+{
+#include "libavcodec/avcodec.h"
+//#include "libavutil/pixfmt.h"
+}
+#endif // __cplusplus
+#endif // FFMPEG_SUPPORT
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
