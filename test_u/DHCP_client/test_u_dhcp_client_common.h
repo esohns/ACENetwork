@@ -110,7 +110,7 @@ struct DHCPClient_SessionData
    , xid (0)
    //, userData (NULL)
   {}
-  struct DHCPClient_SessionData& operator= (struct DHCPClient_SessionData& rhs_in)
+  struct DHCPClient_SessionData& operator= (const struct DHCPClient_SessionData& rhs_in)
   {
     Test_U_StreamSessionData::operator= (rhs_in);
 

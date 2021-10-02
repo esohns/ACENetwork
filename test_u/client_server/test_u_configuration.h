@@ -31,6 +31,8 @@
 #endif // ACE_WIN32 || ACE_WIN64
 #include "ace/Time_Value.h"
 
+#include "common_parser_common.h"
+
 #include "stream_common.h"
 #include "stream_configuration.h"
 #include "stream_iallocator.h"

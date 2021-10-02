@@ -92,7 +92,7 @@ struct PCPClient_SessionData
    , connection (NULL) // outbound
    //, userData (NULL)
   {}
-  struct PCPClient_SessionData& operator= (struct PCPClient_SessionData& rhs_in)
+  struct PCPClient_SessionData& operator= (const struct PCPClient_SessionData& rhs_in)
   {
     Test_U_StreamSessionData::operator= (rhs_in);
 

@@ -21,6 +21,8 @@
 #ifndef IRC_NETWORK_H
 #define IRC_NETWORK_H
 
+#include "common_parser_common.h"
+
 #include "net_common.h"
 #include "net_connection_configuration.h"
 

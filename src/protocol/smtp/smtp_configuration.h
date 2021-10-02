@@ -21,25 +21,16 @@
 #ifndef SMTP_CONFIGURATION_H
 #define SMTP_CONFIGURATION_H
 
-//#include <deque>
-//#include <map>
-//#include <string>
-
 #include "ace/INET_Addr.h"
 
-//#include "common_defines.h"
-//#include "common_inotify.h"
+#include "common_parser_common.h"
 
 #include "stream_common.h"
 
 #include "net_common.h"
-//#include "net_configuration.h"
-//#include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
 #include "smtp_common.h"
-//#include "smtp_defines.h"
-//#include "smtp_stream_common.h"
 
 // forward declarations
 class SMTP_ConnectionConfiguration;

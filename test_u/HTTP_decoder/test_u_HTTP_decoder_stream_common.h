@@ -72,7 +72,7 @@ struct Test_U_HTTPDecoder_SessionData
    //, userData (NULL)
   {};
   
-  struct Test_U_HTTPDecoder_SessionData& operator= (struct Test_U_HTTPDecoder_SessionData& rhs_in)
+  struct Test_U_HTTPDecoder_SessionData& operator= (const struct Test_U_HTTPDecoder_SessionData& rhs_in)
   {
     Test_U_StreamSessionData::operator= (rhs_in);
 

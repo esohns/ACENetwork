@@ -30,6 +30,8 @@
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 
+#include "common_parser_common.h"
+
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"

@@ -135,7 +135,7 @@ struct Test_I_URLStreamLoad_SessionData
    , targetFileName ()
   {}
 
-  struct Test_I_URLStreamLoad_SessionData& operator= (struct Test_I_URLStreamLoad_SessionData& rhs_in)
+  struct Test_I_URLStreamLoad_SessionData& operator= (const struct Test_I_URLStreamLoad_SessionData& rhs_in)
   {
     Test_I_StreamSessionData::operator= (rhs_in);
 
@@ -248,7 +248,7 @@ struct Test_I_URLStreamLoad_SessionData_2
    , targetFileName ()
   {}
 
-  struct Test_I_URLStreamLoad_SessionData_2& operator= (struct Test_I_URLStreamLoad_SessionData_2& rhs_in)
+  struct Test_I_URLStreamLoad_SessionData_2& operator= (const struct Test_I_URLStreamLoad_SessionData_2& rhs_in)
   {
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

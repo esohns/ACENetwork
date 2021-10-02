@@ -31,6 +31,8 @@
 #include "common_defines.h"
 #include "common_inotify.h"
 
+#include "common_parser_common.h"
+
 #include "stream_common.h"
 
 #include "net_configuration.h"
