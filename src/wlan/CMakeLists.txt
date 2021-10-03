@@ -211,9 +211,6 @@ target_sources (${PROJECT_NAME}_WLAN
                 INTERFACE
                 ${absolute_script_files})
 
-#get_target_property (debug ${PROJECT_NAME}_WLAN INTERFACE_INCLUDE_DIRECTORIES)
-#message (STATUS "INTERFACE_INCLUDE_DIRECTORIES: \"${debug}\"")
-
 add_dependencies (${PROJECT_NAME}_WLAN Common)
 if (UNIX)
  if (NL80211_SUPPORT)
