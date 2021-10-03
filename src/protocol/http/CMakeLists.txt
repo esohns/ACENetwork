@@ -1,11 +1,6 @@
-if (UNIX)
- pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
- pkg_check_modules (PKG_SOX REQUIRED sox)
-endif (UNIX)
-
 add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -28,12 +23,12 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
- target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${PKG_SOX_INCLUDE_DIRS}>)
+# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+#                             $<BUILD_INTERFACE:${PKG_SOX_INCLUDE_DIRS}>)
 
- target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
+# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/${BUILD_PATH_SUFFIX}>)
@@ -200,18 +195,18 @@ set_property (TARGET ${PROJECT_NAME}_Protocol_HTTP PROPERTY FOLDER "protocols")
 add_dependencies (${PROJECT_NAME}_Protocol_HTTP Common)
 add_dependencies (${PROJECT_NAME}_Protocol_HTTP ACEStream)
 
-set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES DEFINE_SYMBOL HTTP_BUILD_DLL)
-set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
+#set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES DEFINE_SYMBOL HTTP_BUILD_DLL)
+#set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
 endif (WIN32 AND MSVC)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
- target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
-target_link_libraries (${PROJECT_NAME}_Protocol_HTTP Common)
-target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACEStream)
+target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ACEStream)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

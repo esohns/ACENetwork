@@ -1,5 +1,7 @@
 add_library (${PROJECT_NAME}_Protocol_SMTP STATIC "")
 
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
+get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -10,8 +12,6 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -148,20 +148,20 @@ add_dependencies (${PROJECT_NAME}_Protocol_SMTP ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_SMTP PROPERTIES DEFINE_SYMBOL NET_Protocol_SMTP_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_SMTP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
- target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ${ACE_LIBRARY})
 elseif (WIN32)
-# target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ntdll.lib)
- target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ${ACE_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ntdll.lib)
+ target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ${ACE_LIBRARY})
 endif ()
-target_link_libraries (${PROJECT_NAME}_Protocol_SMTP Common)
-target_link_libraries (${PROJECT_NAME}_Protocol_SMTP CommonMath)
-target_link_libraries (${PROJECT_NAME}_Protocol_SMTP CommonTimer)
+target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC CommonMath)
+target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC CommonTimer)
 
-target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ACEStream)
+target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ACEStream)
 
-target_link_libraries (${PROJECT_NAME}_Protocol_SMTP ${PROJECT_NAME})
+target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ${PROJECT_NAME})
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_SMTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

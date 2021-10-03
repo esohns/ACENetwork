@@ -6,6 +6,8 @@ include (SetDHCPClientImplementation)
 
 add_library (${PROJECT_NAME}_Protocol_DHCP STATIC "")
 
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
+get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -16,8 +18,6 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -161,36 +161,36 @@ add_dependencies (${PROJECT_NAME}_Protocol_DHCP ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES DEFINE_SYMBOL NET_PROTOCOL_DHCP_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  if (DHCLIENT_USE)
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${DHCPCTL_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${OMAPI_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${IRS_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ISC_CFG_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${DNS_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${GEOIP_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_SSL_LIBRARIES})
-#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${GSS_KRB5_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${KRB5_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${GSS_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_KRB5_GSSAPI_LIBRARIES})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ISC_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${JSON_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_JSON_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${DHCPCTL_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${OMAPI_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${IRS_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${ISC_CFG_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${DNS_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${GEOIP_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${PKG_SSL_LIBRARIES})
+#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${GSS_KRB5_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${KRB5_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${GSS_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${PKG_KRB5_GSSAPI_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${ISC_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${JSON_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${PKG_JSON_LIBRARIES})
 
-  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PKG_LIBXML_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${PKG_LIBXML_LIBRARIES})
  endif (DHCLIENT_USE)
 elseif (WIN32)
-# target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ntdll.lib)
- target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ntdll.lib)
+ target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${ACE_LIBRARY})
 endif ()
-target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
-target_link_libraries (${PROJECT_NAME}_Protocol_DHCP CommonTimer)
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC CommonTimer)
 
-target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ACEStream)
 
-target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${PROJECT_NAME})
+target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${PROJECT_NAME})
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

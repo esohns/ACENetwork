@@ -21,7 +21,7 @@ elseif (WIN32)
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif ()
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -39,21 +39,8 @@ if (UNIX)
   add_definitions (-DSD_BUS_SUPPORT)
  endif (DBUS_SUPPORT)
 endif (UNIX)
-#find_package (CommonXML ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-#              PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${CommonXML_DIR})
-# message (FATAL_ERROR "could not find package \"CommonXML\", aborting")
-#endif ()
-#add_definitions (-DCOMMONXML_HAS_DLL)
 
 if (UNIX)
-# target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
-
  if (NL80211_SUPPORT)
   if (PKG_LIBNL3_FOUND)
    target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
@@ -240,7 +227,7 @@ endif (UNIX)
 add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME})
 add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME}_Protocol_DHCP)
 
-set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES DEFINE_SYMBOL NET_WLAN_BUILD_DLL)
+#set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES DEFINE_SYMBOL NET_WLAN_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 #set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
@@ -251,32 +238,32 @@ cotire (${PROJECT_NAME}_WLAN)
 
 if (UNIX)
  if (WEXT_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_WLAN iw)
+  target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC iw)
  endif (WEXT_SUPPORT)
  if (NL80211_SUPPORT)
   if (PKG_LIBNL3_FOUND)
-   target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_LIBNL3_LIBRARIES})
+   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PKG_LIBNL3_LIBRARIES})
   elseif (PKG_LIBNL2_FOUND)
-   target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_LIBNL2_LIBRARIES})
+   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PKG_LIBNL2_LIBRARIES})
   else ()
    message (FATAL_ERROR "libnl not found, aborting")
   endif ()
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_DBUS_LIBRARIES})
-  target_link_libraries (${PROJECT_NAME}_WLAN CommonDBus)
+  target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PKG_DBUS_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC CommonDBus)
  endif (DBUS_SUPPORT)
 elseif (WIN32)
  if (MSXML_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_WLAN msxml2.lib)
+  target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC msxml2.lib)
  elseif (LIBXML2_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_WLAN ${LIBXML2_LIBRARY})
+  target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${LIBXML2_LIBRARY})
  endif ()
 
-# target_link_libraries (${PROJECT_NAME}_WLAN CommonXML)
+# target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC CommonXML)
 endif ()
-target_link_libraries (${PROJECT_NAME}_WLAN ${PROJECT_NAME})
-target_link_libraries (${PROJECT_NAME}_WLAN ${PROJECT_NAME}_Protocol_DHCP)
+target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PROJECT_NAME})
+target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PROJECT_NAME}_Protocol_DHCP)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_WLAN

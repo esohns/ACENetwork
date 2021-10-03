@@ -1,5 +1,7 @@
 add_library (${PROJECT_NAME}_Protocol_PCP STATIC "")
 
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
+get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -10,8 +12,6 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -154,19 +154,19 @@ add_dependencies (${PROJECT_NAME}_Protocol_PCP ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES DEFINE_SYMBOL NET_Protocol_PCP_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_PCP ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
- target_link_libraries (${PROJECT_NAME}_Protocol_PCP ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${ACE_LIBRARY})
 elseif (WIN32)
-# target_link_libraries (${PROJECT_NAME}_Protocol_PCP ntdll.lib)
- target_link_libraries (${PROJECT_NAME}_Protocol_PCP ${ACE_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ntdll.lib)
+ target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${ACE_LIBRARY})
 endif ()
-target_link_libraries (${PROJECT_NAME}_Protocol_PCP Common)
-target_link_libraries (${PROJECT_NAME}_Protocol_PCP CommonTimer)
+target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC CommonTimer)
 
-target_link_libraries (${PROJECT_NAME}_Protocol_PCP ACEStream)
+target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ACEStream)
 
-target_link_libraries (${PROJECT_NAME}_Protocol_PCP ${PROJECT_NAME})
+target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${PROJECT_NAME})
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

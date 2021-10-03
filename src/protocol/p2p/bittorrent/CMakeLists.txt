@@ -2,7 +2,7 @@ add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
 
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -169,9 +169,9 @@ target_sources (${PROJECT_NAME}_Protocol_BitTorrent
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS -Dbittorrent_BUILD_DLL)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLang")
- add_compile_options (-fPIC)
-endif ()
+#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLang")
+# add_compile_options (-fPIC)
+#endif ()
 
 if (WIN32)
 # *NOTE*: generate .def file and export all symbols on Windows
@@ -199,18 +199,17 @@ if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
 endif (WIN32 AND MSVC)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PKG_OPENSSL_LIBRARIES})
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent $ENV{LIB_ROOT}/openssl/libcrypto.lib)
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC $ENV{LIB_ROOT}/openssl/libcrypto.lib)
 
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${ACE_LIBRARY})
 endif ()
-target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
-target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent CommonParser)
-target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
-# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PROJECT_NAME}_Protocol_HTTP)
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC CommonParser)
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ACEStream)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

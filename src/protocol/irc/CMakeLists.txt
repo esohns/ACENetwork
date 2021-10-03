@@ -1,6 +1,6 @@
 add_library (${PROJECT_NAME}_Protocol_IRC STATIC "")
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -152,9 +152,9 @@ target_sources (${PROJECT_NAME}_Protocol_IRC
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLang")
- add_compile_options (-fPIC)
-endif ()
+#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLang")
+# add_compile_options (-fPIC)
+#endif ()
 
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
@@ -172,13 +172,13 @@ add_dependencies (${PROJECT_NAME}_Protocol_IRC ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES DEFINE_SYMBOL IRC_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
- target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
-target_link_libraries (${PROJECT_NAME}_Protocol_IRC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC Common)
 
-target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
+target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ACEStream)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
