@@ -760,6 +760,7 @@ idle_update_progress_cb (gpointer userData_in)
   speed_f =
     (((statistic_s.sentBytes + statistic_s.receivedBytes) - statistic_s.previousBytes) *
     factor_f)/* / static_cast<float> (number_of_connections)*/;
+  ACE_UNUSED_ARG (number_of_connections);
 
   ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   //speed_f = data_p->statistic.streamStatistic.bytesPerSecond;
