@@ -1,0 +1,20 @@
+diff --git "a/ACE/ace/SSL/SSL_Context.cpp" "b/ACE/ace/SSL/SSL_Context.cpp"
+index 3dcfa078cae..8940f638373 100644
+--- "a/ACE/ace/SSL/SSL_Context.cpp"
++++ "b/ACE/ace/SSL/SSL_Context.cpp"
+@@ -395,11 +395,11 @@ ACE_SSL_Context::check_host (const ACE_INET_Addr &host, SSL *peerssl)
+       return false;
+     }
+ 
+-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+-  X509* cert = ::SSL_get1_peer_certificate(peerssl);
+-#else
++//#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
++//  X509* cert = ::SSL_get1_peer_certificate(peerssl);
++//#else
+   X509* cert = ::SSL_get_peer_certificate(peerssl);
+-#endif
++//#endif
+ 
+   if (cert == 0)
+     {
