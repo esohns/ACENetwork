@@ -57,11 +57,11 @@
 #include "IRC_client_stream_common.h"
 
 // forward declaration(s)
-class IRC_Client_GUI_Connection;
-class IRC_Client_GUI_MessageHandler;
+class IRC_Client_GUI_IConnection;
+class IRC_Client_GUI_IMessageHandler;
 
 typedef std::map<std::string,
-                 IRC_Client_GUI_Connection*> IRC_Client_GUI_Connections_t;
+                 IRC_Client_GUI_IConnection*> IRC_Client_GUI_Connections_t;
 typedef IRC_Client_GUI_Connections_t::iterator IRC_Client_GUI_ConnectionsIterator_t;
 typedef IRC_Client_GUI_Connections_t::const_iterator IRC_Client_GUI_ConnectionsConstIterator_t;
 
@@ -191,20 +191,20 @@ struct IRC_Client_UI_HandlerCBData
    , timeStamp ()
   {}
 
-  unsigned int                   acknowledgements;
-  std::string                    builderLabel;
-  IRC_ChannelModes_t             channelModes;
-  IRC_Client_GUI_Connection*     connection;
-  IRC_IControl*                  controller;
+  unsigned int                    acknowledgements;
+  std::string                     builderLabel;
+  IRC_ChannelModes_t              channelModes;
+  IRC_Client_GUI_IConnection*     connection;
+  IRC_IControl*                   controller;
 #if defined (GTK_USE)
-  guint                          eventSourceId;
+  guint                           eventSourceId;
 #endif // GTK_USE
-  IRC_Client_GUI_MessageHandler* handler;
+  IRC_Client_GUI_IMessageHandler* handler;
   // *TODO*: remove this
-  std::string                    id;
-  string_list_t                  parameters;
-  bool                           pending;
-  std::string                    timeStamp;
+  std::string                     id;
+  string_list_t                   parameters;
+  bool                            pending;
+  std::string                     timeStamp;
 };
 
 #endif // IRC_CLIENT_GUI_COMMON_H

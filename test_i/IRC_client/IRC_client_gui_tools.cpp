@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
 #include "IRC_client_gui_tools.h"
 
 #include "ace/Log_Msg.h"
@@ -33,7 +32,6 @@
 #include "IRC_client_gui_connection.h"
 #include "IRC_client_gui_defines.h"
 
-#if defined (GTK_USE)
 bool
 IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
                               const IRC_Client_GUI_Connections_t& connections_in,
@@ -47,7 +45,7 @@ IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
   channel_out.clear ();
 
   // step1: retrieve connection handle
-  IRC_Client_GUI_Connection* connection_p = NULL;
+  IRC_Client_GUI_IConnection* connection_p = NULL;
   for (IRC_Client_GUI_ConnectionsConstIterator_t iterator = connections_in.begin ();
        iterator != connections_in.end ();
        ++iterator)
@@ -77,14 +75,15 @@ IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
   return true;
 }
 
-IRC_Client_GUI_Connection*
+#if defined (GTK_SUPPORT)
+IRC_Client_GUI_IConnection*
 IRC_Client_UI_Tools::current (Common_UI_GTK_State_t& GTKState_in,
                               const IRC_Client_GUI_Connections_t& connections_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
 
   // initialize return value(s)
-  IRC_Client_GUI_Connection* result_p = NULL;
+  IRC_Client_GUI_IConnection* result_p = NULL;
 
   // sanity check(s)
   Common_UI_GTK_BuildersConstIterator_t iterator =
@@ -140,4 +139,4 @@ IRC_Client_UI_Tools::current (Common_UI_GTK_State_t& GTKState_in,
 
   return result_p;
 }
-#endif // GTK_USE
+#endif // GTK_SUPPORT

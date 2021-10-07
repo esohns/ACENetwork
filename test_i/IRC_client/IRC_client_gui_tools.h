@@ -25,14 +25,14 @@
 
 #include "ace/Global_Macros.h"
 
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_common.h"
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 
 #include "IRC_client_gui_common.h"
 
 // forward declarations
-class IRC_Client_GUI_Connection;
+class IRC_Client_GUI_IConnection;
 
 class IRC_Client_UI_Tools
 {
@@ -43,11 +43,11 @@ class IRC_Client_UI_Tools
                        const IRC_Client_GUI_Connections_t&, // connections
                        std::string&,                        // return value: nickname
                        std::string&);                       // return value: channel
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-  static IRC_Client_GUI_Connection* current (Common_UI_GTK_State_t&,               // GTK state
-                                             const IRC_Client_GUI_Connections_t&); // connections
-#endif // GTK_USE
+  static IRC_Client_GUI_IConnection* current (Common_UI_GTK_State_t&,               // GTK state
+                                              const IRC_Client_GUI_Connections_t&); // connections
+#endif // GTK_SUPPORT
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools ())

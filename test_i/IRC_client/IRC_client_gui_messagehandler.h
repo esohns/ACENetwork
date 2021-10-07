@@ -18,14 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_CLIENT_GUI_MESSAGEHANDLER_H
-#define IRC_CLIENT_GUI_MESSAGEHANDLER_H
+#ifndef IRC_Client_GUI_MessageHandler_T_H
+#define IRC_Client_GUI_MessageHandler_T_H
 
 #include <string>
 
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -40,34 +40,154 @@
 #include "IRC_client_gui_common.h"
 
 // forward declaration(s)
-class IRC_Client_GUI_Connection;
+class IRC_Client_GUI_IConnection;
 
-class IRC_Client_GUI_MessageHandler
+class IRC_Client_GUI_IMessageHandler
  : public Common_IGetR_T<struct IRC_Client_UI_HandlerCBData>
 {
  public:
+  inline IRC_Client_GUI_IMessageHandler () {}
+  inline virtual ~IRC_Client_GUI_IMessageHandler () {}
+
+  virtual bool isServerLog () const = NULL;
+
+  virtual void update () = NULL;
+
+  // display (local) text
+  virtual void queueForDisplay (const std::string&) = NULL;
+
+  virtual void setTopic (const std::string&) = NULL;
+  virtual void setModes (const std::string&,  // mode string [i.e. "+|-x"]
+                         const std::string&,  // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
+                         bool = true) = NULL; // locked access ?
+
+  // users
+  //virtual void user (const std::string&,         // nick
+  //                   bool,                       // away ?
+  //                   bool,                       // IRC operator ?
+  //                   bool,                       // channel operator ?
+  //                   bool,                       // voiced ?
+  //                   unsigned int,               // hop count
+  //                   const std::string&) = NULL; // real name
+  //virtual void endUsers () = NULL;
+
+  // channel members
+  virtual void add (const std::string&,  // nickname
+                    bool = true) = NULL; // locked access ?
+  virtual void remove (const std::string&,  // nickname
+                       bool = true) = NULL; // locked access ?
+  virtual void members (const string_list_t&, // channel members
+                        bool = true) = NULL;  // locked access ?
+  virtual void endMembers (bool = true) = NULL; // locked access ?
+  virtual void update (const std::string&) = NULL; // previous nickname
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_IMessageHandler (const IRC_Client_GUI_IMessageHandler&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_IMessageHandler& operator= (const IRC_Client_GUI_IMessageHandler&))
+};
+
+//////////////////////////////////////////
+
+template <enum Common_UI_FrameworkType GUIType>
+class IRC_Client_GUI_MessageHandler_T
+ : public IRC_Client_GUI_IMessageHandler
+{
+ public:
   // ctor for default handler (== server log)
-  IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Connection*,           // connection handle
-                                 const std::string&,                   // connection timestamp
-                                                                       // *NOTE*: used to lookup the corresponding builder
-                                 struct IRC_Client_UI_HandlerCBData*); // UI callback data handle
+  IRC_Client_GUI_MessageHandler_T (IRC_Client_GUI_IConnection*,          // connection handle
+                                   const std::string&,                   // connection timestamp
+                                                                         // *NOTE*: used to lookup the corresponding builder
+                                   struct IRC_Client_UI_HandlerCBData*); // UI callback data handle
+  // ctor for regular channel handler
+  IRC_Client_GUI_MessageHandler_T (IRC_Client_GUI_IConnection*,          // connection handle
+                                   IRC_IControl*,                        // controller handle
+                                   const std::string&,                   // identifier (channel/nick)
+                                   const std::string&,                   // UI (glade) file directory
+                                   const std::string&,                   // connection timestamp
+                                                                         // *NOTE*: used to lookup the corresponding builder
+                                   struct IRC_Client_UI_HandlerCBData*); // UI callback data handle
+  virtual ~IRC_Client_GUI_MessageHandler_T ();
+
+  // implement Common_IGet_T
+  inline virtual const IRC_Client_UI_HandlerCBData& getR () const { ACE_ASSERT (CBData_); return *CBData_; }
+
+  inline bool isPrivateDialog () const { return isPrivateDialog_; }
+  inline virtual bool isServerLog () const { ACE_ASSERT (CBData_); return CBData_->id.empty (); }
+
+  // [cannot make this private :-(]
+  virtual void update ();
+
+  // display (local) text
+  virtual void queueForDisplay (const std::string&);
+
+  virtual void setTopic (const std::string&);
+  virtual void setModes (const std::string&, // mode string [i.e. "+|-x"]
+                         const std::string&, // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
+                         bool = true);       // locked access ?
+
+  // users
+  //virtual void user (const std::string&,   // nick
+  //                   bool,                 // away ?
+  //                   bool,                 // IRC operator ?
+  //                   bool,                 // channel operator ?
+  //                   bool,                 // voiced ?
+  //                   unsigned int,         // hop count
+  //                   const std::string&);  // real name
+  //virtual void endUsers ();
+
+  // channel members
+  virtual void add (const std::string&, // nickname
+                    bool = true);       // locked access ?
+  virtual void remove (const std::string&, // nickname
+                       bool = true);       // locked access ?
+  virtual void members (const string_list_t&, // channel members
+                        bool = true);         // locked access ?
+  virtual void endMembers (bool = true); // locked access ?
+  virtual void update (const std::string&); // previous nickname
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler_T ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler_T (const IRC_Client_GUI_MessageHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler_T& operator= (const IRC_Client_GUI_MessageHandler_T&))
+
+  // helper methods
+  void clearMembers (bool = true); // locked access ?
+
+  struct IRC_Client_UI_HandlerCBData* CBData_;
+  bool                                isFirstMemberListMsg_;
+  bool                                isPrivateDialog_;
+  IRC_Client_MessageQueue_t           messageQueue_;
+  ACE_SYNCH_MUTEX                     messageQueueLock_;
+};
+
+//////////////////////////////////////////
+
+#if defined (GTK_SUPPORT)
+// partial specialization (GTK)
+template <>
+class IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>
+ : public IRC_Client_GUI_IMessageHandler
+{
+ public:
+  // ctor for default handler (== server log)
+  IRC_Client_GUI_MessageHandler_T (IRC_Client_GUI_IConnection*,          // connection handle
+                                   const std::string&,                   // connection timestamp
+                                                                         // *NOTE*: used to lookup the corresponding builder
+                                   struct IRC_Client_UI_HandlerCBData*); // UI callback data handle
   // ctor for regular channel handler
   // *WARNING*: must be called with
   //            IRC_Client_UI_CBData::Common_UI_GTKState::lock held !
-  IRC_Client_GUI_MessageHandler (IRC_Client_GUI_Connection*,         // connection handle
-                                 IRC_IControl*,                      // controller handle
-                                 const std::string&,                 // identifier (channel/nick)
-                                 const std::string&,                 // UI (glade) file directory
-                                 const std::string&,                 // connection timestamp
-                                                                     // *NOTE*: used to lookup the corresponding builder
-                                 struct IRC_Client_UI_HandlerCBData* // UI callback data handle
-#if defined (GTK_USE)
-                                 ,bool = true                        // locked access (GDK) ?
-#endif // GTK_USE
-                                );
+  IRC_Client_GUI_MessageHandler_T (IRC_Client_GUI_IConnection*,         // connection handle
+                                   IRC_IControl*,                       // controller handle
+                                   const std::string&,                  // identifier (channel/nick)
+                                   const std::string&,                  // UI (glade) file directory
+                                   const std::string&,                  // connection timestamp
+                                                                        // *NOTE*: used to lookup the corresponding builder
+                                   struct IRC_Client_UI_HandlerCBData*, // UI callback data handle
+                                   bool = true);                        // locked access (GDK) ?
   // *WARNING*: must be called with
   //            IRC_Client_UI_CBData::Common_UI_GTKState::lock held !
-  virtual ~IRC_Client_GUI_MessageHandler ();
+  virtual ~IRC_Client_GUI_MessageHandler_T ();
 
   // implement Common_IGet_T
   inline virtual const IRC_Client_UI_HandlerCBData& getR () const { ACE_ASSERT (CBData_); return *CBData_; }
@@ -78,7 +198,7 @@ class IRC_Client_GUI_MessageHandler
   // *WARNING*: to be called from gtk_main context ONLY (trigger with
   //            g_idle_add())
   // [cannot make this private :-(]
-  void update ();
+  virtual void update ();
 
 //   const std::string getChannel() const;
 
@@ -87,47 +207,45 @@ class IRC_Client_GUI_MessageHandler
   // - called from gtk_main context
 
   // display (local) text
-  void queueForDisplay (const std::string&);
+  virtual void queueForDisplay (const std::string&);
 
   // returns the toplevel widget of the channel page tab child
   // *NOTE*: the server log handler page doesn't have dynamic (!) children...
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-#if defined (GTK_USE)
   GtkWidget* getTopLevelPageChild (bool = true) const; // locked access ?
-#endif // GTK_USE
 
-  void setTopic (const std::string&);
-  void setModes (const std::string&, // mode string [i.e. "+|-x"]
-                 const std::string&, // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
-                 bool = true);       // locked access ?
+  virtual void setTopic (const std::string&);
+  virtual void setModes (const std::string&, // mode string [i.e. "+|-x"]
+                         const std::string&, // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
+                         bool = true);       // locked access ?
 
   // users
-  void user (const std::string&,   // nick
-             bool,                 // away ?
-             bool,                 // IRC operator ?
-             bool,                 // channel operator ?
-             bool,                 // voiced ?
-             unsigned int,         // hop count
-             const std::string&);  // real name
-  void endUsers ();
+  //virtual void user (const std::string&,   // nick
+  //                   bool,                 // away ?
+  //                   bool,                 // IRC operator ?
+  //                   bool,                 // channel operator ?
+  //                   bool,                 // voiced ?
+  //                   unsigned int,         // hop count
+  //                   const std::string&);  // real name
+  //virtual void endUsers ();
 
   // channel members
-  void add (const std::string&, // nickname
-            bool = true);       // locked access ?
-  void remove (const std::string&, // nickname
-               bool = true);       // locked access ?
-  void members (const string_list_t&, // channel members
-                bool = true);         // locked access ?
-  void endMembers (bool = true); // locked access ?
+  virtual void add (const std::string&, // nickname
+                    bool = true);       // locked access ?
+  virtual void remove (const std::string&, // nickname
+                       bool = true);       // locked access ?
+  virtual void members (const string_list_t&, // channel members
+                        bool = true);         // locked access ?
+  virtual void endMembers (bool = true); // locked access ?
   // *WARNING*: callers may need protection from:
   //            - the thread(s) servicing the UI (GTK) event loop
   //            - the event dispatch thread(s) (reactor/proactor)
-  void update (const std::string&); // previous nickname
+  virtual void update (const std::string&); // previous nickname
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler ())
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler (const IRC_Client_GUI_MessageHandler&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler& operator= (const IRC_Client_GUI_MessageHandler&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler_T ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler_T (const IRC_Client_GUI_MessageHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_MessageHandler_T& operator= (const IRC_Client_GUI_MessageHandler_T&))
 
   // helper methods
   void clearMembers (bool = true); // locked access ?
@@ -137,9 +255,13 @@ class IRC_Client_GUI_MessageHandler
   bool                                isPrivateDialog_;
   IRC_Client_MessageQueue_t           messageQueue_;
   ACE_SYNCH_MUTEX                     messageQueueLock_;
-#if defined (GTK_USE)
   GtkTextView*                        view_; // --> server log
-#endif // GTK_USE
 };
+#endif // GTK_SUPPORT
+
+//////////////////////////////////////////
+
+// include template definition
+#include "IRC_client_gui_messagehandler.inl"
 
 #endif

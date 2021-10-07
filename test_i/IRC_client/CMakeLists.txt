@@ -1,28 +1,12 @@
 if (UNIX)
- include (CheckLibraryExists)
+# include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
  find_package (Threads)
-# check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
-endif ()
-
-#include (FindPkgConfig)
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
-if (UNIX)
-# *NOTE*: Common requires libcap
- pkg_check_modules (PKG_CAP REQUIRED libcap)
-# pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-# *TODO*: repair WIN32 pkgconfig support
-elseif (WIN32)
-endif ()
-#if (NOT EXISTS PDCURSES_LIBRARY)
-
-#include (FindPkgConfig)
-#pkg_check_modules (PKGACE REQUIRED ACE)
+endif (UNIX)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-#message (STATUS "BUILD_PATH_SUFFIX; ${BUILD_PATH_SUFFIX}")
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -31,7 +15,7 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
-endif ()
+endif (NOT EXISTS ${Common_DIR})
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -41,20 +25,15 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
-endif ()
+endif (NOT EXISTS ${ACEStream_DIR})
 
-#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
-#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${ACENetwork_DIR})
-# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-#endif ()
-
+if (GUI_SUPPORT)
+if (CURSES_SUPPORT)
+ include_directories (${CURSES_INCLUDE_DIRS})
+endif (CURSES_SUPPORT)
+endif (GUI_SUPPORT)
 if (UNIX)
- include_directories (${PKG_CAP_INCLUDE_DIRS})
+# include_directories (${PKG_CAP_INCLUDE_DIRS})
  # *WORKAROUND*
  if (GUI_SUPPORT)
   if (CURSES_USE)
@@ -74,14 +53,6 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/stat)
 elseif (WIN32)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
-
-# if (GUI_SUPPORT)
-#  if (CURSES_USE)
-#   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
-#  endif (CURSES_USE)
-# endif (GUI_SUPPORT)
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -118,10 +89,14 @@ set (${EXECUTABLE}_EXE_SRCS
      IRC_client_common_modules.h
      IRC_client_configuration.h
      IRC_client_defines.h
+     IRC_client_gui_connection.cpp
+     IRC_client_gui_connection.h
+     IRC_client_gui_connection.inl
      IRC_client_inputhandler.cpp
      IRC_client_inputhandler.h
-#     IRC_client_messageallocator.cpp
-#     IRC_client_messageallocator.h
+     IRC_client_gui_messagehandler.cpp
+     IRC_client_gui_messagehandler.h
+     IRC_client_gui_messagehandler.inl
      IRC_client_module_IRChandler.cpp
      IRC_client_module_IRChandler.h
      IRC_client_network.h
@@ -140,12 +115,31 @@ set (${EXECUTABLE}_EXE_SRCS
      Streambuf_alt.h
      Streambuf_alt.inl)
 if (GUI_SUPPORT)
- if (CURSES_USE)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      IRC_client_gui_tools.cpp
+      IRC_client_gui_tools.h)
+ if (CURSES_SUPPORT)
   set (${EXECUTABLE}_EXE_SRCS
        ${${EXECUTABLE}_EXE_SRCS}
        IRC_client_curses.cpp
        IRC_client_curses.h)
- endif (CURSES_USE)
+ endif (CURSES_SUPPORT)
+ if (GTK_SUPPORT)
+  set (${EXECUTABLE}_EXE_SRCS
+       ${${EXECUTABLE}_EXE_SRCS}
+       IRC_client_gui_callbacks.cpp
+       IRC_client_gui_callbacks.h)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+   #  set (${EXECUTABLE}_EXE_SRCS
+   #       ${${EXECUTABLE}_EXE_SRCS}
+   #       test_u_wxwidgets_ui.cpp
+   #       test_u_wxwidgets_ui.h
+   #       test_u_wxwidgets_ui.inl
+   #       test_u_wxwidgets_ui_base.cpp
+   #       test_u_wxwidgets_ui_base.h)
+ endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 set (${EXECUTABLE}_INI
      etc/IRC_client.ini
@@ -171,19 +165,17 @@ add_dependencies (${EXECUTABLE} CommonTimer)
 add_dependencies (${EXECUTABLE} ACEStream)
 
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
-#add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
-target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
+ target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
  target_link_libraries (${EXECUTABLE} X11)
-endif (UNIX)
+elseif (WIN32)
+ target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
+endif (WIN32)
 
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 
-if (WIN32)
-# target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-endif (WIN32)
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
 target_link_libraries (${EXECUTABLE} CommonSignal)
@@ -201,7 +193,6 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 if (UNIX)
  cotire (${EXECUTABLE})
 endif (UNIX)
@@ -228,9 +219,11 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      IRC_client_gui_common.h
      IRC_client_gui_connection.cpp
      IRC_client_gui_connection.h
+     IRC_client_gui_connection.inl
      IRC_client_gui_defines.h
      IRC_client_gui_messagehandler.cpp
      IRC_client_gui_messagehandler.h
+     IRC_client_gui_messagehandler.inl
      IRC_client_gui_tools.cpp
      IRC_client_gui_tools.h
      IRC_client_module_IRChandler.cpp
@@ -247,12 +240,13 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      IRC_client_tools.cpp
      IRC_client_tools.h)
 if (GUI_SUPPORT)
- if (GTK_USE)
+ if (GTK_SUPPORT)
   set (${EXECUTABLE_GUI}_EXE_SRCS
        ${${EXECUTABLE_GUI}_EXE_SRCS}
        IRC_client_gui_callbacks.cpp
        IRC_client_gui_callbacks.h)
- elseif (WXWIDGETS_USE)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
    #  set (${EXECUTABLE}_EXE_SRCS
    #       ${${EXECUTABLE}_EXE_SRCS}
    #       test_u_wxwidgets_ui.cpp
@@ -260,7 +254,7 @@ if (GUI_SUPPORT)
    #       test_u_wxwidgets_ui.inl
    #       test_u_wxwidgets_ui_base.cpp
    #       test_u_wxwidgets_ui_base.h)
- endif ()
+ endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 
 #set_source_files_properties (${IRC_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
@@ -286,20 +280,17 @@ add_dependencies (${EXECUTABLE_GUI} CommonTimer)
 add_dependencies (${EXECUTABLE_GUI} ACEStream)
 
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
-#add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
-target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
-
 if (UNIX)
+ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
  target_link_libraries (${EXECUTABLE_GUI} X11)
-endif (UNIX)
+elseif (WIN32)
+ target_link_options (${EXECUTABLE_GUI} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
+endif ()
 
 target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 
-if (WIN32)
-# target_link_options (${EXECUTABLE_GUI} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-endif (WIN32)
 target_link_libraries (${EXECUTABLE_GUI} Common)
 target_link_libraries (${EXECUTABLE_GUI} CommonLog)
 target_link_libraries (${EXECUTABLE_GUI} CommonSignal)

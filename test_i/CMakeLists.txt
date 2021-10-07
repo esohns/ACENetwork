@@ -81,42 +81,43 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-if (UNIX)
- target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+if (GUI_SUPPORT)
+ if (CURSES_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${CURSES_INCLUDE_DIRS}>)
+ endif (CURSES_SUPPORT)
+ if (GTK_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>)
 
- if (DHCLIENT_SUPPORT)
+  if (GTKGLAREA_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                               $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
+  endif (GTKGLAREA_SUPPORT)
+
+  if (LIBGLADE_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                               $<BUILD_INTERFACE:${GLADE_INCLUDE_DIRS}>)
+  endif (LIBGLADE_SUPPORT)
+ endif (GTK_SUPPORT)
+ if (QT_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${Qt_INCLUDE_DIRS}>)
+ endif (QT_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>)
+ endif (WXWIDGETS_SUPPORT)
+endif (GUI_SUPPORT)
+if (UNIX)
+# target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+
+# if (DHCLIENT_SUPPORT)
 #  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
 #                              $<BUILD_INTERFACE:/usr/include/bind-export>)
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC ${BIND9_CFLAGS})
- endif (DHCLIENT_SUPPORT)
-
- if (GUI_SUPPORT)
-  if (CURSES_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${CURSES_INCLUDE_DIRS}>)
-  elseif (GTK_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               "$<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>")
-
-   if (GTKGLAREA_SUPPORT)
-    target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                                $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
-   endif (GTKGLAREA_SUPPORT)
-
-   if (LIBGLADE_SUPPORT)
-    target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                                $<BUILD_INTERFACE:${PKG_GLADE_INCLUDE_DIRS}>)
-   endif (LIBGLADE_SUPPORT)
-  elseif (WXWIDGETS_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>)
-  endif ()
- endif (GUI_SUPPORT)
-
-# target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
-#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
+#  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC ${BIND9_CFLAGS})
+# endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
@@ -142,35 +143,6 @@ if (UNIX)
   endif ()
  endif (GUI_SUPPORT)
 elseif (WIN32)
- if (GUI_SUPPORT)
-  if (CURSES_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses>)
-  elseif (GTK_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>)
-
-   if (GTKGLAREA_SUPPORT)
-    target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                                $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
-   endif (GTKGLAREA_SUPPORT)
-
-# libglade
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libglade-2.6.4/include/libglade-2.0)
-  elseif (WXWIDGETS_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>)
-  endif ()
- endif (GUI_SUPPORT)
-
-# if (DEFINED ENV{ACE_ROOT})
-#  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-#                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
-# else ()
-#  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-#                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
-# endif (DEFINED ENV{ACE_ROOT})
-
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
@@ -207,104 +179,74 @@ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src>)
 
-if (UNIX)
- if (GUI_SUPPORT)
-  if (GTK_USE)
-   if (GTK3_FOUND)
-    target_link_libraries (${PROJECT_NAME}_Test_I ${GTK3_LIBRARIES})
-   elseif (GTK2_FOUND)
-    target_link_libraries (${PROJECT_NAME}_Test_I ${GTK2_LIBRARIES})
-   elseif (GTK_FOUND)
-    target_link_libraries (${PROJECT_NAME}_Test_I ${GTK_LIBRARIES})
-   elseif (GTK2_USE)
-    target_link_libraries (${PROJECT_NAME}_Test_I ${PKG_GTK2_LIBRARIES})
-   elseif (GTK3_USE)
-    target_link_libraries (${PROJECT_NAME}_Test_I ${PKG_GTK3_LIBRARIES})
-   endif ()
+if (GUI_SUPPORT)
+ if (CURSES_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_Test_I ${CURSES_LIBRARIES})
 
-   if (GTKGL_SUPPORT)
-    target_link_libraries (${PROJECT_NAME}_Test_I CommonOpenGL)
-   endif (GTKGL_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_Curses)
+ endif (CURSES_SUPPORT)
+ if (GTK_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_Test_I ${GTK_LIBRARIES})
+  if (GTKGL_SUPPORT)
+   target_link_libraries (${PROJECT_NAME}_Test_I CommonOpenGL)
+  endif (GTKGL_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_GTK)
+ endif (GTK_SUPPORT)
+ if (QT_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_Test_I ${Qt_LIBRARIES})
 
-   target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_GTK)
-  elseif (WXWIDGETS_USE)
-   target_link_libraries (${PROJECT_NAME}_Test_I ${wxWidgets_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_Qt)
+ endif (QT_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_Test_I ${wxWidgets_LIBRARIES})
 
-   target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_wxWidgets)
-  endif ()
+  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_wxWidgets)
+ endif (WXWIDGETS_SUPPORT)
 
-  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI)
- endif (GUI_SUPPORT)
-elseif (WIN32)
- if (GUI_SUPPORT)
-  if (CURSES_USE)
-   target_link_libraries (${PROJECT_NAME}_Test_I ${CURSES_LIBRARY})
-   target_link_libraries (${PROJECT_NAME}_Test_I ${PANEL_LIBRARY})
-  elseif (GTK_USE)
-   target_link_libraries (${PROJECT_NAME}_Test_I ${GTK_LIBRARIES})
-   if (GTKGL_SUPPORT)
-    target_link_libraries (${PROJECT_NAME}_Test_I OpenGL32.lib)
-
-    target_link_libraries (${PROJECT_NAME}_Test_I CommonOpenGL)
-   endif (GTKGL_SUPPORT)
-
-   target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_GTK)
-  elseif (WXWIDGETS_USE)
-   target_link_libraries (${PROJECT_NAME}_Test_I ${wxWidgets_LIBRARIES})
-  endif ()
-
-  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI)
- endif (GUI_SUPPORT)
-endif ()
+ target_link_libraries (${PROJECT_NAME}_Test_I CommonUI)
+endif (GUI_SUPPORT)
 
 ##########################################
 
 add_dependencies (${PROJECT_NAME}_Test_I Common)
 if (GUI_SUPPORT)
  add_dependencies (${PROJECT_NAME}_Test_I CommonUI)
- if (GTK_USE)
+ if (GTK_SUPPORT)
   add_dependencies (${PROJECT_NAME}_Test_I CommonUI_GTK)
   if (GTKGL_SUPPORT)
    add_dependencies (${PROJECT_NAME}_Test_I CommonOpenGL)
   endif (GTKGL_SUPPORT)
- elseif (WXWIDGETS_USE)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
   add_dependencies (${PROJECT_NAME}_Test_I CommonUI_wxWidgets)
- endif (GTK_USE)
+ endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 
 ##########################################
-
-#if (WIN32)
-# add_definitions (-DWIN32)
-# set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # C++ exception handling
-# if (CMAKE_BUILD_TYPE STREQUAL Debug)
-#  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd") # multithreaded debug dll
-# else ()
-#  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD")  # multithreaded dll
-# endif ()
-#endif ()
 
 set (source_files
      test_i_common.h
      test_i_defines.h
      test_i_stream_common.h)
 if (GUI_SUPPORT)
- if (CURSES_USE)
+ if (CURSES_SUPPORT)
   set (source_files
        ${source_files}
        test_i_curses_defines.h)
- elseif (GTK_USE)
+ endif (CURSES_SUPPORT)
+ if (GTK_SUPPORT)
   set (source_files
        ${source_files}
        test_i_gtk_common.h
        test_i_gtk_eventhandler.cpp
        test_i_gtk_eventhandler.h
        test_i_gtk_eventhandler.inl)
- elseif (WXWIDGETS_USE)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
   set (source_files
        ${source_files}
        test_i_wxwidgets_common.h)
- endif ()
+ endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 #install (FILES
 #         ${PROJECT_NAME}_Test_I_GTK_SRCS

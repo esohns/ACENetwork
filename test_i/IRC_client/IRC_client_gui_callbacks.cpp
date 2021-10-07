@@ -50,6 +50,8 @@
 #include "IRC_client_gui_messagehandler.h"
 #include "IRC_client_gui_tools.h"
 
+typedef IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK> IRC_Client_GUI_GTK_Connection_t;
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -147,14 +149,14 @@ connection_setup_function (void* arg_in)
 
     return result;
   } // end IF
-  IRC_Client_GUI_Connection* connection_p = NULL;
+  IRC_Client_GUI_GTK_Connection_t* connection_p = NULL;
 //  gdk_threads_enter ();
   ACE_NEW_NORETURN (connection_p,
-                    IRC_Client_GUI_Connection (&data_p->CBData->connections,
-                                               handler_cb_data_p,
-                                               context_id,
-                                               data_p->phonebookEntry.hostName,
-                                               data_p->CBData->UIFileDirectory));
+                    IRC_Client_GUI_GTK_Connection_t (&data_p->CBData->connections,
+                                                     handler_cb_data_p,
+                                                     context_id,
+                                                     data_p->phonebookEntry.hostName,
+                                                     data_p->CBData->UIFileDirectory));
   if (!connection_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -1092,7 +1094,7 @@ idle_remove_channel_cb (gpointer userData_in)
 
 done:
   number_of_pages = gtk_notebook_get_n_pages (notebook_p);
-  if ((number_of_pages == 1) && data_p->connection->closing_)
+  if ((number_of_pages == 1) && data_p->connection->isClosing ())
   {
     struct IRC_Client_UI_ConnectionCBData* cb_data_p =
         &const_cast<struct IRC_Client_UI_ConnectionCBData&> (data_p->connection->getR ());
@@ -1345,14 +1347,14 @@ idle_update_display_cb (gpointer userData_in)
     return G_SOURCE_CONTINUE;
 
   // step0: retrieve active connection
-  IRC_Client_GUI_Connection* connection_p =
+  IRC_Client_GUI_IConnection* connection_p =
     IRC_Client_UI_Tools::current (const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ()),
                                   data_p->connections);
   if (!connection_p) // *NOTE*: most probable cause: no server page/corresponding connection (yet)
     return G_SOURCE_CONTINUE;
 
   // step1: retrieve active channel
-  IRC_Client_GUI_MessageHandler* message_handler_p =
+  IRC_Client_GUI_IMessageHandler* message_handler_p =
     connection_p->getActiveHandler (false,
                                     false);
   if (!message_handler_p) // *NOTE*: most probable cause: no server page (yet)
@@ -2071,7 +2073,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // step0: retrieve active connection
-  IRC_Client_GUI_Connection* connection_p =
+  IRC_Client_GUI_IConnection* connection_p =
     IRC_Client_UI_Tools::current (state_r,
                                   data_p->connections);
   if (!connection_p)
@@ -2151,7 +2153,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   // step2: retrieve active handler(s) (channel/nick)
   // *TODO*: allow multicast to several channels ?
   //std::string active_id = (*connections_iterator).second->getActiveID ();
-  IRC_Client_GUI_MessageHandler* message_handler_p =
+  IRC_Client_GUI_IMessageHandler* message_handler_p =
     connection_p->getActiveHandler (false,
                                     false);
   if (!message_handler_p)
