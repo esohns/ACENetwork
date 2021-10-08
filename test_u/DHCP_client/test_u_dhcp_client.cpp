@@ -1296,8 +1296,7 @@ allocate:
   } // end IF
   else
 #endif // GUI_SUPPORT
-    Common_Tools::dispatchEvents (useReactor_in,
-                                  group_id);
+    Common_Tools::dispatchEvents (event_dispatch_state_s);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -1312,8 +1311,7 @@ allocate:
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   connection_manager_p->wait ();
-  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                       event_dispatch_state_s.reactorGroupId,
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                        true);
 
 //  if (!UIDefinitionFileName_in.empty ())

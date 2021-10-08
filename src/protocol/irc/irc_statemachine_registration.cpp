@@ -50,7 +50,7 @@ IRC_StateMachine_Registration::change (enum IRC_RegistrationStateType newState_i
   ACE_ASSERT (inherited::stateLock_);
 
   // synchronize access to state machine
-  ACE_Guard<ACE_Null_Mutex> aGuard (*inherited::stateLock_);
+  ACE_Guard<ACE_Thread_Mutex> aGuard (*inherited::stateLock_);
 
   switch (inherited::state_)
   {

@@ -85,9 +85,8 @@ IRC_Stream_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::load"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (false);
-  ACE_NOTREACHED (return false;)
+  return inherited::load (layout_inout,
+                          deleteModules_out);
 }
 
 template <typename StreamStateType,

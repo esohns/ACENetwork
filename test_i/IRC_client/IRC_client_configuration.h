@@ -98,9 +98,9 @@ struct IRC_Client_Configuration
    , protocolConfiguration ()
    ///////////////////////////////////////
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
    , cursesState (NULL)
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
    , encoding (IRC_PRT_DEFAULT_ENCODING)
    , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
@@ -119,10 +119,10 @@ struct IRC_Client_Configuration
   struct IRC_ProtocolConfiguration           protocolConfiguration;
   // ***************************************************************************
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   // *TODO*: move this somewhere else
   struct IRC_Client_CursesState*    cursesState;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible

@@ -112,12 +112,13 @@ enum IRC_UserMode
   USERMODE_RESTRICTEDCONN, // 'r'
   USERMODE_RECVNOTICES,    // 's'
   USERMODE_RECVWALLOPS,    // 'w'
+  USERMODE_HOSTHIDING,     // 'x'
   ////////////////////////////////////////
   USERMODE_MAX,
   USERMODE_INVALID
 };
 // *NOTE*: --> USERMODE_MAX
-typedef std::bitset<7> IRC_UserModes_t;
+typedef std::bitset<USERMODE_MAX> IRC_UserModes_t;
 
 struct IRC_LoginOptions
 {

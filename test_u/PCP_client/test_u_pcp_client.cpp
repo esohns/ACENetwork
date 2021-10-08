@@ -988,8 +988,7 @@ do_work (//bool requestBroadcastReplies_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                           event_dispatch_state_s.reactorGroupId,
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                            true);
       return;
     } // end IF
@@ -1033,8 +1032,7 @@ do_work (//bool requestBroadcastReplies_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
       connection_manager_p->abort ();
       connection_manager_p->wait ();
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                           event_dispatch_state_s.reactorGroupId,
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                            true);
       return;
     } // end IF
@@ -1079,8 +1077,7 @@ do_work (//bool requestBroadcastReplies_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
       connection_manager_p->abort ();
       connection_manager_p->wait ();
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                           event_dispatch_state_s.reactorGroupId,
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                            true);
       return;
     } // end IF
@@ -1174,8 +1171,7 @@ do_work (//bool requestBroadcastReplies_in,
   } // end IF
   else
 #endif // GUI_SUPPORT
-    Common_Tools::dispatchEvents (useReactor_in,
-                                  group_id);
+    Common_Tools::dispatchEvents (event_dispatch_state_s);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -1185,8 +1181,7 @@ do_work (//bool requestBroadcastReplies_in,
     (*iterator_2).second.second.connection->decrease ();
   connection_manager_p->wait ();
   if (!UIDefinitionFileName_in.empty ())
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          true);
 
 //  if (!UIDefinitionFileName_in.empty ())

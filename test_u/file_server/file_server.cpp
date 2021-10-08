@@ -1001,8 +1001,7 @@ do_work (
   // *NOTE*: from this point on, clean up any remote connections !
 
   if (!useUDP_in)
-    Common_Tools::dispatchEvents (useReactor_in,
-                                  group_id);
+    Common_Tools::dispatchEvents (event_dispatch_state_s);
   stop_event_dispatch = false;
 
   // clean up
@@ -1041,9 +1040,8 @@ error:
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   if (stop_event_dispatch)
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                         true);
   if (configuration.listener &&
       !useUDP_in)
     configuration.listener->stop ();

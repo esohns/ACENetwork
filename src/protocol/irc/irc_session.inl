@@ -1215,12 +1215,12 @@ IRC_Session_T<ConnectionType,
 //    if (logToFile_)
 //      output_ << messageText_in;
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
     curses_log (channel_in,     // channel
                 messageText_in, // text
                 *UIState_,      // state
                 true);          // locked access
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
   } // end IF
 //  else

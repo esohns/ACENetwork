@@ -169,8 +169,7 @@ FileServer_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-                                         inherited::configuration_->dispatchState->reactorGroupId,
-                                         false);                                                    // don't block
+    Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                         false);                                    // don't block
  } // end IF
 }

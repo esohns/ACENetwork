@@ -647,8 +647,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  Common_Tools::dispatchEvents (useReactor_in,
-                                group_id);
+  Common_Tools::dispatchEvents (event_dispatch_state_s);
 
   // step8: clean up
 #if defined (GTK_USE)

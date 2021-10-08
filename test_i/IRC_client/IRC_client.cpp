@@ -47,7 +47,7 @@ using namespace std;
 #include "ace/Version.h"
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
 #else
@@ -57,14 +57,13 @@ using namespace std;
 //         to undefine...
 #undef timeout
 #endif // ACE_WIN32 || ACE_WIN32
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "common_file_tools.h"
 #include "common_tools.h"
 
 #include "common_log_tools.h"
@@ -85,6 +84,8 @@ using namespace std;
 
 #include "net_defines.h"
 
+#include "net_client_common_tools.h"
+
 #include "irc_common.h"
 #include "irc_defines.h"
 
@@ -101,9 +102,9 @@ using namespace std;
 #include "IRC_client_tools.h"
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
 #include "IRC_client_curses.h"
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IRCClientStream");
@@ -427,16 +428,17 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *NOTE*: let (n)curses install it's own signal handler and process events in
   //         (w)getch()
   if (useCursesLibrary)
   {
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-//    signals_out.sig_del (SIGINT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    //    signals_out.sig_del (SIGINT);
     signals_out.sig_del (SIGWINCH);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
 // *NOTE*: gdb sends some signals (when running in an IDE ?)
@@ -445,7 +447,7 @@ do_initializeSignals (bool useReactor_in,
 //  signals_out.sig_del (SIGINT);
   signals_out.sig_del (SIGCONT);
   signals_out.sig_del (SIGHUP);
-#endif
+#endif // __GNUC__ && DEBUG_DEBUGGER
 }
 
 ACE_THR_FUNC_RETURN
@@ -458,7 +460,7 @@ connection_setup_curses_function (void* arg_in)
   return_value = -1;
 #else
   return_value = arg_in;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   struct IRC_Client_InputThreadData* thread_data_p =
     static_cast<struct IRC_Client_InputThreadData*> (arg_in);
@@ -504,9 +506,8 @@ connection_setup_curses_function (void* arg_in)
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
   // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (thread_data_p->dispatchState->proactorGroupId,
-                                       thread_data_p->dispatchState->reactorGroupId,
-                                       false);                                        // don't block
+  Common_Tools::finalizeEventDispatch (*thread_data_p->dispatchState,
+                                       false);                        // don't block
 
   connection_p = connection_manager_p->operator[] (0);
   if (!connection_p)
@@ -530,6 +531,7 @@ connection_setup_curses_function (void* arg_in)
                 connection_p));
     goto clean_up;
   } // end IF
+  stream_p = &const_cast<IRC_Client_Stream_t&> (istream_connection_p->stream ());
   module_p =
     stream_p->find (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME));
   if (!module_p)
@@ -617,7 +619,7 @@ connection_setup_curses_function (void* arg_in)
   }
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   // step5: run curses event dispatch ?
   if (thread_data_p->cursesState)
   {
@@ -644,8 +646,7 @@ connection_setup_curses_function (void* arg_in)
       &const_cast<struct IRC_SessionState&> (session_state_r);
 
     // step6: clean up
-    connection_p->decrease ();
-    connection_p = NULL;
+    connection_p->decrease (); connection_p = NULL;
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("running curses dispatch loop...\n")));
@@ -663,7 +664,7 @@ connection_setup_curses_function (void* arg_in)
                   ACE_TEXT ("running curses dispatch loop...DONE\n")));
   } // end IF
   else
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
   {
     // step6: clean up
@@ -674,7 +675,7 @@ connection_setup_curses_function (void* arg_in)
   return_value = 0;
 #else
   return_value = NULL;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   goto done;
 
@@ -682,9 +683,8 @@ clean_up:
   if (connection_p)
     connection_p->decrease ();
 
-  Common_Tools::finalizeEventDispatch (thread_data_p->dispatchState->proactorGroupId,
-                                       thread_data_p->dispatchState->reactorGroupId,
-                                       false);                                        // don't block
+  Common_Tools::finalizeEventDispatch (*thread_data_p->dispatchState,
+                                       false);                        // don't block
 
 done:
   return return_value;
@@ -704,10 +704,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   int result = -1;
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   struct IRC_Client_CursesState curses_state;
   configuration_in.cursesState = &curses_state;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 
   // step1: initialize IRC handler module
@@ -730,13 +730,16 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   struct Stream_ModuleConfiguration module_configuration;
   struct IRC_Client_ModuleHandlerConfiguration modulehandler_configuration;
   struct IRC_Client_StreamConfiguration stream_configuration;
+  modulehandler_configuration.parserConfiguration =
+    &configuration_in.parserConfiguration;
   modulehandler_configuration.protocolConfiguration =
-      &configuration_in.protocolConfiguration;
+    &configuration_in.protocolConfiguration;
   modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  //modulehandler_configuration.streamConfiguration =
-  //  &configuration_in.streamConfiguration;
+  modulehandler_configuration.streamConfiguration =
+    &configuration_in.streamConfiguration;
 
+  stream_configuration.allocatorConfiguration = &allocator_configuration;
   stream_configuration.messageAllocator = &message_allocator;
 
   configuration_in.streamConfiguration.initialize (module_configuration,
@@ -758,18 +761,16 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     return;
   } // end IF
   stream_configuration.cloneModule = true;
-  //configuration_in.streamConfiguration.configuration_.deleteModule = false;
   stream_configuration.module = &IRC_handler;
 
   // step2: initialize event dispatch
-  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-  event_dispatch_configuration_s.numberOfReactorThreads =
+  configuration_in.dispatchConfiguration.numberOfReactorThreads =
       ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
                                                                                           : 0);
-  event_dispatch_configuration_s.numberOfProactorThreads =
+  configuration_in.dispatchConfiguration.numberOfProactorThreads =
       ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
                                                                                            : 0);
-  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
+  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -777,10 +778,16 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
+    &configuration_in.dispatchConfiguration;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+  curses_state.dispatchState = &event_dispatch_state_s;
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
 
   // step3: initialize client connector
   IRC_Client_ConnectionConfiguration connection_configuration;
+  connection_configuration.allocatorConfiguration = &allocator_configuration;
   connection_configuration.socketConfiguration.address = serverAddress_in;
 
   //connection_configuration.bufferSize = IRC_CLIENT_BUFFER_SIZE;
@@ -811,22 +818,16 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
-  //if (!connector_p->initialize (connector_configuration))
-  if (!connector_p->initialize (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-    return;
-  } // end IF
 
   // step3: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.connector = connector_p;
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   signal_handler_configuration.cursesState = &curses_state;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
+  signal_handler_configuration.dispatchState = &event_dispatch_state_s;
   signal_handler_configuration.peerAddress = serverAddress_in;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
@@ -865,7 +866,24 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step5b: (try to) connect to the server
-  ACE_HANDLE handle = connector_p->connect (serverAddress_in);
+  struct Net_UserData user_data_s;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  if (configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+    handle =
+      Net_Client_Common_Tools::connect (connector,
+                                        *static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
+                                        user_data_s,
+                                        serverAddress_in,
+                                        false,
+                                        true);
+  else
+    handle =
+      Net_Client_Common_Tools::connect (asynch_connector,
+                                        *static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
+                                        user_data_s,
+                                        serverAddress_in,
+                                        false,
+                                        true);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -873,9 +891,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (serverAddress_in).c_str ())));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
-                                         false);                                 // don't block
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                         false);                 // don't block
 
     return;
   } // end IF
@@ -888,9 +905,9 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   input_thread_data_s.configuration = &configuration_in;
   input_thread_data_s.dispatchState = &event_dispatch_state_s;
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   input_thread_data_s.cursesState = &curses_state;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
   input_thread_data_s.moduleHandlerConfiguration =
     const_cast<struct IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second.second));
@@ -907,9 +924,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
-                                         false);                                 // don't block
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                         false);                 // don't block
 
     return;
   } // end IF
@@ -937,29 +953,18 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
-                                         false);                                 // don't block
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                         false);                 // don't block
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
-                                configuration_in.groupId);
+  Common_Tools::dispatchEvents (event_dispatch_state_s);
   // *NOTE*: awoken by the worker thread (see above)...
   if (connection_manager_p->count () < 1)
   {
-    // debug info
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result =
-      signal_handler_configuration.peerAddress.addr_to_string (buffer,
-                                                               sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (signal_handler_configuration.peerAddress, false, false).c_str ())));
 
     // clean up
     result = thread_manager_p->wait_grp (group_id_2);
@@ -974,6 +979,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
               ACE_TEXT ("connected...\n")));
 
   // step6b: dispatch events
+  event_dispatch_state_s.proactorGroupId = -1;
+  event_dispatch_state_s.reactorGroupId = -1;
   if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -990,8 +997,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
-                                configuration_in.groupId);
+  Common_Tools::dispatchEvents (event_dispatch_state_s);
 
   // step7: clean up
   result = thread_manager_p->wait_grp (group_id_2);
@@ -1029,12 +1035,12 @@ do_printVersion (const std::string& programName_in)
 
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
             << ACE_TEXT (ACENetwork_PACKAGE_NAME)
             << ACE_TEXT (": ")
             << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
             << std::endl;
-#endif
+#endif // HAVE_CONFIG_H
 
   converter.str ("");
   // ACE version string...
@@ -1053,11 +1059,11 @@ do_printVersion (const std::string& programName_in)
             << std::endl;
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   std::cout << ACE_TEXT ("curses: ")
             << curses_version ()
             << std::endl;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 }
 
@@ -1079,7 +1085,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -1108,13 +1114,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (address_string.c_str ())));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1151,12 +1157,12 @@ ACE_TMAIN (int argc_in,
   {
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (ACE::fini () == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1166,12 +1172,12 @@ ACE_TMAIN (int argc_in,
   {
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (ACE::fini () == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1211,13 +1217,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
 
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1230,13 +1236,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1256,13 +1262,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_SUCCESS;
   } // end IF
@@ -1286,13 +1292,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1358,13 +1364,13 @@ ACE_TMAIN (int argc_in,
                                        previous_signal_actions,
                                        previous_signal_mask);
         Common_Log_Tools::finalizeLogging ();
-    //    // *PORTABILITY*: on Windows, fini ACE...
-    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //    result = ACE::fini ();
-    //    if (result == -1)
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-    //#endif
+        // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        result = ACE::fini ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
         return EXIT_FAILURE;
       } // end IF
@@ -1414,13 +1420,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1434,7 +1440,15 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
   // debug info
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
+              elapsed_time.real_time,
+              elapsed_time.user_time,
+              elapsed_time.system_time,
+              ACE_TEXT (user_time_string.c_str ()),
+              ACE_TEXT (system_time_string.c_str ())));
+#else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
               elapsed_time.real_time,
@@ -1456,15 +1470,7 @@ ACE_TMAIN (int argc_in,
               elapsed_rusage.ru_nsignals,
               elapsed_rusage.ru_nvcsw,
               elapsed_rusage.ru_nivcsw));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
-              elapsed_time.real_time,
-              elapsed_time.user_time,
-              elapsed_time.system_time,
-              ACE_TEXT (user_time_string.c_str ()),
-              ACE_TEXT (system_time_string.c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step9: clean up
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -1475,16 +1481,16 @@ ACE_TMAIN (int argc_in,
   Common_Log_Tools::finalizeLogging ();
 
   // step10: finalize libraries
-//  // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  result = ACE::fini ();
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//      ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+  // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE::fini ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+      ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

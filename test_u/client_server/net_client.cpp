@@ -971,8 +971,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId,
-                                             configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId,
+        Common_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
                                              false); // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
@@ -1030,9 +1029,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId,
-                                             configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId,
-                                             false);                                // don't block
+        Common_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
+                                             false);                                                     // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1061,9 +1059,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   if (UIDefinitionFile_in.empty ())
   {
     // step2: dispatch events
-    Common_Tools::dispatchEvents (useReactor_in,
-                                  (useReactor_in ? configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId
-                                                 : configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId));
+    Common_Tools::dispatchEvents (*configuration_in.signalHandlerConfiguration.dispatchState);
   } // end IF
   else
   {
@@ -1098,8 +1094,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
 
   // step5: stop reactor (&& proactor, if applicable)
-  Common_Tools::finalizeEventDispatch (configuration_in.signalHandlerConfiguration.dispatchState->proactorGroupId,
-                                       configuration_in.signalHandlerConfiguration.dispatchState->reactorGroupId,
+  Common_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
                                        false); // don't block
 
 //  { // synch access

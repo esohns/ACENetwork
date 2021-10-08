@@ -764,9 +764,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   // step6c: dispatch connection attempt, wait for the session to finish
   if (!numberOfDispatchThreads_in)
-    Common_Tools::dispatchEvents ((configuration_in.dispatchConfiguration.numberOfReactorThreads > 0),
-                                  ((configuration_in.dispatchConfiguration.numberOfReactorThreads > 0) ? event_dispatch_state_s.reactorGroupId
-                                                                                                       : event_dispatch_state_s.proactorGroupId));
+    Common_Tools::dispatchEvents (event_dispatch_state_s);
   else
   {
     bittorrent_control.request (metaInfoFileName_in);
@@ -785,8 +783,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("session complete...\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          true);
   } // end ELSE
 

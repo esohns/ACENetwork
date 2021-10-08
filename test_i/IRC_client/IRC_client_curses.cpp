@@ -221,6 +221,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
   NETWORK_TRACE (ACE_TEXT ("::curses_main"));
 
   // sanity check(s)
+  ACE_ASSERT (state_in.dispatchState);
   ACE_ASSERT (controller_in);
 
   int result = ERR;
@@ -246,29 +247,33 @@ curses_main (struct IRC_Client_CursesState& state_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
-    return (result == OK);
+    result = ERR;
+    goto close;
   } // end IF
   release = true;
 
   use_env (TRUE);
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   use_tioctl (TRUE);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 //  nofilter ();
 
   // *NOTE*: if this fails, the program exits, which is not intended behavior
   // *TODO*: --> use newterm() instead
   //state_in.screen = initscr ();
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   state_in.screen = newterm (NULL, NULL, NULL); // use $TERM, STD_OUT, STD_IN
   if (!state_in.screen)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newterm(0x%@), aborting\n"),
                 NULL));
+    result = ERR;
     goto close;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   // *NOTE*: for some (odd) reason, newterm does not work as advertised
   //         (curscr, stdscr corrupt, return value works though)
   stdscr_p = initscr ();
@@ -276,17 +281,19 @@ curses_main (struct IRC_Client_CursesState& state_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initscr(), aborting\n")));
+    result = ERR;
     goto close;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   state_in.screen = SP;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (state_in.screen && stdscr_p);
   string_p = longname ();
   if (!string_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to longname(), aborting\n")));
+    result = ERR;
     goto close;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
@@ -345,6 +352,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
                 LINES - 2, COLS));
+    result = ERR;
     goto close;
   } // end IF
   state_in.log = window_p;
@@ -377,6 +385,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
                 LINES - 4, COLS - 2));
+    result = ERR;
     goto clean;
   } // end IF
   panel_p = new_panel (window_p);
@@ -384,6 +393,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to new_panel(), aborting\n")));
+    result = ERR;
     goto clean;
   } // end IF
   state_in.panels[std::string ()] = panel_p;
@@ -415,12 +425,13 @@ curses_main (struct IRC_Client_CursesState& state_in,
 
   // status window
   state_in.status = newwin (1, COLS,
-                            stdscr_p->_maxy - 1, 0);
+                            stdscr_p->_maxy - 2, 0);
   if (!state_in.status)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
                 1, COLS));
+    result = ERR;
     goto clean;
   } // end IF
   immedok (state_in.status, TRUE);
@@ -434,12 +445,13 @@ curses_main (struct IRC_Client_CursesState& state_in,
 
   // input window
   state_in.input = newwin (1, COLS,
-                           stdscr_p->_maxy, 0);
+                           stdscr_p->_maxy - 1, 0);
   if (!state_in.input)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
-                1, COLS));
+                ACE_TEXT ("failed to newwin(%d,%d,%d,%d), aborting\n"),
+                1, COLS, stdscr_p->_maxy - 1, 0));
+    result = ERR;
     goto clean;
   } // end IF
   result = wmove (state_in.input, 0, 0); // move the cursor to the beginning
@@ -485,6 +497,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to mousemask(), aborting\n")));
+    result = ERR;
     goto clean;
   } // end IF
 
@@ -524,13 +537,14 @@ curses_main (struct IRC_Client_CursesState& state_in,
       }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       case CTL_TAB:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       case '\t':
       {
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 //        if (1) // CTRL-TAB ?
 //          goto default_key;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         state_in.activePanel++;
         if (state_in.activePanel == state_in.panels.end ())
           state_in.activePanel = state_in.panels.find (std::string ());
@@ -554,7 +568,6 @@ curses_main (struct IRC_Client_CursesState& state_in,
         if (result == ERR)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to doupdate(), continuing\n")));
-
         break;
       }
       case '\r': // Apple
@@ -562,7 +575,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
       case KEY_ENTER:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       case PADENTER:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       {
         // sanity check
         if (message_text.empty () ||
@@ -570,9 +583,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
           break; // nothing to do
 
         // step1: send the message
-        {
-          ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.sessionState->lock);
-
+        { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.sessionState->lock);
           // sanity check (s)
           if (state_in.sessionState->channel.empty ())
           {
@@ -635,7 +646,7 @@ curses_main (struct IRC_Client_CursesState& state_in,
         result = nc_getmouse (&mouse_event);
 #else
         result = getmouse (&mouse_event);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         if (result == ERR)
         {
           ACE_DEBUG ((LM_ERROR,
@@ -699,7 +710,7 @@ close:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   delscreen (state_in.screen);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 //release:
   if (release)
@@ -708,6 +719,13 @@ close:
     if (result_2 == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+  } // end IF
+
+  if (result == ERR)
+  {
+    //Common_Tools::finalizeEventDispatch (*state_in.dispatchState,
+    //                                     false);
+    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
   } // end IF
 
   return (result == OK);

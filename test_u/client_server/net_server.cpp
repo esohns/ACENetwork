@@ -905,8 +905,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                           event_dispatch_state_s.reactorGroupId,
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                            true);
       Common_Timer_Tools::finalize ();
       return;
@@ -945,8 +944,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize TCP listener, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          true);
 
 #if defined (GUI_SUPPORT)
@@ -967,8 +965,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize SSL listener, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          true);
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
@@ -991,8 +988,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
                 ACE_TEXT (certificateFile_in.c_str ()),
                 ACE_TEXT (privateKeyFile_in.c_str ())));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          true);
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
@@ -1059,8 +1055,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
+    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          true);
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
@@ -1113,8 +1108,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p_2->socketConfiguration.listenAddress).c_str ())));
 
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                           event_dispatch_state_s.reactorGroupId,
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                            true);
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
@@ -1132,9 +1126,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  Common_Tools::dispatchEvents (useReactor_in,
-                                (useReactor_in ? event_dispatch_state_s.reactorGroupId
-                                               : event_dispatch_state_s.proactorGroupId));
+  Common_Tools::dispatchEvents (event_dispatch_state_s);
 
   // clean up
   // *NOTE*: listener has stopped, interval timer has been cancelled,

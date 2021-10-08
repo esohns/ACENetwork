@@ -1320,6 +1320,8 @@ IRC_Tools::CharToUserMode (char mode_in)
       result = USERMODE_RECVNOTICES; break;
     case 'w':
       result = USERMODE_RECVWALLOPS; break;
+    case 'x':
+      result = USERMODE_HOSTHIDING; break;
     default:
     {
       ACE_DEBUG ((LM_DEBUG,
@@ -1499,7 +1501,7 @@ IRC_Tools::RecordToString (const IRC_Record& message_in)
     case IRC_Record::__QUIRK__ERROR:
 #else
         case IRC_Record::ERROR:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         case IRC_Record::AWAY:
         case IRC_Record::USERS:
         case IRC_Record::USERHOST:
@@ -1539,6 +1541,7 @@ IRC_Tools::RecordToString (const IRC_Record& message_in)
         case IRC_Codes::RPL_MOTD:             // 372
         case IRC_Codes::RPL_MOTDSTART:        // 375
         case IRC_Codes::RPL_ENDOFMOTD:        // 376
+        case IRC_Codes::RPL_HOSTHIDDEN:       // 396
         case IRC_Codes::ERR_NOMOTD:           // 422
         case IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465

@@ -52,6 +52,9 @@
 //#include "IOStream_alt_T.h"
 #include "IRC_client_defines.h"
 
+//#if defined (CURSES_SUPPORT)
+//#include "IRC_client_curses.h"
+//#endif // CURSES_SUPPORT
 #include "IRC_client_network.h"
 
 // phonebook
@@ -118,19 +121,25 @@ struct IRC_Client_InputThreadData
 
 typedef Net_IConnector_T<ACE_INET_Addr,
                          IRC_Client_ConnectionConfiguration> IRC_Client_IConnector_t;
+#if defined (CURSES_SUPPORT)
 struct IRC_Client_CursesState;
+#endif // CURSES_SUPPORT
 struct IRC_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
   IRC_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , connector (NULL)
+#if defined (CURSES_SUPPORT)
    , cursesState (NULL)
+#endif // CURSES_SUPPORT
    , peerAddress ()
   {}
 
   IRC_Client_IConnector_t*       connector;
+#if defined (CURSES_SUPPORT)
   struct IRC_Client_CursesState* cursesState;
+#endif // CURSES_SUPPORT
   ACE_INET_Addr                  peerAddress;
 };
 

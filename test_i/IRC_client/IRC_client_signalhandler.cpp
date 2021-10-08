@@ -19,13 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "IRC_client_signalhandler.h"
 
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
-//#include "ace/Proactor.h"
-//#include "ace/Reactor.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_tools.h"
@@ -39,9 +36,9 @@
 #include "net_macros.h"
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
 #include "IRC_client_curses.h"
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 #include "IRC_client_network.h"
 
@@ -73,10 +70,11 @@ IRC_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     case SIGINT:
     case SIGTERM:
 // *PORTABILITY*: this isn't portable: on Windows SIGQUIT and SIGHUP are not defined...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGHUP:
     case SIGQUIT:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     {
 //       // *PORTABILITY*: tracing in a signal handler context is not portable
 //       // *TODO*
@@ -90,22 +88,22 @@ IRC_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
 // *PORTABILITY*: this isn't portable: on Windows SIGUSR1 and SIGUSR2 are not defined,
 // so we handle SIGBREAK (21) and SIGABRT (22) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR1:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    case SIGBREAK:
 #else
-  case SIGBREAK:
-#endif
+    case SIGUSR1:
+#endif // ACE_WIN32 || ACE_WIN64
     {
       // (try to) connect
       connect = true;
 
       break;
     }
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR2:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    case SIGABRT:
 #else
-  case SIGABRT:
-#endif
+    case SIGUSR2:
+#endif // ACE_WIN32 || ACE_WIN64
     {
       // abort connection
       abort = true;
@@ -171,22 +169,22 @@ done_connect:
     if (inherited::configuration_)
     {
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
       // step1: stop GTK event dispatch ?
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
                                                           true); // high priority ?
-#elif defined (CURSES_USE)
+#endif // GTK_SUPPORT
+#if defined (CURSES_SUPPORT)
         if (inherited::configuration_->cursesState)
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
           inherited::configuration_->cursesState->finished = true;
         } // end IF
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
     } // end IF
 
     // step2: stop event dispatch
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-                                         inherited::configuration_->dispatchState->reactorGroupId,
-                                         false);                                                    // don't block
+    Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                         false);                                    // don't block
   } // end IF
 }

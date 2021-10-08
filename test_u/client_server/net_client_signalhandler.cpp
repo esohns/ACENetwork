@@ -407,8 +407,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // stop event dispatch ?
     if (inherited::configuration_->stopEventDispatchOnShutdown)
-      Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-                                           inherited::configuration_->dispatchState->reactorGroupId,
+      Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
                                            false); // don't block
   } // end IF
 }

@@ -55,6 +55,7 @@ struct IRC_Client_CursesState
    , panels ()
    , screen (NULL)
    , status (NULL)
+   , dispatchState (NULL)
    , finished (false)
    , lock ()
    ///////////////////////////////////////
@@ -73,6 +74,7 @@ struct IRC_Client_CursesState
   WINDOW*                             status;
 
   // dispatch loop
+  struct Common_EventDispatchState*   dispatchState;
   bool                                finished;
   ACE_SYNCH_MUTEX                     lock;
 

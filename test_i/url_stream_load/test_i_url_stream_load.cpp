@@ -861,8 +861,7 @@ do_work (bool debugParser_in,
   connection_manager_2->abort ();
   connection_manager_2->wait ();
 
-  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                       event_dispatch_state_s.reactorGroupId,
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                        true);
 
   timer_manager_p->stop ();
@@ -901,8 +900,7 @@ do_work (bool debugParser_in,
   return;
 
 clean:
-  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                       event_dispatch_state_s.reactorGroupId,
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                        true);
   timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)

@@ -47,12 +47,12 @@ extern const char network_irc_statemachine_registration_name_string_[];
 
 class IRC_StateMachine_Registration
  : public Common_StateMachine_Base_T<network_irc_statemachine_registration_name_string_,
-                                     ACE_NULL_SYNCH,
+                                     ACE_MT_SYNCH,
                                      enum IRC_RegistrationStateType,
                                      Common_IStateMachine_T<enum IRC_RegistrationStateType> >
 {
   typedef Common_StateMachine_Base_T<network_irc_statemachine_registration_name_string_,
-                                     ACE_NULL_SYNCH,
+                                     ACE_MT_SYNCH,
                                      enum IRC_RegistrationStateType,
                                      Common_IStateMachine_T<enum IRC_RegistrationStateType> > inherited;
 
@@ -72,7 +72,7 @@ class IRC_StateMachine_Registration
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration (const IRC_StateMachine_Registration&))
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration& operator= (const IRC_StateMachine_Registration&))
 
-  ACE_Null_Mutex lock_;
+  ACE_Thread_Mutex lock_;
 };
 
 //////////////////////////////////////////

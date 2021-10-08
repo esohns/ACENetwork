@@ -68,7 +68,7 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
     } // end lock scope
 
     { // synch access to state machine
-      ACE_GUARD_RETURN (ACE_SYNCH_NULL_MUTEX, aGuard, *inherited2::stateLock_, false);
+      ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *inherited2::stateLock_, false);
       inherited2::state_ = IRC_REGISTRATION_STATE_NICK;
     } // end lock scope
     initialRegistration_ = true;
@@ -1247,6 +1247,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->streamConfiguration);
   ACE_ASSERT (inherited::configuration_->streamConfiguration->configuration_);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration->configuration_->allocatorConfiguration);
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (record_inout);
 

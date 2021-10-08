@@ -265,14 +265,14 @@ elseif (WIN32)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK2_PATH)
+ file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_PATH}
                            ${FFMPEG_PATH}
-                           ${GTK2_PATH}
+                           ${GTK_PATH}
                            ${ICONV_PATH}
                            ${LIBXML2_PATH}
                            ${ACE_LIB_PATH})

@@ -639,8 +639,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  Common_Tools::dispatchEvents ((CBData_in.configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
-                                group_id);
+  Common_Tools::dispatchEvents (event_dispatch_state_s);
 
   // step8: clean up
   timer_manager_p->stop ();

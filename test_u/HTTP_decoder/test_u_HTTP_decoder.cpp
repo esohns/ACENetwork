@@ -914,8 +914,7 @@ clean_up:
   timer_manager_p->stop ();
   connection_manager_p->stop (true,  // wait ?
                               true); // high priority ?
-  Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                       event_dispatch_state_s.reactorGroupId,
+  Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                        true);
 
   delete iconnector_p;
