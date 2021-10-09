@@ -181,7 +181,11 @@ do_processArguments (int argc_in,
                      std::string& configurationFile_out,
                      bool& debugParser_out,
                      bool& logToFile_out,
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
                      bool& useCursesLibrary_out,
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -219,7 +223,11 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   debugParser_out                = false;
   logToFile_out                  = IRC_CLIENT_SESSION_DEFAULT_LOG;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
   useCursesLibrary_out           = IRC_CLIENT_SESSION_USE_CURSES;
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
   useReactor_out                 =
     (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out = NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
@@ -227,9 +235,15 @@ do_processArguments (int argc_in,
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
 
+  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("a:c:dlrs:tvx:");
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+  options_string += ACE_TEXT_ALWAYS_CHAR ("n");
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("a:c:dlnrs:tvx:"),
+                              ACE_TEXT (options_string.c_str ()),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -274,11 +288,15 @@ do_processArguments (int argc_in,
         logToFile_out = true;
         break;
       }
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
       case 'n':
       {
         useCursesLibrary_out = true;
         break;
       }
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
       case 'r':
       {
         useReactor_out = true;
@@ -451,9 +469,9 @@ do_initializeSignals (bool useReactor_in,
 }
 
 ACE_THR_FUNC_RETURN
-connection_setup_curses_function (void* arg_in)
+connection_setup_function (void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::connection_setup_curses_function"));
+  NETWORK_TRACE (ACE_TEXT ("::connection_setup_function"));
 
   ACE_THR_FUNC_RETURN return_value;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -505,9 +523,6 @@ connection_setup_curses_function (void* arg_in)
         break; // done
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
-  // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (*thread_data_p->dispatchState,
-                                       false);                        // don't block
 
   connection_p = connection_manager_p->operator[] (0);
   if (!connection_p)
@@ -620,64 +635,26 @@ connection_setup_curses_function (void* arg_in)
 
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-  // step5: run curses event dispatch ?
-  if (thread_data_p->cursesState)
-  {
-    //IRC_Client_ISession_t* session_p =
-    //  dynamic_cast<IRC_Client_ISession_t*> (connection_p);
-    //if (!session_p)
-    //{
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to dynamic_cast<IRC_Client_ISession_t*>(0x%@), aborting\n"),
-    //              connection_p));
-
-    //  // clean up
-    //  connection_p->decrease ();
-    //  Common_Tools::finalizeEventDispatch (thread_data_s_p->useReactor,
-    //                                       !thread_data_s_p->useReactor,
-    //                                       -1);
-
-    //  goto clean_up;
-    //} // end IF
-    //const IRC_Client_ConnectionState& connection_state_r = session_p->state ();
-    const struct IRC_SessionState& session_state_r =
-      connection_p->state ();
-    thread_data_p->cursesState->sessionState =
-      &const_cast<struct IRC_SessionState&> (session_state_r);
-
-    // step6: clean up
-    connection_p->decrease (); connection_p = NULL;
-
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("running curses dispatch loop...\n")));
-
-    bool result_2 = curses_main (*thread_data_p->cursesState,
-                                 icontrol_p);
-    if (!result_2)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::curses_main(), aborting\n")));
-      goto clean_up;
-    } // end IF
-    else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("running curses dispatch loop...DONE\n")));
-  } // end IF
-  else
+  struct IRC_Client_CursesState& state_r =
+    const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
+  ACE_ASSERT (!state_r.controller);
+  state_r.controller = icontrol_p;
+  const struct IRC_SessionState& session_state_r =
+    connection_p->state ();
+  ACE_ASSERT (!state_r.sessionState);
+  state_r.sessionState =
+    &const_cast<struct IRC_SessionState&> (session_state_r);
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
-  {
-    // step6: clean up
-    connection_p->decrease ();
-  } // end ELSE
+
+  // step6: clean up
+  connection_p->decrease (); connection_p = NULL;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   return_value = 0;
 #else
   return_value = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
-
-  goto done;
 
 clean_up:
   if (connection_p)
@@ -686,7 +663,6 @@ clean_up:
   Common_Tools::finalizeEventDispatch (*thread_data_p->dispatchState,
                                        false);                        // don't block
 
-done:
   return return_value;
 }
 
@@ -703,12 +679,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  struct IRC_Client_CursesState curses_state;
-  configuration_in.cursesState = &curses_state;
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
   // step1: initialize IRC handler module
 
@@ -779,11 +749,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  curses_state.dispatchState = &event_dispatch_state_s;
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
   // step3: initialize client connector
   IRC_Client_ConnectionConfiguration connection_configuration;
@@ -822,11 +787,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // step3: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.connector = connector_p;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  signal_handler_configuration.cursesState = &curses_state;
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   signal_handler_configuration.dispatchState = &event_dispatch_state_s;
   signal_handler_configuration.peerAddress = serverAddress_in;
   if (!signalHandler_in.initialize (signal_handler_configuration))
@@ -889,13 +849,12 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (serverAddress_in).c_str ())));
-
-    // clean up
     Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          false);                 // don't block
-
     return;
   } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connected...\n")));
 
   // *NOTE*: from this point, clean up any remote connections
 
@@ -904,11 +863,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   struct IRC_Client_InputThreadData input_thread_data_s;
   input_thread_data_s.configuration = &configuration_in;
   input_thread_data_s.dispatchState = &event_dispatch_state_s;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-  input_thread_data_s.cursesState = &curses_state;
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   input_thread_data_s.moduleHandlerConfiguration =
     const_cast<struct IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second.second));
   ACE_thread_t thread_id = -1;
@@ -922,11 +876,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-
-    // clean up
+    connection_manager_p->abort ();
+    connection_manager_p->wait ();
     Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          false);                 // don't block
-
     return;
   } // end IF
   ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
@@ -935,27 +888,26 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   result =
-    thread_manager_p->spawn (::connection_setup_curses_function, // function
-                             &input_thread_data_s,                 // argument
+    thread_manager_p->spawn (::connection_setup_function, // function
+                             &input_thread_data_s,        // argument
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |
-                              THR_INHERIT_SCHED),                // flags
-                             &thread_id,                         // thread id
-                             &thread_handle,                     // thread handle
-                             ACE_DEFAULT_THREAD_PRIORITY,        // priority
-                             group_id_2,                         // group id
-                             NULL,                               // stack
-                             0,                                  // stack size
-                             &thread_name_2);                    // name
+                              THR_INHERIT_SCHED),         // flags
+                             &thread_id,                  // thread id
+                             &thread_handle,              // thread handle
+                             ACE_DEFAULT_THREAD_PRIORITY, // priority
+                             group_id_2,                  // group id
+                             NULL,                        // stack
+                             0,                           // stack size
+                             &thread_name_2);             // name
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
-
-    // clean up
+    connection_manager_p->abort ();
+    connection_manager_p->wait ();
     Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                          false);                 // don't block
-
     return;
   } // end IF
   Common_Tools::dispatchEvents (event_dispatch_state_s);
@@ -965,18 +917,50 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (signal_handler_configuration.peerAddress, false, false).c_str ())));
-
-    // clean up
     result = thread_manager_p->wait_grp (group_id_2);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
                   group_id_2));
-
+    connection_manager_p->abort ();
+    connection_manager_p->wait ();
     return;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connected...\n")));
+  result = thread_manager_p->wait_grp (group_id_2);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
+                group_id_2));
+
+#if defined (GUI_SUPPORT)
+  // step6b: setup GUI
+#if defined (CURSES_SUPPORT)
+  configuration_in.cursesConfiguration.hooks.initHook = curses_init;
+  configuration_in.cursesConfiguration.hooks.finiHook = curses_fini;
+  configuration_in.cursesConfiguration.hooks.inputHook = curses_input;
+  configuration_in.cursesConfiguration.hooks.mainHook = curses_main;
+  struct IRC_Client_CursesState& state_r =
+    const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
+  state_r.dispatchState = &event_dispatch_state_s;
+
+  if (!COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->initialize (configuration_in.cursesConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_UI_Curses_Manager_T::initialize(), returning\n")));
+    connection_manager_p->abort ();
+    connection_manager_p->wait ();
+    return;
+  } // end IF
+  if (!COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->start (NULL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_UI_Curses_Manager_T::start(), returning\n")));
+    connection_manager_p->abort ();
+    connection_manager_p->wait ();
+    return;
+  } // end IF
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
 
   // step6b: dispatch events
   event_dispatch_state_s.proactorGroupId = -1;
@@ -985,26 +969,23 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
-
-    // clean up
-    result = thread_manager_p->wait_grp (group_id_2);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
-                  group_id_2));
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+    COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (true, true);
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
     connection_manager_p->abort ();
     connection_manager_p->wait ();
-
     return;
   } // end IF
   Common_Tools::dispatchEvents (event_dispatch_state_s);
 
   // step7: clean up
-  result = thread_manager_p->wait_grp (group_id_2);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
-                group_id_2));
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+  COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (true, true);
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
   connection_manager_p->abort ();
   connection_manager_p->wait ();
 
@@ -1133,7 +1114,11 @@ ACE_TMAIN (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   bool debug_parser                          = false;
   bool log_to_file                           = IRC_CLIENT_SESSION_DEFAULT_LOG;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
   bool use_curses_library                    = IRC_CLIENT_SESSION_USE_CURSES;
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
   bool use_reactor                           =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
@@ -1148,7 +1133,11 @@ ACE_TMAIN (int argc_in,
                             configuration_file_name,
                             debug_parser,
                             log_to_file,
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
                             use_curses_library,
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
@@ -1277,6 +1266,12 @@ ACE_TMAIN (int argc_in,
   struct IRC_Client_Configuration configuration;
 
   ////////////////////////////////////////
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+  if (use_curses_library)
+    configuration.GUIFramework = COMMON_UI_FRAMEWORK_CURSES;
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
   configuration.protocolConfiguration.loginOptions.nickname =
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
   //   userData.loginOptions.user.username = ;

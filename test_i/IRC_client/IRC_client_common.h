@@ -52,9 +52,6 @@
 //#include "IOStream_alt_T.h"
 #include "IRC_client_defines.h"
 
-//#if defined (CURSES_SUPPORT)
-//#include "IRC_client_curses.h"
-//#endif // CURSES_SUPPORT
 #include "IRC_client_network.h"
 
 // phonebook
@@ -102,45 +99,33 @@ typedef IRC_Client_MessageQueue_t::reverse_iterator IRC_Client_MessageQueueRever
 //typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
 
 struct IRC_Client_Configuration;
-struct IRC_Client_CursesState;
 struct IRC_Client_ModuleHandlerConfiguration;
 struct IRC_Client_InputThreadData
 {
   IRC_Client_InputThreadData ()
    : configuration (NULL)
-   , cursesState (NULL)
    , dispatchState (NULL)
    , moduleHandlerConfiguration (NULL)
   {}
 
   struct IRC_Client_Configuration*              configuration;
-  struct IRC_Client_CursesState*                cursesState;
   struct Common_EventDispatchState*             dispatchState;
   struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
 typedef Net_IConnector_T<ACE_INET_Addr,
                          IRC_Client_ConnectionConfiguration> IRC_Client_IConnector_t;
-#if defined (CURSES_SUPPORT)
-struct IRC_Client_CursesState;
-#endif // CURSES_SUPPORT
 struct IRC_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
   IRC_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , connector (NULL)
-#if defined (CURSES_SUPPORT)
-   , cursesState (NULL)
-#endif // CURSES_SUPPORT
    , peerAddress ()
   {}
 
-  IRC_Client_IConnector_t*       connector;
-#if defined (CURSES_SUPPORT)
-  struct IRC_Client_CursesState* cursesState;
-#endif // CURSES_SUPPORT
-  ACE_INET_Addr                  peerAddress;
+  IRC_Client_IConnector_t* connector;
+  ACE_INET_Addr            peerAddress;
 };
 
 #endif

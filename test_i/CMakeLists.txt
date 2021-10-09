@@ -109,16 +109,29 @@ if (GUI_SUPPORT)
                               $<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>)
  endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
+
+if (GUI_SUPPORT)
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui>)
+ if (CURSES_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/curses>)
+ endif (CURSES_SUPPORT)
+ if (GTK_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/gtk>)
+ endif (GTK_SUPPORT)
+ if (QT_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/qt>)
+ endif (QT_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/wxwidgets>)
+ endif (WXWIDGETS_SUPPORT)
+endif (GUI_SUPPORT)
+
 if (UNIX)
-# target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
-
-# if (DHCLIENT_SUPPORT)
-#  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-#                              $<BUILD_INTERFACE:/usr/include/bind-export>)
-#  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC ${BIND9_CFLAGS})
-# endif (DHCLIENT_SUPPORT)
-
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
@@ -131,17 +144,6 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/signal>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/timer>)
- if (GUI_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui>)
-  if (GTK_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/gtk>)
-  elseif (WXWIDGETS_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/wxwidgets>)
-  endif ()
- endif (GUI_SUPPORT)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
@@ -155,17 +157,6 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/parser>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/timer>)
- if (GUI_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui>)
-  if (GTK_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/gtk>)
-  elseif (WXWIDGETS_USE)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/wxwidgets>)
-  endif ()
- endif (GUI_SUPPORT)
 endif ()
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/${BUILD_PATH_SUFFIX}>)

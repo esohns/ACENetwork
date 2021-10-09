@@ -37,53 +37,60 @@
 #endif // ACE_WIN32 || ACE_WIN32
 #include "panel.h"
 
-#include "IRC_client_common.h"
+#include "common_ui_curses_common.h"
 
-typedef std::map<std::string, struct panel*> IRC_Client_CursesChannels_t;
-typedef IRC_Client_CursesChannels_t::iterator IRC_Client_CursesChannelsIterator_t;
+#include "IRC_client_common.h"
 
 typedef std::map<std::string, IRC_Client_MessageQueue_t> IRC_Client_CursesMessages_t;
 typedef IRC_Client_CursesMessages_t::iterator IRC_Client_CursesMessagesIterator_t;
 
 struct IRC_SessionState;
 struct IRC_Client_CursesState
+ : Common_UI_Curses_State
 {
-  inline IRC_Client_CursesState ()
-   : activePanel ()
+  IRC_Client_CursesState ()
+   : Common_UI_Curses_State ()
+   , activePanel ()
    , input (NULL)
    , log (NULL)
    , panels ()
-   , screen (NULL)
    , status (NULL)
-   , dispatchState (NULL)
-   , finished (false)
-   , lock ()
    ///////////////////////////////////////
    , backLog ()
+   , controller (NULL)
+   , message ()
+   , receivers ()
    , sessionState (NULL)
   {
     activePanel = panels.begin ();
   };
 
   // curses
-  IRC_Client_CursesChannelsIterator_t activePanel;
-  WINDOW*                             input;
-  WINDOW*                             log;
-  IRC_Client_CursesChannels_t         panels;
-  SCREEN*                             screen;
-  WINDOW*                             status;
-
-  // dispatch loop
-  struct Common_EventDispatchState*   dispatchState;
-  bool                                finished;
-  ACE_SYNCH_MUTEX                     lock;
+  Common_UI_Curses_PanelsIterator_t activePanel;
+  WINDOW*                           input;
+  WINDOW*                           log;
+  Common_UI_Curses_Panels_t         panels;
+  WINDOW*                           status;
 
   ////////////////////////////////////////
 
   // session
-  IRC_Client_CursesMessages_t         backLog;
-  struct IRC_SessionState*            sessionState;
+  IRC_Client_CursesMessages_t       backLog;
+  IRC_IControl*                     controller;
+  std::string                       message; // current-
+  string_list_t                     receivers; // current-
+  struct IRC_SessionState*          sessionState;
 };
+
+// event hooks
+bool curses_init (struct Common_UI_Curses_State*); // state
+bool curses_fini (struct Common_UI_Curses_State*); // state
+
+bool curses_input (struct Common_UI_Curses_State*, // state
+                   int);                           // input character
+bool curses_main (struct Common_UI_Curses_State*); // state
+
+//////////////////////////////////////////
 
 bool curses_join (const std::string&,              // channel
                   struct IRC_Client_CursesState&); // state
@@ -91,8 +98,6 @@ void curses_log (const std::string&,      // channel (empty ? server log : chann
                  const std::string&,      // text
                  struct IRC_Client_CursesState&, // state
                  bool = true);                   // lock ?
-bool curses_main (struct IRC_Client_CursesState&, // state
-                  IRC_IControl*);                 // controller
 bool curses_part (const std::string&,              // channel
                   struct IRC_Client_CursesState&); // state
 

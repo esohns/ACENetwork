@@ -102,6 +102,9 @@ struct Test_I_Configuration
    , parserConfiguration ()
    //, streamConfiguration ()
    , signalHandlerConfiguration ()
+#if defined (GUI_SUPPORT)
+   , GUIFramework (COMMON_UI_FRAMEWORK_INVALID)
+#endif // GUI_SUPPORT
    , userData ()
   {}
 
@@ -114,6 +117,10 @@ struct Test_I_Configuration
   //struct Test_I_StreamConfiguration        streamConfiguration;
   // **************************** signal data **********************************
   struct Test_I_SignalHandlerConfiguration   signalHandlerConfiguration;
+
+#if defined (GUI_SUPPORT)
+  enum Common_UI_FrameworkType               GUIFramework;
+#endif // GUI_SUPPORT
 
   struct Test_I_UserData                     userData;
 };

@@ -29,6 +29,13 @@
 #include "common_defines.h"
 #include "common_inotify.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+#include "common_ui_curses_common.h"
+#include "common_ui_curses_manager.h"
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
+
 #include "stream_common.h"
 
 #include "net_defines.h"
@@ -39,11 +46,12 @@
 
 #include "test_i_common.h"
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
-#else
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 //#include "test_u_wxwidgets_common.h"
-#endif // GTK_USE
+#endif // WXWIDGETS_SUPPORT
 #endif // GUI_SUPPORT
 
 #include "IRC_client_common.h"
@@ -99,11 +107,11 @@ struct IRC_Client_Configuration
    ///////////////////////////////////////
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-   , cursesState (NULL)
+   , cursesConfiguration ()
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
    , encoding (IRC_PRT_DEFAULT_ENCODING)
-   , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
+//, groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
    ///////////////////////////////////////
    , userData ()
@@ -120,18 +128,29 @@ struct IRC_Client_Configuration
   // ***************************************************************************
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-  // *TODO*: move this somewhere else
-  struct IRC_Client_CursesState*    cursesState;
+  struct Common_UI_Curses_Configuration      cursesConfiguration;
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
-  enum IRC_CharacterEncoding         encoding;
-  int                                groupId;
-  bool                               logToFile;
+  enum IRC_CharacterEncoding                 encoding;
+  //int                                        groupId;
+  bool                                       logToFile;
 
-  struct Net_UserData                userData;
+  struct Net_UserData                        userData;
 };
+
+//////////////////////////////////////////
+
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+typedef Common_UI_Curses_Manager_T<ACE_MT_SYNCH,
+                                   struct Common_UI_Curses_Configuration,
+                                   struct IRC_Client_CursesState> Common_UI_Curses_Manager_t;
+typedef ACE_Singleton<Common_UI_Curses_Manager_t,
+                      ACE_MT_SYNCH::MUTEX> COMMON_UI_CURSES_MANAGER_SINGLETON;
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
 
 #endif

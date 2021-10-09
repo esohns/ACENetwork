@@ -166,24 +166,20 @@ done_connect:
   // ...shutdown ?
   if (shutdown)
   {
-    if (inherited::configuration_)
-    {
 #if defined (GUI_SUPPORT)
-#if defined (GTK_SUPPORT)
-      // step1: stop GTK event dispatch ?
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
-                                                          true); // high priority ?
-#endif // GTK_SUPPORT
 #if defined (CURSES_SUPPORT)
-        if (inherited::configuration_->cursesState)
-        { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
-          inherited::configuration_->cursesState->finished = true;
-        } // end IF
+    COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+                                                           true); // high priority ?
 #endif // CURSES_SUPPORT
+#if defined (GTK_SUPPORT)
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+                                                        true); // high priority ?
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
-    } // end IF
 
     // step2: stop event dispatch
+    ACE_ASSERT (inherited::configuration_);
+    ACE_ASSERT (inherited::configuration_->dispatchState);
     Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
                                          false);                                    // don't block
   } // end IF
