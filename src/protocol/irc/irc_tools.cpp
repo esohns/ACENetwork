@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <regex>
 #include <sstream>
 
 #include "irc_tools.h"
@@ -143,6 +144,112 @@ IRC_Tools::dump (const IRC_ChannelModes_t& channelModes_in)
        i++)
     if (channelModes_in.test (i))
       result += IRC_Tools::ChannelModeToChar (static_cast<IRC_ChannelMode> (i));
+
+  return result;
+}
+
+std::string
+IRC_Tools::CommandToString (IRC_CommandType_t command_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::CommandToString"));
+
+  std::string result; 
+
+  switch (command_in)
+  {
+    case IRC_Record::PASS:
+      result = ACE_TEXT_ALWAYS_CHAR ("PASS"); break;
+    case IRC_Record::NICK:
+      result = ACE_TEXT_ALWAYS_CHAR ("NICK"); break;
+    case IRC_Record::USER:
+      result = ACE_TEXT_ALWAYS_CHAR ("USER"); break;
+    case IRC_Record::SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("SERVER"); break;
+    case IRC_Record::OPER:
+      result = ACE_TEXT_ALWAYS_CHAR ("OPER"); break;
+    case IRC_Record::QUIT:
+      result = ACE_TEXT_ALWAYS_CHAR ("QUIT"); break;
+    case IRC_Record::SQUIT:
+      result = ACE_TEXT_ALWAYS_CHAR ("SQUIT"); break;
+    case IRC_Record::JOIN:
+      result = ACE_TEXT_ALWAYS_CHAR ("JOIN"); break;
+    case IRC_Record::PART:
+      result = ACE_TEXT_ALWAYS_CHAR ("PART"); break;
+    case IRC_Record::MODE:
+      result = ACE_TEXT_ALWAYS_CHAR ("MODE"); break;
+    case IRC_Record::TOPIC:
+      result = ACE_TEXT_ALWAYS_CHAR ("TOPIC"); break;
+    case IRC_Record::NAMES:
+      result = ACE_TEXT_ALWAYS_CHAR ("NAMES"); break;
+    case IRC_Record::LIST:
+      result = ACE_TEXT_ALWAYS_CHAR ("LIST"); break;
+    case IRC_Record::INVITE:
+      result = ACE_TEXT_ALWAYS_CHAR ("INVITE"); break;
+    case IRC_Record::KICK:
+      result = ACE_TEXT_ALWAYS_CHAR ("KICK"); break;
+    case IRC_Record::SVERSION:
+      result = ACE_TEXT_ALWAYS_CHAR ("VERSION"); break;
+    case IRC_Record::STATS:
+      result = ACE_TEXT_ALWAYS_CHAR ("STATS"); break;
+    case IRC_Record::LINKS:
+      result = ACE_TEXT_ALWAYS_CHAR ("LINKS"); break;
+    case IRC_Record::TIME:
+      result = ACE_TEXT_ALWAYS_CHAR ("TIME"); break;
+    case IRC_Record::CONNECT:
+      result = ACE_TEXT_ALWAYS_CHAR ("CONNECT"); break;
+    case IRC_Record::TRACE:
+      result = ACE_TEXT_ALWAYS_CHAR ("TRACE"); break;
+    case IRC_Record::ADMIN:
+      result = ACE_TEXT_ALWAYS_CHAR ("ADMIN"); break;
+    case IRC_Record::INFO:
+      result = ACE_TEXT_ALWAYS_CHAR ("INFO"); break;
+    case IRC_Record::PRIVMSG:
+      result = ACE_TEXT_ALWAYS_CHAR ("PRIVMSG"); break;
+    case IRC_Record::NOTICE:
+      result = ACE_TEXT_ALWAYS_CHAR ("NOTICE"); break;
+    case IRC_Record::WHO:
+      result = ACE_TEXT_ALWAYS_CHAR ("WHO"); break;
+    case IRC_Record::WHOIS:
+      result = ACE_TEXT_ALWAYS_CHAR ("WHOIS"); break;
+    case IRC_Record::WHOWAS:
+      result = ACE_TEXT_ALWAYS_CHAR ("WHOWAS"); break;
+    case IRC_Record::KILL:
+      result = ACE_TEXT_ALWAYS_CHAR ("KILL"); break;
+    case IRC_Record::PING:
+      result = ACE_TEXT_ALWAYS_CHAR ("PING"); break;
+    case IRC_Record::PONG:
+      result = ACE_TEXT_ALWAYS_CHAR ("PONG"); break;
+#if defined ACE_WIN32 || defined ACE_WIN64
+#pragma message("applying quirk code for this compiler")
+    case IRC_Record::__QUIRK__ERROR:
+#else
+    case IRC_Record::ERROR:
+#endif // ACE_WIN32 || ACE_WIN64
+      result = ACE_TEXT_ALWAYS_CHAR ("ERROR"); break;
+    case IRC_Record::AWAY:
+      result = ACE_TEXT_ALWAYS_CHAR ("AWAY"); break;
+    case IRC_Record::REHASH:
+      result = ACE_TEXT_ALWAYS_CHAR ("REHASH"); break;
+    case IRC_Record::RESTART:
+      result = ACE_TEXT_ALWAYS_CHAR ("RESTART"); break;
+    case IRC_Record::SUMMON:
+      result = ACE_TEXT_ALWAYS_CHAR ("SUMMON"); break;
+    case IRC_Record::USERS:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERS"); break;
+    case IRC_Record::WALLOPS:
+      result = ACE_TEXT_ALWAYS_CHAR ("WALLOPS"); break;
+    case IRC_Record::USERHOST:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERHOST"); break;
+    case IRC_Record::ISON:
+      result = ACE_TEXT_ALWAYS_CHAR ("ISON"); break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown command (was: %d), aborting\n"),
+                  command_in));
+      break;
+    }
+  } // end SWITCH
 
   return result;
 }
@@ -364,20 +471,22 @@ IRC_Tools::UserModeToChar (enum IRC_UserMode mode_in)
 
   switch (mode_in)
   {
-    case USERMODE_LOCALOPERATOR:
-      return 'O';
-    case USERMODE_OPERATOR:
-      return 'o';
-    case USERMODE_RESTRICTEDCONN:
-      return 'r';
-    case USERMODE_RECVWALLOPS:
-      return 'w';
-    case USERMODE_RECVNOTICES:
-      return 's';
-    case USERMODE_INVISIBLE:
-      return 'i';
     case USERMODE_AWAY:
       return 'a';
+    case USERMODE_INVISIBLE:
+      return 'i';
+    case USERMODE_OPERATOR:
+      return 'o';
+    case USERMODE_LOCALOPERATOR:
+      return 'O';
+    case USERMODE_RESTRICTEDCONN:
+      return 'r';
+    case USERMODE_RECVNOTICES:
+      return 's';
+    case USERMODE_RECVWALLOPS:
+      return 'w';
+    case USERMODE_HOSTHIDING:
+      return 'x';
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -403,8 +512,37 @@ IRC_Tools::isValidChannelName (const std::string& string_in)
           (string_in.find ('&', 0) == 0));
 }
 
+bool
+IRC_Tools::parse (const std::string& inputString_in,
+                  IRC_CommandType_t& command_out,
+                  string_list_t& parameters_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::parse"));
+
+  // initialize return value(s)
+  command_out = IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID;
+  parameters_out.clear ();
+
+  std::regex regex (ACE_TEXT_ALWAYS_CHAR ("^(?:/)([[:alpha:]]{1})(?:[[:space:]]+)(?:(.+)(?:[[:space:]]+))*(.*)$"));
+  std::smatch match_results;
+  if (!std::regex_match (inputString_in,
+                         match_results,
+                         regex,
+                         std::regex_constants::match_default))
+    return false;
+  ACE_ASSERT (match_results[1].matched);
+  command_out = IRC_Tools::CharToCommand (match_results[1].str ()[0]);
+  for (unsigned int i = 2;
+       i < match_results.size ();
+       ++i)
+    if (match_results[i].matched)
+      parameters_out.push_back (match_results[i].str ());
+
+  return true;
+}
+
 std::string
-IRC_Tools::CommandToString (const IRC_NumericCommand_t& numeric_in)
+IRC_Tools::CommandToString (IRC_NumericCommand_t numeric_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Tools::CommandToString"));
 
@@ -1385,6 +1523,27 @@ IRC_Tools::ChannelModeToString (enum IRC_ChannelMode mode_in)
 }
 
 std::string
+IRC_Tools::ChannelModeToString (const IRC_ChannelModes_t& modes_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::ChannelModeToString"));
+
+  std::string result;
+
+  // sanity check(s)
+  if (modes_in.none ())
+    return result;
+
+  result = ACE_TEXT_ALWAYS_CHAR ("+");
+  for (unsigned int i = 0;
+       i < modes_in.size ();
+       ++i)
+    if (modes_in.test (i))
+      result += IRC_Tools::ChannelModeToChar (static_cast<enum IRC_ChannelMode> (i));
+
+  return result;
+}
+
+std::string
 IRC_Tools::UserModeToString (enum IRC_UserMode mode_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserModeToString"));
@@ -1416,6 +1575,27 @@ IRC_Tools::UserModeToString (enum IRC_UserMode mode_in)
       break;
     }
   } // end SWITCH
+
+  return result;
+}
+
+std::string
+IRC_Tools::UserModeToString (const IRC_UserModes_t& modes_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserModeToString"));
+
+  std::string result;
+
+  // sanity check(s)
+  if (modes_in.none ())
+    return result;
+
+  result = ACE_TEXT_ALWAYS_CHAR ("+");
+  for (unsigned int i = 0;
+       i < modes_in.size ();
+       ++i)
+    if (modes_in.test (i))
+      result += IRC_Tools::UserModeToChar (static_cast<enum IRC_UserMode> (i));
 
   return result;
 }
@@ -1498,7 +1678,7 @@ IRC_Tools::RecordToString (const IRC_Record& message_in)
         case IRC_Record::KICK:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #pragma message("applying quirk code for this compiler")
-    case IRC_Record::__QUIRK__ERROR:
+        case IRC_Record::__QUIRK__ERROR:
 #else
         case IRC_Record::ERROR:
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1646,4 +1826,27 @@ IRC_Tools::stringify (const IRC_Parameters_t& parameters_in,
     result.erase (--result.end ());
 
   return result;
+}
+
+IRC_CommandType_t
+IRC_Tools::CharToCommand (char char_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::CharToCommand"));
+
+  switch (char_in)
+  {
+    case 'j':
+      return IRC_Record::CommandType::JOIN;
+    case 'p':
+      return IRC_Record::CommandType::PART;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid command (was: %c), aborting\n"),
+                  char_in));
+      break;
+    }
+  } // end SWITCH
+
+  return IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID;
 }

@@ -53,6 +53,8 @@ class IRC_Record
  : public Common_ReferenceCounter_T<ACE_MT_SYNCH>,
    public Common_IDumpState
 {
+  typedef Common_ReferenceCounter_T<ACE_MT_SYNCH> inherited;
+
  public:
   enum CommandType
   {
@@ -148,11 +150,8 @@ class IRC_Record
   Command             command_;
   IRC_Parameters_t    parameters_;
   list_items_ranges_t parameterRanges_;
-
- private:
-  typedef Common_ReferenceCounter_T<ACE_MT_SYNCH> inherited;
 };
 
-typedef IRC_Record::CommandType IRC_CommandType_t;
+typedef enum IRC_Record::CommandType IRC_CommandType_t;
 
 #endif

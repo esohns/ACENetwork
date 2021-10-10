@@ -55,13 +55,19 @@ struct IRC_ConnectionState
   IRC_Statistic_t statistic;
 };
 
+typedef string_list_t channels_t;
+typedef channels_t::iterator channels_iterator_t;
+typedef channels_t::const_iterator channels_const_iterator_t;
+typedef std::map<std::string, IRC_ChannelModes_t> channel_modes_t;
+typedef channel_modes_t::iterator channel_modes_iterator_t;
 struct IRC_SessionState
  : IRC_ConnectionState
 {
   IRC_SessionState ()
    : IRC_ConnectionState ()
+   , activeChannel ()
    , away (false)
-   , channel ()
+   , channels ()
    , channelModes ()
    , isFirstMessage (false)
    , nickName ()
@@ -69,12 +75,13 @@ struct IRC_SessionState
   {}
 
   // *TODO*: remove this
-  bool               away;
-  std::string        channel;
-  IRC_ChannelModes_t channelModes;
-  bool               isFirstMessage;
-  std::string        nickName;
-  IRC_UserModes_t    userModes;
+  std::string     activeChannel;
+  bool            away;
+  channels_t      channels;
+  channel_modes_t channelModes;
+  bool            isFirstMessage;
+  std::string     nickName;
+  IRC_UserModes_t userModes;
 };
 
 typedef Net_IConnection_T<ACE_INET_Addr,

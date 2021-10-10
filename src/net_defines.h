@@ -102,12 +102,11 @@
 
 // stream
 #define NET_STREAM_MAX_MESSAGES                                        0  // 0 --> no limits
-#define NET_STREAM_MESSAGE_DATA_BUFFER_SIZE                            16384 // bytes
 
+#define NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE                    16384 // bytes
 #define NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S              0  // seconds [0: off]
+#define NET_STREAM_DEFAULT_MODULE_SOCKETHANDLER_NAME_STRING            "SocketHandler"
 #define NET_STREAM_DEFAULT_NAME                                        "NetStream"
-
-#define NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING            "SocketHandler"
 
 // statistic
 // *NOTE*: lower values --> more overhead, better estimations

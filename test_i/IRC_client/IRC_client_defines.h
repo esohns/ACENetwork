@@ -43,22 +43,26 @@
 #define IRC_CLIENT_PHONEBOOK_KEYWORD_GROUP              "GROUP:"
 #define IRC_CLIENT_PHONEBOOK_KEYWORD_SERVER             "SERVER:"
 
-#define IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS         3
+//#define IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS         3
 
 //#define IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 
 // client
 // asynchronous connections
-#define IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT            60 // second(s)
-#define IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL   1  // second(s)
+//#define IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT            60 // second(s)
+//#define IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL   1  // second(s)
 #define IRC_CLIENT_SESSION_LOG_FILENAME_PREFIX          "IRC_client_session"
-#define IRC_CLIENT_SESSION_USE_CURSES                   true // use (PD|N)curses ?
 #define IRC_CLIENT_SESSION_DEFAULT_LOG                  false // log to file ? : stdout
 
 // UI/output
-#define IRC_CLIENT_CURSES_COLOR_LOG                     1
-#define IRC_CLIENT_CURSES_COLOR_STATUS                  2
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+#define IRC_CLIENT_CURSES_COLOR_CHANNEL                 1
+#define IRC_CLIENT_CURSES_COLOR_LOG                     2
+#define IRC_CLIENT_CURSES_COLOR_STATUS                  3
 #define IRC_CLIENT_CURSES_CURSOR_MODE                   2 // highlighted
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
 #define IRC_CLIENT_DEFAULT_PRINT_PINGDOT                false
 
 #define IRC_CLIENT_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST

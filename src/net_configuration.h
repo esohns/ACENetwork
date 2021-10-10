@@ -21,12 +21,12 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <Ks.h>
-#endif // ACE_WIN32 || ACE_WIN64
-
 #include <map>
 #include <string>
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "Ks.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"

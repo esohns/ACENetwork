@@ -47,7 +47,7 @@
 
 #include "IRC_client_defines.h"
 //#include "IRC_client_stream.h"
-//#include "IRC_client_stream_common.h"
+#include "IRC_client_stream_common.h"
 
 //////////////////////////////////////////
 

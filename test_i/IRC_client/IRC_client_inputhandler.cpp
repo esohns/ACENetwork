@@ -209,16 +209,14 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
   string_list_t receivers;
   ACE_ASSERT (state_);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_->lock, -1);
-
     // sanity check (s)
-    if (state_->channel.empty ())
+    if (state_->activeChannel.empty ())
     {
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("not in a channel, returning\n")));
       goto done;
     } // end IF
-
-    receivers.push_front (state_->channel);
+    receivers.push_front (state_->activeChannel);
   } // end lock scope
   try {
     configuration_->controller->send (receivers, message_text);

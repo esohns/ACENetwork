@@ -45,144 +45,23 @@
 #include "irc_tools.h"
 
 template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-//              ControllerType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::IRC_Session_T (bool managed_in)
+          typename UIStateType>
+IRC_Client_Session_T<ConnectionType,
+                     UIStateType>::IRC_Client_Session_T (bool managed_in)
  : inherited (managed_in)
- , close_ (false)
- , inputHandler_ (NULL)
- , logToFile_ (IRC_SESSION_DEF_LOG)
-// , output_ (ACE_STREAMBUF_SIZE)
- , shutDownOnEnd_ (true) // *TODO*: allow more sessions
- , UIState_ (NULL)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::IRC_Session_T"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::IRC_Client_Session_T"));
 
 }
 
 template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::~IRC_Session_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::~IRC_Session_T"));
-
-  int result = -1;
-
-  if (unlikely (inputHandler_))
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    // *NOTE*: the input handler runs in a dedicated (detached) thread; there is
-    //         really nothing that can be done to stop it, as the thread id is
-    //         unknown. The thread will return gracefully (calls handle_close ()
-    //         and delete(s) itself) once ACE_STDIN is closed
-    //         (see ACE_Event_Handler.cpp:252, IRC_client_inputhandler.cpp:107)
-    //         --> nothing to be done here...
-#else
-    result = inputHandler_->handle_close (ACE_INVALID_HANDLE,
-                                          ACE_Event_Handler::ALL_EVENTS_MASK);
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to IRC_Client_InputHandler::handle_close(): \"%m\", continuing\n")));
-
-    delete inputHandler_;
-#endif // ACE_WIN32 || ACE_WIN64
-  } // end IF
-
-  if (unlikely (close_))
-  {
-    //result = file_.close ();
-    //if (result == -1)
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to ACE_FILE_Stream::close(): \"%m\", continuing\n")));
-//    result = output_.close ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to IRC_Client_IOStream_t::close(): \"%m\", continuing\n")));
-  } // end IF
-}
-
-template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
+          typename UIStateType>
 void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::start (Stream_SessionId_t sessionId_in,
-                                                     const SessionDataType& sessionData_in)
+IRC_Client_Session_T<ConnectionType,
+                     UIStateType>::start (Stream_SessionId_t sessionId_in,
+                                          const struct IRC_Client_SessionData& sessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::start"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::start"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionData_in);
@@ -227,26 +106,19 @@ IRC_Session_T<ConnectionType,
   } // end ELSE
 
   // step0b: set initial nickname
-  ConfigurationType* configuration_p = NULL;
-  //if (!inherited::manager_)
-  //{
-  //  const IRC_Client_Configuration& configuration_r = inherited::get ();
-  //  configuration_p = &const_cast<IRC_Client_Configuration&> (configuration_r);
-  //} // end IF
-  //else
-    configuration_p = inherited::CONNECTION_BASE_T::configuration_;
   // sanity check(s)
-  ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->protocolConfiguration);
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->protocolConfiguration);
   inherited::state_.nickName =
-      configuration_p->protocolConfiguration->loginOptions.nickname;
+    inherited::CONNECTION_BASE_T::configuration_->protocolConfiguration->loginOptions.nickname;
 
   // step1: initialize output
 #if defined (GUI_SUPPORT)
-  UIState_ = static_cast<StateType*> (configuration_p->UIState);
+  inherited::UIState_ =
+    static_cast<UIStateType*> (inherited::CONNECTION_BASE_T::configuration_->UIState);
 #endif // GUI_SUPPORT
-  logToFile_ = configuration_p->logToFile;
-  if (logToFile_)
+  inherited::logToFile_ = inherited::CONNECTION_BASE_T::configuration_->logToFile;
+  if (inherited::logToFile_)
   {
     std::string file_name =
       Common_Log_Tools::getLogDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME));
@@ -284,19 +156,19 @@ IRC_Session_T<ConnectionType,
 
 //      return;
 //    } // end IF
-    close_ = true;
+    inherited::close_ = true;
   } // end IF
 //  else
 //    output_.set_handle (ACE_STDOUT);
 
   // step2: initialize input
-  if (!configuration_p->UIState &&
-      !inputHandler_)
+  if (!inherited::CONNECTION_BASE_T::configuration_->UIState &&
+      !inherited::inputHandler_)
   {
-    ACE_NEW_NORETURN (inputHandler_,
-                      InputHandlerType (&(inherited::state_),
-                                        (configuration_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR)));
-    if (!inputHandler_)
+    ACE_NEW_NORETURN (inherited::inputHandler_,
+                      IRC_Client_InputHandler (&(inherited::state_),
+                                               (inherited::CONNECTION_BASE_T::configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR)));
+    if (!inherited::inputHandler_)
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
@@ -306,11 +178,11 @@ IRC_Session_T<ConnectionType,
 
       return;
     } // end IF
-    InputHandlerConfigurationType input_handler_configuration;
+    struct IRC_Client_InputHandlerConfiguration input_handler_configuration;
     //input_handler_configuration. = &state_;
     // *TODO*: remove type inference
     input_handler_configuration.connectionConfiguration =
-      configuration_p;
+      inherited::CONNECTION_BASE_T::configuration_;
     if (!inputHandler_->initialize (input_handler_configuration))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -325,37 +197,13 @@ IRC_Session_T<ConnectionType,
 }
 
 template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
+          typename UIStateType>
 void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::notify (Stream_SessionId_t sessionId_in,
-                                                      const enum Stream_SessionMessageType& sessionEvent_in)
+IRC_Client_Session_T<ConnectionType,
+                     UIStateType>::notify (Stream_SessionId_t sessionId_in,
+                                           const enum Stream_SessionMessageType& sessionEvent_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -367,36 +215,12 @@ IRC_Session_T<ConnectionType,
 }
 
 template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
+          typename UIStateType>
 void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::end (Stream_SessionId_t sessionId_in)
+IRC_Client_Session_T<ConnectionType,
+                     UIStateType>::end (Stream_SessionId_t sessionId_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::end"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::end"));
 
   ACE_UNUSED_ARG (sessionId_in);
 
@@ -418,37 +242,13 @@ IRC_Session_T<ConnectionType,
 }
 
 template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
+          typename UIStateType>
 void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::notify (Stream_SessionId_t sessionId_in,
-                                                      const MessageType& message_in)
+IRC_Client_Session_T<ConnectionType,
+                     UIStateType>::notify (Stream_SessionId_t sessionId_in,
+                                           const IRC_Message& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
 
@@ -483,7 +283,7 @@ IRC_Session_T<ConnectionType,
         case IRC_Codes::RPL_GLOBALUSERS:      // 266
         case IRC_Codes::RPL_INVITING:         // 341
         {
-          log (record_r);
+          inherited::log (record_r);
           break;
         }
         case IRC_Codes::RPL_USERHOST:         // 302
@@ -557,19 +357,19 @@ IRC_Session_T<ConnectionType,
         }
         case IRC_Codes::RPL_UNAWAY:           // 305
         {
-          log (record_r);
+          inherited::log (record_r);
 
           break;
         }
         case IRC_Codes::RPL_NOWAWAY:          // 306
         {
-          log (record_r);
+          inherited::log (record_r);
 
           break;
         }
         case IRC_Codes::RPL_ENDOFWHO:         // 315
         {
-          log (record_r);
+          inherited::log (record_r);
 
           inherited::state_.isFirstMessage = true;
 
@@ -581,7 +381,7 @@ IRC_Session_T<ConnectionType,
         }
         case IRC_Codes::RPL_LISTEND:          // 323
         {
-          log (record_r);
+          inherited::log (record_r);
 
           break;
         }
@@ -709,7 +509,7 @@ IRC_Session_T<ConnectionType,
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
         {
-          log (record_r);
+          inherited::log (record_r);
 
           if ((record_r.command_.numeric == IRC_Codes::ERR_NOSUCHNICK)       ||
               (record_r.command_.numeric == IRC_Codes::ERR_UNKNOWNCOMMAND)   ||
@@ -757,7 +557,7 @@ IRC_Session_T<ConnectionType,
         case IRC_Record::USER:
         case IRC_Record::QUIT:
         {
-          log (record_r);
+          inherited::log (record_r);
 
           if ((record_r.prefix_.origin == inherited::state_.nickName) &&
               (command == IRC_Record::QUIT))
@@ -779,15 +579,23 @@ IRC_Session_T<ConnectionType,
             inherited::state_.channelModes.insert (std::make_pair (channel, 0));
             inherited::state_.activeChannel = channel;
 #if defined (GUI_SUPPORT)
-            if (UIState_)
+            if (inherited::UIState_)
             {
+#if defined (CURSES_SUPPORT)
+              if (!curses_join (channel,
+                                *inherited::UIState_))
+                ACE_DEBUG ((LM_ERROR,
+                            ACE_TEXT ("failed to curses_join(\"%s\"), continuing\n"),
+                            ACE_TEXT (channel.c_str ())));
+#endif // CURSES_SUPPORT
             } // end IF
 #endif // GUI_SUPPORT
+
             break;
           } // end IF
 
           // someone joined a common channel...
-          log (record_r);
+          inherited::log (record_r);
 
           break;
         }
@@ -818,15 +626,22 @@ IRC_Session_T<ConnectionType,
             ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
             inherited::state_.channelModes.erase (iterator_2);
 #if defined (GUI_SUPPORT)
-            if (UIState_)
+            if (inherited::UIState_)
             {
+#if defined (CURSES_SUPPORT)
+              if (!curses_part (channel,
+                                *inherited::UIState_))
+                ACE_DEBUG ((LM_ERROR,
+                            ACE_TEXT ("failed to curses_part(\"%s\"), continuing\n"),
+                            ACE_TEXT (channel.c_str ())));
+#endif // CURSES_SUPPORT
             } // end IF
 #endif // GUI_SUPPORT
             break;
           } // end IF
 
           // someone left a common channel...
-          log (record_r);
+          inherited::log (record_r);
 
           break;
         }
@@ -835,12 +650,13 @@ IRC_Session_T<ConnectionType,
           // there are two possibilities:
           // - user mode message
           // - channel mode message
-          log (record_r);
+          inherited::log (record_r);
 
           // retrieve mode string
           IRC_ParametersIterator_t iterator =
             record_r.parameters_.begin ();
           iterator++;
+          std::string channel_string;
 
           if (record_r.parameters_.front () == inherited::state_.nickName)
           {
@@ -851,27 +667,35 @@ IRC_Session_T<ConnectionType,
           else
           {
             // --> channel mode
+            channel_string = record_r.parameters_.front ();
             channel_modes_iterator_t iterator_2 =
-              inherited::state_.channelModes.find (record_r.parameters_.front ());
+              inherited::state_.channelModes.find (channel_string);
             ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
             IRC_Tools::merge (*iterator,
                               (*iterator_2).second);
           } // end ELSE
 #if defined (GUI_SUPPORT)
-          if (UIState_)
+          if (inherited::UIState_)
           {
+#if defined (CURSES_SUPPORT)
+            if (!curses_mode (channel_string,
+                              *inherited::UIState_))
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("failed to curses_mode(\"%s\"), continuing\n"),
+                          ACE_TEXT (channel_string.c_str ())));
+#endif // CURSES_SUPPORT
           } // end IF
 #endif // GUI_SUPPORT
           break;
         }
         case IRC_Record::TOPIC:
         {
-          log (record_r);
+          inherited::log (record_r);
           break;
         }
         case IRC_Record::KICK:
         {
-          log (record_r);
+          inherited::log (record_r);
 
           //// retrieve nickname string
           //IRC_ParametersIterator_t iterator =
@@ -914,7 +738,7 @@ IRC_Session_T<ConnectionType,
 #endif // ACE_WIN32 || ACE_WIN64
         case IRC_Record::AWAY:
         {
-          log (record_r);
+          inherited::log (record_r);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           if (command == IRC_Record::__QUIRK__ERROR)
@@ -952,331 +776,46 @@ IRC_Session_T<ConnectionType,
 }
 
 template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
+          typename UIStateType>
 void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::notify (Stream_SessionId_t sessionId_in,
-                                                      const SessionMessageType& sessionrecord_r)
+IRC_Client_Session_T<ConnectionType,
+                     UIStateType>::notify (Stream_SessionId_t sessionId_in,
+                                           const IRC_Client_SessionMessage& sessionrecord_r)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionrecord_r);
 }
 
 template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
-int
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::open (void* arg_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::open"));
-
-  // step0: initialize this connection
-  // *NOTE*: client-side: arg_in is a handle to the connector
-  //         server-side: arg_in is a handle to the listener
-  ConnectionConfigurationType* connection_configuration_p = NULL;
-  switch (this->role ())
-  {
-    case NET_ROLE_CLIENT:
-    {
-      typename inherited::ICONNECTOR_T* iconnector_p = NULL;
-
-      // work around ACE code here
-      if ((inherited::dispatch () == COMMON_EVENT_DISPATCH_REACTOR) &&
-          (inherited::transportLayer () == NET_TRANSPORTLAYER_TCP))
-      {
-        //ACE_CONNECTOR_T* connector_p =
-        //  static_cast<ACE_CONNECTOR_T*> (arg_in);
-        //ACE_ASSERT (connector_p);
-        //iconnector_p = dynamic_cast<ICONNECTOR_T*> (connector_p);
-        iconnector_p =
-            static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
-        //if (!iconnector_p)
-        //{
-        //  ACE_DEBUG ((LM_ERROR,
-        //              ACE_TEXT ("failed to dynamic_cast<Net_IConnector_T*> (argument was: %@), aborting\n"),
-        //              connector_p));
-        //  return -1;
-        //} // end IF
-      } // end IF
-      else
-        iconnector_p =
-            static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
-      ACE_ASSERT (iconnector_p);
-      connection_configuration_p =
-        &const_cast<ConnectionConfigurationType&> (iconnector_p->getR ());
-      break;
-    }
-    case NET_ROLE_SERVER:
-    {
-      typename inherited::ILISTENER_T* ilistener_p =
-          static_cast<typename inherited::ILISTENER_T*> (arg_in);
-      ACE_ASSERT (ilistener_p);
-      connection_configuration_p =
-        &const_cast<ConnectionConfigurationType&> (ilistener_p->getR ());
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown role (was: %d), aborting\n"),
-                  this->role ()));
-      return -1;
-    }
-  } // end SWITCH
-  ACE_ASSERT (connection_configuration_p);
-
-  ModuleHandlerConfigurationIteratorType iterator;
-  if (!inherited::isManaged_)
-  { // *TODO*: remove type inference
-    ACE_ASSERT (connection_configuration_p->streamConfiguration);
-    iterator =
-      connection_configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->end ());
-  } // end IF
-  else
-  { // *TODO*: remove type inference
-    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
-    iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
-  } // end ELSE
-  (*iterator).second.second.subscriber = this;
-
-  // step1: initialize/start stream, tweak socket, register reading data with
-  //        reactor, ...
-  int result = inherited::open (arg_in);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ConnectionType::open(): \"%m\", continuing\n")));
-
-  return result;
-}
-
-template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
+          typename UIStateType>
 void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::open (ACE_HANDLE handle_in,
-                                                    ACE_Message_Block& messageBlock_in)
+IRC_Client_Session_T<ConnectionType,
+                     UIStateType>::log (const std::string& channel_in,
+                                        const std::string& messageText_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::open"));
-
-  // sanity checK(s)
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
-
-  // step0: intialize configuration object
-  ModuleHandlerConfigurationIteratorType iterator;
-  iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
-  (*iterator).second.second.subscriber = this;
-//  ACE_ASSERT (module_handler_configuration_p->userData);
-//  const IRC_ConnectionState& connection_state_r = inherited::state ();
-//  module_handler_configuration_p->userData->connectionState =
-//      &const_cast<IRC_ConnectionState&> (connection_state_r);
-
-  // step1: initialize/start stream, tweak socket, register reading data with
-  //        reactor, ...
-  inherited::open (handle_in,
-                   messageBlock_in);
-}
-
-template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
-void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::error (const IRC_Record& record_r)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::error"));
-
-  std::string message_text = IRC_Tools::RecordToString (record_r);
-  ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("received error message: \"%s\"\n"),
-              ACE_TEXT (message_text.c_str ())));
-}
-
-template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
-void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::log (const std::string& channel_in,
-                                                   const std::string& messageText_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::log"));
 
 //  int result = -1;
 
-  if (UIState_)
+#if defined (GUI_SUPPORT)
+  if (inherited::UIState_)
   {
 //    if (logToFile_)
 //      output_ << messageText_in;
+#if defined (CURSES_SUPPORT)
+    curses_log (channel_in,           // channel
+                messageText_in,       // text
+                *inherited::UIState_, // state
+                true);                // locked access
+#endif // CURSES_SUPPORT
   } // end IF
+#endif // GUI_SUPPORT
 //  else
 //    output_ << messageText_in;
 //  result = output_.sync ();
 //  if (result == -1)
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to IRC_Client_IOStream_t::sync(): \"%m\", continuing\n")));
-}
-
-template <typename ConnectionType,
-          typename SessionDataType,
-          typename NotificationType,
-          typename ConfigurationType,
-          typename MessageType,
-          typename SessionMessageType,
-          typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
-          typename ConnectionConfigurationType,
-          typename ConnectionManagerType,
-          typename InputHandlerType,
-          typename InputHandlerConfigurationType>
-void
-IRC_Session_T<ConnectionType,
-              SessionDataType,
-              NotificationType,
-              ConfigurationType,
-              MessageType,
-              SessionMessageType,
-              ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
-              ConnectionConfigurationType,
-              ConnectionManagerType,
-              InputHandlerType,
-              InputHandlerConfigurationType>::log (const IRC_Record& record_r)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
-
-  std::string message_text = IRC_Tools::RecordToString (record_r);
-  log (std::string (), // --> server log
-       message_text);
 }

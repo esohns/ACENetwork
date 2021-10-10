@@ -100,6 +100,9 @@ set (${EXECUTABLE}_EXE_SRCS
      IRC_client_module_IRChandler.cpp
      IRC_client_module_IRChandler.h
      IRC_client_network.h
+     IRC_client_session.cpp
+     IRC_client_session.h
+     IRC_client_session.inl
      IRC_client_session_common.h
      IRC_client_sessionmessage.cpp
      IRC_client_sessionmessage.h
@@ -229,6 +232,10 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      IRC_client_module_IRChandler.cpp
      IRC_client_module_IRChandler.h
      IRC_client_network.h
+     IRC_client_session.cpp
+     IRC_client_session.h
+     IRC_client_session.inl
+     IRC_client_session_common.h
      IRC_client_sessionmessage.cpp
      IRC_client_sessionmessage.h
      IRC_client_signalhandler.cpp

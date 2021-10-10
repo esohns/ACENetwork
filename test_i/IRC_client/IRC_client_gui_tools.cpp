@@ -61,7 +61,7 @@ IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
       const struct IRC_SessionState& connection_state_r =
         connection_p->state ();
       nickName_out = connection_state_r.nickName;
-      channel_out = connection_state_r.channel;
+      channel_out = connection_state_r.activeChannel;
       break;
     } // end IF
   } // end FOR

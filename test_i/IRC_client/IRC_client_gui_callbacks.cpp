@@ -317,9 +317,9 @@ connection_failed:
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
   {
     ACE_Time_Value deadline =
-      (COMMON_TIME_NOW +
-       ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0));
-    ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
+      (ACE_OS::gettimeofday () +
+       ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S, 0));
+    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S, 0);
     do
     {
       result_3 = ACE_OS::sleep (delay);
@@ -332,7 +332,7 @@ connection_failed:
       connection_2 = connection_manager_p->get (configuration_p->socketConfiguration.address);
       if (connection_2)
         break; // done
-    } while (COMMON_TIME_NOW < deadline);
+    } while (ACE_OS::gettimeofday () < deadline);
   } // end IF
   else
     connection_2 =

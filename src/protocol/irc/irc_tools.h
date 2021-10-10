@@ -48,11 +48,14 @@ class IRC_Tools
   static std::string dump (const IRC_UserModes_t&);
   static std::string dump (const IRC_ChannelModes_t&);
 
-  static std::string CommandToString (const IRC_NumericCommand_t&);
+  static std::string CommandToString (IRC_NumericCommand_t);
   static std::string ChannelModeToString (enum IRC_ChannelMode);
+  static std::string ChannelModeToString (const IRC_ChannelModes_t&);
   static std::string UserModeToString (enum IRC_UserMode);
+  static std::string UserModeToString (const IRC_UserModes_t&);
   static std::string RecordToString (const IRC_Record&);
 
+  static std::string CommandToString (IRC_CommandType_t);
   static IRC_CommandType_t CommandToType (const std::string&);
   static unsigned int merge (const std::string&, // mode string (e.g. "+i")
                              IRC_UserModes_t&);  // input/return value: (merged) user modes
@@ -63,13 +66,9 @@ class IRC_Tools
 
   static bool isValidChannelName (const std::string&); // string
 
-  //// *NOTE*: iff (delete module == true), fire-and-forget the last argument !
-  //static ACE_HANDLE connect (IRC_IConnector_t&,       // connector handle
-  //                           const ACE_INET_Addr&,    // peer address
-  //                           const IRC_LoginOptions&, // login options
-  //                           bool,                    // clone module ?
-  //                           bool,                    // delete module ?
-  //                           Stream_Module_t*&);      // (final) module handle
+  static bool parse (const std::string&, // input string
+                     IRC_CommandType_t&, // return value: command
+                     string_list_t&);    // return value: parameters
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools ())
@@ -81,6 +80,7 @@ class IRC_Tools
   static IRC_ChannelMode CharToChannelMode (char);
   static std::string stringify (const IRC_Parameters_t&, // parameters
                                 int = 0);                // starting index (-1: LAST parameter)
+  static IRC_CommandType_t CharToCommand (char);
 };
 
 #endif

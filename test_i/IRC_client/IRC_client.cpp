@@ -64,6 +64,7 @@ using namespace std;
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
+#include "common_defines.h"
 #include "common_tools.h"
 
 #include "common_log_tools.h"
@@ -148,10 +149,18 @@ do_printUsage (const std::string& programName_in)
             << IRC_CLIENT_SESSION_DEFAULT_LOG
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n        : use (PD|n)curses library {")
-            << IRC_CLIENT_SESSION_USE_CURSES
+#if defined (CURSES_USE)
+            << true
+#else
+            << false
+#endif // CURSES_USE
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r        : use reactor {")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("}")
@@ -169,7 +178,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]: #thread pool threads {")
-            << IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS
+            << COMMON_EVENT_REACTOR_DEFAULT_THREADPOOL_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
 } // end print_usage
@@ -225,7 +234,11 @@ do_processArguments (int argc_in,
   logToFile_out                  = IRC_CLIENT_SESSION_DEFAULT_LOG;
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-  useCursesLibrary_out           = IRC_CLIENT_SESSION_USE_CURSES;
+#if defined (CURSES_USE)
+  useCursesLibrary_out           = true;
+#else
+  useCursesLibrary_out           = false;
+#endif // CURSES_USE
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
   useReactor_out                 =
@@ -233,7 +246,7 @@ do_processArguments (int argc_in,
   statisticReportingInterval_out = NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
+  numThreadPoolThreads_out       = COMMON_EVENT_REACTOR_DEFAULT_THREADPOOL_THREADS;
 
   std::string options_string = ACE_TEXT_ALWAYS_CHAR ("a:c:dlrs:tvx:");
 #if defined (GUI_SUPPORT)
@@ -488,7 +501,7 @@ connection_setup_function (void* arg_in)
   ACE_ASSERT (thread_data_p->configuration);
 
   int result = -1;
-  ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
+  ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S, 0);
 
   IRC_Client_IConnection_t* connection_p = NULL;
   IRC_Client_IStreamConnection_t* istream_connection_p = NULL;
@@ -509,7 +522,7 @@ connection_setup_function (void* arg_in)
   {
     ACE_Time_Value deadline =
       (COMMON_TIME_NOW +
-       ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0));
+       ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S, 0));
 
     do
     {
@@ -750,6 +763,13 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+  struct IRC_Client_CursesState& state_r =
+    const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
+
   // step3: initialize client connector
   IRC_Client_ConnectionConfiguration connection_configuration;
   connection_configuration.allocatorConfiguration = &allocator_configuration;
@@ -764,6 +784,12 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     &configuration_in.protocolConfiguration;
   connection_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
+#if defined (GUI_SUPPORT)
+  connection_configuration.UIState =
+#if defined (CURSES_SUPPORT)
+    &state_r;
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
@@ -939,8 +965,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   configuration_in.cursesConfiguration.hooks.finiHook = curses_fini;
   configuration_in.cursesConfiguration.hooks.inputHook = curses_input;
   configuration_in.cursesConfiguration.hooks.mainHook = curses_main;
-  struct IRC_Client_CursesState& state_r =
-    const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
   state_r.dispatchState = &event_dispatch_state_s;
 
   if (!COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->initialize (configuration_in.cursesConfiguration))
@@ -1116,7 +1140,11 @@ ACE_TMAIN (int argc_in,
   bool log_to_file                           = IRC_CLIENT_SESSION_DEFAULT_LOG;
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-  bool use_curses_library                    = IRC_CLIENT_SESSION_USE_CURSES;
+#if defined (CURSES_USE)
+  bool use_curses_library                    = true;
+#else
+  bool use_curses_library                    = false;
+#endif // CURSES_USE
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
   bool use_reactor                           =
@@ -1126,7 +1154,7 @@ ACE_TMAIN (int argc_in,
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
-      IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
+    COMMON_EVENT_REACTOR_DEFAULT_THREADPOOL_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             server_address,

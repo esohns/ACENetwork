@@ -62,7 +62,7 @@ class Test_U_SessionMessage;
 struct Test_U_ProtocolConfiguration
 {
   Test_U_ProtocolConfiguration ()
-   : PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   : PDUSize (NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE)
    , pingInterval (ACE_Time_Value::zero)
    , pingAutoAnswer (true)
    , printPongMessages (true)

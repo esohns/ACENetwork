@@ -42,38 +42,34 @@ class ACE_Message_Block;
 
 template <typename ConnectionType,
           typename SessionDataType,
-//          typename ControllerType, // IRC_IControl_T
           typename NotificationType, // Common_INotify_T
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-          typename StateType, // ui state (curses/gtk/...) *TODO*: to be removed
           ///////////////////////////////
           // *TODO*: remove these ASAP
+#if defined (GUI_SUPPORT)
+          typename StateType, // ui state (inherits struct Common_UI_State)
+#endif // GUI_SUPPORT
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
           typename InputHandlerConfigurationType> // *NOTE*: needs to inherit from ACE_FILE_IO
 class IRC_Session_T
  : public ConnectionType
- //, virtual public Net_ISession_T<ACE_INET_Addr,
- //                                Net_SocketConfiguration,
- //                                IRC_Client_Configuration,
- //                                Stream_Statistic,
- //                                IRC_Client_Stream,
- //                                IRC_Client_ConnectionState>
  , public NotificationType
 {
  friend class ACE_Connector<IRC_Session_T<ConnectionType,
                                           SessionDataType,
-//                                          ControllerType,
                                           NotificationType,
                                           ConfigurationType,
                                           MessageType,
                                           SessionMessageType,
                                           ModuleHandlerConfigurationIteratorType,
+#if defined (GUI_SUPPORT)
                                           StateType,
+#endif // GUI_SUPPORT
                                           ConnectionConfigurationType,
                                           ConnectionManagerType,
                                           InputHandlerType,
@@ -81,26 +77,27 @@ class IRC_Session_T
                             ACE_SOCK_CONNECTOR>;
  friend class ACE_Asynch_Connector<IRC_Session_T<ConnectionType,
                                                  SessionDataType,
-//                                                 ControllerType,
                                                  NotificationType,
                                                  ConfigurationType,
                                                  MessageType,
                                                  SessionMessageType,
                                                  ModuleHandlerConfigurationIteratorType,
+#if defined (GUI_SUPPORT)
                                                  StateType,
+#endif // GUI_SUPPORT
                                                  ConnectionConfigurationType,
                                                  ConnectionManagerType,
                                                  InputHandlerType,
                                                  InputHandlerConfigurationType> >;
 
- public:
- // *NOTE*: if there is no default ctor, this will not compile
- inline IRC_Session_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
- IRC_Session_T (bool); // managed ?
-  virtual ~IRC_Session_T ();
+ typedef ConnectionType inherited;
+ typedef NotificationType inherited2;
 
-  // implement Net_ISession_T
-  //virtual const IRC_SessionState& state () const;
+ public:
+  // *NOTE*: if there is no default ctor, this will not compile
+  inline IRC_Session_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  IRC_Session_T (bool); // managed ?
+  virtual ~IRC_Session_T ();
 
   // implement Stream_ISessionDataNotify_T
   virtual void start (Stream_SessionId_t,
@@ -119,22 +116,23 @@ class IRC_Session_T
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
 
- private:
-  typedef ConnectionType inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (IRC_Session_T (const IRC_Session_T&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Session_T& operator= (const IRC_Session_T&))
-
+ protected:
   void error (const IRC_Record&);
   void log (const IRC_Record&);
   void log (const std::string&,  // channel (empty ? server log : channel)
             const std::string&); // text
 
-  bool              close_;
+  bool              close_; // -log file ?
   InputHandlerType* inputHandler_;
   bool              logToFile_;
   bool              shutDownOnEnd_;
+#if defined (GUI_SUPPORT)
   StateType*        UIState_;
+#endif // GUI_SUPPORT
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (IRC_Session_T (const IRC_Session_T&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Session_T& operator= (const IRC_Session_T&))
 };
 
 // include template definition

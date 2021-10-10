@@ -92,13 +92,15 @@ bool curses_main (struct Common_UI_Curses_State*); // state
 
 //////////////////////////////////////////
 
-bool curses_join (const std::string&,              // channel
-                  struct IRC_Client_CursesState&); // state
 void curses_log (const std::string&,      // channel (empty ? server log : channel)
                  const std::string&,      // text
                  struct IRC_Client_CursesState&, // state
                  bool = true);                   // lock ?
+bool curses_join (const std::string&,              // channel
+                  struct IRC_Client_CursesState&); // state
 bool curses_part (const std::string&,              // channel
+                  struct IRC_Client_CursesState&); // state
+bool curses_mode (const std::string&,              // channel
                   struct IRC_Client_CursesState&); // state
 
 #endif
