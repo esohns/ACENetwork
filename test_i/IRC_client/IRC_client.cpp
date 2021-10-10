@@ -377,7 +377,11 @@ do_processArguments (int argc_in,
 
 void
 do_initializeSignals (bool useReactor_in,
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
                       bool useCursesLibrary,
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
                       bool allowUserRuntimeStats_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
@@ -463,6 +467,8 @@ do_initializeSignals (bool useReactor_in,
 
   // *NOTE*: let (n)curses install it's own signal handler and process events in
   //         (w)getch()
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
   if (useCursesLibrary)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -471,6 +477,8 @@ do_initializeSignals (bool useReactor_in,
     signals_out.sig_del (SIGWINCH);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
 
 // *NOTE*: gdb sends some signals (when running in an IDE ?)
 //         --> remove signals (and let IDE handle them)
@@ -788,6 +796,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   connection_configuration.UIState =
 #if defined (CURSES_SUPPORT)
     &state_r;
+#else
+    NULL;
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 
@@ -1221,7 +1231,11 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (use_reactor,
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
                         use_curses_library,
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
                         true,
                         signal_set,
                         ignored_signal_set);

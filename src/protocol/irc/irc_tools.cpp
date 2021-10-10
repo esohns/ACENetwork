@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "irc_tools.h"
+
 #include <regex>
 #include <sstream>
-
-#include "irc_tools.h"
 
 #include "ace/Configuration.h"
 #include "ace/Configuration_Import_Export.h"
@@ -36,6 +36,7 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "irc_common.h"
 #include "irc_configuration.h"
 #include "irc_defines.h"
 

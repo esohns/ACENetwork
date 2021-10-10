@@ -55,25 +55,25 @@ class IRC_Client_GUI_IConnection
   inline IRC_Client_GUI_IConnection () {}
   inline virtual ~IRC_Client_GUI_IConnection () {}
 
-  virtual void finalize (bool = true) = NULL; // locked access ?
+  virtual void finalize (bool = true) = 0; // locked access ?
 
-  virtual bool isClosing () const = NULL;
+  virtual bool isClosing () const = 0;
 
-  virtual const struct IRC_SessionState& state () const = NULL;
+  virtual const struct IRC_SessionState& state () const = 0;
 #if defined (GTK_SUPPORT)  
-  virtual gint exists (const std::string&,        // channel/nick
-                       bool = true) const = NULL; // locked access (GDK) ?
+  virtual gint exists (const std::string&,     // channel/nick
+                       bool = true) const = 0; // locked access (GDK) ?
 #endif // GTK_SUPPORT
-  virtual void channels (string_list_t&) = NULL; // return value: list of active channels
+  virtual void channels (string_list_t&) = 0; // return value: list of active channels
 
-  virtual void createMessageHandler (const std::string&,  // channel/nickname
-                                     bool = true,         // locked access ?
-                                     bool = true) = NULL; // locked access (GDK) ?
-  virtual void terminateMessageHandler (const std::string&,  // channel/nickname
-                                        bool = true) = NULL; // locked access ?
+  virtual void createMessageHandler (const std::string&, // channel/nickname
+                                     bool = true,        // locked access ?
+                                     bool = true) = 0;   // locked access (GDK) ?
+  virtual void terminateMessageHandler (const std::string&, // channel/nickname
+                                        bool = true) = 0;   // locked access ?
 
-  virtual IRC_Client_GUI_IMessageHandler* getActiveHandler (bool = true,               // locked access ?
-                                                            bool = true) const = NULL; // locked access (GDK) ?
+  virtual IRC_Client_GUI_IMessageHandler* getActiveHandler (bool = true,            // locked access ?
+                                                            bool = true) const = 0; // locked access (GDK) ?
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_IConnection (const IRC_Client_GUI_IConnection&))
@@ -139,8 +139,9 @@ class IRC_Client_GUI_Connection_T
 
  private:
   typedef IRC_Client_GUI_MessageHandler_T<GUIType> MESSAGE_HANDLER_T;
+  typedef IRC_Client_GUI_IMessageHandler IMESSAGE_HANDLER_T;
   typedef std::map<std::string,
-                   typename MESSAGE_HANDLER_T*> MESSAGE_HANDLERS_T;
+                   IMESSAGE_HANDLER_T*> MESSAGE_HANDLERS_T;
   typedef typename MESSAGE_HANDLERS_T::const_iterator MESSAGE_HANDLERSCONSTITERATOR_T;
   typedef typename MESSAGE_HANDLERS_T::iterator MESSAGE_HANDLERSITERATOR_T;
 

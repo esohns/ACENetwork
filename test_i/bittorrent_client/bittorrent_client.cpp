@@ -586,7 +586,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
   Net_ConnectionConfigurationsIterator_t iterator;
   Net_ConnectionConfigurationsIterator_t iterator_2;
-  ACE_thread_t thread_id = 0;
+//  ACE_thread_t thread_id = 0;
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;

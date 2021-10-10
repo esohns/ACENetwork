@@ -49,17 +49,17 @@ class IRC_Client_GUI_IMessageHandler
   inline IRC_Client_GUI_IMessageHandler () {}
   inline virtual ~IRC_Client_GUI_IMessageHandler () {}
 
-  virtual bool isServerLog () const = NULL;
+  virtual bool isServerLog () const = 0;
 
-  virtual void update () = NULL;
+  virtual void update () = 0;
 
   // display (local) text
-  virtual void queueForDisplay (const std::string&) = NULL;
+  virtual void queueForDisplay (const std::string&) = 0;
 
-  virtual void setTopic (const std::string&) = NULL;
-  virtual void setModes (const std::string&,  // mode string [i.e. "+|-x"]
-                         const std::string&,  // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
-                         bool = true) = NULL; // locked access ?
+  virtual void setTopic (const std::string&) = 0;
+  virtual void setModes (const std::string&, // mode string [i.e. "+|-x"]
+                         const std::string&, // parameter, if any [i.e. <limit>,<user>,<ban mask>,...]
+                         bool = true) = 0;   // locked access ?
 
   // users
   //virtual void user (const std::string&,         // nick
@@ -72,14 +72,14 @@ class IRC_Client_GUI_IMessageHandler
   //virtual void endUsers () = NULL;
 
   // channel members
-  virtual void add (const std::string&,  // nickname
-                    bool = true) = NULL; // locked access ?
-  virtual void remove (const std::string&,  // nickname
-                       bool = true) = NULL; // locked access ?
+  virtual void add (const std::string&, // nickname
+                    bool = true) = 0;   // locked access ?
+  virtual void remove (const std::string&, // nickname
+                       bool = true) = 0;   // locked access ?
   virtual void members (const string_list_t&, // channel members
-                        bool = true) = NULL;  // locked access ?
-  virtual void endMembers (bool = true) = NULL; // locked access ?
-  virtual void update (const std::string&) = NULL; // previous nickname
+                        bool = true) = 0;     // locked access ?
+  virtual void endMembers (bool = true) = 0; // locked access ?
+  virtual void update (const std::string&) = 0; // previous nickname
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_GUI_IMessageHandler (const IRC_Client_GUI_IMessageHandler&))

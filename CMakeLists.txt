@@ -23,6 +23,7 @@ if (UNIX)
  if (CCACHE_PROGRAM)
 #  set_property (GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
  endif (CCACHE_PROGRAM)
+ set (ENV{CCACHE_DISABLE} "true")
 endif (UNIX)
 
 # build type

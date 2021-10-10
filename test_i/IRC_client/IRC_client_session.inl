@@ -44,6 +44,8 @@
 #include "irc_icontrol.h"
 #include "irc_tools.h"
 
+#include "IRC_client_configuration.h"
+
 template <typename ConnectionType,
           typename UIStateType>
 IRC_Client_Session_T<ConnectionType,
@@ -183,7 +185,7 @@ IRC_Client_Session_T<ConnectionType,
     // *TODO*: remove type inference
     input_handler_configuration.connectionConfiguration =
       inherited::CONNECTION_BASE_T::configuration_;
-    if (!inputHandler_->initialize (input_handler_configuration))
+    if (!inherited::inputHandler_->initialize (input_handler_configuration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to IRC_Client_InputHandler::initialize(): \"%m\", returning\n")));
@@ -227,7 +229,7 @@ IRC_Client_Session_T<ConnectionType,
   int result = -1;
 
   // --> raise a signal
-  if (shutDownOnEnd_)
+  if (inherited::shutDownOnEnd_)
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("connection %u closed/lost, shutting down\n"),
@@ -521,7 +523,7 @@ IRC_Client_Session_T<ConnectionType,
               (record_r.command_.numeric == IRC_Codes::ERR_BADCHANNAME)      ||
               (record_r.command_.numeric == IRC_Codes::ERR_CHANOPRIVSNEEDED) ||
               (record_r.command_.numeric == IRC_Codes::ERR_UMODEUNKNOWNFLAG))
-            error (record_r); // show in statusbar as well...
+            inherited::error (record_r); // show in statusbar as well...
 
           break;
         }
@@ -561,7 +563,7 @@ IRC_Client_Session_T<ConnectionType,
 
           if ((record_r.prefix_.origin == inherited::state_.nickName) &&
               (command == IRC_Record::QUIT))
-            error (record_r); // --> show on statusbar as well
+            inherited::error (record_r); // --> show on statusbar as well
 
           break;
         }
@@ -745,7 +747,7 @@ IRC_Client_Session_T<ConnectionType,
 #else
           if (command == IRC_Record::ERROR)
 #endif // ACE_WIN32 || ACE_WIN64
-            error (record_r); // --> show on statusbar as well...
+            inherited::error (record_r); // --> show on statusbar as well...
 
           break;
         }

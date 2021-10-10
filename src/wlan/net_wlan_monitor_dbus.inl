@@ -358,7 +358,7 @@ Net_WLAN_Monitor_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::get1RR_2"));
 
-  std::string result;
+  static std::string result;
 
   INTERFACEIDENTIFIER_TO_OBJECTPATH_CONSTITERATOR_T iterator =
     std::find_if (objectPathCache_.begin (), objectPathCache_.end (),

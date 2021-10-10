@@ -175,7 +175,7 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} X11)
 elseif (WIN32)
  target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-endif (WIN32)
+endif ()
 
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 

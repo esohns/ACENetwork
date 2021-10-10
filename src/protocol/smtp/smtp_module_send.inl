@@ -116,8 +116,8 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
   const typename DataMessageType::DATA_T::DATA_T& data_r =
     data_container_r.getR ();
 
-  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
+//  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+//    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   int result = -1;
   DataMessageType* message_p = NULL;

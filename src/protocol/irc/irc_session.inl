@@ -42,6 +42,7 @@
 #include "irc_codes.h"
 #include "irc_defines.h"
 #include "irc_icontrol.h"
+#include "irc_network.h"
 #include "irc_tools.h"
 
 template <typename ConnectionType,
@@ -79,7 +80,9 @@ IRC_Session_T<ConnectionType,
  , logToFile_ (IRC_SESSION_DEF_LOG)
 // , output_ (ACE_STREAMBUF_SIZE)
  , shutDownOnEnd_ (true) // *TODO*: allow more sessions
+#if defined (GUI_SUPPORT)
  , UIState_ (NULL)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::IRC_Session_T"));
 
@@ -1231,11 +1234,13 @@ IRC_Session_T<ConnectionType,
 
 //  int result = -1;
 
+#if defined (GUI_SUPPORT)
   if (UIState_)
   {
 //    if (logToFile_)
 //      output_ << messageText_in;
   } // end IF
+#endif // GUI_SUPPORT
 //  else
 //    output_ << messageText_in;
 //  result = output_.sync ();

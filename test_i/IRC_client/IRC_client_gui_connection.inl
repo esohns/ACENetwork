@@ -1029,7 +1029,7 @@ IRC_Client_GUI_Connection_T<GUIType>::createMessageHandler (const std::string& i
   ACE_ASSERT (CBData_.connections);
 
   struct IRC_Client_UI_HandlerCBData* cb_data_p = NULL;
-  IRC_Client_GUI_MessageHandler* message_handler_p = NULL;
+  IMESSAGE_HANDLER_T* message_handler_p = NULL;
 
   if (lockedAccess_in)
   {
@@ -1048,12 +1048,12 @@ IRC_Client_GUI_Connection_T<GUIType>::createMessageHandler (const std::string& i
   *cb_data_p = *CBData_.CBData;
   //  gdk_threads_enter ();
   ACE_NEW_NORETURN (message_handler_p,
-                    IRC_Client_GUI_MessageHandler (this,
-                                                   CBData_.controller,
-                                                   id_in,
-                                                   UIFileDirectory_,
-                                                   CBData_.timeStamp,
-                                                   cb_data_p));
+                    MESSAGE_HANDLER_T (this,
+                                       CBData_.controller,
+                                       id_in,
+                                       UIFileDirectory_,
+                                       CBData_.timeStamp,
+                                       cb_data_p));
   if (!message_handler_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -1122,6 +1122,7 @@ clean_up:
 
 //////////////////////////////////////////
 
+#if defined (GTK_SUPPORT)
 IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Connection_T (IRC_Client_GUI_Connections_t* connections_in,
                                                                                    struct IRC_Client_UI_HandlerCBData* CBData_in,
                                                                                    guint contextId_in,
@@ -3249,3 +3250,4 @@ clean_up:
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
   } // end IF
 }
+#endif // GTK_SUPPORT

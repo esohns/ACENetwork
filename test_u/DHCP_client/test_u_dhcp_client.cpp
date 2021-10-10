@@ -847,7 +847,7 @@ do_work (bool requestBroadcastReplies_in,
   DHCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
-  int group_id = -1;
+//  int group_id = -1;
   ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
 
   DHCPClient_IConnection_t* iconnection_p = NULL;

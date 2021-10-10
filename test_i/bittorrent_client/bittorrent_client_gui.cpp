@@ -629,7 +629,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
 #endif // GTK_USE
 
   // step6: initialize worker(s)
-  int group_id = -1;
+//  int group_id = -1;
   if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,

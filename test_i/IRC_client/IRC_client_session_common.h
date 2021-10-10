@@ -46,6 +46,11 @@ typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,
                              struct IRC_Client_CursesState> IRC_Client_Session_t;
 typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t,
                              struct IRC_Client_CursesState> IRC_Client_AsynchSession_t;
+#else
+typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,
+                             void> IRC_Client_Session_t;
+typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t,
+                             void> IRC_Client_AsynchSession_t;
 #endif // CURSES_SUPPORT
 #else
 typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,

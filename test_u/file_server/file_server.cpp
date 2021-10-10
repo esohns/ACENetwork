@@ -522,7 +522,7 @@ do_work (
   BOOL was_visible_b = true;
 #endif
   long timer_id = -1;
-  int group_id = -1;
+//  int group_id = -1;
   bool stop_event_dispatch = false;
 
   // step0a: initialize configuration
