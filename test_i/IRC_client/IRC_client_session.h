@@ -35,6 +35,7 @@
 #include "irc_record.h"
 #include "irc_session.h"
 
+#include "IRC_client_inputhandler.h"
 #include "IRC_client_network.h"
 
 // forward declarations
@@ -44,7 +45,6 @@ typedef Stream_ISessionDataNotify_T<struct IRC_Client_SessionData,
                                     enum Stream_SessionMessageType,
                                     IRC_Message,
                                     IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
-class IRC_Client_InputHandler;
 
 template <typename ConnectionType,
           typename UIStateType>

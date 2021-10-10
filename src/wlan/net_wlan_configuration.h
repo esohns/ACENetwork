@@ -71,7 +71,7 @@ struct Net_WLAN_MonitorConfiguration
    , debug (false)
 #endif // _DEBUG
    , authenticationType (NL80211_AUTHTYPE_AUTOMATIC)
-   , defaultBufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   , defaultBufferSize (NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE)
    , flushCacheBeforeScans (NET_WLAN_MONITOR_NL80211_DEFAULT_FLUSHCACHEBEFORESCANS)
    , frequency (0)
    , lowPriorityScans (NET_WLAN_MONITOR_NL80211_DEFAULT_LOWPRIORITYSCANS)

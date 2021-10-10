@@ -311,6 +311,7 @@ IRC_Client_GUI_MessageHandler_T<GUIType>::endMembers (bool lockedAccess_in)
 
 //////////////////////////////////////////
 
+#if defined (GTK_SUPPORT)
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_MessageHandler_T (IRC_Client_GUI_IConnection* connection_in,
                                                                                            const std::string& timeStamp_in,
                                                                                            struct IRC_Client_UI_HandlerCBData* CBData_in)
@@ -1463,3 +1464,4 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::endMembers (bool locke
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
   } // end IF
 }
+#endif // GTK_SUPPORT

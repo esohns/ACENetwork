@@ -39,10 +39,12 @@
 
 #include "irc_record.h"
 
-#include "IRC_client_gui_common.h"
 #include "IRC_client_stream_common.h"
 
+#include "IRC_client_gui_common.h"
+
 // forward declaration(s)
+class IRC_Client_GUI_IMessageHandler;
 template <enum Common_UI_FrameworkType GUIType>
 class IRC_Client_GUI_MessageHandler_T;
 
