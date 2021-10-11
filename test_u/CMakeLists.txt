@@ -324,7 +324,7 @@ add_subdirectory (WLAN_monitor)
 
 add_custom_target (test_u ALL
                    COMMENT "building test_u...")
-add_dependencies (test_u client server dhcp_client file_server http_decoder wlan_monitor)
+add_dependencies (test_u client server dhcp_client file_server http_decoder pcp_client wlan_monitor)
 
 cmake_policy (SET CMP0012 NEW)
 if (NOT BUILD_TEST_U)

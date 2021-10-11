@@ -819,7 +819,7 @@ do_work (//bool requestBroadcastReplies_in,
   PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
-  int group_id = -1;
+//  int group_id = -1;
   ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
@@ -941,8 +941,7 @@ do_work (//bool requestBroadcastReplies_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
       connection_manager_p->abort ();
       connection_manager_p->wait ();
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                           event_dispatch_state_s.reactorGroupId,
+      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                            true);
       return;
     } // end IF
@@ -1166,7 +1165,7 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GTK_USE)
-    gtk_manager_p->wait ();
+    gtk_manager_p->wait (false);
 #endif // GTK_USE
   } // end IF
   else

@@ -3319,7 +3319,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
                     ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
-        return result;
+        break;
       } // end IF
       ACE_ASSERT (buffer_length);
       ip_adapter_addresses_p =
@@ -3328,7 +3328,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       {
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-        return result;
+        break;
       } // end IF
       result_2 =
         GetAdaptersAddresses (AF_UNSPEC,              // Family
@@ -3418,7 +3418,7 @@ error:
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
                       ACE_TEXT (result.c_str ())));
-          goto error;
+          break;
         } // end IF
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
@@ -3444,12 +3444,8 @@ error:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_Process_Tools::command(\"%s\"), aborting\n"),
                     ACE_TEXT (ip_route_records_string.c_str ())));
-        return ACE_TEXT_ALWAYS_CHAR ("");
+        break;
       } // end IF
-    //  ACE_DEBUG ((LM_DEBUG,
-    //              ACE_TEXT ("ip data: \"%s\"\n"),
-    //              ACE_TEXT (ip_route_records_string.c_str ())));
-
       std::istringstream converter;
       char buffer_a [BUFSIZ];
       std::string regex_string =
@@ -3473,16 +3469,19 @@ error:
         break;
       } while (!converter.fail ());
       if (unlikely (result.empty ()))
+      {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to retrieve default interface from route data (was: \"%s\"), aborting\n"),
                     ACE_TEXT (ip_route_records_string.c_str ())));
-#if defined (_DEBUG)
+      } // end IF
       else
+      {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
                     ACE_TEXT (result.c_str ()),
                     ACE_TEXT (match_results[1].str ().c_str ())));
-#endif // _DEBUG
+        return result;
+      } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64
       break;
     }
@@ -3512,7 +3511,7 @@ error:
                     ACE_TEXT ("failed to ::WlanOpenHandle(%u): \"%s\", aborting\n"),
                     maximum_client_version,
                     ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
-        return result;
+        break;
       } // end IF
       ACE_ASSERT (client_handle != ACE_INVALID_HANDLE);
 
@@ -3548,8 +3547,8 @@ error_2:
                     ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 #else
       ACE_ASSERT (false);
-      ACE_NOTSUP_RETURN (false);
-      ACE_NOTREACHED (return false;)
+      ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
+      ACE_NOTREACHED (break;)
 #endif // WLANAPI_SUPPORT
 #else
 #if defined (ACE_HAS_GETIFADDRS)
@@ -3577,9 +3576,9 @@ clean:
         ::freeifaddrs (ifaddrs_p); ifaddrs_p = NULL;
       } // end IF
 #else
-    ACE_ASSERT (false);
-    ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
+      ACE_ASSERT (false);
+      ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
+      ACE_NOTREACHED (break;)
 #endif /* ACE_HAS_GETIFADDRS */
 #endif // ACE_WIN32 || ACE_WIN64
       if (likely (!interface_identifiers_a.empty ()))
@@ -3592,7 +3591,7 @@ clean:
 #else
         return interface_identifiers_a.front ();
 #endif // ACE_WIN32 || ACE_WIN64
-    break;
+      break;
     }
     case NET_LINKLAYER_ATM:
     case NET_LINKLAYER_FDDI:
