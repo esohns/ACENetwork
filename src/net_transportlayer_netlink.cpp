@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "net_transportlayer_netlink.h"
 
 #include "net_macros.h"
@@ -31,5 +30,4 @@ Net_TransportLayer_Netlink::Net_TransportLayer_Netlink ()
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Netlink::Net_TransportLayer_Netlink"));
 
 }
-
-#endif
+#endif // ACE_HAS_NETLINK

@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "net_transportlayer_ip_cast.h"
 
 #include "net_macros.h"

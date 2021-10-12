@@ -455,35 +455,6 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 //              so_max_msg_size));
 //#endif
 
-  // step3: register with the reactor
-  if (likely (!configuration_p->writeOnly))
-  {
-    result = inherited2::open (arg_in);
-    if (unlikely (result == -1))
-    {
-      // *NOTE*: this can happen when the connection handle is still registered
-      //         with the reactor (i.e. the reactor is still processing events on
-      //         a file descriptor that has been closed and is now being reused by
-      //         the system)
-      // *NOTE*: more likely, this happened because the (select) reactor is out of
-      //         "free" (read) slots
-      int error = ACE_OS::last_error ();
-      ACE_UNUSED_ARG (error);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: 0x%@): \"%m\", aborting\n"),
-                  arg_in, handle));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: %d): \"%m\", aborting\n"),
-                  arg_in, handle));
-#endif // ACE_WIN32 || ACE_WIN64
-      goto error;
-    } // end IF
-  } // end IF
-
-  // *NOTE*: registered with the reactor (READ_MASK) at this point
-
   return 0;
 
 error:
@@ -558,11 +529,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
       break;
-    case ACE_Event_Handler::EXCEPT_MASK:
-      //if (handle_in == ACE_INVALID_HANDLE) // <-- notification has completed (!useThreadPerConnection)
-      //  ACE_DEBUG((LM_ERROR,
-      //             ACE_TEXT("notification completed, continuing\n")));
-      break;
+    case ACE_Event_Handler::EXCEPT_MASK:     // - failed to send
     case ACE_Event_Handler::ALL_EVENTS_MASK: // - connect failed (e.g. connection refused) /
                                              // - accept failed (e.g. too many connections) /
                                              // - select failed (EBADF see Select_Reactor_T.cpp) /
@@ -612,17 +579,6 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
         } // end IF
       } // end IF
 
-//      ACE_Reactor* reactor_p = inherited2::reactor ();
-//      ACE_ASSERT (reactor_p);
-//      result =
-//        reactor_p->remove_handler (handle_in,
-//                                   (mask_in |
-//                                    ACE_Event_Handler::DONT_CALL));
-//      if (result == -1)
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@/%d, %d), continuing\n"),
-//                    this, handle_in,
-//                    mask_in));
       break;
     }
     default:

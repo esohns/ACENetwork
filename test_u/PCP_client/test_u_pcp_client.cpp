@@ -946,11 +946,7 @@ do_work (//bool requestBroadcastReplies_in,
       return;
     } // end IF
     iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
-#else
       connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-#endif // ACE_WIN32 || ACE_WIN64
     ACE_ASSERT (iconnection_p);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%u: connected to %s\n"),
@@ -1081,11 +1077,7 @@ do_work (//bool requestBroadcastReplies_in,
       return;
     } // end IF
     iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
       connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
-#else
-      connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-#endif // ACE_WIN32 || ACE_WIN64
     ACE_ASSERT (iconnection_p);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%u: connected to %s\n"),
@@ -1095,7 +1087,6 @@ do_work (//bool requestBroadcastReplies_in,
     ACE_NEW_NORETURN (isession_p,
                       PCP_Session_t ());
     ACE_ASSERT (isession_p);
-#else
 #endif // ACE_WIN32 || ACE_WIN64
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));

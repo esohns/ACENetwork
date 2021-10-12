@@ -28,6 +28,7 @@
 #include "stream_common.h"
 
 #include "net_common.h"
+#include "net_connection_configuration.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -139,11 +140,11 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ILISTENER_T* ilistener_p = NULL;
   AddressType peer_SAP;
   enum Net_TransportLayerType transport_layer_e = this->transportLayer ();
-  // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
     NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   ConfigurationType* configuration_p = NULL;
+  bool is_udp_write_only_b = false;
 
   inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
 
@@ -190,7 +191,10 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
       configuration_p =
-          &const_cast<ConfigurationType&> (iconnector_p->getR ());
+        &const_cast<ConfigurationType&> (iconnector_p->getR ());
+      Net_UDPSocketConfiguration_t* socket_configuration_p =
+        (Net_UDPSocketConfiguration_t*)&configuration_p->socketConfiguration;
+      is_udp_write_only_b = socket_configuration_p->writeOnly;
       break;
     }
     default:
@@ -198,7 +202,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: invalid/unknown transport layer (was: %d), aborting\n"),
                   id (),
-                  this->transportLayer ()));
+                  transport_layer_e));
       goto error;
     }
   } // end SWITCH
@@ -296,7 +300,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   handle_stream = true;
 
   // step4: start receiving ?
-  if (likely (!inherited2::configuration_->delayRead))
+  if (likely (!inherited2::configuration_->delayRead) &&
+              !is_udp_write_only_b)
   {
     if (unlikely (!inherited::registerWithReactor ()))
     {
@@ -1268,15 +1273,40 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   bool handle_read = false;
   bool handle_manager = false;
   bool handle_stream = false;
+  enum Net_TransportLayerType transport_layer_e = this->transportLayer ();
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
     NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   AddressType local_SAP, peer_SAP;
+  bool is_udp_write_only_b = false;
 
   inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
 
   // *NOTE*: act() has been called already, Net_ConnectionBase has been
   //         initialized
+
+  ACE_ASSERT (inherited2::configuration_);
+  switch (transport_layer_e)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
+      break;
+    case NET_TRANSPORTLAYER_UDP:
+    {
+      Net_UDPSocketConfiguration_t* socket_configuration_p =
+        (Net_UDPSocketConfiguration_t*)&inherited2::configuration_->socketConfiguration;
+      is_udp_write_only_b = socket_configuration_p->writeOnly;
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: invalid/unknown transport layer (was: %d), aborting\n"),
+                  id (),
+                  transport_layer_e));
+      goto error;
+    }
+  } // end SWITCH
 
   // step1: initialize/tweak socket, initialize I/O, ...
   // *TODO*: remove type inference
@@ -1308,10 +1338,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end IF
 
   // step3: initialize/start stream
-  ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
-                                      inherited2::state_.handle)))
+                                     inherited2::state_.handle)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
@@ -1320,7 +1349,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     goto error;
   } // end IF
   if (unlikely (!stream_.initialize_2 (this,
-                                        ACE_TEXT_ALWAYS_CHAR ("ACE_Stream_Head"))))
+                                       ACE_TEXT_ALWAYS_CHAR ("ACE_Stream_Head"))))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
@@ -1352,7 +1381,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   handle_stream = true;
 
   // step4: start receiving ?
-  if (likely (!inherited2::configuration_->delayRead))
+  if (likely (!inherited2::configuration_->delayRead &&
+              !is_udp_write_only_b))
   {
     if (unlikely (!initiate_read ()))
     {

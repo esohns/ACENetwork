@@ -21,15 +21,15 @@
 
 #include "test_u_callbacks.h"
 
+#include <sstream>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <limits>
 
-#include <iphlpapi.h>
+#include "iphlpapi.h"
 #else
-#include <netinet/ether.h>
-#include <ifaddrs.h>
-#endif
-#include <sstream>
+#include "netinet/ether.h"
+#include "ifaddrs.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
@@ -834,6 +834,11 @@ idle_finalize_UI_cb (gpointer userData_in)
     static_cast<struct PCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
 
+  if (data_p->session)
+  {
+    delete data_p->session; data_p->session = NULL;
+  } // end IF
+
   PCPClient_ConnectionManager_t* connection_manager_p =
     PCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
@@ -1559,15 +1564,15 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     // connect outbound (?)
     if (unlikely (!data_p->session))
     {
-      PCPClient_OutboundConnector_t connector (true);
-      PCPClient_OutboundAsynchConnector_t asynch_connector (true);
+      PCPClient_OutboundConnector_t connector_2 (true);
+      PCPClient_OutboundAsynchConnector_t asynch_connector_2 (true);
       iterator_3 =
         data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
       ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
       ACE_HANDLE handle = ACE_INVALID_HANDLE;
       if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
         handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
+          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector_2,
                                                                            *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                            data_p->configuration->userData,
                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
@@ -1575,7 +1580,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                            true);
       else
         handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
+          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector_2,
                                                                                  *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                                  data_p->configuration->userData,
                                                                                  NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
@@ -1589,11 +1594,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
         goto continue_;
       } // end IF
       iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
-#else
         connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-#endif // ACE_WIN32 || ACE_WIN64
       //ACE_DEBUG ((LM_DEBUG,
       //            ACE_TEXT ("%u: connected to %s\n"),
       //            data_p->connection->id (),
@@ -1690,15 +1691,15 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     if (unlikely (!data_p->session))
     {
       PCPClient_IConnection_t* iconnection_p = NULL;
-      PCPClient_OutboundConnector_t connector (true);
-      PCPClient_OutboundAsynchConnector_t asynch_connector (true);
+      PCPClient_OutboundConnector_t connector_2 (true);
+      PCPClient_OutboundAsynchConnector_t asynch_connector_2 (true);
       iterator_3 =
         data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
       ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
       ACE_HANDLE handle = ACE_INVALID_HANDLE;
       if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
         handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
+          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector_2,
                                                                            *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                            data_p->configuration->userData,
                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
@@ -1706,7 +1707,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                            true);
       else
         handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
+          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector_2,
                                                                                  *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                                  data_p->configuration->userData,
                                                                                  NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
@@ -1722,8 +1723,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
-#else
-        connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
 #endif // ACE_WIN32 || ACE_WIN64
       //ACE_DEBUG ((LM_DEBUG,
       //            ACE_TEXT ("%u: connected to %s\n"),
@@ -1736,7 +1735,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       data_p->session->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                    iconnection_p);
     } // end IF
-#else
 #endif // ACE_WIN32 || ACE_WIN64
 
     failed = false;

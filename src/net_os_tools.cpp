@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "net_os_tools.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

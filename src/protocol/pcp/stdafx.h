@@ -11,7 +11,7 @@
 #include "targetver.h"
 
 // Windows Header Files
-#include <windows.h>
+#include "windows.h"
 
 // *NOTE*: (f)lex generated scanners (re-)define some min/max basic type macros
 //         that are also defined in by the platform SDK (see: <stdint.h>)

@@ -220,9 +220,9 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                   (inherited::CONNECTION_BASE_T::configuration_->useThreadPerConnection ? ACE_TEXT ("%u: failed to ACE_Task::getq(): \"%m\", aborting\n")
                                                                                         : ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n")),
                   this->id ()));
+    inherited::decrease ();
     return -1; // <-- remove 'this' from dispatch
   } // end IF
-//continue_:
   ACE_ASSERT (message_block_p);
 
 //  // finished ?
@@ -237,9 +237,10 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("[%d]: finished sending\n"),
 //                handle_in));
-//#endif
+//#endif // ACE_WIN32 || ACE_WIN64
 //
 //    // clean up
+//    inherited2::decrease ();
 //    message_block_p->release ();
 //    //writeBuffer_ = NULL;
 //
@@ -331,6 +332,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   //              ACE_TEXT ("failed to ACE_Reactor::schedule_wakeup(): \"%m\", continuing\n")));
 
 //continue_:
+  inherited::decrease ();
+
   return result;
 }
 
@@ -572,6 +575,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
           case ICMP_NET_UNREACH:
             break;
           case ICMP_HOST_UNREACH:
+            break;
+          case ICMP_PORT_UNREACH:
             break;
           default:
           {
