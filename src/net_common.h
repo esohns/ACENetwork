@@ -232,11 +232,11 @@ class Net_Netlink_Addr
 struct Net_Statistic
 {
   Net_Statistic ()
-    : sentBytes (0.0F)
-    , receivedBytes (0.0F)
-    , timeStamp (ACE_Time_Value::zero)
-    , previousBytes (0.0F)
-    , previousTimeStamp (ACE_Time_Value::zero)
+   : sentBytes (0.0F)
+   , receivedBytes (0.0F)
+   , timeStamp (ACE_Time_Value::zero)
+   , previousBytes (0.0F)
+   , previousTimeStamp (ACE_Time_Value::zero)
   {}
   struct Net_Statistic operator+= (const struct Net_Statistic& rhs_in)
   {
@@ -299,7 +299,8 @@ typedef unsigned int Net_ConnectionId_t;
 struct Net_ConnectionState
 {
   Net_ConnectionState ()
-   : handle (ACE_INVALID_HANDLE)
+   : closed (false)
+   , handle (ACE_INVALID_HANDLE)
    , lastCollectionTimestamp (ACE_Time_Value::zero)
    , lock ()
    , statistic ()
@@ -307,6 +308,7 @@ struct Net_ConnectionState
    , userData (NULL)
   {}
 
+  bool                       closed; // handle_close() has been called ?
   ACE_HANDLE                 handle;
   ACE_Time_Value             lastCollectionTimestamp;
   ACE_SYNCH_MUTEX            lock;

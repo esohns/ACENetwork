@@ -453,15 +453,21 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::handle_close"));
 
   int result = -1;
+  bool decrease_b = true;
 
   // step0a: set state
   // *IMPORTANT NOTE*: set the state early to avoid deadlock in
   //                   waitForCompletion() (see below), which may be implicitly
   //                   invoked by stream_.finished()
   // *TODO*: remove type inference
-  if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
-      (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED))
-    inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
+        (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)                && // local close ?
+        (inherited2::state_.status != NET_CONNECTION_STATUS_PEER_CLOSED))             // --> peer closed
+      inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+    decrease_b = !inherited2::state_.closed;
+    inherited2::state_.closed = true;
+  } // end lock scope
 
   // step0b: notify stream ?
 //  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
@@ -493,50 +499,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                                              //     accept failed (e.g. too many connections) /
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
-    {
-      // sanity check(s)
-      ACE_ASSERT (inherited2::configuration_);
-
-      // step1: signal completion and wait for all processing
-      // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
-      //                   currently servicing the socket handle will call
-      //                   handle_close()
-//      stream_.flush (false,  // flush inbound ?
-//                     false,  // flush session messages ?
-//                     false); // flush upstream ?
-//      stream_.wait (true,   // wait for worker(s) (if any)
-//                    false,  // wait for upstream (if any)
-//                    false); // wait for downstream (if any)
-
-      // step2: purge any pending (!) notifications ?
-      // *TODO*: remove type inference
-//      if (likely (!inherited2::configuration_->useThreadPerConnection))
-//      { // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
-        //                   using a multithreaded reactor, there may still be
-        //                   in-flight notifications being dispatched at this
-        //                   stage. In that case, do not rely on releasing all
-        //                   handler resources "manually", use reference
-        //                   counting instead
-//        ACE_Reactor* reactor_p = inherited::SVC_HANDLER_T::reactor ();
-//        ACE_ASSERT (reactor_p);
-//        result =
-//            reactor_p->purge_pending_notifications (this,
-//                                                    ACE_Event_Handler::ALL_EVENTS_MASK);
-//        if (unlikely (result == -1))
-//          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("%u: failed to ACE_Reactor::purge_pending_notifications(0x%@,%d): \"%m\", continuing\n"),
-//                      id (),
-//                      this,
-//                      ACE_Event_Handler::ALL_EVENTS_MASK));
-        //else if (result > 0)
-        //  ACE_DEBUG ((LM_DEBUG,
-        //              ACE_TEXT ("flushed %d notifications (handle was: %d)\n"),
-        //              result,
-        //              handle_in));
-//      } // end IF
-
       break;
-    }
     default:
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -557,7 +520,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end SWITCH
 
   // step3: invoke base class maintenance
-  unsigned int count = inherited2::count ();
   bool deregister = inherited2::isRegistered_;
   // *IMPORTANT NOTE*: retain the socket handle:
   //                   - otherwise this fails for the usecase "accept failed"
@@ -589,8 +551,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   if (likely (deregister))
     inherited2::deregister ();
 
-  if ((count > 1) ||
-      ((count == 1) && !deregister))
+  if (decrease_b)
     this->decrease ();
 
   return result;
@@ -1437,9 +1398,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_close"));
 
-  int result = -1;
+//  int result = -1;
   bool cancel_b = false;
-//  bool close_socket_b = false;
+//  bool decrease_b = true;
 
   // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
   //                   gone away, i.e. no new data will be accepted by the
@@ -1453,12 +1414,17 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   //                   waitForCompletion() (see below), which may be implicitly
   //                   invoked by stream_.finished()
   // *TODO*: remove type inference
-  if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
-      (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED))
-  {
-    inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
-    cancel_b = true;
-  } // end IF
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
+        (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)                && // local close ?
+        (inherited2::state_.status != NET_CONNECTION_STATUS_PEER_CLOSED))             // --> peer closed
+    {
+      inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+      cancel_b = true;
+//      decrease_b = !inherited2::state_.closed;
+      inherited2::state_.closed = true;
+    } // end IF
+  } // end lock scope
 
   // step0b: notify stream ?
 //  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
@@ -1495,14 +1461,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited2::deregister ();
 
   // step2c: release socket handle(s) ?
-  result =
-//    (close_socket_b ? inherited::handle_close (handle_in,
-//                                               mask_in)
-//                    : 0);
-    inherited::handle_close (handle_in,
-                             mask_in);
-
-  return result;
+  return inherited::handle_close (handle_in,
+                                  mask_in);
 }
 
 template <typename HandlerType,

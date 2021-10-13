@@ -499,84 +499,29 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::handle_close"));
 
-  //// sanity check(s)
-  //// *IMPORTANT NOTE*: this handles failed connects (e.g. connection refused)
-  //// as well... (see below). This may change in the future, so keep the
-  //// alternate implementation
-  //if (inherited::reference_counting_policy().value() ==
-  //    ACE_Event_Handler::Reference_Counting_Policy::DISABLED)
-  //  return inherited::handle_close (handle_in, mask_in); // --> shortcut
-
   // initialize return value
   int result = 0;
-
-  // *IMPORTANT NOTE*: due to reference counting, the
-  // ACE_Svc_Handle::shutdown() method will crash, as it references a
-  // connection recycler AFTER removing the connection from the reactor (which
-  // releases a reference). In the case that "this" is the final reference,
-  // this leads to a crash. (see code)
-  // --> avoid invoking ACE_Svc_Handle::shutdown()
-  // --> this means that "manual" cleanup is necessary (see below)
-
-  // *IMPORTANT NOTE*: due to reference counting, the base-class function is a
-  // NOP (see code) --> this means that clean up is necessary on:
-  // - connect failed (e.g. connection refused)
-  // - accept failed (e.g. too many connections)
-  // - ... ?
 
   //  bool already_deleted = false;
   switch (mask_in)
   {
-    case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
+    case ACE_Event_Handler::READ_MASK:       // - socket has been closed
       break;
-    case ACE_Event_Handler::EXCEPT_MASK:     // - failed to send
+    case ACE_Event_Handler::EXCEPT_MASK:     // - failed to send (e.g. port unreachable)
     case ACE_Event_Handler::ALL_EVENTS_MASK: // - connect failed (e.g. connection refused) /
                                              // - accept failed (e.g. too many connections) /
                                              // - select failed (EBADF see Select_Reactor_T.cpp) /
                                              // - asynch abort
                                              // - ... ?
     {
-      // *TODO*: validate (failed) connect/accept case
-//      if (!isRegistered_)
-//      {
-//        // (failed) connect/accept case
-
-//        // *IMPORTANT NOTE*: when a connection attempt fails, the reactor
-//        // close()s the connection although it was never open()ed; in that case
-//        // there is no valid socket handle
-//        ACE_HANDLE handle = get_handle ();
-//        if (handle == ACE_INVALID_HANDLE)
-//        {
-//          // (failed) connect case
-
-//          // clean up
-//          decrease ();
-
-//          break;
-//        } // end IF
-
-//        // (failed) accept case
-
-//        // *IMPORTANT NOTE*: when an accept fails (e.g. too many connections),
-//        // this may have been open()ed, so proper clean up will:
-//        // - de-register from the reactor (decreases reference count)
-//        // - close the socket (--> done in dtor (see above))
-//      } // end ELSE IF
-
-      // asynch abort case
-
-      if (likely (handle_in != ACE_INVALID_HANDLE))
+      result = inherited2::peer_.close ();
+      if (unlikely (result == -1))
       {
-        result = inherited2::peer_.close ();
-//        result = inherited2::close ();
-        if (unlikely (result == -1))
-        {
-          int error = ACE_OS::last_error ();
-          if (error != EBADF) // 9: local close()
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_SOCK_IO::close (): \"%m\", continuing\n")));
-                        //ACE_TEXT ("failed to ACE_Svc_Handler::close (): \"%m\", continuing\n")));
-        } // end IF
+        int error = ACE_OS::last_error ();
+        if (error != EBADF) // 9: local close()
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SOCK_IO::close (): \"%m\", continuing\n")));
+                      //ACE_TEXT ("failed to ACE_Svc_Handler::close (): \"%m\", continuing\n")));
       } // end IF
 
       break;
