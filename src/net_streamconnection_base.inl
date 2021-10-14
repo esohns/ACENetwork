@@ -146,7 +146,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ConfigurationType* configuration_p = NULL;
   bool is_udp_write_only_b = false;
 
-  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
+  } // end lock scope
 
   // step0: initialize connection base
   // *NOTE*: client-side: arg_in is a handle to the connector
@@ -232,7 +234,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     //            ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  inherited2::state_.handle = inherited::get_handle ();
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    inherited2::state_.handle = inherited::get_handle ();
+  } // end lock scope
 
   // step2: register with the connection manager ?
   if (likely (inherited2::isManaged_))
@@ -313,7 +317,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     handle_reactor = true;
   } // end IF
 
-  inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+  } // end lock scope
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
                   true);
 
@@ -329,8 +335,10 @@ error:
   if (handle_manager)
     inherited2::deregister ();
 
-  inherited2::state_.handle = ACE_INVALID_HANDLE;
-  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    inherited2::state_.handle = ACE_INVALID_HANDLE;
+    inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+  } // end lock scope
 
   // *IMPORTANT NOTE*: the connector invokes close(NORMAL_CLOSE_OPERATION)
   //                   --> release the final reference there
@@ -802,14 +810,16 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
   // *TODO*: remove type inference
-  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
-  {
-    ACE_HANDLE handle = inherited::get_handle ();
-    ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-    bool no_delay = Net_Common_Tools::getNoDelay (handle);
-    Net_Common_Tools::setNoDelay (handle, true);
-    Net_Common_Tools::setNoDelay (handle, no_delay);
-  } // end IF
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+    if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+    {
+      ACE_HANDLE handle = inherited::get_handle ();
+      ACE_ASSERT (handle != ACE_INVALID_HANDLE);
+      bool no_delay = Net_Common_Tools::getNoDelay (handle);
+      Net_Common_Tools::setNoDelay (handle, true);
+      Net_Common_Tools::setNoDelay (handle, no_delay);
+    } // end IF
+  } // end lock scope
 #endif // ACE_LINUX
 }
 
@@ -1241,7 +1251,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   AddressType local_SAP, peer_SAP;
   bool is_udp_write_only_b = false;
 
-  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+    inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
+  } // end lock scope
 
   // *NOTE*: act() has been called already, Net_ConnectionBase has been
   //         initialized
@@ -1327,7 +1339,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
     session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
-                                                            &(inherited2::state_)));
+                                                             &(inherited2::state_)));
   } // end lock scope
 
   // step3c: start stream
@@ -1355,7 +1367,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     handle_read = true;
   } // end IF
 
-  inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+    inherited2::state_.status = NET_CONNECTION_STATUS_OK;
+  } // end lock scope
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
                   true);
 
@@ -1371,8 +1385,10 @@ error:
   if (handle_manager)
     inherited2::deregister ();
 
-  inherited2::state_.handle = ACE_INVALID_HANDLE;
-  inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+    inherited2::state_.handle = ACE_INVALID_HANDLE;
+    inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+  } // end lock scope
 }
 
 template <typename HandlerType,
@@ -2000,8 +2016,11 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_read_stream"));
 
   int result = -1;
-  bool close_b =
+  bool close_b = false;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+    close_b =
       (inherited2::state_.status == NET_CONNECTION_STATUS_CLOSED);
+  } // end lock scope
   bool release_message_block_b = true;
   size_t bytes_transferred_i = 0;
 
@@ -2067,13 +2086,15 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 //      ACE_DEBUG ((LM_DEBUG,
 //                  ACE_TEXT ("%u: socket (handle was: %d) has been closed\n"),
 //                  id (), result_in.handle ()));
-//#endif
+//#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
     default:
     {
       // update statistic
-      inherited2::state_.statistic.receivedBytes += bytes_transferred_i;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+        inherited2::state_.statistic.receivedBytes += bytes_transferred_i;
+      } // end lock scope
 
       // push the buffer onto the stream for processing
       result = stream_.put (&result_in.message_block (), NULL);
@@ -2217,7 +2238,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     default:
     {
       // update statistic
-      inherited2::state_.statistic.receivedBytes += bytes_transferred_i;
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
+        inherited2::state_.statistic.receivedBytes += bytes_transferred_i;
+      } // end lock scope
 
       // push the buffer into the stream for processing
       result = stream_.put (result_in.message_block (), NULL);

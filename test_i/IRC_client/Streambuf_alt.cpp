@@ -19,8 +19,8 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-#ifndef ACE_STREAMBUF_ALT_CPP
-#define ACE_STREAMBUF_ALT_CPP
+//#ifndef ACE_STREAMBUF_ALT_CPP
+//#define ACE_STREAMBUF_ALT_CPP
 
 #include "Streambuf_alt.h"
 
@@ -29,9 +29,9 @@
 #  include "ace/OS_NS_errno.h"
 #  include "ace/OS_Memory.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+//#if !defined (ACE_LACKS_PRAGMA_ONCE)
+//# pragma once
+//#endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //#if !defined (__ACE_INLINE__)
 ////#include "ace/IOStream_T.inl"
@@ -682,4 +682,4 @@ ACE_Streambuf_alt::timeout (void)
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* ACE_STREAMBUF_ALT_CPP */
+//#endif /* ACE_STREAMBUF_ALT_CPP */

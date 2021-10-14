@@ -2112,15 +2112,17 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
   // *TODO*: remove type inference
-  if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
-  {
-    ACE_HANDLE handle = inherited::get_handle ();
-    ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-    bool no_delay = Net_Common_Tools::getNoDelay (handle);
-    Net_Common_Tools::setNoDelay (handle, true);
-    Net_Common_Tools::setNoDelay (handle, no_delay);
-  } // end IF
-#endif
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock);
+    if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
+    {
+      ACE_HANDLE handle = inherited::get_handle ();
+      ACE_ASSERT (handle != ACE_INVALID_HANDLE);
+      bool no_delay = Net_Common_Tools::getNoDelay (handle);
+      Net_Common_Tools::setNoDelay (handle, true);
+      Net_Common_Tools::setNoDelay (handle, no_delay);
+    } // end IF
+  } // end lock scope
+#endif // ACE_LINUX
 }
 
 template <typename AddressType,

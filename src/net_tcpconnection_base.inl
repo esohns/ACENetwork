@@ -377,11 +377,15 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   int result = -1;
 
   // step1: initialize asynchronous I/O
-  inherited::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock);
+    inherited::state_.status = NET_CONNECTION_STATUS_INITIALIZING;
+  } // end lock scope
   inherited::open (handle_in,
                    messageBlock_in);
-  if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))
-    goto error;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::state_.lock);
+    if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))
+      goto error;
+  } // end lock scope
 
   // step2: process any data ?
   if (unlikely (messageBlock_in.length ()))
