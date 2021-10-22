@@ -795,13 +795,13 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   BitTorrent_Client_TrackerStreamConfiguration_t::ITERATOR_T iterator_2 =
     data_p->configuration->trackerStreamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->trackerStreamConfiguration.end ());
-  (*iterator_2).second.second.destination = path_p;
+  (*iterator_2).second.second->destination = path_p;
   g_free (path_p);
-  if (!Common_File_Tools::isDirectory ((*iterator_2).second.second.destination))
+  if (!Common_File_Tools::isDirectory ((*iterator_2).second.second->destination))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("destination folder (was: \"%s\") does not exist, returning\n"),
-                ACE_TEXT ((*iterator_2).second.second.destination.c_str ())));
+                ACE_TEXT ((*iterator_2).second.second->destination.c_str ())));
     return;
   } // end IF
 

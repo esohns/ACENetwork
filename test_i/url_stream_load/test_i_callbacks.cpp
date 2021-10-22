@@ -192,7 +192,7 @@ idle_load_segment_cb (gpointer userData_in)
   Test_I_URLStreamLoad_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
     data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
-  (*iterator_3).second.second.URL = data_p->URL;
+  (*iterator_3).second.second->URL = data_p->URL;
 
   Test_I_TCPConnector_2_t connector (true);
 #if defined (SSL_SUPPORT)
@@ -430,7 +430,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
   gchar* text_p =
-    Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).second.second.URL);
+    Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).second.second->URL);
   gtk_entry_set_text (entry_p,
                       text_p);
   g_free (text_p);
@@ -465,16 +465,16 @@ idle_initialize_UI_cb (gpointer userData_in)
   //GFile* file_p = NULL;
   struct _GString* string_p = NULL;
   gchar* filename_p = NULL;
-  if (!(*iterator_3).second.second.targetFileName.empty ())
+  if (!(*iterator_3).second.second->targetFileName.empty ())
   {
     // *NOTE*: gtk does not complain if the file doesn't exist, but the button
     //         will display "(None)" --> create empty file
-    if (!Common_File_Tools::isReadable ((*iterator_3).second.second.targetFileName))
-      if (!Common_File_Tools::create ((*iterator_3).second.second.targetFileName))
+    if (!Common_File_Tools::isReadable ((*iterator_3).second.second->targetFileName))
+      if (!Common_File_Tools::create ((*iterator_3).second.second->targetFileName))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_File_Tools::create(\"%s\"): \"%m\", aborting\n"),
-                    ACE_TEXT ((*iterator_3).second.second.targetFileName.c_str ())));
+                    ACE_TEXT ((*iterator_3).second.second->targetFileName.c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
     //file_p =
@@ -487,7 +487,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     //  data_p->configuration->moduleHandlerConfiguration.targetFileName;
     //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
     //                                              file_uri.c_str ()))
-    string_p = g_string_new ((*iterator_3).second.second.targetFileName.c_str ());
+    string_p = g_string_new ((*iterator_3).second.second->targetFileName.c_str ());
     filename_p = string_p->str;
       //Common_UI_GTK_Tools::Locale2UTF8 (data_p->configuration->moduleHandlerConfiguration.targetFileName);
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
@@ -495,7 +495,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT ((*iterator_3).second.second.targetFileName.c_str ())));
+                  ACE_TEXT ((*iterator_3).second.second->targetFileName.c_str ())));
 
       // clean up
       g_string_free (string_p, FALSE);
@@ -551,7 +551,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end ELSE
 
   std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
-  default_folder_uri += (*iterator_3).second.second.targetFileName;
+  default_folder_uri += (*iterator_3).second.second->targetFileName;
   if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
                                                 default_folder_uri.c_str ()))
   {
@@ -566,7 +566,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                !(*iterator_3).second.second.targetFileName.empty ());
+                                !(*iterator_3).second.second->targetFileName.empty ());
   check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME)));
@@ -683,7 +683,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
-  (*iterator_3).second.second.window = window_p;
+  (*iterator_3).second.second->window = window_p;
 
   return G_SOURCE_REMOVE;
 }
@@ -1167,16 +1167,16 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
     ACE_ASSERT (entry_p);
-    (*iterator_3).second.second.URL =
+    (*iterator_3).second.second->URL =
       Common_UI_GTK_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p), -1);
-    if (!HTTP_Tools::parseURL ((*iterator_3).second.second.URL,
+    if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
                                hostname_string,
                                URI_string,
                                use_SSL))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-                  ACE_TEXT ((*iterator_3).second.second.URL.c_str ())));
+                  ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
       goto error;
     } // end IF
     hostname_string_2 = hostname_string;
@@ -1210,7 +1210,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (check_button_p);
     if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p)))
     {
-      (*iterator_3).second.second.targetFileName.clear ();
+      (*iterator_3).second.second->targetFileName.clear ();
       goto continue_;
     } // end IF
     // retrieve output filename
@@ -1248,9 +1248,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                           ACE_DIRECTORY_SEPARATOR_CHAR));
     g_free (directory_p); directory_p = NULL;
     ACE_ASSERT (Common_File_Tools::isDirectory (directory_string));
-    (*iterator_3).second.second.targetFileName = directory_string;
-    (*iterator_3).second.second.targetFileName += ACE_DIRECTORY_SEPARATOR_STR_A;
-    (*iterator_3).second.second.targetFileName +=
+    (*iterator_3).second.second->targetFileName = directory_string;
+    (*iterator_3).second.second->targetFileName += ACE_DIRECTORY_SEPARATOR_STR_A;
+    (*iterator_3).second.second->targetFileName +=
         ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE);
 
     // step3: connect to peer
@@ -1377,7 +1377,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     HTTP_record_p->method =
       (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
                           : HTTP_Codes::HTTP_METHOD_POST);
-    HTTP_record_p->URI = (*iterator_3).second.second.URL;
+    HTTP_record_p->URI = (*iterator_3).second.second->URL;
     HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
     ACE_NEW_NORETURN (message_data_p,

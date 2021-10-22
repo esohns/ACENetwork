@@ -131,7 +131,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
-  session_data_p->targetFileName = (*iterator).second.second.targetFileName;
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
 
@@ -308,7 +308,7 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
-  session_data_p->targetFileName = (*iterator).second.second.targetFileName;
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Common_Image_Resolution_t resolution_s;
   resolution_s.cx = 320;

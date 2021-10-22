@@ -185,7 +185,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
       const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
-  session_data_r.targetFileName = (*iterator).second.second.targetFileName;
+  session_data_r.targetFileName = (*iterator).second.second->targetFileName;
 
   // ******************* IO ************************
   module_p =
@@ -216,7 +216,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  if (!IOReader_impl_p->initialize ((*iterator).second.second))
+  if (!IOReader_impl_p->initialize (*((*iterator).second.second)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s/%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),

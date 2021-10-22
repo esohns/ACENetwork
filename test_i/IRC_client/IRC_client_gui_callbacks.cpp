@@ -178,7 +178,7 @@ connection_setup_function (void* arg_in)
   IRC_Client_StreamConfiguration_t::ITERATOR_T iterator_2 =
     data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
-  (*iterator_2).second.second.subscriber = connection_p;
+  (*iterator_2).second.second->subscriber = connection_p;
 
   // *WARNING*: beyond this point, need to remove the connection page !
   //            --> goto remove_page

@@ -977,7 +977,7 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
   if (unlikely (iconnector_p->useReactor ()))
-    (*iterator_2).second.second.connection =
+    (*iterator_2).second.second->connection =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else
@@ -992,13 +992,13 @@ do_work (bool requestBroadcastReplies_in,
     // *TODO*: avoid tight loop here
     do
     {
-      (*iterator_2).second.second.connection =
+      (*iterator_2).second.second->connection =
           connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress);
-      if ((*iterator_2).second.second.connection)
+      if ((*iterator_2).second.second->connection)
         break;
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
-  if (unlikely (!(*iterator_2).second.second.connection))
+  if (unlikely (!(*iterator_2).second.second->connection))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
@@ -1011,7 +1011,7 @@ do_work (bool requestBroadcastReplies_in,
   do
   {
     status =
-      (*iterator_2).second.second.connection->status ();
+      (*iterator_2).second.second->connection->status ();
     if (status == NET_CONNECTION_STATUS_OK)
       break;
   } while (COMMON_TIME_NOW < deadline);
@@ -1021,25 +1021,25 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ()),
                 status));
-    (*iterator_2).second.second.connection->decrease ();
+    (*iterator_2).second.second->connection->decrease ();
     return;
   } // end IF
   // step1c: wait for the connection stream to finish initializing
   istream_connection_p =
-    dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> ((*iterator_2).second.second.connection);
+    dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> ((*iterator_2).second.second->connection);
   if (unlikely (!istream_connection_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(%@), returning\n"),
-                (*iterator_2).second.second.connection));
-    (*iterator_2).second.second.connection->decrease ();
+                (*iterator_2).second.second->connection));
+    (*iterator_2).second.second->connection->decrease ();
     return;
   } // end IF
   istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
-              (*iterator_2).second.second.connection->id (),
+              (*iterator_2).second.second->connection->id (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
 
   // step1ca: reinitialize connection manager
@@ -1066,7 +1066,7 @@ do_work (bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-      (*iterator_2).second.second.connection->decrease ();
+      (*iterator_2).second.second->connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1082,7 +1082,7 @@ do_work (bool requestBroadcastReplies_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
-      (*iterator_2).second.second.connection->decrease ();
+      (*iterator_2).second.second->connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1124,7 +1124,7 @@ do_work (bool requestBroadcastReplies_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
-      (*iterator_2).second.second.connection->decrease ();
+      (*iterator_2).second.second->connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1178,7 +1178,7 @@ allocate:
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
 //      message_data_container_p->decrease ();
-      (*iterator_2).second.second.connection->decrease ();
+      (*iterator_2).second.second->connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1222,7 +1222,7 @@ allocate:
                            NULL);
 
     DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
-      dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> ((*iterator_2).second.second.connection);
+      dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> ((*iterator_2).second.second->connection);
     ACE_ASSERT (istream_connection_p);
 
     struct DHCP_ConnectionState& state_r =
@@ -1272,7 +1272,7 @@ allocate:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-      (*iterator_2).second.second.connection->decrease ();
+      (*iterator_2).second.second->connection->decrease ();
       connection_manager_p->abort ();
       return;
     } // end IF
@@ -1305,7 +1305,7 @@ allocate:
   connection_manager_p->stop (false,  // wait ?
                               true);  // high priority ?
   connection_manager_p->abort (false); // wait ?
-  (*iterator_2).second.second.connection->decrease ();
+  (*iterator_2).second.second->connection->decrease ();
   if (iconnection_p)
   {
     iconnection_p->decrease (); iconnection_p = NULL;

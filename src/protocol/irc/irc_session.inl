@@ -1094,7 +1094,7 @@ IRC_Session_T<ConnectionType,
       inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
   } // end ELSE
-  (*iterator).second.second.subscriber = this;
+  (*iterator).second.second->subscriber = this;
 
   // step1: initialize/start stream, tweak socket, register reading data with
   //        reactor, ...
@@ -1149,7 +1149,7 @@ IRC_Session_T<ConnectionType,
   iterator =
       inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
-  (*iterator).second.second.subscriber = this;
+  (*iterator).second.second->subscriber = this;
 //  ACE_ASSERT (module_handler_configuration_p->userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();
 //  module_handler_configuration_p->userData->connectionState =

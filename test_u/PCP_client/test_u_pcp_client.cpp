@@ -950,7 +950,7 @@ do_work (//bool requestBroadcastReplies_in,
     ACE_ASSERT (iconnection_p);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%u: connected to %s\n"),
-                (*iterator_2).second.second.connection->id (),
+                (*iterator_2).second.second->connection->id (),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
 
     ACE_NEW_NORETURN (isession_p,
@@ -1081,7 +1081,7 @@ do_work (//bool requestBroadcastReplies_in,
     ACE_ASSERT (iconnection_p);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%u: connected to %s\n"),
-                (*iterator_2).second.second.connection->id (),
+                (*iterator_2).second.second->connection->id (),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
 
     ACE_NEW_NORETURN (isession_p,
@@ -1136,7 +1136,7 @@ do_work (//bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-      (*iterator_2).second.second.connection->decrease ();
+      (*iterator_2).second.second->connection->decrease ();
       connection_manager_p->abort ();
       connection_manager_p->wait ();
       return;
@@ -1168,7 +1168,7 @@ do_work (//bool requestBroadcastReplies_in,
 
   timer_manager_p->stop ();
   if (UIDefinitionFileName_in.empty ())
-    (*iterator_2).second.second.connection->decrease ();
+    (*iterator_2).second.second->connection->decrease ();
   connection_manager_p->wait ();
   if (!UIDefinitionFileName_in.empty ())
     Common_Tools::finalizeEventDispatch (event_dispatch_state_s,

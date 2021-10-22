@@ -900,7 +900,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   input_thread_data_s.configuration = &configuration_in;
   input_thread_data_s.dispatchState = &event_dispatch_state_s;
   input_thread_data_s.moduleHandlerConfiguration =
-    const_cast<struct IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second.second));
+    const_cast<struct IRC_Client_ModuleHandlerConfiguration*> ((*iterator).second.second);
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
