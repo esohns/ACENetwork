@@ -488,6 +488,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (message_inout);
+  ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::isInitialized_);
 
   int result = -1;
@@ -541,10 +542,11 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
         inherited::timerId_ = -1;
       } // end IF
 
-      if (likely (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT))
-        inherited::stop (false, // wait for completion ?
-                         false, // high priority ?
-                         true); // N/A
+      if (likely (inherited::configuration_->concurrency != STREAM_HEADMODULECONCURRENCY_CONCURRENT))
+      { Common_ITask* itask_p = this;
+        itask_p->stop (false,  // wait ?
+                       false); // high priority ?
+      } // end IF
 
       break;
     }
