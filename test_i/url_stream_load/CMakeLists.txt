@@ -127,10 +127,6 @@ set (${EXECUTABLE}_EXE_CFG
      etc/test_i.glade
      etc/resources.rc)
 
-#if (UNIX)
-# add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-#endif (UNIX)
-
 #string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -198,8 +194,10 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${EXECUTABLE})
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${EXECUTABLE})
+target_precompile_headers (${EXECUTABLE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

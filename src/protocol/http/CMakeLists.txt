@@ -23,11 +23,6 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 
 if (UNIX)
-# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-#                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
-# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-#                             $<BUILD_INTERFACE:${PKG_SOX_INCLUDE_DIRS}>)
-
 # target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
@@ -170,6 +165,8 @@ target_sources (${PROJECT_NAME}_Protocol_HTTP
   ${absolute_source_files}
   INTERFACE
   ${absolute_script_files})
+target_precompile_headers (${PROJECT_NAME}_Protocol_HTTP
+                           PUBLIC stdafx.h)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DHTTP_BUILD_DLL)
@@ -209,8 +206,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ACEStream)
 
 # add PCH
-set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${PROJECT_NAME}_Protocol_HTTP)
+#set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${PROJECT_NAME}_Protocol_HTTP)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_HTTP

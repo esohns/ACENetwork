@@ -30,13 +30,7 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DACESTREAM_HAS_DLL)
 
-#add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-
 if (UNIX)
-# include_directories (${PKG_CAP_INCLUDE_DIRS})
-# include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -51,13 +45,6 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
-
-# include_directories ($ENV{ACE_ROOT})
-
- # *TODO*: repair pkgconfig support
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -111,7 +98,7 @@ set (${EXECUTABLE}_SRCS
      stdafx.cpp
      stdafx.h)
 if (GUI_SUPPORT)
- if (GTK_USE)
+ if (GTK_SUPPORT)
   set (${EXECUTABLE}_SRCS
        ${${EXECUTABLE}_SRCS}
        test_u_callbacks.cpp
@@ -119,7 +106,7 @@ if (GUI_SUPPORT)
 # elseif (WXWIDGETS_USE)
 #  set (${EXECUTABLE}_SRCS
 #       ${${EXECUTABLE}_SRCS})
- endif (GTK_USE)
+ endif (GTK_SUPPORT)
 endif (GUI_SUPPORT)
 
 add_executable (${EXECUTABLE}
@@ -175,8 +162,10 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Server)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
 
 # add PCH
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${EXECUTABLE})
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${EXECUTABLE})
+target_precompile_headers (${EXECUTABLE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

@@ -148,6 +148,8 @@ target_sources (${PROJECT_NAME}_Protocol_IRC
                 PRIVATE stdafx.h
                 PRIVATE ${absolute_source_files}
                 INTERFACE ${absolute_script_files})
+target_precompile_headers (${PROJECT_NAME}_Protocol_IRC
+                           PUBLIC stdafx.h)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
@@ -181,9 +183,9 @@ target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ACEStream)
 
 # add PCH
-set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 #set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${PROJECT_NAME}_Protocol_IRC)
+#cotire (${PROJECT_NAME}_Protocol_IRC)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_IRC

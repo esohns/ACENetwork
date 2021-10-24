@@ -25,21 +25,6 @@ endif ()
 add_definitions (-DSTREAM_HAS_DLL)
 #add_definitions (-DSTREAM_DEC_HAS_DLL)
 
-#find_package (${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
-#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${ACENetwork_DIR})
-# message (FATAL_ERROR "could not find package \"${PROJECT_NAME}\", aborting")
-#endif ()
-#add_definitions (-DNET_HAS_DLL)
-#add_definitions (-DHTTP_HAS_DLL)
-
-#add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
 # if (DBUS_SUPPORT)
@@ -66,10 +51,6 @@ elseif (WIN32)
  if (SSL_USE)
   include_directories (${SSL_INCLUDE_DIRS})
  endif (SSL_USE)
-
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
-
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/flex)
@@ -196,8 +177,10 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 # add PCH
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${EXECUTABLE})
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${EXECUTABLE})
+target_precompile_headers (${EXECUTABLE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

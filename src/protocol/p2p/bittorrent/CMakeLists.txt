@@ -165,6 +165,8 @@ target_sources (${PROJECT_NAME}_Protocol_BitTorrent
                 ${absolute_source_files}
                 INTERFACE
                 ${absolute_script_files})
+target_precompile_headers (${PROJECT_NAME}_Protocol_BitTorrent
+                           PUBLIC stdafx.h)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS -Dbittorrent_BUILD_DLL)
@@ -212,8 +214,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC CommonParser)
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ACEStream)
 
 # add PCH
-set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${PROJECT_NAME}_Protocol_BitTorrent)
+#set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${PROJECT_NAME}_Protocol_BitTorrent)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent

@@ -273,6 +273,8 @@ target_sources (${PROJECT_NAME}
                 PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 ${absolute_source_files})
+target_precompile_headers (${PROJECT_NAME}
+                           PUBLIC stdafx.h)
 
 #add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
 
@@ -320,8 +322,8 @@ if (SSL_SUPPORT)
 endif (SSL_SUPPORT)
 
 # add PCH
-set_target_properties (${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${PROJECT_NAME})
+#set_target_properties (${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${PROJECT_NAME})
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}

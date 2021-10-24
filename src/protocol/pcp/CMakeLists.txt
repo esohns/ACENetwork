@@ -128,12 +128,14 @@ foreach (script_file ${script_files})
         ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_PCP
-  PRIVATE stdafx.cpp
-  PRIVATE stdafx.h
-  PRIVATE
-  ${absolute_source_files}
-  INTERFACE
-  ${absolute_script_files})
+                PRIVATE stdafx.cpp
+                PRIVATE stdafx.h
+                PRIVATE
+                ${absolute_source_files}
+                INTERFACE
+                ${absolute_script_files})
+target_precompile_headers (${PROJECT_NAME}_Protocol_PCP
+                           PUBLIC stdafx.h)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_PCP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_PCP_SRCS PROPERTIES COMPILE_DEFINITIONS -DPCP_BUILD_DLL)
@@ -169,8 +171,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ACEStream)
 target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${PROJECT_NAME})
 
 # add PCH
-set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${PROJECT_NAME}_Protocol_PCP)
+#set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${PROJECT_NAME}_Protocol_PCP)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_PCP

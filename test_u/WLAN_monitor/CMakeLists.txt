@@ -62,20 +62,6 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DACESTREAM_HAS_DLL)
 
-#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
-#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${ACENetwork_DIR})
-# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-#endif ()
-#add_definitions (-DACENETWORK_HAS_DLL)
-
-#add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
  if (NL80211_USE)
@@ -126,12 +112,13 @@ set (${EXECUTABLE}_EXE_SRCS
      wlan_monitor_configuration.h
      wlan_monitor_defines.h)
 if (GUI_SUPPORT)
- if (GTK_USE)
+ if (GTK_SUPPORT)
   set (${EXECUTABLE}_EXE_SRCS
        ${${EXECUTABLE}_EXE_SRCS}
        test_u_ui_callbacks.cpp
        test_u_ui_callbacks.h)
- elseif (WXWIDGETS_USE)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
 #  set (${EXECUTABLE}_EXE_SRCS
 #       ${${EXECUTABLE}_EXE_SRCS}
 #       test_u_wxwidgets_ui.cpp
@@ -139,12 +126,8 @@ if (GUI_SUPPORT)
 #       test_u_wxwidgets_ui.inl
 #       test_u_wxwidgets_ui_base.cpp
 #       test_u_wxwidgets_ui_base.h)
- endif ()
+ endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
-
-if (UNIX)
-# add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif (UNIX)
 
 set (ui_definition_file "")
 if (GUI_SUPPORT)
@@ -296,9 +279,11 @@ if (UNIX)
 endif (UNIX)
 
 # add PCH
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 #set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${EXECUTABLE})
+#cotire (${EXECUTABLE})
+target_precompile_headers (${EXECUTABLE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

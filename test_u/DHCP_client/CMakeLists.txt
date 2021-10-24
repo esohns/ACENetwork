@@ -30,23 +30,7 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DACESTREAM_HAS_DLL)
 
-#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
-#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${ACENetwork_DIR})
-# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-#endif ()
-#add_definitions (-DACENETWORK_HAS_DLL)
-
-#add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-
 if (UNIX)
-# include_directories (${PKG_CAP_INCLUDE_DIRS})
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -59,8 +43,6 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
@@ -110,12 +92,13 @@ set (${EXECUTABLE}_EXE_SRCS
 #     test_u_stream.inl)
 #  test_u_template_instantiations.cpp
 if (GUI_SUPPORT)
- if (GTK_USE)
+ if (GTK_SUPPORT)
   set (${EXECUTABLE}_EXE_SRCS
        ${${EXECUTABLE}_EXE_SRCS}
        test_u_callbacks.cpp
        test_u_callbacks.h)
- elseif (WXWIDGETS_USE)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
 #  set (${EXECUTABLE}_EXE_SRCS
 #       ${${EXECUTABLE}_EXE_SRCS}
 #       test_u_wxwidgets_ui.cpp
@@ -123,7 +106,7 @@ if (GUI_SUPPORT)
 #       test_u_wxwidgets_ui.inl
 #       test_u_wxwidgets_ui_base.cpp
 #       test_u_wxwidgets_ui_base.h)
- endif ()
+ endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 
 set (${PROJECT_NAME}_DHCPClient_EXE_CFG
@@ -185,8 +168,10 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
 
 # add PCH
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-cotire (${EXECUTABLE})
+#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#cotire (${EXECUTABLE})
+target_precompile_headers (${EXECUTABLE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets

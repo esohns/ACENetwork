@@ -210,6 +210,8 @@ target_sources (${PROJECT_NAME}_WLAN
                 ${absolute_source_files}
                 INTERFACE
                 ${absolute_script_files})
+target_precompile_headers (${PROJECT_NAME}_WLAN
+                           PUBLIC stdafx.h)
 
 add_dependencies (${PROJECT_NAME}_WLAN Common)
 if (UNIX)
@@ -229,9 +231,9 @@ add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME}_Protocol_DHCP)
 #set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # add PCH
-set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+#set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 #set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${PROJECT_NAME}_WLAN)
+#cotire (${PROJECT_NAME}_WLAN)
 
 if (UNIX)
  if (WEXT_SUPPORT)
