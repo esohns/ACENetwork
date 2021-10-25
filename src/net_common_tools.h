@@ -26,30 +26,23 @@
 
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ifdef.h>
+#include "ifdef.h"
 #else
 #include "net/ethernet.h"
-
-//#if defined (DHCLIENT_SUPPORT)
-//extern "C"
-//{
-//#include "dhcpctl/dhcpctl.h"
-//}
-//#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
 #include "net_common.h"
+#if defined (NETLINK_SUPPORT)
+#include "net_netlink_address.h"
+#endif // NETLINK_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "net_packet_headers.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 // forward declarations
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
-//struct nl_msg;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 #if defined (SSL_SUPPORT)
 class ACE_SSL_Context;
 #endif // SSL_SUPPORT
@@ -220,11 +213,9 @@ class Net_Common_Tools
   static std::string IPAddressToString (const ACE_INET_Addr&, // address
                                         bool = false,         // do not apppend port ?
                                         bool = false);        // resolve to DNS name ?
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
   static std::string NetlinkAddressToString (const Net_Netlink_Addr&);
-
-//  static std::string dump (struct nl_msg*);
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
   // *NOTE*: if the first argument is '0', the trailing ":0" will be cropped
   //         from the return value
   // *NOTE*: returns dotted decimal

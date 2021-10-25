@@ -806,7 +806,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
 //////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1437,4 +1437,4 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   this->decrease ();
 }
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT

@@ -35,8 +35,6 @@
 
 #include "common_configuration.h"
 
-//#include "common_parser_common.h"
-
 #include "common_timer_common.h"
 
 #include "stream_common.h"
@@ -48,6 +46,9 @@
 #endif // ACE_WIN32 || ACE_WIN64
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
+#if defined (NETLINK_SUPPORT)
+#include "net_netlink_address.h"
+#endif // NETLINK_SUPPORT
 
 // forward declarations
 class Stream_IAllocator;
@@ -128,7 +129,7 @@ class Net_SocketConfiguration_T
 
 //////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 template <>
 class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK>
  : public Net_SocketConfigurationBase
@@ -146,7 +147,7 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK>
   Net_Netlink_Addr address;
   int              protocol;
 };
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 
 template <>
 class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
@@ -321,15 +322,15 @@ class Net_StreamConnectionConfiguration_T
 
 //////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkSocketConfiguration_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPSocketConfiguration_t;
 typedef Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPSocketConfiguration_t;
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 typedef Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkConnectionConfiguration_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 typedef Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPConnectionConfiguration_t;
 typedef Net_ConnectionConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPConnectionConfiguration_t;
 
@@ -337,10 +338,10 @@ typedef std::map<std::string,
                  struct Net_ConnectionConfigurationBase*> Net_ConnectionConfigurations_t;
 typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationsIterator_t;
 
-//#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+//#if defined (NETLINK_SUPPORT)
 //typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
 //                                            NET_TRANSPORTLAYER_NETLINK> Net_NetlinkStreamConnectionConfiguration_t;
-//#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+//#endif // NETLINK_SUPPORT
 //typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
 //                                            NET_TRANSPORTLAYER_TCP> Net_TCPStreamConnectionConfiguration_t;
 //typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,

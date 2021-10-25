@@ -27,10 +27,11 @@
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
 
-#include "net_configuration.h"
+#include "net_common.h"
+//#include "net_configuration.h"
+#include "net_netlink_address.h"
 #include "net_sockethandler_base.h"
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 // *NOTE*: this should be added to ACE so Svc_Handler can be parametrized with
 //         ACE_SOCK_Netlink
 class Net_SOCK_Netlink
@@ -79,6 +80,5 @@ class Net_NetlinkSocketHandler_T
 
 // include template definition
 #include "net_netlinksockethandler.inl"
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 #endif

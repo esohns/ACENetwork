@@ -37,7 +37,6 @@
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_netlink.h"
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
 template <typename HandlerType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -194,6 +193,5 @@ class Net_AsynchNetlinkConnection_T
 
 // include template definition
 #include "net_netlinkconnection.inl"
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
 
 #endif

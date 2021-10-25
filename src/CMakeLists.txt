@@ -232,6 +232,8 @@ if (UNIX)
        net_asynch_netlinksockethandler.cpp
        net_asynch_netlinksockethandler.h
        net_asynch_netlinksockethandler.inl
+       net_netlink_address.cpp
+       net_netlink_address.h
        net_netlinkconnection.cpp
        net_netlinkconnection.h
        net_netlinkconnection.inl

@@ -264,7 +264,7 @@ error:
   return result;
 }
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 std::string
 Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& address_in)
 {
@@ -333,7 +333,7 @@ Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& address_in)
 
 //  return result;
 //}
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 
 std::string
 Net_Common_Tools::IPAddressToString (unsigned short port_in,

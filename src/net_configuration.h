@@ -21,36 +21,18 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
-#include <map>
-#include <string>
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "Ks.h"
-#endif // ACE_WIN32 || ACE_WIN64
-
-#include "ace/Basic_Types.h"
-#include "ace/INET_Addr.h"
-#include "ace/Log_Msg.h"
-#include "ace/Time_Value.h"
-
+#include "common.h"
 #include "common_configuration.h"
+#include "common_defines.h"
 
-#include "common_timer_common.h"
+//#include "common_timer_common.h"
 
-#include "stream_common.h"
-#include "stream_configuration.h"
-
-#include "net_common.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "net_common_tools.h"
-#endif // ACE_WIN32 || ACE_WIN64
-#include "net_connection_configuration.h"
-#include "net_defines.h"
-#include "net_iconnectionmanager.h"
+//#include "stream_common.h"
+//#include "stream_configuration.h"
 
 // forward declarations
-class Stream_IAllocator;
-struct Net_UserData;
+//class Stream_IAllocator;
+//struct Net_UserData;
 
 //struct Net_AllocatorConfiguration
 // : Common_AllocatorConfiguration

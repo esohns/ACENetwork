@@ -258,7 +258,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
 //////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 // partial specialization (for Netlink)
 template <typename HandlerType,
           ////////////////////////////////
@@ -350,7 +350,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   ACE_SYNCH_CONDITION condition_;
   ACE_SYNCH_MUTEX     lock_;
 };
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 
 // include template definition
 #include "net_client_asynchconnector.inl"

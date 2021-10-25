@@ -20,9 +20,9 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#include <linux/errqueue.h>
-#include <netinet/ip_icmp.h>
-#endif
+#include "linux/errqueue.h"
+#include "netinet/ip_icmp.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
@@ -2297,7 +2297,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 
 /////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -3192,4 +3192,4 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
               ACE_TEXT (local_address_string.c_str ()),
               buffer));
 }
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT

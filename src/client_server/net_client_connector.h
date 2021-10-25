@@ -249,7 +249,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   bool               managed_;
 };
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 //////////////////////////////////////////
 // specialization (for Netlink)
 template <ACE_SYNCH_DECL, // 'send' lock strategy
@@ -331,7 +331,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   ConfigurationType* configuration_; // connection-
   bool               managed_;
 };
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 
 // include template definition
 #include "net_client_connector.inl"

@@ -23,7 +23,7 @@
 
 /////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
  : dispatch_(COMMON_EVENT_DISPATCH_INVALID)
  , role_(NET_ROLE_INVALID)
@@ -47,4 +47,4 @@ Net_NetlinkTransportLayer_Base::initialize (enum Common_EventDispatchType dispat
 
   return true;
 }
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT

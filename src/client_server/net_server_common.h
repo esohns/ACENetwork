@@ -42,9 +42,9 @@
 //  ConnectionConfigurationType* connectionConfiguration;
 //};
 
-//#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+//#if defined (NETLINK_SUPPORT)
 //typedef Net_ListenerConfiguration_T<NET_TRANSPORTLAYER_NETLINK> Net_NetlinkListenerConfiguration_t;
-//#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+//#endif // NETLINK_SUPPORT
 //typedef Net_ListenerConfiguration_T<NET_TRANSPORTLAYER_TCP> Net_TCPListenerConfiguration_t;
 //typedef Net_ListenerConfiguration_T<NET_TRANSPORTLAYER_UDP> Net_UDPListenerConfiguration_t;
 

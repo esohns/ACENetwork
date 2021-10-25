@@ -30,9 +30,9 @@
 #include "net_common.h"
 #include "net_configuration.h"
 #include "net_iconnection.h"
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 #include "net_netlinksockethandler.h"
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 #include "net_udpsockethandler.h"
 
 // forward declarations
@@ -216,7 +216,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 
 //////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 // partial specialization (for Netlink)
 template <typename ConfigurationType,
           typename StateType,
@@ -301,7 +301,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
 };
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 
 // include template definition
 #include "net_stream_udpsocket_base.inl"

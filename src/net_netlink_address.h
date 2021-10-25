@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Erik Sohns   *
+ *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,15 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "stdafx.h"
 
-#include "net_transportlayer_netlink.h"
+#ifndef NET_NETLINK_ADDRESS_H
+#define NET_NETLINK_ADDRESS_H
 
-#include "net_macros.h"
+#include "ace/Assert.h"
+#include "ace/Netlink_Addr.h"
 
-Net_TransportLayer_Netlink::Net_TransportLayer_Netlink ()
- : inherited ()
+// forward declarations
+struct sockaddr_nl;
+
+class Net_Netlink_Addr
+ : public ACE_Netlink_Addr
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Netlink::Net_TransportLayer_Netlink"));
+  typedef ACE_Netlink_Addr inherited;
 
-}
+ public:
+  Net_Netlink_Addr ()
+   : inherited ()
+  {}
+  Net_Netlink_Addr (const sockaddr_nl* address_in,
+                    int length_in)
+   : inherited (address_in,
+                length_in)
+  {}
+  inline virtual ~Net_Netlink_Addr () {}
+
+  inline Net_Netlink_Addr& operator= (const ACE_Addr& rhs) { *this = rhs; return *this; }
+
+  virtual int addr_to_string (ACE_TCHAR[],    // buffer
+                              size_t,         // size
+                              int = 1) const; // ipaddr_format
+  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+
+  inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+};
+
+#endif

@@ -30,7 +30,7 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
-#include "net_configuration.h"
+#include "net_connection_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 

@@ -35,10 +35,10 @@
 #include "net_sock_dgram.h"
 #include "net_tcpsockethandler.h"
 #include "net_udpsockethandler.h"
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 #include "net_asynch_netlinksockethandler.h"
 #include "net_netlinksockethandler.h"
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 
 typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
                                Net_SOCK_Dgram,
@@ -79,9 +79,9 @@ typedef Net_TCPSocketHandler_T<ACE_NULL_SYNCH,
                                Net_TCPSocketConfiguration_t> Net_SSLSocketHandler_t;
 #endif // SSL_SUPPORT
 
-#if defined (ACE_HAS_NETLINK) && defined (NETLINK_SUPPORT)
+#if defined (NETLINK_SUPPORT)
 typedef Net_NetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Net_NetlinkSocketHandler_t;
 typedef Net_AsynchNetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Net_AsynchNetlinkSocketHandler_t;
-#endif // ACE_HAS_NETLINK && NETLINK_SUPPORT
+#endif // NETLINK_SUPPORT
 
 #endif
