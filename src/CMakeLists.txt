@@ -252,9 +252,11 @@ if (SSL_SUPPORT)
       net_asynch_ssl_tcpsockethandler.inl
       ${source_files})
 endif (SSL_SUPPORT)
+set (source_files
+     ${CMAKE_CURRENT_BINARY_DIR}/../${PROJECT_NAME}_config.h
+     ${source_files})
 if (WIN32)
  set (source_files
-      ../include/${PROJECT_NAME}_config.h
       ../include/targetver.h
       ${source_files})
 endif (WIN32)

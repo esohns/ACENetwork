@@ -847,7 +847,7 @@ do_work (bool debugParser_in,
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  gtk_manager_p->wait ();
+  gtk_manager_p->wait (false);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
