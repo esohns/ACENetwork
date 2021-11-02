@@ -21,8 +21,8 @@ elseif (WIN32)
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif ()
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
+string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
+string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
