@@ -196,10 +196,8 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
 
 # add PCH
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-if (UNIX)
- cotire (${EXECUTABLE})
-endif (UNIX)
+target_precompile_headers (${EXECUTABLE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -315,9 +313,8 @@ target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
 
 # add PCH
-set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${EXECUTABLE_GUI})
+target_precompile_headers (${EXECUTABLE_GUI}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets

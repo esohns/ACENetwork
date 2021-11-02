@@ -156,7 +156,6 @@ add_dependencies (${PROJECT_NAME}_Protocol_PCP ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES DEFINE_SYMBOL NET_Protocol_PCP_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${ACE_LIBRARY})
 elseif (WIN32)
@@ -171,8 +170,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ACEStream)
 target_link_libraries (${PROJECT_NAME}_Protocol_PCP PUBLIC ${PROJECT_NAME})
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_Protocol_PCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${PROJECT_NAME}_Protocol_PCP)
+target_precompile_headers (${PROJECT_NAME}_Protocol_PCP
+                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_PCP

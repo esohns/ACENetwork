@@ -3,7 +3,7 @@
 //      are changed infrequently
 //
 #if defined (_MSC_VER)
-#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 
 // *NOTE*: work around quirky MSVC...
 #define NOMINMAX
@@ -11,11 +11,10 @@
 #include "targetver.h"
 
 // Windows Header Files
-#include <windows.h>
+#include "windows.h"
 #endif // _MSC_VER
 
 // C RunTime Header Files
-//#include <sstream>
 #include <string>
 
 // System Library Header Files
@@ -31,7 +30,6 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common.h"
 #include "common_macros.h"
 #include "common_pragmas.h"
@@ -39,7 +37,6 @@
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "stream_common.h"
 #include "stream_macros.h"
 
@@ -47,6 +44,5 @@
 #if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "net_common.h"
 #include "net_macros.h"

@@ -1,7 +1,7 @@
 add_library (${PROJECT_NAME}_Protocol_SMTP STATIC "")
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
+string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
+string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -63,6 +63,9 @@ target_include_directories (${PROJECT_NAME}_Protocol_SMTP PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>)
 target_include_directories (${PROJECT_NAME}_Protocol_SMTP PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
+
+#get_target_property (debug ${PROJECT_NAME}_Protocol_SMTP INTERFACE_INCLUDE_DIRECTORIES)
+#message (STATUS "${PROJECT_NAME}_Protocol_SMTP INTERFACE_INCLUDE_DIRECTORIES: \"${debug}\"")
 
 ########### next target ###############
 set (source_files
@@ -131,8 +134,7 @@ target_sources (${PROJECT_NAME}_Protocol_SMTP
 target_precompile_headers (${PROJECT_NAME}_Protocol_SMTP
                            PUBLIC stdafx.h)
 
-#set_source_files_properties (${PROJECT_NAME}_Protocol_SMTP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
-#set_source_files_properties (${PROJECT_NAME}_Protocol_SMTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DPCP_BUILD_DLL)
+#set_source_files_properties (${PROJECT_NAME}_Protocol_SMTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DSMTP_BUILD_DLL)
 
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
@@ -150,7 +152,6 @@ add_dependencies (${PROJECT_NAME}_Protocol_SMTP ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_SMTP PROPERTIES DEFINE_SYMBOL NET_Protocol_SMTP_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_SMTP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ${ACE_LIBRARY})
 elseif (WIN32)
@@ -166,8 +167,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ACEStream)
 target_link_libraries (${PROJECT_NAME}_Protocol_SMTP PUBLIC ${PROJECT_NAME})
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_Protocol_SMTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${PROJECT_NAME}_Protocol_SMTP)
+target_precompile_headers (${PROJECT_NAME}_Protocol_SMTP
+                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_SMTP

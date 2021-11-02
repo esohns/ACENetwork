@@ -231,9 +231,8 @@ add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME}_Protocol_DHCP)
 #set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${PROJECT_NAME}_WLAN)
+target_precompile_headers (${PROJECT_NAME}_WLAN
+                           PUBLIC stdafx.h)
 
 if (UNIX)
  if (WEXT_SUPPORT)

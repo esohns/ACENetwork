@@ -1,8 +1,8 @@
 add_library (${PROJECT_NAME}_Client STATIC "")
 add_library (${PROJECT_NAME}_Server STATIC "")
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
+string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
+string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
 if (SSL_SUPPORT)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC ${SSL_INCLUDE_DIRS})
  target_include_directories (${PROJECT_NAME}_Server PUBLIC ${SSL_INCLUDE_DIRS})
@@ -127,8 +127,6 @@ if (SSL_SUPPORT)
       ${source_files_client})
 endif (SSL_SUPPORT)
 
-#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-
 foreach (source_file ${source_files_client})
  get_filename_component (abs_source_file ${source_file} ABSOLUTE)
  list (APPEND absolute_source_files_client
@@ -145,9 +143,8 @@ target_sources (${PROJECT_NAME}_Client
 #set_target_properties (${PROJECT_NAME}_Client PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 # add PCH
-set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${PROJECT_NAME}_Client)
+target_precompile_headers (${PROJECT_NAME}_Client
+                           PUBLIC stdafx.h)
 
 ############## next target ################
 
@@ -171,8 +168,6 @@ if (SSL_SUPPORT)
       ${source_files_server})
 endif (SSL_SUPPORT)
 
-#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-
 foreach (source_file ${source_files_server})
  get_filename_component (abs_source_file ${source_file} ABSOLUTE)
  list (APPEND absolute_source_files_server
@@ -186,7 +181,7 @@ target_sources (${PROJECT_NAME}_Server
                 ${absolute_source_files_server})
 
 if (WIN32)
- set_target_properties (${PROJECT_NAME}_Server PROPERTIES DEFINE_SYMBOL _CRT_SECURE_NO_WARNINGS)
+# set_target_properties (${PROJECT_NAME}_Server PROPERTIES DEFINE_SYMBOL _CRT_SECURE_NO_WARNINGS)
 
  target_link_libraries (${PROJECT_NAME}_Server ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Server Common)
@@ -196,9 +191,8 @@ endif ()
 #set_target_properties (${PROJECT_NAME}_Server PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#set_target_properties (${PROJECT_NAME}_Server PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${PROJECT_NAME}_Server)
+target_precompile_headers (${PROJECT_NAME}_Server
+                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Client ${PROJECT_NAME}_Server

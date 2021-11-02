@@ -174,7 +174,6 @@ add_dependencies (${PROJECT_NAME}_Protocol_IRC ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES DEFINE_SYMBOL IRC_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
@@ -183,9 +182,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ACEStream)
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${PROJECT_NAME}_Protocol_IRC)
+target_precompile_headers (${PROJECT_NAME}_Protocol_IRC
+                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_IRC

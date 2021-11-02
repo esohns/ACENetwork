@@ -11,23 +11,10 @@
 #include "targetver.h"
 
 // Windows Header Files
-#include <windows.h>
-
-// *NOTE*: (f)lex generated scanners (re-)define some min/max basic type macros
-//         that are also defined in by the platform SDK (see: <stdint.h>)
-//#define RC_INVOKED
+#include "windows.h"
 #endif // _MSC_VER
 
 // C RunTime Header Files
-// *WORKAROUND*
-//#include <iostream>
-//using namespace std;
-//// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
-////                   a problem in conjunction with the standard include headers
-////                   when ACE_USES_OLD_IOSTREAMS is defined
-////                   --> include the necessary headers manually (see above), and
-////                       prevent ace/iosfwd.h from causing any harm
-//#define ACE_IOSFWD_H
 #include <string>
 
 #if defined (VALGRIND_SUPPORT)
@@ -43,14 +30,12 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common.h"
 #include "common_macros.h"
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "stream_common.h"
 #include "stream_macros.h"
 
@@ -58,7 +43,6 @@
 #if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "net_common.h"
 #include "net_macros.h"
 

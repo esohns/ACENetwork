@@ -201,7 +201,6 @@ if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
 endif (WIN32 AND MSVC)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
@@ -214,8 +213,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC CommonParser)
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ACEStream)
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${PROJECT_NAME}_Protocol_BitTorrent)
+target_precompile_headers (${PROJECT_NAME}_Protocol_BitTorrent
+                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent

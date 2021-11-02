@@ -623,10 +623,8 @@ curses_main (struct Common_UI_Curses_State* state_in)
 
   int result = ERR;
   int ch = -1;
-  bool release = false;
   ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock,
                                                   ACE_Acquire_Method::ACE_REGULAR);
-  int result_2 = ERR;
   IRC_Client_CursesMessagesIterator_t iterator;
 
   // step3b: handle input

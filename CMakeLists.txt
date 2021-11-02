@@ -193,10 +193,6 @@ set_directory_properties (PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
 
 ################################################################################
 
-add_subdirectory (src)
-
-################################################################################
-
 # configuration files
 # Export the package for use from the build-tree
 # (this registers the build-tree with a global CMake-registry)
@@ -243,6 +239,10 @@ add_definitions (-DHAVE_CONFIG_H)
 
 ################################################################################
 
+add_subdirectory (src)
+
+################################################################################
+
 # Install the ACENetworkConfig.cmake and ACENetworkConfigVersion.cmake
 install (FILES
          "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
@@ -282,11 +282,7 @@ add_subdirectory (test_i)
 ################################################################################
 
 if (UNIX)
-# include (CheckLibraryExists)
-# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  include (GNUInstallDirs)
-
- set (CMAKE_THREAD_PREFER_PTHREAD ON)
 elseif (WIN32)
  if (MSVC)
 #  set (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION "10.0.16299.0") # set Windows SDK version

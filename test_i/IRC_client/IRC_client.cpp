@@ -524,6 +524,7 @@ connection_setup_function (void* arg_in)
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
+  struct IRC_Client_CursesState* state_p = NULL;
 
   // step1: wait for connection ?
   if (thread_data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0)
@@ -656,15 +657,13 @@ connection_setup_function (void* arg_in)
 
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-  struct IRC_Client_CursesState& state_r =
-    const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
-  ACE_ASSERT (!state_r.controller);
-  state_r.controller = icontrol_p;
-  const struct IRC_SessionState& session_state_r =
-    connection_p->state ();
-  ACE_ASSERT (!state_r.sessionState);
-  state_r.sessionState =
-    &const_cast<struct IRC_SessionState&> (session_state_r);
+  state_p =
+      &const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
+  ACE_ASSERT (!state_p->controller);
+  state_p->controller = icontrol_p;
+  ACE_ASSERT (!state_p->sessionState);
+  state_p->sessionState =
+      &const_cast<struct IRC_SessionState&> (connection_p->state ());
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 

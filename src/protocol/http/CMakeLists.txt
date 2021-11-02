@@ -198,7 +198,6 @@ if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
 endif (WIN32 AND MSVC)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
@@ -206,8 +205,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ACEStream)
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${PROJECT_NAME}_Protocol_HTTP)
+target_precompile_headers (${PROJECT_NAME}_Protocol_HTTP
+                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_HTTP

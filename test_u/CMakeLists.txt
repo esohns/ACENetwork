@@ -59,8 +59,8 @@ if (UNIX)
 elseif (WIN32)
 endif ()
 
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
+string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
+string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -71,16 +71,6 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 add_definitions (-DCOMMON_HAS_DLL)
-if (GUI_SUPPORT)
- add_definitions (-DCOMMON_UI_HAS_DLL)
- if (GTK_USE)
-  add_definitions (-DCOMMON_UI_GTK_HAS_DLL)
-  if (GTKGL_SUPPORT)
-   add_definitions (-DCOMMON_GL_HAS_DLL)
-  endif (GTKGL_SUPPORT)
- endif (GTK_USE)
-endif (GUI_SUPPORT)
-
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -93,9 +83,6 @@ endif ()
 add_definitions (-DACESTREAM_HAS_DLL)
 
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
-
  if (GUI_SUPPORT)
   if (GTK_USE)
    target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
@@ -105,10 +92,6 @@ if (UNIX)
                                $<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>)
   endif ()
  endif (GUI_SUPPORT)
-
-# target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/ACE_TAO/ACE>)
-#                             $<BUILD_INTERFACE:/usr/local/src/ACE_wrappers>)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}>)
@@ -156,14 +139,6 @@ elseif (WIN32)
 # libglade
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libglade-2.6.4/include/libglade-2.0)
  endif (GUI_SUPPORT)
-
-# if (DEFINED ENV{ACE_ROOT})
-#  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-#                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
-# else ()
-#  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
-#                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
-# endif (DEFINED ENV{ACE_ROOT})
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)

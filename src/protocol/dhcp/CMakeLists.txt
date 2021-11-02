@@ -144,7 +144,6 @@ target_sources (${PROJECT_NAME}_Protocol_DHCP
 target_precompile_headers (${PROJECT_NAME}_Protocol_DHCP
                            PUBLIC stdafx.h)
 
-#set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS -DDHCP_BUILD_DLL)
 
 # *NOTE*: generate .def file and export all symbols on Windows
@@ -163,7 +162,6 @@ add_dependencies (${PROJECT_NAME}_Protocol_DHCP ACEStream)
 #set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES DEFINE_SYMBOL NET_PROTOCOL_DHCP_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-#target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  if (DHCLIENT_USE)
   target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${DHCPCTL_LIBRARY})
@@ -195,8 +193,8 @@ target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ACEStream)
 target_link_libraries (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${PROJECT_NAME})
 
 # add PCH
-#set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${PROJECT_NAME}_Protocol_DHCP)
+target_precompile_headers (${PROJECT_NAME}_Protocol_DHCP
+                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_DHCP
