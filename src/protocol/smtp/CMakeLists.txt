@@ -64,9 +64,6 @@ target_include_directories (${PROJECT_NAME}_Protocol_SMTP PUBLIC
 target_include_directories (${PROJECT_NAME}_Protocol_SMTP PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
 
-#get_target_property (debug ${PROJECT_NAME}_Protocol_SMTP INTERFACE_INCLUDE_DIRECTORIES)
-#message (STATUS "${PROJECT_NAME}_Protocol_SMTP INTERFACE_INCLUDE_DIRECTORIES: \"${debug}\"")
-
 ########### next target ###############
 set (source_files
      smtp_codes.h

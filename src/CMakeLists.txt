@@ -34,13 +34,6 @@ add_definitions (-DSTREAM_HAS_DLL)
 
 # ........................................
 
-if (UNIX)
- if(CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
-#  set (CMAKE_STATIC_LINKER_FLAGS "-Wl,--as-needed")
- endif (CMAKE_COMPILER_IS_GNUCXX)
-endif (UNIX)
-
 add_library (${PROJECT_NAME} STATIC "")
 
 if (SSL_SUPPORT)

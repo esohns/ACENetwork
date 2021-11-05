@@ -15,37 +15,14 @@ if (GUI_SUPPORT)
 # include (Macros)
  include (PreUIFramework)
  include (SetUIFramework)
-
- if (CURSES_USE)
- elseif (GTK_USE)
+ if (GTK_USE)
   include (SetGTKVersion)
-
-  if (CMAKE_BUILD_TYPE STREQUAL Debug)
-   add_definitions (-DG_ERRORCHECK_MUTEXES)
-  endif (CMAKE_BUILD_TYPE STREQUAL Debug)
- elseif (WXWIDGETS_USE)
-  message (STATUS "wxWidgets_DEFINITIONS: ${wxWidgets_DEFINITIONS}")
-  message (STATUS "wxWidgets_DEFINITIONS_DEBUG: ${wxWidgets_DEFINITIONS_DEBUG}")
-  message (STATUS "wxWidgets_CXX_FLAGS: ${wxWidgets_CXX_FLAGS}")
-  message (STATUS "wxWidgets_USE_FILE: ${wxWidgets_USE_FILE}")
-# # *NOTE*: re-enable ANSI mode, iff available
-# add_definitions (-DwxUSE_UNICODE=0)
-  foreach (DEFINITION ${wxWidgets_DEFINITIONS})
-   add_definitions (-D${DEFINITION})
-  endforeach ()
-  if (WIN32)
-#  add_definitions (-D__WXMSW__)
-#  add_definitions (-DWXUSINGDLL)
-   if (MSVC)
-    add_definitions (-DwxMSVC_VERSION_AUTO)
-   endif (MSVC)
-  endif (WIN32)
-  add_definitions (-DwxUSE_GUI=1)
-  if (CMAKE_BUILD_TYPE STREQUAL Debug)
-   add_definitions (-D__WXDEBUG__)
-  endif (CMAKE_BUILD_TYPE STREQUAL Debug)
- endif ()
+ endif (GTK_USE)
 endif (GUI_SUPPORT)
+
+if (UNIX)
+ add_link_options ("LINKER:--as-needed")
+endif (UNIX)
 
 add_library (${PROJECT_NAME}_Test_I STATIC "")
 
@@ -70,6 +47,7 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
+add_definitions (-DCOMMON_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -80,6 +58,7 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
+add_definitions (-DACESTREAM_HAS_DLL)
 
 if (GUI_SUPPORT)
  if (CURSES_SUPPORT)
@@ -91,6 +70,9 @@ if (GUI_SUPPORT)
                               $<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>)
 
   if (GTKGLAREA_SUPPORT)
+# *NOTE*: check out the 'master' branch for gtk3-based applications
+# *NOTE*: check out the 'gtkglarea-2' branch for gtk2-based applications
+# *TODO*: verify automatically
    target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                                $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
   endif (GTKGLAREA_SUPPORT)
@@ -110,40 +92,46 @@ if (GUI_SUPPORT)
  endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 
-if (GUI_SUPPORT)
- target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui>)
- if (CURSES_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/curses>)
- endif (CURSES_SUPPORT)
- if (GTK_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/gtk>)
- endif (GTK_SUPPORT)
- if (QT_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/qt>)
- endif (QT_SUPPORT)
- if (WXWIDGETS_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/wxwidgets>)
- endif (WXWIDGETS_SUPPORT)
-endif (GUI_SUPPORT)
-
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/log>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/log>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/parser>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/parser>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/signal>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/signal>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/timer>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/timer>)
+ if (GUI_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/ui>)
+  if (CURSES_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/ui/curses>)
+  endif (CURSES_SUPPORT)
+  if (GTK_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/ui/gtk>)
+  endif (GTK_SUPPORT)
+  if (QT_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/ui/qt>)
+  endif (QT_SUPPORT)
+  if (WXWIDGETS_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/ui/wxwidgets>)
+  endif (WXWIDGETS_SUPPORT)
+ endif (GUI_SUPPORT)
+
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/${BUILD_PATH_SUFFIX}>)
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src/modules/lib>)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
@@ -157,45 +145,63 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/parser>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/timer>)
-endif ()
-target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/${BUILD_PATH_SUFFIX}>)
-target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src>)
-target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src/modules/lib>)
+ if (GUI_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui>)
+  if (CURSES_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/curses>)
+  endif (CURSES_SUPPORT)
+  if (GTK_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/gtk>)
+  endif (GTK_SUPPORT)
+  if (QT_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/qt>)
+  endif (QT_SUPPORT)
+  if (WXWIDGETS_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/wxwidgets>)
+  endif (WXWIDGETS_SUPPORT)
+ endif (GUI_SUPPORT)
 
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/${BUILD_PATH_SUFFIX}>)
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src/modules/lib>)
+endif ()
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>)
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src>)
 
 if (GUI_SUPPORT)
+ target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC CommonUI)
  if (CURSES_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_Test_I ${CURSES_LIBRARIES})
-
-  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_Curses)
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC ${CURSES_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC CommonUI_Curses)
  endif (CURSES_SUPPORT)
  if (GTK_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_Test_I ${GTK_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC ${GTK_LIBRARIES})
   if (GTKGL_SUPPORT)
-   target_link_libraries (${PROJECT_NAME}_Test_I CommonOpenGL)
+   target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC CommonOpenGL)
   endif (GTKGL_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_GTK)
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC CommonUI_GTK)
  endif (GTK_SUPPORT)
  if (QT_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_Test_I ${Qt_LIBRARIES})
-
-  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_Qt)
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC ${Qt_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC CommonUI_Qt)
  endif (QT_SUPPORT)
  if (WXWIDGETS_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_Test_I ${wxWidgets_LIBRARIES})
-
-  target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_wxWidgets)
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC ${wxWidgets_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC CommonUI_wxWidgets)
  endif (WXWIDGETS_SUPPORT)
-
- target_link_libraries (${PROJECT_NAME}_Test_I CommonUI)
 endif (GUI_SUPPORT)
+target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC Common)
+target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC ACEStream)
 
 ##########################################
 
@@ -212,6 +218,7 @@ if (GUI_SUPPORT)
   add_dependencies (${PROJECT_NAME}_Test_I CommonUI_wxWidgets)
  endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
+add_dependencies (${PROJECT_NAME}_Test_I ACEStream)
 
 ##########################################
 
@@ -255,6 +262,14 @@ target_sources (${PROJECT_NAME}_Test_I
                 PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 ${absolute_source_files})
+target_precompile_headers (${PROJECT_NAME}_Test_I
+                           PUBLIC stdafx.h)
+
+##########################################
+
+# add all targets to the build-tree export set
+export (TARGETS ${PROJECT_NAME}_Test_I
+       APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
 
 # ----------------------------------------
 
