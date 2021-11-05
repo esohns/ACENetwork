@@ -32,6 +32,10 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DSTREAM_HAS_DLL)
 
+if (UNIX)
+ add_link_options ("LINKER:--as-needed")
+endif (UNIX)
+
 # ........................................
 
 add_library (${PROJECT_NAME} STATIC "")

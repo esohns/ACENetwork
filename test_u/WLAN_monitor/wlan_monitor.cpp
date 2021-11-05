@@ -33,7 +33,6 @@
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN64
 #include "ace/Log_Msg.h"
-//#include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -48,7 +47,6 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common_file_tools.h"
 #include "common_tools.h"
 
@@ -62,16 +60,15 @@
 
 #if defined (GUI_SUPPORT)
 #include "common_ui_defines.h"
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"
@@ -81,9 +78,9 @@
 #include "test_u_eventhandler.h"
 #include "test_u_signalhandler.h"
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_ui_callbacks.h"
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 
 #include "wlan_monitor_common.h"
@@ -169,10 +166,6 @@ do_printUsage (const std::string& programName_in)
 #endif // ACE_WIN32 || ACE_WIN64
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-//  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r [VALUE]   : statistic reporting interval (second(s)) [")
-//            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
-//            << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
-//            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r          : use reactor [")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -328,10 +321,6 @@ do_processArguments (const int& argc_in,
       }
       case 'r':
       {
-//        converter.clear ();
-//        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-//        converter << argumentParser.opt_arg ();
-//        converter >> statisticReportingInterval_out;
         useReactor_out = true;
         break;
       }
@@ -1028,7 +1017,6 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (use_reactor,
-//                        (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR),
                         true,
 //                        (statistic_reporting_interval == 0), // handle SIGUSR1/SIGBREAK
 //                                                             // iff regular reporting
@@ -1054,8 +1042,8 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
-                                           //use_reactor,
-                                           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR),
+                                           (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
@@ -1078,7 +1066,8 @@ ACE_TMAIN (int argc_in,
   lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  Test_U_SignalHandler signal_handler (COMMON_SIGNAL_DISPATCH_SIGNAL,
+  Test_U_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                    : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                        lock_2);
 
   // step1g: set process resource limits
@@ -1102,7 +1091,8 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
-    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -1163,7 +1153,8 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -1220,8 +1211,8 @@ ACE_TMAIN (int argc_in,
              elapsed_rusage.ru_nivcsw));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  Common_Signal_Tools::finalize (//COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
-                                 COMMON_SIGNAL_DISPATCH_REACTOR,
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);

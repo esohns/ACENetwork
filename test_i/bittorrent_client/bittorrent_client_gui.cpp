@@ -1309,7 +1309,8 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
-                                           use_reactor,
+                                           (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
@@ -1347,13 +1348,13 @@ ACE_TMAIN (int argc_in,
 #if defined (GTK_USE)
   lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
-  BitTorrent_Client_SignalHandler signal_handler  ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                                   lock_2
+  BitTorrent_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                                  lock_2
 #if defined (CURSES_USE)
-                                                   ,false);
+                                                  ,false);
 #else
-                                                  );
+                                                 );
 #endif // CURSES_USE
 
   // step5: handle specific program modes

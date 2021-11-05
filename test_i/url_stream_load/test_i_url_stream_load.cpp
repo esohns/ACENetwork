@@ -1199,7 +1199,8 @@ ACE_TMAIN (int argc_in,
     goto error;
   } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
-                                           false,
+                                           (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
@@ -1214,7 +1215,8 @@ ACE_TMAIN (int argc_in,
     do_print_version (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                         ACE_DIRECTORY_SEPARATOR_CHAR))));
 
-    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -1353,7 +1355,8 @@ ACE_TMAIN (int argc_in,
               elapsed_rusage.ru_nivcsw));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
@@ -1369,7 +1372,8 @@ ACE_TMAIN (int argc_in,
   return EXIT_SUCCESS;
 
 error:
-  Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
