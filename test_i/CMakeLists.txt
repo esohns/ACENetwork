@@ -33,8 +33,7 @@ if (UNIX)
    add_definitions (-DNCURSES_INTERNALS)
   endif (CURSES_USE)
  endif (GUI_SUPPORT)
-elseif (WIN32)
-endif ()
+endif (UNIX)
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
@@ -76,11 +75,6 @@ if (GUI_SUPPORT)
    target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                                $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
   endif (GTKGLAREA_SUPPORT)
-
-  if (LIBGLADE_SUPPORT)
-   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${GLADE_INCLUDE_DIRS}>)
-  endif (LIBGLADE_SUPPORT)
  endif (GTK_SUPPORT)
  if (QT_SUPPORT)
   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
@@ -146,22 +140,22 @@ elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/timer>)
  if (GUI_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui>)
   if (CURSES_SUPPORT)
-   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/curses>)
   endif (CURSES_SUPPORT)
   if (GTK_SUPPORT)
-   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/gtk>)
   endif (GTK_SUPPORT)
   if (QT_SUPPORT)
-   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/qt>)
   endif (QT_SUPPORT)
   if (WXWIDGETS_SUPPORT)
-   target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/wxwidgets>)
   endif (WXWIDGETS_SUPPORT)
  endif (GUI_SUPPORT)
