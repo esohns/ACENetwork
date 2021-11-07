@@ -149,7 +149,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]      : reporting interval (seconds) [0: off] [")
-            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t              : trace information [")
@@ -1194,7 +1194,7 @@ ACE_TMAIN (int argc_in,
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
 
   unsigned int reporting_interval            =
-    STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
 
   bool trace_information                     = false;
 

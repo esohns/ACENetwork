@@ -174,7 +174,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]  : statistic reporting interval (second(s)) [")
-            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S
             << ACE_TEXT_ALWAYS_CHAR ("] [0: off]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t          : trace information [")
@@ -262,7 +262,8 @@ do_processArguments (int argc_in,
   //sendRequestOnOffer_out = TEST_U_DEFAULT_PCP_SEND_REQUEST_ON_OFFER;
   useReactor_out =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
-  statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+  statisticReportingInterval_out =
+    STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   traceInformation_out = false;
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out =
@@ -1314,7 +1315,7 @@ ACE_TMAIN (int argc_in,
   bool use_reactor =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
-    STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =

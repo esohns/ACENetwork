@@ -31,10 +31,7 @@ if (UNIX)
 elseif (WIN32)
 endif ()
 
-#include (FindPkgConfig)
-#pkg_check_modules (PKGACE REQUIRED ACE)
-
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -56,16 +53,9 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
-#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${ACENetwork_DIR})
-# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-#endif ()
-
+if (SSL_SUPPORT)
+ include_directories (${SSL_INCLUDE_DIRS})
+endif (SSL_SUPPORT)
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
 
@@ -82,10 +72,6 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/stat)
 elseif (WIN32)
- if (SSL_SUPPORT)
-  include_directories (${SSL_INCLUDE_DIRS})
- endif (SSL_SUPPORT)
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -112,7 +98,6 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/p2p/bittorre
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
-#message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}/../..\"")
 
 ########### next target ###############
 set (bittorrent_client_SRCS
@@ -142,15 +127,13 @@ set (bittorrent_client_SRCS
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
 if (GUI_SUPPORT)
- if (CURSES_USE)
+ if (CURSES_SUPPORT)
   set (bittorrent_client_SRCS
        ${bittorrent_client_SRCS}
        bittorrent_client_curses.cpp
        bittorrent_client_curses.h)
- endif (CURSES_USE)
+ endif (CURSES_SUPPORT)
 endif (GUI_SUPPORT)
-
-#set_source_files_properties(${bittorrent_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 set (EXECUTABLE bittorrent_client)
 add_executable (${EXECUTABLE}
@@ -167,6 +150,7 @@ if (WIN32)
 endif (WIN32)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
+
 add_dependencies (${EXECUTABLE} Common)
 add_dependencies (${EXECUTABLE} CommonLog)
 add_dependencies (${EXECUTABLE} CommonParser)
@@ -218,15 +202,12 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
 if (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
 # set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
 endif (WIN32)
 
 # add PCH
-set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-if (UNIX)
- cotire (${EXECUTABLE})
-endif (UNIX)
+target_precompile_headers (${EXECUTABLE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -292,6 +273,7 @@ if (WIN32)
 endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
+
 add_dependencies (${EXECUTABLE_GUI} Common)
 add_dependencies (${EXECUTABLE_GUI} CommonLog)
 add_dependencies (${EXECUTABLE_GUI} CommonParser)
@@ -309,23 +291,14 @@ target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 
 if (UNIX)
-# target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE_GUI} X11)
-elseif (WIN32)
-endif ()
+endif (UNIX)
 
-if (WIN32)
-# target_link_options (${EXECUTABLE_GUI} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-endif (WIN32)
 target_link_libraries (${EXECUTABLE_GUI} Common)
 target_link_libraries (${EXECUTABLE_GUI} CommonLog)
 target_link_libraries (${EXECUTABLE_GUI} CommonParser)
 target_link_libraries (${EXECUTABLE_GUI} CommonSignal)
 target_link_libraries (${EXECUTABLE_GUI} CommonTimer)
-if (WIN32)
- # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
-# set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
-endif (WIN32)
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
 
@@ -336,9 +309,8 @@ target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
 
 # add PCH
-set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${EXECUTABLE_GUI})
+target_precompile_headers (${EXECUTABLE_GUI}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets

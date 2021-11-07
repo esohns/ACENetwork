@@ -84,16 +84,6 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src/modules/stat>)
 elseif (WIN32)
- if (SSL_SUPPORT)
-  if (DEFINED ENV{SSL_ROOT})
-   target_include_directories (${PROJECT_NAME} PUBLIC
-                               $<BUILD_INTERFACE:$ENV{SSL_ROOT}>)
-  else ()
-   target_include_directories (${PROJECT_NAME} PUBLIC
-                               $<BUILD_INTERFACE:$ENV{LIB_ROOT}/openssl/include>)
-  endif (DEFINED ENV{SSL_ROOT})
- endif (SSL_SUPPORT)
-
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME} PUBLIC
@@ -272,6 +262,7 @@ target_precompile_headers (${PROJECT_NAME}
 #add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
+
 add_dependencies (${PROJECT_NAME} Common)
 
 add_dependencies (${PROJECT_NAME} ACEStream)
@@ -279,40 +270,23 @@ add_dependencies (${PROJECT_NAME} ACEStream)
 #set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-if (UNIX)
-# if (DHCLIENT_SUPPORT)
-#  target_link_libraries (${PROJECT_NAME} ${DHCPCTL_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${OMAPI_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${IRS_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${ISC_CFG_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${DNS_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${GEOIP_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${PKG_SSL_LIBRARIES})
-##  target_link_libraries (${PROJECT_NAME} ${GSS_KRB5_LIBRARY})
-##  target_link_libraries (${PROJECT_NAME} ${KRB5_LIBRARY})
-##  target_link_libraries (${PROJECT_NAME} ${GSS_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${PKG_KRB5_GSSAPI_LIBRARIES})
-#  target_link_libraries (${PROJECT_NAME} ${ISC_LIBRARY})
-##  target_link_libraries (${PROJECT_NAME} ${JSON_LIBRARY})
-#  target_link_libraries (${PROJECT_NAME} ${PKG_JSON_LIBRARIES})
-
-#  target_link_libraries (${PROJECT_NAME} ${PKG_LIBXML_LIBRARIES})
-# endif (DHCLIENT_SUPPORT)
-
- target_link_libraries (${PROJECT_NAME} ${PROJECT_NAME}_WLAN)
-elseif (WIN32)
- target_link_libraries (${PROJECT_NAME} Ntdll.lib)
- target_link_libraries (${PROJECT_NAME} Iphlpapi.lib)
- target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
-
- target_link_libraries (${PROJECT_NAME} Common)
-endif ()
-target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
 if (SSL_SUPPORT)
  target_link_libraries (${PROJECT_NAME} ${SSL_LIBRARIES})
 
  target_link_libraries (${PROJECT_NAME} ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
+if (WIN32)
+ target_link_libraries (${PROJECT_NAME} Ntdll.lib)
+ target_link_libraries (${PROJECT_NAME} Iphlpapi.lib)
+ target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
+
+ target_link_libraries (${PROJECT_NAME} Common)
+endif (WIN32)
+target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
+
+if (UNIX)
+ target_link_libraries (${PROJECT_NAME} ${PROJECT_NAME}_WLAN)
+endif (UNIX)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}
@@ -392,6 +366,8 @@ install (TARGETS ${PROJECT_NAME}
          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
+
+# ////////////////////////////////////////
 
 add_subdirectory (client_server)
 add_subdirectory (protocol)

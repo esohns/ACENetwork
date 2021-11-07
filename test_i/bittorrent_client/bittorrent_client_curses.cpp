@@ -520,7 +520,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
       case 27: // ESC
       {
         // close all sessions
-        controller_in->stop (true); // wait
+//        controller_in->stop (true); // wait
         break;
       }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
