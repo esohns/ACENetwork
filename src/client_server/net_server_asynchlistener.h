@@ -78,8 +78,8 @@ class Net_Server_AsynchListener_T
   inline virtual bool isRunning () const { return isListening_; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   virtual bool start (ACE_Time_Value*); // N/A
-  virtual void stop (bool = true,  // N/A
-                     bool = true); // N/A
+  virtual void stop (bool = true,   // N/A
+                     bool = false); // N/A
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()

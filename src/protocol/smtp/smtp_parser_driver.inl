@@ -418,15 +418,11 @@ SMTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
       case ACE_Message_Block::MB_STOP:
         finished_ = true; requeue_b = false;
         break;
-      case ACE_Message_Block::MB_USER:
+      case STREAM_MESSAGE_SESSION_TYPE:
       {
-        session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
-        if (session_message_p)
-        {
-          session_message_type = session_message_p->type ();
-          if (session_message_type == STREAM_SESSION_MESSAGE_END)
-            finished_ = true; // session has finished --> abort
-        } // end IF
+        session_message_p = static_cast<SessionMessageType*> (message_block_p);
+        if (session_message_p->type () == STREAM_SESSION_MESSAGE_END)
+          finished_ = true; // session has finished --> abort
         break;
       }
       default:

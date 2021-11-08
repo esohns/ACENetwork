@@ -92,8 +92,8 @@ class Net_Connection_Manager_T
   inline virtual bool isRunning () const { return isActive_; }
   inline virtual bool isShuttingDown () const { return !isRunning (); }
   virtual bool start (ACE_Time_Value* = NULL); // N/A
-  virtual void stop (bool = true,  // wait for completion ?
-                     bool = true); // N/A
+  virtual void stop (bool = true,   // wait for completion ?
+                     bool = false); // N/A
   virtual void wait (bool = true) const; // N/A
   virtual void dump_state () const;
   virtual void abort (enum Net_Connection_AbortStrategy); // strategy

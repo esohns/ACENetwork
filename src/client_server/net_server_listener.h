@@ -79,8 +79,8 @@ class Net_Server_Listener_T
   inline virtual bool isRunning () const { return isListening_; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   virtual bool start (ACE_Time_Value*); // N/A
-  virtual void stop (bool = true,  // N/A
-                     bool = true); // N/A
+  virtual void stop (bool = true,   // N/A
+                     bool = false); // N/A
 
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   virtual bool initialize (const ConfigurationType&);

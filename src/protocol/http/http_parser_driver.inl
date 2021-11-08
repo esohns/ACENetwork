@@ -482,27 +482,22 @@ HTTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
-  bool done = false;
-  SessionMessageType* session_message_p = NULL;
-  Stream_SessionMessageType session_message_type =
-      STREAM_SESSION_MESSAGE_INVALID;
+  bool is_session_end = false;
   bool is_data = false;
 
-  // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
+  // *IMPORTANT NOTE*: 'this' is the parser thread currently in yylex() context
 
   // sanity check(s)
-  ACE_ASSERT (blockInParse_);
+  ACE_ASSERT (blockInParse_); // *TODO*
   ACE_ASSERT (messageQueue_);
 
   // 1. wait for data
   do
   {
-    result = messageQueue_->dequeue_head (message_block_p,
-                                          NULL);
-    if (result == -1)
-    {
-      int error = ACE_OS::last_error ();
-      if (error != ESHUTDOWN)
+    result = messageQueue_->dequeue_head (message_block_p, NULL);
+    if (unlikely (result == -1))
+    { int error = ACE_OS::last_error ();
+      if (unlikely (error != ESHUTDOWN))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Queue::dequeue_head(): \"%m\", returning\n")));
       return;
@@ -513,39 +508,39 @@ HTTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
     {
       case ACE_Message_Block::MB_DATA:
       case ACE_Message_Block::MB_PROTO:
-        is_data = true; break;
-      case ACE_Message_Block::MB_USER:
+        is_data = true;
+        break;
+      case STREAM_MESSAGE_SESSION_TYPE:
       {
-        session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
-        if (session_message_p)
-        {
-          session_message_type = session_message_p->type ();
-          if (session_message_type == STREAM_SESSION_MESSAGE_END)
-            done = true; // session has finished --> abort
-        } // end IF
+        SessionMessageType* session_message_p =
+          static_cast<SessionMessageType*> (message_block_p);
+        if (unlikely (session_message_p->type () == STREAM_SESSION_MESSAGE_END))
+          is_session_end = true; // session has finished --> abort
         break;
       }
       default:
         break;
     } // end SWITCH
-    if (is_data) break;
+    if (likely (is_data))
+      break;
 
     // requeue message
     result = messageQueue_->enqueue_tail (message_block_p, NULL);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", returning\n")));
       return;
     } // end IF
-
     message_block_p = NULL;
-  } while (!done);
+
+    if (unlikely (is_session_end))
+      break;
+  } while (true);
 
   // 2. append data ?
-  if (message_block_p)
-  {
-    // sanity check(s)
+  if (likely (message_block_p))
+  { // sanity check(s)
     ACE_ASSERT (fragment_);
 
     ACE_Message_Block* message_block_2 = fragment_;
