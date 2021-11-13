@@ -26,9 +26,9 @@
 
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <guiddef.h>
+#include "guiddef.h"
 #if defined (WLANAPI_SUPPORT)
-#include <wlanapi.h>
+#include "wlanapi.h"
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (DHCLIENT_SUPPORT)
@@ -277,7 +277,7 @@ class Net_WLAN_Monitor_Base_T
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_Base_T& operator= (const Net_WLAN_Monitor_Base_T&))
 
   // implement (part of) Common_IStateMachine_T
-  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+  virtual bool onChange (enum Net_WLAN_MonitorState); // new state
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual bool lock (bool = true) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }

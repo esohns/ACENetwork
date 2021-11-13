@@ -137,13 +137,13 @@ class Net_StreamConnectionBase_T
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
   inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); }
+  inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only
   inline virtual void waitForIdleState () const { stream_.idle (); }
   inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
-
-  StreamType         stream_;
 
  protected:
   // convenient types
@@ -162,9 +162,9 @@ class Net_StreamConnectionBase_T
   virtual void open (ACE_HANDLE, ACE_Message_Block&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return); }
 
   Stream_IAllocator* allocator_;
-
   ACE_SYNCH_MUTEX_T  sendLock_;
   // *NOTE*: support partial writes
+  StreamType         stream_;
   ACE_Message_Block* writeBuffer_;
 
  private:
@@ -268,13 +268,13 @@ class Net_AsynchStreamConnectionBase_T
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
   inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); }
+  inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only
   virtual void waitForIdleState () const;
   inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
-
-  StreamType         stream_;
 
  protected:
   typedef HandlerType HANDLER_T;
@@ -296,6 +296,7 @@ class Net_AsynchStreamConnectionBase_T
   inline virtual int close (u_long = 0) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
   Stream_IAllocator* allocator_;
+  StreamType         stream_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T (const Net_AsynchStreamConnectionBase_T&))

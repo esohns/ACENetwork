@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "IRC_client_sessionmessage.h"
 #include "IRC_client_module_IRChandler.h"
 
 #include <iostream>
@@ -1186,7 +1185,7 @@ IRC_Client_Module_IRCHandler::dump_state () const
 //              ACE_TEXT_ALWAYS_CHAR(name())));
 }
 
-void
+bool
 IRC_Client_Module_IRCHandler::onChange (enum IRC_RegistrationStateType newState_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::onChange"));
@@ -1195,12 +1194,14 @@ IRC_Client_Module_IRCHandler::onChange (enum IRC_RegistrationStateType newState_
 
   if (newState_in == IRC_REGISTRATION_STATE_FINISHED)
   {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
     result = condition_.broadcast ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Condition::broadcast(): \"%m\", continuing\n")));
   } // end IF
+
+  return true;
 }
 
 IRC_Record*

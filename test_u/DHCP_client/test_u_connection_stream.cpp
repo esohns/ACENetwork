@@ -192,7 +192,7 @@ failed:
   if (reset_setup_pipeline)
     const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
-  if (!inherited::reset ())
+  if (!inherited::STREAM_BASE_T::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
                 ACE_TEXT (stream_name_string_)));
@@ -340,7 +340,7 @@ failed:
   if (reset_setup_pipeline)
     const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
-  if (!inherited::reset ())
+  if (!inherited::STREAM_BASE_T::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_Base_T::reset(): \"%m\", continuing\n")));
 

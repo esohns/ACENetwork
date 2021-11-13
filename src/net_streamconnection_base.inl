@@ -54,9 +54,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            UserDataType>::Net_StreamConnectionBase_T (bool managed_in)
  : inherited ()
  , inherited2 (managed_in)
- , stream_ ()
  , allocator_ (NULL)
  , sendLock_ ()
+ , stream_ ()
  , writeBuffer_ (NULL)
  , notify_ (true)
 {
@@ -1104,8 +1104,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  UserDataType>::Net_AsynchStreamConnectionBase_T (bool managed_in)
  : inherited ()
  , inherited2 (managed_in)
- , stream_ ()
  , allocator_ (NULL)
+ , stream_ ()
  , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::Net_AsynchStreamConnectionBase_T"));

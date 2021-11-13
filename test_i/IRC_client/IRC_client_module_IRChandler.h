@@ -141,7 +141,7 @@ class IRC_Client_Module_IRCHandler
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&))
 
   // implement (part of) Common_IStateMachine_T
-  virtual void onChange (enum IRC_RegistrationStateType); // new state
+  virtual bool onChange (enum IRC_RegistrationStateType); // new state
 
   // helper methods
   IRC_Record* allocateMessage (IRC_CommandType_t); // command
