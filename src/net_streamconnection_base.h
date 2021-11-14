@@ -136,7 +136,7 @@ class Net_StreamConnectionBase_T
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
-  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); }
+  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (true, flushSessionMessages_in, false); }
   inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only
@@ -267,7 +267,7 @@ class Net_AsynchStreamConnectionBase_T
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
-  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); }
+  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (true, flushSessionMessages_in, false); }
   inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only

@@ -1138,8 +1138,8 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1e: pre-initialize signal handling
-  ACE_Sig_Set signal_set (0);
-  ACE_Sig_Set ignored_signal_set (0);
+  ACE_Sig_Set signal_set (false);
+  ACE_Sig_Set ignored_signal_set (false);
   do_initializeSignals (true, // allow SIGUSR1/SIGBREAK
                         signal_set,
                         ignored_signal_set);

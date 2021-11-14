@@ -971,12 +971,12 @@ continue_:
 #if defined (WLANAPI_USE)
         // *NOTE*: the timer handler might trigger before scanTimerId_ has been
         //         set --> grab the lock
-        { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+        { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, false);
           if (unlikely (scanTimerId_ == -1))
           {
             ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_,
                                                                           ACE_Acquire_Method::ACE_REGULAR);
-            { ACE_GUARD (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock);
+            { ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock, false);
               if (!startScanTimer (ACE_Time_Value::zero))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to start scan timer, continuing\n")));
@@ -1017,12 +1017,12 @@ continue_:
 #if defined (WLANAPI_USE)
         // *NOTE*: the timer handler might trigger before scanTimerId_ has been
         //         set --> grab the lock
-        { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+        { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, false);
           if (unlikely (scanTimerId_ == -1))
           {
             ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_,
                                                                           ACE_Acquire_Method::ACE_REGULAR);
-            { ACE_GUARD (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock);
+            { ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock, false);
               if (!startScanTimer (ACE_Time_Value::zero))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to start scan timer, continuing\n")));

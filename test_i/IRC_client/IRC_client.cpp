@@ -1227,8 +1227,8 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step4: (pre-)initialize signal handling
-  ACE_Sig_Set signal_set (0);
-  ACE_Sig_Set ignored_signal_set (0);
+  ACE_Sig_Set signal_set (false);
+  ACE_Sig_Set ignored_signal_set (false);
   do_initializeSignals (use_reactor,
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)

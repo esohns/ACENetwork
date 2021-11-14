@@ -1457,8 +1457,8 @@ ACE_TMAIN (int argc_in,
 #endif // GUI_SUPPORT
 
   // step1e: (pre-)initialize signal handling
-  ACE_Sig_Set signal_set (0);
-  ACE_Sig_Set ignored_signal_set (0);
+  ACE_Sig_Set signal_set (false);
+  ACE_Sig_Set ignored_signal_set (false);
   do_initializeSignals (use_reactor,
                         (statistic_reporting_interval == 0), // handle SIGUSR1/SIGBREAK
                                                              // iff regular reporting

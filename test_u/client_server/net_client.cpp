@@ -1492,8 +1492,8 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1e: pre-initialize signal handling
-  ACE_Sig_Set signal_set (0);
-  ACE_Sig_Set ignored_signal_set (0);
+  ACE_Sig_Set signal_set (false);
+  ACE_Sig_Set ignored_signal_set (false);
   do_initializeSignals ((connection_interval == 0), // allow SIGUSR1/SIGBREAK iff
                                                     // regular connections are off
                         signal_set,
