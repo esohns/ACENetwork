@@ -141,8 +141,10 @@ struct Net_WLAN_AccessPointState
 #elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
    : authenticationType (NL80211_AUTHTYPE_AUTOMATIC)
-#endif // NL80211_SUPPORT
    , frequency (0)
+#else
+   : frequency (0)
+#endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
    , IPAddress ()
    , lastSeen (0)
