@@ -3364,7 +3364,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     BitTorrent_PiecesIterator_t iterator_2;
     iterator_2 = inherited::state_.pieces.begin ();
     std::advance (iterator_2,
-                  missing_pieces_a[Common_Tools::getRandomNumber (0,
+                  missing_pieces_a[Common_Tools::getRandomNumber (static_cast<size_t> (0),
                                                                   missing_pieces_a.size () - 1)]);
     index = std::distance (inherited::state_.pieces.begin (), iterator_2);
 #undef NET_BITTORRENT_GET_CHUNKS_ORDERED
@@ -3410,7 +3410,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     std::vector<struct BitTorrent_MessagePayload_Request>::const_iterator iterator_3 =
       missing_chunks_a.begin ();
     std::advance (iterator_3,
-                  Common_Tools::getRandomNumber (0,
+                  Common_Tools::getRandomNumber (static_cast<size_t> (0),
                                                  missing_chunks_a.size () - 1));
     offset = (*iterator_3).begin;
     length = (*iterator_3).length;
