@@ -23,11 +23,11 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common.h"
-
+#include "common_signal_common.h"
 #include "common_signal_handler.h"
 
-#include "wlan_monitor_common.h"
+// forward declarations
+struct WLANMonitor_UI_CBData;
 
 class Test_U_SignalHandler
  : public Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration>
@@ -35,15 +35,13 @@ class Test_U_SignalHandler
   typedef Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration> inherited;
 
  public:
-  Test_U_SignalHandler (enum Common_SignalDispatchType,
-                        ACE_SYNCH_RECURSIVE_MUTEX*);
+  Test_U_SignalHandler ();
   inline virtual ~Test_U_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal information
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))
 

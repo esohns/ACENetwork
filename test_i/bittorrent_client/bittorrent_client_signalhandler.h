@@ -24,13 +24,10 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common.h"
-
+#include "common_signal_common.h"
 #include "common_signal_handler.h"
 
 #include "bittorrent_client_common.h"
-
-#include "test_i_defines.h"
 
 class BitTorrent_Client_SignalHandler
  : public Common_SignalHandler_T<struct BitTorrent_Client_SignalHandlerConfiguration>
@@ -38,15 +35,13 @@ class BitTorrent_Client_SignalHandler
   typedef Common_SignalHandler_T<struct BitTorrent_Client_SignalHandlerConfiguration> inherited;
 
  public:
-  BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType,    // dispatch mode
-                                   ACE_SYNCH_RECURSIVE_MUTEX*);       // lock handle
+  BitTorrent_Client_SignalHandler ();
   inline virtual ~BitTorrent_Client_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler (const BitTorrent_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler& operator= (const BitTorrent_Client_SignalHandler&))
 };

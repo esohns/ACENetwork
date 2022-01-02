@@ -18,14 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_PROTOCOL_SIGNALHANDLER_H
-#define TEST_U_PROTOCOL_SIGNALHANDLER_H
+#ifndef TEST_U_SIGNALHANDLER_H
+#define TEST_U_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common.h"
-
+#include "common_signal_common.h"
 #include "common_signal_handler.h"
 
 #include "test_u_HTTP_decoder_common.h"
@@ -36,15 +35,13 @@ class Test_U_Protocol_SignalHandler
   typedef Common_SignalHandler_T<struct Test_U_HTTPDecoder_SignalHandlerConfiguration> inherited;
 
  public:
-  Test_U_Protocol_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                                 ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
+  Test_U_Protocol_SignalHandler ();
   inline virtual ~Test_U_Protocol_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler (const Test_U_Protocol_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler& operator= (const Test_U_Protocol_SignalHandler&))
 };

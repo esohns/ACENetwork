@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_u_signalhandler.h"
 
 #include <sstream>
@@ -36,13 +35,10 @@
 
 #include "net_macros.h"
 
-//#include "net_wlan_configuration.h"
+#include "wlan_monitor_common.h"
 
-Test_U_SignalHandler::Test_U_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                            ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
- : inherited (dispatchMode_in,
-              lock_in,
-              this) // event handler handle
+Test_U_SignalHandler::Test_U_SignalHandler ()
+ : inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::Test_U_SignalHandler"));
 

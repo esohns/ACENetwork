@@ -1012,14 +1012,13 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set ignored_signal_set (false);
   Common_SignalActions_t previous_signal_actions;
   sigset_t previous_signal_mask;
-  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
+//  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  lock_2 = &state_r.subscribersLock;
+//  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  Test_I_SignalHandler signal_handler (COMMON_SIGNAL_DISPATCH_SIGNAL,
-                                       lock_2);
+  Test_I_SignalHandler signal_handler;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;

@@ -24,8 +24,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common.h"
-
+#include "common_signal_common.h"
 #include "common_signal_handler.h"
 
 #include "IRC_client_common.h"
@@ -37,15 +36,13 @@ class IRC_Client_SignalHandler
   typedef Common_SignalHandler_T<struct IRC_Client_SignalHandlerConfiguration> inherited;
 
  public:
-  IRC_Client_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                            ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
+  IRC_Client_SignalHandler ();
   inline virtual ~IRC_Client_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler (const IRC_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler& operator= (const IRC_Client_SignalHandler&))
 };

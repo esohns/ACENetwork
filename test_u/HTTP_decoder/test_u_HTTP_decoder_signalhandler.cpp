@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_u_HTTP_decoder_signalhandler.h"
 
 #include "ace/Log_Msg.h"
@@ -33,11 +32,8 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_session_message.h"
 
-Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                              ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
- : inherited (dispatchMode_in,
-              lock_in,
-              this) // event handler handle
+Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler ()
+ : inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler"));
 

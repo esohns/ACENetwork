@@ -19,16 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
-
-//#include "http_scanner.h"
-
 #include "bittorrent_client_signalhandler.h"
 
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
-//#include "ace/Proactor.h"
-//#include "ace/Reactor.h"
 
 #include "common_tools.h"
 
@@ -41,11 +35,8 @@
 #endif // GUI_SUPPORT
 #include "bittorrent_client_network.h"
 
-BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                                  ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
- : inherited (dispatchMode_in,
-              lock_in,
-              this) // event handler handle
+BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler ()
+ : inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler"));
 

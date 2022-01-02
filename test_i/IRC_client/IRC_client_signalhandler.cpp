@@ -44,11 +44,8 @@
 
 #include "IRC_client_gui_common.h"
 
-IRC_Client_SignalHandler::IRC_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                    ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
- : inherited (dispatchMode_in,
-              lock_in,
-              this) // event handler handle
+IRC_Client_SignalHandler::IRC_Client_SignalHandler ()
+ : inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::IRC_Client_SignalHandler"));
 

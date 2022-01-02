@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "file_server_signalhandler.h"
 
 #include <sstream>
@@ -44,11 +43,8 @@
 
 #include "test_u_connection_manager_common.h"
 
-FileServer_SignalHandler::FileServer_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                    ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
-: inherited (dispatchMode_in,
-             lock_in,
-             this) // event handler handle
+FileServer_SignalHandler::FileServer_SignalHandler ()
+: inherited (this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::FileServer_SignalHandler"));
 

@@ -1020,10 +1020,8 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  ACE_SYNCH_RECURSIVE_MUTEX signal_lock;
-  BitTorrent_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                                  &signal_lock);
+//  ACE_SYNCH_RECURSIVE_MUTEX signal_lock;
+  BitTorrent_Client_SignalHandler signal_handler;
 
   // step5: handle specific program modes
   if (print_version_and_exit)

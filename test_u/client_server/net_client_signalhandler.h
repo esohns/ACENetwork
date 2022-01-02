@@ -24,11 +24,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-#include "common.h"
 #include "common_isignal.h"
 #include "common_signal_handler.h"
-
-#include "net_common.h"
 
 #include "net_client_common.h"
 #include "net_client_connector_common.h"
@@ -39,9 +36,7 @@ class Client_SignalHandler
   typedef Common_SignalHandler_T<struct Client_SignalHandlerConfiguration> inherited;
 
  public:
-  Client_SignalHandler (enum Common_EventDispatchType,  // event dispatch mode
-                        enum Common_SignalDispatchType, // signal dispatch mode
-                        ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
+  Client_SignalHandler ();
   inline virtual ~Client_SignalHandler () {}
 
   // override Common_IInitialize_T
@@ -51,13 +46,8 @@ class Client_SignalHandler
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Client_SignalHandler (const Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Client_SignalHandler& operator= (const Client_SignalHandler&))
-
-  ACE_INET_Addr                 address_;
-  enum Common_EventDispatchType eventDispatch_;
-  long                          timerId_;
 
   Client_TCP_AsynchConnector_t  AsynchTCPConnector_;
   Client_TCP_Connector_t        TCPConnector_;

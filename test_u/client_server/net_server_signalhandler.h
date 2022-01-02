@@ -23,14 +23,8 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_istatistic.h"
-
 #include "common_isignal.h"
 #include "common_signal_handler.h"
-
-#include "stream_common.h"
-
-#include "net_common.h"
 
 #include "net_server_common.h"
 
@@ -40,15 +34,13 @@ class Server_SignalHandler
   typedef Common_SignalHandler_T<struct Server_SignalHandlerConfiguration> inherited;
 
  public:
-  Server_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                        ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
+  Server_SignalHandler ();
   inline virtual ~Server_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler (const Server_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler& operator= (const Server_SignalHandler&))
 };

@@ -23,7 +23,7 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_isignal.h"
+#include "common_signal_common.h"
 #include "common_signal_handler.h"
 
 #include "test_u_pcp_client_common.h"
@@ -34,15 +34,13 @@ class Test_U_SignalHandler
   typedef Common_SignalHandler_T<struct PCPClient_SignalHandlerConfiguration> inherited;
 
  public:
-  Test_U_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                        ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
+  Test_U_SignalHandler ();
   inline virtual ~Test_U_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))
 };

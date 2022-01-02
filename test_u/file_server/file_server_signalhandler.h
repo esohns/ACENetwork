@@ -36,15 +36,13 @@ class FileServer_SignalHandler
   typedef Common_SignalHandler_T<struct FileServer_SignalHandlerConfiguration> inherited;
 
  public:
-  FileServer_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                            ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
+  FileServer_SignalHandler ();
   inline virtual ~FileServer_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler (const FileServer_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler& operator= (const FileServer_SignalHandler&))
 };

@@ -40,15 +40,8 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_sessionmessage.h"
 
-Client_SignalHandler::Client_SignalHandler (enum Common_EventDispatchType eventDispatchMode_in,
-                                            enum Common_SignalDispatchType signalDispatchMode_in,
-                                            ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
- : inherited (signalDispatchMode_in,
-              lock_in,
-              this) // event handler handle
- , address_ ()
- , eventDispatch_ (eventDispatchMode_in)
- , timerId_ (-1)
+Client_SignalHandler::Client_SignalHandler ()
+ : inherited (this) // event handler handle
  , AsynchTCPConnector_ (true)
  , TCPConnector_ (true)
  , AsynchUDPConnector_ (true)
@@ -72,10 +65,6 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   ACE_ASSERT (configuration_in.TCPConnectionConfiguration);
   ACE_ASSERT (configuration_in.UDPConnectionConfiguration);
   ACE_ASSERT (configuration_in.protocolConfiguration);
-
-  // *TODO*: remove type inference
-  address_ = configuration_in.address;
-  timerId_ = configuration_in.actionTimerId;
 
   AsynchTCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
   TCPConnector_.initialize (*configuration_in.TCPConnectionConfiguration);
@@ -187,7 +176,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   {
     case NET_TRANSPORTLAYER_TCP:
     {
-      switch (eventDispatch_)
+      switch (inherited::configuration_->dispatchState->configuration->dispatch)
       {
         case COMMON_EVENT_DISPATCH_PROACTOR:
         {
@@ -203,7 +192,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown event dispatch type (was: %d), returning\n"),
-                      eventDispatch_));
+                      inherited::configuration_->dispatchState->configuration->dispatch));
           return;
         }
       } // end SWITCH
@@ -211,7 +200,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
     case NET_TRANSPORTLAYER_UDP:
     {
-      switch (eventDispatch_)
+      switch (inherited::configuration_->dispatchState->configuration->dispatch)
       {
         case COMMON_EVENT_DISPATCH_PROACTOR:
         {
@@ -227,7 +216,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown event dispatch type (was: %d), returning\n"),
-                      eventDispatch_));
+                      inherited::configuration_->dispatchState->configuration->dispatch));
           return;
         }
       } // end SWITCH
@@ -259,11 +248,11 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       case NET_TRANSPORTLAYER_SSL:
       { ACE_ASSERT (ssl_tcp_connector_p);
         try {
-          handle_h = ssl_tcp_connector_p->connect (address_);
+          handle_h = ssl_tcp_connector_p->connect (inherited::configuration_->address);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
-                      ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
+                      ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->address).c_str ())));
           return;
         }
         break;
@@ -271,11 +260,11 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       case NET_TRANSPORTLAYER_UDP:
       { ACE_ASSERT (udp_connector_p);
         try {
-          handle_h = udp_connector_p->connect (address_);
+          handle_h = udp_connector_p->connect (inherited::configuration_->address);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
-                      ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
+                      ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->address).c_str ())));
           return;
         }
         break;
@@ -293,7 +282,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       // *PORTABILITY*: tracing in a signal handler context is not portable
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%m\", continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->address).c_str ())));
     } // end IF
   } // end IF
 
@@ -307,28 +296,28 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     // [- UI dispatch]
 
     // step1: stop action timer (if any)
-    if (timerId_ >= 0)
+    if (inherited::configuration_->actionTimerId >= 0)
     {
       const void* act_p = NULL;
-      result = timer_manager_p->cancel_timer (timerId_,
+      result = timer_manager_p->cancel_timer (inherited::configuration_->actionTimerId,
                                               &act_p);
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (unlikely (result <= 0))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_ITimer_T::cancel_timer(%d): \"%m\", continuing\n"),
-                    timerId_));
+                    inherited::configuration_->actionTimerId));
       else
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("cancelled action timer (id was: %d)\n"),
-                    timerId_));
-      timerId_ = -1;
+                    inherited::configuration_->actionTimerId));
+      inherited::configuration_->actionTimerId = -1;
     } // end IF
     timer_manager_p->stop (false, // wait for completion ?
                            true); // N/A
 
     // step2: cancel connection attempts (if any)
-    if (eventDispatch_ == COMMON_EVENT_DISPATCH_PROACTOR)
+    if (inherited::configuration_->dispatchState->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
     {
       switch (inherited::configuration_->protocolConfiguration->transportLayer)
       {

@@ -1513,7 +1513,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
@@ -1532,22 +1532,12 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
   configuration.signalHandlerConfiguration.dispatchState =
     &event_dispatch_state_s;
-  Client_SignalHandler signal_handler ((use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
-                                                    : COMMON_EVENT_DISPATCH_PROACTOR),
-                                       (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                    : COMMON_SIGNAL_DISPATCH_PROACTOR),
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-                                       &state_r.subscribersLock);
-#else
-                                       NULL);
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+  Client_SignalHandler signal_handler;
 
   // step1g: set process resource limits
   // *NOTE*: settings will be inherited by any child processes
@@ -1556,7 +1546,7 @@ ACE_TMAIN (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
     (use_reactor && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   bool stack_traces = true;
   bool use_signal_based_proactor = !use_reactor;
   if (!Common_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
@@ -1578,7 +1568,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 

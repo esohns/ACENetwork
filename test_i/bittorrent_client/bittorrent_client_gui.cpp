@@ -1344,18 +1344,11 @@ ACE_TMAIN (int argc_in,
   struct BitTorrent_Client_Configuration configuration;
   struct BitTorrent_Client_UI_CBData ui_cb_data;
   ui_cb_data.configuration = &configuration;
-  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
+//  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
 #if defined (GTK_USE)
-  lock_2 = &state_r.subscribersLock;
+//  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
-  BitTorrent_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                                  lock_2
-#if defined (CURSES_USE)
-                                                  ,false);
-#else
-                                                 );
-#endif // CURSES_USE
+  BitTorrent_Client_SignalHandler signal_handler;
 
   // step5: handle specific program modes
   if (print_version_and_exit)
