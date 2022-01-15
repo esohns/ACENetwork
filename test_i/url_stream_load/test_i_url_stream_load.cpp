@@ -1011,7 +1011,7 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (false);
   ACE_Sig_Set ignored_signal_set (false);
   Common_SignalActions_t previous_signal_actions;
-  sigset_t previous_signal_mask;
+  ACE_Sig_Set previous_signal_mask (false); // fill ?
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -1190,13 +1190,6 @@ ACE_TMAIN (int argc_in,
   do_initialize_signals (true, // allow SIGUSR1/SIGBREAK
                          signal_set,
                          ignored_signal_set);
-  result = ACE_OS::sigemptyset (&previous_signal_mask);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
-    goto error;
-  } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
                                            (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
@@ -1217,7 +1210,6 @@ ACE_TMAIN (int argc_in,
 
     Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
@@ -1357,7 +1349,6 @@ ACE_TMAIN (int argc_in,
 
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
@@ -1374,7 +1365,6 @@ ACE_TMAIN (int argc_in,
 error:
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
