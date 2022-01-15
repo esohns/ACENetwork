@@ -286,13 +286,13 @@ IRC_ParserDriver::scan_begin (bool useYYScanBuffer_in)
   {
     bufferState_ =
       IRC_Scanner__scan_bytes (fragment_->rd_ptr (),
-                               fragment_->length (),
+                               static_cast<int> (fragment_->length ()),
                                scannerState_);
   } // end ELSE
   if (!bufferState_)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yy_scan_buffer/bytes(%@, %d), aborting\n"),
+                ACE_TEXT ("failed to yy_scan_buffer/bytes(%@, %Q), aborting\n"),
                 fragment_->rd_ptr (),
                 fragment_->length ()));
     return false;
