@@ -29,7 +29,6 @@ using namespace std;
 //                       and prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-//#include "ace/Synch.h"
 #include "IRC_client_inputhandler.h"
 
 #include "ace/Log_Msg.h"
