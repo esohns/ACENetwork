@@ -17,14 +17,14 @@
 // C RunTime Header Files
 #include <string>
 
+#if defined (VALGRIND_USE)
+#include "valgrind/valgrind.h"
+#endif // VALGRIND_USE
+
 // System Library Header Files
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
-
-#if defined (VALGRIND_SUPPORT)
-#include "valgrind/valgrind.h"
-#endif // VALGRIND_SUPPORT
 
 // Library Header Files
 #if defined (HAVE_CONFIG_H)

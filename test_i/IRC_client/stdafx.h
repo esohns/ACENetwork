@@ -15,26 +15,16 @@
 #endif // _MSC_VER
 
 // C RunTime Header Files
-//// *WORKAROUND*
-//#include <iostream>
-//using namespace std;
-//// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
-////                   a problem in conjunction with the standard include headers
-////                   when ACE_USES_OLD_IOSTREAMS is defined
-////                   --> include the necessary headers manually (see above), and
-////                       prevent ace/iosfwd.h from causing any harm
-//#define ACE_IOSFWD_H
-//#include <iostream>
 #include <string>
+
+#if defined (VALGRIND_USE)
+#include "valgrind/valgrind.h"
+#endif // VALGRIND_USE
 
 // System Library Header Files
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
-
-#if defined (VALGRIND_SUPPORT)
-#include "valgrind/valgrind.h"
-#endif // VALGRIND_SUPPORT
 
 // Library Header Files
 #if defined (HAVE_CONFIG_H)
@@ -60,5 +50,4 @@
 #include "net_common.h"
 #include "net_macros.h"
 
-// *TODO*: reference additional headers your program requires here
 #include "IRC_client_common.h"

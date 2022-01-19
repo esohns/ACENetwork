@@ -134,16 +134,7 @@ else ()
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS ACENETWORK_NTRACE=1)
 endif ()
 
-option (VALGRIND_SUPPORT "enable valgrind support" OFF)
-include (CheckIncludeFiles)
-if (VALGRIND_SUPPORT)
- check_include_files (valgrind/valgrind.h HAVE_VALGRIND_H)
-#  include (CheckLibraryExists)
-#  check_library_exists (libvalgrind "" "" HAVE_LIB_VALGRIND)
- pkg_check_modules (PKGVALGRIND REQUIRED valgrind)
- add_definitions (-DLIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
-#  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
-endif ()
+include (valgrind)
 
 option (BUILD_MODULES "build (git) sub-modules" OFF)
 

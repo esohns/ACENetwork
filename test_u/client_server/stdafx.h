@@ -17,19 +17,20 @@
 // C RunTime Header Files
 #include <string>
 
+#if defined (VALGRIND_USE)
+#include "valgrind/valgrind.h"
+#endif // VALGRIND_USE
+
 // System Library Header Files
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
 
-#if defined (VALGRIND_SUPPORT)
-#include "valgrind/valgrind.h"
-#endif // VALGRIND_SUPPORT
-
 // Library Header Files
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
+
 #include "common.h"
 #include "common_macros.h"
 #include "common_pragmas.h"
@@ -37,6 +38,7 @@
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
+
 #include "stream_common.h"
 #include "stream_macros.h"
 
@@ -44,9 +46,9 @@
 #if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
+
 #include "net_common.h"
 #include "net_macros.h"
 
-// *TODO*: reference additional headers your program requires here
 #include "net_client_common.h"
 #include "net_server_common.h"

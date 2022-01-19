@@ -19,20 +19,11 @@
 #endif // _MSC_VER
 
 // C RunTime Header Files
-// *WORKAROUND*
-//#include <iostream>
-//using namespace std;
-//// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
-////                   a problem in conjunction with the standard include headers
-////                   when ACE_USES_OLD_IOSTREAMS is defined
-////                   --> include the necessary headers manually (see above), and
-////                       prevent ace/iosfwd.h from causing any harm
-//#define ACE_IOSFWD_H
 #include <string>
 
-#if defined (VALGRIND_SUPPORT)
+#if defined (VALGRIND_USE)
 #include "valgrind/valgrind.h"
-#endif // VALGRIND_SUPPORT
+#endif // VALGRIND_USE
 
 // System Library Header Files
 #include "ace/config-lite.h"

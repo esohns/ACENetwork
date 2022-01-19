@@ -3,7 +3,7 @@
 //      are changed infrequently
 //
 #if defined (_MSC_VER)
-#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 
 // *NOTE*: work around quirky MSVC...
 #define NOMINMAX
@@ -11,20 +11,20 @@
 #include "targetver.h"
 
 // Windows Header Files
-#include <windows.h>
+#include "windows.h"
 #endif // _MSC_VER
 
 // C RunTime Header Files
 #include <string>
 
+#if defined (VALGRIND_USE)
+#include "valgrind/valgrind.h"
+#endif // VALGRIND_USE
+
 // System Library Header Files
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
-
-#if defined (VALGRIND_SUPPORT)
-#include "valgrind/valgrind.h"
-#endif // VALGRIND_SUPPORT
 
 // Library Header Files
 #if defined (HAVE_CONFIG_H)
