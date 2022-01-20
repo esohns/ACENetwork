@@ -26,7 +26,7 @@
 #include "common_isignal.h"
 #include "common_signal_handler.h"
 
-#include "net_server_common.h"
+#include "test_u_server_common.h"
 
 class Server_SignalHandler
  : public Common_SignalHandler_T<struct Server_SignalHandlerConfiguration>

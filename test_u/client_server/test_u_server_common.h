@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_SERVER_COMMON_H
-#define NET_SERVER_COMMON_H
+#ifndef TEST_U_SERVER_COMMON_H
+#define TEST_U_SERVER_COMMON_H
 
 #include <list>
 

@@ -52,3 +52,6 @@
 
 #include "net_client_common.h"
 #include "net_server_common.h"
+
+#include "test_u_client_common.h"
+#include "test_u_server_common.h"

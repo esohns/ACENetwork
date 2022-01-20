@@ -45,7 +45,7 @@
 #include "test_u_connection_common.h"
 #include "test_u_stream.h"
 
-#include "net_client_common.h"
+#include "test_u_client_common.h"
 
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,

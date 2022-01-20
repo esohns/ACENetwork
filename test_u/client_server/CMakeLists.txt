@@ -91,7 +91,6 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 set (EXECUTABLE_SOURCE client)
 set (${EXECUTABLE_SOURCE}_SRCS
      net_client.cpp
-     net_client_common.h
      net_client_connector_common.h
      net_client_server_defines.h
      net_client_signalhandler.cpp
@@ -101,6 +100,7 @@ set (${EXECUTABLE_SOURCE}_SRCS
      net_client_timeouthandler.h
      stdafx.cpp
      stdafx.h
+     test_u_client_common.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_common.h
@@ -212,7 +212,6 @@ set (${EXECUTABLE_TARGET}_SRCS
      net_client_timeouthandler.cpp
      net_client_timeouthandler.h
      net_server.cpp
-     net_server_common.h
      net_server_listener_common.h
      net_server_signalhandler.cpp
      net_server_signalhandler.h
@@ -234,6 +233,7 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_module_headerparser.h
      test_u_module_protocolhandler.cpp
      test_u_module_protocolhandler.h
+     test_u_server_common.h
      test_u_sessionmessage.cpp
      test_u_sessionmessage.h
      test_u_stream.cpp
