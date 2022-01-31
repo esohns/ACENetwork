@@ -1976,7 +1976,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (inherited2::configuration_->allocatorConfiguration);
 
   // allocate a data buffer
-  size_t pdu_size_i =
+  unsigned int pdu_size_i =
     inherited2::configuration_->allocatorConfiguration->defaultBufferSize +
     inherited2::configuration_->allocatorConfiguration->paddingBytes;
   ACE_Message_Block* message_block_p = this->allocateMessage (pdu_size_i);

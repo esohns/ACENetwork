@@ -330,15 +330,15 @@ PCP_ParserDriver::scan_begin ()
   {
     bufferState_ =
       PCP_Scanner__scan_buffer (fragment_->rd_ptr (),
-                                 fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
-                                 scannerState_);
+                                fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                                scannerState_);
   } // end IF
   else
   {
     bufferState_ =
       PCP_Scanner__scan_bytes (fragment_->rd_ptr (),
-                                fragment_->length (),
-                                scannerState_);
+                               static_cast<int> (fragment_->length ()) + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                               scannerState_);
   } // end ELSE
   if (!bufferState_)
   {

@@ -261,8 +261,7 @@ struct Net_UserData
   void* userData;
 };
 
-// *TODO*: make this an ACE_HANDLE
-typedef unsigned int Net_ConnectionId_t;
+typedef ACE_HANDLE Net_ConnectionId_t;
 
 struct Net_ConnectionState
 {

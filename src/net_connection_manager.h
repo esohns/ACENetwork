@@ -117,7 +117,6 @@ class Net_Connection_Manager_T
   virtual void get (ConfigurationType*&, // return value: (connection-) configuration handle
                     UserDataType*&);     // return value: user data handle
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
-  virtual ICONNECTION_T* get (Net_ConnectionId_t) const; // id
   virtual ICONNECTION_T* get (const AddressType&, // address
                               bool = true) const; // peer address ? : local address // *TODO*: this parameter is redundant; remove ASAP
   virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle

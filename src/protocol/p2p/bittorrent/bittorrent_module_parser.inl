@@ -417,7 +417,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
       } // end IF
       else
       {
-        header_bytes -= message_block_p->length ();
+        header_bytes -= static_cast<unsigned int> (message_block_p->length ());
         message_block_p->rd_ptr (message_block_p->length ());
       } // end ELSE
       message_block_p = message_block_p->cont ();
@@ -426,7 +426,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     message_bytes -= 4 + 1 + 4 + 4;
     do
     { ACE_ASSERT (message_block_p);
-      skipped_bytes += message_block_p->length ();
+      skipped_bytes += static_cast<unsigned int> (message_block_p->length ());
       if (skipped_bytes >= message_bytes)
       {
         if (skipped_bytes == message_bytes)
@@ -470,7 +470,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   {
     do
     {
-      skipped_bytes += message_block_p->length ();
+      skipped_bytes += static_cast<unsigned int> (message_block_p->length ());
       if (skipped_bytes >= message_bytes)
       {
         unsigned int remainder = skipped_bytes - message_bytes;
@@ -621,7 +621,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     } // end IF
     else
     {
-      handshake_bytes -= message_block_p->length ();
+      handshake_bytes -= static_cast<unsigned int> (message_block_p->length ());
       message_block_p->rd_ptr (message_block_p->length ());
     } // end ELSE
     message_block_p = message_block_p->cont ();

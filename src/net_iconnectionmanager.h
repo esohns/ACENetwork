@@ -78,8 +78,7 @@ class Net_IConnectionManager_T
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
   virtual ICONNECTION_T* operator[] (unsigned int) const = 0; // index
-  virtual ICONNECTION_T* get (Net_ConnectionId_t) const = 0; // id
-  virtual ICONNECTION_T* get (const AddressType&,     // address
+  virtual ICONNECTION_T* get (const AddressType&,    // address
                              bool = true) const = 0; // peer address ? : local address
   virtual ICONNECTION_T* get (ACE_HANDLE) const = 0; // socket handle
 };

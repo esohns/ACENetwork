@@ -130,9 +130,10 @@ BitTorrent_ParserDriver::create (yyscan_t state_in,
                                        size_in + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                        state_in);
   else
-    result_p = BitTorrent_Scanner__scan_bytes (buffer_in,
-                                               size_in + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
-                                               state_in);
+    result_p =
+      BitTorrent_Scanner__scan_bytes (buffer_in,
+                                      static_cast<int> (size_in) + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                                      state_in);
   if (!result_p)
   {
     ACE_DEBUG ((LM_ERROR,

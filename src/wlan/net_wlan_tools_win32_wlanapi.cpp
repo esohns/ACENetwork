@@ -1570,8 +1570,9 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
                 ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError (), false).c_str ())));
     goto clean;
   } // end IF
-  V_BSTR (&variant_s) = SysAllocStringByteLen (SSID_in.c_str (),
-                                               SSID_in.size ());
+  V_BSTR (&variant_s) =
+    SysAllocStringByteLen (SSID_in.c_str (),
+                           static_cast<UINT> (SSID_in.size ()));
   ACE_ASSERT (V_BSTR (&variant_s));
   result = node_p->put_nodeValue (variant_s);
   if (unlikely (FAILED (result)))
@@ -1777,7 +1778,7 @@ Net_WLAN_Tools::associate (HANDLE clientHandle_in,
   bool result = false;
   struct _DOT11_SSID ssid_s;
   ACE_OS::memset (&ssid_s, 0, sizeof (struct _DOT11_SSID));
-  ssid_s.uSSIDLength = SSID_in.size ();
+  ssid_s.uSSIDLength = static_cast<ULONG> (SSID_in.size ());
   ACE_OS::memcpy (ssid_s.ucSSID,
                   SSID_in.c_str (),
                   SSID_in.size ());
@@ -1972,7 +1973,7 @@ Net_WLAN_Tools::scan (HANDLE clientHandle_in,
 
   struct _DOT11_SSID ssid_s;
   ACE_OS::memset (&ssid_s, 0, sizeof (struct _DOT11_SSID));
-  ssid_s.uSSIDLength = ESSID_in.size ();
+  ssid_s.uSSIDLength = static_cast<ULONG> (ESSID_in.size ());
   ACE_OS::memcpy (ssid_s.ucSSID,
                   ESSID_in.c_str (),
                   ESSID_in.size ());

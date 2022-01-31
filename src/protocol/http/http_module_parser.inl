@@ -392,7 +392,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     { ACE_ASSERT (message_block_p);
       if (bytes_to_skip <= message_block_p->length ())
         break;
-      bytes_to_skip -= message_block_p->length ();
+      bytes_to_skip -= static_cast<unsigned int> (message_block_p->length ());
       message_block_p->rd_ptr (message_block_p->length ());
       message_block_p = message_block_p->cont ();
     } while (true);
@@ -416,7 +416,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     { ACE_ASSERT (message_block_p);
       if (bytes_to_skip <= message_block_p->length ())
         break;
-      bytes_to_skip -= message_block_p->length ();
+      bytes_to_skip -= static_cast<unsigned int> (message_block_p->length ());
       message_block_p->rd_ptr (message_block_p->length ());
       message_block_p = message_block_p->cont ();
     } while (true);
@@ -437,7 +437,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
         { ACE_ASSERT (message_block_p);
           if (bytes_to_skip <= message_block_p->length ())
             break;
-          bytes_to_skip -= message_block_p->length ();
+          bytes_to_skip -=
+            static_cast<unsigned int> (message_block_p->length ());
           message_block_p->rd_ptr (message_block_p->length ());
           message_block_p = message_block_p->cont ();
         } while (true);
@@ -449,7 +450,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
         { ACE_ASSERT (message_block_p);
           if (bytes_to_skip <= message_block_p->length ())
             break;
-          bytes_to_skip -= message_block_p->length ();
+          bytes_to_skip -=
+            static_cast<unsigned int> (message_block_p->length ());
           message_block_p = message_block_p->cont ();
         } while (true);
         if (bytes_to_skip < message_block_p->length ())
@@ -478,9 +480,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                         ((*iterator_2).first + (*iterator_2).second + 2);
         do
         { ACE_ASSERT (message_block_p);
-          if (bytes_to_skip <= message_block_p->length ())
+          if (bytes_to_skip <= static_cast<unsigned int> (message_block_p->length ()))
             break;
-          bytes_to_skip -= message_block_p->length ();
+          bytes_to_skip -=
+            static_cast<unsigned int> (message_block_p->length ());
           message_block_p->rd_ptr (message_block_p->length ());
           message_block_p = message_block_p->cont ();
         } while (true);

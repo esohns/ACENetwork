@@ -592,7 +592,8 @@ BitTorrent_Tools::isPieceComplete (unsigned int length_in,
        iterator != chunks_in.end ();
        ++iterator)
   { ACE_ASSERT ((*iterator).data);
-    total_length += (*iterator).data->total_length ();
+    total_length +=
+      static_cast<unsigned int> ((*iterator).data->total_length ());
   } // end FOR
 
   return (length_in == total_length);
@@ -621,7 +622,7 @@ BitTorrent_Tools::hasMissingPiece (const BitTorrent_Pieces_t& pieces_in,
        ++iterator)
     if (!BitTorrent_Tools::isPieceComplete ((*iterator).length,
                                             (*iterator).chunks) &&
-        BitTorrent_Tools::havePiece (std::distance (pieces_in.begin (), iterator),
+        BitTorrent_Tools::havePiece (static_cast<unsigned int> (std::distance (pieces_in.begin (), iterator)),
                                      bitfield_in))
       return true;
 
@@ -1009,10 +1010,11 @@ BitTorrent_Tools::sanitizeChunks (BitTorrent_PieceChunks_t& chunks_in)
     if (done_b)
       break;
     // step2b: handle overlaps
-    total_length_i = (*iterator_3).data->total_length ();
+    total_length_i =
+      static_cast<unsigned int> ((*iterator_3).data->total_length ());
     overlap_i =
-        (((*iterator_3).offset + total_length_i) > (*iterator_4).offset ? (*iterator_3).offset + total_length_i - (*iterator_4).offset
-                                                                        : 0);
+      (((*iterator_3).offset + total_length_i) > (*iterator_4).offset ? (*iterator_3).offset + total_length_i - (*iterator_4).offset
+                                                                      : 0);
     if (overlap_i)
     {
       // step2ba: crop the last continuation until the last continuation
@@ -1028,10 +1030,10 @@ BitTorrent_Tools::sanitizeChunks (BitTorrent_PieceChunks_t& chunks_in)
           message_block_p = message_block_p->cont ();
         } // end WHILE
         // step2bab: last continuation contains the overlap ?
-        if (message_block_p->length () > overlap_i)
+        if (static_cast<unsigned int> (message_block_p->length ()) > overlap_i)
           break; // proceed
         // step2bac: no --> crop and continue
-        overlap_i -= message_block_p->length ();
+        overlap_i -= static_cast<unsigned int> (message_block_p->length ());
         ACE_ASSERT (message_block_2);
         message_block_2->cont (NULL);
         message_block_p->release ();

@@ -591,7 +591,7 @@ HTTP_ParserDriver_T<SessionMessageType>::begin (const char* buffer_in,
   {
     bufferState_ =
       HTTP_Scanner__scan_bytes (fragment_->rd_ptr (),
-                                fragment_->length (),
+                                static_cast<int> (fragment_->length ()),
                                 scannerState_);
   } // end ELSE
   if (!bufferState_)

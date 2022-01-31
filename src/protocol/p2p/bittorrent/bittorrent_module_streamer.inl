@@ -247,7 +247,7 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
     case BITTORRENT_MESSAGETYPE_BITFIELD:
     {
       value_i =
-        1 + 4 + (record_r.peerRecord->bitfield.size () * sizeof (ACE_UINT8));
+        1 + 4 + (static_cast<ACE_UINT32> (record_r.peerRecord->bitfield.size ()) * sizeof (ACE_UINT8));
       value_i =
           (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN ? ACE_SWAP_LONG (value_i)
                                                : value_i);
@@ -352,7 +352,8 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
     { 
       ACE_Message_Block* message_block_p = message_inout->cont ();
       ACE_ASSERT (message_block_p);
-      value_i = 1 + 4 + 4 + message_block_p->total_length ();
+      value_i =
+        1 + 4 + 4 + static_cast<ACE_UINT32> (message_block_p->total_length ());
       value_i =
           (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN ? ACE_SWAP_LONG (value_i)
                                                : value_i);

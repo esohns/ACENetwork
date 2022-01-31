@@ -71,7 +71,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration);
 
   // *TODO*: remove type inferences
-  size_t pdu_size_i =
+  unsigned int pdu_size_i =
     inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize +
     inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->paddingBytes;
   message_block_p = inherited::allocateMessage (pdu_size_i);
