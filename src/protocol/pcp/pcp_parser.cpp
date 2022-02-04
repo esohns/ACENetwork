@@ -52,7 +52,7 @@
 /* "%code top" blocks.  */
 
 #include "stdafx.h"
-
+#undef YYTOKENTYPE
 
 
 

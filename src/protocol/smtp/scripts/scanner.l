@@ -1,4 +1,5 @@
 %top{
+#undef YYTOKENTYPE
 #include "smtp_parser.h"
 
 /*

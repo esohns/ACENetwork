@@ -1,4 +1,4 @@
-#include "ace/Synch.h"
+#undef YYTOKENTYPE
 #include "dhcp_parser.h"
 
 /*

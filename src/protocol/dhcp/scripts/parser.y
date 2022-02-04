@@ -14,6 +14,7 @@
 
 %code top {
 #include "stdafx.h"
+#undef YYTOKENTYPE
 }
 
 /* %define location_type */

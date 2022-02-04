@@ -1,3 +1,4 @@
+#undef YYTOKENTYPE
 #include "pcp_parser.h"
 
 /*
