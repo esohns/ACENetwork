@@ -121,7 +121,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
 
   if (inherited::isInitialized_)
   {
-    if (!STREAM_BASE_T::reset ())
+    if (!inherited::STREAM_BASE_T::reset ())
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
                   ACE_TEXT (stream_name_string_)));
