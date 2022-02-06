@@ -85,8 +85,7 @@ class IRC_Module_Bisector_T
   typedef Stream_IStream_T<ACE_SYNCH_USE,
                            Common_TimePolicy_t> ISTREAM_T;
 
-  IRC_Module_Bisector_T (ISTREAM_T* = NULL, // stream handle
-                         bool = true);      // generate session messages ?
+  IRC_Module_Bisector_T (ISTREAM_T* = NULL); // stream handle
   virtual ~IRC_Module_Bisector_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed

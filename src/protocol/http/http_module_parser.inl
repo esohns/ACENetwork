@@ -533,10 +533,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 #else
                       UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
-  : inherited (stream_in,                               // stream handle
-               false,                                   // auto-start ? (active mode only)
-               STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode
-               true)                                    // generate sesssion messages ?
+ : inherited (stream_in) // stream handle
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
                COMMON_PARSER_DEFAULT_LEX_TRACE,                           // trace scanning ?
                COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?

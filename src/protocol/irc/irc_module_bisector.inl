@@ -62,12 +62,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataContainerType,
                       StatisticContainerType,
                       TimerManagerType,
-                      UserDataType>::IRC_Module_Bisector_T (ISTREAM_T* stream_in,
-                                                            bool generateSessionMessages_in)
- : inherited (stream_in,
-              false,
-              STREAM_HEADMODULECONCURRENCY_CONCURRENT,
-              generateSessionMessages_in)
+                      UserDataType>::IRC_Module_Bisector_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , bufferState_ (NULL)
  , context_ (NULL)
  , numberOfFrames_ (0)
@@ -117,11 +113,11 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::~IRC_Module_Bisector_T"));
 
   // fini scanner context
-  if (context_)
+  if (unlikely (context_))
     IRC_Bisector_lex_destroy (context_);
 
   // clean up any unprocessed (chained) buffer(s)
-  if (buffer_)
+  if (unlikely (buffer_))
     buffer_->release ();
 }
 
