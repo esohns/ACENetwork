@@ -3,6 +3,7 @@ add_library (${PROJECT_NAME}_Server STATIC "")
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
+
 if (SSL_SUPPORT)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC ${SSL_INCLUDE_DIRS})
  target_include_directories (${PROJECT_NAME}_Server PUBLIC ${SSL_INCLUDE_DIRS})
@@ -10,7 +11,14 @@ endif (SSL_SUPPORT)
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC ${BIND9_CFLAGS})
  target_include_directories (${PROJECT_NAME}_Server PUBLIC ${BIND9_CFLAGS})
+endif (UNIX)
 
+target_include_directories (${PROJECT_NAME}_Client PUBLIC
+                            $<BUILD_INTERFACE:${ACE_INCLUDE_DIR}>)
+target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                            $<BUILD_INTERFACE:${ACE_INCLUDE_DIR}>)
+
+if (UNIX)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
@@ -100,12 +108,12 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib>)
 endif ()
 target_include_directories (${PROJECT_NAME}_Client PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>)
+                            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 target_include_directories (${PROJECT_NAME}_Client PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>)
 
 target_include_directories (${PROJECT_NAME}_Server PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>)
+                            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 target_include_directories (${PROJECT_NAME}_Server PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>)
 
