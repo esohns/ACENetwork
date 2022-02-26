@@ -46,7 +46,8 @@ jobs:
      with:
       os: ${{matrix.os}}
 
-   - name: Remove Common/ACEStream links
+   - name: Remove Common & ACEStream links
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           sudo rm -f modules/Common
           sudo rm -f modules/ACEStream
@@ -57,10 +58,36 @@ jobs:
       repository: esohns/Common
       path: modules/Common
 
-   - name: Configure CMake (Common)
+   - name: Add Common link [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          cd ..
+          sudo ln -s ACENetwork/modules/Common Common
+          cd ${{github.workspace}}
+
+   - name: Add Common link [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd ..
+          mklink /D Common ACENetwork/modules/Common
+          cd ${{github.workspace}}
+     shell: cmd
+
+   - name: Reset ACE link [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          sudo rm -f modules/Common/modules/ACE
+          sudo ln -s /usr/include modules/Common/modules/ACE
+
+   - name: Update git sub-modules (Common)
      run: |
           cd modules/Common
           git submodule update --init --recursive
+          cd ${{github.workspace}}
+
+   - name: Configure CMake (Common)
+     run: |
+          cd modules/Common
           cmake -B ${{github.workspace}}/modules/Common/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           cd ${{github.workspace}}
 
@@ -70,37 +97,69 @@ jobs:
       repository: esohns/ACEStream
       path: modules/ACEStream
 
-   - name: Add Common link (ACEStream)
+   - name: Add Common link (ACEStream) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream/modules
           sudo rm -f Common
           sudo ln -s ../../Common Common
           cd ${{github.workspace}}
 
-   - name: Add Common/ACEStream links
+   - name: Add Common link (ACEStream) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd ..
-          sudo ln -s ACENetwork/modules/Common Common
+          mklink /D Common ACEStream/modules/Common
+          cd ${{github.workspace}}
+     shell: cmd
+
+   - name: Add ACEStream link [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          cd ..
           sudo ln -s ACENetwork/modules/ACEStream ACEStream
           cd ${{github.workspace}}
 
+   - name: Add ACEStream link [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd ..
+          mklink /D ACEStream ACENetwork/modules/ACEStream
+          cd ${{github.workspace}}
+     shell: cmd
+
    - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream
-          git apply scripts/github_repo_build.patch
+#          git apply -C3 --verbose scripts/github_repo_build.patch
+          patch -f -p1 < scripts/github_repo_build.patch
           cd ${{github.workspace}}
 
-   - name: Generate LibreOffice headers
+   - name: Generate LibreOffice headers (ACEStream) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream/scripts
           chmod u+x make_oo_headers.sh
           sudo ./make_oo_headers.sh
           cd ${{github.workspace}}
 
-   - name: Configure CMake (ACEStream)
+   - name: Generate LibreOffice headers (ACEStream) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules/ACEStream/scripts
+          .\\make_oo_headers.bat
+          cd ${{github.workspace}}
+
+   - name: Update git sub-modules (ACEStream)
      run: |
           cd modules/ACEStream
           git submodule update --init --recursive
+          cd ${{github.workspace}}
+
+   - name: Configure CMake (ACEStream)
+     run: |
+          cd modules/ACEStream
           cmake -B ${{github.workspace}}/modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           cd ${{github.workspace}}
 
@@ -113,4 +172,3 @@ jobs:
    - name: Test
      working-directory: ${{github.workspace}}/build
      run: ctest -C ${{env.BUILD_TYPE}}
-
