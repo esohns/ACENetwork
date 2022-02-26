@@ -73,7 +73,7 @@ jobs:
           cd ${{github.workspace}}
      shell: cmd
 
-   - name: Reset ACE link [UNIX]
+   - name: Reset ACE link (Common) [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           sudo rm -f modules/Common/modules/ACE
@@ -127,6 +127,12 @@ jobs:
           mklink /D ACEStream ACENetwork/modules/ACEStream
           cd ${{github.workspace}}
      shell: cmd
+
+   - name: Reset ACE link (ACEStream) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          sudo rm -f modules/ACEStream/modules/ACE
+          sudo ln -s /usr/include modules/ACEStream/modules/ACE
 
    - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
      if: ${{ matrix.os=='ubuntu-latest' }}
