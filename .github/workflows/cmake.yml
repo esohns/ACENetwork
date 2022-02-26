@@ -135,7 +135,6 @@ jobs:
           sudo ln -s /usr/include modules/ACEStream/modules/ACE
 
    - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
-     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream
 #          git apply -C3 --verbose scripts/github_repo_build.patch
