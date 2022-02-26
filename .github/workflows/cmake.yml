@@ -137,7 +137,6 @@ jobs:
    - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
      run: |
           cd modules/ACEStream
-#          git apply -C3 --verbose scripts/github_repo_build.patch
           patch -f -p1 < scripts/github_repo_build.patch
           cd ${{github.workspace}}
 
