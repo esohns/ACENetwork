@@ -166,7 +166,7 @@ class Net_IStreamConnection_T
                                           StateType,
                                           StatisticContainerType,
                                           HandlerConfigurationType>
- , public Stream_IMessageQueue
+ , public Stream_IMessageQueue // *IMPORTANT NOTE*: (currently) applies to outbound data only !
 {
  public:
   // convenient types

@@ -136,11 +136,13 @@ class Net_StreamConnectionBase_T
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
+  inline virtual int enqueue_head_i (ACE_Message_Block*, ACE_Time_Value* = 0) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); }
   inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (true, flushSessionMessages_in, false); }
   inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only
   inline virtual void waitForIdleState () const { stream_.idle (); }
+  // -------------------------------------
   inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
@@ -267,11 +269,13 @@ class Net_AsynchStreamConnectionBase_T
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
+  inline virtual int enqueue_head_i (ACE_Message_Block*, ACE_Time_Value* = 0) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); }
   inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (true, flushSessionMessages_in, false); }
   inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only
   virtual void waitForIdleState () const;
+  // -------------------------------------
   inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
