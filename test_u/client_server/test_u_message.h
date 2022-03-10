@@ -32,8 +32,6 @@
 
 #include "net_remote_comm.h"
 
-//#include "net_client_common.h"
-
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
@@ -59,7 +57,8 @@ class Test_U_Message
                                                  Test_U_SessionMessage>;
 
  public:
-  Test_U_Message (unsigned int); // size
+  Test_U_Message (Stream_SessionId_t, // session id
+                  unsigned int);      // size
   inline virtual ~Test_U_Message () {}
 
   virtual Net_MessageType_t command () const; // return value: message type
@@ -81,7 +80,7 @@ class Test_U_Message
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by allocators
-  Test_U_Message (Stream_SessionId_t,
+  Test_U_Message (Stream_SessionId_t, // session id
                   ACE_Data_Block*,    // data block to use
                   ACE_Allocator*,     // message allocator
                   bool = true);       // increment running message counter ?

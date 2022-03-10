@@ -79,7 +79,8 @@ class DHCP_Message_T
   typedef DHCP_Message_T<//AllocatorConfigurationType,
                          MessageType> OWN_TYPE_T;
 
-  DHCP_Message_T (unsigned int); // size
+  DHCP_Message_T (Stream_SessionId_t, // session id
+                  unsigned int);      // size
   inline virtual ~DHCP_Message_T () {}
 
   virtual DHCP_MessageType_t command () const; // return value: message type
@@ -95,7 +96,7 @@ class DHCP_Message_T
 
  protected:
   // *NOTE*: to be used by allocators
-  DHCP_Message_T (Stream_SessionId_t,
+  DHCP_Message_T (Stream_SessionId_t, // session id
                   ACE_Data_Block*,    // data block to use
                   ACE_Allocator*,     // message allocator
                   bool = true);       // increment running message counter ?

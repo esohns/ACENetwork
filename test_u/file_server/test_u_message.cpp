@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_u_message.h"
 
 #include "ace/Log_Msg.h"
@@ -27,8 +26,10 @@
 
 #include "net_macros.h"
 
-Test_U_Message::Test_U_Message (unsigned int requestedSize_in)
- : inherited (requestedSize_in)
+Test_U_Message::Test_U_Message (Stream_SessionId_t sessionId_in,
+                                unsigned int requestedSize_in)
+ : inherited (sessionId_in,
+              requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 

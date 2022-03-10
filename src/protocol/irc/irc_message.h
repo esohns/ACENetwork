@@ -25,25 +25,12 @@
 
 #include "stream_data_message_base.h"
 
-//#include "irc_exports.h"
 #include "irc_record.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-//template <ACE_SYNCH_DECL,
-//          typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType>
-//class Stream_MessageAllocatorHeapBase_T;
-//template <ACE_SYNCH_DECL,
-//          typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType>
-//class Stream_CachedMessageAllocator_T;
 
 class IRC_Message
  : public Stream_DataMessageBase_T<IRC_Record,
@@ -69,7 +56,8 @@ class IRC_Message
   //                                             SessionMessageType>;
 
  public:
-  IRC_Message (unsigned int); // size
+  IRC_Message (Stream_SessionId_t, // session id
+               unsigned int);      // size
   // *NOTE*: to be used by allocators
   IRC_Message (Stream_SessionId_t, // session id
                ACE_Data_Block*,    // data block to use

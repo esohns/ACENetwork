@@ -94,8 +94,9 @@ class SMTP_Message_T
   // convenient types
   typedef SMTP_Message_T<MessageType> OWN_TYPE_T;
 
-  SMTP_Message_T (unsigned int); // size
-  inline virtual ~SMTP_Message_T () { }
+  SMTP_Message_T (Stream_SessionId_t, // session id
+                  unsigned int);      // size
+  inline virtual ~SMTP_Message_T () {}
 
   virtual SMTP_Code_t command () const; // return value: message type
   inline static std::string CommandToString (SMTP_Code_t code_in) { return SMTP_Tools::CodeToString (code_in); }
@@ -110,7 +111,7 @@ class SMTP_Message_T
 
  protected:
   // *NOTE*: to be used by allocators
-  SMTP_Message_T (Stream_SessionId_t,
+  SMTP_Message_T (Stream_SessionId_t, // session id
                   ACE_Data_Block*,    // data block to use
                   ACE_Allocator*,     // message allocator
                   bool = true);       // increment running message counter ?

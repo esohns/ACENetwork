@@ -31,8 +31,10 @@
 template <//typename AllocatorConfigurationType,
           typename MessageType>
 PCP_Message_T<//AllocatorConfigurationType,
-               MessageType>::PCP_Message_T (unsigned int requestedSize_in)
- : inherited (requestedSize_in)
+               MessageType>::PCP_Message_T (Stream_SessionId_t sessionId_in,
+                                            unsigned int requestedSize_in)
+ : inherited (sessionId_in,
+              requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("PCP_Message_T::PCP_Message_T"));
 

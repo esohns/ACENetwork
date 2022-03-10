@@ -80,7 +80,8 @@ class PCP_Message_T
   typedef PCP_Message_T<//AllocatorConfigurationType,
                          MessageType> OWN_TYPE_T;
 
-  PCP_Message_T (unsigned int); // size
+  PCP_Message_T (Stream_SessionId_t, // session id
+                 unsigned int);      // size
   inline virtual ~PCP_Message_T () { PCP_Tools::free (inherited::data_);  }
 
   virtual PCP_Opcode_t command () const; // return value: message type
@@ -96,7 +97,7 @@ class PCP_Message_T
 
  protected:
   // *NOTE*: to be used by allocators
-  PCP_Message_T (Stream_SessionId_t,
+  PCP_Message_T (Stream_SessionId_t, // session id
                  ACE_Data_Block*,    // data block to use
                  ACE_Allocator*,     // message allocator
                  bool = true);       // increment running message counter ?

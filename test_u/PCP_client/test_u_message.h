@@ -55,7 +55,8 @@ class Test_U_Message
                                                  Test_U_SessionMessage>;
 
  public:
-  Test_U_Message (unsigned int); // size
+  Test_U_Message (Stream_SessionId_t, // session id
+                  unsigned int);      // size
   inline virtual ~Test_U_Message () {}
 
   // overrides from ACE_Message_Block
@@ -71,7 +72,7 @@ class Test_U_Message
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by message allocators
-  Test_U_Message (Stream_SessionId_t,
+  Test_U_Message (Stream_SessionId_t, // session id
                   ACE_Data_Block*,    // data block to use
                   ACE_Allocator*,     // message block allocator
                   bool = true);       // increment running message counter ?

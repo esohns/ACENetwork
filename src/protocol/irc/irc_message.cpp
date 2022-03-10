@@ -30,8 +30,10 @@
 
 #include "irc_tools.h"
 
-IRC_Message::IRC_Message (unsigned int requestedSize_in)
- : inherited (requestedSize_in)
+IRC_Message::IRC_Message (Stream_SessionId_t sessionId_in,
+                          unsigned int requestedSize_in)
+ : inherited (sessionId_in,
+              requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Message::IRC_Message"));
 

@@ -77,7 +77,8 @@ class HTTP_Message_T
   //                                             SessionMessageType>;
 
  public:
-  HTTP_Message_T (unsigned int); // size
+  HTTP_Message_T (Stream_SessionId_t, // session id
+                  unsigned int);      // size
   virtual ~HTTP_Message_T ();
 
   virtual HTTP_Method_t command () const; // return value: message type
@@ -111,7 +112,7 @@ class HTTP_Message_T
 
  protected:
   // *NOTE*: to be used by allocators
-  HTTP_Message_T (Stream_SessionId_t,
+  HTTP_Message_T (Stream_SessionId_t, // session id
                   ACE_Data_Block*,    // data block to use
                   ACE_Allocator*,     // message allocator
                   bool = true);       // increment running message counter ?

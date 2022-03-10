@@ -33,8 +33,10 @@
 template <//typename AllocatorConfigurationType,
           typename MessageType>
 HTTP_Message_T<//AllocatorConfigurationType,
-               MessageType>::HTTP_Message_T (unsigned int requestedSize_in)
- : inherited (requestedSize_in)
+               MessageType>::HTTP_Message_T (Stream_SessionId_t sessionId_in,
+                                             unsigned int requestedSize_in)
+ : inherited (sessionId_in,
+              requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
 

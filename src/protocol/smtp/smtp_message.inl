@@ -29,8 +29,10 @@
 #include "smtp_defines.h"
 
 template <typename MessageType>
-SMTP_Message_T<MessageType>::SMTP_Message_T (unsigned int requestedSize_in)
- : inherited (requestedSize_in)
+SMTP_Message_T<MessageType>::SMTP_Message_T (Stream_SessionId_t sessionId_in,
+                                             unsigned int requestedSize_in)
+ : inherited (sessionId_in,
+              requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Message_T::SMTP_Message_T"));
 

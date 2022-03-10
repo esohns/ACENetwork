@@ -31,9 +31,6 @@
 
 #include "http_message.h"
 
-//#include "test_u_HTTP_decoder_common.h"
-//#include "test_u_HTTP_decoder_stream_common.h"
-
 // forward declaration(s)
 class ACE_Allocator;
 class Test_U_SessionMessage;
@@ -68,7 +65,8 @@ class Test_U_Message
                                                Test_U_SessionMessage>;
 
  public:
-  Test_U_Message (unsigned int); // size
+  Test_U_Message (Stream_SessionId_t, // session id
+                  unsigned int);      // size
   inline virtual ~Test_U_Message () {}
 
   // overrides from ACE_Message_Block
@@ -86,10 +84,10 @@ class Test_U_Message
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by message allocators
-  Test_U_Message (Stream_SessionId_t,
-                  ACE_Data_Block*, // data block to use
-                  ACE_Allocator*,  // message allocator
-                  bool = true);    // increment running message counter ?
+  Test_U_Message (Stream_SessionId_t, // session id
+                  ACE_Data_Block*,    // data block to use
+                  ACE_Allocator*,     // message allocator
+                  bool = true);       // increment running message counter ?
   //Test_U_Message (ACE_Allocator*); // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message& operator= (const Test_U_Message&))
 };
