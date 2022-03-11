@@ -147,7 +147,7 @@ foreach (source_file ${source_files_client})
 #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
 endforeach ()
 target_sources (${PROJECT_NAME}_Client
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 ${absolute_source_files_client})
 
@@ -168,7 +168,6 @@ set (source_files_server
      net_server_common_tools.cpp
      net_server_common_tools.h
      net_server_defines.h
-#     net_server_exports.h
      net_server_listener.cpp
      net_server_listener.h
      net_server_listener.inl)
@@ -188,7 +187,7 @@ foreach (source_file ${source_files_server})
 #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
 endforeach ()
 target_sources (${PROJECT_NAME}_Server
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 ${absolute_source_files_server})
 
@@ -218,13 +217,11 @@ install (FILES
          net_client_common_tools.inl
          net_client_connector.h
          net_client_defines.h
-#         net_client_exports.h
          net_server_asynchlistener.h
          net_server_asynchlistener.inl
          net_server_common.h
          net_server_common_tools.h
          net_server_defines.h
-#         net_server_exports.h
          net_server_listener.h
          net_server_listener.inl
          net_server_ssl_listener.h

@@ -125,12 +125,13 @@ class BitTorrent_Message_T
   //                                                                         UserDataType> >;
 
  public:
-  BitTorrent_Message_T (unsigned int); // size
+  BitTorrent_Message_T (Stream_SessionId_t, // session id
+                        unsigned int);      // size
   // *NOTE*: to be used by allocators
-  BitTorrent_Message_T (Stream_SessionId_t,
-                        ACE_Data_Block*, // data block to use
-                        ACE_Allocator*,  // message allocator
-                        bool = true);    // increment running message counter ?
+  BitTorrent_Message_T (Stream_SessionId_t, // session id
+                        ACE_Data_Block*,    // data block to use
+                        ACE_Allocator*,     // message allocator
+                        bool = true);       // increment running message counter ?
   //   BitTorrent_Message (ACE_Allocator*); // message allocator
   inline virtual ~BitTorrent_Message_T () {}
 

@@ -71,7 +71,6 @@ set (source_files
      smtp_common_modules.h
      smtp_configuration.h
      smtp_defines.h
-#     smtp_exports.h
      smtp_iparser.h
      smtp_message.cpp
      smtp_message.h
@@ -122,12 +121,10 @@ foreach (script_file ${script_files})
         ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_SMTP
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
-                PRIVATE
-                ${absolute_source_files}
-                INTERFACE
-                ${absolute_script_files})
+                PRIVATE ${absolute_source_files}
+                INTERFACE ${absolute_script_files})
 target_precompile_headers (${PROJECT_NAME}_Protocol_SMTP
                            PUBLIC stdafx.h)
 
@@ -178,7 +175,6 @@ install (FILES
          smtp_common_modules.h
          smtp_configuration.h
          smtp_defines.h
-    #     smtp_exports.h
          smtp_iparser.h
          smtp_message.h
          smtp_message.inl

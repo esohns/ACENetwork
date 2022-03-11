@@ -81,7 +81,6 @@ set (source_files
      dhcp_configuration.h
      dhcp_codes.h
      dhcp_defines.h
-#     dhcp_exports.h
      dhcp_message.cpp
      dhcp_message.h
      dhcp_parser.cpp
@@ -135,12 +134,10 @@ foreach (script_file ${script_files})
         ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_DHCP
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
-                PRIVATE
-                ${absolute_source_files}
-                INTERFACE
-                ${absolute_script_files})
+                PRIVATE ${absolute_source_files}
+                INTERFACE ${absolute_script_files})
 target_precompile_headers (${PROJECT_NAME}_Protocol_DHCP
                            PUBLIC stdafx.h)
 

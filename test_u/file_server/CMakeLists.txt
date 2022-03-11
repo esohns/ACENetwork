@@ -75,6 +75,8 @@ set (${EXECUTABLE}_SRCS
      file_server_signalhandler.cpp
      file_server_signalhandler.h
      file_server_stream_common.h
+#     stdafx.cpp
+     stdafx.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_manager_common.h
@@ -94,9 +96,7 @@ set (${EXECUTABLE}_SRCS
      test_u_stream.cpp
      test_u_stream.h
      test_u_tcpconnection.cpp
-     test_u_tcpconnection.h
-     stdafx.cpp
-     stdafx.h)
+     test_u_tcpconnection.h)
 if (GUI_SUPPORT)
  if (GTK_SUPPORT)
   set (${EXECUTABLE}_SRCS
@@ -162,8 +162,6 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Server)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
 
 # add PCH
-#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${EXECUTABLE})
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
 

@@ -98,7 +98,7 @@ set (${EXECUTABLE_SOURCE}_SRCS
      net_client_stream_common.h
      net_client_timeouthandler.cpp
      net_client_timeouthandler.h
-     stdafx.cpp
+#     stdafx.cpp
      stdafx.h
      test_u_client_common.h
      test_u_common_modules.h
@@ -216,7 +216,7 @@ set (${EXECUTABLE_TARGET}_SRCS
      net_server_signalhandler.cpp
      net_server_signalhandler.h
      net_server_stream_common.h
-     stdafx.cpp
+#     stdafx.cpp
      stdafx.h
      test_u_common_modules.h
      test_u_configuration.h

@@ -87,7 +87,6 @@ set (source_files
      irc_common_modules.h
      irc_configuration.h
      irc_defines.h
-#     irc_exports.h
      irc_icontrol.h
      irc_message.cpp
      irc_message.h
@@ -144,7 +143,7 @@ foreach (script_file ${script_files})
     ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_IRC
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 PRIVATE ${absolute_source_files}
                 INTERFACE ${absolute_script_files})

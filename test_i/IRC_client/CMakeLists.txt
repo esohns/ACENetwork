@@ -75,7 +75,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 ########### next target ###############
 set (EXECUTABLE IRC_client)
 set (${EXECUTABLE}_EXE_SRCS
-     stdafx.cpp
+#     stdafx.cpp
      stdafx.h
      FILE_Stream.cpp
      FILE_Stream.h
@@ -211,7 +211,7 @@ install (FILES
 ########### next target ###############
 set (EXECUTABLE_GUI IRC_client_gui)
 set (${EXECUTABLE_GUI}_EXE_SRCS
-     stdafx.cpp
+#     stdafx.cpp
      stdafx.h
      IRC_client_common.h
      IRC_client_common_modules.h

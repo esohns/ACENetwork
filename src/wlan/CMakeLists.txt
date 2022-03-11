@@ -132,7 +132,6 @@ set (source_files
      net_wlan_common.h
      net_wlan_configuration.h
      net_wlan_defines.h
- #    net_wlan_exports.h
      net_wlan_imanager.h
      net_wlan_imonitor.h
      net_wlan_inetmonitor.cpp
@@ -204,12 +203,10 @@ if (WIN32)
  endif (WLANAPI_SUPPORT)
 endif (WIN32)
 target_sources (${PROJECT_NAME}_WLAN
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
-                PRIVATE
-                ${absolute_source_files}
-                INTERFACE
-                ${absolute_script_files})
+                PRIVATE ${absolute_source_files}
+                INTERFACE ${absolute_script_files})
 target_precompile_headers (${PROJECT_NAME}_WLAN
                            PUBLIC stdafx.h)
 
@@ -272,7 +269,6 @@ set (include_files
      net_wlan_common.h
      net_wlan_configuration.h
      net_wlan_defines.h
-#     net_wlan_exports.h
      net_wlan_imanager.h
      net_wlan_imonitor.h
      net_wlan_inetmonitor.h

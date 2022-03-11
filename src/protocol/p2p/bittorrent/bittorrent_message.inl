@@ -33,8 +33,10 @@
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_Message_T<SessionDataType,
-                     UserDataType>::BitTorrent_Message_T (unsigned int requestedSize_in)
- : inherited (requestedSize_in)
+                     UserDataType>::BitTorrent_Message_T (Stream_SessionId_t sessionId_in,
+                                                          unsigned int requestedSize_in)
+ : inherited (sessionId_in,
+              requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
 

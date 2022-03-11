@@ -91,7 +91,6 @@ set (source_files
      bittorrent_bencoding_parser.h
      bittorrent_bencoding_parser_driver.cpp
      bittorrent_bencoding_parser_driver.h
-#     bittorrent_bencoding_parser_driver.inl
      bittorrent_bencoding_scanner.cpp
      bittorrent_bencoding_scanner.h
      bittorrent_common.h
@@ -116,7 +115,6 @@ set (source_files
      bittorrent_parser.h
      bittorrent_parser_driver.cpp
      bittorrent_parser_driver.h
-#     bittorrent_parser_driver.inl
      bittorrent_scanner.cpp
      bittorrent_scanner.h
      bittorrent_session.cpp
@@ -159,12 +157,10 @@ foreach (script_file ${script_files})
     ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_BitTorrent
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
-                PRIVATE
-                ${absolute_source_files}
-                INTERFACE
-                ${absolute_script_files})
+                PRIVATE ${absolute_source_files}
+                INTERFACE ${absolute_script_files})
 target_precompile_headers (${PROJECT_NAME}_Protocol_BitTorrent
                            PUBLIC stdafx.h)
 
@@ -224,7 +220,6 @@ export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
 install (FILES
          bittorrent_bencoding_parser.h
          bittorrent_bencoding_parser_driver.h
-#         bittorrent_bencoding_parser_driver.inl
          bittorrent_bencoding_scanner.h
          bittorrent_common.h
          bittorrent_control.h
@@ -242,7 +237,6 @@ install (FILES
          bittorrent_network.h
          bittorrent_parser.h
          bittorrent_parser_driver.h
- #        bittorrent_parser_driver.inl
          bittorrent_scanner.h
          bittorrent_session.h
          bittorrent_session.inl

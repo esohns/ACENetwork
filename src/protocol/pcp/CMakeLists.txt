@@ -73,7 +73,6 @@ set (source_files
      pcp_configuration.h
      pcp_codes.h
      pcp_defines.h
-#     pcp_exports.h
      pcp_isession.h
      pcp_message.cpp
      pcp_message.h
@@ -128,12 +127,10 @@ foreach (script_file ${script_files})
         ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_PCP
-                PRIVATE stdafx.cpp
+#                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
-                PRIVATE
-                ${absolute_source_files}
-                INTERFACE
-                ${absolute_script_files})
+                PRIVATE ${absolute_source_files}
+                INTERFACE ${absolute_script_files})
 target_precompile_headers (${PROJECT_NAME}_Protocol_PCP
                            PUBLIC stdafx.h)
 
@@ -185,7 +182,6 @@ install (FILES
          pcp_common_modules.h
          pcp_configuration.h
          pcp_defines.h
-#         pcp_exports.h
          pcp_isession.h
          pcp_message.h
          pcp_parser.h

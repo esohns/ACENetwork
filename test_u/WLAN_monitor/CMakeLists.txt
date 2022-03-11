@@ -101,7 +101,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 ########### next target ###############
 set (EXECUTABLE wlan_monitor)
 set (${EXECUTABLE}_EXE_SRCS
-     stdafx.cpp
+#     stdafx.cpp
      stdafx.h
      test_u_eventhandler.cpp
      test_u_eventhandler.h

@@ -101,7 +101,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 ########### next target ###############
 set (bittorrent_client_SRCS
-     stdafx.cpp
+#     stdafx.cpp
      stdafx.h
      bittorrent_client.cpp
      bittorrent_client_common.h
@@ -219,7 +219,7 @@ install (TARGETS ${EXECUTABLE}
 ########### next target ###############
 set (EXECUTABLE_GUI bittorrent_client_gui)
 set (${EXECUTABLE_GUI}_EXE_SRCS
-     stdafx.cpp
+#     stdafx.cpp
      stdafx.h
      bittorrent_client_common.h
      bittorrent_client_common_modules.h
