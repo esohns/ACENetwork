@@ -63,6 +63,9 @@ CMakeLists.txt.user*
 # MSVC
 .vs/
 
+# CLion
+.idea/
+
 # links (linux-specific)
 #modules/ACE
 #modules/Common
