@@ -204,6 +204,7 @@ struct BitTorrent_PeerSessionData
    , filename ()
    , forwardedHandshake (false)
    , handshake (NULL)
+   , stream (NULL)
   {}
 
   struct BitTorrent_PeerSessionData& operator+= (const struct BitTorrent_PeerSessionData& rhs_in)
@@ -214,9 +215,11 @@ struct BitTorrent_PeerSessionData
     return *this;
   }
 
-  std::string                          filename; // .torrent file
-  bool                                 forwardedHandshake;
-  struct BitTorrent_PeerHandShake*     handshake;
+  std::string                            filename; // .torrent file
+  bool                                   forwardedHandshake;
+  struct BitTorrent_PeerHandShake*       handshake;
+  Stream_IStream_T<ACE_MT_SYNCH,
+                   Common_TimePolicy_t>* stream; // aggregator
 };
 
 struct BitTorrent_TrackerSessionData
@@ -226,6 +229,7 @@ struct BitTorrent_TrackerSessionData
    : Stream_SessionData ()
    , connectionState (NULL)
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   , stream (NULL)
   {}
 
   struct BitTorrent_TrackerSessionData& operator+= (const struct BitTorrent_TrackerSessionData& rhs_in)
@@ -242,6 +246,8 @@ struct BitTorrent_TrackerSessionData
 
   struct BitTorrent_ConnectionState*        connectionState;
   enum Stream_Decoder_CompressionFormatType format;
+  Stream_IStream_T<ACE_MT_SYNCH,
+                   Common_TimePolicy_t>*    stream; // aggregator
 };
 
 struct BitTorrent_PeerStreamState
