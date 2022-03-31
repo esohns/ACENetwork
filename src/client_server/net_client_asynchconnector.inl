@@ -377,7 +377,7 @@ Net_Client_AsynchConnector_T<HandlerType,
       return 0; // *TODO*: race condition; result could be a false positive
 
     if (relativeTimeout_in != ACE_Time_Value::zero)
-      absolute_timeout = COMMON_TIME_NOW + relativeTimeout_in;
+      absolute_timeout = ACE_OS::gettimeofday () + relativeTimeout_in;
     result = condition_.wait (timeout_p);
     if (unlikely (result == -1))
     {

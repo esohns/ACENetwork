@@ -321,7 +321,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     inherited2::state_.status = NET_CONNECTION_STATUS_OK;
   } // end lock scope
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
-                  true);
+                  true); // recurse upstream (if any) ?
 
   return 0;
 
@@ -330,7 +330,7 @@ error:
     inherited::deregisterFromReactor ();
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
-                  false, // wait for upstream (if any) ?
+                  true,  // wait for upstream (if any) ?
                   true); // locked access ?
   if (handle_manager)
     inherited2::deregister ();
@@ -484,16 +484,16 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     {
       notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
-                      true);
+                      true); // recurse upstream (if any) ?
     } // end IF
 
     // step1: shut down the processing stream
-    stream_.flush (false,  // do not flush inbound data
-                   false,  // do not flush session messages
-                   false); // flush upstream (if any)
-    stream_.idle ();
+    stream_.flush (false,  // flush inbound data ?
+                   false,  // flush session messages ?
+                   false); // recurse upstream (if any) ?
+    stream_.idle (false); // recurse upstream (if any) ?
     stream_.stop (true,  // wait for worker(s) (if any)
-                  false, // recurse upstream (if any)
+                  true,  // recurse upstream (if any) ?
                   true); // locked access ?
 //  } // end lock scope
 
@@ -1371,7 +1371,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited2::state_.status = NET_CONNECTION_STATUS_OK;
   } // end lock scope
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
-                  true);
+                  true); // recurse upstream (if any) ?
 
   return;
 
@@ -1380,7 +1380,7 @@ error:
     this->cancel ();
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
-                  false, // wait for upstream (if any) ?
+                  true,  // wait for upstream (if any) ?
                   true); // locked access ?
   if (handle_manager)
     inherited2::deregister ();
@@ -1449,16 +1449,16 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     {
       notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
-                      true);
+                      true); // recurse upstream (if any) ?
     } // end IF
 
     // step1: shut down the processing stream
     stream_.flush (false,  // do not flush inbound data
                    false,  // do not flush session messages
-                   false); // flush upstream (if any) ?
-    stream_.idle ();
+                   false); // recurse upstream (if any) ?
+    stream_.idle (false); // recurse upstream (if any) ?
     stream_.stop (true,  // wait for worker(s) (if any)
-                  false, // wait for upstream (if any) ?
+                  true,  // recurse upstream (if any) ?
                   true); // locked access ?
 //  } // end lock scope
 
