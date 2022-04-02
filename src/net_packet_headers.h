@@ -71,7 +71,7 @@ struct tcphdr
 };
 //#endif
 #else
-#include <netinet/tcp.h>
+#include "netinet/tcp.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -87,11 +87,11 @@ struct udphdr
 };
 //#endif
 #else
-#include <netinet/udp.h>
+#include "netinet/udp.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <in6addr.h>
+#include "in6addr.h"
 //struct in6_addr
 //{
 //  union
@@ -129,7 +129,7 @@ struct udphdr
 //};
 //#endif
 #else
-#include <netinet/ip6.h>
+#include "netinet/ip6.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -169,7 +169,7 @@ struct iphdr
 };
 //#endif
 #else
-#include <netinet/ip.h>
+#include "netinet/ip.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32)  || defined (ACE_WIN64)
@@ -185,7 +185,7 @@ struct iphdr
 #define IPPROTO_COMP  108          /* Compression Header Protocol              */
 #define IPPROTO_SCTP  132          /* Stream Control Transmission Protocol     */
 #else
-#include <netinet/in.h>
+#include "netinet/in.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -240,7 +240,7 @@ struct ether_header
   u_short           ether_type; /* packet type id field */
 };
 #else
-#include <net/ethernet.h>
+#include "net/ethernet.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 /*
@@ -497,7 +497,7 @@ struct fddi_header
 
 #define FDDI_K_SNAP_HLEN 21             /* Total octets in header.       */
 #else
-#include <netinet/if_fddi.h>
+#include "netinet/if_fddi.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (_MSC_VER)

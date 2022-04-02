@@ -86,7 +86,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   int result = -1;
 
   const Test_I_MessageDataContainer& data_container_r = message_inout->getR ();
-  const Test_I_MessageData& data_r = data_container_r.getR ();
+  const Test_I_URLStreamLoad_MessageData& data_r = data_container_r.getR ();
   HTTP_HeadersConstIterator_t iterator =
     data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
   ACE_ASSERT (iterator != data_r.headers.end ());
@@ -155,8 +155,8 @@ Test_I_M3U_Module_Parser::record (M3U_Playlist_t*& record_inout)
   Test_I_Message* message_p = static_cast<Test_I_Message*> (inherited::headFragment_);
   Test_I_MessageDataContainer& data_container_r =
     const_cast<Test_I_MessageDataContainer&> (message_p->getR ());
-  struct Test_I_MessageData& data_r =
-    const_cast<struct Test_I_MessageData&> (data_container_r.getR ());
+  struct Test_I_URLStreamLoad_MessageData& data_r =
+    const_cast<struct Test_I_URLStreamLoad_MessageData&> (data_container_r.getR ());
   data_r.M3UPlaylist = record_inout;
   Test_I_MessageDataContainer* data_container_2 = NULL;
   Test_I_Message* message_2 = static_cast<Test_I_Message*> (inherited::headFragment_->cont ());

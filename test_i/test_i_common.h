@@ -42,143 +42,161 @@
 #include "net_configuration.h"
 #include "net_defines.h"
 
-struct Net_Configuration;
-struct Test_I_UserData
- : Net_UserData
-{
-  Test_I_UserData ()
-   : Net_UserData ()
-   , configuration (NULL)
-  {}
-
-  struct Net_Configuration* configuration;
-};
-
-//struct Test_I_ConnectionState
-// : Net_ConnectionState
-//{
-//  Test_I_ConnectionState ()
-//   : Net_ConnectionState ()
-//   //, configuration (NULL)
-//  {}
-
-//  // *TODO*: remove ASAP
-//  //struct Net_Configuration* configuration;
-//};
-
-//struct Test_I_AllocatorConfiguration
-// : Stream_AllocatorConfiguration
-//{
-//  Test_I_AllocatorConfiguration ()
-//   : Stream_AllocatorConfiguration ()
-//  {
-//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-//    //         'flex's yy_scan_buffer() method
-//    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-//  }
-//};
-
-typedef Stream_Statistic Test_I_Statistic_t;
-typedef Common_IStatistic_T<Test_I_Statistic_t> Test_I_StatisticReportingHandler_t;
-
-struct Test_I_SignalHandlerConfiguration
- : Common_SignalHandlerConfiguration
-{
-  Test_I_SignalHandlerConfiguration ()
-   : Common_SignalHandlerConfiguration ()
-   , statisticReportingHandler (NULL)
-   , statisticReportingTimerId (-1)
-  {}
-
-  Test_I_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                statisticReportingTimerId;
-};
-
-struct Test_I_Configuration
-{
-  Test_I_Configuration ()
-   : dispatchConfiguration ()
-//   , connectionConfigurations ()
-   , parserConfiguration ()
-   //, streamConfiguration ()
-   , signalHandlerConfiguration ()
 #if defined (GUI_SUPPORT)
-   , GUIFramework (COMMON_UI_FRAMEWORK_INVALID)
-#endif // GUI_SUPPORT
-   , userData ()
-  {}
-
-  struct Common_EventDispatchConfiguration   dispatchConfiguration;
-  // **************************** socket data **********************************
-//  Net_ConnectionConfigurations_t           connectionConfigurations;
-  // **************************** parser data **********************************
-  struct Common_FlexBisonParserConfiguration parserConfiguration;
-  //// **************************** stream data **********************************
-  //struct Test_I_StreamConfiguration        streamConfiguration;
-  // **************************** signal data **********************************
-  struct Test_I_SignalHandlerConfiguration   signalHandlerConfiguration;
-
-#if defined (GUI_SUPPORT)
-  enum Common_UI_FrameworkType               GUIFramework;
+#if defined (GTK_SUPPORT)
+#include "test_i_gtk_common.h"
+#endif // GTK_SUPPORT
+#if defined (QT_SUPPORT)
+#include "test_i_qt_common.h"
+#endif // QT_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
+#include "test_i_wxwidgets_common.h"
+#endif // WXWIDGETS_SUPPORT
 #endif // GUI_SUPPORT
 
-  struct Test_I_UserData                     userData;
-};
-
-//////////////////////////////////////////
-
-#if defined (GUI_SUPPORT)
-struct Test_I_UI_ProgressData
+struct Test_I_ProgressData
 {
-  Test_I_UI_ProgressData ()
-   : state (NULL)
+  Test_I_ProgressData ()
+   : sessionId (0)
    , statistic ()
   {
-    ACE_OS::memset (&statistic, 0, sizeof (Test_I_Statistic_t));
+    ACE_OS::memset (&statistic, 0, sizeof (struct Stream_Statistic));
   }
 
-  struct Common_UI_State* state;
-  Test_I_Statistic_t      statistic;
+  Stream_SessionId_t      sessionId;
+  struct Stream_Statistic statistic;
 };
 
-struct Test_I_UI_CBData
+struct Test_I_CBData
 {
-  Test_I_UI_CBData ()
+  Test_I_CBData ()
    : allowUserRuntimeStatistic (true)
-   //, configuration (NULL)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
    , mediaFramework (STREAM_LIB_DEFAULT_MEDIAFRAMEWORK)
 #endif // ACE_WIN32 || ACE_WIN64
    , progressData ()
-   , UIState (NULL)
-  {
-    progressData.state = UIState;
-  }
+  {}
 
   bool                            allowUserRuntimeStatistic;
-  //struct Test_U_Configuration*    configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   enum Stream_MediaFramework_Type mediaFramework;
 #endif // ACE_WIN32 || ACE_WIN64
-  struct Test_I_UI_ProgressData   progressData;
-  struct Common_UI_State*         UIState;
+  struct Test_I_ProgressData      progressData;
 };
 
-struct Test_I_UI_ThreadData
+struct Test_I_ThreadData
 {
-  Test_I_UI_ThreadData ()
+  Test_I_ThreadData ()
    : CBData (NULL)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
    , mediaFramework (STREAM_LIB_DEFAULT_MEDIAFRAMEWORK)
 #endif // ACE_WIN32 || ACE_WIN64
+  {}
+
+  struct Test_I_CBData*           CBData;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  enum Stream_MediaFramework_Type mediaFramework;
+#endif // ACE_WIN32 || ACE_WIN64
+};
+
+#if defined (GUI_SUPPORT)
+struct Test_I_UI_ProgressData
+#if defined (GTK_USE)
+ : Test_I_GTK_ProgressData
+#elif defined (QT_USE)
+ : Test_I_Qt_ProgressData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_ProgressData
+#else
+ : Test_I_ProgressData
+#endif // GTK_USE || QT_USE || WXWIDGETS_USE
+{
+  Test_I_UI_ProgressData ()
+#if defined (GTK_USE)
+   : Test_I_GTK_ProgressData ()
+#elif defined (QT_USE)
+   : Test_I_Qt_ProgressData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_ProgressData ()
+#else
+   : Test_I_ProgressData ()
+#endif // GTK_USE || QT_USE || WXWIDGETS_USE
    , sessionId (0)
+  {}
+
+  Stream_SessionId_t sessionId;
+};
+
+struct Test_I_UI_CBData
+#if defined (GTK_USE)
+ : Test_I_GTK_CBData
+#elif defined (QT_USE)
+ : Test_I_Qt_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_CBData
+#else
+ : Test_I_CBData
+#endif // GTK_USE || QT_USE || WXWIDGETS_USE
+{
+  Test_I_UI_CBData ()
+#if defined (GTK_USE)
+   : Test_I_GTK_CBData ()
+#elif defined (QT_USE)
+   : Test_I_Qt_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_CBData ()
+#else
+   : Test_I_CBData ()
+#endif // GTK_USE || QT_USE || WXWIDGETS_USE
+   , allowUserRuntimeStatistic (true)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , mediaFramework (STREAM_LIB_DEFAULT_MEDIAFRAMEWORK)
+#endif // ACE_WIN32 || ACE_WIN64
+   , progressData ()
+  {
+#if defined (GTK_USE) || defined (QT_USE) || defined (WXWIDGETS_USE)
+    progressData.state = UIState;
+#endif // GTK_USE || QT_USE || WXWIDGETS_USE
+  }
+
+  bool                            allowUserRuntimeStatistic;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  enum Stream_MediaFramework_Type mediaFramework;
+#endif // ACE_WIN32 || ACE_WIN64
+  struct Test_I_UI_ProgressData   progressData;
+};
+
+struct Test_I_UI_ThreadData
+#if defined (GTK_USE)
+ : Test_I_GTK_ThreadData
+#elif defined (QT_USE)
+ : Test_I_Qt_ThreadData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_ThreadData
+#else
+ : Test_I_ThreadData
+#endif // GTK_USE || QT_USE || WXWIDGETS_USE
+{
+  Test_I_UI_ThreadData ()
+#if defined (GTK_USE)
+   : Test_I_GTK_ThreadData ()
+#elif defined (QT_USE)
+   : Test_I_Qt_ThreadData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_ThreadData ()
+#else
+   : Test_I_ThreadData ()
+#endif // GTK_USE || QT_USE || WXWIDGETS_USE
+   , CBData (NULL)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , mediaFramework (STREAM_LIB_DEFAULT_MEDIAFRAMEWORK)
+#endif // ACE_WIN32 || ACE_WIN64
   {}
 
   struct Test_I_UI_CBData*        CBData;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   enum Stream_MediaFramework_Type mediaFramework;
 #endif // ACE_WIN32 || ACE_WIN64
-  size_t                          sessionId;
 };
 #endif // GUI_SUPPORT
 

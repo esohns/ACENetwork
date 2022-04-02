@@ -106,19 +106,19 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 
 struct HTTP_Record;
-struct Test_I_MessageData
+struct Test_I_URLStreamLoad_MessageData
  : HTTP_Record
 {
-  Test_I_MessageData ()
+  Test_I_URLStreamLoad_MessageData ()
    : HTTP_Record ()
    , M3UPlaylist (NULL)
   {};
-  ~Test_I_MessageData ()
+  ~Test_I_URLStreamLoad_MessageData ()
   {
     //if (M3UPlaylist)
     //  delete M3UPlaylist;
   };
-  inline void operator+= (Test_I_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+  inline void operator+= (Test_I_URLStreamLoad_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   M3U_Playlist_t* M3UPlaylist;
 };

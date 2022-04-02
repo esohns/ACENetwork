@@ -28,8 +28,7 @@
 #include "common_ui_gtk_gl_common.h"
 #endif // GTKGL_SUPPORT
 
-//#include "test_i_configuration.h"
-#include "test_i_common.h"
+#include "test_i_configuration.h"
 
 struct Test_I_GTK_Configuration
  : Test_I_Configuration
@@ -51,38 +50,32 @@ struct Test_I_GTK_ProgressData
    : Common_UI_GTK_ProgressData ()
    , statistic ()
   {
-    ACE_OS::memset (&statistic, 0, sizeof (Test_I_Statistic_t));
+    ACE_OS::memset (&statistic, 0, sizeof (struct Stream_Statistic));
   }
 
-  Test_I_Statistic_t statistic;
+  struct Stream_Statistic statistic;
 };
 
 struct Test_I_GTK_CBData
- : Test_I_UI_CBData
+ : Common_UI_GTK_CBData
 {
   Test_I_GTK_CBData ()
-   : Test_I_UI_CBData ()
-   , configuration (NULL)
-//   , cursorType (GDK_LAST_CURSOR)
+   : Common_UI_GTK_CBData ()
    , progressData ()
-   , progressEventSourceId (0)
    , UIState (NULL)
   {
     progressData.state = UIState;
   }
 
-  struct Test_I_Configuration*   configuration;
-//  GdkCursorType                      cursorType;
   struct Test_I_GTK_ProgressData progressData;
-  guint                          progressEventSourceId;
   Common_UI_GTK_State_t*         UIState;
 };
 
-struct Test_I_ThreadData
- : Test_I_UI_ThreadData
+struct Test_I_GTK_ThreadData
+ : Common_UI_GTK_ThreadData
 {
-  Test_I_ThreadData ()
-   : Test_I_UI_ThreadData ()
+  Test_I_GTK_ThreadData ()
+   : Common_UI_GTK_ThreadData ()
    , CBData (NULL)
    , eventSourceId (0)
   {}

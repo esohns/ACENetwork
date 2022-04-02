@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_i_message.h"
 
 #include "ace/Log_Msg.h"
@@ -36,7 +35,7 @@ Test_I_MessageDataContainer::Test_I_MessageDataContainer ()
 
 }
 
-Test_I_MessageDataContainer::Test_I_MessageDataContainer (struct Test_I_MessageData*& messageData_in,
+Test_I_MessageDataContainer::Test_I_MessageDataContainer (struct Test_I_URLStreamLoad_MessageData*& messageData_in,
                                                           bool delete_in)
  : inherited (messageData_in,
               delete_in)
@@ -50,9 +49,9 @@ Test_I_MessageDataContainer::setPR (struct HTTP_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::setPR"));
 
-  struct Test_I_MessageData* data_p = NULL;
+  struct Test_I_URLStreamLoad_MessageData* data_p = NULL;
   ACE_NEW_NORETURN (data_p,
-                    struct Test_I_MessageData ());
+                    struct Test_I_URLStreamLoad_MessageData ());
   if (!data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,

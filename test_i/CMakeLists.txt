@@ -168,9 +168,12 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src/modules/lib>)
 endif ()
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>)
-target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src>)
+
+target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
+target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 if (GUI_SUPPORT)
  target_link_libraries (${PROJECT_NAME}_Test_I PUBLIC CommonUI)
@@ -218,6 +221,8 @@ add_dependencies (${PROJECT_NAME}_Test_I ACEStream)
 
 set (source_files
      test_i_common.h
+     test_i_configuration.h
+     test_i_connection_common.h
      test_i_defines.h
      test_i_stream_common.h)
 if (GUI_SUPPORT)
@@ -267,6 +272,7 @@ export (TARGETS ${PROJECT_NAME}_Test_I
 
 # ----------------------------------------
 
+add_subdirectory (av_stream)
 add_subdirectory (bittorrent_client)
 add_subdirectory (IRC_client)
 add_subdirectory (url_stream_load)
@@ -274,7 +280,7 @@ add_subdirectory (url_stream_load)
 add_custom_target (test_i ALL
                    COMMENT "building test_i..."
                    SOURCES ${ACENetwork_Test_I_SRCS})
-add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui url_stream_load)
+add_dependencies (test_i av_client av_server bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui url_stream_load)
 
 if (NOT BUILD_TEST_I)
  set_target_properties (test_i PROPERTIES EXCLUDE_FROM_ALL 1)

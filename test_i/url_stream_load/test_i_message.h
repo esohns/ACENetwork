@@ -42,22 +42,22 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_I_MessageDataContainer
- : public Stream_DataBase_T<struct Test_I_MessageData>
+ : public Stream_DataBase_T<struct Test_I_URLStreamLoad_MessageData>
  , public Common_ISetPR_T<struct HTTP_Record>
 {
+  typedef Stream_DataBase_T<struct Test_I_URLStreamLoad_MessageData> inherited;
+
  public:
    Test_I_MessageDataContainer ();
   // *IMPORTANT NOTE*: fire-and-forget API
-  Test_I_MessageDataContainer (struct Test_I_MessageData*&, // data handle
-                               bool = true);                // delete in dtor ?
+  Test_I_MessageDataContainer (struct Test_I_URLStreamLoad_MessageData*&, // data handle
+                               bool = true);                              // delete in dtor ?
   inline virtual ~Test_I_MessageDataContainer () {}
 
   // implement Common_ISetPP_T
   virtual void setPR (struct HTTP_Record*&);
 
  private:
-  typedef Stream_DataBase_T<struct Test_I_MessageData> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer (const Test_I_MessageDataContainer&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer& operator= (const Test_I_MessageDataContainer&))
 };

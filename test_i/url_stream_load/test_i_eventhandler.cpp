@@ -207,8 +207,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   Test_I_MessageDataContainer& data_container_r =
     const_cast<Test_I_MessageDataContainer&> (message_in.getR ());
-  struct Test_I_MessageData& data_r =
-    const_cast<struct Test_I_MessageData&> (data_container_r.getR ());
+  struct Test_I_URLStreamLoad_MessageData& data_r =
+    const_cast<struct Test_I_URLStreamLoad_MessageData&> (data_container_r.getR ());
   if (data_r.M3UPlaylist)
   {
     const struct M3U_Element& element_r = data_r.M3UPlaylist->front ();

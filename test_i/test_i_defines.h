@@ -23,6 +23,8 @@
 
 #include "ace/config-lite.h"
 
+#define TEST_I_STREAM_THREAD_NAME                        "stream processor"
+
 // event dispatch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS 1

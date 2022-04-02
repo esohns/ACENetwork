@@ -1,0 +1,10 @@
+LIBRARY camtarget_source_mf
+
+;DESCRIPTION "camtarget mediafoundation media source"
+
+EXPORTS
+  DllMain             PRIVATE
+  DllGetClassObject   PRIVATE
+  DllCanUnloadNow     PRIVATE
+  DllRegisterServer   PRIVATE
+  DllUnregisterServer PRIVATE

@@ -21,14 +21,97 @@
 #ifndef TEST_I_STREAM_COMMON_H
 #define TEST_I_STREAM_COMMON_H
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "mfidl.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
+#include "common_file_common.h"
+
 #include "stream_common.h"
+#include "stream_data_base.h"
 #include "stream_inotify.h"
 #include "stream_session_data.h"
+
+#include "stream_dev_common.h"
 
 #include "test_i_common.h"
 
 // forward declarations
 struct Net_ConnectionState;
+
+struct Test_I_MessageData
+{
+  Test_I_MessageData ()
+  {}
+
+  struct Test_I_MessageData& operator+= (const struct Test_I_MessageData& rhs_in)
+  {
+    return *this;
+  }
+};
+typedef Stream_DataBase_T<struct Test_I_MessageData> Test_I_MessageData_t;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct Test_I_DirectShow_MessageData
+ : Test_I_MessageData
+{
+  Test_I_DirectShow_MessageData ()
+   : Test_I_MessageData ()
+   , sample (NULL)
+   , sampleTime (0)
+  {}
+
+  // audio/video
+  IMediaSample* sample;
+  double        sampleTime;
+};
+typedef Stream_DataBase_T<struct Test_I_DirectShow_MessageData> Test_I_DirectShow_MessageData_t;
+
+struct Test_I_MediaFoundation_MessageData
+ : Test_I_MessageData
+{
+  Test_I_MediaFoundation_MessageData ()
+   : Test_I_MessageData ()
+   , sample (NULL)
+   , sampleTime (0)
+  {}
+
+  // audio/video
+  IMFSample* sample;
+  LONGLONG   sampleTime;
+};
+typedef Stream_DataBase_T<struct Test_I_MediaFoundation_MessageData> Test_I_MediaFoundation_MessageData_t;
+#else
+struct Test_I_ALSA_MessageData
+ : Test_I_MessageData
+{
+  Test_I_ALSA_MessageData ()
+   : Test_I_MessageData ()
+   , deviceHandle (NULL)
+   , release (false)
+  {}
+
+  struct _snd_pcm* deviceHandle; // (capture) device handle
+  bool             release;
+};
+
+struct Test_I_V4L_MessageData
+ : Test_I_MessageData
+{
+  Test_I_V4L_MessageData ()
+   : Test_I_MessageData ()
+   , device (-1)
+   , index (0)
+   , method (STREAM_LIB_V4L_DEFAULT_IO_METHOD)
+   , release (false)
+  {}
+
+  int         device; // (capture) device file descriptor
+  __u32       index;  // 'index' field of v4l2_buffer
+  v4l2_memory method;
+  bool        release;
+};
+typedef Stream_DataBase_T<struct Test_I_V4L_MessageData> Test_I_V4L_MessageData_t;
+#endif // ACE_WIN32 || ACE_WIN64
 
 struct Test_I_StreamSessionData
  : Stream_SessionData
@@ -36,14 +119,147 @@ struct Test_I_StreamSessionData
   Test_I_StreamSessionData ()
    : Stream_SessionData ()
    , connection (NULL)
-   , statistic ()
+   , fileIdentifier ()
   {};
 
-  Net_IINETConnection_t* connection;
+  struct Test_I_StreamSessionData& operator+= (const struct Test_I_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionData::operator+= (rhs_in);
 
-  Test_I_Statistic_t     statistic;
+    connection = (connection ? connection : rhs_in.connection);
+
+    fileIdentifier =
+      (fileIdentifier.empty () ? rhs_in.fileIdentifier : fileIdentifier);
+
+    return *this;
+  }
+
+  Net_IINETConnection_t*        connection;
+  struct Common_File_Identifier fileIdentifier; // target-
 };
 typedef Stream_SessionData_T<struct Test_I_StreamSessionData> Test_I_StreamSessionData_t;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+class Test_I_DirectShow_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                        struct _AMMediaType,
+                                        struct Stream_State,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_DirectShow_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                   struct _AMMediaType,
+                                   struct Stream_State,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+  {}
+
+  Test_I_DirectShow_StreamSessionData& operator+= (const Test_I_DirectShow_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                  struct _AMMediaType,
+                                  struct Stream_State,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+    return *this;
+  }
+};
+typedef Stream_SessionData_T<Test_I_DirectShow_StreamSessionData> Test_I_DirectShow_StreamSessionData_t;
+
+class Test_I_MediaFoundation_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                        IMFMediaType*,
+                                        struct Stream_State,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_MediaFoundation_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                   IMFMediaType*,
+                                   struct Stream_State,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+   , session (NULL)
+  {}
+
+  Test_I_MediaFoundation_StreamSessionData& operator+= (const Test_I_MediaFoundation_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                  IMFMediaType*,
+                                  struct Stream_State,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+    return *this;
+  }
+
+  IMFMediaSession* session;
+};
+typedef Stream_SessionData_T<Test_I_MediaFoundation_StreamSessionData> Test_I_MediaFoundation_StreamSessionData_t;
+#else
+class Test_I_ALSA_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                        struct Stream_MediaFramework_ALSA_MediaType,
+                                        struct Stream_State,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_ALSA_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                   struct Stream_MediaFramework_ALSA_MediaType,
+                                   struct Stream_State,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+  {}
+
+  Test_I_ALSA_StreamSessionData& operator+= (const Test_I_ALSA_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                  struct Stream_MediaFramework_ALSA_MediaType,
+                                  struct Stream_State,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+    return *this;
+  }
+};
+typedef Stream_SessionData_T<Test_I_ALSA_StreamSessionData> Test_I_ALSA_StreamSessionData_t;
+
+class Test_I_V4L_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                        struct Stream_MediaFramework_V4L_MediaType,
+                                        struct Stream_State,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_V4L_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                   struct Stream_MediaFramework_V4L_MediaType,
+                                   struct Stream_State,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+  {}
+
+  Test_I_V4L_StreamSessionData& operator+= (const Test_I_V4L_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+                                  struct Stream_MediaFramework_V4L_MediaType,
+                                  struct Stream_State,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+    return *this;
+  }
+};
+typedef Stream_SessionData_T<Test_I_V4L_StreamSessionData> Test_I_V4L_StreamSessionData_t;
+#endif // ACE_WIN32 || ACE_WIN64
 
 struct Test_I_StreamState
  : Stream_State
@@ -56,29 +272,131 @@ struct Test_I_StreamState
   struct Test_I_StreamSessionData* sessionData;
 };
 
-//typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct Test_I_DirectShow_StreamState
+ : Stream_State
+{
+  Test_I_DirectShow_StreamState ()
+   : Stream_State ()
+   , sessionData (NULL)
+  {}
 
-//enum Test_I_SAXParserStateBase
-//{
-//  SAXPARSER_STATE_INVALID = -1,
-//  ////////////////////////////////////////
-//  SAXPARSER_STATE_IN_HEAD = 0,
-//  SAXPARSER_STATE_IN_HTML,
-//  SAXPARSER_STATE_IN_BODY
-//  ////////////////////////////////////////
-//};
-//struct Test_I_SAXParserContext
-// : Stream_Module_HTMLParser_SAXParserContextBase
-//{
-//  inline Test_I_SAXParserContext ()
-//   : Stream_Module_HTMLParser_SAXParserContextBase ()
-//   , sessionData (NULL)
-//   , state (SAXPARSER_STATE_INVALID)
-//  {};
-//
-//  struct Test_I_StreamSessionData* sessionData;
-//
-//  enum Test_I_SAXParserStateBase   state;
-//};
+  Test_I_DirectShow_StreamSessionData* sessionData;
+};
+
+struct Test_I_MediaFoundation_StreamState
+ : Stream_State
+{
+  Test_I_MediaFoundation_StreamState ()
+   : Stream_State ()
+   , sessionData (NULL)
+  {}
+
+  Test_I_MediaFoundation_StreamSessionData* sessionData;
+};
+#else
+struct Test_I_ALSA_StreamState
+ : Stream_State
+{
+  Test_I_ALSA_StreamState ()
+   : Stream_State ()
+   , sessionData (NULL)
+  {}
+
+  Test_I_ALSA_StreamSessionData* sessionData;
+};
+#endif // ACE_WIN32 || ACE_WIN64
+
+struct Test_I_ModuleHandlerConfiguration
+ : virtual Stream_ModuleHandlerConfiguration
+{
+  Test_I_ModuleHandlerConfiguration ()
+   : Stream_ModuleHandlerConfiguration ()
+   , fileIdentifier ()
+   , printProgressDot (false)
+  {}
+
+  struct Common_File_Identifier fileIdentifier; // source-/target-
+  bool                          printProgressDot;
+};
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct Test_I_DirectShow_ModuleHandlerConfiguration
+ : Test_I_ModuleHandlerConfiguration
+{
+  Test_I_DirectShow_ModuleHandlerConfiguration ()
+   : Test_I_ModuleHandlerConfiguration ()
+   , builder (NULL)
+   , deviceIdentifier ()
+   , filterConfiguration (NULL)
+   , filterCLSID (GUID_NULL)
+   , outputFormat ()
+   , push (STREAM_LIB_DIRECTSHOW_FILTER_SOURCE_DEFAULT_PUSH)
+   , sampleIsDataMessage (false)
+  {
+    ACE_OS::memset (&outputFormat, 0, sizeof (struct _AMMediaType));
+  }
+
+  IGraphBuilder*                                               builder;
+  struct Stream_Device_Identifier                              deviceIdentifier;
+  struct Stream_MediaFramework_DirectShow_FilterConfiguration* filterConfiguration;
+  CLSID                                                        filterCLSID;
+  struct _AMMediaType                                          outputFormat;
+  // *IMPORTANT NOTE*: 'asynchronous' filters implement IAsyncReader (downstream
+  //                   filters 'pull' media samples), 'synchronous' filters
+  //                   implement IMemInputPin and 'push' media samples to
+  //                   downstream filters
+  bool                                                         push;
+  bool                                                         sampleIsDataMessage;
+};
+
+struct Test_I_MediaFoundation_ModuleHandlerConfiguration
+ : Test_I_ModuleHandlerConfiguration
+{
+  Test_I_MediaFoundation_ModuleHandlerConfiguration ()
+   : Test_I_ModuleHandlerConfiguration ()
+   , deviceIdentifier ()
+   , manageMediaSession (false)
+   , mediaFoundationConfiguration (NULL)
+   , outputFormat (NULL)
+   , session (NULL)
+  {}
+
+  struct Stream_Device_Identifier                             deviceIdentifier;
+  bool                                                        manageMediaSession;
+  struct Stream_MediaFramework_MediaFoundation_Configuration* mediaFoundationConfiguration;
+  IMFMediaType*                                               outputFormat;
+  IMFMediaSession*                                            session;
+};
+#else
+struct Test_I_ALSA_ModuleHandlerConfiguration
+ : Test_I_ModuleHandlerConfiguration
+{
+  Test_I_ALSA_ModuleHandlerConfiguration ()
+   : Test_I_ModuleHandlerConfiguration ()
+   , ALSAConfiguration (NULL)
+   , deviceIdentifier ()
+   , outputFormat ()
+  {
+    deviceIdentifier.identifier =
+        ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_CAPTURE_DEFAULT_DEVICE_NAME);
+  }
+
+  struct Stream_MediaFramework_ALSA_Configuration* ALSAConfiguration;
+  struct Stream_Device_Identifier                  deviceIdentifier;
+  struct Stream_MediaFramework_ALSA_MediaType      outputFormat;
+};
+#endif // ACE_WIN32 || ACE_WIN64
+
+struct Test_I_StreamConfiguration
+ : Stream_Configuration
+{
+  Test_I_StreamConfiguration ()
+   : Stream_Configuration ()
+   , fileIdentifier ()
+  {}
+
+  struct Common_File_Identifier fileIdentifier; // target-
+};
 
 #endif

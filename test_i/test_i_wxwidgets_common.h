@@ -38,17 +38,17 @@ struct Test_I_wxWidgets_ProgressData
    : Common_UI_wxWidgets_ProgressData ()
    , statistic ()
   {
-    ACE_OS::memset (&statistic, 0, sizeof (Test_I_Statistic_t));
+    ACE_OS::memset (&statistic, 0, sizeof (struct Stream_Statistic));
   }
 
-  Test_I_Statistic_t statistic;
+  struct Stream_Statistic statistic;
 };
 
 struct Test_I_wxWidgets_CBData
- : Test_I_UI_CBData
+ : Common_UI_wxWidgets_CBData
 {
   Test_I_wxWidgets_CBData ()
-   : Test_I_UI_CBData ()
+   : Common_UI_wxWidgets_CBData ()
    , progressData ()
    , UIState (NULL)
   {
@@ -60,10 +60,10 @@ struct Test_I_wxWidgets_CBData
 };
 
 struct Test_I_wxWidgets_ThreadData
- : Test_I_UI_ThreadData
+ : Common_UI_wxWidgets_ThreadData
 {
   Test_I_wxWidgets_ThreadData ()
-   : Test_I_UI_ThreadData ()
+   : Common_UI_wxWidgets_ThreadData ()
    , CBData (NULL)
   {}
 

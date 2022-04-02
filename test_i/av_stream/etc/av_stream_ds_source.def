@@ -1,0 +1,10 @@
+LIBRARY camtarget_source
+
+;DESCRIPTION "camtarget directshow source filter"
+
+EXPORTS
+  DllMain             PRIVATE
+  DllGetClassObject   PRIVATE
+  DllCanUnloadNow     PRIVATE
+  DllRegisterServer   PRIVATE
+  DllUnregisterServer PRIVATE
