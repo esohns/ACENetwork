@@ -4593,7 +4593,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   enum Net_TransportLayerType protocol = NET_TRANSPORTLAYER_INVALID;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_thread_t thread_id = std::numeric_limits<unsigned long>::max ();
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
       protocol = directshow_ui_cb_data_p->configuration->protocol;
@@ -4605,7 +4605,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
@@ -4717,8 +4717,8 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
 
   // --> user pressed play
 
-  if (ui_cb_data_p->isFirst)
-    ui_cb_data_p->isFirst = false;
+  if (ui_cb_data_base_p->isFirst)
+    ui_cb_data_base_p->isFirst = false;
 
   // step0: modify widgets
   gtk_action_set_stock_id (GTK_ACTION (toggleAction_in),
@@ -4753,7 +4753,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   //gtk_widget_set_sensitive (GTK_WIDGET (frame_p), false);
 
   // step1: set up progress reporting
-  ui_cb_data_p->progressData.transferred = 0;
+  ui_cb_data_base_p->progressData.transferred = 0;
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_PROGRESSBAR_NAME)));
@@ -4786,7 +4786,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
                               1, &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    switch (ui_cb_data_p->mediaFramework)
+    switch (ui_cb_data_base_p->mediaFramework)
     {
       case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
         ACE_OS::strcpy ((*directshow_modulehandler_iterator).second.second->deviceIdentifier.identifier._string,
@@ -4800,14 +4800,14 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                    ui_cb_data_p->mediaFramework));
+                    ui_cb_data_base_p->mediaFramework));
         return;
       }
     } // end SWITCH
 #else
     (*modulehandler_iterator).second.second->deviceIdentifier.identifier =
         g_value_get_string (&value);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -4825,7 +4825,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   unsigned short port_number =
     static_cast<unsigned short> (gtk_spin_button_get_value_as_int (spin_button_p));
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
@@ -4849,7 +4849,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
@@ -4870,7 +4870,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (radio_button_p)) ? NET_TRANSPORTLAYER_TCP
                                                                        : NET_TRANSPORTLAYER_UDP);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
       directshow_ui_cb_data_p->configuration->protocol = protocol;
@@ -4882,13 +4882,13 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
 #else
   ui_cb_data_p->configuration->protocol = protocol;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // retrieve buffer
   spin_button_p =
@@ -4896,7 +4896,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
   ACE_ASSERT (spin_button_p);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
       (*directshow_stream_iterator).second.configuration_->allocatorConfiguration->defaultBufferSize =
@@ -4912,21 +4912,21 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
 #else
 //  (*stream_iterator).second.configuration->allocatorConfiguration->defaultBufferSize =
 //    static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // sanity check(s)
   bool result_3 = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HRESULT result_2 = E_FAIL;
   IMFTopology* topology_p = NULL;
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     { 
@@ -4966,7 +4966,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
@@ -4984,7 +4984,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
 
   // step3: start processing thread
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
@@ -5021,12 +5021,12 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
   if (thread_data_p)
-    thread_data_p->mediaFramework = ui_cb_data_p->mediaFramework;
+    thread_data_p->mediaFramework = ui_cb_data_base_p->mediaFramework;
 #else
   ACE_NEW_NORETURN (thread_data_2,
                     struct Test_I_AVStream_Client_ALSA_V4L_ThreadData ());
@@ -5035,7 +5035,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     thread_data_2->CBData = ui_cb_data_p;
     thread_data_p = thread_data_2;
   } // end ELSE
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   if (!thread_data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -5085,7 +5085,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
 
     // step3: start progress reporting
 //    ACE_ASSERT (!ui_cb_data_p->progressData.eventSourceId);
-    ui_cb_data_p->progressData.eventSourceId =
+    ui_cb_data_base_p->progressData.eventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
       //                 &ui_cb_data_p->progressData,
@@ -5093,9 +5093,9 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
       g_timeout_add (//G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
                      COMMON_UI_REFRESH_DEFAULT_PROGRESS_MS, // ms (?)
                      idle_update_progress_source_cb,
-                     &ui_cb_data_p->progressData);// ,
+                     &ui_cb_data_base_p->progressData);// ,
                      //NULL);
-    if (!ui_cb_data_p->progressData.eventSourceId)
+    if (!ui_cb_data_base_p->progressData.eventSourceId)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_source_cb): \"%m\", returning\n")));
@@ -5110,13 +5110,14 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
 
       goto error;
     } // end IF
-    thread_data_p->eventSourceId = ui_cb_data_p->progressData.eventSourceId;
-    ui_cb_data_p->progressData.pendingActions[ui_cb_data_p->progressData.eventSourceId] =
+    thread_data_p->eventSourceId =
+      ui_cb_data_base_p->progressData.eventSourceId;
+    ui_cb_data_base_p->progressData.pendingActions[ui_cb_data_base_p->progressData.eventSourceId] =
       ACE_Thread_ID (thread_id, thread_handle);
     //    ACE_DEBUG ((LM_DEBUG,
     //                ACE_TEXT ("idle_update_progress_cb: %d\n"),
     //                event_source_id));
-    state_r.eventSourceIds.insert (ui_cb_data_p->progressData.eventSourceId);
+    state_r.eventSourceIds.insert (ui_cb_data_base_p->progressData.eventSourceId);
   } // end lock scope
 
   return;
@@ -7840,8 +7841,8 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
   (*stream_iterator).second.configuration_->format.video.frameRate.denominator =
       frame_rate_denominator;
 #endif // ACE_WIN32 || ACE_WIN64
-  set_capture_format (ui_cb_data_p);
-  update_buffer_size (ui_cb_data_p);
+  set_capture_format (ui_cb_data_base_p);
+  update_buffer_size (ui_cb_data_base_p);
 } // combobox_rate_changed_cb
 
 #if GTK_CHECK_VERSION(3,0,0)
