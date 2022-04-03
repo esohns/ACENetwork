@@ -239,6 +239,11 @@ if (GUI_SUPPORT)
        test_i_gtk_eventhandler.h
        test_i_gtk_eventhandler.inl)
  endif (GTK_SUPPORT)
+ if (QT_SUPPORT)
+  set (source_files
+       ${source_files}
+       test_i_qt_common.h)
+ endif (QT_SUPPORT)
  if (WXWIDGETS_SUPPORT)
   set (source_files
        ${source_files}
@@ -280,7 +285,10 @@ add_subdirectory (url_stream_load)
 add_custom_target (test_i ALL
                    COMMENT "building test_i..."
                    SOURCES ${ACENetwork_Test_I_SRCS})
-add_dependencies (test_i av_client av_server bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui url_stream_load)
+add_dependencies (test_i av_stream_client av_stream_server bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui url_stream_load)
+if (WIN32)
+ add_dependencies (test_i av_stream_ds_source av_stream_mf_source)
+endif (WIN32)
 
 if (NOT BUILD_TEST_I)
  set_target_properties (test_i PROPERTIES EXCLUDE_FROM_ALL 1)

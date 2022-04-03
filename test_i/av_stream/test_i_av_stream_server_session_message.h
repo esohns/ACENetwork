@@ -36,7 +36,7 @@ class ACE_Allocator;
 class Test_I_AVStream_Server_DirectShow_Message;
 class Test_I_AVStream_Server_MediaFoundation_Message;
 #endif
-class Test_I_AVStream_Server_Stream_Message;
+class Test_I_AVStream_Server_Message;
 //template <ACE_SYNCH_DECL,
 //          typename AllocatorConfigurationType,
 //          typename ControlMessageType,
@@ -139,19 +139,19 @@ class Test_I_AVStream_Server_MediaFoundation_SessionMessage
 class Test_I_AVStream_Server_SessionMessage
  : public Stream_SessionMessageBase_T<//struct Common_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      Test_I_AVStream_Server_SessionData_t,
+                                      Test_I_AVStream_Server_StreamSessionData_t,
                                       struct Stream_UserData>
 {
   typedef Stream_SessionMessageBase_T<//struct Common_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      Test_I_AVStream_Server_SessionData_t,
+                                      Test_I_AVStream_Server_StreamSessionData_t,
                                       struct Stream_UserData> inherited;
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                                  struct Common_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
-                                                 Test_I_AVStream_Server_Stream_Message,
+                                                 Test_I_AVStream_Server_Message,
                                                  Test_I_AVStream_Server_SessionMessage>;
 
  public:

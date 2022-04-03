@@ -119,17 +119,17 @@ typedef Stream_SessionData_T<Test_I_AVStream_Client_MediaFoundation_StreamSessio
 
 typedef Stream_SessionData_T<Test_I_AVStream_Server_MediaFoundation_StreamSessionData> Test_I_AVStream_Server_MediaFoundation_StreamSessionData_t;
 #else
-struct Test_I_AVStream_Client_V4L_ConnectionConfiguration;
+struct Test_I_AVStream_Client_ALSA_V4L_ConnectionConfiguration;
 struct Net_StreamConnectionState;
-struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration;
-class Test_I_AVStream_Client_V4L_StreamSessionData;
-struct Test_I_AVStream_Client_V4L_SocketHandlerConfiguration;
-class Test_I_AVStream_Client_V4L_Message;
-class Test_I_AVStream_Client_V4L_SessionMessage;
-struct Test_I_AVStream_Client_V4L_StreamConfiguration;
-struct Test_I_AVStream_Client_V4L_StreamState;
+struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration;
+class Test_I_AVStream_Client_ALSA_V4L_StreamSessionData;
+struct Test_I_AVStream_Client_ALSA_V4L_SocketHandlerConfiguration;
+class Test_I_AVStream_Client_ALSA_V4L_Message;
+class Test_I_AVStream_Client_ALSA_V4L_SessionMessage;
+struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration;
+struct Test_I_AVStream_Client_ALSA_V4L_StreamState;
 
-typedef Stream_SessionData_T<Test_I_AVStream_Client_V4L_StreamSessionData> Test_I_AVStream_Client_V4L_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData> Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -206,40 +206,40 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> Test_I_AVStream_Client_MediaFoundation_UDPConnectionManager_t;
 #else
 //extern const char stream_name_string_[];
-struct Test_I_AVStream_Client_V4L_StreamConfiguration;
-struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration;
+struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration;
+struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Test_I_AVStream_Client_V4L_StreamConfiguration,
-                               struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration> Test_I_AVStream_Client_V4L_StreamConfiguration_t;
-struct Test_I_AVStream_Client_V4L_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<Test_I_AVStream_Client_V4L_StreamConfiguration_t,
-                                            NET_TRANSPORTLAYER_TCP> Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t;
-typedef Net_StreamConnectionConfiguration_T<Test_I_AVStream_Client_V4L_StreamConfiguration_t,
-                                            NET_TRANSPORTLAYER_UDP> Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t;
+                               struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
+                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration> Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t;
+struct Test_I_AVStream_Client_ALSA_V4L_ConnectionConfiguration;
+typedef Net_StreamConnectionConfiguration_T<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t,
+                                            NET_TRANSPORTLAYER_TCP> Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t;
+typedef Net_StreamConnectionConfiguration_T<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t,
+                                            NET_TRANSPORTLAYER_UDP> Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t;
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                 Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
-                                 struct Net_UserData> Test_I_AVStream_Client_V4L_ITCPConnectionManager_t;
+                                 struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_ITCPConnectionManager_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+                                 Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
-                                 struct Net_UserData> Test_I_AVStream_Client_V4L_IUDPConnectionManager_t;
+                                 struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_IUDPConnectionManager_t;
 
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                 Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
-                                 struct Net_UserData> Test_I_AVStream_Client_V4L_TCPConnectionManager_t;
+                                 struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+                                 Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
-                                 struct Net_UserData> Test_I_AVStream_Client_V4L_UDPConnectionManager_t;
+                                 struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -413,38 +413,38 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
-                                      struct Test_I_AVStream_Client_V4L_StreamState,
-                                      struct Test_I_AVStream_Client_V4L_StreamConfiguration,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
-                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                                      Test_I_AVStream_Client_V4L_StreamSessionData,
-                                      Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                       Stream_ControlMessage_t,
-                                      Test_I_AVStream_Client_V4L_Message,
-                                      Test_I_AVStream_Client_V4L_SessionMessage,
+                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
                                       ACE_INET_Addr,
-                                      Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-                                      struct Stream_UserData> Test_I_AVStream_Client_V4L_Net_TCPStream_t;
+                                      Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t,
+                                      struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t;
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       stream_name_string_2,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
-                                      struct Test_I_AVStream_Client_V4L_StreamState,
-                                      struct Test_I_AVStream_Client_V4L_StreamConfiguration,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
-                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                                      Test_I_AVStream_Client_V4L_StreamSessionData,
-                                      Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                       Stream_ControlMessage_t,
-                                      Test_I_AVStream_Client_V4L_Message,
-                                      Test_I_AVStream_Client_V4L_SessionMessage,
+                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
                                       ACE_INET_Addr,
-                                      Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-                                      struct Stream_UserData> Test_I_AVStream_Client_V4L_Net_UDPStream_t;
+                                      Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t,
+                                      struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_Net_UDPStream_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
@@ -487,13 +487,13 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
 //                          Net_StreamStatistic_t> Test_I_AVStream_Server_MediaFoundation_IUDPConnection_t;
 #else
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          //Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+//                          //Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
 //                          struct Net_StreamConnectionState,
-//                          Net_StreamStatistic_t> Test_I_AVStream_Client_V4L_ITCPConnection_t;
+//                          Net_StreamStatistic_t> Test_I_AVStream_Client_ALSA_V4L_ITCPConnection_t;
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          //Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+//                          //Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
 //                          struct Net_StreamConnectionState,
-//                          Net_StreamStatistic_t> Test_I_AVStream_Client_V4L_IUDPConnection_t;
+//                          Net_StreamStatistic_t> Test_I_AVStream_Client_ALSA_V4L_IUDPConnection_t;
 //
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          //Test_I_AVStream_Server_TCPConnectionConfiguration_t,
@@ -585,40 +585,40 @@ typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
 #else
 typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                 Net_TCPSocketHandler_t,
-                                Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                 struct Net_StreamConnectionState,
                                 Net_StreamStatistic_t,
-                                Test_I_AVStream_Client_V4L_Net_TCPStream_t,
-                                struct Net_UserData> Test_I_AVStream_Client_V4L_TCPConnection_t;
+                                Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t,
+                                struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_TCPConnection_t;
 #if defined (SSL_SUPPORT)
 typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
                                 Net_SSLSocketHandler_t,
-                                Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                 struct Net_StreamConnectionState,
                                 Net_StreamStatistic_t,
-                                Test_I_AVStream_Client_V4L_Net_TCPStream_t,
-                                struct Net_UserData> Test_I_AVStream_Client_V4L_SSLConnection_t;
+                                Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t,
+                                struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_SSLConnection_t;
 #endif // SSL_SUPPORT
 typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
-                                      Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                      Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                       struct Net_StreamConnectionState,
                                       Net_StreamStatistic_t,
-                                      Test_I_AVStream_Client_V4L_Net_TCPStream_t,
-                                      struct Net_UserData> Test_I_AVStream_Client_V4L_AsynchTCPConnection_t;
+                                      Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t,
+                                      struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_AsynchTCPConnection_t;
 
 typedef Net_UDPConnectionBase_T<ACE_NULL_SYNCH,
                                 Net_UDPSocketHandler_t,
-                                Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+                                Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
                                 struct Net_StreamConnectionState,
                                 Net_StreamStatistic_t,
-                                Test_I_AVStream_Client_V4L_Net_UDPStream_t,
-                                struct Net_UserData> Test_I_AVStream_Client_V4L_UDPConnection_t;
+                                Test_I_AVStream_Client_ALSA_V4L_Net_UDPStream_t,
+                                struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_UDPConnection_t;
 typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
-                                      Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+                                      Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
                                       struct Net_StreamConnectionState,
                                       Net_StreamStatistic_t,
-                                      Test_I_AVStream_Client_V4L_Net_UDPStream_t,
-                                      struct Net_UserData> Test_I_AVStream_Client_V4L_AsynchUDPConnection_t;
+                                      Test_I_AVStream_Client_ALSA_V4L_Net_UDPStream_t,
+                                      struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_AsynchUDPConnection_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
@@ -635,9 +635,9 @@ typedef Net_IConnector_T<ACE_INET_Addr,
                          Test_I_AVStream_Client_MediaFoundation_UDPConnectionConfiguration_t> Test_I_AVStream_Client_MediaFoundation_IUDPConnector_t;
 #else
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t> Test_I_AVStream_Client_V4L_ITCPConnector_t;
+                         Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t> Test_I_AVStream_Client_ALSA_V4L_ITCPConnector_t;
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t> Test_I_AVStream_Client_V4L_IUDPConnector_t;
+                         Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t> Test_I_AVStream_Client_ALSA_V4L_IUDPConnector_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
@@ -739,51 +739,51 @@ typedef Net_Client_AsynchConnector_T<Test_I_AVStream_Client_MediaFoundation_Asyn
                                      struct Net_UserData> Test_I_AVStream_Client_MediaFoundation_UDPAsynchConnector_t;
 #else
 typedef Net_Client_Connector_T<ACE_NULL_SYNCH,
-                               Test_I_AVStream_Client_V4L_TCPConnection_t,
+                               Test_I_AVStream_Client_ALSA_V4L_TCPConnection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
-                               Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                               Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                struct Net_StreamConnectionState,
                                Net_StreamStatistic_t,
                                Net_TCPSocketConfiguration_t,
-                               Test_I_AVStream_Client_V4L_Net_TCPStream_t,
-                               struct Net_UserData> Test_I_AVStream_Client_V4L_TCPConnector_t;
+                               Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t,
+                               struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_TCPConnector_t;
 #if defined (SSL_SUPPORT)
-typedef Net_Client_SSL_Connector_T<Test_I_AVStream_Client_V4L_SSLConnection_t,
+typedef Net_Client_SSL_Connector_T<Test_I_AVStream_Client_ALSA_V4L_SSLConnection_t,
                                    ACE_SSL_SOCK_Connector,
-                                   Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                   Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                    struct Net_StreamConnectionState,
                                    Net_StreamStatistic_t,
-                                   Test_I_AVStream_Client_V4L_Net_TCPStream_t,
-                                   struct Net_UserData> Test_I_AVStream_Client_V4L_SSLConnector_t;
+                                   Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t,
+                                   struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_SSLConnector_t;
 #endif // SSL_SUPPORT
-typedef Net_Client_AsynchConnector_T<Test_I_AVStream_Client_V4L_AsynchTCPConnection_t,
+typedef Net_Client_AsynchConnector_T<Test_I_AVStream_Client_ALSA_V4L_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
-                                     Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                     Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                      struct Net_StreamConnectionState,
                                      Net_StreamStatistic_t,
                                      Net_TCPSocketConfiguration_t,
-                                     Test_I_AVStream_Client_V4L_Net_TCPStream_t,
-                                     struct Net_UserData> Test_I_AVStream_Client_V4L_TCPAsynchConnector_t;
+                                     Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t,
+                                     struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_TCPAsynchConnector_t;
 
 typedef Net_Client_Connector_T<ACE_NULL_SYNCH,
-                               Test_I_AVStream_Client_V4L_UDPConnection_t,
+                               Test_I_AVStream_Client_ALSA_V4L_UDPConnection_t,
                                Net_SOCK_Dgram,
                                ACE_INET_Addr,
-                               Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+                               Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
                                struct Net_StreamConnectionState,
                                Net_StreamStatistic_t,
                                Net_UDPSocketConfiguration_t,
-                               Test_I_AVStream_Client_V4L_Net_UDPStream_t,
-                               struct Net_UserData> Test_I_AVStream_Client_V4L_UDPConnector_t;
-typedef Net_Client_AsynchConnector_T<Test_I_AVStream_Client_V4L_AsynchUDPConnection_t,
+                               Test_I_AVStream_Client_ALSA_V4L_Net_UDPStream_t,
+                               struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_UDPConnector_t;
+typedef Net_Client_AsynchConnector_T<Test_I_AVStream_Client_ALSA_V4L_AsynchUDPConnection_t,
                                      ACE_INET_Addr,
-                                     Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+                                     Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
                                      struct Net_StreamConnectionState,
                                      Net_StreamStatistic_t,
                                      Net_UDPSocketConfiguration_t,
-                                     Test_I_AVStream_Client_V4L_Net_UDPStream_t,
-                                     struct Net_UserData> Test_I_AVStream_Client_V4L_UDPAsynchConnector_t;
+                                     Test_I_AVStream_Client_ALSA_V4L_Net_UDPStream_t,
+                                     struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_UDPAsynchConnector_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////

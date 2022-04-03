@@ -24,7 +24,7 @@
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 
-#include "stream_message_base.h"
+#include "stream_data_message_base.h"
 #include "stream_messageallocatorheap_base.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -144,13 +144,13 @@ class Test_I_AVStream_Server_MediaFoundation_Message
 };
 #else
 class Test_I_AVStream_Server_Message
- : public Stream_MessageBase_T<//struct Common_AllocatorConfiguration,
-                               enum Stream_MessageType,
-                               int>
+ : public Stream_DataMessageBase_T<struct Test_I_AVStream_Server_MessageData,
+                                   enum Stream_MessageType,
+                                   int>
 {
-  typedef Stream_MessageBase_T<//struct Common_AllocatorConfiguration,
-                               enum Stream_MessageType,
-                               int> inherited;
+  typedef Stream_DataMessageBase_T<struct Test_I_AVStream_Server_MessageData,
+                                   enum Stream_MessageType,
+                                   int> inherited;
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,

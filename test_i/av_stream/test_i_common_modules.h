@@ -161,17 +161,17 @@ typedef Stream_Dev_Cam_Source_MediaFoundation_T<ACE_MT_SYNCH,
 #else
 typedef Stream_Module_CamSource_V4L_T<ACE_MT_SYNCH,
                                       Stream_ControlMessage_t,
-                                      Test_I_AVStream_Client_V4L_Message,
-                                      Test_I_AVStream_Client_V4L_SessionMessage,
-                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
-                                      struct Test_I_AVStream_Client_V4L_StreamState,
-                                      Test_I_AVStream_Client_V4L_StreamSessionData,
-                                      Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
-                                      struct Stream_UserData> Test_I_AVStream_Client_V4L_CamSource;
+                                      struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_CamSource;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -213,18 +213,18 @@ typedef Stream_Module_Tagger_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                Stream_ControlMessage_t,
-                               Test_I_AVStream_Client_Message,
+                               Test_I_AVStream_Client_ALSA_V4L_Message,
                                Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
                                STREAM_MEDIATYPE_AUDIO,
-                               struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_Tagger;
+                               struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_V4L_Audio_Tagger;
 typedef Stream_Module_Tagger_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                Stream_ControlMessage_t,
-                               Test_I_AVStream_Client_Message,
+                               Test_I_AVStream_Client_ALSA_V4L_Message,
                                Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
                                STREAM_MEDIATYPE_VIDEO,
-                               struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_V4L_Tagger;
+                               struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_V4L_Video_Tagger;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -352,65 +352,65 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
 #else
 typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Stream_ControlMessage_t,
-                                     Test_I_AVStream_Client_V4L_Message,
-                                     Test_I_AVStream_Client_V4L_SessionMessage,
-                                     struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                     Test_I_AVStream_Client_ALSA_V4L_Message,
+                                     Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
-                                     struct Test_I_AVStream_Client_V4L_StreamState,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                      struct Stream_Statistic,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
-                                     Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-                                     struct Stream_UserData> Test_I_AVStream_Client_V4L_TCP_Writer_t;
+                                     Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t,
+                                     struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_TCP_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Stream_ControlMessage_t,
-                                     Test_I_AVStream_Client_V4L_Message,
-                                     Test_I_AVStream_Client_V4L_SessionMessage,
-                                     struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                     Test_I_AVStream_Client_ALSA_V4L_Message,
+                                     Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
-                                     struct Test_I_AVStream_Client_V4L_StreamState,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                      struct Stream_Statistic,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
-                                     Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-                                     struct Stream_UserData> Test_I_AVStream_Client_V4L_TCP_Reader_t;
+                                     Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t,
+                                     struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_TCP_Reader_t;
 
 typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Stream_ControlMessage_t,
-                                     Test_I_AVStream_Client_V4L_Message,
-                                     Test_I_AVStream_Client_V4L_SessionMessage,
-                                     struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                     Test_I_AVStream_Client_ALSA_V4L_Message,
+                                     Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
-                                     struct Test_I_AVStream_Client_V4L_StreamState,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                      struct Stream_Statistic,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
-                                     Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-                                     struct Stream_UserData> Test_I_AVStream_Client_V4L_UDP_Writer_t;
+                                     Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t,
+                                     struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_UDP_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Stream_ControlMessage_t,
-                                     Test_I_AVStream_Client_V4L_Message,
-                                     Test_I_AVStream_Client_V4L_SessionMessage,
-                                     struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                     Test_I_AVStream_Client_ALSA_V4L_Message,
+                                     Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
-                                     struct Test_I_AVStream_Client_V4L_StreamState,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                      struct Stream_Statistic,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
-                                     Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-                                     struct Stream_UserData> Test_I_AVStream_Client_V4L_UDP_Reader_t;
+                                     Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t,
+                                     struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_UDP_Reader_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -533,42 +533,42 @@ typedef Test_I_AVStream_Splitter_T<ACE_MT_SYNCH,
 
 typedef Test_I_AVStream_Streamer_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
-                                   struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                   struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                    Stream_ControlMessage_t,
-                                   Test_I_AVStream_Server_V4L_Message,
-                                   Test_I_AVStream_Server_V4L_SessionMessage,
-                                   struct Stream_UserData> Test_I_AVStream_Client_Streamer;
+                                   Test_I_AVStream_Client_ALSA_V4L_Message,
+                                   Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                   struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_Streamer;
 
 typedef Stream_Miscellaneous_Distributor_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
-                                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                                       Stream_ControlMessage_t,
-                                                      Test_I_AVStream_Client_V4L_Message,
-                                                      Test_I_AVStream_Client_V4L_SessionMessage,
-                                                      Test_I_AVStream_Client_V4L_StreamSessionData_t> Test_I_AVStream_Client_V4L_Distributor;
+                                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t> Test_I_AVStream_Client_ALSA_V4L_Distributor;
 
 //typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
 //                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+//                                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
 //                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Client_V4L_Message,
-//                                                      Test_I_AVStream_Client_V4L_SessionMessage,
+//                                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+//                                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
 //                                                      Test_I_CommandType_t,
 //                                                      struct Stream_Statistic,
 //                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Client_V4L_StreamSessionData,
-//                                                      Test_I_AVStream_Client_V4L_StreamSessionData_t> Test_I_AVStream_Client_Statistic_ReaderTask_t;
+//                                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+//                                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t> Test_I_AVStream_Client_Statistic_ReaderTask_t;
 //typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
 //                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+//                                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
 //                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Client_V4L_Message,
-//                                                      Test_I_AVStream_Client_V4L_SessionMessage,
+//                                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+//                                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
 //                                                      Test_I_CommandType_t,
 //                                                      struct Stream_Statistic,
 //                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Client_V4L_StreamSessionData,
-//                                                      Test_I_AVStream_Client_V4L_StreamSessionData_t> Test_I_AVStream_Client_Statistic_WriterTask_t;
+//                                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+//                                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t> Test_I_AVStream_Client_Statistic_WriterTask_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -628,27 +628,27 @@ typedef Stream_Vis_MediaFoundation_Target_Direct3D_T<ACE_MT_SYNCH,
 #if defined (GTK_SUPPORT)
 typedef Stream_Miscellaneous_Distributor_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
-                                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                                       Stream_ControlMessage_t,
-                                                      Test_I_AVStream_Client_V4L_Message,
-                                                      Test_I_AVStream_Client_V4L_SessionMessage,
-                                                      Test_I_AVStream_Client_V4L_StreamSessionData_t> Test_I_AVStream_Client_V4L_Distributor_Reader_t;
+                                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t> Test_I_AVStream_Client_ALSA_V4L_Distributor_Reader_t;
 typedef Stream_Miscellaneous_Distributor_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
-                                                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                                       Stream_ControlMessage_t,
-                                                      Test_I_AVStream_Client_V4L_Message,
-                                                      Test_I_AVStream_Client_V4L_SessionMessage,
-                                                      Test_I_AVStream_Client_V4L_StreamSessionData_t> Test_I_AVStream_Client_V4L_Distributor_Writer_t;
+                                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t> Test_I_AVStream_Client_ALSA_V4L_Distributor_Writer_t;
 
 typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
-                                       struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                       struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                        Stream_ControlMessage_t,
-                                       Test_I_AVStream_Client_V4L_Message,
-                                       Test_I_AVStream_Client_V4L_SessionMessage,
-                                       Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                       struct Stream_MediaFramework_V4L_MediaType> Test_I_AVStream_Client_V4L_Display;
+                                       Test_I_AVStream_Client_ALSA_V4L_Message,
+                                       Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                       Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                       struct Stream_MediaFramework_V4L_MediaType> Test_I_AVStream_Client_ALSA_V4L_Display;
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
@@ -691,21 +691,21 @@ typedef Stream_Visualization_LibAVResize_T<ACE_MT_SYNCH,
 #else
 typedef Stream_Decoder_LibAVConverter_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                        struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                         Stream_ControlMessage_t,
-                                        Test_I_AVStream_Client_V4L_Message,
-                                        Test_I_AVStream_Client_V4L_SessionMessage,
-                                        Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                        struct Stream_MediaFramework_ALSA_V4L_MediaType> Test_I_AVStream_Client_V4L_Converter;
+                                        Test_I_AVStream_Client_ALSA_V4L_Message,
+                                        Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                        struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_V4L_Converter;
 
 typedef Stream_Visualization_LibAVResize_T<ACE_MT_SYNCH,
                                            Common_TimePolicy_t,
-                                           struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                           struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                            Stream_ControlMessage_t,
-                                           Test_I_AVStream_Client_V4L_Message,
-                                           Test_I_AVStream_Client_V4L_SessionMessage,
-                                           Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                           struct Stream_MediaFramework_ALSA_V4L_MediaType> Test_I_AVStream_Client_V4L_Resize;
+                                           Test_I_AVStream_Client_ALSA_V4L_Message,
+                                           Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                           Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                           struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_V4L_Resize;
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
 
@@ -728,13 +728,13 @@ typedef Test_I_Stream_Module_EventHandler_T<struct Stream_ModuleConfiguration,
                                             struct Stream_UserData> Test_I_AVStream_Client_MediaFoundation_EventHandler;
 #else
 typedef Test_I_Stream_Module_EventHandler_T<struct Stream_ModuleConfiguration,
-                                            struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                            struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                             Stream_ControlMessage_t,
-                                            Test_I_AVStream_Client_V4L_Stream_Message,
-                                            Test_I_AVStream_Client_V4L_SessionMessage,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                            struct Stream_UserData> Test_I_AVStream_Client_V4L_Module_EventHandler;
+                                            Test_I_AVStream_Client_ALSA_V4L_Message,
+                                            Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                            Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                            Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                            struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler;
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
@@ -858,7 +858,6 @@ typedef Stream_Vis_Target_MediaFoundation_T<ACE_MT_SYNCH,
 //                                            Test_I_AVStream_Server_MediaFoundation_StreamSessionData_t> Test_I_AVStream_Server_Stream_DisplayNull;
 #else
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
 #if defined (FFMPEG_SUPPORT)
 typedef Stream_Visualization_LibAVResize_T<ACE_MT_SYNCH,
                                            Common_TimePolicy_t,
@@ -867,8 +866,9 @@ typedef Stream_Visualization_LibAVResize_T<ACE_MT_SYNCH,
                                            Test_I_AVStream_Server_Message,
                                            Test_I_AVStream_Server_SessionMessage,
                                            Test_I_AVStream_Server_StreamSessionData_t,
-                                           struct Stream_MediaFramework_FFMPEG_VideoMediaType> Test_I_AVStream_Server_Resize;
+                                           struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Resize;
 #endif // FFMPEG_SUPPORT
+#if defined (GTK_SUPPORT)
 typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
                                        struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
@@ -876,8 +876,8 @@ typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
                                        Test_I_AVStream_Server_Message,
                                        Test_I_AVStream_Server_SessionMessage,
                                        Test_I_AVStream_Server_StreamSessionData_t,
-                                       struct Stream_MediaFramework_FFMPEG_VideoMediaType> Test_I_AVStream_Server_Display;
-#endif // GTK_USE
+                                       struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Display;
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -938,12 +938,12 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessi
                               Stream_INotify_t,                                                // stream notification interface type
                               Test_I_Stream_MediaFoundation_CamSource);                        // writer type
 #else
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_V4L_StreamSessionData,                // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                       // session event type
-                              struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_dev_cam_source_v4l_module_name_string,
                               Stream_INotify_t,                                     // stream notification interface type
-                              Test_I_AVStream_Client_V4L_CamSource);                        // writer type
+                              Test_I_AVStream_Client_ALSA_V4L_CamSource);                        // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -978,13 +978,13 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_lib_tagger_module_name_string,
                               Stream_INotify_t,                                 // stream notification interface type
-                              Test_I_AVStream_Client_ALSA_Tagger);                       // writer type
+                              Test_I_AVStream_Client_ALSA_V4L_Audio_Tagger);                       // writer type
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                   // session data type
                               enum Stream_SessionMessageType,                   // session event type
                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_lib_tagger_module_name_string,
                               Stream_INotify_t,                                 // stream notification interface type
-                              Test_I_AVStream_Client_V4L_Tagger);                        // writer type
+                              Test_I_AVStream_Client_ALSA_V4L_Video_Tagger);                        // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1022,23 +1022,23 @@ DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_MediaFoundation_StreamSessionDa
                           Test_I_AVStream_Client_MediaFoundation_Module_UDPWriter_t,               // writer type
                           Test_I_AVStream_Client_MediaFoundation_Module_UDP_IO);                    // name
 #else
-DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_V4L_StreamSessionData,                // session data type
+DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
                           enum Stream_SessionMessageType,                       // session event type
-                          struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                          struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                           libacestream_default_net_io_module_name_string,
                           Stream_INotify_t,                                     // stream notification interface type
-                          Test_I_AVStream_Client_V4L_TCP_Reader_t,                      // reader type
-                          Test_I_AVStream_Client_V4L_TCP_Writer_t,                      // writer type
-                          Test_I_AVStream_Client_V4L_TCP_IO);                           // name
+                          Test_I_AVStream_Client_ALSA_V4L_TCP_Reader_t,                      // reader type
+                          Test_I_AVStream_Client_ALSA_V4L_TCP_Writer_t,                      // writer type
+                          Test_I_AVStream_Client_ALSA_V4L_TCP_IO);                           // name
 
-DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_V4L_StreamSessionData,                // session data type
+DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
                           enum Stream_SessionMessageType,                       // session event type
-                          struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                          struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                           libacestream_default_net_io_module_name_string,
                           Stream_INotify_t,                                     // stream notification interface type
-                          Test_I_AVStream_Client_V4L_UDP_Reader_t,                      // reader type
-                          Test_I_AVStream_Client_V4L_UDP_Writer_t,                      // writer type
-                          Test_I_AVStream_Client_V4L_UDP_IO);                           // name
+                          Test_I_AVStream_Client_ALSA_V4L_UDP_Reader_t,                      // reader type
+                          Test_I_AVStream_Client_ALSA_V4L_UDP_Writer_t,                      // writer type
+                          Test_I_AVStream_Client_ALSA_V4L_UDP_IO);                           // name
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1130,30 +1130,30 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,         
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_AVStream_Server_Splitter);                         // writer type
 
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_V4L_StreamSessionData,                 // session data type
-                              enum Stream_SessionMessageType,                           // session event type
-                              struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                    // session event type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_splitter_module_name_string,
-                              Stream_INotify_t,                                         // stream notification interface type
-                              Test_I_AVStream_Client_Splitter);                         // writer type
+                              Stream_INotify_t,                                                  // stream notification interface type
+                              Test_I_AVStream_Client_ALSA_V4L_Streamer);                         // writer type
 
-DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_V4L_StreamSessionData,                 // session data type
+DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
                           enum Stream_SessionMessageType,                               // session event type
-                          struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                          struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                           libacestream_default_misc_distributor_module_name_string,
                           Stream_INotify_t,                                             // stream notification interface type
-                          Test_I_AVStream_Client_V4L_Distributor::READER_TASK_T,        // reader type
-                          Test_I_AVStream_Client_V4L_Distributor,                       // writer type
-                          Test_I_AVStream_Client_V4L_Distributor);                      // name
+                          Test_I_AVStream_Client_ALSA_V4L_Distributor::READER_TASK_T,        // reader type
+                          Test_I_AVStream_Client_ALSA_V4L_Distributor,                       // writer type
+                          Test_I_AVStream_Client_ALSA_V4L_Distributor);                      // name
 
-//DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_V4L_StreamSessionData,                // session data type
+//DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
 //                          enum Stream_SessionMessageType,                       // session event type
-//                          struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+//                          struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
 //                          libacestream_default_stat_report_module_name_string,
 //                          Stream_INotify_t,                                     // stream notification interface type
 //                          Test_I_AVStream_Client_Statistic_ReaderTask_t,                 // reader type
 //                          Test_I_AVStream_Client_Statistic_WriterTask_t,                 // writer type
-//                          Test_I_AVStream_Client_V4L_StatisticReport);                  // name
+//                          Test_I_AVStream_Client_ALSA_V4L_StatisticReport);                  // name
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1172,21 +1172,21 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessi
 #else
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_V4L_StreamSessionData,                          // session data type
+DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                          // session data type
                           enum Stream_SessionMessageType,                         // session event type
-                          struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,    // module handler configuration type
+                          struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,    // module handler configuration type
                           libacestream_default_misc_distributor_module_name_string,
                           Stream_INotify_t,                                       // stream notification interface type
-                          Test_I_AVStream_Client_V4L_Distributor_Reader_t,                 // reader type
-                          Test_I_AVStream_Client_V4L_Distributor_Writer_t,                 // writer type
-                          Test_I_AVStream_Client_V4L_Distributor);                         // module name prefix
+                          Test_I_AVStream_Client_ALSA_V4L_Distributor_Reader_t,                 // reader type
+                          Test_I_AVStream_Client_ALSA_V4L_Distributor_Writer_t,                 // writer type
+                          Test_I_AVStream_Client_ALSA_V4L_Distributor);                         // module name prefix
 
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_V4L_StreamSessionData,                  // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                  // session data type
                               enum Stream_SessionMessageType,                         // session event type
-                              struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,   // module handler configuration type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,   // module handler configuration type
                               libacestream_default_vis_gtk_pixbuf_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
-                              Test_I_AVStream_Client_V4L_Display);                            // writer type
+                              Test_I_AVStream_Client_ALSA_V4L_Display);                            // writer type
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1219,19 +1219,19 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessi
                               Stream_INotify_t,                                                // stream notification interface type
                               Test_I_AVStream_Client_MediaFoundation_Resize);                           // writer type
 #else
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_V4L_StreamSessionData,                             // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                             // session data type
                               enum Stream_SessionMessageType,                            // session event type
-                              struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,       // module handler configuration type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,       // module handler configuration type
                               libacestream_default_dec_libav_decoder_module_name_string,
                               Stream_INotify_t,                                          // stream notification interface type
-                              Test_I_AVStream_Client_V4L_Converter);                              // writer type
+                              Test_I_AVStream_Client_ALSA_V4L_Converter);                              // writer type
 
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_V4L_StreamSessionData,                  // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                  // session data type
                               enum Stream_SessionMessageType,                         // session event type
-                              struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,   // module handler configuration type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,   // module handler configuration type
                               libacestream_default_vis_libav_resize_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
-                              Test_I_AVStream_Client_V4L_Resize);                            // writer type
+                              Test_I_AVStream_Client_ALSA_V4L_Resize);                            // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
 
@@ -1249,12 +1249,12 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessi
                               Stream_INotify_t,                                                // stream notification interface type
                               Test_I_AVStream_Client_MediaFoundation_EventHandler);                     // writer type
 #else
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_V4L_StreamSessionData,                // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                       // session event type
-                              struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
                               Stream_INotify_t,                                     // stream notification interface type
-                              Test_I_AVStream_Client_V4L_Module_EventHandler);              // writer type
+                              Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler);              // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1307,22 +1307,22 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_MediaFoundation_StreamSessi
                               Test_I_AVStream_Server_MediaFoundation_Display);                          // writer type
 #else
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
 #if defined (FFMPEG_SUPPORT)
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                  // session data type
-                              enum Stream_SessionMessageType,                         // session event type
-                              struct Test_I_AVStream_Server_ModuleHandlerConfiguration,   // module handler configuration type
-                              libacestream_default_vis_libav_resize_module_name_string,
-                              Stream_INotify_t,                                       // stream notification interface type
-                              Test_I_AVStream_Server_Resize);                             // writer type
+                             enum Stream_SessionMessageType,                         // session event type
+                             struct Test_I_AVStream_Server_ModuleHandlerConfiguration,   // module handler configuration type
+                             libacestream_default_vis_libav_resize_module_name_string,
+                             Stream_INotify_t,                                       // stream notification interface type
+                             Test_I_AVStream_Server_Resize);                             // writer type
 #endif // FFMPEG_SUPPORT
+#if defined (GTK_SUPPORT)
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                       // session data type
                               enum Stream_SessionMessageType,                         // session event type
                               struct Test_I_AVStream_Server_ModuleHandlerConfiguration,        // module handler configuration type
                               libacestream_default_vis_gtk_pixbuf_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
                               Test_I_AVStream_Server_Display);                                 // writer type
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 

@@ -95,8 +95,8 @@ struct Test_I_AVStream_Client_ConnectionConfiguration;
 struct Test_I_AVStream_Client_MediaFoundation_ConnectionState;
 struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration;
 #else
-struct Test_I_AVStream_Client_V4L_ConnectionState;
-struct Test_I_AVStream_Client_V4L_StreamConfiguration;
+struct Test_I_AVStream_Client_ALSA_V4L_ConnectionState;
+struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration;
 #endif // ACE_WIN32 || ACE_WIN64
 template <typename ConfigurationType>
 class Test_I_AVStream_Client_SignalHandler_T;
@@ -179,29 +179,29 @@ class Test_I_AVStream_Client_MediaFoundation_StreamSessionData
 };
 typedef Stream_SessionData_T<Test_I_AVStream_Client_MediaFoundation_StreamSessionData> Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t;
 #else
-class Test_I_AVStream_Client_V4L_StreamSessionData
- : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
-                                        struct Stream_MediaFramework_ALSA_V4L_MediaType,
-                                        struct Test_I_AVStream_Client_V4L_StreamState,
+class Test_I_AVStream_Client_ALSA_V4L_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
+                                        struct Stream_MediaFramework_ALSA_V4L_Format,
+                                        struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
                                         struct Stream_Statistic,
                                         struct Stream_UserData>
 {
  public:
-  Test_I_AVStream_Client_V4L_StreamSessionData ()
-   : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
-                                   struct Stream_MediaFramework_ALSA_V4L_MediaType,
-                                   struct Test_I_AVStream_Client_V4L_StreamState,
+  Test_I_AVStream_Client_ALSA_V4L_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
+                                   struct Stream_MediaFramework_ALSA_V4L_Format,
+                                   struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
    , connection (NULL)
   {}
 
-  Test_I_AVStream_Client_V4L_StreamSessionData& operator+= (const Test_I_AVStream_Client_V4L_StreamSessionData& rhs_in)
+  Test_I_AVStream_Client_ALSA_V4L_StreamSessionData& operator+= (const Test_I_AVStream_Client_ALSA_V4L_StreamSessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
-    Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
-                                  struct Stream_MediaFramework_ALSA_V4L_MediaType,
-                                  struct Test_I_AVStream_Client_V4L_StreamState,
+    Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
+                                  struct Stream_MediaFramework_ALSA_V4L_Format,
+                                  struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator+= (rhs_in);
 
@@ -212,7 +212,7 @@ class Test_I_AVStream_Client_V4L_StreamSessionData
 
   Net_IINETConnection_t* connection;
 };
-typedef Stream_SessionData_T<Test_I_AVStream_Client_V4L_StreamSessionData> Test_I_AVStream_Client_V4L_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData> Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 struct Stream_Statistic;
@@ -257,25 +257,25 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_AVStream_Client_MediaFoundation_Message,
                       Test_I_AVStream_Client_MediaFoundation_SessionMessage> Test_I_AVStream_Client_MediaFoundation_StreamBase_t;
 #else
-struct Test_I_AVStream_Client_V4L_StreamState;
-struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration;
-class Test_I_AVStream_Client_V4L_Stream_Message;
-class Test_I_AVStream_Client_V4L_SessionMessage;
+struct Test_I_AVStream_Client_ALSA_V4L_StreamState;
+struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration;
+class Test_I_AVStream_Client_ALSA_V4L_Message;
+class Test_I_AVStream_Client_ALSA_V4L_SessionMessage;
 typedef Stream_Base_T<ACE_MT_SYNCH,
                       Common_TimePolicy_t,
                       stream_name_string_,
                       enum Stream_ControlType,
                       enum Stream_SessionMessageType,
                       enum Stream_StateMachine_ControlState,
-                      struct Test_I_AVStream_Client_V4L_StreamState,
-                      struct Test_I_AVStream_Client_V4L_StreamConfiguration,
+                      struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                      struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                       struct Stream_Statistic,
-                      struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                      Test_I_AVStream_Client_V4L_StreamSessionData,
-                      Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                       Stream_ControlMessage_t,
-                      Test_I_AVStream_Client_V4L_Message,
-                      Test_I_AVStream_Client_V4L_SessionMessage> Test_I_AVStream_Client_V4L_StreamBase_t;
+                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_ALSA_V4L_StreamBase_t;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Client_DirectShow_StreamSessionData,
@@ -472,17 +472,17 @@ struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration
   IMFVideoDisplayControl*                                   windowController;
 };
 #else
-typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Client_V4L_StreamSessionData,
+typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
                                     enum Stream_SessionMessageType,
-                                    Test_I_AVStream_Client_V4L_Message,
-                                    Test_I_AVStream_Client_V4L_SessionMessage> Test_I_AVStream_Client_V4L_ISessionNotify_t;
-typedef std::list<Test_I_AVStream_Client_V4L_ISessionNotify_t*> Test_I_AVStream_Client_V4L_Subscribers_t;
-typedef Test_I_AVStream_Client_V4L_Subscribers_t::iterator Test_I_AVStream_Client_V4L_SubscribersIterator_t;
-struct Test_I_AVStream_Client_V4L_StreamConfiguration;
-struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration
+                                    Test_I_AVStream_Client_ALSA_V4L_Message,
+                                    Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_ALSA_V4L_ISessionNotify_t;
+typedef std::list<Test_I_AVStream_Client_ALSA_V4L_ISessionNotify_t*> Test_I_AVStream_Client_ALSA_V4L_Subscribers_t;
+typedef Test_I_AVStream_Client_ALSA_V4L_Subscribers_t::iterator Test_I_AVStream_Client_ALSA_V4L_SubscribersIterator_t;
+struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration;
+struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration
  : Test_I_AVStream_ModuleHandlerConfiguration
 {
-  Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration ()
+  Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration ()
    : Test_I_AVStream_ModuleHandlerConfiguration ()
 #if defined (GUI_SUPPORT)
    , area ()
@@ -515,15 +515,15 @@ struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration
   __u32                                         buffers; // v4l device buffers
   Net_IINETConnection_t*                        connection; // TCP target/IO module
   Net_ConnectionConfigurations_t*               connectionConfigurations;
-  Test_I_AVStream_Client_V4L_TCPConnectionManager_t*     connectionManager; // TCP IO module
+  Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t* connectionManager; // TCP IO module
   enum v4l2_memory                              method; // v4l2 camera source
   struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat; // display module
   //struct Stream_MediaFramework_V4L_MediaType     sourceFormat; // source module
   ACE_Time_Value                                statisticCollectionInterval;
   // *TODO*: remove this ASAP
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t*      streamConfiguration;
-  Test_I_AVStream_Client_V4L_ISessionNotify_t*           subscriber;
-  Test_I_AVStream_Client_V4L_Subscribers_t*              subscribers;
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t* streamConfiguration;
+  Test_I_AVStream_Client_ALSA_V4L_ISessionNotify_t*      subscriber;
+  Test_I_AVStream_Client_ALSA_V4L_Subscribers_t*         subscribers;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GdkWindow*                                    window;
@@ -570,20 +570,20 @@ struct Test_I_AVStream_Client_MediaFoundation_SignalHandlerConfiguration
 };
 typedef Test_I_AVStream_Client_SignalHandler_T<struct Test_I_AVStream_Client_MediaFoundation_SignalHandlerConfiguration> Test_I_AVStream_Client_MediaFoundation_SignalHandler_t;
 #else
-struct Test_I_AVStream_Client_V4L_SignalHandlerConfiguration
+struct Test_I_AVStream_Client_ALSA_V4L_SignalHandlerConfiguration
  : Test_I_SignalHandlerConfiguration
 {
-  Test_I_AVStream_Client_V4L_SignalHandlerConfiguration ()
+  Test_I_AVStream_Client_ALSA_V4L_SignalHandlerConfiguration ()
    : Test_I_SignalHandlerConfiguration ()
    , connectionManager (NULL)
    //   , statisticReportingInterval (0)
    , stream (NULL)
   {}
 
-  Test_I_AVStream_Client_V4L_TCPConnectionManager_t* connectionManager;
-  Test_I_AVStream_Client_V4L_StreamBase_t*           stream;
+  Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t* connectionManager;
+  Test_I_AVStream_Client_ALSA_V4L_StreamBase_t*           stream;
 };
-typedef Test_I_AVStream_Client_SignalHandler_T<struct Test_I_AVStream_Client_V4L_SignalHandlerConfiguration> Test_I_AVStream_Client_V4L_SignalHandler_t;
+typedef Test_I_AVStream_Client_SignalHandler_T<struct Test_I_AVStream_Client_ALSA_V4L_SignalHandlerConfiguration> Test_I_AVStream_Client_ALSA_V4L_SignalHandler_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -640,28 +640,28 @@ typedef std::map<std::string,
                  Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t> Test_I_AVStream_Client_MediaFoundation_StreamConfigurations_t;
 typedef Test_I_AVStream_Client_MediaFoundation_StreamConfigurations_t::iterator Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t;
 #else
-struct Test_I_AVStream_Client_V4L_StreamConfiguration
+struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration
  : Stream_Configuration
 {
-  Test_I_AVStream_Client_V4L_StreamConfiguration ()
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration ()
    : Stream_Configuration ()
    , format ()
    , module_2 (NULL)
   {}
 
   // **************************** stream data **********************************
-  struct Stream_MediaFramework_V4L_MediaType format;
-  Stream_Module_t*                           module_2;
+  struct Stream_MediaFramework_ALSA_V4L_Format format;
+  Stream_Module_t*                             module_2;
 };
 
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Test_I_AVStream_Client_V4L_StreamConfiguration,
-                               struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration> Test_I_AVStream_Client_V4L_StreamConfiguration_t;
-typedef Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T Test_I_AVStream_Client_V4L_StreamConfigurationIterator_t;
+                               struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
+                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration> Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t;
+typedef Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationIterator_t;
 typedef std::map<std::string,
-                 Test_I_AVStream_Client_V4L_StreamConfiguration_t> Test_I_AVStream_Client_V4L_StreamConfigurations_t;
-typedef Test_I_AVStream_Client_V4L_StreamConfigurations_t::iterator Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t;
+                 Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t> Test_I_AVStream_Client_ALSA_V4L_StreamConfigurations_t;
+typedef Test_I_AVStream_Client_ALSA_V4L_StreamConfigurations_t::iterator Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -687,15 +687,15 @@ struct Test_I_AVStream_Client_MediaFoundation_StreamState
   Test_I_AVStream_Client_MediaFoundation_StreamSessionData* sessionData;
 };
 #else
-struct Test_I_AVStream_Client_V4L_StreamState
+struct Test_I_AVStream_Client_ALSA_V4L_StreamState
  : Stream_State
 {
-  Test_I_AVStream_Client_V4L_StreamState ()
+  Test_I_AVStream_Client_ALSA_V4L_StreamState ()
    : Stream_State ()
    , sessionData (NULL)
   {}
 
-  Test_I_AVStream_Client_V4L_StreamSessionData* sessionData;
+  Test_I_AVStream_Client_ALSA_V4L_StreamSessionData* sessionData;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -739,10 +739,10 @@ struct Test_I_AVStream_Client_MediaFoundation_Configuration
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurations_t            streamConfigurations;
 };
 #else
-struct Test_I_AVStream_Client_V4L_Configuration
+struct Test_I_AVStream_Client_ALSA_V4L_Configuration
  : Test_I_AVStream_Configuration
 {
-  Test_I_AVStream_Client_V4L_Configuration ()
+  Test_I_AVStream_Client_ALSA_V4L_Configuration ()
    : Test_I_AVStream_Configuration ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
@@ -750,11 +750,11 @@ struct Test_I_AVStream_Client_V4L_Configuration
   {}
 
   // **************************** signal data **********************************
-  struct Test_I_AVStream_Client_V4L_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct Test_I_AVStream_Client_ALSA_V4L_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  Net_ConnectionConfigurations_t                      connectionConfigurations;
+  Net_ConnectionConfigurations_t                                    connectionConfigurations;
   // **************************** stream data **********************************
-  Test_I_AVStream_Client_V4L_StreamConfigurations_t            streamConfigurations;
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurations_t            streamConfigurations;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -792,17 +792,17 @@ typedef Common_ISubscribe_T<Test_I_AVStream_Client_MediaFoundation_ISessionNotif
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           struct Common_AllocatorConfiguration,
                                           Stream_ControlMessage_t,
-                                          Test_I_AVStream_Client_V4L_Message,
-                                          Test_I_AVStream_Client_V4L_SessionMessage> Test_I_AVStream_Client_V4L_MessageAllocator_t;
+                                          Test_I_AVStream_Client_ALSA_V4L_Message,
+                                          Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_ALSA_V4L_MessageAllocator_t;
 
-struct Test_I_AVStream_Client_V4L_UI_CBData;
-typedef Test_I_AVStream_Client_EventHandler_T<Test_I_AVStream_Client_V4L_StreamSessionData,
+struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData;
+typedef Test_I_AVStream_Client_EventHandler_T<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
                                               enum Stream_SessionMessageType,
-                                              Test_I_AVStream_Client_V4L_Message,
-                                              Test_I_AVStream_Client_V4L_SessionMessage,
-                                              struct Test_I_AVStream_Client_V4L_UI_CBData> Test_I_AVStream_Client_V4L_EventHandler_t;
+                                              Test_I_AVStream_Client_ALSA_V4L_Message,
+                                              Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                              struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData> Test_I_AVStream_Client_ALSA_V4L_EventHandler_t;
 
-typedef Common_ISubscribe_T<Test_I_AVStream_Client_V4L_ISessionNotify_t> Test_I_AVStream_Client_V4L_ISubscribe_t;
+typedef Common_ISubscribe_T<Test_I_AVStream_Client_ALSA_V4L_ISessionNotify_t> Test_I_AVStream_Client_ALSA_V4L_ISubscribe_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
@@ -849,10 +849,10 @@ struct Test_I_AVStream_Client_MediaFoundation_UI_CBData
   Test_I_AVStream_Client_MediaFoundation_StreamBase_t*         UDPStream;
 };
 #else
-struct Test_I_AVStream_Client_V4L_UI_CBData
+struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData
  : Test_I_AVStream_UI_CBData
 {
-  Test_I_AVStream_Client_V4L_UI_CBData ()
+  Test_I_AVStream_Client_ALSA_V4L_UI_CBData ()
    : Test_I_AVStream_UI_CBData ()
    , configuration (NULL)
    , fileDescriptor (-1)
@@ -862,12 +862,12 @@ struct Test_I_AVStream_Client_V4L_UI_CBData
    , UDPStream (NULL)
   {}
 
-  struct Test_I_AVStream_Client_V4L_Configuration* configuration;
-  int                                              fileDescriptor; // (capture) device file descriptor
-  Test_I_AVStream_Client_V4L_StreamBase_t*         stream;
-  Test_I_AVStream_Client_V4L_Subscribers_t         subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX                        subscribersLock;
-  Test_I_AVStream_Client_V4L_StreamBase_t*         UDPStream;
+  struct Test_I_AVStream_Client_ALSA_V4L_Configuration* configuration;
+  int                                                   fileDescriptor; // (capture) device file descriptor
+  Test_I_AVStream_Client_ALSA_V4L_StreamBase_t*         stream;
+  Test_I_AVStream_Client_ALSA_V4L_Subscribers_t         subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX                             subscribersLock;
+  Test_I_AVStream_Client_ALSA_V4L_StreamBase_t*         UDPStream;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -894,15 +894,15 @@ struct Test_I_AVStream_Client_MediaFoundation_ThreadData
   struct Test_I_AVStream_Client_MediaFoundation_UI_CBData* CBData;
 };
 #else
-struct Test_I_AVStream_Client_V4L_ThreadData
+struct Test_I_AVStream_Client_ALSA_V4L_ThreadData
  : Test_I_AVStream_ThreadData
 {
-  Test_I_AVStream_Client_V4L_ThreadData ()
+  Test_I_AVStream_Client_ALSA_V4L_ThreadData ()
    : Test_I_AVStream_ThreadData ()
    , CBData (NULL)
   {}
 
-  struct Test_I_AVStream_Client_V4L_UI_CBData* CBData;
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* CBData;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // GUI_SUPPORT

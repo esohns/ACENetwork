@@ -57,61 +57,18 @@ typedef Test_I_AVStream_Client_MediaFoundation_Stream_T<Test_I_AVStream_Client_M
 typedef Test_I_AVStream_Client_MediaFoundation_Stream_T<Test_I_AVStream_Client_MediaFoundation_UDPConnectionManager_t,
                                                         Test_I_AVStream_Client_MediaFoundation_UDPAsynchConnector_t> Test_I_AVStream_Client_MediaFoundation_AsynchUDPStream_t;
 #else
-typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-                                            struct Test_I_AVStream_Client_V4L_StreamConfiguration,
-                                            Common_Timer_Manager_t,
-                                            struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                            Stream_ControlMessage_t,
-                                            Test_I_AVStream_Client_V4L_Message,
-                                            Test_I_AVStream_Client_V4L_SessionMessage,
-                                            Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-                                            Test_I_AVStream_Client_V4L_TCPConnector_t> Test_I_AVStream_Client_V4L_TCPStream_t;
-typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-                                            struct Test_I_AVStream_Client_V4L_StreamConfiguration,
-                                            Common_Timer_Manager_t,
-                                            struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                            Stream_ControlMessage_t,
-                                            Test_I_AVStream_Client_V4L_Message,
-                                            Test_I_AVStream_Client_V4L_SessionMessage,
-                                            Test_I_AVStream_Client_V4L_InetConnectionManager_t,
-                                            Test_I_AVStream_Client_V4L_SSLTCPConnector_t> Test_I_AVStream_Client_V4L_SSLTCPStream_t;
-typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-                                            struct Test_I_AVStream_Client_V4L_StreamConfiguration,
-                                            Common_Timer_Manager_t,
-                                            struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                            Stream_ControlMessage_t,
-                                            Test_I_AVStream_Client_V4L_Message,
-                                            Test_I_AVStream_Client_V4L_SessionMessage,
-                                            Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-                                            Test_I_AVStream_Client_V4L_TCPAsynchConnector_t> Test_I_AVStream_Client_V4L_AsynchTCPStream_t;
-typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-                                            struct Test_I_AVStream_Client_V4L_StreamConfiguration,
-                                            Common_Timer_Manager_t,
-                                            struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                            Stream_ControlMessage_t,
-                                            Test_I_AVStream_Client_V4L_Message,
-                                            Test_I_AVStream_Client_V4L_SessionMessage,
-                                            Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-                                            Test_I_AVStream_Client_V4L_UDPConnector_t> Test_I_AVStream_Client_V4L_UDPStream_t;
-typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-                                            struct Test_I_AVStream_Client_V4L_StreamConfiguration,
-                                            Common_Timer_Manager_t,
-                                            struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData,
-                                            Test_I_AVStream_Client_V4L_StreamSessionData_t,
-                                            Stream_ControlMessage_t,
-                                            Test_I_AVStream_Client_V4L_Message,
-                                            Test_I_AVStream_Client_V4L_SessionMessage,
-                                            Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-                                            Test_I_AVStream_Client_V4L_UDPAsynchConnector_t> Test_I_AVStream_Client_V4L_AsynchUDPStream_t;
+typedef Test_I_AVStream_Client_V4L_Stream_T<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t,
+                                            Test_I_AVStream_Client_ALSA_V4L_TCPConnector_t> Test_I_AVStream_Client_V4L_TCPStream_t;
+#if defined (SSL_SUPPORT)
+typedef Test_I_AVStream_Client_V4L_Stream_T<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t,
+                                            Test_I_AVStream_Client_ALSA_V4L_SSLConnector_t> Test_I_AVStream_Client_V4L_SSLStream_t;
+#endif // SSL_SUPPORT
+typedef Test_I_AVStream_Client_V4L_Stream_T<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t,
+                                            Test_I_AVStream_Client_ALSA_V4L_TCPAsynchConnector_t> Test_I_AVStream_Client_V4L_AsynchTCPStream_t;
+typedef Test_I_AVStream_Client_V4L_Stream_T<Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t,
+                                            Test_I_AVStream_Client_ALSA_V4L_UDPConnector_t> Test_I_AVStream_Client_V4L_UDPStream_t;
+typedef Test_I_AVStream_Client_V4L_Stream_T<Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t,
+                                            Test_I_AVStream_Client_ALSA_V4L_UDPAsynchConnector_t> Test_I_AVStream_Client_V4L_AsynchUDPStream_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #endif

@@ -153,7 +153,9 @@ class Test_I_AVStream_Client_MediaFoundation_Message
   enum Stream_MediaType_Type mediaType_;
 };
 #else
-class Test_I_AVStream_Client_V4L_Message
+class Test_I_AVStream_Client_ALSA_V4L_SessionMessage;
+
+class Test_I_AVStream_Client_ALSA_V4L_Message
  : public Stream_DataMessageBase_T<struct Test_I_V4L_MessageData,
                                    enum Stream_MessageType,
                                    enum Stream_MediaType_Type>
@@ -168,13 +170,13 @@ class Test_I_AVStream_Client_V4L_Message
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                                  struct Common_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
-                                                 Test_I_AVStream_Client_V4L_Message,
-                                                 Test_I_Source_V4L_SessionMessage>;
+                                                 Test_I_AVStream_Client_ALSA_V4L_Message,
+                                                 Test_I_AVStream_Client_ALSA_V4L_SessionMessage>;
 
  public:
-  Test_I_AVStream_Client_V4L_Message (Stream_SessionId_t, // session id
+  Test_I_AVStream_Client_ALSA_V4L_Message (Stream_SessionId_t, // session id
                                       unsigned int);      // size
-  inline virtual ~Test_I_AVStream_Client_V4L_Message () {}
+  inline virtual ~Test_I_AVStream_Client_ALSA_V4L_Message () {}
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -192,18 +194,18 @@ class Test_I_AVStream_Client_V4L_Message
  protected:
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
-  Test_I_AVStream_Client_V4L_Message (const Test_I_AVStream_Client_V4L_Message&);
+  Test_I_AVStream_Client_ALSA_V4L_Message (const Test_I_AVStream_Client_ALSA_V4L_Message&);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_V4L_Message ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_ALSA_V4L_Message ())
   // *NOTE*: to be used by message allocators
-  Test_I_AVStream_Client_V4L_Message (Stream_SessionId_t, // session id
-                                      ACE_Data_Block*,    // data block
-                                      ACE_Allocator*,     // message allocator
-                                      bool = true);       // increment running message counter ?
-  Test_I_AVStream_Client_V4L_Message (Stream_SessionId_t, // session id
-                                      ACE_Allocator*);    // message allocator
-  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_V4L_Message& operator= (const Test_I_AVStream_Client_V4L_Message&))
+  Test_I_AVStream_Client_ALSA_V4L_Message (Stream_SessionId_t, // session id
+                                           ACE_Data_Block*,    // data block
+                                           ACE_Allocator*,     // message allocator
+                                           bool = true);       // increment running message counter ?
+  Test_I_AVStream_Client_ALSA_V4L_Message (Stream_SessionId_t, // session id
+                                           ACE_Allocator*);    // message allocator
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_ALSA_V4L_Message& operator= (const Test_I_AVStream_Client_ALSA_V4L_Message&))
 
   enum Stream_MediaType_Type mediaType_;
 };

@@ -25,6 +25,7 @@
 #include "ace/Message_Block.h"
 
 #include "test_i_av_stream_common.h"
+#undef YYTOKENTYPE
 #include "test_i_av_stream_parser.h"
 
 // forward declaration(s)

@@ -208,15 +208,15 @@ struct Test_I_AVStream_MediaFoundation_StreamSessionData
 };
 //typedef Stream_SessionData_T<Test_I_AVStream_MediaFoundation_StreamSessionData> Test_I_AVStream_MediaFoundation_StreamSessionData_t;
 #else
-struct Test_I_AVStream_V4L_StreamSessionData
+struct Test_I_AVStream_ALSA_V4L_StreamSessionData
  : Test_I_StreamSessionData
- , stream (NULL)
 {
-  Test_I_AVStream_V4L_StreamSessionData ()
+  Test_I_AVStream_ALSA_V4L_StreamSessionData ()
    : Test_I_StreamSessionData ()
+   , stream (NULL)
   {}
 
-  struct Test_I_AVStream_V4L_StreamSessionData& operator+= (const struct Test_I_AVStream_V4L_StreamSessionData& rhs_in)
+  struct Test_I_AVStream_ALSA_V4L_StreamSessionData& operator+= (const struct Test_I_AVStream_ALSA_V4L_StreamSessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
     Test_I_StreamSessionData::operator+= (rhs_in);

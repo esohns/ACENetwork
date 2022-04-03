@@ -1392,13 +1392,13 @@ set_capture_format (struct Test_I_AVStream_UI_CBData* CBData_in)
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (CBData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (CBData_in);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif
@@ -1557,21 +1557,21 @@ set_capture_format (struct Test_I_AVStream_UI_CBData* CBData_in)
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.format.pixelformat =
+  (*stream_iterator).second.configuration_->format.video.format.pixelformat =
     format_i;
-  (*stream_iterator).second.configuration_->format.format.height = height;
-  (*stream_iterator).second.configuration_->format.format.width = width;
+  (*stream_iterator).second.configuration_->format.video.format.height = height;
+  (*stream_iterator).second.configuration_->format.video.format.width = width;
 //retry:
-  if (unlikely (!Stream_Device_Tools::setFormat (V4L_ui_cb_data_p->fileDescriptor,
-                                                 (*stream_iterator).second.configuration_->format.format)))
+  if (unlikely (!Stream_Device_Tools::setFormat (ui_cb_data_p->fileDescriptor,
+                                                 (*stream_iterator).second.configuration_->format.video.format)))
   {
 //    static bool retried_set_format_b = false;
 //    if (!retried_set_format_b)
 //    { retried_set_format_b = true;
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to Stream_Device_Tools::setFormat(), retrying\n")));
-//      v4l2_close (V4L_ui_cb_data_p->fileDescriptor); V4L_ui_cb_data_p->fileDescriptor = -1;
-//      V4L_ui_cb_data_p->fileDescriptor = v4l2_open ();
+//      v4l2_close (ui_cb_data_p->fileDescriptor); ui_cb_data_p->fileDescriptor = -1;
+//      ui_cb_data_p->fileDescriptor = v4l2_open ();
 //      goto retry;
 //    } // end IF
     ACE_DEBUG ((LM_ERROR,
@@ -1643,13 +1643,13 @@ update_buffer_size (struct Test_I_AVStream_UI_CBData* CBData_in)
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (CBData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (CBData_in);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif
@@ -1709,7 +1709,7 @@ update_buffer_size (struct Test_I_AVStream_UI_CBData* CBData_in)
   } // end SWITCH
 #else
   frame_size_i =
-      (*stream_iterator).second.configuration_->format.format.sizeimage;
+      (*stream_iterator).second.configuration_->format.video.format.sizeimage;
 #endif // ACE_WIN32 || ACE_WIN64
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<gdouble> (frame_size_i));
@@ -1809,8 +1809,8 @@ stream_processing_function (void* arg_in)
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_ThreadData* V4L_thread_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_ThreadData*> (arg_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_ThreadData* V4L_thread_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_ThreadData*> (arg_in);
   // sanity check(s)
   ACE_ASSERT (V4L_thread_data_p->CBData);
   ACE_ASSERT (V4L_thread_data_p->CBData->configuration);
@@ -1822,10 +1822,10 @@ stream_processing_function (void* arg_in)
   // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
     V4L_thread_data_p->CBData->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != V4L_thread_data_p->CBData->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1883,10 +1883,10 @@ stream_processing_function (void* arg_in)
         //(*iterator_2).second.second->stream = ui_cb_data_p->CBData->stream;
         result_2 =
           V4L_thread_data_p->CBData->stream->initialize ((*stream_iterator).second);
-        const Test_I_AVStream_Client_V4L_StreamSessionData_t* session_data_container_p =
+        const Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t* session_data_container_p =
           &V4L_thread_data_p->CBData->stream->getR_2 ();
         session_ui_cb_data_p =
-          &const_cast<Test_I_AVStream_Client_V4L_StreamSessionData&> (session_data_container_p->getR ());
+          &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_data_container_p->getR ());
 #endif // ACE_WIN32 || ACE_WIN64
         break;
       }
@@ -1934,10 +1934,10 @@ stream_processing_function (void* arg_in)
         //(*iterator_2).second.stream = ui_cb_data_p->CBData->UDPStream;
         result_2 =
           V4L_thread_data_p->CBData->UDPStream->initialize ((*stream_iterator).second);
-        const Test_I_AVStream_Client_V4L_StreamSessionData_t* session_data_container_p =
+        const Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t* session_data_container_p =
           &V4L_thread_data_p->CBData->UDPStream->getR_2 ();
         session_ui_cb_data_p =
-          &const_cast<Test_I_AVStream_Client_V4L_StreamSessionData&> (session_data_container_p->getR ());
+          &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_data_container_p->getR ());
 #endif // ACE_WIN32 || ACE_WIN64
         break;
       }
@@ -2117,15 +2117,15 @@ idle_initialize_source_UI_cb (gpointer userData_in)
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
   // sanity check(s)
-  ACE_ASSERT (V4L_ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->configuration);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -2365,15 +2365,15 @@ idle_initialize_source_UI_cb (gpointer userData_in)
   } // end SWITCH
 #else
   Net_ConnectionConfigurationsIterator_t iterator_2 =
-    V4L_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != V4L_ui_cb_data_p->configuration->connectionConfigurations.end ());
+    ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != ui_cb_data_p->configuration->connectionConfigurations.end ());
   ACE_INET_Addr address_s =
       NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.address;
   string_p = address_s.get_host_name ();
   port_number = address_s.get_port_number ();
-  protocol = V4L_ui_cb_data_p->configuration->protocol;
+  protocol = ui_cb_data_p->configuration->protocol;
   use_reactor =
-          (V4L_ui_cb_data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0);
+          (ui_cb_data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0);
   use_loopback =
     NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice;
   buffer_size =
@@ -2770,10 +2770,10 @@ idle_initialize_source_UI_cb (gpointer userData_in)
     }
   } // end SWITCH
 #else
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t iterator_3 =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (iterator_3 != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T iterator_4 =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t iterator_3 =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+      ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator_4 =
       (*iterator_3).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4 != (*iterator_3).second.end ());
   ACE_ASSERT (!(*iterator_4).second.second->window);
@@ -2828,8 +2828,8 @@ idle_initialize_source_UI_cb (gpointer userData_in)
   (*iterator_4).second.second->area.width =
       static_cast<__u32> (allocation.width);
 
-  ACE_ASSERT (!V4L_ui_cb_data_p->pixelBuffer);
-  V4L_ui_cb_data_p->pixelBuffer =
+  ACE_ASSERT (!ui_cb_data_p->pixelBuffer);
+  ui_cb_data_p->pixelBuffer =
 #if GTK_CHECK_VERSION (3,0,0)
       gdk_pixbuf_get_from_window ((*iterator_4).second.second->window,
                                   0, 0,
@@ -2841,13 +2841,13 @@ idle_initialize_source_UI_cb (gpointer userData_in)
                                     0, 0,
                                     0, 0, allocation.width, allocation.height);
 #endif
-  if (!V4L_ui_cb_data_p->pixelBuffer)
+  if (!ui_cb_data_p->pixelBuffer)
   { // *NOTE*: most probable reason: window is not mapped
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gdk_pixbuf_get_from_window(), aborting\n")));
     return G_SOURCE_REMOVE;
   } // end IF
-  (*iterator_4).second.second->pixelBuffer = V4L_ui_cb_data_p->pixelBuffer;
+  (*iterator_4).second.second->pixelBuffer = ui_cb_data_p->pixelBuffer;
 #endif
 
   // step11: select default capture source (if any)
@@ -4170,8 +4170,8 @@ idle_finalize_source_UI_cb (gpointer userData_in)
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
 
   // clean up
   int result = -1;
@@ -4254,10 +4254,10 @@ idle_update_info_display_cb (gpointer userData_in)
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
   // sanity check(s)
-  ACE_ASSERT (V4L_ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->configuration);
 #endif
   GtkSpinButton* spin_button_p = NULL;
   bool is_session_message = false;
@@ -4518,9 +4518,9 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   // --> user pressed play/pause/stop
 
   // sanity check(s)
-  struct Test_I_AVStream_UI_CBData* ui_cb_data_p =
+  struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
     static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
-  ACE_ASSERT (ui_cb_data_p);
+  ACE_ASSERT (ui_cb_data_base_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -4537,7 +4537,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t mediafoundation_stream_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
@@ -4567,26 +4567,26 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  // sanity check(s)
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
-#endif
-
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+#endif // ACE_WIN32 || ACE_WIN64
 
   // sanity check(s)
-  ACE_ASSERT (ui_cb_data_p);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (ui_cb_data_base_p);
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   struct Test_I_AVStream_ThreadData* thread_data_p = NULL;
@@ -4610,9 +4610,9 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_ThreadData* thread_data_2 = NULL;
+  struct Test_I_AVStream_Client_ALSA_V4L_ThreadData* thread_data_2 = NULL;
   ACE_thread_t thread_id = -1;
-  protocol = V4L_ui_cb_data_p->configuration->protocol;
+  protocol = ui_cb_data_p->configuration->protocol;
 #endif
   ACE_hthread_t thread_handle;
   ACE_TCHAR thread_name[BUFSIZ];
@@ -4626,7 +4626,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     case NET_TRANSPORTLAYER_TCP:
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      switch (ui_cb_data_p->mediaFramework)
+      switch (ui_cb_data_base_p->mediaFramework)
       {
         case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
           stream_p = directshow_ui_cb_data_p->stream;
@@ -4638,19 +4638,19 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                      ui_cb_data_p->mediaFramework));
+                      ui_cb_data_base_p->mediaFramework));
           return;
       }
     } // end SWITCH
 #else
-      stream_p = V4L_ui_cb_data_p->stream;
-#endif
+      stream_p = ui_cb_data_p->stream;
+#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
     case NET_TRANSPORTLAYER_UDP:
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      switch (ui_cb_data_p->mediaFramework)
+      switch (ui_cb_data_base_p->mediaFramework)
       {
         case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
           stream_p = directshow_ui_cb_data_p->UDPStream;
@@ -4662,20 +4662,20 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                      ui_cb_data_p->mediaFramework));
+                      ui_cb_data_base_p->mediaFramework));
           return;
         }
       } // end SWITCH
 #else
-      stream_p = V4L_ui_cb_data_p->UDPStream;
-#endif
+      stream_p = ui_cb_data_p->UDPStream;
+#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown protocol (was: %d), returning\n"),
-                  ui_cb_data_p->configuration->protocol));
+                  protocol));
       return;
     }
   } // end SWITCH
@@ -4812,9 +4812,9 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  if (V4L_ui_cb_data_p->fileDescriptor != -1)
+  if (ui_cb_data_p->fileDescriptor != -1)
     (*modulehandler_iterator).second.second->deviceIdentifier.fileDescriptor =
-      V4L_ui_cb_data_p->fileDescriptor;
+      ui_cb_data_p->fileDescriptor;
 #endif // ACE_WIN32 || ACE_WIN64
 
   // retrieve port number
@@ -4855,8 +4855,8 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   } // end SWITCH
 #else
   Net_ConnectionConfigurationsIterator_t iterator_5 =
-    V4L_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_5 != V4L_ui_cb_data_p->configuration->connectionConfigurations.end ());
+    ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_5 != ui_cb_data_p->configuration->connectionConfigurations.end ());
   NET_CONFIGURATION_TCP_CAST ((*iterator_5).second)->socketConfiguration.address.set_port_number (port_number,
                                                                                                   1);
 #endif // ACE_WIN32 || ACE_WIN64
@@ -4887,7 +4887,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     }
   } // end SWITCH
 #else
-  V4L_ui_cb_data_p->configuration->protocol = protocol;
+  ui_cb_data_p->configuration->protocol = protocol;
 #endif
 
   // retrieve buffer
@@ -4973,8 +4973,8 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
 #else
   result_3 =
     Stream_Device_Tools::setFormat ((*modulehandler_iterator).second.second->deviceIdentifier.fileDescriptor,
-                                    (*stream_iterator).second.configuration_->format.format);
-#endif
+                                    (*stream_iterator).second.configuration_->format.video.format);
+#endif // ACE_WIN32 || ACE_WIN64
   if (!result_3)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -5029,10 +5029,10 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     thread_data_p->mediaFramework = ui_cb_data_p->mediaFramework;
 #else
   ACE_NEW_NORETURN (thread_data_2,
-                    struct Test_I_AVStream_Client_V4L_ThreadData ());
+                    struct Test_I_AVStream_Client_ALSA_V4L_ThreadData ());
   if (thread_data_2)
   {
-    thread_data_2->CBData = V4L_ui_cb_data_p;
+    thread_data_2->CBData = ui_cb_data_p;
     thread_data_p = thread_data_2;
   } // end ELSE
 #endif
@@ -5964,7 +5964,7 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
     if (ui_cb_data_p->configuration->handle != ACE_INVALID_HANDLE)
     {
       Test_I_AVStream_Server_UDPConnectionManager_t* connection_manager_p =
-        Test_I_AVStream_Server_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
+        TEST_I_AVSTREAM_SERVER_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
       ACE_ASSERT (connection_manager_p);
 
       Test_I_AVStream_Server_UDPConnectionManager_t::ICONNECTION_T* connection_p =
@@ -6620,12 +6620,12 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
   } // end SWITCH
 #else
   // sanity check(s)
-  struct Test_I_AVStream_Client_V4L_UI_CBData* ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -6906,10 +6906,10 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
     ui_cb_data_p->fileDescriptor = -1;
   } // end IFs
   ACE_ASSERT (ui_cb_data_p->fileDescriptor == -1);
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t iterator_3 =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t iterator_3 =
       ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T iterator_4 =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator_4 =
       (*iterator_3).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4 != (*iterator_3).second.end ());
   int open_mode =
@@ -7021,7 +7021,7 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
     index_i = 2;
     g_value_init (&value, G_TYPE_UINT);
     g_value_set_uint (&value,
-                     (*stream_iterator).second.configuration_->format.format.pixelformat);
+                     (*stream_iterator).second.configuration_->format.video.format.pixelformat);
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
@@ -7044,9 +7044,9 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
   STREAM_TRACE (ACE_TEXT ("::combobox_format_changed_cb"));
 
   // sanity check(s)
-  struct Test_I_AVStream_UI_CBData* ui_cb_data_p =
+  struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
     static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
-  ACE_ASSERT (ui_cb_data_p);
+  ACE_ASSERT (ui_cb_data_base_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -7062,7 +7062,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t mediafoundation_stream_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
@@ -7096,18 +7096,18 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -7162,7 +7162,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
   bool result = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HRESULT result_2 = E_FAIL;
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     { 
@@ -7216,16 +7216,16 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.format.pixelformat =
+  (*stream_iterator).second.configuration_->format.video.format.pixelformat =
     format_i;
 
   result =
-    load_resolutions (V4L_ui_cb_data_p->fileDescriptor,
+    load_resolutions (ui_cb_data_p->fileDescriptor,
                       format_i,
                       list_store_p);
 #endif // ACE_WIN32 || ACE_WIN64
@@ -7247,7 +7247,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
     g_value_init (&value, G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     Common_Image_Resolution_t resolution_s;
-    switch (ui_cb_data_p->mediaFramework)
+    switch (ui_cb_data_base_p->mediaFramework)
     {
       case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
       {
@@ -7265,7 +7265,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                    ui_cb_data_p->mediaFramework));
+                    ui_cb_data_base_p->mediaFramework));
         return;
       }
     } // end SWITCH
@@ -7273,7 +7273,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
                       resolution_s.cy);
 #else
     g_value_set_uint (&value,
-                      (*stream_iterator).second.configuration_->format.format.height);
+                      (*stream_iterator).second.configuration_->format.video.format.height);
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
@@ -7346,13 +7346,13 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -7569,10 +7569,10 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.format.width = width;
-  (*stream_iterator).second.configuration_->format.format.height = height;
+  (*stream_iterator).second.configuration_->format.video.format.width = width;
+  (*stream_iterator).second.configuration_->format.video.format.height = height;
 
-  result = load_rates (V4L_ui_cb_data_p->fileDescriptor,
+  result = load_rates (ui_cb_data_p->fileDescriptor,
                        format_i,
                        width, height,
                        list_store_p);
@@ -7622,7 +7622,7 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
                       framerate_i);
 #else
     g_value_set_uint (&value,
-                      (*stream_iterator).second.configuration_->format.frameRate.numerator);
+                      (*stream_iterator).second.configuration_->format.video.frameRate.numerator);
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
@@ -7638,9 +7638,9 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
   STREAM_TRACE (ACE_TEXT ("::combobox_rate_changed_cb"));
 
   // sanity check(s)
-  struct Test_I_AVStream_UI_CBData* ui_cb_data_p =
+  struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
     static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
-  ACE_ASSERT (ui_cb_data_p);
+  ACE_ASSERT (ui_cb_data_base_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -7656,7 +7656,7 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t mediafoundation_stream_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
@@ -7690,18 +7690,18 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -7746,7 +7746,7 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HRESULT result = E_FAIL;
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     { 
@@ -7830,14 +7830,14 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return;
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.frameRate.numerator =
+  (*stream_iterator).second.configuration_->format.video.frameRate.numerator =
       frame_rate;
-  (*stream_iterator).second.configuration_->format.frameRate.denominator =
+  (*stream_iterator).second.configuration_->format.video.frameRate.denominator =
       frame_rate_denominator;
 #endif // ACE_WIN32 || ACE_WIN64
   set_capture_format (ui_cb_data_p);
@@ -7912,15 +7912,15 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
   // sanity check(s)
-  ACE_ASSERT (V4L_ui_cb_data_p->configuration);
+  ACE_ASSERT (ui_cb_data_p->configuration);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif
@@ -8054,7 +8054,7 @@ drawingarea_size_allocate_target_cb (GtkWidget* widget_in,
     static_cast<struct Test_I_AVStream_Server_V4L_UI_CBData*> (userData_in);
   ACE_ASSERT (ui_cb_data_p);
   ACE_ASSERT (ui_cb_data_p->configuration);
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     ui_cb_data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != ui_cb_data_p->configuration->streamConfiguration.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -8129,9 +8129,9 @@ drawingarea_configure_event_source_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   ACE_ASSERT (event_in);
-  struct Test_I_AVStream_UI_CBData* ui_cb_data_p =
+  struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
     static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
-  ACE_ASSERT (ui_cb_data_p);
+  ACE_ASSERT (ui_cb_data_base_p);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct Test_I_AVStream_Client_DirectShow_UI_CBData* directshow_ui_cb_data_p = NULL;
@@ -8142,7 +8142,7 @@ drawingarea_configure_event_source_cb (GtkWidget* widget_in,
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t mediafoundation_stream_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
@@ -8180,27 +8180,27 @@ drawingarea_configure_event_source_cb (GtkWidget* widget_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), aborting\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return false;
     }
   } // end SWITCH
 #else
   // sanity check(s)
-  struct Test_I_AVStream_Client_V4L_UI_CBData* V4L_ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_V4L_UI_CBData*> (userData_in);
-  ACE_ASSERT (V4L_ui_cb_data_p);
-  ACE_ASSERT (V4L_ui_cb_data_p->configuration);
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
+  ACE_ASSERT (ui_cb_data_p);
+  ACE_ASSERT (ui_cb_data_p->configuration);
 
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  switch (ui_cb_data_p->mediaFramework)
+  switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     { //ACE_ASSERT (directshow_ui_cb_data_p->configuration->moduleHandlerConfiguration->windowController);
@@ -8242,7 +8242,7 @@ drawingarea_configure_event_source_cb (GtkWidget* widget_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), aborting\n"),
-                  ui_cb_data_p->mediaFramework));
+                  ui_cb_data_base_p->mediaFramework));
       return false;
     }
   } // end SWITCH
@@ -8251,10 +8251,11 @@ drawingarea_configure_event_source_cb (GtkWidget* widget_in,
       event_in->configure.height;
   (*modulehandler_iterator).second.second->area.width =
       event_in->configure.width;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return FALSE;
 } // drawingarea_configure_event_source_cb
+
 gboolean
 drawingarea_configure_event_target_cb (GtkWidget* widget_in,
                                        GdkEvent* event_in,
@@ -8319,7 +8320,7 @@ drawingarea_configure_event_target_cb (GtkWidget* widget_in,
   Test_I_AVStream_Server_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     ui_cb_data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != ui_cb_data_p->configuration->streamConfiguration.end ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   switch (ui_cb_data_base_p->mediaFramework)
@@ -8373,7 +8374,7 @@ drawingarea_configure_event_target_cb (GtkWidget* widget_in,
     event_in->configure.height;
   (*modulehandler_iterator).second.second->area.width =
     event_in->configure.width;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return FALSE;
 } // drawingarea_configure_event_target_cb

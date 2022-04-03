@@ -109,21 +109,21 @@ typedef ACE_Singleton<Test_I_AVStream_Server_MediaFoundation_UDPConnectionManage
 #else
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t,
+                                 Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
-                                 struct Net_UserData> Test_I_AVStream_Client_V4L_TCPConnectionManager_t;
+                                 struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 Test_I_AVStream_Client_V4L_UDPConnectionConfiguration_t,
+                                 Test_I_AVStream_Client_ALSA_V4L_UDPConnectionConfiguration_t,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
-                                 struct Net_UserData> Test_I_AVStream_Client_V4L_UDPConnectionManager_t;
+                                 struct Net_UserData> Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t;
 
-typedef ACE_Singleton<Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-                      ACE_SYNCH_MUTEX> TEST_I_AVSTREAM_CLIENT_V4L_TCP_CONNECTIONMANAGER_SINGLETON;
-typedef ACE_Singleton<Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-                      ACE_SYNCH_MUTEX> TEST_I_AVSTREAM_CLIENT_V4L_UDP_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t,
+                      ACE_SYNCH_MUTEX> TEST_I_AVSTREAM_CLIENT_ALSA_V4L_TCP_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<Test_I_AVStream_Client_ALSA_V4L_UDPConnectionManager_t,
+                      ACE_SYNCH_MUTEX> TEST_I_AVSTREAM_CLIENT_ALSA_V4L_UDP_CONNECTIONMANAGER_SINGLETON;
 
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,

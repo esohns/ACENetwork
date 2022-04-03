@@ -1039,6 +1039,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
   struct Test_I_AVStream_Server_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_AVStream_Server_ModuleHandlerConfiguration modulehandler_configuration_2; // splitter
+
+  modulehandler_configuration.allocatorConfiguration = &allocator_configuration;
   modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.configuration = &configuration;
@@ -1064,6 +1066,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   modulehandler_configuration.outputFormat.resolution.width =
       STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH ;
 
+  modulehandler_configuration.parserConfiguration =
+      &configuration.parserConfiguration;
   modulehandler_configuration.printProgressDot =
     UIDefinitionFilename_in.empty ();
   modulehandler_configuration.statisticReportingInterval =
@@ -1073,11 +1077,19 @@ do_work (unsigned int maximumNumberOfConnections_in,
   modulehandler_configuration.targetFileName = fileName_in;
 
   stream_configuration.allocatorConfiguration = &allocator_configuration;
-  stream_configuration.format.format = AV_PIX_FMT_RGB24;
-  stream_configuration.format.resolution.height =
+
+  stream_configuration.format.audio.format = STREAM_LIB_ALSA_DEFAULT_FORMAT;
+  stream_configuration.format.audio.rate = STREAM_LIB_ALSA_DEFAULT_SAMPLE_RATE;
+  stream_configuration.format.audio.channels = STREAM_LIB_ALSA_DEFAULT_CHANNELS;
+
+  stream_configuration.format.video.format.pixelformat = V4L2_PIX_FMT_RGB24;
+  stream_configuration.format.video.format.height =
       STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
-  stream_configuration.format.resolution.width =
+  stream_configuration.format.video.format.width =
       STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH ;
+  stream_configuration.format.video.frameRate.numerator =
+      STREAM_DEV_CAM_DEFAULT_CAPTURE_RATE;
+
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
                                                 stream_configuration);
@@ -1291,9 +1303,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
   Test_I_AVStream_Server_TCPConnectionConfiguration_t connection_configuration;
   Test_I_AVStream_Server_TCPConnectionManager_t* tcp_connection_manager_p =
-    Test_I_AVStream_Server_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
+    TEST_I_AVSTREAM_SERVER_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
   Test_I_AVStream_Server_UDPConnectionManager_t* udp_connection_manager_p =
-    Test_I_AVStream_Server_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
+    TEST_I_AVSTREAM_SERVER_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
   tcp_connection_manager_p->initialize ((maximumNumberOfConnections_in ? maximumNumberOfConnections_in
                                                                        : std::numeric_limits<unsigned int>::max ()),
                                         ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
@@ -1441,8 +1453,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
   } // end IF
-  if (bufferSize_in)
-    allocator_configuration_p->defaultBufferSize = bufferSize_in;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.messageAllocator = &message_allocator;
@@ -1533,6 +1543,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end ELSE
   } // end SWITCH
 #else
+  allocator_configuration.defaultBufferSize =
+    (STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT * STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH * 3) +
+    sizeof (struct acestream_av_stream_header);
+
   stream_configuration.cloneModule = true;
   stream_configuration.messageAllocator = allocator_p;
   if (!UIDefinitionFilename_in.empty ())
@@ -1671,7 +1685,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 //        Test_I_AVStream_Server_LISTENER_SINGLETON::instance ();
 //  else
     configuration.signalHandlerConfiguration.listener =
-        Test_I_AVStream_Server_ASYNCHLISTENER_SINGLETON::instance ();
+        TEST_I_AVSTREAM_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
   configuration.signalHandlerConfiguration.statisticReportingHandler =
       report_handler_p;
   configuration.signalHandlerConfiguration.statisticReportingTimerId =

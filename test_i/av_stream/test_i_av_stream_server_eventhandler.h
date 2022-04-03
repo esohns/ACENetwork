@@ -82,7 +82,7 @@ typedef Test_I_Server_EventHandler_T<Test_I_AVStream_Server_MediaFoundation_Stre
                                      Test_I_AVStream_Server_MediaFoundation_SessionMessage,
                                      struct Test_I_AVStream_Server_MediaFoundation_UI_CBData> Test_I_AVStream_Server_MediaFoundation_EventHandler_t;
 #else
-typedef Test_I_Server_EventHandler_T<Test_I_AVStream_Server_SessionData,
+typedef Test_I_Server_EventHandler_T<Test_I_AVStream_Server_StreamSessionData,
                                      enum Stream_SessionMessageType,
                                      Test_I_AVStream_Server_Message,
                                      Test_I_AVStream_Server_SessionMessage,

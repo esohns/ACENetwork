@@ -3182,8 +3182,8 @@ AVStream_Scanner_wrap (yyscan_t yyscanner)
   ACE_ASSERT (driver);
 
   if (!driver->switchBuffer())
-  {
-    ACE_DEBUG ((LM_ERROR,
+  { // most probably received MB_STOP
+    ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("failed to AVStream_ParserDriver::switchBuffer(), aborting\n")));
     return 1;
   } // end IF

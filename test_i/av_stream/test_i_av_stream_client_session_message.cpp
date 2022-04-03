@@ -198,39 +198,39 @@ Test_I_AVStream_Client_MediaFoundation_SessionMessage::duplicate (void) const
   return message_p;
 }
 #else
-Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage (Stream_SessionId_t sessionId_in,
-                                                                                      enum Stream_SessionMessageType messageType_in,
-                                                                                      Test_I_AVStream_Client_V4L_SessionData_t*& sessionData_in,
-                                                                                      struct Stream_UserData* userData_in)
+Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage (Stream_SessionId_t sessionId_in,
+                                                                                                enum Stream_SessionMessageType messageType_in,
+                                                                                                Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t*& sessionData_in,
+                                                                                                struct Stream_UserData* userData_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_in,
               userData_in)
  , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage"));
 
 }
 
-Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage (const Test_I_AVStream_Client_V4L_SessionMessage& message_in)
+Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage (const Test_I_AVStream_Client_ALSA_V4L_SessionMessage& message_in)
  : inherited (message_in)
  , mediaType_ (message_in.mediaType_)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage"));
 
 }
 
-Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage (Stream_SessionId_t sessionId_in,
+Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage (Stream_SessionId_t sessionId_in,
                                                                                       ACE_Allocator* messageAllocator_in)
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
  , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage"));
 
 }
 
-Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage (Stream_SessionId_t sessionId_in,
+Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage (Stream_SessionId_t sessionId_in,
                                                                                       ACE_Data_Block* dataBlock_in,
                                                                                       ACE_Allocator* messageAllocator_in)
  : inherited (sessionId_in,
@@ -238,32 +238,32 @@ Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMes
               messageAllocator_in) // message block allocator
  , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_SessionMessage::Test_I_AVStream_Client_V4L_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_V4L_SessionMessage::Test_I_AVStream_Client_ALSA_V4L_SessionMessage"));
 
 }
 
 ACE_Message_Block*
-Test_I_AVStream_Client_V4L_SessionMessage::duplicate (void) const
+Test_I_AVStream_Client_ALSA_V4L_SessionMessage::duplicate (void) const
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_SessionMessage::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_V4L_SessionMessage::duplicate"));
 
-  Test_I_AVStream_Client_V4L_SessionMessage* message_p = NULL;
+  Test_I_AVStream_Client_ALSA_V4L_SessionMessage* message_p = NULL;
 
-  // create a new <Test_I_AVStream_Client_V4L_SessionMessage> that contains unique copies of
+  // create a new <Test_I_AVStream_Client_ALSA_V4L_SessionMessage> that contains unique copies of
   // the message block fields, but a reference counted duplicate of
   // the <ACE_Data_Block>.
 
   // if there is no allocator, use the standard new and delete calls.
   if (inherited::message_block_allocator_ == NULL)
     ACE_NEW_RETURN (message_p,
-                    Test_I_AVStream_Client_V4L_SessionMessage (*this),
+                    Test_I_AVStream_Client_ALSA_V4L_SessionMessage (*this),
                     NULL);
 
-  // *WARNING*: the allocator returns a Test_I_AVStream_Client_V4L_SessionMessageBase<ConfigurationType>
+  // *WARNING*: the allocator returns a Test_I_AVStream_Client_ALSA_V4L_SessionMessageBase<ConfigurationType>
   //            when passing 0 as argument to malloc()
   ACE_NEW_MALLOC_RETURN (message_p,
-                         static_cast<Test_I_AVStream_Client_V4L_SessionMessage*> (inherited::message_block_allocator_->malloc (0)),
-                         Test_I_AVStream_Client_V4L_SessionMessage (*this),
+                         static_cast<Test_I_AVStream_Client_ALSA_V4L_SessionMessage*> (inherited::message_block_allocator_->malloc (0)),
+                         Test_I_AVStream_Client_ALSA_V4L_SessionMessage (*this),
                          NULL);
 
   // increment the reference counts of all the continuation messages

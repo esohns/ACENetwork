@@ -32,6 +32,11 @@
 #include "stream_inotify.h"
 #include "stream_session_data.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include "stream_lib_v4l_defines.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "stream_dev_common.h"
 
 #include "test_i_common.h"

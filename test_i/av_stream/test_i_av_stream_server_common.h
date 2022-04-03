@@ -117,6 +117,7 @@ struct Test_I_AVStream_Server_DirectShow_MessageData
   IMediaSample*                     sample;
   double                            sampleTime;
 };
+
 struct Test_I_AVStream_Server_MediaFoundation_MessageData
 {
   Test_I_AVStream_Server_MediaFoundation_MessageData ()
@@ -128,6 +129,15 @@ struct Test_I_AVStream_Server_MediaFoundation_MessageData
   struct acestream_av_stream_header header;
   IMFMediaBuffer*                   sample;
   LONGLONG                          sampleTime;
+};
+#else
+struct Test_I_AVStream_Server_MessageData
+{
+  Test_I_AVStream_Server_MessageData ()
+   : header ()
+  {}
+
+  struct acestream_av_stream_header header;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -211,7 +221,7 @@ class Test_I_AVStream_Server_MediaFoundation_StreamSessionData
 typedef Stream_SessionData_T<Test_I_AVStream_Server_MediaFoundation_StreamSessionData> Test_I_AVStream_Server_MediaFoundation_StreamSessionData_t;
 #else
 class Test_I_AVStream_Server_StreamSessionData
- : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
+ : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
                                         struct Stream_MediaFramework_ALSA_V4L_Format,
                                         struct Test_I_AVStream_Server_StreamState,
                                         struct Stream_Statistic,
@@ -219,7 +229,7 @@ class Test_I_AVStream_Server_StreamSessionData
 {
  public:
   Test_I_AVStream_Server_StreamSessionData ()
-   : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
+   : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
                                    struct Stream_MediaFramework_ALSA_V4L_Format,
                                    struct Test_I_AVStream_Server_StreamState,
                                    struct Stream_Statistic,
@@ -230,7 +240,7 @@ class Test_I_AVStream_Server_StreamSessionData
   Test_I_AVStream_Server_StreamSessionData& operator+= (const Test_I_AVStream_Server_StreamSessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
-    Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
+    Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
                                   struct Stream_MediaFramework_ALSA_V4L_Format,
                                   struct Test_I_AVStream_Server_StreamState,
                                   struct Stream_Statistic,
@@ -424,9 +434,9 @@ struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration
 #endif // GUI_SUPPORT
 };
 #else
-typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Server_SessionData,
+typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Server_StreamSessionData,
                                     enum Stream_SessionMessageType,
-                                    Test_I_AVStream_Server_Stream_Message,
+                                    Test_I_AVStream_Server_Message,
                                     Test_I_AVStream_Server_SessionMessage> Test_I_AVStream_Server_ISessionNotify_t;
 typedef std::list<Test_I_AVStream_Server_ISessionNotify_t*> Test_I_AVStream_Server_Subscribers_t;
 typedef Test_I_AVStream_Server_Subscribers_t::iterator Test_I_AVStream_Server_SubscribersIterator_t;
@@ -629,10 +639,10 @@ struct Test_I_AVStream_Server_StreamConfiguration
 #endif // GUI_SUPPORT
   {}
 
-  struct Stream_MediaFramework_FFMPEG_VideoMediaType format;
+  struct Stream_MediaFramework_ALSA_V4L_Format format;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  GdkWindow*                                         window;
+  GdkWindow*                                   window;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 };

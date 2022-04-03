@@ -476,6 +476,11 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   int result = -1;
   int retries_i = 0;
   ACE_Message_Block* message_block_p = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  ACE_Message_Block* message_block_2 = NULL;
+#endif // ACE_WIN32 || ACE_WIN64
+
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
       inherited::stream_.upstream (true);
   if (likely (!stream_p))
@@ -503,6 +508,7 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   ACE_ASSERT (message_block_p);
 
   // start (asynchronous) write
+send:
   inherited::increase ();
   inherited::counter_.increase ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -513,10 +519,11 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
                                      0,                                    // priority
                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #else
-send:
+  message_block_2 = message_block_p->cont ();
+  message_block_p->cont (NULL);
   result =
     inherited::outputStream_.write (*message_block_p,                     // data
-                                    message_block_p->total_length (),     // #bytes to write
+                                    message_block_p->length (),           // #bytes to write
                                     NULL,                                 // asynchronous completion token
                                     0,                                    // priority
                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
@@ -554,18 +561,16 @@ send:
 
     return -1;
   } // end IF
-//  else if (result == 0)
-//  {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: socket was closed\n"),
-//                handle_in));
-//#else
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: socket was closed\n"),
-//                handle_in));
-//#endif
-//  } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  // send any continuation(s)
+  if (unlikely (message_block_2))
+  {
+    message_block_p = message_block_2;
+    goto send;
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
 }

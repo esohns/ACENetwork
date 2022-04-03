@@ -812,7 +812,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
          struct Test_I_AVStream_Client_MediaFoundation_UI_CBData& mediaFoundationCBData_in,
          struct Test_I_AVStream_Client_DirectShow_UI_CBData& directShowCBData_in,
 #else
-         struct Test_I_AVStream_Client_V4L_UI_CBData& v4l2CBData_in,
+         struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData& v4l2CBData_in,
 #endif // ACE_WIN32 || ACE_WIN64
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -931,7 +931,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
     }
   } // end SWITCH
 #else
-  Test_I_AVStream_Client_V4L_MessageAllocator_t message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
+  Test_I_AVStream_Client_ALSA_V4L_MessageAllocator_t message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
                                                           &heap_allocator,     // heap allocator handle
                                                           true);               // block ?
   allocator_p = &message_allocator;
@@ -1089,44 +1089,53 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
     }
   } // end SWITCH
 #else
-  Test_I_AVStream_Client_V4L_StreamConfigurationsIterator_t stream_iterator;
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator;
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator;
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator;
 
-  Test_I_AVStream_Client_V4L_EventHandler_t event_handler (&v4l2CBData_in);
-  Test_I_AVStream_Client_V4L_Module_EventHandler_Module event_handler_module ((useUDP_in ? v4l2CBData_in.UDPStream : v4l2CBData_in.stream),
-                                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_AVStream_Client_ALSA_V4L_Streamer_Module streamer_module ((useUDP_in ? v4l2CBData_in.UDPStream : v4l2CBData_in.stream),
+                                                                   ACE_TEXT_ALWAYS_CHAR ("Streamer"));
+
+  Test_I_AVStream_Client_ALSA_V4L_EventHandler_t event_handler (&v4l2CBData_in);
+  Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler_Module event_handler_module ((useUDP_in ? v4l2CBData_in.UDPStream : v4l2CBData_in.stream),
+                                                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Stream_AllocatorConfiguration allocator_configuration;
-  struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration modulehandler_configuration;
-  struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration modulehandler_configuration_2; // net io
+  struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration modulehandler_configuration_2; // net io
   modulehandler_configuration.allocatorConfiguration = &allocator_configuration;
   modulehandler_configuration.connectionConfigurations =
       &v4l2CBData_in.configuration->connectionConfigurations;
   modulehandler_configuration.deviceIdentifier = deviceIdentifier_in;
   modulehandler_configuration.subscriber = &event_handler;
 
-  struct Test_I_AVStream_Client_V4L_StreamConfiguration stream_configuration;
-  struct Test_I_AVStream_Client_V4L_StreamConfiguration stream_configuration_2;
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t stream_configuration_3;
-  Test_I_AVStream_Client_V4L_StreamConfiguration_t stream_configuration_4;
+  struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration stream_configuration;
+  struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration stream_configuration_2;
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t stream_configuration_3;
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t stream_configuration_4;
   stream_configuration.allocatorConfiguration = &allocator_configuration;
+
+  stream_configuration.format.audio.format = STREAM_LIB_ALSA_DEFAULT_FORMAT;
+  stream_configuration.format.audio.rate = STREAM_LIB_ALSA_DEFAULT_SAMPLE_RATE;
+  stream_configuration.format.audio.channels = STREAM_LIB_ALSA_DEFAULT_CHANNELS;
+
 //  stream_configuration.format.format.pixelformat = V4L2_PIX_FMT_RGB24;
-  stream_configuration.format.format.pixelformat = V4L2_PIX_FMT_YUYV;
-  stream_configuration.format.format.width =
+  stream_configuration.format.video.format.pixelformat = V4L2_PIX_FMT_YUYV;
+  stream_configuration.format.video.format.width =
     STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH;
-  stream_configuration.format.format.height =
+  stream_configuration.format.video.format.height =
     STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
-  stream_configuration.format.frameRate.numerator =
+  stream_configuration.format.video.frameRate.numerator =
     STREAM_DEV_CAM_DEFAULT_CAPTURE_RATE;
+
   stream_configuration.messageAllocator = allocator_p;
   stream_configuration.module = &event_handler_module;
-
+  stream_configuration.module_2 = &streamer_module;
   modulehandler_configuration.outputFormat.format =
     Stream_MediaFramework_Tools::v4lFormatToffmpegFormat (V4L2_PIX_FMT_RGB24);
   modulehandler_configuration.outputFormat.resolution.height =
-    stream_configuration.format.format.height;
+    stream_configuration.format.video.format.height;
   modulehandler_configuration.outputFormat.resolution.width =
-    stream_configuration.format.format.width;
+    stream_configuration.format.video.format.width;
 
   stream_configuration_3.initialize (module_configuration,
                                      modulehandler_configuration,
@@ -1294,7 +1303,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   Test_I_AVStream_Client_DirectShow_EventHandler_t directshow_ui_event_handler (&directShowCBData_in);
   Test_I_AVStream_Client_MediaFoundation_EventHandler_t mediafoundation_ui_event_handler (&mediaFoundationCBData_in);
 #else
-  Test_I_AVStream_Client_V4L_EventHandler_t ui_event_handler (&v4l2CBData_in);
+  Test_I_AVStream_Client_ALSA_V4L_EventHandler_t ui_event_handler (&v4l2CBData_in);
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1303,7 +1312,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   Test_I_AVStream_Client_MediaFoundation_EventHandler* mediafoundation_event_handler_p =
     NULL;
 #else
-//  Test_I_AVStream_Client_V4L_Module_EventHandler* module_event_handler_p = NULL;
+//  Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler* module_event_handler_p = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
   struct Common_TimerConfiguration timer_configuration;
   timer_configuration.dispatch =
@@ -1370,7 +1379,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
     }
   } // end SWITCH
 #else
-  Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t connection_configuration;
+  Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t connection_configuration;
   connection_configuration.allocatorConfiguration = &allocator_configuration;
 //  connection_configuration.allocatorConfiguration->defaultBufferSize = bufferSize_in;
 
@@ -1456,12 +1465,12 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   Net_ConnectionConfigurationsIterator_t connection_iterator =
     v4l2CBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (connection_iterator != v4l2CBData_in.configuration->connectionConfigurations.end ());
-  Test_I_AVStream_Client_V4L_TCPConnectionManager_t* connection_manager_p =
-    TEST_I_AVSTREAM_CLIENT_V4L_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t* connection_manager_p =
+    TEST_I_AVSTREAM_CLIENT_ALSA_V4L_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*static_cast<Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second),
+  connection_manager_p->set (*static_cast<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second),
                              &user_data_s);
   (*modulehandler_iterator).second.second->connectionManager =
     connection_manager_p;
@@ -1496,9 +1505,9 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
     }
   } // end SWITCH
 #else
-  Test_I_AVStream_Client_V4L_SignalHandler_t signal_handler;
+  Test_I_AVStream_Client_ALSA_V4L_SignalHandler_t signal_handler;
   event_handler_p =
-    dynamic_cast<Test_I_AVStream_Client_V4L_Module_EventHandler*> (event_handler_module.writer ());
+    dynamic_cast<Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler*> (event_handler_module.writer ());
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1597,12 +1606,12 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
 //  (*connection_iterator).second.writeOnly = true;
   (*connection_iterator).second->statisticReportingInterval =
     statisticReportingInterval_in;
-  static_cast<Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->messageAllocator =
+  static_cast<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->messageAllocator =
       &message_allocator;
-  static_cast<Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->streamConfiguration =
+  static_cast<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->streamConfiguration =
       &stream_configuration_4;
 
-  connection_manager_p->set (*static_cast<Test_I_AVStream_Client_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second),
+  connection_manager_p->set (*static_cast<Test_I_AVStream_Client_ALSA_V4L_TCPConnectionConfiguration_t*> ((*connection_iterator).second),
                              &user_data_s);
 #endif // ACE_WIN32 || ACE_WIN64
   // ********************** module configuration data **************************
@@ -1748,7 +1757,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   } // end SWITCH
 #else
   v4l2CBData_in.configuration->signalHandlerConfiguration.connectionManager =
-    TEST_I_AVSTREAM_CLIENT_V4L_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
+    TEST_I_AVSTREAM_CLIENT_ALSA_V4L_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
   v4l2CBData_in.configuration->signalHandlerConfiguration.dispatchState =
       &event_dispatch_state_s;
   v4l2CBData_in.configuration->signalHandlerConfiguration.stream = v4l2CBData_in.stream;
@@ -2007,6 +2016,7 @@ clean:
     }
   } // end SWITCH
 #else
+  v4l2CBData_in.stream->remove (&streamer_module, true, true);
   delete v4l2CBData_in.stream; v4l2CBData_in.stream = NULL;
   delete v4l2CBData_in.UDPStream; v4l2CBData_in.UDPStream = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -2312,8 +2322,8 @@ ACE_TMAIN (int argc_in,
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_V4L_UI_CBData ui_cb_data;
-  struct Test_I_AVStream_Client_V4L_Configuration V4L_configuration;
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData ui_cb_data;
+  struct Test_I_AVStream_Client_ALSA_V4L_Configuration V4L_configuration;
   ui_cb_data.configuration = &V4L_configuration;
 #if defined (GTK_USE)
   ui_cb_data.UIState = &state_r;

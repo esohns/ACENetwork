@@ -43,6 +43,8 @@
 #include "test_i_network.h"
 #include "test_i_connection_manager_common.h"
 #include "test_i_av_stream_client_common.h"
+#include "test_i_av_stream_client_message.h"
+#include "test_i_av_stream_client_session_message.h"
 
 // forward declarations
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -223,15 +225,15 @@ class Test_I_AVStream_Client_V4L_Stream_T
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
-                        struct Test_I_AVStream_Client_V4L_StreamState,
-                        struct Test_I_AVStream_Client_V4L_StreamConfiguration,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                         struct Stream_Statistic,
-                        struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_V4L_StreamSessionData,
-                        Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                        struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                         Stream_ControlMessage_t,
-                        Test_I_AVStream_Client_V4L_Message,
-                        Test_I_AVStream_Client_V4L_SessionMessage>
+                        Test_I_AVStream_Client_ALSA_V4L_Message,
+                        Test_I_AVStream_Client_ALSA_V4L_SessionMessage>
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -239,15 +241,15 @@ class Test_I_AVStream_Client_V4L_Stream_T
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
-                        struct Test_I_AVStream_Client_V4L_StreamState,
-                        struct Test_I_AVStream_Client_V4L_StreamConfiguration,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                         struct Stream_Statistic,
-                        struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_V4L_StreamSessionData,
-                        Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                        struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                         Stream_ControlMessage_t,
-                        Test_I_AVStream_Client_V4L_Message,
-                        Test_I_AVStream_Client_V4L_SessionMessage> inherited;
+                        Test_I_AVStream_Client_ALSA_V4L_Message,
+                        Test_I_AVStream_Client_ALSA_V4L_SessionMessage> inherited;
 
  public:
   Test_I_AVStream_Client_V4L_Stream_T ();
@@ -265,19 +267,19 @@ class Test_I_AVStream_Client_V4L_Stream_T
                                               ConnectorType> OWN_TYPE_T;
   typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                      Common_TimePolicy_t,
-                                     struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
                                      Stream_ControlMessage_t,
-                                     Test_I_AVStream_Client_V4L_Message,
-                                     Test_I_AVStream_Client_V4L_SessionMessage,
-                                     Test_I_AVStream_Client_V4L_StreamSessionData_t,
+                                     Test_I_AVStream_Client_ALSA_V4L_Message,
+                                     Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                                      ConnectionManagerType,
                                      ConnectorType> WRITER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,                      // task synch type
                                          Common_TimePolicy_t,               // time policy
-                                         Test_I_AVStream_Client_V4L_StreamSessionData, // session data type
+                                         Test_I_AVStream_Client_ALSA_V4L_StreamSessionData, // session data type
                                          enum Stream_SessionMessageType,    // session event type
                                          struct Stream_ModuleConfiguration, // module configuration type
-                                         struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                                         struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                                          libacestream_default_net_target_module_name_string,
                                          Stream_INotify_t,            // stream notification interface type
                                          WRITER_T> TARGET_MODULE_T;         // writer type

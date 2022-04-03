@@ -79,14 +79,12 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
                   Test_I_AVStream_Server_DirectShow_Parser_Module (this,
                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
                   false);
-  ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_DirectShow_Splitter_Module (this,
                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_SPLITTER_DEFAULT_NAME_STRING)),
                   false);
-  ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
   branch_p = module_p;
   inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_AUDIO_NAME_STRING));
@@ -101,7 +99,6 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
                   Test_I_AVStream_Server_DirectShow_WASAPIOut_Module (this,
                                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_RENDER_DEFAULT_NAME_STRING)),
                   false);
-  ACE_ASSERT (module_p);
   layout_in->append (module_p, branch_p, index_i);
 
   //module_p = NULL;
@@ -109,7 +106,6 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
   //                Test_I_AVStream_Server_DirectShow_StatisticReport_Module (this,
   //                                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
   //                false);
-  //ACE_ASSERT (module_p);
   //layout_in->append (module_p, NULL, 0);
 
   ++index_i;
@@ -118,7 +114,6 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
                   Test_I_AVStream_Server_DirectShow_Display_Module (this,
                                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
                   false);
-  ACE_ASSERT (module_p);
   layout_in->append (module_p, branch_p, index_i);
 
   delete_out = true;
@@ -1149,15 +1144,13 @@ Test_I_AVStream_Server_TCPStream::Test_I_AVStream_Server_TCPStream ()
 
 bool
 Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
-                               bool& delete_out)
+                                        bool& delete_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::load"));
 
   // initialize return value(s)
   delete_out = true;
   ACE_ASSERT (delete_out);
-
-  Stream_Module_t* module_p = NULL;
 
   if (!inherited::load (layout_in,
                         delete_out))
@@ -1166,6 +1159,10 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
                 ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::load(), aborting\n")));
     return false;
   } // end IF
+
+  Stream_Module_t* module_p = NULL;
+  typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
+  unsigned int index_i = 0;
 
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Parser_Module (this,
@@ -1178,26 +1175,32 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_SPLITTER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_AVStream_Server_StatisticReport_Module (this,
-  //                                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
+  branch_p = module_p;
+//  inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_AUDIO_NAME_STRING));
+  inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_VIDEO_NAME_STRING));
+  Stream_IDistributorModule* idistributor_p =
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+  ACE_ASSERT (idistributor_p);
+  idistributor_p->initialize (inherited::configuration_->configuration_->branches);
+
+  module_p = NULL;
+  // *TODO*: add ALSA target module
+
+//  ++index_i;
   module_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Resize_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
                   false);
-  layout_in->append (module_p, NULL, 0);
+  layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Display_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_PIXBUF_DEFAULT_NAME_STRING)),
+                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_PIXBUF_DEFAULT_NAME_STRING)),
                   false);
-  layout_in->append (module_p, NULL, 0);
+  layout_in->append (module_p, branch_p, index_i);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   module_p = NULL;
@@ -1298,7 +1301,7 @@ Test_I_AVStream_Server_UDPStream::Test_I_AVStream_Server_UDPStream ()
 
 bool
 Test_I_AVStream_Server_UDPStream::load (Stream_ILayout* layout_in,
-                               bool& delete_out)
+                                        bool& delete_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::load"));
 
@@ -1324,17 +1327,17 @@ Test_I_AVStream_Server_UDPStream::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   //Test_I_AVStream_Server_Module_AVIDecoder_Module            decoder_;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_AVStream_Server_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_AVStream_Server_StatisticReport_Module (this,
+//                                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Display_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_PIXBUF_DEFAULT_NAME_STRING)),
+                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_PIXBUF_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
 #endif // GTK_USE
@@ -1348,7 +1351,7 @@ Test_I_AVStream_Server_UDPStream::load (Stream_ILayout* layout_in,
 
 bool
 Test_I_AVStream_Server_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
-                                  ACE_HANDLE handle_in)
+                                              ACE_HANDLE handle_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::initialize"));
 
