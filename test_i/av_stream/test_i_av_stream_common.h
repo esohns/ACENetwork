@@ -105,11 +105,11 @@ class Stream_IAllocator;
 
 enum acestream_av_stream_message_type
 {
-  ACESTREAM_MESSAGE_AUDIO = 0,
-  ACESTREAM_MESSAGE_VIDEO,
+  AVSTREAM_MESSAGE_AUDIO = 0,
+  AVSTREAM_MESSAGE_VIDEO,
   ////////////////////////////////////////
-  ACESTREAM_MESSAGE_INVALID,
-  ACESTREAM_MESSAGE_MAX
+  AVSTREAM_MESSAGE_INVALID,
+  AVSTREAM_MESSAGE_MAX
 };
 
 #if defined (_MSC_VER)
@@ -136,6 +136,7 @@ struct Test_I_AVStream_DirectShow_StreamSessionData
    : Test_I_DirectShow_StreamSessionData ()
    , direct3DDevice (NULL)
    , resetToken (0)
+   , stream (NULL)
   {}
 
   // *NOTE*: called on stream link after connecting; 'this' is upstream
@@ -166,11 +167,12 @@ struct Test_I_AVStream_DirectShow_StreamSessionData
   }
 
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  IDirect3DDevice9Ex*               direct3DDevice;
+  IDirect3DDevice9Ex* direct3DDevice;
 #else
-  IDirect3DDevice9*                 direct3DDevice;
+  IDirect3DDevice9*   direct3DDevice;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-  UINT                              resetToken; // direct 3D manager 'id'
+  UINT                resetToken; // direct 3D manager 'id'
+  Stream_IStream_t*   stream;
 };
 //typedef Stream_SessionData_T<Test_I_AVStream_DirectShow_SessionData> Test_I_AVStream_DirectShow_SessionData_t;
 
@@ -183,7 +185,7 @@ struct Test_I_AVStream_MediaFoundation_StreamSessionData
    , direct3DManagerResetToken (0)
    , rendererNodeId (0)
    , session (NULL)
-   //, topology (NULL)
+   , stream (NULL)
   {}
 
   struct Test_I_AVStream_MediaFoundation_StreamSessionData& operator+= (const struct Test_I_AVStream_MediaFoundation_StreamSessionData& rhs_in)
@@ -195,19 +197,20 @@ struct Test_I_AVStream_MediaFoundation_StreamSessionData
   }
 
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  IDirect3DDevice9Ex*               direct3DDevice;
+  IDirect3DDevice9Ex* direct3DDevice;
 #else
-  IDirect3DDevice9*                 direct3DDevice;
+  IDirect3DDevice9*   direct3DDevice;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-  UINT                              direct3DManagerResetToken;
-  TOPOID                            rendererNodeId;
-  IMFMediaSession*                  session;
-  //IMFTopology*               topology;
+  UINT                direct3DManagerResetToken;
+  TOPOID              rendererNodeId;
+  IMFMediaSession*    session;
+  Stream_IStream_t*   stream;
 };
 //typedef Stream_SessionData_T<Test_I_AVStream_MediaFoundation_StreamSessionData> Test_I_AVStream_MediaFoundation_StreamSessionData_t;
 #else
 struct Test_I_AVStream_V4L_StreamSessionData
  : Test_I_StreamSessionData
+ , stream (NULL)
 {
   Test_I_AVStream_V4L_StreamSessionData ()
    : Test_I_StreamSessionData ()
@@ -220,6 +223,8 @@ struct Test_I_AVStream_V4L_StreamSessionData
 
     return *this;
   }
+
+  Stream_IStream_t* stream;
 };
 //typedef Stream_SessionData_T<Test_I_AVStream_V4L_StreamSessionData> Test_I_AVStream_V4L_StreamSessionData_t;
 #endif // ACE_WIN32 || ACE_WIN64

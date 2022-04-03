@@ -127,44 +127,26 @@ void yyprint (FILE*, yytokentype, YYSTYPE);*/
 message:      header msg_body                                 { $$ = $1 + $2; };
               | %empty                                        { $$ = 0; };
 header:       "type"                                          { driver->header_.type = $1;
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("set type: %d\n"),
-                                                                            driver->header_.type));
                                                               }
               "length"                                        { $$ = $1 + $3;
                                                                 driver->header_.length = $3;
                                                                 driver->missing_ = $3;
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("set length: %d\n"),
-                                                                            driver->header_.length));
                                                               };
 msg_body:     "data"                                          { driver->missing_ -= $1;
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s)\n"),
-                                                                            $1));
                                                               }
               ext_msg_body                                    { $$ = $1 + $3; };
               | "body"                                        { $$ = $1;
                                                                 driver->missing_ -= $1;
                                                                 ACE_ASSERT (!driver->missing_);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s), message complete\n"),
-                                                                            $1));
                                                                 driver->message_cb ();
                                                                 YYACCEPT;
                                                               };
 ext_msg_body: "data"                                          { driver->missing_ -= $1;
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s)\n"),
-                                                                            $1));
                                                               }
               ext_msg_body                                    { $$ = $1 + $3; };
               | "body"                                        { $$ = $1;
                                                                 driver->missing_ -= $1;
                                                                 ACE_ASSERT (!driver->missing_);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s), message complete\n"),
-                                                                            $1));
                                                                 driver->message_cb ();
                                                                 YYACCEPT;
                                                               };

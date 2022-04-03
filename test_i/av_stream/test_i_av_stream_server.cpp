@@ -472,8 +472,9 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 bool
-do_initialize_directshow (struct _AMMediaType& sourceMediaType_inout,
-                          struct _AMMediaType& outputMediaType_inout)
+do_initialize_directshow (struct _AMMediaType& sourceAudioMediaType_inout,
+                          struct _AMMediaType& sourceVideoMediaType_inout,
+                          struct _AMMediaType& outputVideoMediaType_inout)
 {
   STREAM_TRACE (ACE_TEXT ("::do_initialize_directshow"));
 
@@ -483,25 +484,24 @@ do_initialize_directshow (struct _AMMediaType& sourceMediaType_inout,
   Stream_MediaFramework_Tools::initialize (STREAM_MEDIAFRAMEWORK_DIRECTSHOW);
 
   // initialize return value(s)
-  Stream_MediaFramework_DirectShow_Tools::free (sourceMediaType_inout);
-  Stream_MediaFramework_DirectShow_Tools::free (outputMediaType_inout);
+  Stream_MediaFramework_DirectShow_Tools::free (sourceAudioMediaType_inout);
+  Stream_MediaFramework_DirectShow_Tools::free (sourceVideoMediaType_inout);
+  Stream_MediaFramework_DirectShow_Tools::free (outputVideoMediaType_inout);
 
-  if (!sourceMediaType_inout.pbFormat)
+  // sanity check(s)
+  ACE_ASSERT (!sourceVideoMediaType_inout.pbFormat);
+  sourceVideoMediaType_inout.pbFormat =
+    static_cast<BYTE*> (CoTaskMemAlloc (sizeof (struct tagVIDEOINFOHEADER)));
+  if (!sourceVideoMediaType_inout.pbFormat)
   {
-    sourceMediaType_inout.pbFormat =
-      static_cast<BYTE*> (CoTaskMemAlloc (sizeof (struct tagVIDEOINFOHEADER)));
-    if (!sourceMediaType_inout.pbFormat)
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to CoTaskMemAlloc(%u): \"%m\", aborting\n"),
-                  sizeof (struct tagVIDEOINFOHEADER)));
-      goto error;
-    } // end IF
-    ACE_OS::memset (sourceMediaType_inout.pbFormat, 0, sizeof (struct tagVIDEOINFOHEADER));
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to CoTaskMemAlloc(%u): \"%m\", aborting\n"),
+                sizeof (struct tagVIDEOINFOHEADER)));
+    goto error;
   } // end IF
-
+  ACE_OS::memset (sourceVideoMediaType_inout.pbFormat, 0, sizeof (struct tagVIDEOINFOHEADER));
   struct tagVIDEOINFOHEADER* video_info_header_p =
-    reinterpret_cast<struct tagVIDEOINFOHEADER*> (sourceMediaType_inout.pbFormat);
+    reinterpret_cast<struct tagVIDEOINFOHEADER*> (sourceVideoMediaType_inout.pbFormat);
   ACE_ASSERT (video_info_header_p);
 
   // *NOTE*: empty --> use entire video
@@ -534,7 +534,7 @@ do_initialize_directshow (struct _AMMediaType& sourceMediaType_inout,
   //video_info_header_p->bmiHeader.biClrUsed;
   //video_info_header_p->bmiHeader.biClrImportant;
 
-  sourceMediaType_inout.majortype = MEDIATYPE_Video;
+  sourceVideoMediaType_inout.majortype = MEDIATYPE_Video;
   // work out the GUID for the subtype from the header info
   // *TODO*: cannot use GetBitmapSubtype(), as it returns MEDIASUBTYPE_RGB32
   //         for uncompressed RGB (the Color Space Converter expects
@@ -548,24 +548,46 @@ do_initialize_directshow (struct _AMMediaType& sourceMediaType_inout,
   //  //SubTypeGUID = MEDIASUBTYPE_Avi; // fallback
   //  SubTypeGUID = MEDIASUBTYPE_RGB24; // fallback
   //} // end IF
-  sourceMediaType_inout.subtype = MEDIASUBTYPE_RGB32;
-  sourceMediaType_inout.bFixedSizeSamples = TRUE;
-  sourceMediaType_inout.bTemporalCompression = FALSE;
-  sourceMediaType_inout.lSampleSize =
+  sourceVideoMediaType_inout.subtype = MEDIASUBTYPE_RGB32;
+  sourceVideoMediaType_inout.bFixedSizeSamples = TRUE;
+  sourceVideoMediaType_inout.bTemporalCompression = FALSE;
+  sourceVideoMediaType_inout.lSampleSize =
     video_info_header_p->bmiHeader.biSizeImage;
-  sourceMediaType_inout.formattype = FORMAT_VideoInfo;
-  sourceMediaType_inout.cbFormat = sizeof (struct tagVIDEOINFOHEADER);
+  sourceVideoMediaType_inout.formattype = FORMAT_VideoInfo;
+  sourceVideoMediaType_inout.cbFormat = sizeof (struct tagVIDEOINFOHEADER);
 
   media_type_p =
-    Stream_MediaFramework_DirectShow_Tools::copy (sourceMediaType_inout);
+    Stream_MediaFramework_DirectShow_Tools::copy (sourceVideoMediaType_inout);
   if (!media_type_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::copy(), aborting\n")));
     goto error;
   } // end IF
-  outputMediaType_inout = *media_type_p;
+  outputVideoMediaType_inout = *media_type_p;
   delete (media_type_p); media_type_p = NULL;
+
+  struct tWAVEFORMATEX waveformatex_s;
+  ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
+  waveformatex_s.wFormatTag = STREAM_DEV_MIC_DEFAULT_FORMAT;
+  waveformatex_s.nChannels = STREAM_DEV_MIC_DEFAULT_CHANNELS;
+  waveformatex_s.nSamplesPerSec = STREAM_DEV_MIC_DEFAULT_SAMPLE_RATE;
+  waveformatex_s.wBitsPerSample = STREAM_DEV_MIC_DEFAULT_BITS_PER_SAMPLE;
+  waveformatex_s.nBlockAlign =
+    (waveformatex_s.nChannels * (waveformatex_s.wBitsPerSample / 8));
+  waveformatex_s.nAvgBytesPerSec =
+    (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
+  //waveformatex_s.cbSize = 0;
+  result = CreateAudioMediaType (&waveformatex_s,
+                                 &sourceAudioMediaType_inout,
+                                 TRUE);
+  if (FAILED (result))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to CreateAudioMediaType(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
+    goto error;
+  } // end IF
 
   return true;
 
@@ -574,8 +596,9 @@ error:
   //  media_filter_p->Release ();
   if (media_type_p)
     Stream_MediaFramework_DirectShow_Tools::delete_ (media_type_p);
-  Stream_MediaFramework_DirectShow_Tools::free (sourceMediaType_inout);
-  Stream_MediaFramework_DirectShow_Tools::free (outputMediaType_inout);
+  Stream_MediaFramework_DirectShow_Tools::free (sourceAudioMediaType_inout);
+  Stream_MediaFramework_DirectShow_Tools::free (sourceVideoMediaType_inout);
+  Stream_MediaFramework_DirectShow_Tools::free (outputVideoMediaType_inout);
 
   return false;
 }
@@ -806,7 +829,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   else
     event_dispatch_configuration_s.numberOfProactorThreads =
       TEST_I_DEFAULT_NUMBER_OF_SERVER_DISPATCH_THREADS;
-  struct Stream_AllocatorConfiguration allocator_configuration;
+  struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   bool serialize_output = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct Test_I_AVStream_Server_DirectShow_Configuration directshow_configuration;
@@ -927,6 +950,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
+      //directshow_configuration.parserConfiguration.debugScanner = true;
+      //directshow_configuration.parserConfiguration.debugParser = true;
+
       directshow_modulehandler_configuration.concurrency =
         STREAM_HEADMODULECONCURRENCY_CONCURRENT;
       directshow_modulehandler_configuration.configuration =
@@ -938,6 +964,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
       directshow_modulehandler_configuration.filterConfiguration =
         &directshow_configuration.filterConfiguration;
       directshow_modulehandler_configuration.inbound = true;
+      directshow_modulehandler_configuration.parserConfiguration =
+        &directshow_configuration.parserConfiguration;
       directshow_modulehandler_configuration.printProgressDot =
         UIDefinitionFilename_in.empty ();
       directshow_modulehandler_configuration.statisticReportingInterval =
@@ -1074,7 +1102,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
         directShowCBData_in.configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_ASSERT (directshow_modulehandler_iterator != directShowCBData_in.configuration->streamConfiguration.end ());
       result =
-        do_initialize_directshow ((*directshow_modulehandler_iterator).second.second->sourceFormat,
+        do_initialize_directshow (directshow_stream_configuration.format.audio,
+                                  directshow_stream_configuration.format.video,
                                   (*directshow_modulehandler_iterator).second.second->outputFormat);
       break;
     }
@@ -1440,7 +1469,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //directshow_configuration.pinConfiguration.bufferSize = bufferSize_in;
       ACE_ASSERT (!directshow_configuration.pinConfiguration.format);
       directshow_configuration.pinConfiguration.format =
-        Stream_MediaFramework_DirectShow_Tools::copy ((*directshow_modulehandler_iterator).second.second->sourceFormat);
+        Stream_MediaFramework_DirectShow_Tools::copy (directshow_stream_configuration.format.video);
       ACE_ASSERT (directshow_configuration.pinConfiguration.format);
 
       directshow_configuration.pinConfiguration.allocatorProperties =
@@ -1473,7 +1502,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
       allocator_configuration.defaultBufferSize =
-        (*directshow_modulehandler_iterator).second.second->sourceFormat.lSampleSize;
+        (directshow_stream_configuration.format.video.lSampleSize +
+         sizeof (struct acestream_av_stream_header));
       directshow_stream_configuration.cloneModule = true;
       directshow_stream_configuration.messageAllocator = allocator_p;
       if (!UIDefinitionFilename_in.empty ())
@@ -2686,7 +2716,7 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACEStream_PACKAGE_NAME),
+      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
                                         ACE::basename (argv_in[0]));
   if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]),           // program name
                                             log_file_name,                        // log file name

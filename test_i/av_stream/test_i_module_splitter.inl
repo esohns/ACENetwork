@@ -64,20 +64,19 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
   ACE_ASSERT (message_in);
 
   int result = -1;
-  ACE_Message_Block* message_block_p = NULL;
   const typename MessageType::DATA_T& message_data_r = message_in->getR ();
   std::string branch_name_string;
 
   // map message type to branch name
   switch (message_data_r.header.type)
   {
-    case ACESTREAM_MESSAGE_AUDIO:
+    case AVSTREAM_MESSAGE_AUDIO:
     {
       branch_name_string =
         ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_AUDIO_NAME_STRING);
       break;
     }
-    case ACESTREAM_MESSAGE_VIDEO:
+    case AVSTREAM_MESSAGE_VIDEO:
     {
       branch_name_string =
         ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_VIDEO_NAME_STRING);
@@ -104,13 +103,13 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
                                   (*iterator).second));
     ACE_ASSERT (iterator_2 != modules_.end ());
     ACE_ASSERT ((*iterator_2).first);
-    result = (*iterator_2).first->enqueue_tail (message_block_p, NULL);
+    result = (*iterator_2).first->enqueue_tail (message_in, NULL);
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Message_Queue_Base::enqueue_tail(): \"%m\", returning\n"),
                   inherited::mod_->name ()));
-      message_block_p->release (); message_block_p = NULL;
+      message_in->release (); message_in = NULL;
       return;
     } // end IF
   } // end lock scope

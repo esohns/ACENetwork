@@ -48,7 +48,7 @@ class Stream_MessageAllocatorHeapBase_T;
 class Test_I_AVStream_Client_DirectShow_Message
  : public Stream_DataMessageBase_T<struct Test_I_DirectShow_MessageData,
                                    enum Stream_MessageType,
-                                   int>
+                                   enum Stream_MediaType_Type>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -59,7 +59,7 @@ class Test_I_AVStream_Client_DirectShow_Message
 
   typedef Stream_DataMessageBase_T<struct Test_I_DirectShow_MessageData,
                                    enum Stream_MessageType,
-                                   int> inherited;
+                                   enum Stream_MediaType_Type> inherited;
 
  public:
   Test_I_AVStream_Client_DirectShow_Message (Stream_SessionId_t, // session id
@@ -73,8 +73,11 @@ class Test_I_AVStream_Client_DirectShow_Message
   virtual ACE_Message_Block* release (void);
 
   // implement Stream_MessageBase_T
-  inline virtual int command () const { return ACE_Message_Block::MB_DATA; };
-  static std::string CommandTypeToString (int);
+  inline virtual enum Stream_MediaType_Type command () const { return mediaType_; };
+  static std::string CommandTypeToString (enum Stream_MediaType_Type);
+
+  inline void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+  inline enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
 
  protected:
   // copy ctor to be used by duplicate() and child classes
@@ -91,6 +94,8 @@ class Test_I_AVStream_Client_DirectShow_Message
   Test_I_AVStream_Client_DirectShow_Message (Stream_SessionId_t, // session id
                                              ACE_Allocator*);    // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_DirectShow_Message& operator= (const Test_I_AVStream_Client_DirectShow_Message&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 
 //////////////////////////////////////////
@@ -98,7 +103,7 @@ class Test_I_AVStream_Client_DirectShow_Message
 class Test_I_AVStream_Client_MediaFoundation_Message
  : public Stream_DataMessageBase_T<struct Test_I_MediaFoundation_MessageData,
                                    enum Stream_MessageType,
-                                   int>
+                                   enum Stream_MediaType_Type>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -109,11 +114,11 @@ class Test_I_AVStream_Client_MediaFoundation_Message
 
   typedef Stream_DataMessageBase_T<struct Test_I_MediaFoundation_MessageData,
                                    enum Stream_MessageType,
-                                   int> inherited;
+                                   enum Stream_MediaType_Type> inherited;
   
  public:
   Test_I_AVStream_Client_MediaFoundation_Message (Stream_SessionId_t, // session id
-                                                unsigned int);      // size
+                                                  unsigned int);      // size
   virtual ~Test_I_AVStream_Client_MediaFoundation_Message ();
 
   // overrides from ACE_Message_Block
@@ -123,8 +128,11 @@ class Test_I_AVStream_Client_MediaFoundation_Message
   virtual ACE_Message_Block* release (void);
 
   // implement Stream_MessageBase_T
-  inline virtual int command () const { return ACE_Message_Block::MB_DATA; };
-  static std::string CommandTypeToString (int);
+  inline virtual enum Stream_MediaType_Type command () const { return mediaType_; };
+  static std::string CommandTypeToString (enum Stream_MediaType_Type);
+
+  inline void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+  inline enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
 
  protected:
   // copy ctor to be used by duplicate() and child classes
@@ -141,17 +149,19 @@ class Test_I_AVStream_Client_MediaFoundation_Message
   Test_I_AVStream_Client_MediaFoundation_Message (Stream_SessionId_t, // session id
                                                   ACE_Allocator*);    // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_MediaFoundation_Message& operator= (const Test_I_AVStream_Client_MediaFoundation_Message&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 #else
 class Test_I_AVStream_Client_V4L_Message
  : public Stream_DataMessageBase_T<struct Test_I_V4L_MessageData,
                                    enum Stream_MessageType,
-                                   int>
+                                   enum Stream_MediaType_Type>
  , public Common_ReferenceCounter_T<ACE_MT_SYNCH>
 {
   typedef Stream_DataMessageBase_T<struct Test_I_V4L_MessageData,
                                    enum Stream_MessageType,
-                                   int> inherited;
+                                   enum Stream_MediaType_Type> inherited;
   typedef Common_ReferenceCounter_T<ACE_MT_SYNCH> inherited2;
 
   // grant access to specific private ctors
@@ -173,8 +183,11 @@ class Test_I_AVStream_Client_V4L_Message
   virtual ACE_Message_Block* release (void);
 
   // implement Stream_MessageBase_T
-  inline virtual int command () const { return ACE_Message_Block::MB_DATA; }
-  static std::string CommandTypeToString (int);
+  inline virtual enum Stream_MediaType_Type command () const { return mediaType_; }
+  static std::string CommandTypeToString (enum Stream_MediaType_Type);
+
+  inline void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+  inline enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
 
  protected:
   // copy ctor to be used by duplicate() and child classes
@@ -191,6 +204,8 @@ class Test_I_AVStream_Client_V4L_Message
   Test_I_AVStream_Client_V4L_Message (Stream_SessionId_t, // session id
                                       ACE_Allocator*);    // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_V4L_Message& operator= (const Test_I_AVStream_Client_V4L_Message&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 

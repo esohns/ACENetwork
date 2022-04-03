@@ -65,8 +65,10 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
-
   Stream_Module_t* module_p = NULL;
+  typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
+  unsigned int index_i = 0;
+
   ACE_NEW_RETURN (module_p,
                   Test_I_Stream_DirectShow_CamSource_Module (this,
                                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_CAM_SOURCE_DIRECTSHOW_DEFAULT_NAME_STRING)),
@@ -75,23 +77,49 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   module_p = NULL;
   //ACE_NEW_RETURN (module_p,
   //                Test_I_AVStream_Client_DirectShow_Converter_Module (this,
-  //                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
+  //                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
   //                false);
   //layout_out->append (module_p, NULL, 0);
   //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Client_DirectShow_Video_Tagger_Module (this,
+                                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_out->append (module_p, NULL, 0);
+  module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   TARGET_MODULE_T (this,
                                    ACE_TEXT_ALWAYS_CHAR (MODULE_NET_TARGET_DEFAULT_NAME_STRING)),
                   false);
   layout_out->append (module_p, NULL, 0);
   module_p = NULL;
+
   if ((*iterator).second.second->window)
   {
     ACE_NEW_RETURN (module_p,
-                    Test_I_AVStream_Client_DirectShow_Display_Module (this,
-                                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
+                    Test_I_AVStream_Client_DirectShow_Distributor_Module (this,
+                                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
                     false);
     layout_out->append (module_p, NULL, 0);
+    branch_p = module_p;
+    inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    Stream_IDistributorModule* idistributor_p =
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+    ACE_ASSERT (idistributor_p);
+    idistributor_p->initialize (inherited::configuration_->configuration_->branches);
+  } // end IF
+
+  ACE_ASSERT (inherited::configuration_->configuration_->module_2);
+  layout_out->append (inherited::configuration_->configuration_->module_2, NULL, 0);
+
+  if ((*iterator).second.second->window)
+  {
+    module_p = NULL;
+    ACE_NEW_RETURN (module_p,
+                    Test_I_AVStream_Client_DirectShow_Display_Module (this,
+                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
+                    false);
+    layout_out->append (module_p, branch_p, index_i);
   } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  //else
@@ -145,6 +173,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   ISampleGrabber* isample_grabber_p = NULL;
   std::string log_file_name;
   struct _AMMediaType media_type_s;
+  struct Stream_MediaFramework_DirectShow_AudioVideoFormat format_s;
 
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -219,7 +248,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
 continue_:
   if (!Stream_Device_DirectShow_Tools::setCaptureFormat ((*iterator).second.second->builder,
                                                          CLSID_VideoInputDeviceCategory,
-                                                         configuration_in.configuration_->format))
+                                                         configuration_in.configuration_->format.video))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Device_DirectShow_Tools::setCaptureFormat(), aborting\n"),
@@ -250,7 +279,7 @@ continue_:
   //ACE_ASSERT ((*iterator).second.second->direct3DConfiguration->handle);
 
   if (!Stream_Module_Decoder_Tools::loadVideoRendererGraph (CLSID_VideoInputDeviceCategory,
-                                                            configuration_in.configuration_->format,
+                                                            configuration_in.configuration_->format.video,
                                                             (*iterator).second.second->outputFormat,
                                                             (*iterator).second.second->window,
                                                             (*iterator).second.second->builder,
@@ -468,7 +497,9 @@ continue_:
   // ---------------------------------------------------------------------------
   // step5: update session data
   ACE_ASSERT (session_data_p->formats.empty ());
-  session_data_p->formats.push_back (configuration_in.configuration_->format);
+  Stream_MediaFramework_DirectShow_Tools::copy (configuration_in.configuration_->format,
+                                                format_s);
+  session_data_p->formats.push_back (format_s);
   ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
   if (!Stream_MediaFramework_DirectShow_Tools::getOutputFormat ((*iterator).second.second->builder,
                                                                 STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB,
@@ -480,8 +511,15 @@ continue_:
                 ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB)));
     goto error;
   } // end IF
-  session_data_p->formats.push_back (media_type_s);
+  ACE_OS::memset (&format_s.audio, 0, sizeof (struct _AMMediaType));
+  ACE_OS::memset (&format_s.video, 0, sizeof (struct _AMMediaType));
+  Stream_MediaFramework_DirectShow_Tools::copy (configuration_in.configuration_->format,
+                                                format_s);
+  Stream_MediaFramework_DirectShow_Tools::free (format_s.video);
+  format_s.video = media_type_s;
+  session_data_p->formats.push_back (format_s);
   //ACE_ASSERT (Stream_MediaFramework_DirectShow_Tools::matchMediaType (*session_data_p->outputFormat, *(*iterator).second.second->outputFormat));
+  session_data_p->stream = this;
 
   // ---------------------------------------------------------------------------
   // step6: initialize head module
@@ -738,6 +776,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
     const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (inherited::sessionData_->getR ());
   bool input_mediatype_was_null = false;
   IMFMediaType* media_type_p = NULL;
+  struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat format_s;
 
   // ---------------------------------------------------------------------------
   // sanity check(s)
@@ -797,40 +836,40 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
   UINT32 item_count = 0;
   ULONG reference_count = 0;
 
-  if (!configuration_in.configuration_->format)
+  if (!configuration_in.configuration_->format.video)
   {
-    result = MFCreateMediaType (&configuration_in.configuration_->format);
+    result = MFCreateMediaType (&configuration_in.configuration_->format.video);
     ACE_ASSERT (SUCCEEDED (result));
     //result =
     //  configuration_in.configuration->format->SetGUID (MF_MT_SUBTYPE,
     //                                                   MFVideoFormat_RGB24);
     //ACE_ASSERT (SUCCEEDED (result));
     result =
-      MFSetAttributeSize (configuration_in.configuration_->format,
+      MFSetAttributeSize (configuration_in.configuration_->format.video,
                           MF_MT_FRAME_RATE,
                           STREAM_DEV_CAM_DEFAULT_CAPTURE_RATE, 1);
     ACE_ASSERT (SUCCEEDED (result));
     result =
-        MFSetAttributeSize (configuration_in.configuration_->format,
+        MFSetAttributeSize (configuration_in.configuration_->format.video,
                             MF_MT_FRAME_SIZE,
                             STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH,
                             STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT);
     ACE_ASSERT (SUCCEEDED (result));
     result =
-      configuration_in.configuration_->format->SetUINT32 (MF_MT_INTERLACE_MODE,
-                                                          MFVideoInterlace_Progressive);
+      configuration_in.configuration_->format.video->SetUINT32 (MF_MT_INTERLACE_MODE,
+                                                                MFVideoInterlace_Progressive);
     ACE_ASSERT (SUCCEEDED (result));
     result =
-      MFSetAttributeRatio (configuration_in.configuration_->format,
+      MFSetAttributeRatio (configuration_in.configuration_->format.video,
                            MF_MT_PIXEL_ASPECT_RATIO,
                            1, 1);
     ACE_ASSERT (SUCCEEDED (result));
     input_mediatype_was_null = true;
   } // end IF
-  ACE_ASSERT (configuration_in.configuration_->format);
+  ACE_ASSERT (configuration_in.configuration_->format.video);
   ACE_ASSERT ((*iterator).second.second->deviceIdentifier.identifierDiscriminator == Stream_Device_Identifier::GUID);
   if (!Stream_Module_Decoder_Tools::loadVideoRendererTopology ((*iterator).second.second->deviceIdentifier.identifier._guid,
-                                                               configuration_in.configuration_->format,
+                                                               configuration_in.configuration_->format.video,
                                                                source_impl_p,
                                                                (*iterator).second.second->window,
                                                                (*iterator).second.second->sampleGrabberNodeId,
@@ -878,19 +917,14 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: capture format: %s\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT (Stream_MediaFramework_MediaFoundation_Tools::toString (configuration_in.configuration_->format).c_str ())));
+                ACE_TEXT (Stream_MediaFramework_MediaFoundation_Tools::toString (configuration_in.configuration_->format.video, true).c_str ())));
 #endif // _DEBUG
-  media_type_p =
-    Stream_MediaFramework_MediaFoundation_Tools::copy (configuration_in.configuration_->format);
-  if (!media_type_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_MediaFramework_MediaFoundation_Tools::copy(), aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    goto error;
-  } // end IF
+
   ACE_ASSERT (session_data_r.formats.empty ());
-  session_data_r.formats.push_back (media_type_p);
+  Stream_MediaFramework_MediaFoundation_Tools::copy (configuration_in.configuration_->format,
+                                                     format_s);
+  session_data_r.formats.push_back (format_s);
+
   media_type_p = NULL;
   if (!Stream_MediaFramework_MediaFoundation_Tools::getOutputFormat (topology_p,
                                                                      (*iterator).second.second->sampleGrabberNodeId,
@@ -902,8 +936,15 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
     goto error;
   } // end IF
   ACE_ASSERT (media_type_p);
-  session_data_r.formats.push_back (media_type_p);
+
+  format_s.audio = NULL; format_s.video = NULL;
+  Stream_MediaFramework_MediaFoundation_Tools::copy (configuration_in.configuration_->format,
+                                                     format_s);
+  format_s.video->Release (); format_s.video = NULL;
+  format_s.video = media_type_p;
+  session_data_r.formats.push_back (format_s);
   media_type_p = NULL;
+  session_data_r.stream = this;
 
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   if (mediaSession_)
@@ -951,12 +992,12 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
 
   // -------------------------------------------------------------
 
-  source_impl_p->setP (&(inherited::state_));
-  //fileReader_impl_p->reset ();
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
+  //source_impl_p->setP (&(inherited::state_));
+  ////fileReader_impl_p->reset ();
+  //// *NOTE*: push()ing the module will open() it
+  ////         --> set the argument that is passed along (head module expects a
+  ////             handle to the session data)
+  //module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (NULL))
@@ -1048,7 +1089,7 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
   // *TODO*: remove type inference
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Client_V4L_CamSource_Module (this,
-                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_CAM_SOURCE_V4L_DEFAULT_NAME_STRING)),
+                                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_CAM_SOURCE_V4L_DEFAULT_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
 //  module_p = NULL;
@@ -1140,6 +1181,7 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
   ACE_ASSERT (iterator != configuration_in.end ());
   ACE_ASSERT (session_data_r.formats.empty ());
   session_data_r.formats.push_back (configuration_in.configuration_->format);
+  session_data_r.stream = this;
 
   // ---------------------------------------------------------------------------
   // sanity check(s)

@@ -126,6 +126,9 @@ set (${EXECUTABLE_CLIENT}_EXE_SRCS
      test_i_module_eventhandler.cpp
      test_i_module_eventhandler.h
      test_i_module_eventhandler.inl
+     test_i_module_streamer.cpp
+     test_i_module_streamer.h
+     test_i_module_streamer.inl
      test_i_network.h
      test_i_av_stream_server_message.cpp
      test_i_av_stream_server_message.h

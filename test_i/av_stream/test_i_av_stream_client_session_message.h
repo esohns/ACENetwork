@@ -39,13 +39,11 @@ template <ACE_SYNCH_DECL,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 class Test_I_AVStream_Client_DirectShow_SessionMessage
- : public Stream_SessionMessageBase_T<//struct Common_AllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
+ : public Stream_SessionMessageBase_T<enum Stream_SessionMessageType,
                                       Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
                                       struct Stream_UserData>
 {
-  typedef Stream_SessionMessageBase_T<//struct Common_AllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
+  typedef Stream_SessionMessageBase_T<enum Stream_SessionMessageType,
                                       Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
                                       struct Stream_UserData> inherited;
 
@@ -68,6 +66,9 @@ class Test_I_AVStream_Client_DirectShow_SessionMessage
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
 
+  inline void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+  inline enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
+
  private:
   // copy ctor to be used by duplicate()
   Test_I_AVStream_Client_DirectShow_SessionMessage (const Test_I_AVStream_Client_DirectShow_SessionMessage&);
@@ -82,6 +83,8 @@ class Test_I_AVStream_Client_DirectShow_SessionMessage
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_DirectShow_SessionMessage ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_DirectShow_SessionMessage& operator= (const Test_I_AVStream_Client_DirectShow_SessionMessage&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 
 //////////////////////////////////////////
@@ -116,6 +119,9 @@ class Test_I_AVStream_Client_MediaFoundation_SessionMessage
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
 
+  inline void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+  inline enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
+
  private:
   // copy ctor to be used by duplicate()
   Test_I_AVStream_Client_MediaFoundation_SessionMessage (const Test_I_AVStream_Client_MediaFoundation_SessionMessage&);
@@ -130,6 +136,8 @@ class Test_I_AVStream_Client_MediaFoundation_SessionMessage
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_MediaFoundation_SessionMessage ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_MediaFoundation_SessionMessage& operator= (const Test_I_AVStream_Client_MediaFoundation_SessionMessage&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 #else
 class Test_I_AVStream_Client_V4L_SessionMessage
@@ -162,6 +170,9 @@ class Test_I_AVStream_Client_V4L_SessionMessage
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
 
+  inline void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+  inline enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
+
  private:
   // copy ctor to be used by duplicate()
   Test_I_AVStream_Client_V4L_SessionMessage (const Test_I_AVStream_Client_V4L_SessionMessage&);
@@ -176,6 +187,8 @@ class Test_I_AVStream_Client_V4L_SessionMessage
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_V4L_SessionMessage ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_V4L_SessionMessage& operator= (const Test_I_AVStream_Client_V4L_SessionMessage&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 #endif
 

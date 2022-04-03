@@ -447,8 +447,8 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   127,   127,   128,   129,   129,   141,   141,   147,   155,
-     155,   161
+       0,   127,   127,   128,   129,   129,   135,   135,   138,   144,
+     144,   147
 };
 #endif
 
@@ -1191,9 +1191,6 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
 
   case 4: /* $@1: %empty  */
                                                               { driver->header_.type = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("set type: %d\n"),
-                                                                            driver->header_.type));
                                                               }
     break;
 
@@ -1201,17 +1198,11 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                               { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
                                                                 driver->header_.length = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
                                                                 driver->missing_ = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("set length: %d\n"),
-                                                                            driver->header_.length));
                                                               }
     break;
 
   case 6: /* $@2: %empty  */
                                                               { driver->missing_ -= (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s)\n"),
-                                                                            (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival)));
                                                               }
     break;
 
@@ -1223,18 +1214,13 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                               { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
                                                                 driver->missing_ -= (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
                                                                 ACE_ASSERT (!driver->missing_);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s), message complete\n"),
-                                                                            (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival)));
+                                                                driver->message_cb ();
                                                                 YYACCEPT;
                                                               }
     break;
 
   case 9: /* $@3: %empty  */
                                                               { driver->missing_ -= (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s)\n"),
-                                                                            (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival)));
                                                               }
     break;
 
@@ -1246,9 +1232,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                               { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
                                                                 driver->missing_ -= (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
                                                                 ACE_ASSERT (!driver->missing_);
-                                                                ACE_DEBUG ((LM_DEBUG,
-                                                                            ACE_TEXT ("received %d byte(s), message complete\n"),
-                                                                            (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival)));
+                                                                driver->message_cb ();
                                                                 YYACCEPT;
                                                               }
     break;

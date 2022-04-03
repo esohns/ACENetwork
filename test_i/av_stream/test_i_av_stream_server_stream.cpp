@@ -139,6 +139,7 @@ Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  struct Stream_MediaFramework_DirectShow_AudioVideoFormat format_s;
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -190,7 +191,7 @@ Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& 
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("source format: %s\n"),
-              ACE_TEXT (Stream_MediaFramework_DirectShow_Tools::toString ((*iterator).second.second->sourceFormat, true).c_str ())));
+              ACE_TEXT (Stream_MediaFramework_DirectShow_Tools::toString (configuration_in.configuration_->format, true).c_str ())));
 
   //log_file_name =
   //  Common_File_Tools::getLogDirectory (std::string (),
@@ -204,7 +205,9 @@ Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& 
   // ---------------------------------------------------------------------------
 
   ACE_ASSERT (session_data_r.formats.empty ());
-  session_data_r.formats.push_back (*Stream_MediaFramework_DirectShow_Tools::copy ((*iterator).second.second->sourceFormat));
+  Stream_MediaFramework_DirectShow_Tools::copy (configuration_in.configuration_->format,
+                                                format_s);
+  session_data_r.formats.push_back (format_s);
 
   // ---------------------------------------------------------------------------
 
@@ -356,7 +359,7 @@ Test_I_AVStream_Server_DirectShow_UDPStream::load (Stream_ILayout* layout_in,
 
 bool
 Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& configuration_in,
-                                                ACE_HANDLE handle_in)
+                                                         ACE_HANDLE handle_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::initialize"));
 
@@ -367,6 +370,7 @@ Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  struct Stream_MediaFramework_DirectShow_AudioVideoFormat format_s;
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -418,7 +422,7 @@ Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& 
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("source format: %s\n"),
-              ACE_TEXT (Stream_MediaFramework_DirectShow_Tools::toString ((*iterator).second.second->sourceFormat, true).c_str ())));
+              ACE_TEXT (Stream_MediaFramework_DirectShow_Tools::toString (configuration_in.configuration_->format, true).c_str ())));
 
   //log_file_name =
   //  Common_File_Tools::getLogDirectory (std::string (),
@@ -432,7 +436,9 @@ Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& 
   // ---------------------------------------------------------------------------
 
   ACE_ASSERT (session_data_r.formats.empty ());
-  session_data_r.formats.push_back (*Stream_MediaFramework_DirectShow_Tools::copy ((*iterator).second.second->sourceFormat));
+  Stream_MediaFramework_DirectShow_Tools::copy (configuration_in.configuration_->format,
+                                                format_s);
+  session_data_r.formats.push_back (format_s);
 
   // ---------------------------------------------------------------------------
 

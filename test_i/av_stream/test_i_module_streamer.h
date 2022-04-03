@@ -18,14 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_MODULE_STREAMER_H
-#define IRC_MODULE_STREAMER_H
+#ifndef TEST_I_AVSTREAM_MODULE_STREAMER_H
+#define TEST_I_AVSTREAM_MODULE_STREAMER_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
-#include "stream_task_base_synch.h"
+
+#include "stream_misc_aggregator.h"
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -37,47 +38,43 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType,
           ////////////////////////////////
           typename UserDataType>
-class IRC_Module_Streamer_T
- : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
-                                 TimePolicyType,
-                                 ConfigurationType,
-                                 ControlMessageType,
-                                 DataMessageType,
-                                 SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 UserDataType>
+class Test_I_AVStream_Streamer_T
+ : public Stream_Module_Aggregator_WriterTask_T<ACE_SYNCH_USE,
+                                                TimePolicyType,
+                                                ConfigurationType,
+                                                ControlMessageType,
+                                                DataMessageType,
+                                                SessionMessageType>
 {
-  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
-                                 TimePolicyType,
-                                 ConfigurationType,
-                                 ControlMessageType,
-                                 DataMessageType,
-                                 SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 UserDataType> inherited;
+  typedef Stream_Module_Aggregator_WriterTask_T<ACE_SYNCH_USE,
+                                                TimePolicyType,
+                                                ConfigurationType,
+                                                ControlMessageType,
+                                                DataMessageType,
+                                                SessionMessageType> inherited;
 
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  IRC_Module_Streamer_T (ISTREAM_T*);                     // stream handle
+  Test_I_AVStream_Streamer_T (ISTREAM_T*);                     // stream handle
 #else
-  IRC_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
+  Test_I_AVStream_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
 #endif // ACE_WIN32 || ACE_WIN64
-  inline virtual ~IRC_Module_Streamer_T () {}
+  inline virtual ~Test_I_AVStream_Streamer_T () {}
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);            // return value: pass message downstream ?
+  inline virtual void handleSessionMessage (SessionMessageType*&, // data message handle
+                                            bool&) {}             // return value: pass message downstream ?
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T ())
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T (const IRC_Module_Streamer_T&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T& operator= (const IRC_Module_Streamer_T&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Streamer_T ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Streamer_T (const Test_I_AVStream_Streamer_T&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Streamer_T& operator= (const Test_I_AVStream_Streamer_T&))
 };
 
 // include template definition
-#include "irc_module_streamer.inl"
+#include "test_i_module_streamer.inl"
 
 #endif

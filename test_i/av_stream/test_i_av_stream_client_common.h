@@ -111,7 +111,7 @@ extern const char stream_name_string_[];
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 class Test_I_AVStream_Client_DirectShow_StreamSessionData
  : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_DirectShow_StreamSessionData,
-                                        struct _AMMediaType,
+                                        struct Stream_MediaFramework_DirectShow_AudioVideoFormat,
                                         struct Test_I_AVStream_Client_DirectShow_StreamState,
                                         struct Stream_Statistic,
                                         struct Stream_UserData>
@@ -119,7 +119,7 @@ class Test_I_AVStream_Client_DirectShow_StreamSessionData
  public:
   Test_I_AVStream_Client_DirectShow_StreamSessionData ()
    : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_DirectShow_StreamSessionData,
-                                   struct _AMMediaType,
+                                   struct Stream_MediaFramework_DirectShow_AudioVideoFormat,
                                    struct Test_I_AVStream_Client_DirectShow_StreamState,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
@@ -130,7 +130,7 @@ class Test_I_AVStream_Client_DirectShow_StreamSessionData
   {
     // *NOTE*: the idea is to 'merge' the data...
     Stream_SessionDataMediaBase_T<struct Test_I_AVStream_DirectShow_StreamSessionData,
-                                  struct _AMMediaType,
+                                  struct Stream_MediaFramework_DirectShow_AudioVideoFormat,
                                   struct Test_I_AVStream_Client_DirectShow_StreamState,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator+= (rhs_in);
@@ -146,7 +146,7 @@ typedef Stream_SessionData_T<Test_I_AVStream_Client_DirectShow_StreamSessionData
 
 class Test_I_AVStream_Client_MediaFoundation_StreamSessionData
  : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_MediaFoundation_StreamSessionData,
-                                        IMFMediaType*,
+                                        struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat,
                                         struct Test_I_AVStream_Client_MediaFoundation_StreamState,
                                         struct Stream_Statistic,
                                         struct Stream_UserData>
@@ -154,7 +154,7 @@ class Test_I_AVStream_Client_MediaFoundation_StreamSessionData
  public:
   Test_I_AVStream_Client_MediaFoundation_StreamSessionData ()
    : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_MediaFoundation_StreamSessionData,
-                                   IMFMediaType*,
+                                   struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat,
                                    struct Test_I_AVStream_Client_MediaFoundation_StreamState,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
@@ -165,7 +165,7 @@ class Test_I_AVStream_Client_MediaFoundation_StreamSessionData
   {
     // *NOTE*: the idea is to 'merge' the data...
     Stream_SessionDataMediaBase_T<struct Test_I_AVStream_MediaFoundation_StreamSessionData,
-                                  IMFMediaType*,
+                                  struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat,
                                   struct Test_I_AVStream_Client_MediaFoundation_StreamState,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator+= (rhs_in);
@@ -181,7 +181,7 @@ typedef Stream_SessionData_T<Test_I_AVStream_Client_MediaFoundation_StreamSessio
 #else
 class Test_I_AVStream_Client_V4L_StreamSessionData
  : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
-                                        struct Stream_MediaFramework_V4L_MediaType,
+                                        struct Stream_MediaFramework_ALSA_V4L_MediaType,
                                         struct Test_I_AVStream_Client_V4L_StreamState,
                                         struct Stream_Statistic,
                                         struct Stream_UserData>
@@ -189,7 +189,7 @@ class Test_I_AVStream_Client_V4L_StreamSessionData
  public:
   Test_I_AVStream_Client_V4L_StreamSessionData ()
    : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
-                                   struct Stream_MediaFramework_V4L_MediaType,
+                                   struct Stream_MediaFramework_ALSA_V4L_MediaType,
                                    struct Test_I_AVStream_Client_V4L_StreamState,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
@@ -200,7 +200,7 @@ class Test_I_AVStream_Client_V4L_StreamSessionData
   {
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionDataMediaBase_T<struct Test_I_AVStream_V4L_StreamSessionData,
-                                  struct Stream_MediaFramework_V4L_MediaType,
+                                  struct Stream_MediaFramework_ALSA_V4L_MediaType,
                                   struct Test_I_AVStream_Client_V4L_StreamState,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator+= (rhs_in);
@@ -594,13 +594,13 @@ struct Test_I_AVStream_Client_DirectShow_StreamConfiguration
    : Stream_Configuration ()
    , format ()
    , graphLayout ()
-  {
-    ACE_OS::memset (&format, 0, sizeof (struct _AMMediaType));
-  }
+   , module_2 (NULL)
+  {}
 
   // **************************** stream data **********************************
-  struct _AMMediaType                       format;
-  Stream_MediaFramework_DirectShow_Graph_t  graphLayout;
+  struct Stream_MediaFramework_DirectShow_AudioVideoFormat format;
+  Stream_MediaFramework_DirectShow_Graph_t                 graphLayout;
+  Stream_Module_t*                                         module_2;
 };
 
 //extern const char stream_name_string_[];
@@ -618,15 +618,17 @@ struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration
 {
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration ()
    : Stream_Configuration ()
-   , format (NULL)
+   , format ()
+   , module_2 (NULL)
    , mediaFoundationConfiguration (NULL)
   {}
 
   // **************************** stream data **********************************
-  IMFMediaType*                               format;
+  struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat format;
+  Stream_Module_t*                                              module_2;
 
   // **************************** media foundation *****************************
-  struct Test_I_MediaFoundationConfiguration* mediaFoundationConfiguration;
+  struct Test_I_MediaFoundationConfiguration*                   mediaFoundationConfiguration;
 };
 
 //extern const char stream_name_string_[];
@@ -644,10 +646,12 @@ struct Test_I_AVStream_Client_V4L_StreamConfiguration
   Test_I_AVStream_Client_V4L_StreamConfiguration ()
    : Stream_Configuration ()
    , format ()
+   , module_2 (NULL)
   {}
 
   // **************************** stream data **********************************
   struct Stream_MediaFramework_V4L_MediaType format;
+  Stream_Module_t*                           module_2;
 };
 
 //extern const char stream_name_string_[];

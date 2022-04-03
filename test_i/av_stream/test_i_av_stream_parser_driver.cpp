@@ -67,9 +67,6 @@ AVStream_ParserDriver::~AVStream_ParserDriver ()
 {
   NETWORK_TRACE (ACE_TEXT ("AVStream_ParserDriver::~AVStream_ParserDriver"));
 
-  if (buffer_)
-    buffer_->release ();
-
   // finalize lex scanner
   if (scannerState_ &&
       AVStream_Scanner_lex_destroy (scannerState_))
@@ -112,7 +109,7 @@ AVStream_ParserDriver::parse (ACE_Message_Block* messageBlock_in)
 
   // sanity check(s)
   ACE_ASSERT (messageBlock_in);
-  ACE_ASSERT (!buffer_);
+  //ACE_ASSERT (!buffer_);
 
   // *NOTE*: we parse ALL available message fragments
   // *TODO*: yyrestart(), yy_create_buffer/yy_switch_to_buffer, YY_INPUT...

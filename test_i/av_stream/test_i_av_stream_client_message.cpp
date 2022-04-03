@@ -37,15 +37,17 @@ Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Mes
                                                                                       unsigned int size_in)
  : inherited (sessionId_in,
               size_in)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
 
 }
 
 Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message (const Test_I_AVStream_Client_DirectShow_Message& message_in)
  : inherited (message_in)
+ , mediaType_ (message_in.mediaType_)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
 
 }
 
@@ -57,8 +59,9 @@ Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Mes
               dataBlock_in,               // use (don't own (!) memory of-) this data block
               messageAllocator_in,        // message block allocator
               incrementMessageCounter_in)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
 
 }
 
@@ -66,14 +69,15 @@ Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Mes
                                                                                       ACE_Allocator* messageAllocator_in)
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message"));
 
 }
 
 Test_I_AVStream_Client_DirectShow_Message::~Test_I_AVStream_Client_DirectShow_Message ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::~Test_I_AVStream_Client_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::~Test_I_AVStream_Client_DirectShow_Message"));
 
   // release media sample ?
   if (inherited::data_.sample)
@@ -85,7 +89,7 @@ Test_I_AVStream_Client_DirectShow_Message::~Test_I_AVStream_Client_DirectShow_Me
 ACE_Message_Block*
 Test_I_AVStream_Client_DirectShow_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::duplicate"));
 
   Test_I_AVStream_Client_DirectShow_Message* message_p = NULL;
 
@@ -144,7 +148,7 @@ Test_I_AVStream_Client_DirectShow_Message::duplicate (void) const
 ACE_Message_Block*
 Test_I_AVStream_Client_DirectShow_Message::release (void)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::release"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::release"));
 
   ULONG reference_count = 0;
   if (inherited::data_.sample)
@@ -156,13 +160,28 @@ Test_I_AVStream_Client_DirectShow_Message::release (void)
 }
 
 std::string
-Test_I_AVStream_Client_DirectShow_Message::CommandTypeToString (int command_in)
+Test_I_AVStream_Client_DirectShow_Message::CommandTypeToString (enum Stream_MediaType_Type mediaType_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::CommandTypeToString"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Message::CommandTypeToString"));
 
-  ACE_UNUSED_ARG (command_in);
+  std::string result;
 
-  return ACE_TEXT_ALWAYS_CHAR ("MB_DATA");
+  switch (mediaType_in)
+  {
+    case STREAM_MEDIATYPE_AUDIO:
+      result = ACE_TEXT_ALWAYS_CHAR ("AUDIO"); break;
+    case STREAM_MEDIATYPE_VIDEO:
+      result = ACE_TEXT_ALWAYS_CHAR ("VIDEO"); break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown media type (was: %d), aborting\n"),
+                  mediaType_in));
+      break;
+    }
+  } // end SWITCH
+
+  return result;
 }
 
 //////////////////////////////////////////
@@ -171,15 +190,17 @@ Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoun
                                                                                                 unsigned int size_in)
  : inherited (sessionId_in,
               size_in)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
 
 }
 
 Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message (const Test_I_AVStream_Client_MediaFoundation_Message& message_in)
  : inherited (message_in)
+ , mediaType_ (message_in.mediaType_)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
 
 }
 
@@ -191,8 +212,9 @@ Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoun
               dataBlock_in,               // use (don't own (!) memory of-) this data block
               messageAllocator_in,        // message block allocator
               incrementMessageCounter_in)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
 
 }
 
@@ -200,27 +222,27 @@ Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoun
                                                                                                 ACE_Allocator* messageAllocator_in)
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::Test_I_AVStream_Client_MediaFoundation_Message"));
 
 }
 
 Test_I_AVStream_Client_MediaFoundation_Message::~Test_I_AVStream_Client_MediaFoundation_Message ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::~Test_I_AVStream_Client_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::~Test_I_AVStream_Client_MediaFoundation_Message"));
 
   // release media sample ?
   if (inherited::data_.sample)
   {
-    inherited::data_.sample->Release ();
-    inherited::data_.sample = NULL;
+    inherited::data_.sample->Release (); inherited::data_.sample = NULL;
   } // end IF
 }
 
 ACE_Message_Block*
 Test_I_AVStream_Client_MediaFoundation_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::duplicate"));
 
   Test_I_AVStream_Client_MediaFoundation_Message* message_p = NULL;
 
@@ -280,7 +302,7 @@ Test_I_AVStream_Client_MediaFoundation_Message::duplicate (void) const
 ACE_Message_Block*
 Test_I_AVStream_Client_MediaFoundation_Message::release (void)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::release"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::release"));
 
   ULONG reference_count = 0;
   if (inherited::data_.sample)
@@ -292,13 +314,28 @@ Test_I_AVStream_Client_MediaFoundation_Message::release (void)
 }
 
 std::string
-Test_I_AVStream_Client_MediaFoundation_Message::CommandTypeToString (int command_in)
+Test_I_AVStream_Client_MediaFoundation_Message::CommandTypeToString (enum Stream_MediaType_Type mediaType_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::CommandTypeToString"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Message::CommandTypeToString"));
 
-  ACE_UNUSED_ARG (command_in);
+  std::string result;
 
-  return ACE_TEXT_ALWAYS_CHAR ("MB_DATA");
+  switch (mediaType_in)
+  {
+    case STREAM_MEDIATYPE_AUDIO:
+      result = ACE_TEXT_ALWAYS_CHAR ("AUDIO"); break;
+    case STREAM_MEDIATYPE_VIDEO:
+      result = ACE_TEXT_ALWAYS_CHAR ("VIDEO"); break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown media type (was: %d), aborting\n"),
+                  mediaType_in));
+      break;
+    }
+  } // end SWITCH
+
+  return result;
 }
 #else
 Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message (Stream_SessionId_t sessionId_in,
@@ -306,16 +343,18 @@ Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message (Stream_S
  : inherited (sessionId_in,
               size_in)
  , inherited2 (1, false)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
 
 }
 
 Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message (const Test_I_AVStream_Client_V4L_Message& message_in)
  : inherited (message_in)
  , inherited2 (1, false)
+ , mediaType_ (message_in.mediaType_)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
 
 }
 
@@ -328,8 +367,9 @@ Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message (Stream_S
               messageAllocator_in,        // message block allocator
               incrementMessageCounter_in)
  , inherited2 (1, false)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
 
 }
 
@@ -338,15 +378,16 @@ Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message (Stream_S
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
  , inherited2 (1, false)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::Test_I_AVStream_Client_V4L_Message"));
 
 }
 
 ACE_Message_Block*
 Test_I_AVStream_Client_V4L_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::duplicate"));
 
   Test_I_AVStream_Client_V4L_Message* message_p = NULL;
 
@@ -359,7 +400,7 @@ Test_I_AVStream_Client_V4L_Message::duplicate (void) const
 ACE_Message_Block*
 Test_I_AVStream_Client_V4L_Message::release (void)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::release"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::release"));
 
   int result = -1;
   int error = 0;
@@ -442,12 +483,27 @@ Test_I_AVStream_Client_V4L_Message::release (void)
 }
 
 std::string
-Test_I_AVStream_Client_V4L_Message::CommandTypeToString (int command_in)
+Test_I_AVStream_Client_V4L_Message::CommandTypeToString (enum Stream_MediaType_Type mediaType_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::CommandTypeToString"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Message::CommandTypeToString"));
 
-  ACE_UNUSED_ARG (command_in);
+  std::string result;
 
-  return ACE_TEXT_ALWAYS_CHAR ("MB_DATA");
+  switch (mediaType_in)
+  {
+    case STREAM_MEDIATYPE_AUDIO:
+      result = ACE_TEXT_ALWAYS_CHAR ("AUDIO"); break;
+    case STREAM_MEDIATYPE_VIDEO:
+      result = ACE_TEXT_ALWAYS_CHAR ("VIDEO"); break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown media type (was: %d), aborting\n"),
+                  mediaType_in));
+      break;
+    }
+  } // end SWITCH
+
+  return result;
 }
 #endif // ACE_WIN32 || ACE_WIN64

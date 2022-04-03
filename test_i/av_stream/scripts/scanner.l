@@ -59,13 +59,17 @@ CHAR           [\x00-\xFF]
                              return LENGTH; }
 } // end <length>
 <body>{
-{CHAR}+                    { //yylloc->step();
-                             yylval->ival = yyleng;
-                             if (static_cast<ACE_UINT32> (yyleng) < driver->missing_)
-                               return DATA;
+{CHAR}{1}                  { //yylloc->step();
+                             char c = 0;
+                             for (unsigned int i = 0;
+                                  i < (driver->missing_ - 1);
+                                  ++i)
+                             {
+                               c = yyinput (yyscanner);
+                               // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
+                               *(yyg->yy_c_buf_p - 1) = c;
+                             } // end FOR
                              yylval->ival = driver->missing_;
-                             if (likely ((static_cast<ACE_UINT32> (yyleng) - driver->missing_) > 0))
-                               yyless (driver->missing_);
                              BEGIN(header);
                              return BODY; }
 } // end <body>
