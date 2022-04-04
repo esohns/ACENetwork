@@ -1730,9 +1730,9 @@ stream_processing_function (void* arg_in)
 #endif // ACE_WIN32 || ACE_WIN64
 
   // sanity check(s)
-  struct Test_I_AVStream_ThreadData* thread_data_p =
+  struct Test_I_AVStream_ThreadData* thread_data_base_p =
     static_cast<struct Test_I_AVStream_ThreadData*> (arg_in);
-  ACE_ASSERT (thread_data_p);
+  ACE_ASSERT (thread_data_base_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -1743,10 +1743,10 @@ stream_processing_function (void* arg_in)
   Common_UI_GTK_BuildersConstIterator_t iterator;
   ACE_SYNCH_MUTEX* lock_p = NULL;
   enum Net_TransportLayerType protocol = NET_TRANSPORTLAYER_INVALID;
-  Stream_IStreamControlBase* stream_p = NULL;
+  Stream_IStreamControlBase* stream_p = NULL, *stream_2 = NULL;
   GtkStatusbar* statusbar_p = NULL;
   std::ostringstream converter;
-  const Stream_SessionData* session_ui_cb_data_p = NULL;
+  const Stream_SessionData* session_data_p = NULL;
   bool result_2 = false;
   guint context_id = 0;
 
@@ -1758,7 +1758,7 @@ stream_processing_function (void* arg_in)
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t mediafoundation_stream_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
-  switch (thread_data_p->mediaFramework)
+  switch (thread_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
@@ -1804,27 +1804,27 @@ stream_processing_function (void* arg_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  thread_data_p->mediaFramework));
+                  thread_data_base_p->mediaFramework));
       goto done;
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_ALSA_V4L_ThreadData* V4L_thread_data_p =
+  struct Test_I_AVStream_Client_ALSA_V4L_ThreadData* thread_data_p =
     static_cast<struct Test_I_AVStream_Client_ALSA_V4L_ThreadData*> (arg_in);
   // sanity check(s)
-  ACE_ASSERT (V4L_thread_data_p->CBData);
-  ACE_ASSERT (V4L_thread_data_p->CBData->configuration);
+  ACE_ASSERT (thread_data_p->CBData);
+  ACE_ASSERT (thread_data_p->CBData->configuration);
 
   iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   lock_p = &state_r.lock;
-  protocol = V4L_thread_data_p->CBData->configuration->protocol;
+  protocol = thread_data_p->CBData->configuration->protocol;
   // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
-    V4L_thread_data_p->CBData->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != V4L_thread_data_p->CBData->configuration->streamConfigurations.end ());
+    thread_data_p->CBData->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != thread_data_p->CBData->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
@@ -1842,7 +1842,7 @@ stream_processing_function (void* arg_in)
       case NET_TRANSPORTLAYER_TCP:
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        switch (thread_data_p->mediaFramework)
+        switch (thread_data_base_p->mediaFramework)
         {
           case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
           {
@@ -1874,18 +1874,23 @@ stream_processing_function (void* arg_in)
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                        thread_data_p->mediaFramework));
+                        thread_data_base_p->mediaFramework));
             goto done;
           }
         } // end SWITCH
 #else
-        stream_p = V4L_thread_data_p->CBData->stream;
-        //(*iterator_2).second.second->stream = ui_cb_data_p->CBData->stream;
+        stream_p = thread_data_p->CBData->audioStream;
+        stream_2 = thread_data_p->CBData->videoStream;
+
         result_2 =
-          V4L_thread_data_p->CBData->stream->initialize ((*stream_iterator).second);
+          thread_data_p->CBData->audioStream->initialize ((*stream_iterator).second);
+        ACE_ASSERT (result_2);
+        result_2 =
+          thread_data_p->CBData->videoStream->initialize ((*stream_iterator).second);
+
         const Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t* session_data_container_p =
-          &V4L_thread_data_p->CBData->stream->getR_2 ();
-        session_ui_cb_data_p =
+          &thread_data_p->CBData->videoStream->getR_2 ();
+        session_data_p =
           &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_data_container_p->getR ());
 #endif // ACE_WIN32 || ACE_WIN64
         break;
@@ -1930,13 +1935,14 @@ stream_processing_function (void* arg_in)
           }
         } // end SWITCH
 #else
-        stream_p = V4L_thread_data_p->CBData->UDPStream;
-        //(*iterator_2).second.stream = ui_cb_data_p->CBData->UDPStream;
+        stream_p = thread_data_p->CBData->UDPStream;
+
         result_2 =
-          V4L_thread_data_p->CBData->UDPStream->initialize ((*stream_iterator).second);
+          thread_data_p->CBData->UDPStream->initialize ((*stream_iterator).second);
+
         const Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t* session_data_container_p =
-          &V4L_thread_data_p->CBData->UDPStream->getR_2 ();
-        session_ui_cb_data_p =
+          &thread_data_p->CBData->UDPStream->getR_2 ();
+        session_data_p =
           &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_data_container_p->getR ());
 #endif // ACE_WIN32 || ACE_WIN64
         break;
@@ -1949,10 +1955,10 @@ stream_processing_function (void* arg_in)
         goto done;
       }
     } // end SWITCH
-    ACE_ASSERT (session_ui_cb_data_p);
+    ACE_ASSERT (session_data_p);
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter << session_ui_cb_data_p->sessionId;
+    converter << session_data_p->sessionId;
 
     // retrieve status bar handle
     gdk_threads_enter ();
@@ -1966,7 +1972,7 @@ stream_processing_function (void* arg_in)
 
     // set context ID
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    switch (thread_data_p->mediaFramework)
+    switch (thread_data_base_p->mediaFramework)
     {
       case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
         (*directshow_modulehandler_iterator).second.second->contextId =
@@ -1980,7 +1986,7 @@ stream_processing_function (void* arg_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                    thread_data_p->mediaFramework));
+                    thread_data_base_p->mediaFramework));
         goto done;
       }
     } // end SWITCH
@@ -1994,17 +2000,14 @@ stream_processing_function (void* arg_in)
                 ACE_TEXT ("failed to initialize stream: \"%m\", aborting\n")));
     goto done;
   } // end IF
-  ACE_ASSERT (stream_p);
+  ACE_ASSERT (stream_p && stream_2);
 
   // *NOTE*: processing currently happens 'inline' (borrows calling thread)
   stream_p->start ();
-  //    if (!stream_p->isRunning ())
-  //    {
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to start stream, aborting\n")));
-  //      return;
-  //    } // end IF
+  stream_2->start ();
+
   stream_p->wait (true, false, false);
+  stream_2->wait (true, false, false);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = 0;
@@ -2037,7 +2040,7 @@ done:
     } // end SWITCH
   } // end lock scope
 #else
-    V4L_thread_data_p->CBData->progressData.completedActions.insert (thread_data_p->eventSourceId);
+    thread_data_p->CBData->progressData.completedActions.insert (thread_data_p->eventSourceId);
   } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -2823,10 +2826,6 @@ idle_initialize_source_UI_cb (gpointer userData_in)
       static_cast<__u32> (allocation.height);
   (*iterator_4).second.second->outputFormat.resolution.width =
       static_cast<__u32> (allocation.width);
-  (*iterator_4).second.second->area.height =
-      static_cast<__u32> (allocation.height);
-  (*iterator_4).second.second->area.width =
-      static_cast<__u32> (allocation.width);
 
   ACE_ASSERT (!ui_cb_data_p->pixelBuffer);
   ui_cb_data_p->pixelBuffer =
@@ -2911,6 +2910,7 @@ idle_end_source_UI_cb (gpointer userData_in)
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_TOGGLEACTION_STREAM_NAME)));
   ACE_ASSERT (toggle_action_p);
   gtk_action_set_stock_id (GTK_ACTION (toggle_action_p), GTK_STOCK_MEDIA_PLAY);
+  gtk_action_set_sensitive (GTK_ACTION (toggle_action_p), TRUE);
   if (gtk_toggle_action_get_active (toggle_action_p))
   {
     un_toggling_stream = true;
@@ -4019,8 +4019,7 @@ idle_end_target_UI_cb (gpointer userData_in)
     GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_ACTION_CLOSE_ALL_NAME)));
   ACE_ASSERT (action_p);
-  gtk_action_set_sensitive (action_p,
-                            (connection_count != 0));
+  gtk_action_set_sensitive (action_p, (connection_count != 0));
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -4620,7 +4619,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
   ACE_Thread_Manager* thread_manager_p = NULL;
   int result = -1;
 
-  Stream_IStreamControlBase* stream_p = NULL;
+  Stream_IStreamControlBase* stream_p = NULL, *stream_2 = NULL;
   switch (protocol)
   {
     case NET_TRANSPORTLAYER_TCP:
@@ -4643,7 +4642,8 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
       }
     } // end SWITCH
 #else
-      stream_p = ui_cb_data_p->stream;
+      stream_p = ui_cb_data_p->audioStream;
+      stream_2 = ui_cb_data_p->videoStream;
 #endif // ACE_WIN32 || ACE_WIN64
       break;
     }
@@ -4679,7 +4679,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
       return;
     }
   } // end SWITCH
-  ACE_ASSERT (stream_p);
+  ACE_ASSERT (stream_p && stream_2);
 
   GtkAction* action_p = NULL;
   //GtkFrame* frame_p =
@@ -4694,24 +4694,17 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
 
     //// step0: modify widgets
     //gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_MEDIA_PLAY);
-
-    //action_p =
-    //  //    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-    //  //                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_ACTION_SETTINGS_NAME)));
-    //  //  ACE_ASSERT (action_p);
-    //  //  gtk_action_set_sensitive (action_p, true);
-    //  //  action_p =
-    //  GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-    //                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_ACTION_RESET_NAME)));
-    //ACE_ASSERT (action_p);
-    //gtk_action_set_sensitive (action_p, true);
+    gtk_action_set_sensitive (GTK_ACTION (toggleAction_in), FALSE);
 
     //gtk_widget_set_sensitive (GTK_WIDGET (frame_p), true);
 
     // step1: stop stream
-    stream_p->stop (false, // wait ?
-                    true); // locked access ?
-
+    stream_p->stop (false,  // wait ?
+                    false,  // recurse ?
+                    false); // high priority ?
+    stream_2->stop (false,  // wait ?
+                    false,  // recurse ?
+                    false); // high priority ?
     return;
   } // end IF
 
@@ -8248,9 +8241,9 @@ drawingarea_configure_event_source_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
 #else
-  (*modulehandler_iterator).second.second->area.height =
+  (*modulehandler_iterator).second.second->outputFormat.resolution.height =
       event_in->configure.height;
-  (*modulehandler_iterator).second.second->area.width =
+  (*modulehandler_iterator).second.second->outputFormat.resolution.width =
       event_in->configure.width;
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -8371,9 +8364,9 @@ drawingarea_configure_event_target_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
 #else
-  (*modulehandler_iterator).second.second->area.height =
+  (*modulehandler_iterator).second.second->outputFormat.resolution.height =
     event_in->configure.height;
-  (*modulehandler_iterator).second.second->area.width =
+  (*modulehandler_iterator).second.second->outputFormat.resolution.width =
     event_in->configure.width;
 #endif // ACE_WIN32 || ACE_WIN64
 

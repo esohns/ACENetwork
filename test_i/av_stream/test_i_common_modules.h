@@ -58,6 +58,8 @@
 #endif // GUI_SUPPORT
 #else
 #include "stream_dev_cam_source_v4l.h"
+#include "stream_dev_mic_source_alsa.h"
+#include "stream_dev_target_alsa.h"
 
 #include "stream_lib_v4l_common.h"
 
@@ -172,6 +174,18 @@ typedef Stream_Module_CamSource_V4L_T<ACE_MT_SYNCH,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
                                       struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_CamSource;
+typedef Stream_Dev_Mic_Source_ALSA_T<ACE_MT_SYNCH,
+                                     Stream_ControlMessage_t,
+                                     Test_I_AVStream_Client_ALSA_V4L_Message,
+                                     Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                                     enum Stream_ControlType,
+                                     enum Stream_SessionMessageType,
+                                     struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                     Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                     struct Stream_Statistic,
+                                     Common_Timer_Manager_t> Test_I_AVStream_Client_ALSA_V4L_MicSource;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -879,6 +893,14 @@ typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
                                        struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Display;
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
+
+typedef Stream_Dev_Target_ALSA_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+                                 Stream_ControlMessage_t,
+                                 Test_I_AVStream_Server_Message,
+                                 Test_I_AVStream_Server_SessionMessage,
+                                 Test_I_AVStream_Server_StreamSessionData> Test_I_AVStream_Server_Target_ALSA;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -938,12 +960,18 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessi
                               Stream_INotify_t,                                                // stream notification interface type
                               Test_I_Stream_MediaFoundation_CamSource);                        // writer type
 #else
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
-                              enum Stream_SessionMessageType,                       // session event type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                    // session event type
                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_dev_cam_source_v4l_module_name_string,
-                              Stream_INotify_t,                                     // stream notification interface type
+                              Stream_INotify_t,                                                  // stream notification interface type
                               Test_I_AVStream_Client_ALSA_V4L_CamSource);                        // writer type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
+                             enum Stream_SessionMessageType,                                    // session event type
+                             struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                             libacestream_default_dev_mic_source_alsa_module_name_string,
+                             Stream_INotify_t,                                                  // stream notification interface type
+                             Test_I_AVStream_Client_ALSA_V4L_MicSource);                        // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1324,6 +1352,13 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,         
                               Test_I_AVStream_Server_Display);                                 // writer type
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
+
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                // session data type
+                             enum Stream_SessionMessageType,                           // session event type
+                             struct Test_I_AVStream_Server_ModuleHandlerConfiguration, // module handler configuration type
+                             libacestream_default_dev_target_alsa_module_name_string,
+                             Stream_INotify_t,                                         // stream notification interface type
+                             Test_I_AVStream_Server_Target_ALSA);                      // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

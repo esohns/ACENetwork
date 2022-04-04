@@ -108,8 +108,10 @@
 #include "test_i_av_stream_client_stream.h"
 #include "test_i_av_stream_stream_common.h"
 
-const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("AVStream");
-const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING);
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Audio");
+const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Video");
+const char stream_name_string_3[] =
+    ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING);
 
 void
 do_printUsage (const std::string& programName_in)
@@ -129,21 +131,21 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-b [VALUE]  : buffer size (byte(s)) [")
-            << TEST_I_DEFAULT_BUFFER_SIZE
-            << ACE_TEXT_ALWAYS_CHAR ("])")
-            << std::endl;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c          : show console [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
 #else
-  std::string device_file = ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
-  device_file += ACE_DIRECTORY_SEPARATOR_CHAR;
-  device_file += ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEFAULT_VIDEO_DEVICE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d [STRING] : device [\"")
-            << device_file
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-a [STRING] : audio device [\"")
+            << ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_CAPTURE_DEFAULT_DEVICE_NAME)
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
+            << std::endl;
+  std::string video_device_file = ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
+  video_device_file += ACE_DIRECTORY_SEPARATOR_CHAR;
+  video_device_file += ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEFAULT_VIDEO_DEVICE);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d [STRING] : video device [\"")
+            << video_device_file
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -216,11 +218,11 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
-                     unsigned int& bufferSize_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                      bool& showConsole_out,
 #else
-                     struct Stream_Device_Identifier& deviceIdentifier_out,
+                     struct Stream_Device_Identifier& audioDeviceIdentifier_out,
+                     struct Stream_Device_Identifier& videoDeviceIdentifier_out,
 #endif // ACE_WIN32 || ACE_WIN64
                      std::string& gtkRcFile_out,
                      bool& useUncompressedFormat_out,
@@ -244,13 +246,15 @@ do_processArguments (int argc_in,
     Common_File_Tools::getWorkingDirectory ();
 
   // initialize results
-  bufferSize_out = TEST_I_DEFAULT_BUFFER_SIZE;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
 #else
-  deviceIdentifier_out.identifier = ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
-  deviceIdentifier_out.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  deviceIdentifier_out.identifier +=
+  audioDeviceIdentifier_out.identifier =
+    ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_CAPTURE_DEFAULT_DEVICE_NAME);
+  videoDeviceIdentifier_out.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
+  videoDeviceIdentifier_out.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  videoDeviceIdentifier_out.identifier +=
     ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEFAULT_VIDEO_DEVICE);
 #endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
@@ -282,9 +286,9 @@ do_processArguments (int argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                              ACE_TEXT ("b:ce:fg::h:lmp:rs:tuvx:"),
+                              ACE_TEXT ("ce:fg::h:lmp:rs:tuvx:"),
 #else
-                              ACE_TEXT ("b:d:e:fg::h:lp:rs:tuvx:"),
+                              ACE_TEXT ("a:d:e:fg::h:lp:rs:tuvx:"),
 #endif // ACE_WIN32 || ACE_WIN64
                               1,                          // skip command name
                               1,                          // report parsing errors
@@ -297,14 +301,6 @@ do_processArguments (int argc_in,
   {
     switch (option)
     {
-      case 'b':
-      {
-        converter.clear ();
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
-        converter >> bufferSize_out;
-        break;
-      }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       case 'c':
       {
@@ -312,9 +308,15 @@ do_processArguments (int argc_in,
         break;
       }
 #else
+      case 'a':
+      {
+        audioDeviceIdentifier_out.identifier =
+          ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+        break;
+      }
       case 'd':
       {
-        deviceIdentifier_out.identifier =
+        videoDeviceIdentifier_out.identifier =
           ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
         break;
       }
@@ -789,13 +791,10 @@ do_finalize_mediafoundation ()
 #endif // ACE_WIN32 || ACE_WIN64
 
 void
-do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
-         unsigned int bufferSize_in,
+do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
+         const struct Stream_Device_Identifier& videoDeviceIdentifier_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
          bool showConsole_in,
-         REFGUID interfaceIdentifier_in,
-#else
-         const std::string& interfaceIdentifier_in,
 #endif // ACE_WIN32 || ACE_WIN64
          bool useUncompressedFormat_in,
          const std::string& UIDefinitionFilename_in,
@@ -812,7 +811,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
          struct Test_I_AVStream_Client_MediaFoundation_UI_CBData& mediaFoundationCBData_in,
          struct Test_I_AVStream_Client_DirectShow_UI_CBData& directShowCBData_in,
 #else
-         struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData& v4l2CBData_in,
+         struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData& CBData_in,
 #endif // ACE_WIN32 || ACE_WIN64
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -852,7 +851,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
     }
   } // end SWITCH
 #else
-  camstream_configuration_p = v4l2CBData_in.configuration;
+  camstream_configuration_p = CBData_in.configuration;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (camstream_configuration_p);
   if (useReactor_in)
@@ -893,11 +892,9 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
     }
   } // end SWITCH
 #else
-  allocator_configuration_p = &v4l2CBData_in.configuration->allocatorConfiguration;
+  allocator_configuration_p = &CBData_in.configuration->allocatorConfiguration;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (allocator_configuration_p);
-  if (bufferSize_in)
-    allocator_configuration_p->defaultBufferSize = bufferSize_in;
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (*allocator_configuration_p))
@@ -932,8 +929,8 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   } // end SWITCH
 #else
   Test_I_AVStream_Client_ALSA_V4L_MessageAllocator_t message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
-                                                          &heap_allocator,     // heap allocator handle
-                                                          true);               // block ?
+                                                                        &heap_allocator,     // heap allocator handle
+                                                                        true);               // block ?
   allocator_p = &message_allocator;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (allocator_p);
@@ -1092,20 +1089,33 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator;
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator;
 
-  Test_I_AVStream_Client_ALSA_V4L_Streamer_Module streamer_module ((useUDP_in ? v4l2CBData_in.UDPStream : v4l2CBData_in.stream),
+  Test_I_AVStream_Client_ALSA_V4L_Streamer_Module streamer_module (CBData_in.videoStream,
                                                                    ACE_TEXT_ALWAYS_CHAR ("Streamer"));
 
-  Test_I_AVStream_Client_ALSA_V4L_EventHandler_t event_handler (&v4l2CBData_in);
-  Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler_Module event_handler_module ((useUDP_in ? v4l2CBData_in.UDPStream : v4l2CBData_in.stream),
+  Test_I_AVStream_Client_ALSA_V4L_EventHandler_t event_handler (&CBData_in);
+  Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler_Module event_handler_module (CBData_in.videoStream,
                                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+
+  struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration; // capture
+  ALSA_configuration.asynch = false;
+//  ALSA_configuration.asynch = STREAM_LIB_ALSA_CAPTURE_DEFAULT_ASYNCH;
+  ALSA_configuration.bufferSize = STREAM_LIB_ALSA_CAPTURE_DEFAULT_BUFFER_SIZE;
+  ALSA_configuration.bufferTime = STREAM_LIB_ALSA_CAPTURE_DEFAULT_BUFFER_TIME;
+  ALSA_configuration.periods = STREAM_LIB_ALSA_CAPTURE_DEFAULT_PERIODS;
+  ALSA_configuration.periodSize = STREAM_LIB_ALSA_CAPTURE_DEFAULT_PERIOD_SIZE;
+  ALSA_configuration.periodTime = STREAM_LIB_ALSA_CAPTURE_DEFAULT_PERIOD_TIME;
 
   struct Stream_AllocatorConfiguration allocator_configuration;
   struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration modulehandler_configuration;
-  struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration modulehandler_configuration_2; // net io
+  struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration modulehandler_configuration_2; // alsa source
+  struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration modulehandler_configuration_3; // net io
+  modulehandler_configuration.ALSAConfiguration = &ALSA_configuration;
   modulehandler_configuration.allocatorConfiguration = &allocator_configuration;
+  modulehandler_configuration.concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
-      &v4l2CBData_in.configuration->connectionConfigurations;
-  modulehandler_configuration.deviceIdentifier = deviceIdentifier_in;
+      &CBData_in.configuration->connectionConfigurations;
+  modulehandler_configuration.deviceIdentifier = videoDeviceIdentifier_in;
+  modulehandler_configuration.messageAllocator = &message_allocator;
   modulehandler_configuration.subscriber = &event_handler;
 
   struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration stream_configuration;
@@ -1140,30 +1150,35 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   stream_configuration_3.initialize (module_configuration,
                                      modulehandler_configuration,
                                      stream_configuration);
-  v4l2CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                            stream_configuration_3));
+  modulehandler_configuration_2 = modulehandler_configuration;
+  modulehandler_configuration_2.deviceIdentifier = audioDeviceIdentifier_in;
+  stream_configuration_3.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_MIC_SOURCE_ALSA_DEFAULT_NAME_STRING),
+                                                 std::make_pair (&module_configuration,
+                                                                 &modulehandler_configuration_2)));
+  CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                        stream_configuration_3));
   stream_iterator =
-    v4l2CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != v4l2CBData_in.configuration->streamConfigurations.end ());
+    CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != CBData_in.configuration->streamConfigurations.end ());
   modulehandler_iterator = (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
   allocator_configuration_p = &allocator_configuration;
 
-  modulehandler_configuration_2 = modulehandler_configuration;
-  modulehandler_configuration_2.concurrency =
+  modulehandler_configuration_3 = modulehandler_configuration;
+  modulehandler_configuration_3.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-  modulehandler_configuration_2.inbound = false;
+  modulehandler_configuration_3.inbound = false;
 
   stream_configuration_2.allocatorConfiguration = &allocator_configuration;
   stream_configuration_2.messageAllocator = allocator_p;
   stream_configuration_4.initialize (module_configuration,
-                                     modulehandler_configuration_2,
+                                     modulehandler_configuration_3,
                                      stream_configuration_2);
-  v4l2CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING),
+  CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING),
                                                             stream_configuration_4));
 //  stream_iterator =
-//    v4l2CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
-//  ACE_ASSERT (stream_iterator != v4l2CBData_in.configuration->streamConfigurations.end ());
+//    CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
+//  ACE_ASSERT (stream_iterator != CBData_in.configuration->streamConfigurations.end ());
 #endif // ACE_WIN32 || ACE_WIN64
   camstream_configuration_p->protocol = (useUDP_in ? NET_TRANSPORTLAYER_UDP
                                                    : NET_TRANSPORTLAYER_TCP);
@@ -1203,12 +1218,14 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
       }
     } // end SWITCH
 #else
-    ACE_NEW_NORETURN (v4l2CBData_in.stream,
+    ACE_NEW_NORETURN (CBData_in.audioStream,
+                      Test_I_AVStream_Client_ALSA_Stream ());
+    ACE_NEW_NORETURN (CBData_in.videoStream,
                       Test_I_AVStream_Client_V4L_TCPStream_t ());
-    ACE_NEW_NORETURN (v4l2CBData_in.UDPStream,
+    ACE_NEW_NORETURN (CBData_in.UDPStream,
                       Test_I_AVStream_Client_V4L_UDPStream_t ());
-    result = (v4l2CBData_in.stream &&
-              v4l2CBData_in.UDPStream);
+    result = (CBData_in.audioStream && CBData_in.videoStream &&
+              CBData_in.UDPStream);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   else
@@ -1245,12 +1262,14 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
       }
     } // end SWITCH
 #else
-    ACE_NEW_NORETURN (v4l2CBData_in.stream,
+    ACE_NEW_NORETURN (CBData_in.audioStream,
+                      Test_I_AVStream_Client_ALSA_Stream ());
+    ACE_NEW_NORETURN (CBData_in.videoStream,
                       Test_I_AVStream_Client_V4L_AsynchTCPStream_t ());
-    ACE_NEW_NORETURN (v4l2CBData_in.UDPStream,
+    ACE_NEW_NORETURN (CBData_in.UDPStream,
                       Test_I_AVStream_Client_V4L_AsynchUDPStream_t ());
-    result = (v4l2CBData_in.stream &&
-              v4l2CBData_in.UDPStream);
+    result =
+        (CBData_in.audioStream && CBData_in.videoStream && CBData_in.UDPStream);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end ELSE
   if (!result)
@@ -1303,7 +1322,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   Test_I_AVStream_Client_DirectShow_EventHandler_t directshow_ui_event_handler (&directShowCBData_in);
   Test_I_AVStream_Client_MediaFoundation_EventHandler_t mediafoundation_ui_event_handler (&mediaFoundationCBData_in);
 #else
-  Test_I_AVStream_Client_ALSA_V4L_EventHandler_t ui_event_handler (&v4l2CBData_in);
+  Test_I_AVStream_Client_ALSA_V4L_EventHandler_t ui_event_handler (&CBData_in);
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1326,7 +1345,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   Net_IConnectionManagerBase* iconnection_manager_p = NULL;
   Net_IStreamStatisticHandler_t* report_handler_p = NULL;
   //Test_I_AVStream_Client_Stream_IStatistic_t stream_report_handler;
-  Stream_IStreamControlBase* stream_p = NULL;
+  Stream_IStreamControlBase* stream_p = NULL, *stream_2 = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
@@ -1384,16 +1403,16 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
 //  connection_configuration.allocatorConfiguration->defaultBufferSize = bufferSize_in;
 
 //  stream_iterator =
-//    v4l2CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
-//  ACE_ASSERT (stream_iterator != v4l2CBData_in.configuration->streamConfigurations.end ());
+//    CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
+//  ACE_ASSERT (stream_iterator != CBData_in.configuration->streamConfigurations.end ());
 //  stream_iterator =
-//    v4l2CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-//  ACE_ASSERT (stream_iterator != v4l2CBData_in.configuration->streamConfigurations.end ());
+//    CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+//  ACE_ASSERT (stream_iterator != CBData_in.configuration->streamConfigurations.end ());
 
 //  result =
 //    connection_configuration.initialize ((*stream_iterator).second);
   ACE_ASSERT (result);
-  v4l2CBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+  CBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                 &connection_configuration));
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -1463,8 +1482,8 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   } // end SWITCH
 #else
   Net_ConnectionConfigurationsIterator_t connection_iterator =
-    v4l2CBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (connection_iterator != v4l2CBData_in.configuration->connectionConfigurations.end ());
+    CBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (connection_iterator != CBData_in.configuration->connectionConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t* connection_manager_p =
     TEST_I_AVSTREAM_CLIENT_ALSA_V4L_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
@@ -1666,14 +1685,14 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
 
   (*modulehandler_iterator).second.second->connectionManager =
     connection_manager_p;
-  (*modulehandler_iterator).second.second->configuration = v4l2CBData_in.configuration;
+  (*modulehandler_iterator).second.second->configuration = CBData_in.configuration;
   (*modulehandler_iterator).second.second->connectionConfigurations =
-      &v4l2CBData_in.configuration->connectionConfigurations;
+      &CBData_in.configuration->connectionConfigurations;
   (*modulehandler_iterator).second.second->statisticReportingInterval =
     ACE_Time_Value (statisticReportingInterval_in, 0);
   //(*modulehandler_iterator).second.second->stream =
-  //    ((V4L_configuration.protocol == NET_TRANSPORTLAYER_TCP) ? v4l2CBData_in.stream
-  //                                                             : v4l2CBData_in.UDPStream);
+  //    ((V4L_configuration.protocol == NET_TRANSPORTLAYER_TCP) ? CBData_in.stream
+  //                                                             : CBData_in.UDPStream);
 //  (*modulehandler_iterator).second.subscriber = &ui_event_handler;
 
 //  (*modulehandler_iterator).second.second->deviceIdentifier.identifier =
@@ -1688,7 +1707,7 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
   ui_state_p = &const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   (*modulehandler_iterator).second.second->pixelBufferLock =
       &ui_state_p->lock;
-  v4l2CBData_in.UIState = ui_state_p;
+  CBData_in.UIState = ui_state_p;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -1756,13 +1775,16 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
     }
   } // end SWITCH
 #else
-  v4l2CBData_in.configuration->signalHandlerConfiguration.connectionManager =
+  CBData_in.configuration->signalHandlerConfiguration.connectionManager =
     TEST_I_AVSTREAM_CLIENT_ALSA_V4L_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
-  v4l2CBData_in.configuration->signalHandlerConfiguration.dispatchState =
+  CBData_in.configuration->signalHandlerConfiguration.dispatchState =
       &event_dispatch_state_s;
-  v4l2CBData_in.configuration->signalHandlerConfiguration.stream = v4l2CBData_in.stream;
+  CBData_in.configuration->signalHandlerConfiguration.audioStream =
+      CBData_in.audioStream;
+  CBData_in.configuration->signalHandlerConfiguration.videoStream =
+      CBData_in.videoStream;
   result =
-    signal_handler.initialize (v4l2CBData_in.configuration->signalHandlerConfiguration);
+    signal_handler.initialize (CBData_in.configuration->signalHandlerConfiguration);
   event_handler_p = &signal_handler;
 #endif // ACE_WIN32 || ACE_WIN64
   if (!result)
@@ -1899,15 +1921,18 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
       }
     } // end SWITCH
 #else
-    if (v4l2CBData_in.configuration->protocol == NET_TRANSPORTLAYER_TCP)
+    if (CBData_in.configuration->protocol == NET_TRANSPORTLAYER_TCP)
     {
-      stream_p = v4l2CBData_in.stream;
-      result = v4l2CBData_in.stream->initialize ((*stream_iterator).second);
+      stream_p = CBData_in.audioStream;
+      stream_2 = CBData_in.videoStream;
+
+      result = CBData_in.audioStream->initialize ((*stream_iterator).second);
+      result &= CBData_in.videoStream->initialize ((*stream_iterator).second);
     } // end IF
     else
     {
-      stream_p = v4l2CBData_in.UDPStream;
-      result = v4l2CBData_in.UDPStream->initialize ((*stream_iterator).second);
+      stream_p = CBData_in.UDPStream;
+      result = CBData_in.UDPStream->initialize ((*stream_iterator).second);
     } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64
     if (!result)
@@ -1921,21 +1946,13 @@ do_work (const struct Stream_Device_Identifier& deviceIdentifier_in,
 
       goto clean;
     } // end IF
-    ACE_ASSERT (stream_p);
+    ACE_ASSERT (stream_p && stream_2);
 
-    // *NOTE*: this call blocks until an error occurs
     stream_p->start ();
-    //    if (!stream_p->isRunning ())
-    //    {
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to start stream, aborting\n")));
+    stream_2->start ();
 
-    //      // clean up
-    //      //timer_manager_p->stop ();
-
-    //      return;
-    //    } // end IF
     stream_p->wait (true, false, false);
+    stream_2->wait (true, false, false);
 
     // clean up
   //    connection_manager_p->stop ();
@@ -2016,9 +2033,11 @@ clean:
     }
   } // end SWITCH
 #else
-  v4l2CBData_in.stream->remove (&streamer_module, true, true);
-  delete v4l2CBData_in.stream; v4l2CBData_in.stream = NULL;
-  delete v4l2CBData_in.UDPStream; v4l2CBData_in.UDPStream = NULL;
+  CBData_in.audioStream->remove (&streamer_module, true, true);
+  CBData_in.videoStream->remove (&streamer_module, true, true);
+  delete CBData_in.audioStream; CBData_in.audioStream = NULL;
+  delete CBData_in.videoStream; CBData_in.videoStream = NULL;
+  delete CBData_in.UDPStream; CBData_in.UDPStream = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
 
   ACE_DEBUG ((LM_DEBUG,
@@ -2108,18 +2127,18 @@ ACE_TMAIN (int argc_in,
   std::string configuration_path = Common_File_Tools::getWorkingDirectory ();
 
   // step1a set defaults
-  unsigned int buffer_size = TEST_I_DEFAULT_BUFFER_SIZE;
-  struct Stream_Device_Identifier device_identifier;
+  struct Stream_Device_Identifier audio_device_identifier;
+  struct Stream_Device_Identifier video_device_identifier;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool show_console = false;
-  struct _GUID interface_identifier = GUID_NULL;
 #else
-  device_identifier.identifier =
+  audio_device_identifier.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_CAPTURE_DEFAULT_DEVICE_NAME);
+  video_device_identifier.identifier =
     ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
-  device_identifier.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  device_identifier.identifier +=
+  video_device_identifier.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  video_device_identifier.identifier +=
     ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEFAULT_VIDEO_DEVICE);
-  std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -2153,11 +2172,11 @@ ACE_TMAIN (int argc_in,
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,
                             argv_in,
-                            buffer_size,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                             show_console,
 #else
-                            device_identifier,
+                            audio_device_identifier,
+                            video_device_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
                             gtk_rc_filename,
                             use_uncompressed_format,
@@ -2490,13 +2509,10 @@ ACE_TMAIN (int argc_in,
   ACE_High_Res_Timer timer;
   timer.start ();
   // step2: do actual work
-  do_work (device_identifier,
-           buffer_size,
+  do_work (audio_device_identifier,
+           video_device_identifier,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
            show_console,
-           interface_identifier,
-#else
-           interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
            use_uncompressed_format,
            gtk_glade_filename,

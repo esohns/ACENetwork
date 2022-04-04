@@ -446,11 +446,7 @@ struct Test_I_AVStream_Server_ModuleHandlerConfiguration
 {
   Test_I_AVStream_Server_ModuleHandlerConfiguration ()
    : Test_I_AVStream_ModuleHandlerConfiguration ()
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-   , area ()
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+   , ALSAConfiguration (NULL)
    , connectionConfigurations (NULL)
    , connectionManager (NULL)
 #if defined (GUI_SUPPORT)
@@ -458,7 +454,6 @@ struct Test_I_AVStream_Server_ModuleHandlerConfiguration
    , contextId (0)
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-   , crunch (false)
    , outputFormat ()
    , queue (NULL)
    , streamConfiguration (NULL)
@@ -469,26 +464,21 @@ struct Test_I_AVStream_Server_ModuleHandlerConfiguration
     inbound = true;
   }
 
+  struct Stream_MediaFramework_ALSA_Configuration*   ALSAConfiguration;
+  Net_ConnectionConfigurations_t*                    connectionConfigurations;
+  Test_I_AVStream_Server_TCPConnectionManager_t*     connectionManager; // net IO module
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  GdkRectangle                                  area;
+  guint                                              contextId;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  Net_ConnectionConfigurations_t*               connectionConfigurations;
-  Test_I_AVStream_Server_TCPConnectionManager_t*         connectionManager; // net IO module
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-  guint                                         contextId;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-  bool                                          crunch;            // splitter module
   struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat; // gtk pixbuf module
-  ACE_Message_Queue_Base*                       queue;  // (inbound) buffer queue handle
+  ACE_Message_Queue_Base*                            queue;  // (inbound) buffer queue handle
   // *TODO*: remove this ASAP
-  Test_I_AVStream_Server_StreamConfiguration_t*          streamConfiguration;
-  std::string                                   targetFileName;    // file writer module
-  Test_I_AVStream_Server_ISessionNotify_t*               subscriber;
-  Test_I_AVStream_Server_Subscribers_t*                  subscribers;
+  Test_I_AVStream_Server_StreamConfiguration_t*      streamConfiguration;
+  std::string                                        targetFileName;    // file writer module
+  Test_I_AVStream_Server_ISessionNotify_t*           subscriber;
+  Test_I_AVStream_Server_Subscribers_t*              subscribers;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 

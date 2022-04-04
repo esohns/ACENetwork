@@ -107,6 +107,7 @@ template <typename SessionDataType,
           typename CallbackDataType>
 class Test_I_AVStream_Client_EventHandler_T;
 extern const char stream_name_string_[];
+extern const char stream_name_string_2[];
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 class Test_I_AVStream_Client_DirectShow_StreamSessionData
@@ -275,7 +276,37 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_ALSA_V4L_Message,
-                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_ALSA_V4L_StreamBase_t;
+                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_ALSA_StreamBase_t;
+typedef Stream_Base_T<ACE_MT_SYNCH,
+                      Common_TimePolicy_t,
+                      stream_name_string_2,
+                      enum Stream_ControlType,
+                      enum Stream_SessionMessageType,
+                      enum Stream_StateMachine_ControlState,
+                      struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                      struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
+                      struct Stream_Statistic,
+                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                      Stream_ControlMessage_t,
+                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_V4L_StreamBase_t;
+//typedef Stream_Base_T<ACE_MT_SYNCH,
+//                      Common_TimePolicy_t,
+//                      stream_name_string_3,
+//                      enum Stream_ControlType,
+//                      enum Stream_SessionMessageType,
+//                      enum Stream_StateMachine_ControlState,
+//                      struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+//                      struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
+//                      struct Stream_Statistic,
+//                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+//                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+//                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+//                      Stream_ControlMessage_t,
+//                      Test_I_AVStream_Client_ALSA_V4L_Message,
+//                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_Net_StreamBase_t;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Client_DirectShow_StreamSessionData,
@@ -484,16 +515,13 @@ struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration
 {
   Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration ()
    : Test_I_AVStream_ModuleHandlerConfiguration ()
-#if defined (GUI_SUPPORT)
-   , area ()
-#endif // GUI_SUPPORT
+   , ALSAConfiguration (NULL)
    , buffers (STREAM_LIB_V4L_DEFAULT_DEVICE_BUFFERS)
    , connection (NULL)
    , connectionConfigurations (NULL)
    , connectionManager (NULL)
    , method (STREAM_LIB_V4L_DEFAULT_IO_METHOD)
    , outputFormat ()
-   //, sourceFormat ()
    , statisticCollectionInterval (ACE_Time_Value::zero)
    , streamConfiguration (NULL)
    , subscriber (NULL)
@@ -502,38 +530,31 @@ struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration
    , window (NULL)
 #endif // GUI_SUPPORT
   {
-#if defined (GUI_SUPPORT)
-    ACE_OS::memset (&area, 0, sizeof (struct v4l2_rect));
-#endif // GUI_SUPPORT
-
     finishOnDisconnect = true;
   }
 
-#if defined (GUI_SUPPORT)
-  struct v4l2_rect                              area;
-#endif // GUI_SUPPORT
-  __u32                                         buffers; // v4l device buffers
-  Net_IINETConnection_t*                        connection; // TCP target/IO module
-  Net_ConnectionConfigurations_t*               connectionConfigurations;
+  struct Stream_MediaFramework_ALSA_Configuration*        ALSAConfiguration;
+  __u32                                                   buffers; // v4l device buffers
+  Net_IINETConnection_t*                                  connection; // TCP target/IO module
+  Net_ConnectionConfigurations_t*                         connectionConfigurations;
   Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t* connectionManager; // TCP IO module
-  enum v4l2_memory                              method; // v4l2 camera source
-  struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat; // display module
-  //struct Stream_MediaFramework_V4L_MediaType     sourceFormat; // source module
-  ACE_Time_Value                                statisticCollectionInterval;
+  enum v4l2_memory                                        method; // v4l2 camera source
+  struct Stream_MediaFramework_FFMPEG_VideoMediaType      outputFormat; // display module
+  ACE_Time_Value                                          statisticCollectionInterval;
   // *TODO*: remove this ASAP
-  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t* streamConfiguration;
-  Test_I_AVStream_Client_ALSA_V4L_ISessionNotify_t*      subscriber;
-  Test_I_AVStream_Client_ALSA_V4L_Subscribers_t*         subscribers;
+  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t*  streamConfiguration;
+  Test_I_AVStream_Client_ALSA_V4L_ISessionNotify_t*       subscriber;
+  Test_I_AVStream_Client_ALSA_V4L_Subscribers_t*          subscribers;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  GdkWindow*                                    window;
+  GdkWindow*                                              window;
 #elif defined (WXWIDGETS_USE)
-  wxWindow*                                     window;
+  wxWindow*                                               window;
 #elif defined (QT_USE)
-  XID                                           window;
+  XID                                                     window;
 #else
-  void*                                         window;
-#endif
+  void*                                                   window;
+#endif // GTK_USE || WXWIDGETS_USE || QT_USE
 #endif // GUI_SUPPORT
 };
 #endif // ACE_WIN32 || ACE_WIN64
@@ -576,12 +597,15 @@ struct Test_I_AVStream_Client_ALSA_V4L_SignalHandlerConfiguration
   Test_I_AVStream_Client_ALSA_V4L_SignalHandlerConfiguration ()
    : Test_I_SignalHandlerConfiguration ()
    , connectionManager (NULL)
-   //   , statisticReportingInterval (0)
-   , stream (NULL)
+   , audioStream (NULL)
+   , videoStream (NULL)
+   , UDPStream (NULL)
   {}
 
   Test_I_AVStream_Client_ALSA_V4L_TCPConnectionManager_t* connectionManager;
-  Test_I_AVStream_Client_ALSA_V4L_StreamBase_t*           stream;
+  Test_I_AVStream_Client_ALSA_StreamBase_t*               audioStream;
+  Test_I_AVStream_Client_V4L_StreamBase_t*                videoStream;
+  Stream_IStreamControlBase*                              UDPStream;
 };
 typedef Test_I_AVStream_Client_SignalHandler_T<struct Test_I_AVStream_Client_ALSA_V4L_SignalHandlerConfiguration> Test_I_AVStream_Client_ALSA_V4L_SignalHandler_t;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -856,7 +880,8 @@ struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData
    : Test_I_AVStream_UI_CBData ()
    , configuration (NULL)
    , fileDescriptor (-1)
-   , stream (NULL)
+   , audioStream (NULL)
+   , videoStream (NULL)
    , subscribers ()
    , subscribersLock ()
    , UDPStream (NULL)
@@ -864,10 +889,11 @@ struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData
 
   struct Test_I_AVStream_Client_ALSA_V4L_Configuration* configuration;
   int                                                   fileDescriptor; // (capture) device file descriptor
-  Test_I_AVStream_Client_ALSA_V4L_StreamBase_t*         stream;
+  Test_I_AVStream_Client_ALSA_StreamBase_t*             audioStream;
+  Test_I_AVStream_Client_V4L_StreamBase_t*              videoStream;
   Test_I_AVStream_Client_ALSA_V4L_Subscribers_t         subscribers;
   ACE_SYNCH_RECURSIVE_MUTEX                             subscribersLock;
-  Test_I_AVStream_Client_ALSA_V4L_StreamBase_t*         UDPStream;
+  Test_I_AVStream_Client_V4L_StreamBase_t*              UDPStream;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 

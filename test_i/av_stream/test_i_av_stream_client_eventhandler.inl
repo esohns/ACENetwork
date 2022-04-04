@@ -58,10 +58,9 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
 #endif // GUI_SUPPORT
 #if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
- , sessionData_ (NULL)
-#else
- : sessionData_ (NULL)
 #endif // GUI_SUPPORT
+ , lock_ ()
+ , sessionData_ ()
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_EventHandler_T::Test_I_AVStream_Client_EventHandler_T"));
 
@@ -88,7 +87,6 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #endif // GUI_SUPPORT
-  ACE_ASSERT (!sessionData_);
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -100,7 +98,10 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  sessionData_ = &const_cast<SessionDataType&> (sessionData_in);
+  { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
+    sessionData_.insert (std::make_pair (sessionId_in,
+                                         &const_cast<SessionDataType&> (sessionData_in)));
+  } // end lock scope
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -185,8 +186,12 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  if (sessionData_)
-    sessionData_ = NULL;
+  SESSIONDATA_MAP_ITERATOR_T iterator;
+  { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
+    iterator = sessionData_.find (sessionId_in);
+    ACE_ASSERT (iterator != sessionData_.end ());
+    sessionData_.erase (iterator);
+  } // end lock scope
 }
 
 template <typename SessionDataType,
@@ -299,45 +304,45 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
     }
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
-//      float current_bytes = 0.0F;
+      SESSIONDATA_MAP_ITERATOR_T iterator;
+      { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
+        iterator = sessionData_.find (sessionId_in);
+        ACE_ASSERT (iterator != sessionData_.end ());
 
-      // sanity check(s)
-      if (!sessionData_)
-        goto continue_;
-
-      if (sessionData_->lock)
-      {
-        result = sessionData_->lock->acquire ();
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
-      } // end IF
+        if ((*iterator).second->lock)
+        {
+          result = (*iterator).second->lock->acquire ();
+          if (result == -1)
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
+        } // end IF
 
       // *NOTE*: the byte counter is more current than what is received here
       //         (see above) --> do not update
       //current_bytes = CBData_->progressData.statistic.bytes;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+        { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-        CBData_->progressData.statistic = sessionData_->statistic;
+          CBData_->progressData.statistic = (*iterator).second->statistic;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-      } // end lock scope
+        } // end lock scope
 #endif // GTK_USE
 #endif // GUI_SUPPORT
       //CBData_->progressData.statistic.bytes = current_bytes;
 
-      if (sessionData_->lock)
-      {
-        result = sessionData_->lock->release ();
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-      } // end IF
+        if ((*iterator).second->lock)
+        {
+          result = (*iterator).second->lock->release ();
+          if (result == -1)
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+        } // end IF
+      } // end lock scope
 
-continue_:
+//continue_:
       event_e = COMMON_UI_EVENT_STATISTIC;
       break;
     }

@@ -1176,7 +1176,7 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, NULL, 0);
   branch_p = module_p;
-//  inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_AUDIO_NAME_STRING));
+  inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_AUDIO_NAME_STRING));
   inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (TEST_I_AVSTREAM_MODULE_SPLITTER_BRANCH_VIDEO_NAME_STRING));
   Stream_IDistributorModule* idistributor_p =
       dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
@@ -1184,9 +1184,13 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
   idistributor_p->initialize (inherited::configuration_->configuration_->branches);
 
   module_p = NULL;
-  // *TODO*: add ALSA target module
+  ACE_NEW_RETURN (module_p,
+                 Test_I_AVStream_Server_Target_ALSA_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
+                 false);
+  layout_in->append (module_p, branch_p, index_i);
 
-//  ++index_i;
+  ++index_i;
   module_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)

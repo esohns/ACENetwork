@@ -68,6 +68,7 @@
 #include "test_i_av_stream_defines.h"
 
 // forward declarations
+extern const char stream_name_string_3[];
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct Test_I_AVStream_Client_DirectShow_ConnectionConfiguration;
 struct Net_StreamConnectionState;
@@ -331,7 +332,7 @@ extern const char stream_name_string_2[];
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      stream_name_string_2,
+                                      stream_name_string_3,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
@@ -350,7 +351,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct Stream_UserData> Test_I_AVStream_Client_DirectShow_Net_TCPStream_t;
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      stream_name_string_2,
+                                      stream_name_string_3,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
@@ -370,7 +371,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
 
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      stream_name_string_2,
+                                      stream_name_string_3,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
@@ -389,7 +390,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct Stream_UserData> Test_I_AVStream_Client_MediaFoundation_Net_TCPStream_t;
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      stream_name_string_2,
+                                      stream_name_string_3,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
@@ -409,7 +410,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
 #else
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      stream_name_string_2,
+                                      stream_name_string_3,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
@@ -428,7 +429,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct Stream_UserData> Test_I_AVStream_Client_ALSA_V4L_Net_TCPStream_t;
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
-                                      stream_name_string_2,
+                                      stream_name_string_3,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,

@@ -1040,12 +1040,18 @@ do_work (unsigned int maximumNumberOfConnections_in,
   struct Test_I_AVStream_Server_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_AVStream_Server_ModuleHandlerConfiguration modulehandler_configuration_2; // splitter
 
+  struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration; // playback
+  ALSA_configuration.asynch = false;
+
+  modulehandler_configuration.ALSAConfiguration = &ALSA_configuration;
   modulehandler_configuration.allocatorConfiguration = &allocator_configuration;
   modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.configuration = &configuration;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
+  modulehandler_configuration.deviceIdentifier.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
   modulehandler_configuration.inbound = true;
 
   //modulehandler_configuration.connectionManager = connection_manager_p;

@@ -53,6 +53,7 @@ struct IMFMediaSession;
 class Stream_IAllocator;
 
 extern const char stream_name_string_[];
+extern const char stream_name_string_2[];
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 template <typename ConnectionManagerType,
@@ -216,9 +217,7 @@ class Test_I_AVStream_Client_MediaFoundation_Stream_T
   IMFMediaSession* mediaSession_;
 };
 #else
-template <typename ConnectionManagerType,
-          typename ConnectorType>
-class Test_I_AVStream_Client_V4L_Stream_T
+class Test_I_AVStream_Client_ALSA_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         stream_name_string_,
@@ -238,6 +237,57 @@ class Test_I_AVStream_Client_V4L_Stream_T
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         stream_name_string_,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                        Stream_ControlMessage_t,
+                        Test_I_AVStream_Client_ALSA_V4L_Message,
+                        Test_I_AVStream_Client_ALSA_V4L_SessionMessage> inherited;
+
+public:
+  Test_I_AVStream_Client_ALSA_Stream ();
+  inline virtual ~Test_I_AVStream_Client_ALSA_Stream () { inherited::shutdown (); }
+
+     // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ILayout*, // return value: module list
+                    bool&);          // return value: delete modules ?
+
+     // implement Common_IInitialize_T
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+
+private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_ALSA_Stream (const Test_I_AVStream_Client_ALSA_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_ALSA_Stream& operator= (const Test_I_AVStream_Client_ALSA_Stream&))
+};
+
+template <typename ConnectionManagerType,
+          typename ConnectorType>
+class Test_I_AVStream_Client_V4L_Stream_T
+ : public Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_2,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamState,
+                        struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                        Stream_ControlMessage_t,
+                        Test_I_AVStream_Client_ALSA_V4L_Message,
+                        Test_I_AVStream_Client_ALSA_V4L_SessionMessage>
+{
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_2,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -291,186 +341,5 @@ class Test_I_AVStream_Client_V4L_Stream_T
 
 // include template definition
 #include "test_i_av_stream_client_stream.inl"
-
-////////////////////////////////////////////
-//
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//typedef Test_I_AVStream_Client_DirectShow_Stream_T<struct Test_I_AVStream_Client_DirectShow_StreamState,
-//                                          struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
-//                                          Common_Timer_Manager_t,
-//                                          struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
-//                                          Stream_ControlMessage_t,
-//                                          Test_I_AVStream_Client_DirectShow_Message,
-//                                          Test_I_AVStream_Client_DirectShow_SessionMessage,
-//                                          Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t,
-//                                          Test_I_AVStream_Client_DirectShow_TCPConnector_t> Test_I_AVStream_Client_DirectShow_TCPStream_t;
-//#if defined (SSL_USE)
-//typedef Test_I_AVStream_Client_DirectShow_Stream_T<struct Test_I_AVStream_Client_DirectShow_StreamState,
-//                                          struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
-//                                          Common_Timer_Manager_t,
-//                                          struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
-//                                          Stream_ControlMessage_t,
-//                                          Test_I_AVStream_Client_DirectShow_Message,
-//                                          Test_I_AVStream_Client_DirectShow_SessionMessage,
-//                                          Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t,
-//                                          Test_I_AVStream_Client_DirectShow_SSLConnector_t> Test_I_AVStream_Client_DirectShow_SSLTCPStream_t;
-//#endif // SSL_USE
-//typedef Test_I_AVStream_Client_DirectShow_Stream_T<struct Test_I_AVStream_Client_DirectShow_StreamState,
-//                                          struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
-//                                          Common_Timer_Manager_t,
-//                                          struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
-//                                          Stream_ControlMessage_t,
-//                                          Test_I_AVStream_Client_DirectShow_Message,
-//                                          Test_I_AVStream_Client_DirectShow_SessionMessage,
-//                                          Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t,
-//                                          Test_I_AVStream_Client_DirectShow_TCPAsynchConnector_t> Test_I_AVStream_Client_DirectShow_AsynchTCPStream_t;
-//
-//typedef Test_I_AVStream_Client_DirectShow_Stream_T<struct Test_I_AVStream_Client_DirectShow_StreamState,
-//                                          struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
-//                                          Common_Timer_Manager_t,
-//                                          struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
-//                                          Stream_ControlMessage_t,
-//                                          Test_I_AVStream_Client_DirectShow_Message,
-//                                          Test_I_AVStream_Client_DirectShow_SessionMessage,
-//                                          Test_I_AVStream_Client_DirectShow_UDPConnectionManager_t,
-//                                          Test_I_AVStream_Client_DirectShow_UDPConnector_t> Test_I_AVStream_Client_DirectShow_UDPStream_t;
-//typedef Test_I_AVStream_Client_DirectShow_Stream_T<struct Test_I_AVStream_Client_DirectShow_StreamState,
-//                                          struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
-//                                          Common_Timer_Manager_t,
-//                                          struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData,
-//                                          Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
-//                                          Stream_ControlMessage_t,
-//                                          Test_I_AVStream_Client_DirectShow_Message,
-//                                          Test_I_AVStream_Client_DirectShow_SessionMessage,
-//                                          Test_I_AVStream_Client_DirectShow_UDPConnectionManager_t,
-//                                          Test_I_AVStream_Client_DirectShow_UDPAsynchConnector_t> Test_I_AVStream_Client_DirectShow_AsynchUDPStream_t;
-//
-//typedef Test_I_AVStream_Client_MediaFoundation_Stream_T<struct Test_I_AVStream_Client_MediaFoundation_StreamState,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
-//                                               Common_Timer_Manager_t,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
-//                                               Stream_ControlMessage_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_Message,
-//                                               Test_I_AVStream_Client_MediaFoundation_SessionMessage,
-//                                               Test_I_AVStream_Client_MediaFoundation_TCPConnectionManager_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_TCPConnector_t> Test_I_AVStream_Client_MediaFoundation_TCPStream_t;
-//#if defined (SSL_USE)
-//typedef Test_I_AVStream_Client_MediaFoundation_Stream_T<struct Test_I_AVStream_Client_MediaFoundation_StreamState,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
-//                                               Common_Timer_Manager_t,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
-//                                               Stream_ControlMessage_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_Message,
-//                                               Test_I_AVStream_Client_MediaFoundation_SessionMessage,
-//                                               Test_I_AVStream_Client_MediaFoundation_TCPConnectionManager_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_SSLConnector_t> Test_I_AVStream_Client_MediaFoundation_SSLTCPStream_t;
-//#endif // SSL_USE
-//typedef Test_I_AVStream_Client_MediaFoundation_Stream_T<struct Test_I_AVStream_Client_MediaFoundation_StreamState,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
-//                                               Common_Timer_Manager_t,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
-//                                               Stream_ControlMessage_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_Message,
-//                                               Test_I_AVStream_Client_MediaFoundation_SessionMessage,
-//                                               Test_I_AVStream_Client_MediaFoundation_TCPConnectionManager_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_TCPAsynchConnector_t> Test_I_AVStream_Client_MediaFoundation_AsynchTCPStream_t;
-//
-//typedef Test_I_AVStream_Client_MediaFoundation_Stream_T<struct Test_I_AVStream_Client_MediaFoundation_StreamState,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
-//                                               Common_Timer_Manager_t,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
-//                                               Stream_ControlMessage_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_Message,
-//                                               Test_I_AVStream_Client_MediaFoundation_SessionMessage,
-//                                               Test_I_AVStream_Client_MediaFoundation_UDPConnectionManager_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_UDPConnector_t> Test_I_AVStream_Client_MediaFoundation_UDPStream_t;
-//typedef Test_I_AVStream_Client_MediaFoundation_Stream_T<struct Test_I_AVStream_Client_MediaFoundation_StreamState,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
-//                                               Common_Timer_Manager_t,
-//                                               struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
-//                                               Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
-//                                               Stream_ControlMessage_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_Message,
-//                                               Test_I_AVStream_Client_MediaFoundation_SessionMessage,
-//                                               Test_I_AVStream_Client_MediaFoundation_UDPConnectionManager_t,
-//                                               Test_I_AVStream_Client_MediaFoundation_UDPAsynchConnector_t> Test_I_AVStream_Client_MediaFoundation_AsynchUDPStream_t;
-//#else
-//typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-//                                   Test_I_AVStream_Client_V4L_StreamConfiguration_t,
-//                                   Common_Timer_Manager_t,
-//                                   struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData_t,
-//                                   Stream_ControlMessage_t,
-//                                   Test_I_AVStream_Client_V4L_Message,
-//                                   Test_I_AVStream_Client_V4L_SessionMessage,
-//                                   Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-//                                   Test_I_AVStream_Client_V4L_TCPConnector_t> Test_I_AVStream_Client_V4L_TCPStream_t;
-//#if defined (SSL_USE)
-//typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-//                                   Test_I_AVStream_Client_V4L_StreamConfiguration_t,
-//                                   Common_Timer_Manager_t,
-//                                   struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData_t,
-//                                   Stream_ControlMessage_t,
-//                                   Test_I_AVStream_Client_V4L_Message,
-//                                   Test_I_AVStream_Client_V4L_SessionMessage,
-//                                   Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-//                                   Test_I_AVStream_Client_V4L_SSLConnector_t> Test_I_AVStream_Client_V4L_SSLTCPStream_t;
-//#endif // SSL_USE
-//typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-//                                   Test_I_AVStream_Client_V4L_StreamConfiguration_t,
-//                                   Common_Timer_Manager_t,
-//                                   struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData_t,
-//                                   Stream_ControlMessage_t,
-//                                   Test_I_AVStream_Client_V4L_Message,
-//                                   Test_I_AVStream_Client_V4L_SessionMessage,
-//                                   Test_I_AVStream_Client_V4L_TCPConnectionManager_t,
-//                                   Test_I_AVStream_Client_V4L_TCPAsynchConnector_t> Test_I_AVStream_Client_V4L_AsynchTCPStream_t;
-//
-//typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-//                                   Test_I_AVStream_Client_V4L_StreamConfiguration_t,
-//                                   Common_Timer_Manager_t,
-//                                   struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData_t,
-//                                   Stream_ControlMessage_t,
-//                                   Test_I_AVStream_Client_V4L_Message,
-//                                   Test_I_AVStream_Client_V4L_SessionMessage,
-//                                   Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-//                                   Test_I_AVStream_Client_V4L_UDPConnector_t> Test_I_AVStream_Client_V4L_UDPStream_t;
-//typedef Test_I_AVStream_Client_V4L_Stream_T<struct Test_I_AVStream_Client_V4L_StreamState,
-//                                   Test_I_AVStream_Client_V4L_StreamConfiguration_t,
-//                                   Common_Timer_Manager_t,
-//                                   struct Test_I_AVStream_Client_V4L_ModuleHandlerConfiguration,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData,
-//                                   Test_I_AVStream_Client_V4L_StreamSessionData_t,
-//                                   Stream_ControlMessage_t,
-//                                   Test_I_AVStream_Client_V4L_Message,
-//                                   Test_I_AVStream_Client_V4L_SessionMessage,
-//                                   Test_I_AVStream_Client_V4L_UDPConnectionManager_t,
-//                                   Test_I_AVStream_Client_V4L_UDPAsynchConnector_t> Test_I_AVStream_Client_V4L_AsynchUDPStream_t;
-//#endif // ACE_WIN32 || ACE_WIN64
 
 #endif

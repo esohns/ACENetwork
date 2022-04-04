@@ -508,7 +508,10 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   ACE_ASSERT (message_block_p);
 
   // start (asynchronous) write
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 send:
+#endif // ACE_WIN32 || ACE_WIN64
   inherited::increase ();
   inherited::counter_.increase ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

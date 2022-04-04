@@ -21,6 +21,8 @@
 #ifndef TEST_I_AVSTREAM_CLIENT_EVENTHANDLER_H
 #define TEST_I_AVSTREAM_CLIENT_EVENTHANDLER_H
 
+#include <map>
+
 #include "ace/Global_Macros.h"
 
 #include "stream_isessionnotify.h"
@@ -60,8 +62,12 @@ class Test_I_AVStream_Client_EventHandler_T
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_EventHandler_T (const Test_I_AVStream_Client_EventHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_EventHandler_T& operator= (const Test_I_AVStream_Client_EventHandler_T&))
 
+  typedef std::map<Stream_SessionId_t, SessionDataType*> SESSIONDATA_MAP_T;
+  typedef typename SESSIONDATA_MAP_T::iterator SESSIONDATA_MAP_ITERATOR_T;
+
   CallbackDataType* CBData_;
-  SessionDataType*  sessionData_;
+  ACE_Thread_Mutex  lock_;
+  SESSIONDATA_MAP_T sessionData_;
 };
 
 // include template definition
