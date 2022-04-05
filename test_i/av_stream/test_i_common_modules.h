@@ -1105,18 +1105,22 @@ DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_DirectShow_StreamSessionData,  
                           Test_I_AVStream_Client_DirectShow_Distributor,                       // writer type
                           Test_I_AVStream_Client_DirectShow_Distributor);                      // name
 
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionData,                 // session data type
-                              enum Stream_SessionMessageType,                                      // session event type
-                              struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
-                              libacestream_default_misc_splitter_module_name_string,
-                              Stream_INotify_t,                                                    // stream notification interface type
-                              Test_I_AVStream_Client_DirectShow_Streamer);                         // writer type
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessionData,                 // session data type
-                              enum Stream_SessionMessageType,                                           // session event type
-                              struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration, // module handler configuration type
-                              libacestream_default_misc_splitter_module_name_string,
-                              Stream_INotify_t,                                                         // stream notification interface type
-                              Test_I_AVStream_Client_MediaFoundation_Streamer);                         // writer type
+DATASTREAM_MODULE_DUPLEX_A (Test_I_AVStream_Client_DirectShow_StreamSessionData,                 // session data type
+                            enum Stream_SessionMessageType,                                      // session event type
+                            struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+                            libacestream_default_misc_splitter_module_name_string,
+                            Stream_INotify_t,                                                    // stream notification interface type
+                            Test_I_AVStream_Client_DirectShow_Streamer::READER_TASK_T,           // reader type
+                            Test_I_AVStream_Client_DirectShow_Streamer,                          // writer type
+                            Test_I_AVStream_Client_DirectShow_Streamer);                         // name
+DATASTREAM_MODULE_DUPLEX_A (Test_I_AVStream_Client_MediaFoundation_StreamSessionData,                 // session data type
+                            enum Stream_SessionMessageType,                                           // session event type
+                            struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration, // module handler configuration type
+                            libacestream_default_misc_splitter_module_name_string,
+                            Stream_INotify_t,                                                         // stream notification interface type
+                            Test_I_AVStream_Client_MediaFoundation_Streamer::READER_TASK_T,           // reader type
+                            Test_I_AVStream_Client_MediaFoundation_Streamer,                          // writer type
+                            Test_I_AVStream_Client_MediaFoundation_Streamer);                         // name
 
 DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_MediaFoundation_StreamSessionData,                 // session data type
                           enum Stream_SessionMessageType,                                           // session event type
@@ -1158,12 +1162,14 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,         
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_AVStream_Server_Splitter);                         // writer type
 
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
-                              enum Stream_SessionMessageType,                                    // session event type
-                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
-                              libacestream_default_misc_splitter_module_name_string,
-                              Stream_INotify_t,                                                  // stream notification interface type
-                              Test_I_AVStream_Client_ALSA_V4L_Streamer);                         // writer type
+DATASTREAM_MODULE_DUPLEX_A (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
+                            enum Stream_SessionMessageType,                                    // session event type
+                            struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
+                            libacestream_default_misc_splitter_module_name_string,
+                            Stream_INotify_t,                                                  // stream notification interface type
+                            Test_I_AVStream_Client_ALSA_V4L_Streamer::READER_TASK_T,           // reader type
+                            Test_I_AVStream_Client_ALSA_V4L_Streamer,                          // writer type
+                            Test_I_AVStream_Client_ALSA_V4L_Streamer);                         // name
 
 DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
                           enum Stream_SessionMessageType,                               // session event type

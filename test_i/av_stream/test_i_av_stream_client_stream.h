@@ -56,9 +56,7 @@ extern const char stream_name_string_[];
 extern const char stream_name_string_2[];
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-template <typename ConnectionManagerType,
-          typename ConnectorType>
-class Test_I_AVStream_Client_DirectShow_Stream_T
+class Test_I_AVStream_Client_DirectShow_Audio_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         stream_name_string_,
@@ -78,6 +76,57 @@ class Test_I_AVStream_Client_DirectShow_Stream_T
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         stream_name_string_,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_AVStream_Client_DirectShow_StreamState,
+                        struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
+                        Test_I_AVStream_Client_DirectShow_StreamSessionData,
+                        Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                        Stream_ControlMessage_t,
+                        Test_I_AVStream_Client_DirectShow_Message,
+                        Test_I_AVStream_Client_DirectShow_SessionMessage> inherited;
+
+public:
+  Test_I_AVStream_Client_DirectShow_Audio_Stream ();
+  inline virtual ~Test_I_AVStream_Client_DirectShow_Audio_Stream () { inherited::shutdown (); }
+
+     // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ILayout*, // return value: module list
+                    bool&);          // return value: delete modules ?
+
+     // implement Common_IInitialize_T
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+
+private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_DirectShow_Audio_Stream (const Test_I_AVStream_Client_DirectShow_Audio_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_DirectShow_Audio_Stream& operator= (const Test_I_AVStream_Client_DirectShow_Audio_Stream&))
+};
+
+template <typename ConnectionManagerType,
+          typename ConnectorType>
+class Test_I_AVStream_Client_DirectShow_Stream_T
+ : public Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_2,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_AVStream_Client_DirectShow_StreamState,
+                        struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
+                        Test_I_AVStream_Client_DirectShow_StreamSessionData,
+                        Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                        Stream_ControlMessage_t,
+                        Test_I_AVStream_Client_DirectShow_Message,
+                        Test_I_AVStream_Client_DirectShow_SessionMessage>
+{
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_2,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -135,7 +184,7 @@ template <typename ConnectionManagerType,
 class Test_I_AVStream_Client_MediaFoundation_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_name_string_2,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -152,7 +201,7 @@ class Test_I_AVStream_Client_MediaFoundation_Stream_T
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_name_string_2,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -210,8 +259,8 @@ class Test_I_AVStream_Client_MediaFoundation_Stream_T
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_MediaFoundation_Stream_T (const Test_I_AVStream_Client_MediaFoundation_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_MediaFoundation_Stream_T& operator= (const Test_I_AVStream_Client_MediaFoundation_Stream_T&))
 
-  // *TODO*: re-consider this API
-  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  //// *TODO*: re-consider this API
+  //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // media session
   IMFMediaSession* mediaSession_;

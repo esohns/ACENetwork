@@ -1479,7 +1479,7 @@ set_capture_format (struct Test_I_AVStream_UI_CBData* CBData_in)
       ACE_ASSERT ((*directshow_modulehandler_iterator).second.second->builder);
 
       // step1: set capture format
-      Stream_MediaFramework_DirectShow_Tools::free ((*directshow_stream_iterator).second.configuration_->format);
+      Stream_MediaFramework_DirectShow_Tools::free ((*directshow_stream_iterator).second.configuration_->format.video);
       if (!Stream_Device_DirectShow_Tools::getVideoCaptureFormat ((*directshow_modulehandler_iterator).second.second->builder,
                                                                   media_subtype,
                                                                   width, height,
@@ -1749,6 +1749,7 @@ stream_processing_function (void* arg_in)
   const Stream_SessionData* session_data_p = NULL;
   bool result_2 = false;
   guint context_id = 0;
+  Stream_Module_t* module_p = NULL;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct Test_I_AVStream_Client_DirectShow_ThreadData* directshow_thread_data_p = NULL;
@@ -1846,27 +1847,33 @@ stream_processing_function (void* arg_in)
         {
           case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
           {
-            stream_p = directshow_thread_data_p->CBData->stream;
-            //(*directshow_modulehandler_iterator).second.second->stream =
-            //  directshow_ui_cb_data_p->CBData->stream;
+            stream_p = directshow_thread_data_p->CBData->audioStream;
+            stream_2 = directshow_thread_data_p->CBData->videoStream;
+
             result_2 =
-              directshow_thread_data_p->CBData->stream->initialize ((*directshow_stream_iterator).second);
+              directshow_thread_data_p->CBData->audioStream->initialize ((*directshow_stream_iterator).second);
+            result_2 &=
+              directshow_thread_data_p->CBData->videoStream->initialize ((*directshow_stream_iterator).second);
+
             const Test_I_AVStream_Client_DirectShow_StreamSessionData_t* session_data_container_p =
-              &directshow_thread_data_p->CBData->stream->getR_2 ();
-            session_ui_cb_data_p =
+              &directshow_thread_data_p->CBData->videoStream->getR_2 ();
+            session_data_p =
               &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_data_container_p->getR ());
             break;
           }
           case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
           {
-            stream_p = mediafoundation_thread_data_p->CBData->stream;
-            //(*mediafoundation_modulehandler_iterator).second.second->stream =
-            //  mediafoundation_ui_cb_data_p->CBData->stream;
+            stream_p = mediafoundation_thread_data_p->CBData->audioStream;
+            stream_2 = mediafoundation_thread_data_p->CBData->videoStream;
+
             result_2 =
-              mediafoundation_thread_data_p->CBData->stream->initialize ((*mediafoundation_stream_iterator).second);
+              mediafoundation_thread_data_p->CBData->audioStream->initialize ((*mediafoundation_stream_iterator).second);
+            result_2 =
+              mediafoundation_thread_data_p->CBData->videoStream->initialize ((*mediafoundation_stream_iterator).second);
+
             const Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t* session_data_container_p =
-              &mediafoundation_thread_data_p->CBData->stream->getR_2 ();
-            session_ui_cb_data_p =
+              &mediafoundation_thread_data_p->CBData->videoStream->getR_2 ();
+            session_data_p =
               &const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (session_data_container_p->getR ());
             break;
           }
@@ -1898,7 +1905,7 @@ stream_processing_function (void* arg_in)
       case NET_TRANSPORTLAYER_UDP:
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        switch (thread_data_p->mediaFramework)
+        switch (thread_data_base_p->mediaFramework)
         {
           case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
           {
@@ -1909,7 +1916,7 @@ stream_processing_function (void* arg_in)
               directshow_thread_data_p->CBData->UDPStream->initialize ((*directshow_stream_iterator).second);
             const Test_I_AVStream_Client_DirectShow_StreamSessionData_t* session_data_container_p =
               &directshow_thread_data_p->CBData->UDPStream->getR_2 ();
-            session_ui_cb_data_p =
+            session_data_p =
               &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_data_container_p->getR ());
             break;
           }
@@ -1922,7 +1929,7 @@ stream_processing_function (void* arg_in)
               mediafoundation_thread_data_p->CBData->UDPStream->initialize ((*mediafoundation_stream_iterator).second);
             const Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t* session_data_container_p =
               &mediafoundation_thread_data_p->CBData->UDPStream->getR_2 ();
-            session_ui_cb_data_p =
+            session_data_p =
               &const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (session_data_container_p->getR ());
             break;
           }
@@ -1930,7 +1937,7 @@ stream_processing_function (void* arg_in)
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                        thread_data_p->mediaFramework));
+                        thread_data_base_p->mediaFramework));
             goto done;
           }
         } // end SWITCH
@@ -1951,7 +1958,7 @@ stream_processing_function (void* arg_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown protocol (was: %d), returning\n"),
-                    thread_data_p->CBData->configuration->protocol));
+                    thread_data_base_p->CBData->configuration->protocol));
         goto done;
       }
     } // end SWITCH
@@ -2002,7 +2009,6 @@ stream_processing_function (void* arg_in)
   } // end IF
   ACE_ASSERT (stream_p && stream_2);
 
-  // *NOTE*: processing currently happens 'inline' (borrows calling thread)
   stream_p->start ();
   stream_2->start ();
 
@@ -2022,30 +2028,48 @@ done:
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *lock_p, std::numeric_limits<void*>::max ());
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    switch (thread_data_p->mediaFramework)
+    switch (thread_data_base_p->mediaFramework)
     {
       case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-        directshow_thread_data_p->CBData->progressData.completedActions.insert (thread_data_p->eventSourceId);
+      {
+        module_p =
+          const_cast<Stream_Module_t*> (directshow_thread_data_p->CBData->audioStream->find (ACE_TEXT_ALWAYS_CHAR ("Streamer"),
+                                                                                             false,   // sanitize names ?
+                                                                                             false)); // recurse ?
+        ACE_ASSERT (module_p);
+        directshow_thread_data_p->CBData->audioStream->remove (module_p, true, true);
+        directshow_thread_data_p->CBData->videoStream->remove (module_p, true, true);
+        directshow_thread_data_p->CBData->progressData.completedActions.insert (thread_data_base_p->eventSourceId);
         break;
+      }
       case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
-        mediafoundation_thread_data_p->CBData->progressData.completedActions.insert (thread_data_p->eventSourceId);
+      {
+        mediafoundation_thread_data_p->CBData->progressData.completedActions.insert (thread_data_base_p->eventSourceId);
         break;
+      }
       default:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                    thread_data_p->mediaFramework));
+                    thread_data_base_p->mediaFramework));
         goto done;
       }
     } // end SWITCH
   } // end lock scope
 #else
+    module_p =
+      const_cast<Stream_Module_t*> (thread_data_p->CBData->audioStream->find (ACE_TEXT_ALWAYS_CHAR ("Streamer"),
+                                                                              false,   // sanitize names ?
+                                                                              false)); // recurse ?
+    ACE_ASSERT (module_p);
+    thread_data_p->CBData->audioStream->remove (module_p, true, true);
+    thread_data_p->CBData->videoStream->remove (module_p, true, true);
     thread_data_p->CBData->progressData.completedActions.insert (thread_data_p->eventSourceId);
   } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
 
   // clean up
-  delete thread_data_p; thread_data_p = NULL;
+  delete thread_data_base_p; thread_data_base_p = NULL;
 
   return result;
 }
@@ -2787,30 +2811,21 @@ idle_initialize_source_UI_cb (gpointer userData_in)
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Image_Resolution_t resolution_s;
+  resolution_s.cx = allocation.width;
+  resolution_s.cy = allocation.height;
   switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      (*directshow_modulehandler_iterator).second.second->area.bottom =
-        allocation.height;
-      (*directshow_modulehandler_iterator).second.second->area.left =
-        allocation.x;
-      (*directshow_modulehandler_iterator).second.second->area.right =
-        allocation.width;
-      (*directshow_modulehandler_iterator).second.second->area.top =
-        allocation.y;
+      Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
+                                                             (*directshow_modulehandler_iterator).second.second->outputFormat);
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
-      (*mediafoundation_modulehandler_iterator).second.second->area.bottom =
-      allocation.height;
-      (*mediafoundation_modulehandler_iterator).second.second->area.left =
-        allocation.x;
-      (*mediafoundation_modulehandler_iterator).second.second->area.right =
-        allocation.width;
-      (*mediafoundation_modulehandler_iterator).second.second->area.top =
-        allocation.y;
+      Stream_MediaFramework_MediaFoundation_Tools::setResolution (resolution_s,
+                                                                  (*mediafoundation_modulehandler_iterator).second.second->outputFormat);
       break;
     }
     default:
@@ -4628,10 +4643,12 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
       switch (ui_cb_data_base_p->mediaFramework)
       {
         case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-          stream_p = directshow_ui_cb_data_p->stream;
+          stream_p = directshow_ui_cb_data_p->audioStream;
+          stream_2 = directshow_ui_cb_data_p->videoStream;
           break;
         case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
-          stream_p = mediafoundation_ui_cb_data_p->stream;
+          stream_p = mediafoundation_ui_cb_data_p->audioStream;
+          stream_2 = mediafoundation_ui_cb_data_p->videoStream;
           break;
         default:
         {
@@ -7937,18 +7954,15 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
   //gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
   //                           &allocation);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Image_Resolution_t resolution_s;
+  resolution_s.cx = allocation_in->width;
+  resolution_s.cy = allocation_in->height;
   switch (ui_cb_data_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-    {//ACE_ASSERT (directshow_ui_cb_data_p->configuration->moduleHandlerConfiguration->windowController);
-      (*directshow_modulehandler_iterator).second.second->area.bottom =
-        allocation_in->height;
-      (*directshow_modulehandler_iterator).second.second->area.left =
-        allocation_in->x;
-      (*directshow_modulehandler_iterator).second.second->area.right =
-        allocation_in->width;
-      (*directshow_modulehandler_iterator).second.second->area.top =
-        allocation_in->y;
+    {
+      Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
+                                                             (*directshow_modulehandler_iterator).second.second->outputFormat);
 
       //HRESULT result =
       //  ui_cb_data_p->configuration.moduleHandlerConfiguration->windowController->SetWindowPosition (directshow_ui_cb_data_p->configuration->moduleHandlerConfiguration.area.left,
@@ -7965,14 +7979,8 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
-      (*mediafoundation_modulehandler_iterator).second.second->area.bottom =
-        allocation_in->height;
-      (*mediafoundation_modulehandler_iterator).second.second->area.left =
-        allocation_in->x;
-      (*mediafoundation_modulehandler_iterator).second.second->area.right =
-        allocation_in->width;
-      (*mediafoundation_modulehandler_iterator).second.second->area.top =
-        allocation_in->y;
+      Stream_MediaFramework_MediaFoundation_Tools::setResolution (resolution_s,
+                                                                  (*mediafoundation_modulehandler_iterator).second.second->outputFormat);
       break;
     }
     default:

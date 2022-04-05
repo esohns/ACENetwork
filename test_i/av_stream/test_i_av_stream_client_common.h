@@ -241,7 +241,23 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_DirectShow_Message,
-                      Test_I_AVStream_Client_DirectShow_SessionMessage> Test_I_AVStream_Client_DirectShow_StreamBase_t;
+                      Test_I_AVStream_Client_DirectShow_SessionMessage> Test_I_AVStream_Client_DirectShow_Audio_StreamBase_t;
+typedef Stream_Base_T<ACE_MT_SYNCH,
+                      Common_TimePolicy_t,
+                      stream_name_string_2,
+                      enum Stream_ControlType,
+                      enum Stream_SessionMessageType,
+                      enum Stream_StateMachine_ControlState,
+                      struct Test_I_AVStream_Client_DirectShow_StreamState,
+                      struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
+                      struct Stream_Statistic,
+                      struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
+                      Test_I_AVStream_Client_DirectShow_StreamSessionData,
+                      Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                      Stream_ControlMessage_t,
+                      Test_I_AVStream_Client_DirectShow_Message,
+                      Test_I_AVStream_Client_DirectShow_SessionMessage> Test_I_AVStream_Client_DirectShow_Video_StreamBase_t;
+
 typedef Stream_Base_T<ACE_MT_SYNCH,
                       Common_TimePolicy_t,
                       stream_name_string_,
@@ -256,7 +272,22 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_MediaFoundation_Message,
-                      Test_I_AVStream_Client_MediaFoundation_SessionMessage> Test_I_AVStream_Client_MediaFoundation_StreamBase_t;
+                      Test_I_AVStream_Client_MediaFoundation_SessionMessage> Test_I_AVStream_Client_MediaFoundation_Audio_StreamBase_t;
+typedef Stream_Base_T<ACE_MT_SYNCH,
+                      Common_TimePolicy_t,
+                      stream_name_string_2,
+                      enum Stream_ControlType,
+                      enum Stream_SessionMessageType,
+                      enum Stream_StateMachine_ControlState,
+                      struct Test_I_AVStream_Client_MediaFoundation_StreamState,
+                      struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
+                      struct Stream_Statistic,
+                      struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
+                      Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
+                      Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
+                      Stream_ControlMessage_t,
+                      Test_I_AVStream_Client_MediaFoundation_Message,
+                      Test_I_AVStream_Client_MediaFoundation_SessionMessage> Test_I_AVStream_Client_MediaFoundation_Video_StreamBase_t;
 #else
 struct Test_I_AVStream_Client_ALSA_V4L_StreamState;
 struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration;
@@ -320,9 +351,6 @@ struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration
 {
   Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration ()
    : Test_I_AVStream_ModuleHandlerConfiguration ()
-#if defined (GUI_SUPPORT)
-   , area ()
-#endif // GUI_SUPPORT
    , builder (NULL)
    , connection (NULL)
    , connectionConfigurations (NULL)
@@ -352,7 +380,8 @@ struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration
 
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration operator= (const struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration& rhs_in)
   {
-    area = rhs_in.area;
+    Test_I_AVStream_ModuleHandlerConfiguration::operator= (rhs_in);
+
     if (builder)
     {
       builder->Release (); builder = NULL;
@@ -423,29 +452,25 @@ struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration
     return *this;
   }
 
-#if defined (GUI_SUPPORT)
-  struct tagRECT                                       area; // visualization module
-#endif // GUI_SUPPORT
-  IGraphBuilder*                                       builder;
-  Net_IINETConnection_t*                               connection; // TCP target/IO module
-  Net_ConnectionConfigurations_t*                      connectionConfigurations;
+  IGraphBuilder*                                                builder;
+  Net_IINETConnection_t*                                        connection; // TCP target/IO module
+  Net_ConnectionConfigurations_t*                               connectionConfigurations;
   Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t*     connectionManager; // TCP IO module
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  guint                                                contextId;
+  guint                                                         contextId;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   struct Test_I_AVStream_Client_DirectShow_FilterConfiguration* filterConfiguration;
-  CLSID                                                filterCLSID;
-  struct _AMMediaType                                  outputFormat; // display module
-  bool                                                 push;
-  //struct _AMMediaType                                  sourceFormat;
+  CLSID                                                         filterCLSID;
+  struct _AMMediaType                                           outputFormat; // display module
+  bool                                                          push;
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t*      streamConfiguration;
   Test_I_AVStream_Client_DirectShow_ISessionNotify_t*           subscriber;
   Test_I_AVStream_Client_DirectShow_Subscribers_t*              subscribers;
 #if defined (GUI_SUPPORT)
-  IVideoWindow*                                        windowController; // visualization module
-  IMFVideoDisplayControl*                              windowController2; // visualization module (EVR)
+  IVideoWindow*                                                 windowController; // visualization module
+  IMFVideoDisplayControl*                                       windowController2; // visualization module (EVR)
 #endif // GUI_SUPPORT
 };
 
@@ -567,12 +592,14 @@ struct Test_I_AVStream_Client_DirectShow_SignalHandlerConfiguration
    : Test_I_SignalHandlerConfiguration ()
    , connectionManager (NULL)
 //   , statisticReportingInterval (0)
-   , stream (NULL)
+   , audioStream (NULL)
+   , videoStream (NULL)
   {}
 
-  Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t*  connectionManager;
+  Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t* connectionManager;
 //  unsigned int                statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
-  Test_I_AVStream_Client_DirectShow_StreamBase_t*            stream;
+  Test_I_AVStream_Client_DirectShow_Audio_StreamBase_t*     audioStream;
+  Test_I_AVStream_Client_DirectShow_Video_StreamBase_t*     videoStream;
 };
 typedef Test_I_AVStream_Client_SignalHandler_T<struct Test_I_AVStream_Client_DirectShow_SignalHandlerConfiguration> Test_I_AVStream_Client_DirectShow_SignalHandler_t;
 struct Test_I_AVStream_Client_MediaFoundation_SignalHandlerConfiguration
@@ -582,12 +609,14 @@ struct Test_I_AVStream_Client_MediaFoundation_SignalHandlerConfiguration
    : Test_I_SignalHandlerConfiguration ()
    , connectionManager (NULL)
    //   , statisticReportingInterval (0)
-   , stream (NULL)
+   , audioStream (NULL)
+   , videoStream (NULL)
   {}
 
-  Test_I_AVStream_Client_MediaFoundation_TCPConnectionManager_t*  connectionManager;
+  Test_I_AVStream_Client_MediaFoundation_TCPConnectionManager_t* connectionManager;
   //  unsigned int                statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
-  Test_I_AVStream_Client_MediaFoundation_StreamBase_t*            stream;
+  Test_I_AVStream_Client_MediaFoundation_Audio_StreamBase_t*     audioStream;
+  Test_I_AVStream_Client_MediaFoundation_Video_StreamBase_t*     videoStream;
 };
 typedef Test_I_AVStream_Client_SignalHandler_T<struct Test_I_AVStream_Client_MediaFoundation_SignalHandlerConfiguration> Test_I_AVStream_Client_MediaFoundation_SignalHandler_t;
 #else
@@ -839,7 +868,8 @@ struct Test_I_AVStream_Client_DirectShow_UI_CBData
   Test_I_AVStream_Client_DirectShow_UI_CBData ()
    : Test_I_AVStream_UI_CBData ()
    , configuration (NULL)
-   , stream (NULL)
+   , audioStream (NULL)
+   , videoStream (NULL)
    , subscribers ()
    , subscribersLock ()
    , streamConfiguration (NULL)
@@ -847,11 +877,12 @@ struct Test_I_AVStream_Client_DirectShow_UI_CBData
   {}
 
   struct Test_I_AVStream_Client_DirectShow_Configuration* configuration;
-  Test_I_AVStream_Client_DirectShow_StreamBase_t*         stream;
+  Test_I_AVStream_Client_DirectShow_Audio_StreamBase_t*   audioStream;
+  Test_I_AVStream_Client_DirectShow_Video_StreamBase_t*   videoStream;
   Test_I_AVStream_Client_DirectShow_Subscribers_t         subscribers;
   ACE_SYNCH_RECURSIVE_MUTEX                               subscribersLock;
   IAMStreamConfig*                                        streamConfiguration;
-  Test_I_AVStream_Client_DirectShow_StreamBase_t*         UDPStream;
+  Test_I_AVStream_Client_DirectShow_Video_StreamBase_t*   UDPStream;
 };
 
 struct Test_I_AVStream_Client_MediaFoundation_UI_CBData
@@ -860,17 +891,19 @@ struct Test_I_AVStream_Client_MediaFoundation_UI_CBData
   Test_I_AVStream_Client_MediaFoundation_UI_CBData ()
    : Test_I_AVStream_UI_CBData ()
    , configuration (NULL)
-   , stream (NULL)
+   , audioStream (NULL)
+   , videoStream (NULL)
    , subscribers ()
    , subscribersLock ()
    , UDPStream (NULL)
   {}
 
   struct Test_I_AVStream_Client_MediaFoundation_Configuration* configuration;
-  Test_I_AVStream_Client_MediaFoundation_StreamBase_t*         stream;
+  Test_I_AVStream_Client_MediaFoundation_Audio_StreamBase_t*   audioStream;
+  Test_I_AVStream_Client_MediaFoundation_Video_StreamBase_t*   videoStream;
   Test_I_AVStream_Client_MediaFoundation_Subscribers_t         subscribers;
   ACE_SYNCH_RECURSIVE_MUTEX                                    subscribersLock;
-  Test_I_AVStream_Client_MediaFoundation_StreamBase_t*         UDPStream;
+  Test_I_AVStream_Client_MediaFoundation_Video_StreamBase_t*   UDPStream;
 };
 #else
 struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData

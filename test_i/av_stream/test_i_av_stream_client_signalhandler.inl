@@ -129,18 +129,24 @@ Test_I_AVStream_Client_SignalHandler_T<ConfigurationType>::handle (const struct 
     // - stop processing stream
     // - activation timers (connection attempts, ...)
 
-    // step1: stop processing stream
-    ACE_ASSERT (inherited::configuration_->stream);
-    inherited::configuration_->stream->stop (false, // don't block
-                                             true); // locked access
+    // step1: stop processing streams
+    ACE_ASSERT (inherited::configuration_->audioStream);
+    ACE_ASSERT (inherited::configuration_->videoStream);
+    inherited::configuration_->audioStream->stop (false, // don't block
+                                                  false, // recurse ?
+                                                  true); // high priority ?
+    inherited::configuration_->videoStream->stop (false, // don't block
+                                                  false, // recurse ?
+                                                  true); // high priority ?
 
     // step2: stop/abort(/wait) for connections
     //ConnectionManagerType* connection_manager_p =
-    //    Test_I_AVStream_Client_CONNECTIONMANAGER_SINGLETON::instance ();
+    //    TEST_I_AVSTREAM_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
     //ACE_ASSERT (connection_manager_p);
     //connection_manager_p->stop ();
     ACE_ASSERT (inherited::configuration_->connectionManager);
-    inherited::configuration_->connectionManager->stop (false, true);
+    inherited::configuration_->connectionManager->stop (false,
+                                                        true);
     inherited::configuration_->connectionManager->abort ();
     //inherited::configuration_->connectionManager->wait ();
   } // end IF
