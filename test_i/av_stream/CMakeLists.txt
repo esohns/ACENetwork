@@ -266,7 +266,7 @@ if (UNIX)
           DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}/av_stream" COMPONENT config)
 elseif (WIN32)
  install (FILES ${ui_definition_file}
-          DESTINATION "data/${PROJECT_NAME}/av_stream" COMPONENT config)
+          DESTINATION "etc/av_stream" COMPONENT config)
 #          DESTINATION "$ENV{APPDATA}/${PROJECT_NAME}/av_stream" COMPONENT config)
 endif ()
 

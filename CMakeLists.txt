@@ -90,9 +90,6 @@ foreach (path BIN CMAKE SHARE INCLUDE LIB)
 endforeach ()
 
 # project options
-set (DEBUG_DEBUGGER TRUE
-     CACHE BOOL "in debugger")
-
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
  if (CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options (-g)
@@ -104,10 +101,6 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 #  add_definitions (-D_ITERATOR_DEBUG_LEVEL=2)
  endif (WIN32)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _DEBUG)
- if (DEBUG_DEBUGGER AND
-     NOT DEFINED IN_CPACK)
-  add_definitions (-DDEBUG_DEBUGGER)
- endif ()
 elseif (CMAKE_BUILD_TYPE STREQUAL Release)
  if (CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options (-O3)

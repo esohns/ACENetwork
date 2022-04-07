@@ -214,10 +214,11 @@ if (WIN32)
                 ${ACENetwork_DIR}/src/protocol/dhcp/${CMAKE_BUILD_TYPE}/ACENetwork_Protocol_DHCP.dll
           DESTINATION bin COMPONENT bin)
  install (FILES etc/test_u.glade
-          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
+          DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
+#          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 elseif (UNIX)
  install (FILES etc/test_u.glade
-          DESTINATION share/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
+          DESTINATION etc/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 endif ()
 
 ##########################################
