@@ -542,6 +542,18 @@ do_work (bool debugParser_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
+#if defined (SSL_SUPPORT)
+  if (unlikely (!Net_Common_Tools::initializeSSLContext (ACE_TEXT_ALWAYS_CHAR (""),
+                                                         ACE_TEXT_ALWAYS_CHAR (""),
+                                                         true,   // client
+                                                         NULL))) // default context
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("failed to Net_Common_Tools::initializeSSLContext(), returning\n")));
+    return;
+  } // end IF
+#endif // SSL_SUPPORT
+
 #if defined (GUI_SUPPORT)
   Test_I_EventHandler message_handler (&CBData_in);
 #else

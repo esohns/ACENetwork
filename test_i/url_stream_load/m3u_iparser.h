@@ -25,12 +25,13 @@
 #include <vector>
 
 #include "common_configuration.h"
-//#include "common_iget.h"
 
 #include "common_iscanner.h"
 #include "common_iparser.h"
-//#include "common_parser_bencoding_common.h"
 #include "common_parser_common.h"
+
+typedef std::vector<std::pair<std::string, std::string> > M3U_KeyValues_t;
+typedef M3U_KeyValues_t::const_iterator M3U_KeyValuesIterator_t;
 
 struct M3U_Element
 {
@@ -39,6 +40,9 @@ struct M3U_Element
   ACE_INT32 Length;
   std::string Title;
   std::string URL;
+
+  std::string key; // temp
+  M3U_KeyValues_t keyValues;
 };
 typedef std::vector<struct M3U_Element> M3U_Playlist_t;
 typedef M3U_Playlist_t::const_iterator M3U_PlaylistIterator_t;

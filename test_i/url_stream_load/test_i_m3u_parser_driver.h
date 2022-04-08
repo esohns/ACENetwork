@@ -60,7 +60,7 @@ class M3U_ParserDriver
                               M3U_IParser_t,
                               M3U_IParser_t> PARSER_BASE_T;
 
-  // implement (part of) Bencoding_IParser
+  // implement (part of) Common_ILexScanner_T
   using PARSER_BASE_T::initialize;
   using PARSER_BASE_T::buffer;
 //  using PARSER_BASE_T::debug;

@@ -1060,7 +1060,8 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                           GTK_STOCK_MEDIA_PLAY);
 
     try {
-      ui_cb_data_p->monitor->stop ();
+      ui_cb_data_p->monitor->stop (true,   // wait for completion ?
+                                   false); // high priority ?
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask::stop(): \"%m\", aborting\n")));

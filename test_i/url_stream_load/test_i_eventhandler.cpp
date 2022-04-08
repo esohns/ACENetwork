@@ -211,6 +211,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     const_cast<struct Test_I_URLStreamLoad_MessageData&> (data_container_r.getR ());
   if (data_r.M3UPlaylist)
   {
+    // sanity check(s)
+    ACE_ASSERT (!data_r.M3UPlaylist->empty ());
+
     const struct M3U_Element& element_r = data_r.M3UPlaylist->front ();
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("loading \"%s\"...\n"),

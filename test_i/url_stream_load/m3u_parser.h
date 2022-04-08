@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.5.
+// A Bison parser, made by GNU Bison 3.7.6.
 
 // Skeleton interface for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015, 2018-2019 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2021 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // As a special exception, you may create a larger work that contains
 // part or all of the Bison parser skeleton and distribute that work
@@ -38,8 +38,9 @@
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-// Undocumented macros, especially those whose name start with YY_,
-// are private implementation details.  Do not rely on them.
+// DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+// especially those whose name start with YY_ or yy_.  They are
+// private implementation details that can be changed or removed.
 
 #ifndef YY_YY_M3U_PARSER_H_INCLUDED
 # define YY_YY_M3U_PARSER_H_INCLUDED
@@ -124,9 +125,9 @@
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
@@ -231,37 +232,88 @@ namespace yy {
       location_type location;
     };
 
-    /// Tokens.
+    /// Token kinds.
     struct token
     {
-      enum yytokentype
+      enum token_kind_type
       {
-        END = 0,
-        END_OF_ELEMENT = 258,
-        LENGTH = 259,
-        TITLE = 260,
-        URL = 261,
-        BEGIN_INF = 262,
-        BEGIN_ELEMS = 263
+        YYEMPTY = -2,
+    END = 0,                       // "end"
+    YYerror = 256,                 // error
+    YYUNDEF = 257,                 // "invalid token"
+    END_OF_ELEMENT = 258,          // "element_end"
+    KEY = 259,                     // "key"
+    LENGTH = 260,                  // "length"
+    TITLE = 261,                   // "title"
+    URL = 262,                     // "URL"
+    VALUE = 263,                   // "value"
+    BEGIN_EXTINF = 264,            // "begin_ext_inf"
+    BEGIN_EXT_STREAM_INF = 265,    // "begin_ext_stream_inf"
+    BEGIN_ELEMS = 266              // "begin_elements"
+      };
+      /// Backward compatibility alias (Bison 3.6).
+      typedef token_kind_type yytokentype;
+    };
+
+    /// Token kind, as returned by yylex.
+    typedef token::yytokentype token_kind_type;
+
+    /// Backward compatibility alias (Bison 3.6).
+    typedef token_kind_type token_type;
+
+    /// Symbol kinds.
+    struct symbol_kind
+    {
+      enum symbol_kind_type
+      {
+        YYNTOKENS = 12, ///< Number of tokens.
+        S_YYEMPTY = -2,
+        S_YYEOF = 0,                             // "end"
+        S_YYerror = 1,                           // error
+        S_YYUNDEF = 2,                           // "invalid token"
+        S_END_OF_ELEMENT = 3,                    // "element_end"
+        S_KEY = 4,                               // "key"
+        S_LENGTH = 5,                            // "length"
+        S_TITLE = 6,                             // "title"
+        S_URL = 7,                               // "URL"
+        S_VALUE = 8,                             // "value"
+        S_BEGIN_EXTINF = 9,                      // "begin_ext_inf"
+        S_BEGIN_EXT_STREAM_INF = 10,             // "begin_ext_stream_inf"
+        S_BEGIN_ELEMS = 11,                      // "begin_elements"
+        S_YYACCEPT = 12,                         // $accept
+        S_playlist = 13,                         // playlist
+        S_14_1 = 14,                             // $@1
+        S_elements = 15,                         // elements
+        S_element = 16,                          // element
+        S_17_2 = 17,                             // $@2
+        S_18_3 = 18,                             // $@3
+        S_ext_inf_rest_1 = 19,                   // ext_inf_rest_1
+        S_20_4 = 20,                             // $@4
+        S_ext_inf_rest_2 = 21,                   // ext_inf_rest_2
+        S_22_5 = 22,                             // $@5
+        S_ext_inf_rest_3 = 23,                   // ext_inf_rest_3
+        S_24_6 = 24,                             // $@6
+        S_ext_inf_rest_4 = 25,                   // ext_inf_rest_4
+        S_ext_stream_inf_rest_1 = 26,            // ext_stream_inf_rest_1
+        S_key_values = 27,                       // key_values
+        S_key_value = 28,                        // key_value
+        S_29_7 = 29,                             // $@7
+        S_ext_stream_inf_rest_3 = 30,            // ext_stream_inf_rest_3
+        S_31_8 = 31,                             // $@8
+        S_ext_stream_inf_rest_4 = 32             // ext_stream_inf_rest_4
       };
     };
 
-    /// (External) token type, as returned by yylex.
-    typedef token::yytokentype token_type;
+    /// (Internal) symbol kind.
+    typedef symbol_kind::symbol_kind_type symbol_kind_type;
 
-    /// Symbol type: an internal symbol number.
-    typedef int symbol_number_type;
-
-    /// The symbol type number to denote an empty symbol.
-    enum { empty_symbol = -2 };
-
-    /// Internal symbol number for tokens (subsumed by symbol_number_type).
-    typedef signed char token_number_type;
+    /// The number of tokens.
+    static const symbol_kind_type YYNTOKENS = symbol_kind::YYNTOKENS;
 
     /// A complete symbol.
     ///
-    /// Expects its Base type to provide access to the symbol type
-    /// via type_get ().
+    /// Expects its Base type to provide access to the symbol kind
+    /// via kind ().
     ///
     /// Provide access to semantic value and location.
     template <typename Base>
@@ -278,7 +330,11 @@ namespace yy {
 
 #if 201103L <= YY_CPLUSPLUS
       /// Move constructor.
-      basic_symbol (basic_symbol&& that);
+      basic_symbol (basic_symbol&& that)
+        : Base (std::move (that))
+        , value (std::move (that.value))
+        , location (std::move (that.location))
+      {}
 #endif
 
       /// Copy constructor.
@@ -299,10 +355,19 @@ namespace yy {
       }
 
       /// Destroy contents, and record that is empty.
-      void clear ()
+      void clear () YY_NOEXCEPT
       {
         Base::clear ();
       }
+
+      /// The user-facing name of this symbol.
+      std::string name () const YY_NOEXCEPT
+      {
+        return parser::symbol_name (this->kind ());
+      }
+
+      /// Backward compatibility (Bison 3.6).
+      symbol_kind_type type_get () const YY_NOEXCEPT;
 
       /// Whether empty.
       bool empty () const YY_NOEXCEPT;
@@ -324,48 +389,60 @@ namespace yy {
     };
 
     /// Type access provider for token (enum) based symbols.
-    struct by_type
+    struct by_kind
     {
       /// Default constructor.
-      by_type ();
+      by_kind ();
 
 #if 201103L <= YY_CPLUSPLUS
       /// Move constructor.
-      by_type (by_type&& that);
+      by_kind (by_kind&& that);
 #endif
 
       /// Copy constructor.
-      by_type (const by_type& that);
+      by_kind (const by_kind& that);
 
-      /// The symbol type as needed by the constructor.
-      typedef token_type kind_type;
+      /// The symbol kind as needed by the constructor.
+      typedef token_kind_type kind_type;
 
       /// Constructor from (external) token numbers.
-      by_type (kind_type t);
+      by_kind (kind_type t);
 
       /// Record that this symbol is empty.
-      void clear ();
+      void clear () YY_NOEXCEPT;
 
-      /// Steal the symbol type from \a that.
-      void move (by_type& that);
+      /// Steal the symbol kind from \a that.
+      void move (by_kind& that);
 
       /// The (internal) type number (corresponding to \a type).
       /// \a empty when empty.
-      symbol_number_type type_get () const YY_NOEXCEPT;
+      symbol_kind_type kind () const YY_NOEXCEPT;
 
-      /// The symbol type.
-      /// \a empty_symbol when empty.
-      /// An int, not token_number_type, to be able to store empty_symbol.
-      int type;
+      /// Backward compatibility (Bison 3.6).
+      symbol_kind_type type_get () const YY_NOEXCEPT;
+
+      /// The symbol kind.
+      /// \a S_YYEMPTY when empty.
+      symbol_kind_type kind_;
     };
 
+    /// Backward compatibility for a private implementation detail (Bison 3.6).
+    typedef by_kind by_type;
+
     /// "External" symbols: returned by the scanner.
-    struct symbol_type : basic_symbol<by_type>
+    struct symbol_type : basic_symbol<by_kind>
     {};
 
     /// Build a parser object.
     parser (M3U_IParser* iparser_yyarg, M3U_IScanner_t* iscanner_yyarg);
     virtual ~parser ();
+
+#if 201103L <= YY_CPLUSPLUS
+    /// Non copyable.
+    parser (const parser&) = delete;
+    /// Non copyable.
+    parser& operator= (const parser&) = delete;
+#endif
 
     /// Parse.  An alias for parse ().
     /// \returns  0 iff parsing succeeded.
@@ -397,22 +474,49 @@ namespace yy {
     /// Report a syntax error.
     void error (const syntax_error& err);
 
+    /// The user-facing name of the symbol whose (internal) number is
+    /// YYSYMBOL.  No bounds checking.
+    static std::string symbol_name (symbol_kind_type yysymbol);
 
+
+
+    class context
+    {
+    public:
+      context (const parser& yyparser, const symbol_type& yyla);
+      const symbol_type& lookahead () const YY_NOEXCEPT { return yyla_; }
+      symbol_kind_type token () const YY_NOEXCEPT { return yyla_.kind (); }
+      const location_type& location () const YY_NOEXCEPT { return yyla_.location; }
+
+      /// Put in YYARG at most YYARGN of the expected tokens, and return the
+      /// number of tokens stored in YYARG.  If YYARG is null, return the
+      /// number of expected tokens (guaranteed to be less than YYNTOKENS).
+      int expected_tokens (symbol_kind_type yyarg[], int yyargn) const;
+
+    private:
+      const parser& yyparser_;
+      const symbol_type& yyla_;
+    };
 
   private:
-    /// This class is not copyable.
+#if YY_CPLUSPLUS < 201103L
+    /// Non copyable.
     parser (const parser&);
+    /// Non copyable.
     parser& operator= (const parser&);
+#endif
+
 
     /// Stored state numbers (used for stacks).
     typedef signed char state_type;
 
-    /// Generate an error message.
-    /// \param yystate   the state where the error occurred.
-    /// \param yyla      the lookahead token.
-    virtual std::string yysyntax_error_ (state_type yystate,
-                                         const symbol_type& yyla) const;
+    /// The arguments of the error message.
+    int yy_syntax_error_arguments_ (const context& yyctx,
+                                    symbol_kind_type yyarg[], int yyargn) const;
 
+    /// Generate an error message.
+    /// \param yyctx     the context in which the error occurred.
+    virtual std::string yysyntax_error_ (const context& yyctx) const;
     /// Compute post-reduction state.
     /// \param yystate   the current state
     /// \param yysym     the nonterminal to push on the stack
@@ -429,10 +533,17 @@ namespace yy {
     static const signed char yypact_ninf_;
     static const signed char yytable_ninf_;
 
-    /// Convert a scanner token number \a t to a symbol number.
-    /// In theory \a t should be a token_type, but character literals
+    /// Convert a scanner token kind \a t to a symbol kind.
+    /// In theory \a t should be a token_kind_type, but character literals
     /// are valid, yet not members of the token_type enum.
-    static token_number_type yytranslate_ (int t);
+    static symbol_kind_type yytranslate_ (int t);
+
+    /// Convert the symbol name \a n to a form suitable for a diagnostic.
+    static std::string yytnamerr_ (const char *yystr);
+
+    /// For a symbol, its name in clear.
+    static const char* const yytname_[];
+
 
     // Tables.
     // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -468,26 +579,20 @@ namespace yy {
     static const signed char yyr2_[];
 
 
-    /// Convert the symbol name \a n to a form suitable for a diagnostic.
-    static std::string yytnamerr_ (const char *n);
-
-
-    /// For a symbol, its name in clear.
-    static const char* const yytname_[];
 #if YYDEBUG
     // YYRLINE[YYN] -- Source line where rule number YYN was defined.
     static const unsigned char yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
-    virtual void yy_reduce_print_ (int r);
+    virtual void yy_reduce_print_ (int r) const;
     /// Print the state stack on the debug stream.
-    virtual void yystack_print_ ();
+    virtual void yy_stack_print_ () const;
 
     /// Debugging level.
     int yydebug_;
     /// Debug stream.
     std::ostream* yycdebug_;
 
-    /// \brief Display a symbol type, value and location.
+    /// \brief Display a symbol kind, value and location.
     /// \param yyo    The output stream.
     /// \param yysym  The symbol.
     template <typename Base>
@@ -508,7 +613,7 @@ namespace yy {
       /// Default constructor.
       by_state () YY_NOEXCEPT;
 
-      /// The symbol type as needed by the constructor.
+      /// The symbol kind as needed by the constructor.
       typedef state_type kind_type;
 
       /// Constructor.
@@ -520,12 +625,12 @@ namespace yy {
       /// Record that this symbol is empty.
       void clear () YY_NOEXCEPT;
 
-      /// Steal the symbol type from \a that.
+      /// Steal the symbol kind from \a that.
       void move (by_state& that);
 
-      /// The (internal) type number (corresponding to \a state).
-      /// \a empty_symbol when empty.
-      symbol_number_type type_get () const YY_NOEXCEPT;
+      /// The symbol kind (corresponding to \a state).
+      /// \a symbol_kind::S_YYEMPTY when empty.
+      symbol_kind_type kind () const YY_NOEXCEPT;
 
       /// The state number used to denote an empty symbol.
       /// We use the initial state, as it does not have a value.
@@ -564,14 +669,21 @@ namespace yy {
     {
     public:
       // Hide our reversed order.
-      typedef typename S::reverse_iterator iterator;
-      typedef typename S::const_reverse_iterator const_iterator;
+      typedef typename S::iterator iterator;
+      typedef typename S::const_iterator const_iterator;
       typedef typename S::size_type size_type;
       typedef typename std::ptrdiff_t index_type;
 
       stack (size_type n = 200)
         : seq_ (n)
       {}
+
+#if 201103L <= YY_CPLUSPLUS
+      /// Non copyable.
+      stack (const stack&) = delete;
+      /// Non copyable.
+      stack& operator= (const stack&) = delete;
+#endif
 
       /// Random access.
       ///
@@ -623,24 +735,18 @@ namespace yy {
         return index_type (seq_.size ());
       }
 
-      std::ptrdiff_t
-      ssize () const YY_NOEXCEPT
-      {
-        return std::ptrdiff_t (size ());
-      }
-
       /// Iterator on top of the stack (going downwards).
       const_iterator
       begin () const YY_NOEXCEPT
       {
-        return seq_.rbegin ();
+        return seq_.begin ();
       }
 
       /// Bottom of the stack.
       const_iterator
       end () const YY_NOEXCEPT
       {
-        return seq_.rend ();
+        return seq_.end ();
       }
 
       /// Present a slice of the top of a stack.
@@ -664,8 +770,12 @@ namespace yy {
       };
 
     private:
+#if YY_CPLUSPLUS < 201103L
+      /// Non copyable.
       stack (const stack&);
+      /// Non copyable.
       stack& operator= (const stack&);
+#endif
       /// The wrapped container.
       S seq_;
     };
@@ -695,29 +805,23 @@ namespace yy {
     /// Pop \a n symbols from the stack.
     void yypop_ (int n = 1);
 
-    /// Some specific tokens.
-    static const token_number_type yy_error_token_ = 1;
-    static const token_number_type yy_undef_token_ = 2;
-
     /// Constants.
     enum
     {
-      yyeof_ = 0,
-      yylast_ = 8,     ///< Last index in yytable_.
-      yynnts_ = 13,  ///< Number of nonterminal symbols.
-      yyfinal_ = 4, ///< Termination state number.
-      yyntokens_ = 9  ///< Number of tokens.
+      yylast_ = 13,     ///< Last index in yytable_.
+      yynnts_ = 21,  ///< Number of nonterminal symbols.
+      yyfinal_ = 4 ///< Termination state number.
     };
 
 
     // User arguments.
     M3U_IParser* iparser;
     M3U_IScanner_t* iscanner;
+
   };
 
 
 } // yy
-
 
 
 // "%code provides" blocks.

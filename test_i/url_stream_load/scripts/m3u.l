@@ -1,5 +1,4 @@
 %top{
-//  #include "ace/Synch.h"
   #include "common_iparser.h"
 
   #include "m3u_parser.h"
@@ -38,7 +37,6 @@ extern YY_DECL;
   ////                       prevent ace/iosfwd.h from causing any harm
   //#define ACE_IOSFWD_H
 
-//  #include "ace/Synch.h"
   #include "m3u_scanner.h"
   #include "m3u_parser.h"
   #include "test_i_m3u_parser_driver.h"
@@ -55,13 +53,13 @@ extern YY_DECL;
 %option backup
 %option batch
 %option never-interactive
-%option stack
+/*%option stack*/
 %option pointer
 
 %option nodefault
 %option nomain
 %option nostdinit
-/*%option nounput*/
+%option nounput
 /*%option noyywrap*/
 
 %option 8bit
@@ -93,12 +91,15 @@ DIGIT                             [[:digit:]]
 OCTET                             [\x00-\xFF]
 TO_COMMA                          [^,]
 TO_END_OF_LINE                    [^\x0A]
+TO_EQUALS                         [^=]
 
-%s state_x
-%s state_inf
-%s state_inf_key_value
-%s state_inf_title
-%s state_inf_url
+%s state_value
+%s state_ext_inf
+%s state_ext_inf_title
+%s state_ext_stream_inf_key_value
+%s state_ext_stream_inf_next_value
+%s state_ext_stream_inf_is_last_value
+%s state_url
 
 %{
 /* handle locations */
@@ -128,77 +129,128 @@ TO_END_OF_LINE                    [^\x0A]
 %}
 
 <INITIAL>{
-"#EXTM3U\x0A"          { parser->offset (yyleng);
-                         ACE_NEW_NORETURN (yylval->lval,
-                                           M3U_Playlist_t);
-                         ACE_ASSERT (yylval->eval);
-                         return yy::parser::token::BEGIN_ELEMS; }
-"#EXT-X-TARGETDURATION:" { parser->offset (yyleng);
-                           BEGIN (state_x); }
-"#EXT-X-ALLOW-CACHE:"  { parser->offset (yyleng);
-                         BEGIN (state_x); }
-"#EXT-X-VERSION:"      { parser->offset (yyleng);
-                         BEGIN (state_x); }
-"#EXT-X-MEDIA-SEQUENCE:" { parser->offset (yyleng);
-                           BEGIN (state_x); }
-"#EXTINF:"             { parser->offset (yyleng);
-                         BEGIN (state_inf);
-                         ACE_NEW_NORETURN (yylval->eval,
-                                           struct M3U_Element);
-                         ACE_ASSERT (yylval->eval);
-                         return yy::parser::token::BEGIN_INF; }
-\x0A                   { parser->offset (yyleng); }
+"#EXTM3U\x0A"                     { parser->offset (yyleng);
+                                    ACE_NEW_NORETURN (yylval->lval,
+                                                      M3U_Playlist_t);
+                                    ACE_ASSERT (yylval->lval);
+                                    return yy::parser::token::BEGIN_ELEMS; }
+"#EXT-X-INDEPENDENT-SEGMENTS\x0A" { parser->offset (yyleng); }
+"#EXT-X-TARGETDURATION:"          { parser->offset (yyleng);
+                                    BEGIN (state_value); }
+"#EXT-X-ALLOW-CACHE:"             { parser->offset (yyleng);
+                                    BEGIN (state_value); }
+"#EXT-X-VERSION:"                 { parser->offset (yyleng);
+                                    BEGIN (state_value); }
+"#EXT-X-MEDIA-SEQUENCE:"          { parser->offset (yyleng);
+                                    BEGIN (state_value); }
+"#EXT-X-DISCONTINUITY-SEQUENCE:"  { parser->offset (yyleng);
+                                    BEGIN (state_value); }
+"#EXT-X-PROGRAM-DATE-TIME:"       { parser->offset (yyleng);
+                                    BEGIN (state_value); }
+"#EXT-X-STREAM-INF:"              { parser->offset (yyleng);
+                                    BEGIN (state_ext_stream_inf_key_value);
+                                    ACE_NEW_NORETURN (yylval->eval,
+                                                     struct M3U_Element);
+                                    ACE_ASSERT (yylval->eval);
+                                    return yy::parser::token::BEGIN_EXT_STREAM_INF; }
+"#EXTINF:"                        { parser->offset (yyleng);
+                                    BEGIN (state_ext_inf);
+                                    ACE_NEW_NORETURN (yylval->eval,
+                                                      struct M3U_Element);
+                                    ACE_ASSERT (yylval->eval);
+                                    return yy::parser::token::BEGIN_EXTINF; }
+\x0A                              { parser->offset (yyleng); }
 } // end <INITIAL>
-<state_x>{
-{TO_END_OF_LINE}+/\x0A { parser->offset (yyleng); }
-\x0A                   { parser->offset (yyleng);
-                         BEGIN (INITIAL); }
-} // end <state_x>
-<state_inf>{
-{TO_COMMA}+/,          { parser->offset (yyleng);
-                         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-                         converter.clear ();
-                         converter << yytext;
-                         converter >> yylval->ival;
-                         return yy::parser::token::LENGTH; }
-","                    { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
-                         BEGIN (state_inf_title); }
-} // end <state_inf>
-<state_inf_title>{
-{TO_END_OF_LINE}+/\x0A { parser->offset (yyleng);
-                         ACE_NEW_NORETURN (yylval->sval,
-                                           std::string);
-                         ACE_ASSERT (yylval->sval);
-                         yylval->sval->push_back (yytext[0]);
-                         return yy::parser::token::TITLE; }
-\x0A                   { parser->offset (yyleng);
-                         BEGIN (state_inf_url); }
-} // end <state_inf_title>
-<state_inf_url>{
-{TO_END_OF_LINE}+/\x0A { parser->offset (yyleng);
-                         ACE_NEW_NORETURN (yylval->sval,
-                                           std::string);
-                         ACE_ASSERT (yylval->sval);
-                         yylval->sval->append (yytext);
-                         return yy::parser::token::URL; }
-\x0A                   { parser->offset (yyleng);
-                         BEGIN (INITIAL);
-                         return yy::parser::token::END_OF_ELEMENT; }
-} // end <state_inf_url>
-<<EOF>>                { return yy::parser::token::END; }
-<*>{OCTET}            { /* *TODO*: use (?s:.) ? */
-                        if (!parser->isBlocking ())
-                          return yy::parser::token::END;
-                        // wait for more data fragment(s)
-                        if (!parser->switchBuffer ())
-                        { // *NOTE*: most probable reason: connection
-                          //         has been closed --> session end
-                          ACE_DEBUG ((LM_DEBUG,
-                                      ACE_TEXT ("failed to Common_IParser::switchBuffer(), returning\n")));
-                          yyterminate(); // not enough data, cannot proceed
-                        } // end IF
-                        yyless (0); }
+
+<state_value>{
+{TO_END_OF_LINE}+/\x0A            { parser->offset (yyleng); }
+\x0A                              { parser->offset (yyleng);
+                                    BEGIN (INITIAL); }
+} // end <state_value>
+
+<state_ext_inf>{
+{TO_COMMA}+/,                     { parser->offset (yyleng);
+                                    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+                                    converter.clear ();
+                                    converter << yytext;
+                                    converter >> yylval->ival;
+                                    return yy::parser::token::LENGTH; }
+","                               { ACE_ASSERT (yyleng == 1);
+                                    parser->offset (1);
+                                    BEGIN (state_ext_inf_title); }
+} // end <state_ext_inf>
+<state_ext_inf_title>{
+{TO_END_OF_LINE}+/\x0A            { parser->offset (yyleng);
+                                    ACE_NEW_NORETURN (yylval->sval,
+                                                      std::string);
+                                    ACE_ASSERT (yylval->sval);
+                                    *(yylval->sval) = yytext;
+                                    return yy::parser::token::TITLE; }
+\x0A                              { parser->offset (yyleng);
+                                    BEGIN (state_url); }
+} // end <state_key_value>
+
+<state_ext_stream_inf_key_value>{
+{TO_EQUALS}+/=                    { parser->offset (yyleng);
+                                    ACE_NEW_NORETURN (yylval->sval,
+                                                     std::string);
+                                    ACE_ASSERT (yylval->sval);
+                                    *(yylval->sval) = yytext;
+                                    return yy::parser::token::KEY; }
+"="                               { parser->offset (yyleng);
+                                    BEGIN (state_ext_stream_inf_is_last_value); }
+} // end <state_ext_stream_inf_key_value>
+<state_ext_stream_inf_is_last_value>{
+{TO_END_OF_LINE}+/\x0A            { std::string test_string = yytext;
+                                    if (test_string.find_first_of (',') == std::string::npos)
+                                    {
+                                      ACE_NEW_NORETURN (yylval->sval,
+                                                       std::string);
+                                      ACE_ASSERT (yylval->sval);
+                                      *(yylval->sval) = yytext;
+                                      return yy::parser::token::VALUE;
+                                    } // end IF
+                                    yyless (0);
+                                    BEGIN (state_ext_stream_inf_next_value);
+                                  }
+\x0A                              { parser->offset (yyleng);
+                                    BEGIN (state_url); }
+} // end <state_ext_stream_inf_is_last_value>
+<state_ext_stream_inf_next_value>{
+{TO_COMMA}+/,                     { parser->offset (yyleng);
+                                    ACE_NEW_NORETURN (yylval->sval,
+                                                     std::string);
+                                    ACE_ASSERT (yylval->sval);
+                                    *(yylval->sval) = yytext;
+                                    return yy::parser::token::VALUE; }
+","                                { parser->offset (yyleng);
+                                     BEGIN (state_ext_stream_inf_key_value); }
+} // end <state_inf_next_value>
+<state_url>{
+{TO_END_OF_LINE}+/\x0A            { parser->offset (yyleng);
+                                    ACE_NEW_NORETURN (yylval->sval,
+                                                      std::string);
+                                    ACE_ASSERT (yylval->sval);
+                                    *(yylval->sval) = yytext;
+                                    return yy::parser::token::URL; }
+\x0A                              { parser->offset (yyleng);
+                                    BEGIN (INITIAL);
+                                    return yy::parser::token::END_OF_ELEMENT; }
+} // end <state_url>
+
+<<EOF>>                           { return yy::parser::token::END; }
+<*>{OCTET}                        { /* *TODO*: use (?s:.) ? */
+                                    if (!parser->isBlocking ())
+                                      return yy::parser::token::END;
+                                    // wait for more data fragment(s)
+                                    if (!parser->switchBuffer ())
+                                    { // *NOTE*: most probable reason: connection
+                                      //         has been closed --> session end
+                                      ACE_DEBUG ((LM_DEBUG,
+                                                  ACE_TEXT ("failed to Common_IParser::switchBuffer(), returning\n")));
+                                      yyterminate(); // not enough data, cannot proceed
+                                    } // end IF
+                                    yyless (0); }
 %% /* end of rules */
 
 #include "stream_macros.h"
@@ -212,51 +264,28 @@ M3U_wrap (yyscan_t yyscanner)
 {
   NETWORK_TRACE (ACE_TEXT ("::M3U_wrap"));
 
-  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+  // sanity check(s)
+//  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
   M3U_ParserDriver* driver =
     static_cast<M3U_ParserDriver*> (M3U_get_extra (yyscanner));
-
-  // sanity check(s)
   ACE_ASSERT (driver);
   if (driver->hasFinished ())
     return 1; // done
 //  ACE_ASSERT (driver->fragment_);
 
   // *NOTE*: there is more data
-  // 1. gobble/save the rest
-  // 2. switch buffers
-  // 3. unput the rest
-  // 4. continue scanning
+  // 1. switch buffers
+  // 2. continue scanning
 
   // step1
-  std::string the_rest;
-//  the_rest.append (yytext, yyleng);
-//  for (char c = yyinput (yyscanner);
-//       c != EOF;
-//       c = yyinput (yyscanner));
-  yyg->yy_c_buf_p += yyleng;
-  yyg->yy_hold_char = *yyg->yy_c_buf_p;
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("the rest: \"%s\"\n"),
-//              ACE_TEXT (the_rest.c_str ())));
-
-  // step2
   if (!driver->switchBuffer ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_ParserBase_T::switchBuffer() [remaining data was: \"%s\"], aborting\n"),
-                ACE_TEXT (the_rest.c_str ())));
+                ACE_TEXT ("failed to Common_ParserBase_T::switchBuffer(), aborting\n")));
     return 1;
   } // end IF
 
-  // step3
-//  for (std::string::reverse_iterator iterator = the_rest.rbegin ();
-//       iterator != the_rest.rend ();
-//       ++iterator)
-//    unput (*iterator);
-
-  // step4
-  // yymore ();
+  // step2
   return 0;
 }
 #ifdef __cplusplus

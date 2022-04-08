@@ -1412,9 +1412,9 @@ allocate:
       goto error;
     } // end IF
     // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-    message_p->initialize (message_data_p,
-                           message_p->sessionId (),
-                           NULL);
+//    message_p->initialize (message_data_p,
+//                           message_p->sessionId (),
+//                           NULL);
 
     //Test_I_ConnectionStream& stream_r =
     //    const_cast<Test_I_ConnectionStream&> (istream_connection_p->stream ());

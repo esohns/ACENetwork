@@ -85,21 +85,28 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
 
   int result = -1;
 
+  // append \n to final fragment, if not present
+  std::istringstream converter;
+  unsigned int content_length = 0, missing_bytes = 0;
   const Test_I_MessageDataContainer& data_container_r = message_inout->getR ();
   const Test_I_URLStreamLoad_MessageData& data_r = data_container_r.getR ();
   HTTP_HeadersConstIterator_t iterator =
     data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-  ACE_ASSERT (iterator != data_r.headers.end ());
-  std::istringstream converter;
+  if (unlikely (iterator == data_r.headers.end ()))
+  {
+    ACE_DEBUG ((LM_WARNING,
+               ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
+               inherited::mod_->name (),
+               ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+    goto continue_;
+  } // end IF
   converter.str ((*iterator).second);
-  unsigned int content_length = 0;
   converter >> content_length;
-  unsigned int missing_bytes =
+  missing_bytes =
       content_length - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
                      - message_inout->total_length ();
   if (!missing_bytes)
   {
-    // append \n to final fragment, if not present
     ACE_Message_Block* message_block_p = message_inout;
     while (message_block_p->cont ())
       message_block_p = message_block_p->cont ();
@@ -107,6 +114,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
       message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
   } // end IF
 
+continue_:
   // initialize return value(s)
   // *NOTE*: the default behavior is to pass all messages along
   //         --> in this case, the individual frames are extracted and passed

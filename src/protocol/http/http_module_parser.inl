@@ -118,7 +118,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   crunch_ = configuration_in.crunchMessages;
 
-  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
+//  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
       inherited::msg_queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))

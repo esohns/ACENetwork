@@ -302,10 +302,13 @@ class Net_Common_Tools
 
 #if defined (SSL_SUPPORT)
   // --- SSL ---
-  // *IMPORTANT NOTE*: certificates must be in PEM format
-  static bool setCertificates (const std::string&,       // certificate file (FQ-)path
-                               const std::string&,       // private key file (FQ-)path
-                               ACE_SSL_Context* = NULL); // context handle {NULL: global}
+  static std::string SSLErrorToString ();
+
+  // *IMPORTANT NOTE*: currently, certificates must be in PEM format
+  static bool initializeSSLContext (const std::string&,       // certificate file (FQ-)path
+                                    const std::string&,       // private key file (FQ-)path
+                                    bool,                     // client ? : server mode
+                                    ACE_SSL_Context* = NULL); // context handle {NULL: global}
 #endif // SSL_SUPPORT
 
  private:

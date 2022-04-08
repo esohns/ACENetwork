@@ -2,7 +2,6 @@
 #define M3U_HEADER_H 1
 #define M3U_IN_HEADER 1
 
-//  #include "ace/Synch.h"
   #include "common_iparser.h"
 
   #include "m3u_parser.h"
@@ -639,11 +638,13 @@ void yyfree ( void * , yyscan_t yyscanner );
 
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
-#define state_x 1
-#define state_inf 2
-#define state_inf_key_value 3
-#define state_inf_title 4
-#define state_inf_url 5
+#define state_value 1
+#define state_ext_inf 2
+#define state_ext_inf_title 3
+#define state_ext_stream_inf_key_value 4
+#define state_ext_stream_inf_next_value 5
+#define state_ext_stream_inf_is_last_value 6
+#define state_url 7
 
 #endif
 
@@ -793,8 +794,6 @@ static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
 
 
 /* %if-c-only */
-
-
 
 
 

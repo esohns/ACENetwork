@@ -465,7 +465,7 @@ do_initializeSignals (bool useReactor_in,
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 
-  // *NOTE*: let (n)curses install it's own signal handler and process events in
+  // *NOTE*: let (n)curses install its' own signal handler and process events in
   //         (w)getch()
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
@@ -479,14 +479,6 @@ do_initializeSignals (bool useReactor_in,
   } // end IF
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
-
-// *NOTE*: gdb sends some signals (when running in an IDE ?)
-//         --> remove signals (and let IDE handle them)
-#if defined (__GNUC__) && defined (DEBUG_DEBUGGER)
-//  signals_out.sig_del (SIGINT);
-  signals_out.sig_del (SIGCONT);
-  signals_out.sig_del (SIGHUP);
-#endif // __GNUC__ && DEBUG_DEBUGGER
 }
 
 ACE_THR_FUNC_RETURN

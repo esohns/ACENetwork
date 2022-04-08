@@ -35,7 +35,6 @@
 /****************************************/
 
 // options
-#cmakedefine01 DEBUG_DEBUGGER
 #cmakedefine TRACING
 #cmakedefine VALGRIND_SUPPORT
 // sub-options - src

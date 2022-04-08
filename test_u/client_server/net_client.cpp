@@ -679,12 +679,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Client_TCP_Connector_t tcp_connector (true);
 #if defined (SSL_SUPPORT)
   Client_SSL_Connector_t ssl_connector (true);
-  if (!Net_Common_Tools::setCertificates (certificateFile_in,
-                                          privateKeyFile_in,
-                                          NULL))
+  if (!Net_Common_Tools::initializeSSLContext (certificateFile_in,
+                                               privateKeyFile_in,
+                                               true,  // client mode
+                                               NULL)) // default context
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::initializeSSLContext(\"%s\",\"%s\",NULL), returning\n"),
                 ACE_TEXT (certificateFile_in.c_str ()),
                 ACE_TEXT (privateKeyFile_in.c_str ())));
     return;
@@ -1223,12 +1224,6 @@ ACE_TMAIN (int argc_in,
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  //configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  //configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
   enum Client_TimeoutHandler::ActionModeType action_mode =

@@ -131,19 +131,24 @@
 
 // terminals
 %token
- END_OF_ELEMENT "element_end"
-// END_OF_FRAGMENT   "end_of_fragment"
- END 0             "end"
+              END_OF_ELEMENT       "element_end"
+              END 0                "end"
 ;
-%token <ival> LENGTH      "length"
-%token <sval> TITLE       "title"
-%token <sval> URL         "URL"
-%token <eval> BEGIN_INF   "begin_element_inf"
-%token <lval> BEGIN_ELEMS "begin_elements"
+%token <sval> KEY                  "key"
+%token <ival> LENGTH               "length"
+%token <sval> TITLE                "title"
+%token <sval> URL                  "URL"
+%token <sval> VALUE                "value"
+%token <eval> BEGIN_EXTINF         "begin_ext_inf"
+%token <eval> BEGIN_EXT_STREAM_INF "begin_ext_stream_inf"
+%token <lval> BEGIN_ELEMS          "begin_elements"
 
 // non-terminals
-%nterm  <eval> element inf_rest_1 inf_rest_2 inf_rest_3 inf_rest_4
-%nterm  <lval> playlist elements
+%nterm  <ival> elements key_values key_value
+%nterm  <eval> element
+%nterm  <sval> ext_stream_inf_rest_1 ext_stream_inf_rest_3 ext_stream_inf_rest_4
+%nterm  <sval> ext_inf_rest_1 ext_inf_rest_2 ext_inf_rest_3 ext_inf_rest_4
+%nterm  <lval> playlist
 
 /*%precedence element inf_rest_1 inf_rest_2 inf_rest_3 inf_rest_4
 %precedence playlist elements*/
@@ -189,28 +194,52 @@ playlist:         "begin_elements" {
                     }
                     YYACCEPT;
                   }
+
 elements:         elements element
 /*                  |                    { }*/
                   | %empty             { }
-element:          "begin_element_inf" {
+element:          "begin_ext_inf" {
                     iparser->setP_2 ($1);
-                  } inf_rest_1 { }
-inf_rest_1:       "length" {
+                  } ext_inf_rest_1 { }
+                  | "begin_ext_stream_inf" {
+                    iparser->setP_2 ($1);
+                  } ext_stream_inf_rest_1 { }
+
+ext_inf_rest_1:   "length" {
                     struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.Length = $1; } inf_rest_2 { }
-inf_rest_2:       "title" {
+                    element_r.Length = $1; } ext_inf_rest_2 { }
+ext_inf_rest_2:   "title" {
                     struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.Title = *$1; } inf_rest_3 { }
-                  | inf_rest_3 { }
-inf_rest_3:       "URL" {
+                    element_r.Title = *$1; } ext_inf_rest_3 { }
+                  | ext_inf_rest_3 { }
+ext_inf_rest_3:   "URL" {
                     struct M3U_Element& element_r = iparser->current_2 ();
-                    element_r.URL = *$1; } inf_rest_4 { }
-inf_rest_4:       "element_end" {
+                    element_r.URL = *$1; } ext_inf_rest_4 { }
+ext_inf_rest_4:   "element_end" {
                     M3U_Playlist_t& playlist_r = iparser->current ();
                     struct M3U_Element& element_r = iparser->current_2 ();
                     playlist_r.push_back (element_r); }
 /*                  |                    { }*/
                   | %empty             { }
+
+ext_stream_inf_rest_1: key_values ext_stream_inf_rest_3 { }
+key_values: key_values key_value
+/*            |                    { }*/
+            | %empty             { }
+key_value:   "key" {
+  struct M3U_Element& element_r = iparser->current_2 ();
+  element_r.key = *$1; } "value" {
+  struct M3U_Element& element_r = iparser->current_2 ();
+  element_r.keyValues.push_back (std::make_pair (element_r.key, *$3)); element_r.key.clear (); }
+ext_stream_inf_rest_3:   "URL" {
+  struct M3U_Element& element_r = iparser->current_2 ();
+  element_r.URL = *$1; } ext_stream_inf_rest_4 { }
+ext_stream_inf_rest_4:   "element_end" {
+  M3U_Playlist_t& playlist_r = iparser->current ();
+  struct M3U_Element& element_r = iparser->current_2 ();
+  playlist_r.push_back (element_r); }
+/*                  |                    { }*/
+| %empty             { }
 %%
 
 void

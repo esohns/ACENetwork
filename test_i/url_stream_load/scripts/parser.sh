@@ -41,10 +41,11 @@ do
   exit 1
  fi
  REPORT_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/_report.txt/')
- bison --graph --report=all --report-file=${REPORT_FILE} --xml --warnings=all ${FILE}
-#bison --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${FILE}
+ GRAPH_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/_graph.dot/')
+ bison --graph=${GRAPH_FILE} --report=all --report-file=${REPORT_FILE} --xml --warnings=all ${FILE}
+#bison --feature=caret --graph --report=all --report-file=${REPORT_FILE} --xml --warnings=all ${FILE}
  [ $? -ne 0 ] && echo "ERROR: \"${FILE}\" failed (status was: $?), aborting" && exit 1
- DOT_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/_parser.dot/')
+ DOT_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/_graph.dot/')
  DOT_FILE="$(dirname ${DOT_FILE})/$(basename ${DOT_FILE})"
  [ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
  IMAGE_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/.png/')

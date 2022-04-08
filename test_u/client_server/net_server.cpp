@@ -979,12 +979,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
     return;
   } // end IF
 
-  if (!Net_Common_Tools::setCertificates (certificateFile_in,
-                                          privateKeyFile_in,
-                                          NULL))
+  if (!Net_Common_Tools::initializeSSLContext (certificateFile_in,
+                                               privateKeyFile_in,
+                                               false, // server mode
+                                               NULL)) // default context
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setCertificates(\"%s\",\"%s\",NULL), returning\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::initializeSSLContext(\"%s\",\"%s\",NULL), returning\n"),
                 ACE_TEXT (certificateFile_in.c_str ()),
                 ACE_TEXT (privateKeyFile_in.c_str ())));
 
