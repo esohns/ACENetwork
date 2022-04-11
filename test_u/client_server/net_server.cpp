@@ -979,10 +979,19 @@ do_work (unsigned int maximumNumberOfConnections_in,
     return;
   } // end IF
 
-  if (!Net_Common_Tools::initializeSSLContext (certificateFile_in,
-                                               privateKeyFile_in,
-                                               false, // server mode
-                                               NULL)) // default context
+  std::string filename_string =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      false); // data
+  filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
+  filename_string +=
+    ACE_TEXT_ALWAYS_CHAR (NET_PROTOCOL_DEFAULT_SSL_TRUSTED_CAS_FILENAME_STRING);
+
+  if (unlikely (!Net_Common_Tools::initializeSSLContext (certificateFile_in,
+                                                         privateKeyFile_in,
+                                                         filename_string,    // trusted CAs
+                                                         false,              // server mode
+                                                         NULL)))             // default context
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::initializeSSLContext(\"%s\",\"%s\",NULL), returning\n"),

@@ -23,12 +23,9 @@
 
 #include "ace/Log_Msg.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#if defined (FFMPEG_SUPPORT)
-#include "stream_lib_ffmpeg_common.h"
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
+#include "stream_misc_defines.h"
+
+#include "stream_net_http_defines.h"
 
 #include "net_macros.h"
 
@@ -36,6 +33,7 @@
 #include "test_i_session_message.h"
 #include "test_i_m3u_module_parser.h"
 #include "test_i_common_modules.h"
+#include "test_i_module_httpget.h"
 
 Test_I_ConnectionStream::Test_I_ConnectionStream ()
  : inherited ()
@@ -63,20 +61,26 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
   //module_p = NULL;
   //ACE_NEW_RETURN (module_p,
   //                Test_I_StatisticReport_Module (this,
-  //                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+  //                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
   //                false);
   //layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPGet_Module (this,
-                                         ACE_TEXT_ALWAYS_CHAR ("HTTPGet")),
+                  Test_I_Defragment_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_M3U_Module_Parser_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR ("M3UParser")),
+                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
                   false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                 Test_I_Module_HTTPGet_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                 false);
   layout_in->append (module_p, NULL, 0);
   //module_p = NULL;
   //ACE_NEW_RETURN (module_p,

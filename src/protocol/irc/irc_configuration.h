@@ -89,7 +89,7 @@ struct IRC_ModuleHandlerConfiguration
     //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
     // *WARNING*: currently, this does NOT work with multithreaded streams
     //            --> USE WITH CAUTION !
-    crunchMessages = IRC_DEFAULT_CRUNCH_MESSAGES;
+    //crunchMessages = IRC_DEFAULT_CRUNCH_MESSAGES;
     inbound = true;
     passive = false;
   }

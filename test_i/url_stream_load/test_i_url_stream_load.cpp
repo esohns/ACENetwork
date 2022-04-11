@@ -32,8 +32,8 @@
 #include "uuids.h"
 #endif // UUIDS_H
 #elif defined (ACE_LINUX)
-#include <sys/capability.h>
-#include <linux/capability.h>
+#include "sys/capability.h"
+#include "linux/capability.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Get_Opt.h"
@@ -543,10 +543,18 @@ do_work (bool debugParser_in,
 
   // step0a: initialize configuration and stream
 #if defined (SSL_SUPPORT)
+  std::string filename_string =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      false); // data
+  filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
+  filename_string +=
+    ACE_TEXT_ALWAYS_CHAR (NET_PROTOCOL_DEFAULT_SSL_TRUSTED_CAS_FILENAME_STRING);
   if (unlikely (!Net_Common_Tools::initializeSSLContext (ACE_TEXT_ALWAYS_CHAR (""),
                                                          ACE_TEXT_ALWAYS_CHAR (""),
-                                                         true,   // client
-                                                         NULL))) // default context
+                                                         filename_string, // trusted CAs
+                                                         true,            // client
+                                                         NULL)))          // default context
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("failed to Net_Common_Tools::initializeSSLContext(), returning\n")));
@@ -626,12 +634,15 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
+  modulehandler_configuration.clone = true;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   //modulehandler_configuration.connectionManager = connection_manager_p;
+//  configuration_in.parserConfiguration.debugParser = true;
+//  configuration_in.parserConfiguration.debugScanner = true;
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration.statisticReportingInterval =
@@ -1064,7 +1075,8 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
   process_profile.start ();
 
-  Common_Tools::initialize ();
+  Common_Tools::initialize (false); // initialize RNG ?
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   // step1a set defaults
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

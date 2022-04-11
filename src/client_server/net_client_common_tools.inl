@@ -45,6 +45,9 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   typename ConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* connection_p =
     NULL;
   typename ConnectorType::ICONNECTOR_T* iconnector_p = &connector_in;
+  ACE_Time_Value deadline, timeout;
+  enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+  typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
 
   // step1: initialize the connection manager
   iconnection_manager_p->set (configuration_in,
@@ -78,14 +81,13 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
 #else
       iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (result));
 #endif // ACE_WIN32 || ACE_WIN64
+    if (unlikely (!connection_p))
+      goto continue_;
   } // end IF
   else
   {
-    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                            0);
-    ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-    enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-    typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+    timeout.sec (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S);
+    deadline = ACE_OS::gettimeofday () + timeout;
 
     // step1: wait for the connection to establish
     typename ConnectorType::IASYNCH_CONNECTOR_T* iasynch_connector_p =
@@ -117,35 +119,38 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
                                                  isPeerAddress_in);
       if (likely (connection_p))
         break;
-    } while (COMMON_TIME_NOW < deadline);
+    } while (ACE_OS::gettimeofday () < deadline);
     if (unlikely (!connection_p))
       goto continue_;
-
-    // step3: wait for the connection to finish initializing
-    // *TODO*: avoid these tight loops
-    do
-    {
-      status = connection_p->status ();
-      // *TODO*: break early upon failure too
-      if (status == NET_CONNECTION_STATUS_OK)
-        break;
-    } while (COMMON_TIME_NOW < deadline);
-    if (unlikely (status != NET_CONNECTION_STATUS_OK))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
-      connection_p->decrease ();
-      return ACE_INVALID_HANDLE;
-    } // end IF
-
-    // step4: wait for the connection stream (if any) to finish initializing
-    istream_connection_p =
-      dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (connection_p);
-    if (likely (istream_connection_p))
-      istream_connection_p->wait (STREAM_STATE_RUNNING,
-                                  NULL); // <-- block
   } // end ELSE
+
+  timeout.sec (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S);
+  deadline = ACE_OS::gettimeofday () + timeout;
+
+  // step3: wait for the connection to finish initializing
+  // *TODO*: avoid these tight loops
+  do
+  {
+    status = connection_p->status ();
+    if (status > NET_CONNECTION_STATUS_INITIALIZING)
+      break;
+  } while (ACE_OS::gettimeofday () < deadline);
+  if (unlikely (status != NET_CONNECTION_STATUS_OK))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to %s, aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+    connection_p->decrease ();
+    return ACE_INVALID_HANDLE;
+  } // end IF
+
+  // step4: wait for the connection stream (if any) to finish initializing
+  istream_connection_p =
+    dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (connection_p);
+  if (likely (istream_connection_p))
+    istream_connection_p->wait (STREAM_STATE_RUNNING,
+                                NULL); // <-- block
+
 continue_:
   if (unlikely (!connection_p))
   {

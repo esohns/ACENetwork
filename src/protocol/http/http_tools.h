@@ -52,11 +52,13 @@ class HTTP_Tools
 
   static enum Stream_Decoder_CompressionFormatType EncodingToCompressionFormat (const std::string&);
 
+  // URI/URL
   static bool parseURL (const std::string&, // URL
                         std::string&,       // return value: host name
 //                        ACE_INET_Addr&,     // return value: host address
                         std::string&,       // return value: URI
                         bool&);             // return value: use SSL ?
+  static bool URLIsURI (const std::string&); // URL
   static bool URLRequiresSSL (const std::string&); // URL
 
   // *NOTE*: this 'escapes' the input so it can be sent in an URL

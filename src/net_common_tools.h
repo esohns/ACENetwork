@@ -307,6 +307,7 @@ class Net_Common_Tools
   // *IMPORTANT NOTE*: currently, certificates must be in PEM format
   static bool initializeSSLContext (const std::string&,       // certificate file (FQ-)path
                                     const std::string&,       // private key file (FQ-)path
+                                    const std::string&,       // CA certificates file/directory (FQ-)path
                                     bool,                     // client ? : server mode
                                     ACE_SSL_Context* = NULL); // context handle {NULL: global}
 #endif // SSL_SUPPORT

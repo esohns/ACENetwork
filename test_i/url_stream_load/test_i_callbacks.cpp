@@ -21,15 +21,15 @@
 
 #include "test_i_callbacks.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <limits>
-
-#include <iphlpapi.h>
-#else
-#include <netinet/ether.h>
-#include <ifaddrs.h>
-#endif
 #include <sstream>
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "iphlpapi.h"
+#else
+#include "netinet/ether.h"
+#include "ifaddrs.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
@@ -146,15 +146,46 @@ idle_load_segment_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
-  // select connector
-  std::string hostname_string, hostname_string_2, URI_string;
+  // update configuration
+  Test_I_URLStreamLoad_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+  std::string hostname_string, hostname_string_2, URI_string, URL_string;
   bool use_SSL = false;
+  if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+               ACE_TEXT (data_p->URL.c_str ())));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  if (HTTP_Tools::URLIsURI (data_p->URL))
+  {
+    URL_string = ACE_TEXT_ALWAYS_CHAR ("http");
+    URL_string +=
+        (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
+    URL_string += ACE_TEXT_ALWAYS_CHAR ("://");
+    URL_string += hostname_string;
+    size_t position = URI_string.find_last_of ('/', std::string::npos);
+    ACE_ASSERT (position != std::string::npos);
+    URI_string.erase (position + 1, std::string::npos);
+    URL_string += URI_string;
+    URL_string += data_p->URL;
+  } // end IF
+  else
+    URL_string = data_p->URL;
+  (*iterator_3).second.second->URL = URL_string;
+
+  // select connector
   size_t position = std::string::npos;
   int result = -1;
   Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  if (!HTTP_Tools::parseURL (data_p->URL,
+  if (!HTTP_Tools::parseURL (URL_string,
                              hostname_string,
                              URI_string,
                              use_SSL))
@@ -187,12 +218,6 @@ idle_load_segment_cb (gpointer userData_in)
   } // end IF
   static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
     static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
-
-  // update configuration
-  Test_I_URLStreamLoad_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
-    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
-  (*iterator_3).second.second->URL = data_p->URL;
 
   Test_I_TCPConnector_2_t connector (true);
 #if defined (SSL_SUPPORT)
@@ -384,35 +409,35 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             (gdouble)std::numeric_limits<ACE_UINT32>::max ());
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             (gdouble)std::numeric_limits<ACE_UINT32>::max ());
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             (gdouble)std::numeric_limits<ACE_UINT32>::max ());
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_DATA_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             (gdouble)std::numeric_limits<ACE_UINT64>::max ());
   spin_button_p =
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             (gdouble)std::numeric_limits<ACE_UINT32>::max ());
   Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
@@ -924,6 +949,8 @@ idle_update_info_display_cb (gpointer userData_in)
           break;
         }
         case COMMON_UI_EVENT_FINISHED:
+        case COMMON_UI_EVENT_ABORT:
+        case COMMON_UI_EVENT_STEP:
         {
           spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,

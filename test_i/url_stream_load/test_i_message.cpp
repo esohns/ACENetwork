@@ -179,7 +179,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
     return NULL;
   } // end IF
 
-  // allocate a new ARDrone_LiveVideoMessage that contains unique copies of the message
+  // allocate a new message that contains unique copies of the message
   // block fields, and "deep" copie(s) of the data block(s)
 
   // *NOTE*: if there is no allocator, use the standard new/delete calls
@@ -219,6 +219,25 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
 
   // set message type
   result_p->set (inherited::type_);
+
+  // initialize
+  if (inherited::isInitialized_)
+  {
+    Test_I_MessageDataContainer* data_container_p = NULL;
+    ACE_NEW_NORETURN (data_container_p,
+                      Test_I_MessageDataContainer ());
+    if (!data_container_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+      result_p->release ();
+      return NULL;
+    } // end IF
+    data_container_p->setR (inherited::data_->getR ());
+    result_p->initialize (data_container_p,
+                          inherited::sessionId_,
+                          NULL);
+  } // end IF
 
   // clone any continuations
   if (inherited::cont_)

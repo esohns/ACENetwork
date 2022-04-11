@@ -94,7 +94,7 @@ struct PCP_ModuleHandlerConfiguration
    , printProgressDot (PCP_DEFAULT_PRINT_PROGRESSDOT)
    , protocolConfiguration (NULL)
   {
-    crunchMessages = PCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
+    //crunchMessages = PCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
   }
 

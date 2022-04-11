@@ -331,7 +331,7 @@ error:
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
                   true,  // wait for upstream (if any) ?
-                  true); // locked access ?
+                  true); // high priority ?
   if (handle_manager)
     inherited2::deregister ();
 
@@ -492,9 +492,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                    false,  // flush session messages ?
                    false); // recurse upstream (if any) ?
     stream_.idle (false); // recurse upstream (if any) ?
-    stream_.stop (true,  // wait for worker(s) (if any)
-                  true,  // recurse upstream (if any) ?
-                  true); // locked access ?
+    stream_.stop (true,   // wait for worker(s) (if any)
+                  true,   // recurse upstream (if any) ?
+                  false); // high priority ?
 //  } // end lock scope
 
   switch (mask_in)
@@ -1381,7 +1381,7 @@ error:
   if (handle_stream)
     stream_.stop (true,  // wait for completion ?
                   true,  // wait for upstream (if any) ?
-                  true); // locked access ?
+                  true); // high priority ?
   if (handle_manager)
     inherited2::deregister ();
 
@@ -1457,9 +1457,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                    false,  // do not flush session messages
                    false); // recurse upstream (if any) ?
     stream_.idle (false); // recurse upstream (if any) ?
-    stream_.stop (true,  // wait for worker(s) (if any)
-                  true,  // recurse upstream (if any) ?
-                  true); // locked access ?
+    stream_.stop (true,   // wait for worker(s) (if any)
+                  true,   // recurse upstream (if any) ?
+                  false); // high priority ?
 //  } // end lock scope
 
   // *NOTE*: pending socket operations are notified by the kernel and will
@@ -1795,7 +1795,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::waitForIdleState"));
 
   // step1: wait for the streams' 'outbound' queue to turn idle
-  stream_.idle ();
+  stream_.idle (false); // recurse ?
 
   // --> outbound stream data has been processed
 

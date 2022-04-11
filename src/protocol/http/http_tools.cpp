@@ -503,6 +503,23 @@ HTTP_Tools::parseURL (const std::string& URL_in,
 }
 
 bool
+HTTP_Tools::URLIsURI (const std::string& URL_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLIsURI"));
+
+  // sanity check(s)
+  ACE_ASSERT (!URL_in.empty ());
+
+  std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^[^/]+(?:/(?:[^/])*)*(?:/)?$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  return std::regex_match (URL_in,
+                           match_results,
+                           regex,
+                           std::regex_constants::match_default);
+}
+
+bool
 HTTP_Tools::URLRequiresSSL (const std::string& URL_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLRequiresSSL"));
@@ -638,18 +655,18 @@ HTTP_Tools::IPAddressToHostName (const ACE_INET_Addr& address_in)
   std::string result;
 
   int result_2 = -1;
-  ACE_TCHAR buffer[BUFSIZ]; // *TODO*: max. 32 bytes ?
-  ACE_OS::memset (&buffer, 0, sizeof (buffer));
-  result_2 = address_in.addr_to_string (buffer,
-                                        sizeof (buffer),
+  ACE_TCHAR buffer_a[BUFSIZ];
+  ACE_OS::memset (&buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+  result_2 = address_in.addr_to_string (buffer_a,
+                                        sizeof (ACE_TCHAR[BUFSIZ]),
                                         0); // want hostname !
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string(): \"%m\", aborting\n")));
     return result;
   } // end IF
-  result = ACE_TEXT_ALWAYS_CHAR (buffer);
+  result = ACE_TEXT_ALWAYS_CHAR (buffer_a);
 
   return result;
 }

@@ -30,16 +30,11 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
-//#if defined (FFMPEG_SUPPORT)
-//#include "stream_dec_libav_decoder.h"
-//#endif // FFMPEG_SUPPORT
 #include "stream_dec_mpeg_ts_decoder.h"
 
 #include "stream_file_sink.h"
 
-//#if defined (FFMPEG_SUPPORT)
-//#include "stream_lib_ffmpeg_common.h"
-//#endif // FFMPEG_SUPPORT
+#include "stream_misc_defragment.h"
 
 #include "stream_stat_statistic_report.h"
 
@@ -94,16 +89,16 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    struct Test_I_URLStreamLoad_SessionData,
                                                    Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-                                                   Common_TimePolicy_t,
-                                                   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                                                   Stream_ControlMessage_t,
-                                                   Test_I_Message,
-                                                   Test_I_SessionMessage,
-                                                   HTTP_Method_t,
-                                                   struct Stream_Statistic,
-                                                   Common_Timer_Manager_t,
-                                                   struct Test_I_URLStreamLoad_SessionData,
-                                                   Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_WriterTask_t;
+                                                      Common_TimePolicy_t,
+                                                      struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_Message,
+                                                      Test_I_SessionMessage,
+                                                      HTTP_Method_t,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Test_I_URLStreamLoad_SessionData,
+                                                      Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_WriterTask_t;
 DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
                           enum Stream_SessionMessageType,                         // session event type
                           struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
@@ -113,18 +108,31 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           Test_I_StatisticReport_WriterTask_t,                    // writer type
                           Test_I_StatisticReport);                                // name
 
-typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                                            Stream_ControlMessage_t,
-                                            Test_I_Message,
-                                            Test_I_SessionMessage> Test_I_HTTPGet;
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,   // session data type
-                              enum Stream_SessionMessageType,            // session event type
-                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
-                              libacestream_default_net_http_get_module_name_string,
-                              Stream_INotify_t,                          // stream notification interface type
-                              Test_I_HTTPGet);                           // writer type
+typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                   Stream_ControlMessage_t,
+                                   Test_I_Message,
+                                   Test_I_SessionMessage> Test_I_Defragment;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,                 // session data type
+                              enum Stream_SessionMessageType,                          // session event type
+                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,  // module handler configuration type
+                              libacestream_default_misc_defragment_module_name_string,
+                              Stream_INotify_t,                                        // stream notification interface type
+                              Test_I_Defragment);                                      // writer type
+
+//typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
+//                                            Common_TimePolicy_t,
+//                                            struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+//                                            Stream_ControlMessage_t,
+//                                            Test_I_Message,
+//                                            Test_I_SessionMessage> Test_I_HTTPGet;
+//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,   // session data type
+//                              enum Stream_SessionMessageType,            // session event type
+//                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
+//                              libacestream_default_net_http_get_module_name_string,
+//                              Stream_INotify_t,                          // stream notification interface type
+//                              Test_I_HTTPGet);                           // writer type
 
 //////////////////////////////////////////
 

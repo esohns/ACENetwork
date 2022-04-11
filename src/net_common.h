@@ -186,10 +186,10 @@ enum Net_Connection_Status
 {
   NET_CONNECTION_STATUS_INVALID              = -1,
   ////////////////////////////////////////
-  NET_CONNECTION_STATUS_OK                   = 0,
-  ////////////////////////////////////////
-  NET_CONNECTION_STATUS_INITIALIZING,
+  NET_CONNECTION_STATUS_INITIALIZING         = 0,
   NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
+  ////////////////////////////////////////
+  NET_CONNECTION_STATUS_OK,
   ////////////////////////////////////////
   NET_CONNECTION_STATUS_CLOSED,      // (local) close ()
   NET_CONNECTION_STATUS_PEER_CLOSED, // connection closed by the peer

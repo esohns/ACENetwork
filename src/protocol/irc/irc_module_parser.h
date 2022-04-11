@@ -24,8 +24,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-//#include "common_time_common.h"
-
 #include "stream_task_base_synch.h"
 
 #include "irc_defines.h"
@@ -108,7 +106,7 @@ class IRC_Module_Parser_T
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T (const IRC_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T& operator= (const IRC_Module_Parser_T&))
 
-  bool             crunchMessages_;
+  //bool             crunchMessages_;
 
   // driver
   bool             debugScanner_;

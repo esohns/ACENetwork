@@ -68,6 +68,11 @@
 #define NET_PROTOCOL_DEFAULT_NETLINK                                   NETLINK_GENERIC
 #define NET_PROTOCOL_DEFAULT_NETLINK_GROUP                             1
 
+// --- SSL ---
+#if defined (SSL_SUPPORT)
+#define NET_PROTOCOL_DEFAULT_SSL_TRUSTED_CAS_FILENAME_STRING           "cacert.pem"
+#endif // SSL_SUPPORT
+
 // --- UDP ---
 
 // *NOTE*: see also: SO_MAX_MSG_SIZE
@@ -97,7 +102,7 @@
 #define NET_CONNECTION_DEFAULT_SEND_RETRIES                            10
 
 // (asynchronous) connections
-#define NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S          60 // second(s)
+#define NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S          15 // second(s)
 #define NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S 1  // second(s)
 
 // stream

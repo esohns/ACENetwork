@@ -3690,18 +3690,28 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
                   ACE_TEXT (ip_address_and_port.c_str ())));
       return false;
     } // end IF
-    result = inet_address.get_host_name (buffer_a,
-                                         sizeof (char[HOST_NAME_MAX]));
-    hostName_inout = buffer_a;
-    if (unlikely ((result == -1) ||
-                  // *NOTE*: ACE_INET_Addr::get_host_name does not set NI_NAMEREQD for
-                  //         getnameinfo(), therefore check for dotted-decimal return value
-                  Net_Common_Tools::matchIPAddress (hostName_inout))
-       )
+    result = ACE_OS::getnameinfo ((sockaddr*)inet_address.get_addr (),
+                                  sizeof (struct sockaddr_in),
+                                  buffer_a,
+                                  sizeof (char[HOST_NAME_MAX]),
+                                  NULL,
+                                  0,
+                                  NI_NAMEREQD);
+    //result = inet_address.get_host_name (buffer_a,
+    //                                     sizeof (char[HOST_NAME_MAX]));
+    //hostName_inout = buffer_a;
+    //if (unlikely ((result == -1) ||
+    //              // *NOTE*: ACE_INET_Addr::get_host_name does not set NI_NAMEREQD for
+    //              //         getnameinfo(), therefore check for dotted-decimal return value
+    //              Net_Common_Tools::matchIPAddress (hostName_inout))
+    //   )
+    if (unlikely (result))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (dottedDecimal_inout.c_str ())));
+                  //ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to ACE_OS::getnameinfo(\"%s\"): \"%s\", aborting\n"),
+                  ACE_TEXT (dottedDecimal_inout.c_str ()),
+                  ACE_TEXT (gai_strerror (result))));
       hostName_inout.clear ();
       return false;
     } // end IF
@@ -4674,12 +4684,14 @@ Net_Common_Tools::SSLErrorToString ()
 bool
 Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
                                         const std::string& privateKey_in,
+                                        const std::string& CACertificates_in,
                                         bool isClient_in,
                                         ACE_SSL_Context* context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::initializeSSLContext"));
 
   int result = -1;
+  std::string CA_certificates_file_string, CA_certificates_directory_string;
 
   ACE_SSL_Context* context_p =
       (context_in ? context_in : ACE_SSL_Context::instance ());
@@ -4702,19 +4714,21 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
 
   SSL_CTX* real_context_p = context_p->context ();
   ACE_ASSERT (real_context_p);
-  unsigned long new_options_i = 0;
-  new_options_i = SSL_CTX_clear_options (real_context_p, SSL_OP_ALL);
+  uint64_t new_options_i = 0;
+  new_options_i = SSL_CTX_set_options (real_context_p, SSL_OP_ALL);
   ACE_UNUSED_ARG (new_options_i);
+  //new_options_i = SSL_CTX_clear_options (real_context_p, SSL_OP_ALL);
+  //ACE_UNUSED_ARG (new_options_i);
   new_options_i =
     SSL_CTX_set_options (real_context_p, SSL_OP_NO_SSLv3); // force TLS
   ACE_UNUSED_ARG (new_options_i);
-  new_options_i =
-      SSL_CTX_set_options (real_context_p,
-                           SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2
-  ACE_UNUSED_ARG (new_options_i);
-  SSL_CTX_set_verify (real_context_p,
-                      SSL_VERIFY_NONE,
-                      NULL);
+  //new_options_i =
+  //    SSL_CTX_set_options (real_context_p,
+  //                         SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2
+  //ACE_UNUSED_ARG (new_options_i);
+  //SSL_CTX_set_verify (real_context_p,
+  //                    SSL_VERIFY_NONE,
+  //                    NULL);
 
   // set certificates ?
   if (certificate_in.empty () || privateKey_in.empty ())
@@ -4750,6 +4764,34 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
   } // end IF
 
 continue_:
+  // load CA certificates ?
+  if (CACertificates_in.empty ())
+    goto continue_2;
+
+  if (Common_File_Tools::isFile (CACertificates_in))
+    CA_certificates_file_string = CACertificates_in;
+  else
+  { ACE_ASSERT (Common_File_Tools::isDirectory (CACertificates_in));
+    CA_certificates_directory_string = CACertificates_in;
+  } // end ELSE
+
+  result =
+    context_p->load_trusted_ca (CA_certificates_file_string.empty () ? NULL : CA_certificates_file_string.c_str (),
+                                CA_certificates_directory_string.empty () ? NULL : CA_certificates_directory_string.c_str (),
+                                false); // do not use environment variables
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SSL_Context::load_trusted_ca(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (CACertificates_in.c_str ()),
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+    return false;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("using trusted CA certificates from: \"%s\"\n"),
+              ACE_TEXT (CACertificates_in.c_str ())));
+
+continue_2:
   return true;
 }
 #endif // SSL_SUPPORT

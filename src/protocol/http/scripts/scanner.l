@@ -64,7 +64,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 
 %option header-file="http_scanner.h" outfile="http_scanner.cpp"
 %option yylineno yywrap
-%option nomain nounput noyymore noreject nodefault nostdinit
+%option nomain nounput noyymore noreject nodefault nostdinit noline
 /* %option nostack noline nounistd */
 %option nostack nounistd
 /* %option c++ yyclass="HTTP_Scanner" */
@@ -327,6 +327,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 %s             body
 %s             chunked_body
 %s             chunk
+%s             data
+%s             data_2
 
 %{
 /* handle locations */
@@ -347,6 +349,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
   std::smatch match_results;
   std::istringstream converter;
   unsigned int content_length_or_chunk_size = 0;
+  unsigned int missing_bytes = 0;
 %}
 
 <INITIAL>{
@@ -488,8 +491,9 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                  record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              if (iterator != record_r.headers.end ())
                              {
-                               converter.str ((*iterator).second);
+                               converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                                converter.clear ();
+                               converter.str ((*iterator).second);
                                converter >> content_length_or_chunk_size;
                                if (!content_length_or_chunk_size)
                                  BEGIN (INITIAL); // no data
@@ -547,30 +551,42 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              HTTP_HeadersIterator_t iterator =
                                  record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              ACE_ASSERT (iterator != record_r.headers.end ());
-                             converter.str ((*iterator).second);
+                             converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
+                             converter.str ((*iterator).second);
                              converter >> content_length_or_chunk_size;
+                             missing_bytes = content_length_or_chunk_size;
                              if (yy_flex_debug)
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found body @%d of %d byte(s)\n"),
                                            iparser_p->offset (),
                                            content_length_or_chunk_size));
-                             --content_length_or_chunk_size;
-                             char c = 0;
+                             --missing_bytes;
+/*                             char c = 0;
                              for (unsigned int i = 0;
-                                  i < content_length_or_chunk_size;
+                                  i < missing_bytes;
                                   ++i)
                              {
                                c = yyinput (yyscanner);
                                // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
                                *(yyg->yy_c_buf_p - 1) = c;
-                             } // end FOR
-                             BEGIN (INITIAL);
-                             yylval->ival = content_length_or_chunk_size + 1;
-//                               return yy::HTTP_Parser::token::BODY;
-                             return yytokentype::BODY;
+                             } // end FOR */
+                             BEGIN (data);
                            }
 } // end <body>
+<data>{
+{OCTET}{1}                 { ACE_ASSERT (content_length_or_chunk_size);
+                             ACE_ASSERT (missing_bytes);
+                             --missing_bytes;
+                             if (unlikely (!missing_bytes))
+                             {
+                               BEGIN (INITIAL);
+                               yylval->ival = content_length_or_chunk_size;
+//                               return yy::HTTP_Parser::token::BODY;
+                               return yytokentype::BODY;
+                             } // end IF
+                           }
+} // end <data>
 <chunked_body>{
 {CHUNK_LINE}{CRLF}         { if (iparser_p->currentChunkSize ()) // *IMPORTANT NOTE*: 0 the first time around
                                iparser_p->offset (iparser_p->currentChunkSize () + 2);
@@ -626,13 +642,11 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 {CHUNK_LINE}{CRLF}         { iparser_p->offset (yyleng);
                              if (content_length_or_chunk_size)
                              {
-                               if (yy_flex_debug)
-                                 ACE_DEBUG ((LM_DEBUG,
-                                             ACE_TEXT ("found entity chunk @%d: %u byte(s)\n"),
-                                             iparser_p->offset (),
-                                             content_length_or_chunk_size));
-                               // gobble chunk data
-                               char c = 0;
+                               ACE_DEBUG ((LM_DEBUG,
+                                           ACE_TEXT ("found entity chunk @%d: %u byte(s)\n"),
+                                           iparser_p->offset (),
+                                           content_length_or_chunk_size));
+/*                               char c = 0;
                                for (unsigned int i = 0;
                                     i < content_length_or_chunk_size;
                                     ++i)
@@ -649,22 +663,45 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                c = yyinput (yyscanner);
                                ACE_ASSERT (c == '\n');
                                // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-                               *(yyg->yy_c_buf_p - 1) = c;
+                               *(yyg->yy_c_buf_p - 1) = c;*/
+                               missing_bytes = content_length_or_chunk_size;
+                               BEGIN (data_2);
                              } // end IF
                              else
                              {
-                               if (yy_flex_debug)
-                                 ACE_DEBUG ((LM_DEBUG,
-                                             ACE_TEXT ("found last entity chunk @%d: 0 byte(s)\n"),
-                                             iparser_p->offset ()));
+                               ACE_DEBUG ((LM_DEBUG,
+                                           ACE_TEXT ("found last entity chunk @%d: 0 byte(s)\n"),
+                                           iparser_p->offset ()));
                                // *NOTE*: do not consume the terminating CRLF
                                //         here; this happens in <chunked_body>
+                               yylval->ival = content_length_or_chunk_size;
+                               BEGIN (chunked_body);
+/*                             return yy::HTTP_Parser::token::CHUNK; */
+                               return yytokentype::CHUNK;
                              } // end ELSE
-                             yylval->ival = content_length_or_chunk_size;
-                             BEGIN (chunked_body);
-/*                             return yy::HTTP_Parser::token::CHUNK; } */
-                             return yytokentype::CHUNK; }
+                           }
 } // end <chunk>
+<data_2>{
+{OCTET}{1}                 { ACE_ASSERT (missing_bytes);
+                             --missing_bytes;
+                             if (unlikely (!missing_bytes))
+                             {
+                               // gobble trailing delimiter (CRLF)
+                               char c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\r');
+                               // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
+                               *(yyg->yy_c_buf_p - 1) = c;
+                               c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\n');
+                               // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
+                               *(yyg->yy_c_buf_p - 1) = c;
+                               BEGIN (chunked_body);
+                               yylval->ival = content_length_or_chunk_size;
+/*                             return yy::HTTP_Parser::token::CHUNK; } */
+                               return yytokentype::CHUNK;
+                             } // end IF
+                           }
+} // end <data_2>
 <<EOF>>                    { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                 { /* *TODO*: use (?s:.) ? */
                              if (!iparser_p->isBlocking ())
@@ -697,33 +734,12 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
   ACE_ASSERT (iparser_p);
   if (!iparser_p->isBlocking ())
     return 1; // not enough data, cannot proceed
-  if (iparser_p->hasFinished ())
-  {
-    BEGIN (INITIAL);
-    return 1; // done
-  } // end IF
+//  if (iparser_p->hasFinished ())
+//  {
+//    BEGIN (INITIAL);
+//    return 1; // done
+//  } // end IF
 
-  // *NOTE*: there is more data
-  // 1. gobble/save the rest
-  // 2. switch buffers
-  // 3. unput the rest
-  // 4. continue scanning
-
-  // step1
-  //std::string the_rest;
-  //the_rest.append (yytext, yyleng);
-//  for (char c = yyinput (yyscanner);
-//       c != EOF;
-//       c = yyinput (yyscanner));
-  //yyg->yy_c_buf_p += yyleng;
-  //yyg->yy_hold_char = *yyg->yy_c_buf_p;
-  //if (yy_flex_debug)
-  //  ACE_DEBUG ((LM_DEBUG,
-  //              ACE_TEXT ("the rest: \"%s\" (%d byte(s))\n"),
-  //              ACE_TEXT (the_rest.c_str ()),
-  //              the_rest.size ()));
-
-  // step2
   if (!iparser_p->switchBuffer ())
   {
     // *NOTE*: most probable reason: received session end message
@@ -731,16 +747,6 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
                 ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
     return 1;
   } // end IF
-
-  // step3
-  //for (std::string::reverse_iterator iterator = the_rest.rbegin ();
-  //     iterator != the_rest.rend ();
-  //     ++iterator)
-  //  unput (*iterator);
-
-  // step4
-  //yyg->yy_did_buffer_switch_on_eof = 1;
-  // yymore ();
 
   return 0;
 }

@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "openssl/ssl.h"
+
 #include "ace/Log_Msg.h"
 #include "ace/Svc_Handler.h"
 
@@ -136,7 +138,6 @@ Net_Client_SSL_Connector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::connect"));
 
   int result = -1;
-
   HandlerType* handler_p = NULL;
   ACE_Synch_Options synch_options = ACE_Synch_Options::defaults;
   ACE_INET_Addr local_address = ACE_sap_any_cast (ACE_INET_Addr&);
@@ -244,9 +245,44 @@ Net_Client_SSL_Connector_T<HandlerType,
   // default behavior
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (managed_));
-  if (!handler_out)
+  if (unlikely (!handler_out))
+  {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return -1;
+  } // end IF
 
-  return (handler_out ? 0 : -1);
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  std::string hostname_string =
+    Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address,
+                                         true,  // do not append port
+                                         true); // resolve
+  if (unlikely (hostname_string.empty ()))
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("failed to resolve address; cannot set TLS SNI hostname, continuing\n")));
+    return 0;
+  } // end IF
+
+  // support TLS SNI
+  typename HandlerType::stream_type& stream_r = handler_out->peer ();
+  SSL* context_p = stream_r.ssl ();
+  ACE_ASSERT (context_p);
+  int result = SSL_set_tlsext_host_name (context_p,
+                                         hostname_string.c_str ());
+  if (unlikely (result == 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SSL_set_tlsext_host_name(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (hostname_string.c_str ()),
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+    delete handler_out; handler_out = NULL;
+    return -1;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("set TLS SNI hostname: \"%s\"\n"),
+              ACE_TEXT (hostname_string.c_str ())));
+
+  return 0;
 }

@@ -37,15 +37,12 @@
 #include "http_scanner.h"
 
 template <typename SessionMessageType>
-HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string& scannerTables_in,
-                                                              bool traceScanning_in,
-                                                              bool traceParsing_in)
+HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string& scannerTables_in)
  : configuration_ (NULL)
  , finished_ (false)
  , fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
- , trace_ (traceParsing_in)
  , blockInParse_ (false)
  , isFirst_ (true)
  //, parser_ (this,          // driver
@@ -137,11 +134,11 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string&
   //parser_.set (scannerState_);
 
   // trace ?
-  HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
+  HTTP_Scanner_set_debug ((COMMON_PARSER_DEFAULT_LEX_TRACE ? 1 : 0),
                           scannerState_);
   //parser_.set_debug_level (trace_ ? 1 : 0); // binary (see bison manual)
 //  yysetdebug (trace_ ? 1 : 0);
-  yydebug = (trace_ ? 1 : 0);
+  yydebug = (COMMON_PARSER_DEFAULT_YACC_TRACE ? 1 : 0);
 }
 
 template <typename SessionMessageType>
@@ -188,7 +185,6 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
 
     blockInParse_ = false;
     isFirst_ = true;
-    trace_ = COMMON_PARSER_DEFAULT_YACC_TRACE;
 
     //if (!scannerTables_.empty ())
     //{
@@ -223,7 +219,6 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
   configuration_ =
       &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
   blockInParse_ = configuration_->block;
-  trace_ = configuration_->debugParser;
   messageQueue_ = configuration_->messageQueue;
   useYYScanBuffer_ = configuration_->useYYScanBuffer;
 
@@ -231,7 +226,7 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
                           scannerState_);
   //parser_.set_debug_level (trace_ ? 1 : 0); // binary (see bison manual)
   //yysetdebug (trace_ ? 1 : 0);
-  yydebug = (trace_ ? 1 : 0);
+  yydebug = (configuration_->debugParser ? 1 : 0);
 
   isInitialized_ = true;
 

@@ -100,6 +100,8 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_message.h
      test_i_module_eventhandler.cpp
      test_i_module_eventhandler.h
+     test_i_module_httpget.cpp
+     test_i_module_httpget.h
      test_i_m3u_module_parser.cpp
      test_i_m3u_module_parser.h
      test_i_m3u_parser_driver.cpp
@@ -256,26 +258,37 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/url_stream_load
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/url_stream_load
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
+ string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
+ if (GUI_SUPPORT)
+  if (GTK_SUPPORT)
+   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+  endif (GTK_SUPPORT)
+  if (WXWIDGETS_SUPPORT)
+   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
+  endif (WXWIDGETS_SUPPORT)
+ endif (GUI_SUPPORT)
  if (SSL_SUPPORT)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_PATH)
- file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
+ file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
+# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
+# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
+ file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_PATH}
                            ${FFMPEG_PATH}
                            ${GTK_PATH}
-                           ${ICONV_PATH}
-                           ${LIBXML2_PATH}
-                           ${ACE_LIB_PATH})
+                           ${WXWIDGETS_PATH}
+#                           ${ICONV_PATH}
+#                           ${LIBXML2_PATH}
+                           ${ACE_LIBRARY_PATH})
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -r -t -u https://tagesschau-lh.akamaihd.net/i/tagesschau_3@66339/index_320_av-p.m3u8"
+                         COMMAND ${COMMAND}
+                         ARGS "-l -r -t -u https://mcdn.daserste.de/daserste/de/master.m3u8"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                                               G:/software/Development/dll
@@ -287,6 +300,6 @@ elseif (WIN32)
                                               ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/html/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/protocol/http/Debug
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/url_stream_load
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/url_stream_load
                          ENVIRONMENT foo=bar)
 endif ()

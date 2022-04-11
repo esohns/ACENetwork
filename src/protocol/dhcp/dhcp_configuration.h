@@ -99,7 +99,7 @@ struct DHCP_ModuleHandlerConfiguration
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
    , protocolConfiguration (NULL)
   {
-    crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
+    //crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
   }
 

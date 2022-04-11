@@ -46,13 +46,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      SessionMessageType>::HTTP_Module_Parser_T (ISTREAM_T* stream_in)
 #else
                      SessionMessageType>::HTTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
- , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
-               COMMON_PARSER_DEFAULT_LEX_TRACE,                           // trace scanning ?
-               COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?
+ , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
  , headFragment_ (NULL)
- , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , chunks_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::HTTP_Module_Parser_T"));
@@ -112,11 +109,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     {
       headFragment_->release (); headFragment_ = NULL;
     } // end IF
-    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
     chunks_.clear ();
   } // end IF
-
-  crunch_ = configuration_in.crunchMessages;
 
 //  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
@@ -278,6 +272,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   switch (message_inout->type ())
   {
+    case STREAM_SESSION_MESSAGE_ABORT:
+    {
+      break;
+    }
     case STREAM_SESSION_MESSAGE_END:
     {
       //// *NOTE*: (in a 'passive' scenario,) a parser thread may be waiting for
@@ -322,11 +320,13 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (record_inout);
   ACE_ASSERT (record_inout == inherited2::record_);
   ACE_ASSERT (inherited::sessionData_);
+  ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (headFragment_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
   // debug info
-  if (inherited2::trace_)
-    ACE_DEBUG ((LM_INFO,
+  if (unlikely (inherited2::configuration_->debugParser))
+    ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
@@ -339,12 +339,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   {
     session_data_r.format =
         HTTP_Tools::EncodingToCompressionFormat ((*iterator).second);
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: set compression format: \"%s\"\n"),
                 inherited::mod_->name (),
                 ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
-#endif // _DEBUG
   } // end IF
 
   DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
@@ -534,11 +532,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in) // stream handle
- , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
-               COMMON_PARSER_DEFAULT_LEX_TRACE,                           // trace scanning ?
-               COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?
+ , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
  , headFragment_ (NULL)
- , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
+ //, crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , chunks_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
@@ -622,11 +618,11 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     {
       headFragment_->release (); headFragment_ = NULL;
     } // end IF
-    crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
+    //crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
     chunks_.clear ();
   } // end IF
 
-  crunch_ = configuration_in.crunchMessages;
+  //crunch_ = configuration_in.crunchMessages;
   ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
       inherited::msg_queue_;
@@ -834,16 +830,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
       break;
     }
-    //// *NOTE*: the stream has been link()ed, the message contains the (merged)
-    ////         upstream session data --> retain a reference
-    //case STREAM_SESSION_MESSAGE_LINK:
-    //{
-    //  // *NOTE*: relax the concurrency policy in this case
-    //  // *TODO*: this isn't very reliable
-    //  inherited::concurrent_ = true;
-
-    //  break;
-    //}
     case STREAM_SESSION_MESSAGE_END:
     {
       // *NOTE*: only process the first 'session end' message (see above: 2566)
@@ -859,11 +845,11 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       } // end IF
       chunks_.clear ();
 
-      // *TODO*: remove type inference
-      //if (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT)
-      this->stop (false, // wait ?
-                  false, // high priority ?
-                  true); // locked access ?
+      if (inherited::configuration_->concurrency != STREAM_HEADMODULECONCURRENCY_CONCURRENT)
+      { Common_ITask* itask_p = this;
+        itask_p->stop (false,  // wait ?
+                       false); // high priority ?
+      } // end IF
 
       break;
     }
@@ -959,12 +945,14 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (record_inout);
   ACE_ASSERT (record_inout == inherited2::record_);
+  ACE_ASSERT (inherited::sessionData_);
+  ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (headFragment_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
   // debug info ?
-  if (inherited2::trace_)
-    ACE_DEBUG ((LM_INFO,
+  if (unlikely (inherited2::configuration_->debugParser))
+    ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 

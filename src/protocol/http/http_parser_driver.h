@@ -50,9 +50,7 @@ class HTTP_ParserDriver_T
  : public HTTP_IParser
 {
  public:
-  HTTP_ParserDriver_T (const std::string&,                       // scanner tables file (if any)
-                       bool = COMMON_PARSER_DEFAULT_LEX_TRACE,   // debug scanning ?
-                       bool = COMMON_PARSER_DEFAULT_YACC_TRACE); // debug parsing ?
+  HTTP_ParserDriver_T (const std::string&); // scanner tables file (if any)
   virtual ~HTTP_ParserDriver_T ();
 
   // implement (part of) HTTP_IParser
@@ -87,7 +85,6 @@ class HTTP_ParserDriver_T
   ACE_Message_Block*                          fragment_;
   unsigned int                                offset_; // parsed entity bytes
   struct HTTP_Record*                         record_;
-  bool                                        trace_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T ())

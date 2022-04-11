@@ -106,7 +106,7 @@ class HTTP_Module_Parser_T
   // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
-  bool     crunch_;
+  //bool     crunch_;
 
   //                            offset        size
   typedef std::vector<std::pair<unsigned int, unsigned int> > CHUNKS_T;
@@ -167,6 +167,7 @@ class HTTP_Module_ParserH_T
                                       StatisticContainerType,
                                       TimerManagerType,
                                       UserDataType> inherited;
+  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
@@ -212,8 +213,6 @@ class HTTP_Module_ParserH_T
   DataMessageType* headFragment_;
 
  private:
-  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
@@ -231,7 +230,7 @@ class HTTP_Module_ParserH_T
   // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
-  bool     crunch_;
+  //bool     crunch_;
 
   //                            offset        size
   typedef std::vector<std::pair<unsigned int, unsigned int> > CHUNKS_T;

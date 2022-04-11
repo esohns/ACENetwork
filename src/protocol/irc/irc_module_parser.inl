@@ -45,7 +45,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
                     SessionMessageType>::IRC_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
 #endif
  : inherited (stream_in)
- , crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
+ //, crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
  , debugScanner_ (COMMON_PARSER_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
@@ -77,7 +77,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
   {
     debugScanner_ = COMMON_PARSER_DEFAULT_LEX_TRACE;
     debugParser_ = COMMON_PARSER_DEFAULT_YACC_TRACE;
-    crunchMessages_ = IRC_DEFAULT_CRUNCH_MESSAGES;
+    //crunchMessages_ = IRC_DEFAULT_CRUNCH_MESSAGES;
   } // end IF
 
   // sanity check(s)
@@ -85,7 +85,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 
   debugScanner_ = configuration_in.parserConfiguration->debugScanner;
   debugParser_ = configuration_in.parserConfiguration->debugParser;
-  crunchMessages_ = configuration_in.crunchMessages;
+  //crunchMessages_ = configuration_in.crunchMessages;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -127,7 +127,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 
   // "crunch" messages for easier parsing ?
   DataMessageType* message_p = message_inout;
-  if (crunchMessages_)
+  if (true)
   {
 //     message->dump_state();
 
@@ -209,8 +209,8 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
   driver_.initialize (const_cast<IRC_Record&> (message_p->getR ()),
                       debugScanner_,
                       debugParser_);
-  if (!driver_.parse (message_p,        // data block
-                      crunchMessages_)) // has data been crunched ?
+  if (!driver_.parse (message_p, // data block
+                      true))     // has data been crunched ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_ParserDriver::parse(ID: %u), returning\n"),

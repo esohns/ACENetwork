@@ -79,6 +79,7 @@
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
+#include "net_defines.h"
 #include "net_iconnector.h"
 #include "net_macros.h"
 
@@ -679,10 +680,20 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Client_TCP_Connector_t tcp_connector (true);
 #if defined (SSL_SUPPORT)
   Client_SSL_Connector_t ssl_connector (true);
-  if (!Net_Common_Tools::initializeSSLContext (certificateFile_in,
-                                               privateKeyFile_in,
-                                               true,  // client mode
-                                               NULL)) // default context
+
+  std::string filename_string =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      false); // data
+  filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
+  filename_string +=
+    ACE_TEXT_ALWAYS_CHAR (NET_PROTOCOL_DEFAULT_SSL_TRUSTED_CAS_FILENAME_STRING);
+
+  if (unlikely (!Net_Common_Tools::initializeSSLContext (certificateFile_in,
+                                                         privateKeyFile_in,
+                                                         filename_string,    // trusted CAs
+                                                         true,               // client mode
+                                                         NULL)))             // default context
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::initializeSSLContext(\"%s\",\"%s\",NULL), returning\n"),
