@@ -625,12 +625,12 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (statusbar_p);
   guint context_id =
     gtk_statusbar_get_context_id (statusbar_p,
-                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_STATUSBAR_CONTEXT_DATA));
+                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_CONTEXT_DATA));
   state_r.contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_DATA,
                                              context_id));
   context_id =
     gtk_statusbar_get_context_id (statusbar_p,
-                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_STATUSBAR_CONTEXT_INFORMATION));
+                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_CONTEXT_INFORMATION));
   state_r.contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_INFORMATION,
                                              context_id));
 

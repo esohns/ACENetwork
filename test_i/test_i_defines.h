@@ -60,18 +60,28 @@
 
 //////////////////////////////////////////
 
+#if defined (GUI_SUPPORT)
 // UI
 #define TEST_I_UI_THREAD_NAME                            "stream processor"
 
+#if defined (GTK_SUPPORT)
 // UI - GTK
 #define TEST_I_UI_GTK_DEFAULT_RC_FILE                    "resources.rc"
+#if defined (GTK2_USE)
+#define TEST_I_UI_GTK_DEFAULT_GLADE_FILE                 "test_i.gtk2"
+#elif defined (GTK3_USE) || defined (GTK4_USE)
+#define TEST_I_UI_GTK_DEFAULT_GLADE_FILE                 "test_i.gtk3"
+#else
 #define TEST_I_UI_GTK_DEFAULT_GLADE_FILE                 "test_i.glade"
+#endif // GTK2_USE || GTK3_USE || GTK4_USE
 
 //#define TEST_I_UI_GTK_PANGO_LOG_FONT_DESCRIPTION          "Monospace 8"
 //#define TEST_I_UI_GTK_PANGO_LOG_COLOR_BASE                "#FFFFFF" // white
 //#define TEST_I_UI_GTK_PANGO_LOG_COLOR_TEXT                "#000000" // black
 
-#define TEST_I_UI_STATUSBAR_CONTEXT_DATA                 "data"
-#define TEST_I_UI_STATUSBAR_CONTEXT_INFORMATION          "information"
+#define TEST_I_UI_GTK_STATUSBAR_CONTEXT_DATA             "data"
+#define TEST_I_UI_GTK_STATUSBAR_CONTEXT_INFORMATION      "information"
+#endif // GTK_SUPPORT
+#endif // GUI_SUPPORT
 
 #endif
