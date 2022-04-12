@@ -39,6 +39,8 @@ endif (SSL_SUPPORT)
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser/m3u)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
 
@@ -59,6 +61,8 @@ elseif (WIN32)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser/m3u)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
 
@@ -84,11 +88,6 @@ set (EXECUTABLE url_stream_load)
 set (${EXECUTABLE}_EXE_SRCS
 #     stdafx.cpp
      stdafx.h
-     m3u_iparser.h
-     m3u_parser.cpp
-     m3u_parser.h
-     m3u_scanner.cpp
-     m3u_scanner.h
      test_i_common_modules.h
      test_i_connection_common.h
      test_i_connection_manager_common.h
@@ -104,10 +103,6 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_module_httpget.h
      test_i_m3u_module_parser.cpp
      test_i_m3u_module_parser.h
-     test_i_m3u_parser_driver.cpp
-     test_i_m3u_parser_driver.h
-     test_i_m3u_tools.cpp
-     test_i_m3u_tools.h
      test_i_session_message.cpp
      test_i_session_message.h
      test_i_signalhandler.cpp
@@ -175,6 +170,8 @@ endif ()
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonLog)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonParser)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonParser_M3U)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonSignal)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 

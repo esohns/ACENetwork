@@ -35,6 +35,10 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/math>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/parser>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/parser/bencoding>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/timer>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
@@ -46,8 +50,8 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/src/modules/stat>)
 elseif (WIN32)
- target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
-                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/openssl/include>)
+# target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                             $<BUILD_INTERFACE:$ENV{LIB_ROOT}/openssl/include>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/3rd_party/msvc>)
@@ -57,7 +61,11 @@ elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/math>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/parser>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Common/src/parser/bencoding>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ACEStream/${BUILD_PATH_SUFFIX}>)
@@ -206,6 +214,7 @@ elseif (WIN32)
 endif ()
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC CommonParser)
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC CommonParser_Bencoding)
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ACEStream)
 
 # add PCH

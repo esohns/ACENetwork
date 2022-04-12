@@ -26,8 +26,6 @@
 #include <set>
 #include <string>
 
-//#include "libxml/tree.h"
-
 #if defined (FFMPEG_SUPPORT)
 #ifdef __cplusplus
 extern "C"
@@ -39,9 +37,9 @@ extern "C"
 #endif // FFMPEG_SUPPORT
 
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 
 #include "ace/INET_Addr.h"
@@ -54,12 +52,14 @@ extern "C"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
+#include "common_parser_m3u_iparser.h"
+
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 
 #include "stream_base.h"
@@ -91,7 +91,6 @@ extern "C"
 #include "test_i_defines.h"
 #include "test_i_stream_common.h"
 
-#include "m3u_iparser.h"
 #include "test_i_connection_common.h"
 
 // forward declarations

@@ -29,6 +29,8 @@
 
 #include "common_parser_common.h"
 
+#include "common_parser_m3u_parser_driver.h"
+
 #include "common_time_common.h"
 
 #include "stream_common.h"
@@ -36,7 +38,6 @@
 
 #include "stream_misc_parser.h"
 
-#include "test_i_m3u_parser_driver.h"
 #include "test_i_message.h"
 #include "test_i_session_message.h"
 #include "test_i_url_stream_load_stream_common.h"
@@ -48,7 +49,7 @@ class Test_I_M3U_Module_Parser
                                  Stream_ControlMessage_t,
                                  Test_I_Message,
                                  Test_I_SessionMessage,
-                                 M3U_ParserDriver,
+                                 Common_Parser_M3U_ParserDriver,
                                  struct Stream_UserData>
 {
   typedef Stream_Module_Parser_T <ACE_MT_SYNCH,
@@ -57,7 +58,7 @@ class Test_I_M3U_Module_Parser
                                   Stream_ControlMessage_t,
                                   Test_I_Message,
                                   Test_I_SessionMessage,
-                                  M3U_ParserDriver,
+                                  Common_Parser_M3U_ParserDriver,
                                   struct Stream_UserData> inherited;
 
  public:
