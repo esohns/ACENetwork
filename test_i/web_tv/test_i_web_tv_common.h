@@ -21,6 +21,8 @@
 #ifndef TEST_I_WEBTV_COMMON_H
 #define TEST_I_WEBTV_COMMON_H
 
+#include "ace/Date_Time.h"
+
 #include "common_isubscribe.h"
 
 #include "stream_common.h"
@@ -46,6 +48,16 @@ class Test_I_Message;
 class Test_I_SessionMessage;
 class Test_I_SessionMessage_2;
 
+typedef std::vector<std::string> Test_I_WebTV_ChannelSegmentURLs_t;
+typedef Test_I_WebTV_ChannelSegmentURLs_t::iterator Test_I_WebTV_ChannelSegmentURLsIterator_t;
+typedef Test_I_WebTV_ChannelSegmentURLs_t::const_iterator Test_I_WebTV_ChannelSegmentURLsConstIterator_t;
+struct Test_I_WebTV_ChannelSegment
+{
+  ACE_Time_Value                    start;
+  ACE_Time_Value                    end;
+  Test_I_WebTV_ChannelSegmentURLs_t URLs;
+};
+
 struct Test_I_WebTV_ChannelResolution
 {
   Common_Image_Resolution_t resolution;
@@ -55,15 +67,19 @@ typedef std::vector<struct Test_I_WebTV_ChannelResolution> Test_I_WebTV_ChannelR
 typedef Test_I_WebTV_ChannelResolutions_t::iterator Test_I_WebTV_ChannelResolutionsIterator_t;
 typedef Test_I_WebTV_ChannelResolutions_t::const_iterator Test_I_WebTV_ChannelResolutionsConstIterator_t;
 
+// *NOTE*: the main program URL 'mainURL' contains information about the
+//         available streams
 struct Test_I_WebTV_ChannelConfiguration
 {
-  ACE_INET_Addr                     address;
-  std::string                       baseURI;
-  std::string                       name;
-  Test_I_WebTV_ChannelResolutions_t resolutions;
+  std::string                        baseURI; // sub-URI (if any) of the individual streams
+  std::string                        mainURL; // program-
+  std::string                        name;
+  Test_I_WebTV_ChannelResolutions_t  resolutions;
+  struct Test_I_WebTV_ChannelSegment segment;
 };
 typedef std::map<unsigned int, struct Test_I_WebTV_ChannelConfiguration> Test_I_WebTV_ChannelConfigurations_t;
 typedef Test_I_WebTV_ChannelConfigurations_t::iterator Test_I_WebTV_ChannelConfigurationsIterator_t;
+typedef Test_I_WebTV_ChannelConfigurations_t::const_iterator Test_I_WebTV_ChannelConfigurationsConstIterator_t;
 
 struct Test_I_WebTV_Configuration
 #if defined (GUI_SUPPORT)
@@ -151,6 +167,7 @@ struct Test_I_WebTV_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , channels (NULL)
    , currentChannel (0)
+   , currentStream (0)
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , subscribers ()
@@ -159,6 +176,7 @@ struct Test_I_WebTV_UI_CBData
   struct Test_I_WebTV_Configuration*    configuration;
   Test_I_WebTV_ChannelConfigurations_t* channels;
   unsigned int                          currentChannel;
+  unsigned int                          currentStream;
   ACE_HANDLE                            handle; // connection-
   struct Test_I_WebTV_UI_ProgressData   progressData;
   Test_I_Subscribers_t                  subscribers;

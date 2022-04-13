@@ -36,6 +36,8 @@
 #include "linux/capability.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include "ace/Configuration.h"
+#include "ace/Configuration_Import_Export.h"
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
@@ -44,7 +46,6 @@
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
-//#include "ace/Synch.h"
 #include "ace/Version.h"
 
 #if defined (HAVE_CONFIG_H)
@@ -131,10 +132,19 @@ do_print_usage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
+  std::string ini_file = configuration_path;
+  ini_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  ini_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_INI_FILE);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [PATH] : configuration file [\"")
+            << ini_file
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d        : debug parser [")
             << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_SUPPORT)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
@@ -142,6 +152,8 @@ do_print_usage (const std::string& programName_in)
             << gtk_rc_file
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
+#endif // GTK_SUPPORT
+#endif // GUI_SUPPORT
   std::string output_file = Common_File_Tools::getTempDirectory ();
 //  output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
 //  output_file +=
@@ -150,6 +162,7 @@ do_print_usage (const std::string& programName_in)
             << output_file
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+#if defined (GUI_SUPPORT)
   std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
@@ -157,6 +170,7 @@ do_print_usage (const std::string& programName_in)
             << UI_file
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
+#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l        : log to a file [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -186,17 +200,17 @@ do_print_usage (const std::string& programName_in)
 bool
 do_process_arguments (int argc_in,
                       ACE_TCHAR** argv_in, // cannot be const...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      bool& showConsole_out,
-#endif
+                      std::string& configurationFile_out,
                       bool& debugParser_out,
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
                       std::string& GtkRcFileName_out,
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
                       std::string& outputDirectory_out,
+#if defined (GUI_SUPPORT)
                       std::string& UIDefinitonFileName_out,
+#endif // GUI_SUPPORT
                       bool& logToFile_out,
                       bool& useReactor_out,
                       ACE_Time_Value& statisticReportingInterval_out,
@@ -215,9 +229,9 @@ do_process_arguments (int argc_in,
                                                         true); // configuration-
 
   // initialize results
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  showConsole_out = false;
-#endif
+  configurationFile_out = configuration_directory;
+  configurationFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configurationFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_INI_FILE);
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
@@ -230,10 +244,12 @@ do_process_arguments (int argc_in,
 //  fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
 //  fileName_out +=
 //    ACE_TEXT_ALWAYS_CHAR (Test_I_WebTV_DEFAULT_OUTPUT_FILE);
+#if defined (GUI_SUPPORT)
   UIDefinitonFileName_out = configuration_directory;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
+#endif // GUI_SUPPORT
   logToFile_out = false;
   useReactor_out = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
@@ -243,13 +259,16 @@ do_process_arguments (int argc_in,
   channel_out = 1;
   printVersionAndExit_out = false;
 
+  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("c:df:lrs:tu:v");
+#if defined (GUI_SUPPORT)
+#if defined (GTK_SUPPORT)
+  options_string += ACE_TEXT_ALWAYS_CHAR ("e:");
+#endif // GTK_SUPPORT
+  options_string += ACE_TEXT_ALWAYS_CHAR ("g:");
+#endif // GUI_SUPPORT
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:lrs:tu:v"),
-#else
-                               ACE_TEXT ("de:f:g:lrs:tu:v"),
-#endif
+                               ACE_TEXT (options_string.c_str ()),
                                1,                         // skip command name
                                1,                         // report parsing errors
                                ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -261,38 +280,39 @@ do_process_arguments (int argc_in,
   {
     switch (option)
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
       case 'c':
       {
-        showConsole_out = true;
+        configurationFile_out =
+            ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
-#endif
       case 'd':
       {
         debugParser_out = true;
         break;
       }
-      case 'e':
-      {
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
+      case 'e':
+      {
         GtkRcFileName_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
-#endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
         break;
       }
+#endif // GTK_SUPPORT
+#endif // GUI_SUPPORT
       case 'f':
       {
         outputDirectory_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
+#if defined (GUI_SUPPORT)
       case 'g':
       {
         UIDefinitonFileName_out =
-          ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
+            ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
+#endif // GUI_SUPPORT
       case 'l':
       {
         logToFile_out = true;
@@ -413,8 +433,144 @@ do_initialize_signals (ACE_Sig_Set& signals_out,
 #endif // ACE_WIN32 || ACE_WIN64
 }
 
+bool
+do_parse_configuration_file (const std::string& fileName_in,
+                            Test_I_WebTV_ChannelConfigurations_t& configuration_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("::do_parse_configuration_file"));
+
+     // initialize return value(s)
+  configuration_inout.clear ();
+
+  ACE_Configuration_Heap configuration_heap;
+  int result = configuration_heap.open ();
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("ACE_Configuration_Heap::open() failed: \"%m\", aborting\n")));
+    return false;
+  } // end IF
+
+  ACE_Ini_ImpExp ini_import_export (configuration_heap);
+  result = ini_import_export.import_config (fileName_in.c_str ());
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("ACE_Ini_ImpExp::import_config(\"%s\") failed, aborting\n"),
+               ACE_TEXT (fileName_in.c_str ())));
+    return false;
+  } // end IF
+
+  // find/open "channels" section...
+  ACE_Configuration_Section_Key root_section_key;
+  result =
+      configuration_heap.open_section (configuration_heap.root_section (),
+                                       ACE_TEXT (TEST_I_WEBTV_CNF_CHANNELS_SECTION_HEADER),
+                                       0, // MUST exist !
+                                       root_section_key);
+  if (unlikely (result == -1))
+  {
+    ACE_ERROR ((LM_ERROR,
+               ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(%s), returning\n"),
+               ACE_TEXT (TEST_I_WEBTV_CNF_CHANNELS_SECTION_HEADER)));
+    return false;
+  } // end IF
+
+  // import channels...
+  int index = 0;
+  ACE_TString section_name;
+  struct Test_I_WebTV_ChannelConfiguration channel_configuration_s;
+  unsigned int channel_number = 0;
+  while (configuration_heap.enumerate_sections (root_section_key,
+                                                index,
+                                                section_name) == 0)
+  {
+    // open section
+    ACE_Configuration_Section_Key section_key;
+    result =
+        configuration_heap.open_section (root_section_key,
+                                         section_name.c_str (),
+                                         0, // MUST exist !
+                                         section_key);
+    ACE_ASSERT (result == 0);
+
+    int index_2 = 0;
+    ACE_TString item_name, item_value;
+    ACE_Configuration::VALUETYPE item_type;
+    u_int item_value_2;
+    while (configuration_heap.enumerate_values (section_key,
+                                                index_2,
+                                                item_name,
+                                                item_type) == 0)
+    {
+      switch (item_type)
+      {
+        case ACE_Configuration::INTEGER:
+        {
+          result =
+              configuration_heap.get_integer_value (section_key,
+                                                    ACE_TEXT (item_name.c_str ()),
+                                                    item_value_2);
+          if (unlikely (result == -1))
+          {
+            ACE_ERROR ((LM_ERROR,
+                       ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"): \"%m\", aborting\n"),
+                       ACE_TEXT (item_name.c_str ())));
+            return false;
+          } // end IF
+          if (!ACE_OS::strcmp (item_name.c_str (),
+                              ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NUMBER_KEY)))
+            channel_number = item_value_2;
+          break;
+        }
+        case ACE_Configuration::STRING:
+        {
+          result =
+              configuration_heap.get_string_value (section_key,
+                                                   ACE_TEXT (item_name.c_str ()),
+                                                   item_value);
+          if (unlikely (result == -1))
+          {
+            ACE_ERROR ((LM_ERROR,
+                       ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"): \"%m\", aborting\n"),
+                       ACE_TEXT (item_name.c_str ())));
+            return false;
+          } // end IF
+          if (!ACE_OS::strcmp (item_name.c_str (),
+                              ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NUMBER_KEY)))
+            channel_number = ACE_OS::atoi (item_value.c_str ());
+          else if (!ACE_OS::strcmp (item_name.c_str (),
+                               ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NAME_KEY)))
+            channel_configuration_s.name = item_value.c_str ();
+          else if (!ACE_OS::strcmp (item_name.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_URL_KEY)))
+            channel_configuration_s.mainURL = item_value.c_str ();
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown item type (was: %d), continuing\n"),
+                      item_type));
+          break;
+        }
+      } // end SWITCH
+      ++index_2;
+    } // end WHILE
+    configuration_inout.insert (std::make_pair (channel_number, channel_configuration_s));
+    ++index;
+  } // end WHILE
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("imported \"%s\": %u channel(s)\n"),
+              ACE_TEXT (fileName_in.c_str ()),
+              configuration_inout.size ()));
+
+  return true;
+}
+
 void
-do_work (bool debugParser_in,
+do_work (const std::string& configurationFile_in,
+         bool debugParser_in,
          const std::string& outputDirectory_in,
          const std::string& UIDefinitionFileName_in,
          bool useReactor_in,
@@ -427,14 +583,44 @@ do_work (bool debugParser_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-         bool showConsole_in,
-#endif // ACE_WIN32 || ACE_WIN64
          Test_I_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
+  Test_I_WebTV_ChannelConfigurations_t channels;
+  if (unlikely (!do_parse_configuration_file (configurationFile_in,
+                                              channels)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("failed to do_parse_configuration_file(\"%s\"), returning\n"),
+               ACE_TEXT (configurationFile_in.c_str ())));
+    return;
+  } // end IF
+  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
+      channels.find (channel_in);
+  if (unlikely (channel_iterator == channels.end ()))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("invalid channel# (was: %u), returning\n"),
+               channel_in));
+    return;
+  } // end IF
+  ACE_INET_Addr host_address;
+  std::string hostname_string, URI_string;
+  bool use_SSL = false;
+  if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
+                             host_address,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT ((*channel_iterator).second.mainURL.c_str ())));
+    return;
+  } // end IF
+
 #if defined (SSL_SUPPORT)
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
@@ -457,6 +643,8 @@ do_work (bool debugParser_in,
 
 #if defined (GUI_SUPPORT)
   Test_I_EventHandler message_handler (&CBData_in);
+  CBData_in.channels = &channels;
+  CBData_in.currentChannel = channel_in;
 #else
   Test_I_EventHandler message_handler;
 #endif // GUI_SUPPORT
@@ -611,9 +799,9 @@ do_work (bool debugParser_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
@@ -722,10 +910,9 @@ do_work (bool debugParser_in,
       goto clean;
     } // end IF
     BOOL was_visible_b = false;
-    if (!showConsole_in)
-      was_visible_b = ShowWindow (window_p, SW_HIDE);
+    was_visible_b = ShowWindow (window_p, SW_HIDE);
     ACE_UNUSED_ARG (was_visible_b);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 #endif // GUI_SUPPORT
 
@@ -882,9 +1069,7 @@ ACE_TMAIN (int argc_in,
 
   int result = -1;
   ACE_Profile_Timer process_profile;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  bool show_console;
-#endif // ACE_WIN32 || ACE_WIN64
+  std::string configuration_file;
   bool debug_parser;
   std::string configuration_path;
   std::string output_directory;
@@ -967,14 +1152,14 @@ ACE_TMAIN (int argc_in,
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   // step1a set defaults
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  show_console = false;
-#endif // ACE_WIN32 || ACE_WIN64
-  debug_parser = false;
   configuration_path =
       Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
-                                                        true); // configuration-
+                                                       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                       true); // configuration-
+  configuration_file = configuration_path;
+  configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_INI_FILE);
+  debug_parser = false;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   gtk_rc_file = configuration_path;
@@ -1005,17 +1190,17 @@ ACE_TMAIN (int argc_in,
   // step1b: parse/process/validate configuration
   if (!do_process_arguments (argc_in,
                              argv_in,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                             show_console,
-#endif // ACE_WIN32 || ACE_WIN64
+                             configuration_file,
                              debug_parser,
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
                              gtk_rc_file,
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
                              output_directory,
+#if defined (GUI_SUPPORT)
                              ui_definition_file,
+#endif // GUI_SUPPORT
                              log_to_file,
                              use_reactor,
                              statistic_reporting_interval,
@@ -1045,16 +1230,14 @@ ACE_TMAIN (int argc_in,
   //              ACE_TEXT ("the select()-based reactor is not reentrant, using the thread-pool reactor instead...\n")));
   //  use_thread_pool = true;
   //} // end IF
-  if (
+  if (!Common_File_Tools::isReadable (configuration_file)
 #if defined (GUI_SUPPORT)
-      (!ui_definition_file.empty () &&
-       !Common_File_Tools::isReadable (ui_definition_file))
+      || (!ui_definition_file.empty () &&
+          !Common_File_Tools::isReadable (ui_definition_file))
 #if defined (GTK_SUPPORT)
       || (!gtk_rc_file.empty () &&
           !Common_File_Tools::isReadable (gtk_rc_file))
 #endif // GTK_SUPPORT
-#else
-     false
 #endif // GUI_SUPPORT
       //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
      )
@@ -1175,7 +1358,8 @@ ACE_TMAIN (int argc_in,
 
   timer.start ();
   // step2: do actual work
-  do_work (debug_parser,
+  do_work (configuration_file,
+           debug_parser,
            output_directory,
            ui_definition_file,
            use_reactor,
@@ -1188,9 +1372,6 @@ ACE_TMAIN (int argc_in,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-           show_console,
-#endif // ACE_WIN32 || ACE_WIN64
            signal_handler);
   timer.stop ();
 

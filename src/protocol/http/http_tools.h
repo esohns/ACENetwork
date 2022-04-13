@@ -54,8 +54,8 @@ class HTTP_Tools
 
   // URI/URL
   static bool parseURL (const std::string&, // URL
+                        ACE_INET_Addr&,     // return value: address
                         std::string&,       // return value: host name
-//                        ACE_INET_Addr&,     // return value: host address
                         std::string&,       // return value: URI
                         bool&);             // return value: use SSL ?
   static bool URLIsURI (const std::string&); // URL

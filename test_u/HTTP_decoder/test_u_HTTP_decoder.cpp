@@ -253,8 +253,10 @@ do_processArguments (int argc_in,
         URL_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
 
         // step1: parse URL
+        ACE_INET_Addr peer_address;
         std::string URI_string;
         if (!HTTP_Tools::parseURL (URL_out,
+                                   peer_address,
                                    hostName_out,
                                    URI_string,
                                    useSSL_out))
@@ -265,48 +267,47 @@ do_processArguments (int argc_in,
           return false;
         } // end IF
 
-        std::string hostname_string = hostName_out;
-        ACE_INET_Addr peer_address;
-        size_t position =
-          hostName_out.find_last_of (':', std::string::npos);
-        if (position == std::string::npos)
-        {
-          port_out = (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT
-                                 : HTTP_DEFAULT_SERVER_PORT);
-          hostname_string += ':';
-          std::ostringstream converter;
-          converter << port_out;
-          hostname_string += converter.str ();
-        } // end IF
-        else
-        {
-          std::istringstream converter (hostName_out.substr (position + 1,
-                                                             std::string::npos));
-          converter >> port_out;
-        } // end ELSE
-        result = peer_address.set (hostname_string.c_str (),
-                                   AF_INET);
-        if (result == -1)
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
-                      ACE_TEXT (hostname_string.c_str ())));
-          return false;
-        } // end IF
+//        std::string hostname_string = hostName_out;
+//        size_t position =
+//          hostName_out.find_last_of (':', std::string::npos);
+//        if (position == std::string::npos)
+//        {
+//          port_out = (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT
+//                                 : HTTP_DEFAULT_SERVER_PORT);
+//          hostname_string += ':';
+//          std::ostringstream converter;
+//          converter << port_out;
+//          hostname_string += converter.str ();
+//        } // end IF
+//        else
+//        {
+//          std::istringstream converter (hostName_out.substr (position + 1,
+//                                                             std::string::npos));
+//          converter >> port_out;
+//        } // end ELSE
+//        result = peer_address.set (hostname_string.c_str (),
+//                                   AF_INET);
+//        if (result == -1)
+//        {
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+//                      ACE_TEXT (hostname_string.c_str ())));
+//          return false;
+//        } // end IF
 
         // step2: validate address/verify host name exists
         //        --> resolve
-        ACE_TCHAR buffer[HOST_NAME_MAX];
-        ACE_OS::memset (buffer, 0, sizeof (buffer));
-        result = peer_address.get_host_name (buffer,
-                                             sizeof (buffer));
+        ACE_TCHAR buffer_a[HOST_NAME_MAX];
+        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
+        result = peer_address.get_host_name (buffer_a,
+                                             sizeof (ACE_TCHAR[HOST_NAME_MAX]));
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(): \"%m\", aborting\n")));
           return false;
         } // end IF
-        std::string hostname = ACE_TEXT_ALWAYS_CHAR (buffer);
+        std::string hostname = ACE_TEXT_ALWAYS_CHAR (buffer_a);
         std::string dotted_decimal_string;
         if (!Net_Common_Tools::getAddress (hostname,
                                            dotted_decimal_string))

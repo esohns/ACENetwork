@@ -207,6 +207,28 @@ idle_finalize_UI_cb (gpointer userData_in)
   return G_SOURCE_REMOVE;
 }
 
+void
+load_channels (GtkListStore* listStore_in,
+               const Test_I_WebTV_ChannelConfigurations_t& channels_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::load_channels"));
+
+  // initialize result
+  gtk_list_store_clear (listStore_in);
+
+  GtkTreeIter iterator;
+  for (Test_I_WebTV_ChannelConfigurationsConstIterator_t iterator_2 = channels_in.begin ();
+       iterator_2 != channels_in.end ();
+       ++iterator_2)
+  {
+    gtk_list_store_append (listStore_in, &iterator);
+    gtk_list_store_set (listStore_in, &iterator,
+                       0, (*iterator_2).second.name.c_str (),
+                       1, (*iterator_2).first,
+                       -1);
+  } // end FOR
+}
+
 gboolean
 idle_initialize_UI_cb (gpointer userData_in)
 {
@@ -278,6 +300,12 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   //"cell-background", 0,
                                   ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
+  GtkListStore* list_store_p =
+      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME)));
+  ACE_ASSERT (list_store_p);
+  load_channels (list_store_p,
+                 *data_p->channels);
   combo_box_p =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
@@ -486,48 +514,27 @@ idle_initialize_UI_cb (gpointer userData_in)
     gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT ((*iterator_3).second.second->window);
 
+  // select some widgets
+  combo_box_p =
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
+  ACE_ASSERT (combo_box_p);
+#if GTK_CHECK_VERSION(2,30,0)
+  struct _GValue value = G_VALUE_INIT;
+#else
+  struct _GValue value;
+  ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+  g_value_init (&value, G_TYPE_UINT);
+  g_value_set_uint (&value,
+                    data_p->currentChannel);
+  Common_UI_GTK_Tools::selectValue (combo_box_p,
+                                    value,
+                                    1);
+  g_value_unset (&value);
+
   return G_SOURCE_REMOVE;
 }
-
-//gboolean
-//idle_reset_UI_cb (gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::idle_reset_UI_cb"));
-
-//  // sanity check(s)
-//  struct Test_I_WebTV_UI_CBData* data_p =
-//    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p);
-//  Common_UI_GTK_Manager_t* gtk_manager_p =
-//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-//  ACE_ASSERT (gtk_manager_p);
-//  Common_UI_GTK_State_t& state_r =
-//    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-//  Common_UI_GTK_BuildersConstIterator_t iterator =
-//    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != state_r.builders.end ());
-
-//  GtkSpinButton* spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  gtk_spin_button_set_value (spin_button_p, 0.0);
-//  spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_SESSION_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  gtk_spin_button_set_value (spin_button_p, 0.0);
-//  spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_DATA_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  gtk_spin_button_set_value (spin_button_p, 0.0);
-//  spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BYTES_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  gtk_spin_button_set_value (spin_button_p, 0.0);
-//}
 
 gboolean
 idle_start_session_cb (gpointer userData_in)
@@ -878,13 +885,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
 
-  Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-    TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (iconnection_manager_p);
   Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
     TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
   ACE_ASSERT (iconnection_manager_2);
-  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
   bool success = false;
 
   if (gtk_toggle_button_get_active (toggleButton_in))
@@ -906,21 +910,21 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     gtk_widget_set_sensitive (GTK_WIDGET (frame_p), FALSE);
 
     // step2: update configuration
-    std::string URI_string;
+    std::string URI_string, URI_string_2;
     GtkToggleButton* toggle_button_p = NULL;
     GtkFileChooserButton* file_chooser_button_p = NULL;
     Net_ConnectionConfigurationsIterator_t iterator_2 =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
     ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-    Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
-    Test_I_TCPConnector_t connector (true);
+    Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+    Test_I_TCPConnector_2_t connector (true);
 #if defined (SSL_SUPPORT)
-    Test_I_SSLConnector_t ssl_connector (true);
+    Test_I_SSLConnector_2_t ssl_connector (true);
 #endif // SSL_SUPPORT
-    Test_I_AsynchTCPConnector_t asynch_connector (true);
-    Test_I_IStreamConnection_t* istream_connection_p = NULL;
+    Test_I_AsynchTCPConnector_2_t asynch_connector (true);
+    Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
     HTTP_Form_t HTTP_form;
     HTTP_Headers_t HTTP_headers;
     struct HTTP_Record* HTTP_record_p = NULL;
@@ -938,6 +942,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
 #endif // GTK_CHECK_VERSION (2,30,0)
     Common_Image_Resolution_t resolution_s;
     Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
+    ACE_INET_Addr host_address;
     std::string hostname_string;
     bool use_SSL = false;
     struct Net_UserData user_data_s;
@@ -982,11 +987,34 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
         URI_string = (*iterator_5).URI;
     ACE_ASSERT (!URI_string.empty ());
     (*iterator_3).second.second->URL.clear ();
+    if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
+                               host_address,
+                               hostname_string,
+                               URI_string_2,
+                               use_SSL))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                 ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
+      return;
+    } // end IF
+    (*iterator_3).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
+    (*iterator_3).second.second->URL +=
+        (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
+    (*iterator_3).second.second->URL += ACE_TEXT_ALWAYS_CHAR ("://");
+    (*iterator_3).second.second->URL += hostname_string;
+    size_t position = URI_string_2.find_last_of ('/', std::string::npos);
+    ACE_ASSERT (position != std::string::npos);
+    URI_string_2.erase (position + 1, std::string::npos);
+    (*iterator_3).second.second->URL += URI_string_2;
+
     (*iterator_3).second.second->URL =
         (*channel_iterator).second.baseURI;
     (*iterator_3).second.second->URL += URI_string;
-    static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address =
-        (*channel_iterator).second.address;
+    static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address =
+        host_address;
+    static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.hostname =
+        hostname_string;
 
     // save to file ?
     toggle_button_p =
@@ -1006,17 +1034,6 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
     ACE_ASSERT (Common_File_Tools::isDirectory ((*iterator_3).second.second->targetFileName));
 
-    if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
-                               hostname_string,
-                               URI_string,
-                               use_SSL))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                 ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-                 ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
-      return;
-    } // end IF
-
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
     {
@@ -1024,18 +1041,18 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       if (use_SSL)
         data_p->handle =
             Net_Client_Common_Tools::connect (ssl_connector,
-                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second),
                                               user_data_s,
-                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                              static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
                                               false, // wait ?
                                               true); // peer address ?
       else
 #endif // SSL_SUPPORT
         data_p->handle =
             Net_Client_Common_Tools::connect (connector,
-                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second),
                                               user_data_s,
-                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                              static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
                                               false, // wait ?
                                               true); // peer address ?
     } // end IF
@@ -1047,9 +1064,9 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
 #endif // SSL_SUPPORT
       data_p->handle =
           Net_Client_Common_Tools::connect (asynch_connector,
-                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second),
                                             user_data_s,
-                                            static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                            static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
                                             false, // wait ?
                                             true); // peer address ?
     } // end ELSE
@@ -1057,25 +1074,25 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
       goto error;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
     // step4: send HTTP request
     ACE_ASSERT (iconnection_p);
     istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_t*> (iconnection_p);
+      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
     ACE_ASSERT (istream_connection_p);
     //struct HTTP_ConnectionState& state_r =
     //    const_cast<struct HTTP_ConnectionState&> (istream_connection_p->state ());
@@ -1193,9 +1210,9 @@ continue_:
   ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+    iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
 #else
-    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+    iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
 #endif // ACE_WIN32 || ACE_WIN64
   if (iconnection_p)
   {
@@ -1241,108 +1258,69 @@ button_load_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_BuildersConstIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
-
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
-      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
-  ACE_ASSERT (iconnection_manager_2);
-  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-  bool success = false;
+  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
+  ACE_ASSERT (data_p->channels);
+  ACE_ASSERT (data_p->currentChannel);
+  channel_iterator = data_p->channels->find (data_p->currentChannel);
+  ACE_ASSERT (channel_iterator != data_p->channels->end ());
+  Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
 
-  Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
-  std::string hostname_string, hostname_string_2, URI_string, URL_string;
+  ACE_INET_Addr host_address;
+  std::string hostname_string, URI_string, URL_string;
   bool use_SSL = false;
-  if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
-                            hostname_string,
-                            URI_string,
-                            use_SSL))
+  if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
+                             host_address,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-               ACE_TEXT (data_p->URL.c_str ())));
+               ACE_TEXT ((*channel_iterator).second.mainURL.c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-  if (HTTP_Tools::URLIsURI (data_p->URL))
-  {
-    URL_string = ACE_TEXT_ALWAYS_CHAR ("http");
-    URL_string +=
-        (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
-    URL_string += ACE_TEXT_ALWAYS_CHAR ("://");
-    URL_string += hostname_string;
-    size_t position = URI_string.find_last_of ('/', std::string::npos);
-    ACE_ASSERT (position != std::string::npos);
-    URI_string.erase (position + 1, std::string::npos);
-    URL_string += URI_string;
-    URL_string += data_p->URL;
-  } // end IF
-  else
-    URL_string = data_p->URL;
-  (*iterator_3).second.second->URL = URL_string;
-
-     // select connector
-  size_t position = std::string::npos;
-  int result = -1;
+  (*iterator_3).second.second->URL = (*channel_iterator).second.mainURL;
   Net_ConnectionConfigurationsIterator_t iterator_2 =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  if (!HTTP_Tools::parseURL (URL_string,
-                            hostname_string,
-                            URI_string,
-                            use_SSL))
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-               ACE_TEXT (data_p->URL.c_str ())));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  hostname_string_2 = hostname_string;
-  position =
-      hostname_string_2.find_last_of (':', std::string::npos);
-  if (position == std::string::npos)
-  {
-    hostname_string_2 += ':';
-    std::ostringstream converter;
-    converter << (use_SSL ? HTTPS_DEFAULT_SERVER_PORT
-                          : HTTP_DEFAULT_SERVER_PORT);
-    hostname_string_2 += converter.str ();
-  } // end IF
-  result =
-      static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
-                                                                                                                     AF_INET);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
-               ACE_TEXT (hostname_string_2.c_str ())));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
-      static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
+  static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address =
+      host_address;
+  static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
+      hostname_string;
 
-  Test_I_TCPConnector_2_t connector (true);
+  // select connector
+  Test_I_TCPConnector_t connector (true);
 #if defined (SSL_SUPPORT)
-  Test_I_SSLConnector_2_t ssl_connector (true);
+  Test_I_SSLConnector_t ssl_connector (true);
 #endif // SSL_SUPPORT
-  Test_I_AsynchTCPConnector_2_t asynch_connector (true);
-  Test_I_IConnector_2_t* iconnector_p = NULL;
-  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
-      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
-  ACE_ASSERT (iconnection_manager_p);
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
-
-     // step3: connect to peer
+  Test_I_AsynchTCPConnector_t asynch_connector (true);
+  struct Net_UserData user_data_s;
+//  ACE_ASSERT (!data_p->handle)
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
   {
 #if defined (SSL_SUPPORT)
     if (use_SSL)
-      iconnector_p = &ssl_connector;
+      data_p->handle =
+          Net_Client_Common_Tools::connect (ssl_connector,
+                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                            user_data_s,
+                                            static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                            false, // wait ?
+                                            true); // peer address ?
     else
 #endif // SSL_SUPPORT
-      iconnector_p = &connector;
+      data_p->handle =
+          Net_Client_Common_Tools::connect (connector,
+                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                            user_data_s,
+                                            static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                            false, // wait ?
+                                            true); // peer address ?
   } // end IF
   else
   {
@@ -1350,119 +1328,38 @@ button_load_clicked_cb (GtkWidget* widget_in,
     // *TODO*: add SSL support to the proactor framework
     ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
-    iconnector_p = &asynch_connector;
+    data_p->handle =
+        Net_Client_Common_Tools::connect (asynch_connector,
+                                          *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                          user_data_s,
+                                          static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                          false, // wait ?
+                                          true); // peer address ?
   } // end ELSE
-  if (!iconnector_p->initialize (*static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-
-     // step3b: connect
-  data_p->handle =
-      iconnector_p->connect (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address);
-  // *TODO*: support one-thread operation by scheduling a signal and manually
-  //         running the dispatch loop for a limited time...
-  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
-  {
-    data_p->handle = ACE_INVALID_HANDLE;
-
-    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                           0);
-    ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-    // *TODO*: avoid tight loop here
-    do
-    {
-      iconnection_p =
-          iconnection_manager_p->get (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                     true);
-      if (iconnection_p)
-      {
-        data_p->handle =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-            reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
-#else
-            static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
-        break;
-      } // end IF
-    } while (COMMON_TIME_NOW < deadline);
-    if (!iconnection_p)
-      ACE_DEBUG ((LM_ERROR,
-                 ACE_TEXT ("failed to connect to %s (timed out after: %#T), continuing\n"),
-                 ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ()),
-                 &timeout));
-  } // end IF
-  else
-  {
-    iconnection_p =
-        iconnection_manager_p->get (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                   true);
-    if (iconnection_p)
-    {
-      data_p->handle =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-          reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
-#else
-          static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
-    } // end IF
-  } // end ELSE
+//    iconnection_p =
+//        iconnection_manager_p->get (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+//                                    true);
   if (data_p->handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("failed to connect to %s, aborting\n"),
-               ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+               ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  //    ACE_DEBUG ((LM_DEBUG,
-  //                ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
-  //                data_p->handle,
-  //                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
-  //#else
-  //    ACE_DEBUG ((LM_DEBUG,
-  //                ACE_TEXT ("%d: opened TCP socket to %s\n"),
-  //                data_p->handle,
-  //                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
-  //#endif
-
-     // clean up
-  iconnection_p->decrease (); iconnection_p = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
+              data_p->handle,
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%d: opened TCP socket to %s\n"),
+              data_p->handle,
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
 
   return FALSE;
 } // button_load_clicked_cb
-
-void
-entry_url_activate_cb (GtkEntry* entry_in,
-                       gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::entry_url_activate_cb"));
-
-  ACE_UNUSED_ARG (entry_in);
-
-  // sanity check(s)
-  struct Test_I_WebTV_UI_CBData* data_p =
-      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
-
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
-  GtkToggleButton* toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
-  ACE_ASSERT (toggle_button_p);
-  gtk_toggle_button_toggled (toggle_button_p);
-}
 
 gint
 button_about_clicked_cb (GtkWidget* widget_in,

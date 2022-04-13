@@ -254,35 +254,39 @@ Net_Client_SSL_Connector_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  std::string hostname_string =
-    Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address,
-                                         true,  // do not append port
-                                         true); // resolve
-  if (unlikely (hostname_string.empty ()))
+  if (configuration_->socketConfiguration.hostname.empty ())
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("failed to resolve address; cannot set TLS SNI hostname, continuing\n")));
-    return 0;
+    configuration_->socketConfiguration.hostname =
+      Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address,
+                                           true,  // do not append port
+                                           true); // resolve
+    if (unlikely (configuration_->socketConfiguration.hostname.empty ()))
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("failed to resolve address; cannot set TLS SNI hostname, continuing\n")));
+      return 0;
+    } // end IF
   } // end IF
 
   // support TLS SNI
   typename HandlerType::stream_type& stream_r = handler_out->peer ();
   SSL* context_p = stream_r.ssl ();
   ACE_ASSERT (context_p);
-  int result = SSL_set_tlsext_host_name (context_p,
-                                         hostname_string.c_str ());
+  int result =
+      SSL_set_tlsext_host_name (context_p,
+                                configuration_->socketConfiguration.hostname.c_str ());
   if (unlikely (result == 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SSL_set_tlsext_host_name(\"%s\"): \"%s\", aborting\n"),
-                ACE_TEXT (hostname_string.c_str ()),
+                ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ()),
                 ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
     delete handler_out; handler_out = NULL;
     return -1;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("set TLS SNI hostname: \"%s\"\n"),
-              ACE_TEXT (hostname_string.c_str ())));
+              ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ())));
 
   return 0;
 }

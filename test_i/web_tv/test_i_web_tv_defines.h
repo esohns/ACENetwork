@@ -21,9 +21,16 @@
 #ifndef TEST_I_WEBTV_DEFINES_H
 #define TEST_I_WEBTV_DEFINES_H
 
+// ini
+#define TEST_I_WEBTV_CNF_CHANNELS_SECTION_HEADER          "channels"
+#define TEST_I_WEBTV_CNF_CHANNEL_NUMBER_KEY               "number"
+#define TEST_I_WEBTV_CNF_CHANNEL_NAME_KEY                 "name"
+#define TEST_I_WEBTV_CNF_CHANNEL_URL_KEY                  "URL"
+
+#define TEST_I_WEBTV_CNF_INI_FILE                         "web_tv.ini"
+
 // M3U
-#define TEST_I_M3U_EXTINFO_RESOLUTION_HEIGHT_STRING       "height"
-#define TEST_I_M3U_EXTINFO_RESOLUTION_WIDTH_STRING        "width"
+#define TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING          "RESOLUTION"
 
 //----------------------------------------
 
@@ -34,12 +41,13 @@
 #define TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME               "combobox_channel"
 #define TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME               "combobox_display"
 #define TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME            "combobox_resolution"
-#define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                   "dialog_about"
+#define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                   "aboutdialog"
 #define TEST_I_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
 #define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
 #define TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
 #define TEST_I_UI_GTK_FRAME_CHANNEL_NAME                  "frame_channel"
+#define TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME              "liststore_channel"
 #define TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME           "liststore_resolution"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                    "progressbar"
 #define TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME         "spinbutton_connections"

@@ -43,6 +43,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
   ACE_ASSERT (inherited::sessionData_);
 
   HTTP_HeadersIterator_t iterator;
+  ACE_INET_Addr host_address;
   std::string uri_string, host_name_string;
   bool close_connection_b = true;
   std::string host_name_string_2;
@@ -82,6 +83,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
         // *IMPORTANT NOTE*: only auto-effectuate same-server/protocol redirects
         if (!is_basename_b &&
             !HTTP_Tools::parseURL (element_r.URL,
+                                   host_address,
                                    host_name_string,
                                    uri_string,
                                    use_SSL))
@@ -93,6 +95,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
           goto error;
         } // end IF
         if (!HTTP_Tools::parseURL (inherited::configuration_->URL,
+                                   host_address,
                                    host_name_string_2,
                                    uri_string_2,
                                    use_SSL_2))
@@ -213,9 +216,10 @@ continue_:
       // step2: send request ?
       // *IMPORTANT NOTE*: only auto-effectuate same-server/protocol redirects
       if (!HTTP_Tools::parseURL ((*iterator).second,
-                                host_name_string,
-                                uri_string,
-                                use_SSL))
+                                 host_address,
+                                 host_name_string,
+                                 uri_string,
+                                 use_SSL))
       {
         ACE_DEBUG ((LM_ERROR,
                    ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
@@ -224,9 +228,10 @@ continue_:
         goto error;
       } // end IF
       if (!HTTP_Tools::parseURL (inherited::configuration_->URL,
-                                host_name_string_2,
-                                uri_string_2,
-                                use_SSL_2))
+                                 host_address,
+                                 host_name_string_2,
+                                 uri_string_2,
+                                 use_SSL_2))
       {
         ACE_DEBUG ((LM_ERROR,
                    ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),

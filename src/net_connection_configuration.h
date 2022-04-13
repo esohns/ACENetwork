@@ -160,6 +160,7 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
    : inherited ()
    , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
               static_cast<ACE_UINT32> (INADDR_ANY))
+   , hostname ()
   {
     int result = -1;
 
@@ -176,7 +177,8 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
   }
   //inline virtual ~Net_SocketConfiguration_T () {}
 
-  ACE_INET_Addr address; // listening/peer-
+  ACE_INET_Addr address;  // listening/peer-
+  std::string   hostname; // peer- (supports TLS SNI, iff name resolution fails)
 };
 
 template <>

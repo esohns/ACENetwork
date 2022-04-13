@@ -121,13 +121,15 @@ if (GUI_SUPPORT)
  endif (GTK_SUPPORT)
 endif (GUI_SUPPORT)
 set (${EXECUTABLE}_EXE_CFG
-     etc/test_i.gtk3)
+     etc/test_i.gtk2
+     etc/test_i.gtk3
+     etc/resources.rc)
 
 #string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE}_EXE_SRCS}
-                etc/test_i.gtk3)
+                ${${EXECUTABLE}_EXE_CFG})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 if (WIN32 AND NOT BUILD_TEST_I)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)

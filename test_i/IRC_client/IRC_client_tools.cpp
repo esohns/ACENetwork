@@ -21,7 +21,6 @@
 
 #include <sstream>
 
-//#include "ace/Synch.h"
 #include "IRC_client_tools.h"
 
 #include "ace/Configuration.h"

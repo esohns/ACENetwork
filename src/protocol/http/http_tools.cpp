@@ -395,24 +395,22 @@ HTTP_Tools::EncodingToCompressionFormat (const std::string& encoding_in)
 
 bool
 HTTP_Tools::parseURL (const std::string& URL_in,
+                      ACE_INET_Addr& address_out,
                       std::string& hostName_out,
-//                      ACE_INET_Addr& hostName_out,
                       std::string& URI_out,
                       bool& useSSL_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::parseURL"));
 
   // intialize return value(s)
+  address_out.reset ();
   hostName_out.clear ();
-//  hostName_out.reset ();
   URI_out.clear ();
   useSSL_out = false;
 
-//  std::string hostname;
   unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   std::istringstream converter;
-  //std::string dotted_decimal_string;
-//  int result = -1;
+  int result = -1;
 
   // step1: split protocol/hostname/port
   std::string regex_string =
@@ -435,7 +433,6 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   if (match_results[1].matched)
     useSSL_out = true;
   ACE_ASSERT (match_results[2].matched);
-//  hostname = match_results[2];
   hostName_out = match_results[2];
   if (match_results[3].matched)
   {
@@ -498,6 +495,17 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   } // end IF
 //  ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
   ACE_ASSERT (!match_results_3.empty ());
+
+  result =
+      address_out.set ((useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT),
+                       match_results[2].str ().c_str (),
+                       AF_INET);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
 
   return true;
 }

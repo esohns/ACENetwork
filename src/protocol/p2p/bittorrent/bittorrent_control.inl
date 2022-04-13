@@ -109,6 +109,7 @@ BitTorrent_Control_T<SessionAsynchType,
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
       NULL;
   std::string user_agent;
+  ACE_INET_Addr host_address;
   std::string host_name_string;
   std::string URI_string;
   bool use_SSL = false;
@@ -163,6 +164,7 @@ BitTorrent_Control_T<SessionAsynchType,
   ACE_ASSERT (iterator != configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
   if (unlikely (!HTTP_Tools::parseURL (*(*iterator).second->string,
+                                       host_address,
                                        host_name_string,
                                        URI_string,
                                        use_SSL)))
@@ -919,6 +921,7 @@ BitTorrent_Control_T<SessionAsynchType,
   ACE_ASSERT (session_in);
   ACE_ASSERT (configuration_);
 
+  ACE_INET_Addr host_address;
   std::string host_name_string, URI_string;
   bool use_SSL = false;
   SessionStateType* session_state_p =
@@ -946,6 +949,7 @@ BitTorrent_Control_T<SessionAsynchType,
 
   // step1: update tracker address / URI
   if (!HTTP_Tools::parseURL (redirectedURL_in,
+                             host_address,
                              host_name_string,
                              URI_string,
                              use_SSL))

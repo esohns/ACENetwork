@@ -150,9 +150,11 @@ idle_load_segment_cb (gpointer userData_in)
   Test_I_URLStreamLoad_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
       data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+  ACE_INET_Addr host_address;
   std::string hostname_string, hostname_string_2, URI_string, URL_string;
   bool use_SSL = false;
   if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
+                             host_address,
                              hostname_string,
                              URI_string,
                              use_SSL))
@@ -186,6 +188,7 @@ idle_load_segment_cb (gpointer userData_in)
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   if (!HTTP_Tools::parseURL (URL_string,
+                             host_address,
                              hostname_string,
                              URI_string,
                              use_SSL))
@@ -1147,6 +1150,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // step2: update configuration
     GtkSpinButton* spin_button_p = NULL;
     GtkEntry* entry_p = NULL;
+    ACE_INET_Addr host_address;
     std::string URI_string, directory_string, hostname_string;
     bool use_SSL = false;
     std::string hostname_string_2;
@@ -1197,6 +1201,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     (*iterator_3).second.second->URL =
       Common_UI_GTK_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p), -1);
     if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
+                               host_address,
                                hostname_string,
                                URI_string,
                                use_SSL))

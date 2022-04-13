@@ -1548,6 +1548,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_ASSERT (inherited::configuration_->metaInfo);
 
   Bencoding_DictionaryIterator_t iterator;
+  ACE_INET_Addr host_address;
   std::string host_name_string;
   std::string user_agent;
   Net_ConnectionId_t tracker_connection_id = 0;
@@ -1580,6 +1581,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_ASSERT (iterator != inherited::configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
   if (!HTTP_Tools::parseURL (*(*iterator).second->string,
+                             host_address,
                              host_name_string,
                              data_p->URI,
                              use_SSL))

@@ -165,6 +165,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration
   Test_I_WebTV_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
+   , display ()
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
@@ -179,6 +180,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration
   }
 
   Net_ConnectionConfigurations_t* connectionConfigurations;
+  struct Common_UI_DisplayDevice  display;
   Test_I_ISessionNotify_t*        subscriber;
   Test_I_Subscribers_t*           subscribers;
   std::string                     targetFileName; // dump module

@@ -115,6 +115,7 @@
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">0</property>
+                <property name="secondary">True</property>
               </packing>
             </child>
             <child>
@@ -570,6 +571,8 @@
                     <property name="app-paintable">True</property>
                     <property name="can-focus">False</property>
                     <property name="double-buffered">False</property>
+                    <signal name="draw" handler="drawingarea_draw_cb" swapped="no"/>
+                    <signal name="size-allocate" handler="drawingarea_size_allocate_cb" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>

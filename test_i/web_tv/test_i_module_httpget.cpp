@@ -47,11 +47,6 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
   ACE_ASSERT (inherited::sessionData_);
 
   HTTP_HeadersIterator_t iterator;
-  std::string uri_string, host_name_string;
-  bool close_connection_b = true;
-  std::string host_name_string_2;
-  std::string uri_string_2;
-  bool use_SSL = false, use_SSL_2 = false;
   struct Test_I_WebTV_SessionData& session_data_r =
       const_cast<struct Test_I_WebTV_SessionData&> (inherited::sessionData_->getR ());
 
@@ -67,96 +62,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
     {
       inherited::receivedBytes_ += message_inout->total_length ();
 
-      if (data_r.M3UPlaylist)
-      {
-        const struct M3U_Element& element_r = data_r.M3UPlaylist->front ();
-        bool is_basename_b = Common_File_Tools::isBasename (element_r.URL);
-        std::string URL_string = element_r.URL;
-
-        // sanity check(s)
-        ACE_ASSERT (!element_r.URL.empty ());
-
-        if (!Common_String_Tools::endswith (element_r.URL,
-                                            ACE_TEXT_ALWAYS_CHAR ("m3u")) &&
-            !Common_String_Tools::endswith (element_r.URL,
-                                            ACE_TEXT_ALWAYS_CHAR ("m3u8")))
-          goto continue_2;
-
-        // send request ?
-        // *IMPORTANT NOTE*: only auto-effectuate same-server/protocol redirects
-        if (!is_basename_b &&
-            !HTTP_Tools::parseURL (element_r.URL,
-                                   host_name_string,
-                                   uri_string,
-                                   use_SSL))
-        {
-          ACE_DEBUG ((LM_ERROR,
-                     ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
-                     inherited::mod_->name (),
-                     ACE_TEXT (element_r.URL.c_str ())));
-          goto error;
-        } // end IF
-        if (!HTTP_Tools::parseURL (inherited::configuration_->URL,
-                                   host_name_string_2,
-                                   uri_string_2,
-                                   use_SSL_2))
-        {
-          ACE_DEBUG ((LM_ERROR,
-                     ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
-                     inherited::mod_->name (),
-                     ACE_TEXT ((*iterator).second.c_str ())));
-          goto error;
-        } // end IF
-        if (is_basename_b)
-        {
-          host_name_string = host_name_string_2;
-          use_SSL = use_SSL_2;
-
-          URL_string = ACE_TEXT_ALWAYS_CHAR ("http");
-          URL_string +=
-            (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
-          URL_string += ACE_TEXT_ALWAYS_CHAR ("://");
-          URL_string += host_name_string;
-          size_t position = uri_string_2.find_last_of ('/', std::string::npos);
-          ACE_ASSERT (position != std::string::npos);
-          uri_string_2.erase (position + 1, std::string::npos);
-          URL_string += uri_string_2;
-          URL_string += element_r.URL;
-        } // end IF
-        if (likely ((host_name_string != host_name_string_2) ||
-                    (use_SSL != use_SSL_2)))
-        { // *TODO*
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("%s: URL (was: \"%s\") redirects to a different host, and/or requires a HTTP(S) connection, cannot proceed\n"),
-                      inherited::mod_->name (),
-                      ACE_TEXT (inherited::configuration_->URL.c_str ())));
-          passMessageDownstream_out = false;
-          goto error;
-        } // end IF
-
-        inherited::receivedBytes_ = 0;
-        close_connection_b = false;
-        passMessageDownstream_out = false;
-
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("retrieving \"%s\"...\n"),
-                    ACE_TEXT (URL_string.c_str ())));
-        if (!inherited::send (URL_string,
-                              inherited::configuration_->HTTPHeaders,
-                              inherited::configuration_->HTTPForm))
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("%s: failed to send HTTP request \"%s\", aborting\n"),
-                      inherited::mod_->name (),
-                      ACE_TEXT (URL_string.c_str ())));
-          goto error;
-        } // end IF
-
-        goto continue_;
-      } // end IF
-
       // got all data ? --> close connection ?
-continue_2:
       iterator =
           data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
       if (iterator != data_r.headers.end ())
@@ -168,8 +74,7 @@ continue_2:
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
           if (inherited::configuration_->closeAfterReception &&
               (content_length == receivedBytes_)             &&
-              session_data_r.connection                      &&
-              close_connection_b)
+              session_data_r.connection)
           {
             ACE_DEBUG ((LM_DEBUG,
                        ACE_TEXT ("%s: received all content, closing connection\n"),
@@ -184,7 +89,6 @@ continue_2:
                    ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
                    inherited::mod_->name (),
                    ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-continue_:
       break; // done
     }
     case HTTP_Codes::HTTP_STATUS_MULTIPLECHOICES:
@@ -215,11 +119,15 @@ continue_:
                  data_r.status));
 
       // step2: send request ?
+      ACE_INET_Addr host_address;
+      std::string host_name_string, host_name_string_2, uri_string, uri_string_2;
+      bool use_SSL = false, use_SSL_2 = false;
       // *IMPORTANT NOTE*: only auto-effectuate same-server/protocol redirects
       if (!HTTP_Tools::parseURL ((*iterator).second,
-                                host_name_string,
-                                uri_string,
-                                use_SSL))
+                                 host_address,
+                                 host_name_string,
+                                 uri_string,
+                                 use_SSL))
       {
         ACE_DEBUG ((LM_ERROR,
                    ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
@@ -228,9 +136,10 @@ continue_:
         goto error;
       } // end IF
       if (!HTTP_Tools::parseURL (inherited::configuration_->URL,
-                                host_name_string_2,
-                                uri_string_2,
-                                use_SSL_2))
+                                 host_address,
+                                 host_name_string_2,
+                                 uri_string_2,
+                                 use_SSL_2))
       {
         ACE_DEBUG ((LM_ERROR,
                    ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),

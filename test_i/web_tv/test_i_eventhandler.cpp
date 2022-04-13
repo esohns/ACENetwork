@@ -21,6 +21,8 @@
 
 #include "test_i_eventhandler.h"
 
+#include <regex>
+
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "gtk/gtk.h"
@@ -187,9 +189,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   // sanity check(s)
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
-#endif // GUI_SUPPORT
-
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -210,68 +209,103 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     const_cast<Test_I_MessageDataContainer&> (message_in.getR ());
   struct Test_I_WebTV_MessageData& data_r =
     const_cast<struct Test_I_WebTV_MessageData&> (data_container_r.getR ());
-  if (data_r.M3UPlaylist)
-  {
-    // sanity check(s)
-    ACE_ASSERT (data_r.M3UPlaylist);
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-    // sanity check(s)
-    ACE_ASSERT (CBData_->channels);
-    ACE_ASSERT (CBData_->currentChannel);
+  if (!data_r.M3UPlaylist) {
+    CBData_->progressData.statistic.bytes += message_in.total_length();
+    return;
+  } // end IF
 
-    // process playlist data
-    Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
-        CBData_->channels->find (CBData_->currentChannel);
-    ACE_ASSERT (channel_iterator != CBData_->channels->end ());
+  // sanity check(s)
+  ACE_ASSERT(CBData_->channels);
+  ACE_ASSERT(CBData_->currentChannel);
+  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
+      CBData_->channels->find(CBData_->currentChannel);
+  ACE_ASSERT(channel_iterator != CBData_->channels->end());
 
+  // process stream data
+  if (!CBData_->currentStream) {
     struct Test_I_WebTV_ChannelResolution resolution_s;
     std::istringstream converter;
-    for (M3U_PlaylistIterator_t iterator = data_r.M3UPlaylist->begin ();
-         iterator != data_r.M3UPlaylist->end ();
-         ++iterator)
-    {
-      for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
-           iterator_2 != (*iterator).keyValues.end ();
-           ++iterator_2)
-      {
-        if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
-                             ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_RESOLUTION_WIDTH_STRING)))
-        {
-          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-          converter.clear ();
-          converter.str ((*iterator_2).second);
+    for (M3U_PlaylistIterator_t iterator = data_r.M3UPlaylist->begin();
+         iterator != data_r.M3UPlaylist->end(); ++iterator) {
+      for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin();
+           iterator_2 != (*iterator).keyValues.end(); ++iterator_2) {
+        if (!ACE_OS::strcmp((*iterator_2).first.c_str(),
+                            ACE_TEXT_ALWAYS_CHAR(
+                                TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING))) {
+          std::string regex_string = ACE_TEXT_ALWAYS_CHAR(
+              "^([[:digit:]]+)(?:[[:space:]xX]+)([[:digit:]]+)$");
+          std::regex regex(regex_string);
+          std::smatch match_results;
+          if (unlikely(
+                  !std::regex_match((*iterator_2).second, match_results, regex,
+                                    std::regex_constants::match_default))) {
+            ACE_DEBUG((LM_ERROR,
+                       ACE_TEXT("failed to parse M3U \"%s\" key (value was: "
+                                "\"%s\"), returning\n"),
+                       ACE_TEXT(TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING),
+                       ACE_TEXT((*iterator_2).second.c_str())));
+            return;
+          } // end IF
+          ACE_ASSERT(match_results.ready() && !match_results.empty());
+          converter.str(ACE_TEXT_ALWAYS_CHAR(""));
+          converter.clear();
+          converter.str(match_results[1].str());
           converter >> resolution_s.resolution.width;
-        } // end IF
-        else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
-                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_RESOLUTION_HEIGHT_STRING)))
-        {
-          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-          converter.clear ();
-          converter.str ((*iterator_2).second);
+          converter.str(ACE_TEXT_ALWAYS_CHAR(""));
+          converter.clear();
+          converter.str(match_results[2].str());
           converter >> resolution_s.resolution.height;
+          break;
         } // end IF
       } // end FOR
       resolution_s.URI = (*iterator).URL;
-      (*channel_iterator).second.resolutions.push_back (resolution_s);
+      (*channel_iterator).second.resolutions.push_back(resolution_s);
     } // end FOR
 
-    guint event_source_id = g_idle_add (idle_load_channel_configuration_cb,
-                                        CBData_);
-    if (event_source_id == 0)
+    guint event_source_id =
+        g_idle_add (idle_load_channel_configuration_cb, CBData_);
+    if (unlikely (event_source_id == 0))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add(idle_load_channel_configuration_cb): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to g_idle_add(idle_load_channel_configuration_cb): ""\"%m\", returning\n")));
       return;
     } // end IF
     state_r.eventSourceIds.insert (event_source_id);
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+
+    return;
   } // end IF
-#if defined (GUI_SUPPORT)
-  else
-    CBData_->progressData.statistic.bytes += message_in.total_length ();
+
+  // process playlist data
+  M3U_PlaylistIterator_t iterator_2 = data_r.M3UPlaylist->end ();
+  std::advance (iterator_2, -1);
+  for (M3U_PlaylistIterator_t iterator = data_r.M3UPlaylist->begin ();
+       iterator != data_r.M3UPlaylist->end ();
+       ++iterator)
+  {
+    if (iterator == data_r.M3UPlaylist->begin ())
+    {
+
+    } // end IF
+    else if (iterator == iterator_2)
+    {
+
+    } // end ELSE IF
+    (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
+  } // end FOR
+
+  guint event_source_id =
+      g_idle_add (idle_start_session_cb, CBData_);
+  if (unlikely (event_source_id == 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): ""\"%m\", returning\n")));
+    return;
+  } // end IF
+  state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 }
 
