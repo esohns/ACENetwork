@@ -107,16 +107,6 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
 #if defined (GTK_USE)
 //  CBData_->progressData.transferred = 0;
   state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
-
-  guint event_source_id = g_idle_add (idle_start_session_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 }
@@ -212,51 +202,58 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  if (!data_r.M3UPlaylist) {
-    CBData_->progressData.statistic.bytes += message_in.total_length();
+  if (!data_r.M3UPlaylist)
+  {
+    CBData_->progressData.statistic.bytes += message_in.total_length ();
     return;
   } // end IF
 
   // sanity check(s)
-  ACE_ASSERT(CBData_->channels);
-  ACE_ASSERT(CBData_->currentChannel);
+  ACE_ASSERT (CBData_->channels);
+  ACE_ASSERT (CBData_->currentChannel);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
-      CBData_->channels->find(CBData_->currentChannel);
-  ACE_ASSERT(channel_iterator != CBData_->channels->end());
+      CBData_->channels->find (CBData_->currentChannel);
+  ACE_ASSERT (channel_iterator != CBData_->channels->end ());
 
   // process stream data
-  if (!CBData_->currentStream) {
+  if (!CBData_->currentStream)
+  {
     struct Test_I_WebTV_ChannelResolution resolution_s;
     std::istringstream converter;
-    for (M3U_PlaylistIterator_t iterator = data_r.M3UPlaylist->begin();
-         iterator != data_r.M3UPlaylist->end(); ++iterator) {
-      for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin();
-           iterator_2 != (*iterator).keyValues.end(); ++iterator_2) {
-        if (!ACE_OS::strcmp((*iterator_2).first.c_str(),
-                            ACE_TEXT_ALWAYS_CHAR(
-                                TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING))) {
-          std::string regex_string = ACE_TEXT_ALWAYS_CHAR(
-              "^([[:digit:]]+)(?:[[:space:]xX]+)([[:digit:]]+)$");
-          std::regex regex(regex_string);
+    for (M3U_ElementsIterator_t iterator = data_r.M3UPlaylist->elements.begin ();
+         iterator != data_r.M3UPlaylist->elements.end ();
+         ++iterator)
+    {
+      for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
+           iterator_2 != (*iterator).keyValues.end ();
+           ++iterator_2)
+      {
+        if (!ACE_OS::strcmp((*iterator_2).first.c_str (),
+                            ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING)))
+        {
+          std::string regex_string =
+              ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(?:[[:space:]xX]+)([[:digit:]]+)$");
+          std::regex regex (regex_string);
           std::smatch match_results;
-          if (unlikely(
-                  !std::regex_match((*iterator_2).second, match_results, regex,
-                                    std::regex_constants::match_default))) {
-            ACE_DEBUG((LM_ERROR,
-                       ACE_TEXT("failed to parse M3U \"%s\" key (value was: "
-                                "\"%s\"), returning\n"),
-                       ACE_TEXT(TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING),
-                       ACE_TEXT((*iterator_2).second.c_str())));
+          if (unlikely(!std::regex_match ((*iterator_2).second,
+                                          match_results,
+                                          regex,
+                                          std::regex_constants::match_default)))
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT("failed to parse M3U \"%s\" key (value was: ""\"%s\"), returning\n"),
+                        ACE_TEXT (TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING),
+                        ACE_TEXT ((*iterator_2).second.c_str ())));
             return;
           } // end IF
-          ACE_ASSERT(match_results.ready() && !match_results.empty());
-          converter.str(ACE_TEXT_ALWAYS_CHAR(""));
-          converter.clear();
-          converter.str(match_results[1].str());
+          ACE_ASSERT (match_results.ready () && !match_results.empty ());
+          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+          converter.clear ();
+          converter.str (match_results[1].str ());
           converter >> resolution_s.resolution.width;
-          converter.str(ACE_TEXT_ALWAYS_CHAR(""));
-          converter.clear();
-          converter.str(match_results[2].str());
+          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+          converter.clear ();
+          converter.str (match_results[2].str ());
           converter >> resolution_s.resolution.height;
           break;
         } // end IF
@@ -279,13 +276,13 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   } // end IF
 
   // process playlist data
-  M3U_PlaylistIterator_t iterator_2 = data_r.M3UPlaylist->end ();
+  M3U_ElementsIterator_t iterator_2 = data_r.M3UPlaylist->elements.end ();
   std::advance (iterator_2, -1);
-  for (M3U_PlaylistIterator_t iterator = data_r.M3UPlaylist->begin ();
-       iterator != data_r.M3UPlaylist->end ();
+  for (M3U_ElementsIterator_t iterator = data_r.M3UPlaylist->elements.begin ();
+       iterator != data_r.M3UPlaylist->elements.end ();
        ++iterator)
   {
-    if (iterator == data_r.M3UPlaylist->begin ())
+    if (iterator == data_r.M3UPlaylist->elements.begin ())
     {
 
     } // end IF

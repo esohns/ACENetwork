@@ -211,9 +211,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   if (data_r.M3UPlaylist)
   {
     // sanity check(s)
-    ACE_ASSERT (!data_r.M3UPlaylist->empty ());
+    ACE_ASSERT (!data_r.M3UPlaylist->elements.empty ());
 
-    const struct M3U_Element& element_r = data_r.M3UPlaylist->front ();
+    const struct M3U_Element& element_r = data_r.M3UPlaylist->elements.front ();
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("loading \"%s\"...\n"),
                 ACE_TEXT (element_r.URL.c_str ())));

@@ -180,7 +180,6 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 #target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
-#target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
 if (WIN32)
  target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
 endif (WIN32)
@@ -188,6 +187,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network_Protocol_HTTPGet)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Visualization)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
@@ -195,8 +195,6 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
-#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${EXECUTABLE})
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
 

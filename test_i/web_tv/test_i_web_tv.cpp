@@ -708,6 +708,7 @@ do_work (const std::string& configurationFile_in,
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_2; // marshal
   struct Test_I_WebTV_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
@@ -717,9 +718,6 @@ do_work (const std::string& configurationFile_in,
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
-  //modulehandler_configuration.connectionManager = connection_manager_p;
-//  configuration_in.parserConfiguration.debugParser = true;
-//  configuration_in.parserConfiguration.debugScanner = true;
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration.statisticReportingInterval =
@@ -729,53 +727,56 @@ do_work (const std::string& configurationFile_in,
 //  modulehandler_configuration.URL = URL_in;
   modulehandler_configuration.waitForConnect = false;
   // ******************** (sub-)stream configuration data *********************
-  //if (bufferSize_in)
-  //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
-  //    bufferSize_in;
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module = &event_handler_module;
   stream_configuration.printFinalReport = true;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
-  //configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-  //                                                             std::make_pair (module_configuration,
-  //                                                                             modulehandler_configuration)));
+  modulehandler_configuration_2 = modulehandler_configuration;
+  struct Common_FlexBisonParserConfiguration parserConfiguration_2;
+  modulehandler_configuration_2.parserConfiguration = &parserConfiguration_2;
+  configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                                                               std::make_pair (&module_configuration,
+                                                                               &modulehandler_configuration_2)));
 
-  //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
-
-  struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
-  modulehandler_configuration_2.allocatorConfiguration =
+  struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
+  ALSA_configuration.asynch = false;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_3;
+  modulehandler_configuration_3.ALSAConfiguration = &ALSA_configuration;
+  modulehandler_configuration_3.allocatorConfiguration =
     &allocator_configuration;
-  modulehandler_configuration_2.closeAfterReception = true;
+  modulehandler_configuration_3.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_2.codecId = AV_CODEC_ID_H263;
+  modulehandler_configuration_3.codecId = AV_CODEC_ID_AV1;
 #endif // FFMPEG_SUPPORT
-  modulehandler_configuration_2.concurrency =
+  modulehandler_configuration_3.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
-  modulehandler_configuration_2.connectionConfigurations =
+  modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+  modulehandler_configuration_3.deviceIdentifier.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_2.outputFormat.subtype = MEDIASUBTYPE_RGB24;
+  modulehandler_configuration_3.outputFormat.subtype = MEDIASUBTYPE_RGB24;
 #else
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_2.outputFormat.format = AV_PIX_FMT_RGB24;
+  modulehandler_configuration_3.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
-  modulehandler_configuration_2.parserConfiguration =
+  modulehandler_configuration_3.parserConfiguration =
     &configuration_in.parserConfiguration;
-  modulehandler_configuration_2.statisticReportingInterval =
+  modulehandler_configuration_3.statisticReportingInterval =
     statisticReportingInterval_in;
-  modulehandler_configuration_2.subscriber = &message_handler;
-  modulehandler_configuration_2.targetFileName = outputDirectory_in;
+  modulehandler_configuration_3.subscriber = &message_handler;
+  modulehandler_configuration_3.targetFileName = outputDirectory_in;
 //  modulehandler_configuration_2.URL = URL_in;
-  modulehandler_configuration_2.waitForConnect = false;
+  modulehandler_configuration_3.waitForConnect = false;
   struct Test_I_WebTV_StreamConfiguration_2 stream_configuration_2;
   stream_configuration_2.messageAllocator = &message_allocator_2;
   stream_configuration_2.module = &event_handler_module_2;
   stream_configuration_2.printFinalReport = true;
   configuration_in.streamConfiguration_2.initialize (module_configuration,
-                                                     modulehandler_configuration_2,
+                                                     modulehandler_configuration_3,
                                                      stream_configuration_2);
 
   // step0c: initialize connection manager

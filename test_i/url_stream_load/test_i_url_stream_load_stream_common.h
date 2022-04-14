@@ -119,7 +119,7 @@ struct Test_I_URLStreamLoad_MessageData
   };
   inline void operator+= (Test_I_URLStreamLoad_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
-  M3U_Playlist_t* M3UPlaylist;
+  struct M3U_Playlist* M3UPlaylist;
 };
 
 struct Test_I_URLStreamLoad_SessionData

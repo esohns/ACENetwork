@@ -27,6 +27,8 @@
 
 #include "stream_net_http_defines.h"
 
+#include "stream_vis_defines.h"
+
 #include "net_macros.h"
 
 #include "test_i_message.h"
@@ -228,36 +230,70 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   //                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
   //                false);
   //layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPGet_2_Module (this,
-                                           ACE_TEXT_ALWAYS_CHAR ("HTTPGet")),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_MPEGTSDecoder_Module (this,
-  //                                            ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
 //  module_p = NULL;
 //  ACE_NEW_RETURN (module_p,
-//                  Test_I_MPEG2Decoder_Module (this,
-//                                              ACE_TEXT_ALWAYS_CHAR ("MPEG2Decoder")),
-//                  false);
-//  layout_in->append (module_p, NULL, 0);
-//  module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_Display_Module (this,
-//                                         ACE_TEXT_ALWAYS_CHAR ("Display")),
+//                  Test_I_HTTPGet_2_Module (this,
+//                                           ACE_TEXT_ALWAYS_CHAR ("HTTPGet")),
 //                  false);
 //  layout_in->append (module_p, NULL, 0);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_FileSink_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR ("FileSink")),
+                  Test_I_MPEGTSDecoder_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
+
+  typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
+  unsigned int index_i = 1;
+
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Splitter_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  branch_p = module_p;
+  configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
+  configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+  Stream_IDistributorModule* idistributor_p =
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+  ACE_ASSERT (idistributor_p);
+  idistributor_p->initialize (configuration_->configuration_->branches);
+
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_ALSA_Module (this,
+                                      ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+
+  ++index_i;
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Decoder_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_LibAVResize_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_GTKCairo_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+
+  ++index_i;
+//  module_p = NULL;
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_FileSink_Module (this,
+//                                          ACE_TEXT_ALWAYS_CHAR ("FileSink")),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
 
   deleteModules_out = true;
 
@@ -281,13 +317,6 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   Stream_Module_t* module_p = NULL;
 //  Test_I_Net_Writer_t* netIO_impl_p = NULL;
   Test_I_HTTPParser* parser_impl_p = NULL;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType media_type_s;
-#else
-#if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_FFMPEG_VideoMediaType media_type_s;
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -311,19 +340,8 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
       const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
-  //session_data_p->sessionID = configuration_in.sessionID;
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Common_Image_Resolution_t resolution_s;
-  resolution_s.cx = 320;
-  resolution_s.cy = 240;
-  Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
-                                                         media_type_s);
-#else
-  media_type_s.resolution.width = 320;
-  media_type_s.resolution.height = 240;
-#endif // ACE_WIN32 || ACE_WIN64
-  session_data_p->formats.push_front (media_type_s);
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
 
   // ---------------------------------------------------------------------------
 
@@ -353,7 +371,7 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
+//  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (configuration_in.configuration_->notificationStrategy))

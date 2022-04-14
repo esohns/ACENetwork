@@ -147,7 +147,7 @@ continue_:
 }
 
 void
-Test_I_M3U_Module_Parser::record (M3U_Playlist_t*& record_inout)
+Test_I_M3U_Module_Parser::record (struct M3U_Playlist*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::record"));
 

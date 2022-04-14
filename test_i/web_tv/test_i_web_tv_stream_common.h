@@ -119,7 +119,7 @@ struct Test_I_WebTV_MessageData
   };
   inline void operator+= (Test_I_WebTV_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
-  M3U_Playlist_t* M3UPlaylist;
+  struct M3U_Playlist* M3UPlaylist;
 };
 
 struct Test_I_WebTV_SessionData
@@ -217,26 +217,27 @@ struct Test_I_WebTV_StreamState
 //////////////////////////////////////////
 
 struct Test_I_WebTV_StreamState_2;
-struct Test_I_WebTV_SessionData_2
- : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+class Test_I_WebTV_SessionData_2
+ : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                 struct _AMMediaType,
+                                        struct _AMMediaType,
 #else
 #if defined (FFMPEG_SUPPORT)
-                                 struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                        struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
-                                 struct Test_I_WebTV_StreamState_2,
-                                 struct Stream_Statistic,
-                                 struct Stream_UserData>
+                                        struct Test_I_WebTV_StreamState_2,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
 {
+ public:
   Test_I_WebTV_SessionData_2 ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                                    struct _AMMediaType,
 #else
 #if defined (FFMPEG_SUPPORT)
-                                   struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                   struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                                    struct Test_I_WebTV_StreamState_2,
@@ -249,14 +250,14 @@ struct Test_I_WebTV_SessionData_2
    , targetFileName ()
   {}
 
-  struct Test_I_WebTV_SessionData_2& operator= (const struct Test_I_WebTV_SessionData_2& rhs_in)
+  Test_I_WebTV_SessionData_2& operator= (const Test_I_WebTV_SessionData_2& rhs_in)
   {
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                                   struct _AMMediaType,
 #else
 #if defined (FFMPEG_SUPPORT)
-                                  struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                  struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                                   struct Test_I_WebTV_StreamState_2,
@@ -270,14 +271,14 @@ struct Test_I_WebTV_SessionData_2
     return *this;
   }
 
-  ACE_INET_Addr                                address;
-  Test_I_IConnection_t*                        connection;
-  enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
-  std::string                                  targetFileName; // file writer module
+  ACE_INET_Addr                             address;
+  Test_I_IConnection_t*                     connection;
+  enum Stream_Decoder_CompressionFormatType format; // HTTP parser module
+  std::string                               targetFileName; // file writer module
 };
-typedef Stream_SessionData_T<struct Test_I_WebTV_SessionData_2> Test_I_WebTV_SessionData_2_t;
+typedef Stream_SessionData_T<Test_I_WebTV_SessionData_2> Test_I_WebTV_SessionData_2_t;
 
-typedef Stream_ISessionDataNotify_T<struct Test_I_WebTV_SessionData_2,
+typedef Stream_ISessionDataNotify_T<Test_I_WebTV_SessionData_2,
                                     enum Stream_SessionMessageType,
                                     Test_I_Message,
                                     Test_I_SessionMessage_2> Test_I_ISessionNotify_2_t;
@@ -289,10 +290,12 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
 {
   Test_I_WebTV_ModuleHandlerConfiguration_2 ()
    : HTTP_ModuleHandlerConfiguration ()
+   , ALSAConfiguration (NULL)
 #if defined (FFMPEG_SUPPORT)
    , codecId (AV_CODEC_ID_NONE)
 #endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
+   , deviceIdentifier ()
    , program (1)
    , streamType (27) // H264
    , subscriber (NULL)
@@ -309,25 +312,27 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
     inbound = true;
   }
 
+  struct Stream_MediaFramework_ALSA_Configuration* ALSAConfiguration;
 #if defined (FFMPEG_SUPPORT)
-  enum AVCodecID                  codecId;
+  enum AVCodecID                                   codecId;
 #endif // FFMPEG_SUPPORT
-  Net_ConnectionConfigurations_t* connectionConfigurations;
-  unsigned int                    program;                  // MPEG TS decoder module
-  unsigned int                    streamType;               // MPEG TS decoder module
-  Test_I_ISessionNotify_2_t*      subscriber;
-  Test_I_Subscribers_2_t*         subscribers;
-  std::string                     targetFileName; // dump module
+  Net_ConnectionConfigurations_t*                  connectionConfigurations;
+  struct Stream_Device_Identifier                  deviceIdentifier;
+  unsigned int                                     program;                  // MPEG TS decoder module
+  unsigned int                                     streamType;               // MPEG TS decoder module
+  Test_I_ISessionNotify_2_t*                       subscriber;
+  Test_I_Subscribers_2_t*                          subscribers;
+  std::string                                      targetFileName; // dump module
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType             outputFormat;
+  struct _AMMediaType                              outputFormat;
 #else
 #if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat;
+  struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  GdkWindow*                      window;
+  GdkWindow*                                       window;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 };
@@ -337,7 +342,10 @@ struct Test_I_WebTV_StreamConfiguration_2
 {
   Test_I_WebTV_StreamConfiguration_2 ()
    : HTTP_StreamConfiguration ()
+   , mediaType ()
   {}
+
+  struct Stream_MediaFramework_FFMPEG_MediaType mediaType;
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
@@ -352,7 +360,7 @@ struct Test_I_WebTV_StreamState_2
    , sessionData (NULL)
   {}
 
-  struct Test_I_WebTV_SessionData_2* sessionData;
+  Test_I_WebTV_SessionData_2* sessionData;
 };
 
 #endif

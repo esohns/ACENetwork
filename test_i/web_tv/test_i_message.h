@@ -25,6 +25,8 @@
 
 #include "stream_data_message_base.h"
 
+#include "stream_lib_imediatype.h"
+
 #include "http_message.h"
 
 #include "test_i_web_tv_common.h"
@@ -68,6 +70,7 @@ class Test_I_Message
  : public Stream_DataMessageBase_2<Test_I_MessageDataContainer,
                                    enum Stream_MessageType,
                                    HTTP_Method_t>
+ , public Stream_IMediaType
 {
   typedef Stream_DataMessageBase_2<Test_I_MessageDataContainer,
                                    enum Stream_MessageType,
@@ -97,6 +100,10 @@ class Test_I_Message
   // create a "shallow" copy that references the current block(s) of data
   virtual ACE_Message_Block* duplicate (void) const;
 
+  // implement Stream_IMediaType
+  inline virtual enum Stream_MediaType_Type getMediaType () { return mediaType_; }
+  inline virtual void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+
  protected:
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
@@ -111,6 +118,8 @@ class Test_I_Message
                   bool = true);       // increment running message counter ?
   //Test_I_Message (ACE_Allocator*); // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_I_Message& operator= (const Test_I_Message&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 
 #endif

@@ -78,7 +78,7 @@ class Test_I_M3U_Module_Parser
   ACE_UNIMPLEMENTED_FUNC (Test_I_M3U_Module_Parser (const Test_I_M3U_Module_Parser&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_M3U_Module_Parser& operator= (const Test_I_M3U_Module_Parser&))
 
-  virtual void record (M3U_Playlist_t*&); // data record
+  virtual void record (struct M3U_Playlist*&); // data record
 };
 
 // declare module

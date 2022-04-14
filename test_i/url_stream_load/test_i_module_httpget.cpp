@@ -65,8 +65,9 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
       inherited::receivedBytes_ += message_inout->total_length ();
 
       if (data_r.M3UPlaylist)
-      {
-        const struct M3U_Element& element_r = data_r.M3UPlaylist->front ();
+      { ACE_ASSERT (!data_r.M3UPlaylist->elements.empty ());
+        const struct M3U_Element& element_r =
+            data_r.M3UPlaylist->elements.front ();
         bool is_basename_b = Common_File_Tools::isBasename (element_r.URL);
         std::string URL_string = element_r.URL;
 

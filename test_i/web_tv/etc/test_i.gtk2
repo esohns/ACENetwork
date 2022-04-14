@@ -52,16 +52,6 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="liststore_resolution">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name width -->
-      <column type="guint"/>
-      <!-- column-name height -->
-      <column type="guint"/>
-    </columns>
-  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -278,7 +268,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkFrame" id="frame1">
+                      <object class="GtkFrame" id="frame_channel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label_xalign">0</property>
@@ -305,6 +295,33 @@
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame_configuration">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <child>
+                          <object class="GtkAlignment" id="alignment4">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkVBox" id="vbox7">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
                                   <object class="GtkComboBox" id="combobox_resolution">
                                     <property name="visible">True</property>
@@ -317,7 +334,7 @@
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="position">0</property>
                                   </packing>
                                 </child>
                               </object>
@@ -331,7 +348,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                     <child>
@@ -501,7 +518,7 @@
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
@@ -588,5 +605,15 @@
       <widget name="togglebutton_display"/>
       <widget name="togglebutton_save"/>
     </widgets>
+  </object>
+  <object class="GtkListStore" id="liststore_resolution">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name width -->
+      <column type="guint"/>
+      <!-- column-name height -->
+      <column type="guint"/>
+    </columns>
   </object>
 </interface>
