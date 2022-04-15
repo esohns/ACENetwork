@@ -44,6 +44,7 @@
 #define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                   "aboutdialog"
 #define TEST_I_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
 #define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea"
+#define TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME         "drawingarea_fullscreen"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
 #define TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
 #define TEST_I_UI_GTK_FRAME_CHANNEL_NAME                  "frame_channel"

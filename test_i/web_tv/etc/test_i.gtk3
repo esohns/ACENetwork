@@ -646,4 +646,20 @@
       <widget name="togglebutton_display"/>
     </widgets>
   </object>
+  <object class="GtkWindow" id="window_fullscreen">
+    <property name="can-focus">False</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="decorated">False</property>
+    <property name="deletable">False</property>
+    <child>
+      <object class="GtkDrawingArea" id="drawingarea_fullscreen">
+        <property name="visible">True</property>
+        <property name="app-paintable">True</property>
+        <property name="can-focus">False</property>
+        <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+        <property name="double-buffered">False</property>
+      </object>
+    </child>
+  </object>
 </interface>

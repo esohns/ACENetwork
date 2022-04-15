@@ -250,11 +250,19 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
           converter.str (ACE_TEXT_ALWAYS_CHAR (""));
           converter.clear ();
           converter.str (match_results[1].str ());
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          converter >> resolution_s.resolution.cx;
+#else
           converter >> resolution_s.resolution.width;
+#endif // ACE_WIN32 || ACE_WIN64
           converter.str (ACE_TEXT_ALWAYS_CHAR (""));
           converter.clear ();
           converter.str (match_results[2].str ());
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          converter >> resolution_s.resolution.cy;
+#else
           converter >> resolution_s.resolution.height;
+#endif // ACE_WIN32 || ACE_WIN64
           break;
         } // end IF
       } // end FOR

@@ -81,14 +81,14 @@ class Net_Client_SSL_Connector_T
   inline virtual ~Net_Client_SSL_Connector_T () {}
 
   // implement Net_Client_IConnector_T
-  virtual enum Net_TransportLayerType transportLayer () const;
+  inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_TCP; } // there is no other-
   inline virtual bool useReactor () const { return true; }
 
   // *NOTE*: handlers retrieve the configuration object with get ()
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
 
-  virtual void abort ();
+  inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 
  protected:

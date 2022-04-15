@@ -30,6 +30,7 @@ Test_U_Message::Test_U_Message (Stream_SessionId_t sessionId_in,
                                 unsigned int requestedSize_in)
  : inherited (sessionId_in,
               requestedSize_in)
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
@@ -38,6 +39,7 @@ Test_U_Message::Test_U_Message (Stream_SessionId_t sessionId_in,
 // *NOTE*: this is implicitly invoked by duplicate() as well...
 Test_U_Message::Test_U_Message (const Test_U_Message& message_in)
  : inherited (message_in)
+ , mediaType_ (message_in.mediaType_)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
@@ -51,6 +53,7 @@ Test_U_Message::Test_U_Message (Stream_SessionId_t sessionId_in,
               dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // message block allocator
               incrementMessageCounter_in) // increment the message id ?
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 

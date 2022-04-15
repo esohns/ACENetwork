@@ -246,6 +246,8 @@ DATASTREAM_MODULE_DUPLEX (Test_I_WebTV_SessionData_2,                           
                           Test_I_Splitter_Writer_t,                                 // writer type
                           Test_I_Splitter);                                         // module name prefix
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 typedef Stream_Dev_Target_ALSA_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  struct Test_I_WebTV_ModuleHandlerConfiguration_2,
@@ -259,6 +261,7 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,                // sess
                               libacestream_default_dev_target_alsa_module_name_string,
                               Stream_INotify_t,                                 // stream notification interface type
                               Test_I_ALSA);                                  // writer type
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (FFMPEG_SUPPORT)
 typedef Stream_Decoder_LibAVDecoder_T<ACE_MT_SYNCH,

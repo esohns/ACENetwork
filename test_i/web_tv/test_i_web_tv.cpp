@@ -740,29 +740,36 @@ do_work (const std::string& configurationFile_in,
                                                                std::make_pair (&module_configuration,
                                                                                &modulehandler_configuration_2)));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
   ALSA_configuration.asynch = false;
+#endif // ACE_WIN32 || ACE_WIN64
   struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_3;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_4; // audio decoder
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   modulehandler_configuration_3.ALSAConfiguration = &ALSA_configuration;
+#endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_3.allocatorConfiguration =
     &allocator_configuration;
   modulehandler_configuration_3.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_3.codecId = AV_CODEC_ID_AV1;
+  modulehandler_configuration_3.codecId = AV_CODEC_ID_H264;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_3.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (false); // *TODO*
+#else
   modulehandler_configuration_3.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_3.outputFormat.subtype = MEDIASUBTYPE_RGB24;
-#else
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_3.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_3.parserConfiguration =
     &configuration_in.parserConfiguration;
   modulehandler_configuration_3.statisticReportingInterval =
@@ -778,6 +785,11 @@ do_work (const std::string& configurationFile_in,
   configuration_in.streamConfiguration_2.initialize (module_configuration,
                                                      modulehandler_configuration_3,
                                                      stream_configuration_2);
+  modulehandler_configuration_4 = modulehandler_configuration_3;
+  modulehandler_configuration_4.codecId = AV_CODEC_ID_AAC;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Decoder_2"),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_4)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =

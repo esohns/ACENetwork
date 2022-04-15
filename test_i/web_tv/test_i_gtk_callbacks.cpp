@@ -43,6 +43,9 @@
 #include "common_ui_gtk_manager_common.h"
 #include "common_ui_gtk_tools.h"
 
+#include "stream_vis_defines.h"
+#include "stream_vis_iresize.h"
+
 #include "net_macros.h"
 
 #include "net_client_common_tools.h"
@@ -139,14 +142,27 @@ load_resolutions (GtkListStore* listStore_in,
        iterator_2 != resolutions_in.end ();
        ++iterator_2)
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    converter << (*iterator_2).resolution.cx;
+#else
     converter << (*iterator_2).resolution.width;
+#endif // ACE_WIN32 || ACE_WIN64
     converter << ACE_TEXT_ALWAYS_CHAR (" x ");
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    converter << (*iterator_2).resolution.cy;
+#else
     converter << (*iterator_2).resolution.height;
+#endif // ACE_WIN32 || ACE_WIN64
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
                        0, converter.str ().c_str (),
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                       1, (*iterator_2).resolution.cx,
+                       2, (*iterator_2).resolution.cy,
+#else
                        1, (*iterator_2).resolution.width,
                        2, (*iterator_2).resolution.height,
+#endif // ACE_WIN32 || ACE_WIN64
                        -1);
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
@@ -776,6 +792,117 @@ allocate:
 }
 
 gboolean
+drawing_area_resize_end (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawing_area_resize_end"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  GtkToggleButton* toggle_button_p =
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  GtkDrawingArea* drawing_area_p =
+      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                                (gtk_toggle_button_get_active (toggle_button_p) ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)
+                                                                                                : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME))));
+  ACE_ASSERT (drawing_area_p);
+  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
+      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_2);
+
+  GtkAllocation allocation_s;
+  gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
+                             &allocation_s);
+  ACE_DEBUG ((LM_DEBUG,
+             ACE_TEXT ("window resized to %dx%d\n"),
+             allocation_s.width, allocation_s.height));
+
+  Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  (*iterator_3).second.second->outputFormat.video.resolution.cy =
+    allocation_s.height;
+  (*iterator_3).second.second->outputFormat.video.resolution.cx =
+    allocation_s.width;
+#else
+  (*iterator_3).second.second->outputFormat.video.resolution.height =
+      allocation_s.height;
+  (*iterator_3).second.second->outputFormat.video.resolution.width =
+      allocation_s.width;
+#endif // ACE_WIN32 || ACE_WIN64
+
+  ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (iconnection_p);
+  Test_I_IStreamConnection_2_t* istream_connection_p =
+      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
+  Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
+      const_cast<Test_I_IStreamConnection_2_t::STREAM_T&> (istream_connection_p->stream ());
+  if (!stream_r.isRunning ())
+    return FALSE;
+
+  // *NOTE*: two things need doing:
+  //         - drop inbound frames until the 'resize' session message is through
+  //         - enqueue a 'resize' session message
+
+  // step1:
+  const Stream_Module_t* module_p =
+      stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+  ACE_ASSERT (module_p);
+  Stream_Visualization_IResize* iresize_p =
+      dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  ACE_ASSERT (iresize_p);
+  try {
+    iresize_p->resizing ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), aborting\n")));
+    return FALSE;
+  }
+
+  // step2
+  stream_r.control (STREAM_CONTROL_RESIZE, false);
+
+  return FALSE;
+} // drawing_area_resize_end
+void
+drawingarea_size_allocate_cb (GtkWidget* widget_in,
+                              GdkRectangle* allocation_in,
+                              gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_size_allocate_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+  ACE_UNUSED_ARG (allocation_in);
+
+  static gint timer_id = 0;
+  if (timer_id == 0)
+  {
+    timer_id = g_timeout_add (300, drawing_area_resize_end, userData_in);
+    return;
+  } // end IF
+  g_source_remove (timer_id);
+  timer_id = g_timeout_add (300, drawing_area_resize_end, userData_in);
+} // drawingarea_size_allocate_cb
+
+gboolean
 idle_update_progress_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
@@ -1179,13 +1306,21 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                               1,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    resolution_s.cx = g_value_get_uint (&value);
+#else
     resolution_s.width = g_value_get_uint (&value);
+#endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                               &iterator_4,
                               2, &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    resolution_s.cy = g_value_get_uint (&value);
+#else
     resolution_s.height = g_value_get_uint (&value);
+#endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     ACE_ASSERT (data_p->channels);
     ACE_ASSERT (data_p->currentChannel);
@@ -1194,8 +1329,13 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     for (Test_I_WebTV_ChannelResolutionsConstIterator_t iterator_5 = (*channel_iterator).second.resolutions.begin ();
          iterator_5 != (*channel_iterator).second.resolutions.end ();
          ++iterator_5)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (((*iterator_5).resolution.cx == resolution_s.cx) &&
+          ((*iterator_5).resolution.cy == resolution_s.cy))
+#else
       if (((*iterator_5).resolution.width == resolution_s.width) &&
           ((*iterator_5).resolution.height == resolution_s.height))
+#endif // ACE_WIN32 || ACE_WIN64
         URI_string = (*iterator_5).URI;
     ACE_ASSERT (!URI_string.empty ());
     (*iterator_3).second.second->URL.clear ();
@@ -1487,7 +1627,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
               data_p->handle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: opened TCP socket to %s\n"),
@@ -1552,15 +1692,27 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
                             &iterator_2,
                             1, &value);
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  resolution_s.cx = g_value_get_uint (&value);
+#else
   resolution_s.width = g_value_get_uint (&value);
+#endif // ACE_WIN32 || ACE_WIN64
   g_value_unset (&value);
   gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                             &iterator_2,
                             2, &value);
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  resolution_s.cy = g_value_get_uint (&value);
+#else
   resolution_s.height = g_value_get_uint (&value);
+#endif // ACE_WIN32 || ACE_WIN64
   g_value_unset (&value);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  data_p->currentStream = resolution_s.cx;
+#else
   data_p->currentStream = resolution_s.width;
+#endif // ACE_WIN32 || ACE_WIN64
 } // combobox_resolution_changed_cb
 
 gint

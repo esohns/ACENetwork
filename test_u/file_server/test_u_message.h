@@ -29,6 +29,8 @@
 #include "stream_message_base.h"
 #include "stream_messageallocatorheap_base.h"
 
+#include "stream_lib_imediatype.h"
+
 #include "file_server_common.h"
 
 // forward declaration(s)
@@ -41,6 +43,7 @@ class Test_U_Message
  : public Stream_MessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                enum Stream_MessageType,
                                int>
+ , public Stream_IMediaType
 {
   typedef Stream_MessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                enum Stream_MessageType,
@@ -58,8 +61,12 @@ class Test_U_Message
                   unsigned int);      // size
   inline virtual ~Test_U_Message () {}
 
-  inline virtual int command () const { return ACE_Message_Block::MB_DATA; };
-  inline static std::string CommandTypeToString (int) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); };
+  // implement Stream_IMediaType
+  inline virtual enum Stream_MediaType_Type getMediaType () { return mediaType_; }
+  inline virtual void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+
+  inline virtual int command () const { return ACE_Message_Block::MB_DATA; }
+  inline static std::string CommandTypeToString (int) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); }
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -83,6 +90,8 @@ class Test_U_Message
                   bool = true);       // increment running message counter ?
 //   Test_U_Message (ACE_Allocator*); // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message& operator= (const Test_U_Message&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 
 #endif

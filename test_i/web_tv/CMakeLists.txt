@@ -122,8 +122,7 @@ if (GUI_SUPPORT)
 endif (GUI_SUPPORT)
 set (${EXECUTABLE}_EXE_CFG
      etc/test_i.gtk2
-     etc/test_i.gtk3
-     etc/resources.rc)
+     etc/test_i.gtk3)
 
 #string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
 add_executable (${EXECUTABLE}

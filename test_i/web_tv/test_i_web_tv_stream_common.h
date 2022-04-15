@@ -69,12 +69,9 @@ extern "C"
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
 #if defined (FFMPEG_SUPPORT)
 #include "stream_lib_ffmpeg_common.h"
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
 
 //#include "stream_module_htmlparser.h"
 
@@ -219,13 +216,9 @@ struct Test_I_WebTV_StreamState
 struct Test_I_WebTV_StreamState_2;
 class Test_I_WebTV_SessionData_2
  : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                        struct _AMMediaType,
-#else
 #if defined (FFMPEG_SUPPORT)
                                         struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
                                         struct Test_I_WebTV_StreamState_2,
                                         struct Stream_Statistic,
                                         struct Stream_UserData>
@@ -233,13 +226,9 @@ class Test_I_WebTV_SessionData_2
  public:
   Test_I_WebTV_SessionData_2 ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                   struct _AMMediaType,
-#else
 #if defined (FFMPEG_SUPPORT)
                                    struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
                                    struct Test_I_WebTV_StreamState_2,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
@@ -253,13 +242,9 @@ class Test_I_WebTV_SessionData_2
   Test_I_WebTV_SessionData_2& operator= (const Test_I_WebTV_SessionData_2& rhs_in)
   {
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                  struct _AMMediaType,
-#else
 #if defined (FFMPEG_SUPPORT)
                                   struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
                                   struct Test_I_WebTV_StreamState_2,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator= (rhs_in);
@@ -323,13 +308,9 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
   Test_I_ISessionNotify_2_t*                       subscriber;
   Test_I_Subscribers_2_t*                          subscribers;
   std::string                                      targetFileName; // dump module
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType                              outputFormat;
-#else
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GdkWindow*                                       window;

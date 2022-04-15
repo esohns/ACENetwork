@@ -244,7 +244,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
 
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
-  unsigned int index_i = 1;
+  unsigned int index_i = 0;
 
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
@@ -262,10 +262,19 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
+                  Test_I_Decoder_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR ("Decoder_2")),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  ACE_NEW_RETURN (module_p,
                   Test_I_ALSA_Module (this,
                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
+#endif // ACE_WIN32 || ACE_WIN64
 
   ++index_i;
   module_p = NULL;
@@ -312,7 +321,7 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  struct Test_I_WebTV_SessionData_2* session_data_p = NULL;
+  Test_I_WebTV_SessionData_2* session_data_p = NULL;
   inherited::CONFIGURATION_T::ITERATOR_T iterator;
   Stream_Module_t* module_p = NULL;
 //  Test_I_Net_Writer_t* netIO_impl_p = NULL;
@@ -335,7 +344,7 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
-    &const_cast<struct Test_I_WebTV_SessionData_2&> (inherited::sessionData_->getR ());
+    &const_cast<Test_I_WebTV_SessionData_2&> (inherited::sessionData_->getR ());
   iterator =
       const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
