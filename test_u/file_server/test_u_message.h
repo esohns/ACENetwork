@@ -62,7 +62,7 @@ class Test_U_Message
   inline virtual ~Test_U_Message () {}
 
   // implement Stream_IMediaType
-  inline virtual enum Stream_MediaType_Type getMediaType () { return mediaType_; }
+  inline virtual enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
   inline virtual void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
 
   inline virtual int command () const { return ACE_Message_Block::MB_DATA; }

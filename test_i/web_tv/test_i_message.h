@@ -101,7 +101,7 @@ class Test_I_Message
   virtual ACE_Message_Block* duplicate (void) const;
 
   // implement Stream_IMediaType
-  inline virtual enum Stream_MediaType_Type getMediaType () { return mediaType_; }
+  inline virtual enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
   inline virtual void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
 
  protected:
