@@ -762,7 +762,10 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_ASSERT (false); // *TODO*
+  modulehandler_configuration_3.deviceIdentifier.identifierDiscriminator =
+    Stream_Device_Identifier::GUID;
+  modulehandler_configuration_3.deviceIdentifier.identifier._guid =
+    Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false); // playback
 #else
   modulehandler_configuration_3.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
@@ -1161,7 +1164,12 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
   process_profile.start ();
 
-  Common_Tools::initialize (false); // initialize RNG ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Tools::initialize (true,   // COM ?
+                            false); // RNG ?
+#else
+  Common_Tools::initialize (false); // RNG ?
+#endif // ACE_WIN32 || ACE_WIN64
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   // step1a set defaults
@@ -1191,7 +1199,8 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
 #endif // GUI_SUPPORT
   log_to_file = false;
-  use_reactor = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+  use_reactor =
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statistic_reporting_interval =
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S, 0)
                                                    : ACE_Time_Value::zero);
@@ -1316,6 +1325,7 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1452,6 +1462,7 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
+  Common_Tools::finalize ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();
@@ -1468,6 +1479,7 @@ error:
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
+  Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();
   if (result == -1)

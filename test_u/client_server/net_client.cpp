@@ -529,7 +529,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   int result = -1;
 
   // step0a: initialize random number generator
-  Common_Tools::initialize ();
   Test_U_Common_Tools::initialize ();
 
   // step0a: initialize configuration
@@ -1201,37 +1200,12 @@ ACE_TMAIN (int argc_in,
   // start profile timer...
   process_profile.start ();
 
-  // initialize randomness
-  // *TODO*: use STL functionality here
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed (RAND_MAX = %d)...\n"),
-              RAND_MAX));
-  ACE_Time_Value now = COMMON_TIME_NOW;
-  random_seed = static_cast <unsigned int> (now.sec ());
-  // *PORTABILITY*: outside glibc, this is not very portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_OS::srand (static_cast<u_int> (random_seed));
+  Common_Tools::initialize (false, // COM ?
+                            true); // RNG ?
 #else
-  ACE_OS::memset (random_state_buffer, 0, sizeof (random_state_buffer));
-  result = ::initstate_r (random_seed,
-                          random_state_buffer, sizeof (random_state_buffer),
-                          &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initstate_r(): \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-  result = ::srandom_r (random_seed, &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize random seed: \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-#endif
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed...DONE\n")));
+  Common_Tools::initialize (true); // RNG ?
+#endif // ACE_WIN32 || ACE_WIN64
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
@@ -1313,6 +1287,7 @@ ACE_TMAIN (int argc_in,
     // make 'em learn
     do_printUsage (ACE::basename (argv_in[0]));
 
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1344,6 +1319,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("invalid arguments, aborting\n")));
     do_printUsage (ACE::basename (argv_in[0]));
 
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1360,6 +1336,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("invalid UI definition file (was: %s), aborting\n"),
                 ACE_TEXT (UI_file_path.c_str ())));
 
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1430,6 +1407,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
 
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1446,6 +1424,7 @@ ACE_TMAIN (int argc_in,
     do_printVersion (ACE::basename (argv_in[0]));
 
     Common_Log_Tools::finalizeLogging ();
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1487,6 +1466,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to initialize event dispatch, aborting\n")));
 
     Common_Log_Tools::finalizeLogging ();
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1517,6 +1497,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Log_Tools::finalizeLogging ();
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1552,6 +1533,7 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1637,6 +1619,7 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
+    Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1694,6 +1677,7 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
+  Common_Tools::finalize ();
 
   // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

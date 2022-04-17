@@ -2135,7 +2135,6 @@ ACE_TMAIN (int argc_in,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   int result = -1;
-  bool COM_initialized = false;
 #endif // ACE_WIN32 || ACE_WIN64
 
   // step0: initialize
@@ -2155,9 +2154,11 @@ ACE_TMAIN (int argc_in,
   // start profile timer...
   process_profile.start ();
 
-  Common_Tools::initialize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  COM_initialized = Common_Tools::initializeCOM ();
+  Common_Tools::initialize (true,   // COM ?
+                            false); // RNG ?
+#else
+  Common_Tools::initialize (false); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
 
   std::string configuration_path = Common_File_Tools::getWorkingDirectory ();
@@ -2233,7 +2234,6 @@ ACE_TMAIN (int argc_in,
     do_printUsage (ACE::basename (argv_in[0]));
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (COM_initialized) Common_Tools::finalizeCOM ();
     // *PORTABILITY*: on Windows, finalize ACE...
     result = ACE::fini ();
     if (result == -1)
@@ -2272,7 +2272,6 @@ ACE_TMAIN (int argc_in,
     do_printUsage (ACE::basename (argv_in[0]));
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (COM_initialized) Common_Tools::finalizeCOM ();
     // *PORTABILITY*: on Windows, finalize ACE...
     result = ACE::fini ();
     if (result == -1)
@@ -2370,7 +2369,6 @@ ACE_TMAIN (int argc_in,
 
       Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (COM_initialized) Common_Tools::finalizeCOM ();
       // *PORTABILITY*: on Windows, finalize ACE...
       result = ACE::fini ();
       if (result == -1)
@@ -2424,7 +2422,6 @@ ACE_TMAIN (int argc_in,
 
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (COM_initialized) Common_Tools::finalizeCOM ();
     // *PORTABILITY*: on Windows, finalize ACE...
     result = ACE::fini ();
     if (result == -1)
@@ -2455,7 +2452,6 @@ ACE_TMAIN (int argc_in,
     Common_Log_Tools::finalizeLogging ();
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (COM_initialized) Common_Tools::finalizeCOM ();
     // *PORTABILITY*: on Windows, finalize ACE...
     result = ACE::fini ();
     if (result == -1)
@@ -2477,7 +2473,6 @@ ACE_TMAIN (int argc_in,
     Common_Log_Tools::finalizeLogging ();
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (COM_initialized) Common_Tools::finalizeCOM ();
     // *PORTABILITY*: on Windows, finalize ACE...
     result = ACE::fini ();
     if (result == -1)
@@ -2503,7 +2498,6 @@ ACE_TMAIN (int argc_in,
     Common_Log_Tools::finalizeLogging ();
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (COM_initialized) Common_Tools::finalizeCOM ();
     // *PORTABILITY*: on Windows, finalize ACE...
     result = ACE::fini ();
     if (result == -1)
@@ -2533,7 +2527,6 @@ ACE_TMAIN (int argc_in,
       Common_Log_Tools::finalizeLogging ();
       Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (COM_initialized) Common_Tools::finalizeCOM ();
       // *PORTABILITY*: on Windows, finalize ACE...
       result = ACE::fini ();
       if (result == -1)
@@ -2607,7 +2600,6 @@ ACE_TMAIN (int argc_in,
     Common_Log_Tools::finalizeLogging ();
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (COM_initialized) Common_Tools::finalizeCOM ();
     // *PORTABILITY*: on Windows, finalize ACE...
     result = ACE::fini ();
     if (result == -1)
@@ -2666,7 +2658,6 @@ ACE_TMAIN (int argc_in,
   Common_Log_Tools::finalizeLogging ();
   Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (COM_initialized) Common_Tools::finalizeCOM ();
   // *PORTABILITY*: on Windows, finalize ACE...
   result = ACE::fini ();
   if (result == -1)

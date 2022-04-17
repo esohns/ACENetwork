@@ -1020,17 +1020,9 @@ ACE_TMAIN (int argc_in,
   ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
   std::string gtk_rc_file;
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  logstack_p = &state_r.logStack;
-  lock_p = &state_r.logStackLock;
+  Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  Common_Logger_t logger (logstack_p,
-                          lock_p);
   std::string log_file_name;
   ACE_Sig_Set signal_set (false);
   ACE_Sig_Set ignored_signal_set (false);
@@ -1076,10 +1068,28 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
   process_profile.start ();
 
-  Common_Tools::initialize (false); // initialize RNG ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Tools::initialize (false,  // COM ?
+                            false); // RNG ?
+#else
+  Common_Tools::initialize (false); // RNG ?
+#endif // ACE_WIN32 || ACE_WIN64
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   // step1a set defaults
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  logstack_p = &state_r.logStack;
+  lock_p = &state_r.logStackLock;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+  Common_Logger_t logger (logstack_p,
+                          lock_p);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   show_console = false;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1238,6 +1248,7 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1377,6 +1388,7 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
+  Common_Tools::finalize ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();
@@ -1393,6 +1405,7 @@ error:
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
+  Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();
   if (result == -1)

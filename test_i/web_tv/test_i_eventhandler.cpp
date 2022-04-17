@@ -425,7 +425,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
 void
 Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
-                            const struct Test_I_WebTV_SessionData_2& sessionData_in)
+                            const Test_I_WebTV_SessionData_2& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::start"));
 
@@ -448,7 +448,7 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (iterator == sessionDataMap2_.end ());
 
   sessionDataMap2_.insert (std::make_pair (sessionId_in,
-                                           &const_cast<struct Test_I_WebTV_SessionData_2&> (sessionData_in)));
+                                           &const_cast<Test_I_WebTV_SessionData_2&> (sessionData_in)));
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
