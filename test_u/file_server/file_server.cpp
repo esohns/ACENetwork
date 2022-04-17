@@ -26,14 +26,12 @@
 #include <string>
 #include <vector>
 
-//#include "ace/streams.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN32
 #include "ace/Log_Msg.h"
-//#include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -120,13 +118,9 @@ do_printUsage (const std::string& programName_in)
   std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
+      Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
+                                                        true);
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -139,7 +133,7 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
   std::string source_file = Common_File_Tools::getTempDirectory ();
   source_file += ACE_DIRECTORY_SEPARATOR_STR;
@@ -226,13 +220,9 @@ do_processArguments (const int& argc_in,
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
+      Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
+                                                        true);
 
   // initialize results
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -514,7 +504,12 @@ do_work (
   struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  CBData_in.UIState = &state_r;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -578,14 +573,15 @@ do_work (
 //    bufferSize_in;
   struct Stream_ModuleConfiguration module_configuration;
   struct FileServer_ModuleHandlerConfiguration modulehandler_configuration;
+  struct FileServer_ModuleHandlerConfiguration modulehandler_configuration_2; // net io
   struct FileServer_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &configuration.allocatorConfiguration;
+  modulehandler_configuration.concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
   modulehandler_configuration.fileIdentifier.identifier = fileName_in;
-  if (useUDP_in)
-    modulehandler_configuration.inbound = false;
+  modulehandler_configuration.inbound = false;
   modulehandler_configuration.printFinalReport = true;
   //modulehandler_configuration.program =
   //  FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER;
@@ -601,6 +597,7 @@ do_work (
 #if defined (GUI_SUPPORT)
     modulehandler_configuration.subscribers = &CBData_in.subscribers;
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
+    ACE_ASSERT (CBData_in.UIState);
     modulehandler_configuration.lock =
       &CBData_in.UIState->subscribersLock;
 #endif // GTK_USE || WXWIDGETS_USE
@@ -622,6 +619,13 @@ do_work (
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
                                                 stream_configuration);
+
+  modulehandler_configuration_2 = modulehandler_configuration;
+  modulehandler_configuration_2.concurrency =
+      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING),
+                                                            std::make_pair (&module_configuration,
+                                                                            &modulehandler_configuration_2)));
 
   // ********************** socket configuration data **************************
   FileServer_TCPConnectionConfiguration tcp_connection_configuration;
@@ -649,6 +653,8 @@ do_work (
 
   if (useUDP_in)
   {
+    udp_connection_configuration.allocatorConfiguration =
+        &configuration.allocatorConfiguration;
     udp_connection_configuration.messageAllocator = &message_allocator;
     udp_connection_configuration.streamConfiguration =
       &configuration.streamConfiguration;
@@ -662,6 +668,8 @@ do_work (
     //configuration.listenerConfiguration.connectionConfiguration =
     //    &tcp_connection_configuration;
 
+    tcp_connection_configuration.allocatorConfiguration =
+        &configuration.allocatorConfiguration;
     tcp_connection_configuration.messageAllocator = &message_allocator;
     tcp_connection_configuration.streamConfiguration =
       &configuration.streamConfiguration;
@@ -807,12 +815,6 @@ do_work (
   if (!UIDefinitionFile_in.empty ())
   {
 #if defined (GTK_USE)
-    gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
-
     //Common_UI_GladeDefinition ui_definition (argc_in,
 //                                         argv_in);
     Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
@@ -824,7 +826,6 @@ do_work (
       idle_finalize_ui_cb;
     CBData_in.configuration->GTKConfiguration.eventHooks.initHook =
       idle_initialize_ui_cb;
-    CBData_in.UIState = &state_r;
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     ACE_ASSERT (gtk_manager_p);
@@ -992,7 +993,7 @@ do_work (
   } // end IF
   else
 #if defined (GTK_USE)
-    gtk_manager_p->wait ();
+    gtk_manager_p->wait (false);
 #else
     ;
 #endif // GTK_USE
@@ -1101,7 +1102,9 @@ ACE_TMAIN (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::main"));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   int result = -1;
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step0: initialize
 // *PORTABILITY*: on Windows, initialize ACE...
@@ -1113,53 +1116,19 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
   // start profile timer...
   process_profile.start ();
 
-  // initialize randomness
-  // *TODO*: use STL functionality here
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed (RAND_MAX = %d)...\n"),
-              RAND_MAX));
-  ACE_Time_Value now = COMMON_TIME_NOW;
-  random_seed = static_cast<unsigned int> (now.sec ());
-  // *PORTABILITY*: outside glibc, this is not very portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_OS::srand (static_cast<u_int> (random_seed));
-#else
-  ACE_OS::memset (random_state_buffer, 0, sizeof (random_state_buffer));
-  result = ::initstate_r (random_seed,
-                          random_state_buffer, sizeof (random_state_buffer),
-                          &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initstate_r(): \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-  result = ::srandom_r (random_seed, &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize random seed: \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-#endif
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed...DONE\n")));
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
+      Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
+                                                        true); // configuration-
 
   // step1a set defaults
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1237,10 +1206,10 @@ ACE_TMAIN (int argc_in,
   if (NET_STREAM_MAX_MESSAGES)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((UI_file_path.empty () && !Common_File_Tools::isReadable (source_file))   ||
-      (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path)) ||
+  if (!Common_File_Tools::isReadable (source_file)
+      || (!UI_file_path.empty () && !Common_File_Tools::isReadable (UI_file_path))
       //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)
-      false)
+      || false)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));

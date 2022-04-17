@@ -524,6 +524,10 @@ send:
 #else
   message_block_2 = message_block_p->cont ();
   message_block_p->cont (NULL);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+send_2:
+#endif // ACE_WIN32 || ACE_WIN64
   result =
     inherited::outputStream_.write (*message_block_p,                     // data
                                     message_block_p->length (),           // #bytes to write
@@ -541,7 +545,7 @@ send:
     {
       ++retries_i;
       if (retries_i <= NET_CONNECTION_DEFAULT_SEND_RETRIES)
-        goto send;
+        goto send_2;
     } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -59,8 +59,8 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_FileReader_Module (this,
-                                            ACE_TEXT_ALWAYS_CHAR ("FileSource")),
+                  Test_U_FileReaderH_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR ("FileSource")),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
@@ -78,7 +78,7 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Net_IO_Module (this,
-                                        ACE_TEXT_ALWAYS_CHAR ("NetworkIO")),
+                                        ACE_TEXT_ALWAYS_CHAR ("NetIO")),
                   false);
   layout_inout->append (module_p, NULL, 0);
 
@@ -141,24 +141,17 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
 
   // ******************* Socket Handler ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetworkIO")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetIO")));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("NetworkIO")));
+                ACE_TEXT ("NetIO")));
     goto error;
   } // end IF
   net_io_impl_p =
-    dynamic_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
-  if (!net_io_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    goto error;
-  } // end IF
+    static_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
   net_io_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it

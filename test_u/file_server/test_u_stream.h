@@ -32,7 +32,6 @@
 
 #include "stream_base.h"
 #include "stream_common.h"
-//#include "stream_control_message.h"
 #include "stream_session_data.h"
 #include "stream_statemachine_control.h"
 
@@ -40,9 +39,7 @@
 
 #include "test_u_stream_common.h"
 
-//#include "test_u_connection_manager_common.h"
 #include "test_u_configuration.h"
-//#include "file_server_connection_common.h"
 #include "test_u_message.h"
 #include "file_server_stream_common.h"
 
