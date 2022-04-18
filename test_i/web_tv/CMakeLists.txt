@@ -47,7 +47,6 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/file)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/html)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
@@ -69,7 +68,6 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/file)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/html)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
@@ -153,6 +151,7 @@ if (UNIX)
 endif (UNIX)
 if (FFMPEG_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${ffmpeg_LIBRARIES})
+ target_link_libraries (${EXECUTABLE} PUBLIC ${ffmpeg_2_LIBRARIES})
 endif (FFMPEG_SUPPORT)
 #if (LIBXML2_SUPPORT)
 # target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
@@ -177,8 +176,9 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonSignal)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
-#target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_File)
 if (WIN32)
  target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
 endif (WIN32)
@@ -254,7 +254,7 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/url_stream_load
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/web_tv
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
@@ -271,16 +271,14 @@ elseif (WIN32)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
+ file (TO_CMAKE_PATH "${ffmpeg_2_LIB_DIR}" FFMPEG_2_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_PATH}
                            ${FFMPEG_PATH}
+                           ${FFMPEG_2_PATH}
                            ${GTK_PATH}
                            ${WXWIDGETS_PATH}
-#                           ${ICONV_PATH}
-#                           ${LIBXML2_PATH}
                            ${ACE_LIBRARY_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
@@ -296,6 +294,6 @@ elseif (WIN32)
                                               ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/html/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/protocol/http/Debug
-                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/url_stream_load
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/web_tv
                          ENVIRONMENT foo=bar)
 endif ()

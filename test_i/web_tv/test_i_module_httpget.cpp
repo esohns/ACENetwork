@@ -148,7 +148,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
         goto error;
       } // end IF
       if (likely ((host_name_string != host_name_string_2) ||
-                 (use_SSL != use_SSL_2)))
+                  (use_SSL != use_SSL_2)))
       { // *TODO*
         ACE_DEBUG ((LM_ERROR,
                    ACE_TEXT ("%s: URL (was: \"%s\") redirects to a different host, and/or requires a HTTP(S) connection, cannot proceed\n"),

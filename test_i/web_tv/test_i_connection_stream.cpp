@@ -243,6 +243,13 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, NULL, 0);
 
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Defragment_2_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
   unsigned int index_i = 0;
 
@@ -262,12 +269,17 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_Decoder_Module (this,
-                                         ACE_TEXT_ALWAYS_CHAR ("Decoder_2")),
+                  Test_I_AudioDecoder_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_WASAPIOut_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_RENDER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
 #else
   ACE_NEW_RETURN (module_p,
                   Test_I_ALSA_Module (this,
@@ -277,24 +289,32 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
   ++index_i;
+
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_Decoder_Module (this,
-                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                  Test_I_FileSink_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_LibAVResize_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_GTKCairo_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
+
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_VideoDecoder_Module (this,
+  //                                            ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, branch_p, index_i);
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_VideoResize_Module (this,
+  //                                           ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, branch_p, index_i);
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_GTKCairo_Module (this,
+  //                                        ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, branch_p, index_i);
 
   ++index_i;
 //  module_p = NULL;

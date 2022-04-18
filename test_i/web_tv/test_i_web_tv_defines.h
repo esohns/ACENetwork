@@ -36,7 +36,7 @@
 
 #if defined (GTK_SUPPORT)
 #define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
-#define TEST_I_UI_GTK_BUTTON_CUT_NAME                     "button_load"
+#define TEST_I_UI_GTK_BUTTON_LOAD_NAME                    "button_load"
 #define TEST_I_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
 #define TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME               "combobox_channel"
 #define TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME               "combobox_display"

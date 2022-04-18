@@ -242,6 +242,8 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
                           NULL);
   } // end IF
 
+  result_p->setMediaType (mediaType_);
+
   // clone any continuations
   if (inherited::cont_)
   {

@@ -97,7 +97,7 @@ idle_end_session_cb (gpointer userData_in)
 //  gtk_spinner_stop (spinner_p);
 //  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
-  ACE_ASSERT (data_p->progressData.eventSourceId);
+  //ACE_ASSERT (data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     if (!g_source_remove (data_p->progressData.eventSourceId))
       ACE_DEBUG ((LM_ERROR,
@@ -205,6 +205,12 @@ idle_load_channel_configuration_cb (gpointer userData_in)
   ACE_ASSERT (combo_box_p);
   gtk_combo_box_set_active (combo_box_p, 0);
 
+  GtkButton* button_p =
+    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BUTTON_LOAD_NAME)));
+  ACE_ASSERT (button_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (button_p),
+                            TRUE);
   GtkToggleButton* toggle_button_p =
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
@@ -393,9 +399,9 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
 
-  Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
-    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+  Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
@@ -579,6 +585,47 @@ idle_initialize_UI_cb (gpointer userData_in)
 }
 
 gboolean
+idle_segment_download_complete_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_segment_download_complete_cb"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
+      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_2);
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
+
+  ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
+  iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+
+  if (iconnection_p)
+  {
+    iconnection_p->close();
+    iconnection_p->decrease(); iconnection_p = NULL;
+  } // end IF
+  data_p->handle = ACE_INVALID_HANDLE;
+  iconnection_manager_2->abort ();
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
 idle_start_session_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_start_session_cb"));
@@ -590,7 +637,8 @@ idle_start_session_cb (gpointer userData_in)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersConstIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
@@ -628,14 +676,14 @@ idle_start_session_cb (gpointer userData_in)
   bool use_SSL = false;
   struct Net_UserData user_data_s;
   ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
-  std::string first_URL =
-      (*channel_iterator).second.segment.URLs.front ();
-  bool is_URI_b = HTTP_Tools::URLIsURI (first_URL);
+  std::string current_URL =
+      (*channel_iterator).second.segment.URLs.back ();
+  bool is_URI_b = HTTP_Tools::URLIsURI (current_URL);
 
   if (is_URI_b)
     URL_string = (*iterator_3).second.second->URL;
   else
-    URL_string = first_URL;
+    URL_string = current_URL;
   if (!HTTP_Tools::parseURL (URL_string,
                              host_address,
                              hostname_string,
@@ -658,7 +706,7 @@ idle_start_session_cb (gpointer userData_in)
     ACE_ASSERT (position != std::string::npos);
     URI_string.erase (position + 1, std::string::npos);
     URI_string_2 = URI_string;
-    URI_string_2 += first_URL;
+    URI_string_2 += current_URL;
     URI_string = URI_string_2;
   } // end IF
 
@@ -717,6 +765,28 @@ idle_start_session_cb (gpointer userData_in)
               ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
+  //ACE_ASSERT (!data_p->progressData.eventSourceId);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+    data_p->progressData.eventSourceId =
+    //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+    //                 idle_update_progress_cb,
+    //                 &data_p->progressData,
+    //                 NULL);
+    g_timeout_add (//G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
+                    COMMON_UI_REFRESH_DEFAULT_PROGRESS_MS, // ms (?)
+                    idle_update_progress_cb,
+                    &data_p->progressData);//,
+//                       NULL);
+    if (data_p->progressData.eventSourceId > 0)
+      state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", aborting\n")));
+      return G_SOURCE_REMOVE;
+    } // end IF
+  } // end lock scope
+
   // send HTTP request
   ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
   iconnection_p =
@@ -741,6 +811,8 @@ idle_start_session_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   HTTP_record_p->form = HTTP_form;
+  HTTP_headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
+                                       hostname_string));
   HTTP_record_p->headers = HTTP_headers;
   HTTP_record_p->method =
       (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
@@ -784,6 +856,9 @@ allocate:
   message_block_p = message_p;
   istream_connection_p->send (message_block_p);
   message_p = NULL;
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("requesting: \"%s\"\n"),
+              ACE_TEXT (URI_string.c_str ())));
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;
@@ -842,7 +917,8 @@ drawing_area_resize_end (gpointer userData_in)
       allocation_s.width;
 #endif // ACE_WIN32 || ACE_WIN64
 
-  ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
+  if (data_p->handle == ACE_INVALID_HANDLE)
+    return FALSE;
   Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
@@ -882,6 +958,7 @@ drawing_area_resize_end (gpointer userData_in)
 
   return FALSE;
 } // drawing_area_resize_end
+
 void
 drawingarea_size_allocate_cb (GtkWidget* widget_in,
                               GdkRectangle* allocation_in,
@@ -1262,6 +1339,11 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+    Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_4 =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
+    ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration.end ());
+    (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
+    (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
     Test_I_TCPConnector_t connector (true);
 #if defined (SSL_SUPPORT)
     Test_I_SSLConnector_t ssl_connector (true);
@@ -1271,14 +1353,13 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     HTTP_Headers_t HTTP_headers;
 //    GtkSpinner* spinner_p = NULL;
     GtkProgressBar* progressbar_p = NULL;
-    GtkTreeIter iterator_4;
+    GtkTreeIter iterator_5;
 #if GTK_CHECK_VERSION (2,30,0)
     struct _GValue value = G_VALUE_INIT;
 #else
     struct _GValue value;
     ACE_OS::memset (&value, 0, sizeof (struct _GValue));
 #endif // GTK_CHECK_VERSION (2,30,0)
-    Common_Image_Resolution_t resolution_s;
     Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
     ACE_INET_Addr host_address;
     std::string hostname_string;
@@ -1291,7 +1372,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
     ACE_ASSERT (combo_box_p);
     if (!gtk_combo_box_get_active_iter (combo_box_p,
-                                        &iterator_4))
+                                        &iterator_5))
     {
       ACE_DEBUG ((LM_ERROR,
                  ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
@@ -1302,24 +1383,28 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
     ACE_ASSERT (list_store_p);
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
-                              &iterator_4,
+                              &iterator_5,
                               1,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    resolution_s.cx = g_value_get_uint (&value);
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cx =
+        g_value_get_uint (&value);
 #else
-    resolution_s.width = g_value_get_uint (&value);
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.width =
+        g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
-                              &iterator_4,
+                              &iterator_5,
                               2, &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    resolution_s.cy = g_value_get_uint (&value);
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cy =
+        g_value_get_uint (&value);
 #else
-    resolution_s.height = g_value_get_uint (&value);
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.height =
+        g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     ACE_ASSERT (data_p->channels);
@@ -1330,11 +1415,11 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
          iterator_5 != (*channel_iterator).second.resolutions.end ();
          ++iterator_5)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (((*iterator_5).resolution.cx == resolution_s.cx) &&
-          ((*iterator_5).resolution.cy == resolution_s.cy))
+      if (((*iterator_5).resolution.cx == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cx) &&
+          ((*iterator_5).resolution.cy == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cy))
 #else
-      if (((*iterator_5).resolution.width == resolution_s.width) &&
-          ((*iterator_5).resolution.height == resolution_s.height))
+      if (((*iterator_5).resolution.width == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.width) &&
+          ((*iterator_5).resolution.height == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.height))
 #endif // ACE_WIN32 || ACE_WIN64
         URI_string = (*iterator_5).URI;
     ACE_ASSERT (!URI_string.empty ());
@@ -1546,6 +1631,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
   Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+
+  gtk_widget_set_sensitive (widget_in, FALSE);
 
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URL_string;

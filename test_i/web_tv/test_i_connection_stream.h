@@ -45,6 +45,7 @@ class Test_I_SessionMessage;
 class Test_I_SessionMessage_2;
 
 extern const char stream_name_string_[];
+extern const char stream_name_string_2[];
 
 class Test_I_ConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -102,9 +103,6 @@ class Test_I_ConnectionStream
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream (const Test_I_ConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream& operator= (const Test_I_ConnectionStream&))
-
-  // *TODO*: re-consider this API
-  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 //////////////////////////////////////////
@@ -112,7 +110,7 @@ class Test_I_ConnectionStream
 class Test_I_ConnectionStream_2
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_,
+                                        stream_name_string_2,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -132,7 +130,7 @@ class Test_I_ConnectionStream_2
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_,
+                                        stream_name_string_2,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -165,9 +163,6 @@ class Test_I_ConnectionStream_2
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_2 (const Test_I_ConnectionStream_2&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_2& operator= (const Test_I_ConnectionStream_2&))
-
-  // *TODO*: re-consider this API
-  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 #endif

@@ -33,6 +33,7 @@ gboolean idle_end_session_cb (gpointer);
 gboolean idle_load_channel_configuration_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
+gboolean idle_segment_download_complete_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);

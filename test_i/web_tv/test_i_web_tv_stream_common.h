@@ -162,7 +162,6 @@ struct Test_I_WebTV_ModuleHandlerConfiguration
   Test_I_WebTV_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
-   , display ()
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
@@ -177,7 +176,6 @@ struct Test_I_WebTV_ModuleHandlerConfiguration
   }
 
   Net_ConnectionConfigurations_t* connectionConfigurations;
-  struct Common_UI_DisplayDevice  display;
   Test_I_ISessionNotify_t*        subscriber;
   Test_I_Subscribers_t*           subscribers;
   std::string                     targetFileName; // dump module
@@ -281,12 +279,15 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
 #endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
    , deviceIdentifier ()
+   , display ()
    , program (1)
    , streamType (27) // H264
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
+#if defined (FFMPEG_SUPPORT)
    , outputFormat ()
+#endif // FFMPEG_SUPPORT
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , window (NULL)
@@ -303,6 +304,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
 #endif // FFMPEG_SUPPORT
   Net_ConnectionConfigurations_t*                  connectionConfigurations;
   struct Stream_Device_Identifier                  deviceIdentifier;
+  struct Common_UI_DisplayDevice                   display;
   unsigned int                                     program;                  // MPEG TS decoder module
   unsigned int                                     streamType;               // MPEG TS decoder module
   Test_I_ISessionNotify_2_t*                       subscriber;

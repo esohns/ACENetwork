@@ -95,26 +95,34 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   if (unlikely (iterator == data_r.headers.end ()))
   {
     ACE_DEBUG ((LM_WARNING,
-               ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
-               inherited::mod_->name (),
-               ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-    goto continue_;
+                ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
+                inherited::mod_->name (),
+                ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+    // assume the message contains all of the content
   } // end IF
-  converter.str ((*iterator).second);
-  converter >> content_length;
-  missing_bytes =
-      content_length - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
-                     - message_inout->total_length ();
+  else
+  {
+    converter.str ((*iterator).second);
+    converter >> content_length;
+    missing_bytes =
+        content_length - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
+                       - message_inout->total_length ();
+  } // end ELSE
   if (!missing_bytes)
   {
     ACE_Message_Block* message_block_p = message_inout;
     while (message_block_p->cont ())
       message_block_p = message_block_p->cont ();
     if (*(message_block_p->rd_ptr () + (message_block_p->length () - 1)) != '\n')
-      message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
+    {
+      int result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
+      ACE_ASSERT (result != -1);
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: appended line break to data\n"),
+                  inherited::mod_->name ()));
+    } // end IF
   } // end IF
 
-continue_:
   // initialize return value(s)
   // *NOTE*: the default behavior is to pass all messages along
   //         --> in this case, the individual frames are extracted and passed

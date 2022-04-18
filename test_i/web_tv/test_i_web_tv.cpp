@@ -74,6 +74,9 @@
 
 #include "stream_allocatorheap.h"
 
+#include "stream_dec_defines.h"
+#include "stream_dec_tools.h"
+
 #include "stream_misc_defines.h"
 
 #include "stream_file_sink.h"
@@ -110,7 +113,8 @@
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
 
-const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream");
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream");
+const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR("WebTVStream_2");
 
 void
 do_print_usage (const std::string& programName_in)
@@ -587,6 +591,10 @@ do_work (const std::string& configurationFile_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Stream_MediaFramework_DirectSound_Tools::initialize ();
+#endif // ACE_WIN32 || ACE_WIN64
+
   // step0a: initialize configuration and stream
   Test_I_WebTV_ChannelConfigurations_t channels;
   if (unlikely (!do_parse_configuration_file (configurationFile_in,
@@ -715,7 +723,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration.clone = true;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
-      STREAM_HEADMODULECONCURRENCY_ACTIVE;
+      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   modulehandler_configuration.parserConfiguration =
@@ -746,40 +754,60 @@ do_work (const std::string& configurationFile_in,
   ALSA_configuration.asynch = false;
 #endif // ACE_WIN32 || ACE_WIN64
   struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_3;
-  struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_4; // audio decoder
+  //struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_4; // parser
+  struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_5; // audio decoder
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   modulehandler_configuration_3.ALSAConfiguration = &ALSA_configuration;
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_3.allocatorConfiguration =
     &allocator_configuration;
+  modulehandler_configuration_3.clone = true;
   modulehandler_configuration_3.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_3.codecId = AV_CODEC_ID_H264;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_3.concurrency =
-      STREAM_HEADMODULECONCURRENCY_ACTIVE;
+      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+  modulehandler_configuration_3.debug = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_3.deviceIdentifier.identifierDiscriminator =
     Stream_Device_Identifier::GUID;
   modulehandler_configuration_3.deviceIdentifier.identifier._guid =
     Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false); // playback
+  struct tWAVEFORMATEX* waveformatex_p =
+    Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_3.deviceIdentifier.identifier._guid);
 #else
   modulehandler_configuration_3.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  modulehandler_configuration_3.outputFormat.audio.format =
+      Stream_Module_Decoder_Tools::to (*waveformatex_p);
+  modulehandler_configuration_3.outputFormat.audio.channels =
+      waveformatex_p->nChannels;
+  modulehandler_configuration_3.outputFormat.audio.sampleRate =
+      waveformatex_p->nSamplesPerSec;
+  CoTaskMemFree (waveformatex_p); waveformatex_p = NULL;
+#else
+  modulehandler_configuration_3.outputFormat.audio.format = AV_SAMPLE_FMT_S16;
+  modulehandler_configuration_3.outputFormat.audio.channels = 2;
+  modulehandler_configuration_3.outputFormat.audio.sampleRate = 48000;
+#endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_3.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT
+  struct Common_FlexBisonParserConfiguration parserConfiguration_3;
   modulehandler_configuration_3.parserConfiguration =
-    &configuration_in.parserConfiguration;
+    &parserConfiguration_3;
   modulehandler_configuration_3.statisticReportingInterval =
     statisticReportingInterval_in;
   modulehandler_configuration_3.subscriber = &message_handler;
-  modulehandler_configuration_3.targetFileName = outputDirectory_in;
-//  modulehandler_configuration_2.URL = URL_in;
+  modulehandler_configuration_3.targetFileName =
+    ACE_TEXT_ALWAYS_CHAR ("webtv.264");
+  //modulehandler_configuration_3.targetFileName = outputDirectory_in;
   modulehandler_configuration_3.waitForConnect = false;
   struct Test_I_WebTV_StreamConfiguration_2 stream_configuration_2;
   stream_configuration_2.messageAllocator = &message_allocator_2;
@@ -788,11 +816,18 @@ do_work (const std::string& configurationFile_in,
   configuration_in.streamConfiguration_2.initialize (module_configuration,
                                                      modulehandler_configuration_3,
                                                      stream_configuration_2);
-  modulehandler_configuration_4 = modulehandler_configuration_3;
-  modulehandler_configuration_4.codecId = AV_CODEC_ID_AAC;
-  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Decoder_2"),
+
+  //modulehandler_configuration_4 = modulehandler_configuration_3;
+  //struct Common_FlexBisonParserConfiguration parserConfiguration_4;
+  //modulehandler_configuration_4.parserConfiguration = &parserConfiguration_4;
+  //configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING),
+  //                                                               std::make_pair (&module_configuration,
+  //                                                                               &modulehandler_configuration_4)));
+  modulehandler_configuration_5 = modulehandler_configuration_3;
+  modulehandler_configuration_5.codecId = AV_CODEC_ID_AAC;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
-                                                                                 &modulehandler_configuration_4)));
+                                                                                 &modulehandler_configuration_5)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
