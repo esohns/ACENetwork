@@ -75,7 +75,6 @@ set (${EXECUTABLE}_SRCS
      file_server_signalhandler.cpp
      file_server_signalhandler.h
      file_server_stream_common.h
-#     stdafx.cpp
      stdafx.h
      test_u_common_modules.h
      test_u_configuration.h

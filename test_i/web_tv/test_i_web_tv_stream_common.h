@@ -281,7 +281,8 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
    , deviceIdentifier ()
    , display ()
    , program (1)
-   , streamType (27) // H264
+   , audioStreamType (15) // AAC
+   , videoStreamType (27) // H264
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
@@ -306,7 +307,8 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
   struct Stream_Device_Identifier                  deviceIdentifier;
   struct Common_UI_DisplayDevice                   display;
   unsigned int                                     program;                  // MPEG TS decoder module
-  unsigned int                                     streamType;               // MPEG TS decoder module
+  unsigned int                                     audioStreamType;          // MPEG TS decoder module
+  unsigned int                                     videoStreamType;          // MPEG TS decoder module
   Test_I_ISessionNotify_2_t*                       subscriber;
   Test_I_Subscribers_2_t*                          subscribers;
   std::string                                      targetFileName; // dump module

@@ -503,8 +503,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     {
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-
       guint event_source_id = g_idle_add (idle_segment_download_complete_cb,
                                           CBData_);
       if (event_source_id == 0)

@@ -4719,9 +4719,9 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
   ACE_UNUSED_ARG (new_options_i);
   //new_options_i = SSL_CTX_clear_options (real_context_p, SSL_OP_ALL);
   //ACE_UNUSED_ARG (new_options_i);
-  new_options_i =
-    SSL_CTX_set_options (real_context_p, SSL_OP_NO_SSLv3); // force TLS
-  ACE_UNUSED_ARG (new_options_i);
+//  new_options_i =
+//    SSL_CTX_set_options (real_context_p, SSL_OP_NO_SSLv3); // force TLS
+//  ACE_UNUSED_ARG (new_options_i);
   //new_options_i =
   //    SSL_CTX_set_options (real_context_p,
   //                         SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2

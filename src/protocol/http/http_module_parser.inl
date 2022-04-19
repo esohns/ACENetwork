@@ -369,7 +369,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
-  message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
+  message_p = static_cast<DataMessageType*> (headFragment_->cont ());
   while (message_p)
   {
     data_container_p->increase ();
@@ -377,7 +377,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     message_p->initialize (data_container_2,
                            message_p->sessionId (),
                            NULL);
-    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
+    message_p = static_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
   // frame the content

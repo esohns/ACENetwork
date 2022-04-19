@@ -84,7 +84,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
           } // end IF
         } // end lock scope
       } // end IF
-      else
+      else // most likely: chunked transfer
         ACE_DEBUG ((LM_WARNING,
                    ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
                    inherited::mod_->name (),

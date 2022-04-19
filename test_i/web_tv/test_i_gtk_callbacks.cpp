@@ -613,14 +613,12 @@ idle_segment_download_complete_cb (gpointer userData_in)
 #else
       iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
 #endif // ACE_WIN32 || ACE_WIN64
-
   if (iconnection_p)
   {
     iconnection_p->close();
     iconnection_p->decrease(); iconnection_p = NULL;
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;
-  iconnection_manager_2->abort ();
 
   return G_SOURCE_REMOVE;
 }
@@ -658,12 +656,34 @@ idle_start_session_cb (gpointer userData_in)
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
   ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
 
+  // close connection
+  Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+      TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (iconnection_manager_p);
+  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+  ACE_ASSERT (data_p->handle);
+  iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (iconnection_p);
+  if (iconnection_p)
+  {
+    iconnection_p->close();
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+  data_p->handle = ACE_INVALID_HANDLE;
+
+  ACE_OS::sleep (2);
+
   Test_I_TCPConnector_2_t connector (true);
 #if defined (SSL_SUPPORT)
   Test_I_SSLConnector_2_t ssl_connector (true);
 #endif // SSL_SUPPORT
   Test_I_AsynchTCPConnector_2_t asynch_connector (true);
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_2 = NULL;
   Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
   HTTP_Form_t HTTP_form;
   HTTP_Headers_t HTTP_headers;
@@ -789,15 +809,15 @@ idle_start_session_cb (gpointer userData_in)
 
   // send HTTP request
   ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
-  iconnection_p =
+  iconnection_2 =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
 #else
       iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
 #endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iconnection_p);
+  ACE_ASSERT (iconnection_2);
   istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
+      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_2);
   ACE_ASSERT (istream_connection_p);
   const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
       istream_connection_p->stream ();
@@ -861,7 +881,7 @@ allocate:
               ACE_TEXT (URI_string.c_str ())));
 
   // clean up
-  iconnection_p->decrease (); iconnection_p = NULL;
+  iconnection_2->decrease (); iconnection_2 = NULL;
 
   return G_SOURCE_REMOVE;
 }
@@ -1466,7 +1486,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (file_chooser_button_p);
     (*iterator_3).second.second->targetFileName =
       gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
-    ACE_ASSERT (Common_File_Tools::isDirectory ((*iterator_3).second.second->targetFileName));
+//    ACE_ASSERT (Common_File_Tools::isDirectory ((*iterator_3).second.second->targetFileName));
 
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)

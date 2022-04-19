@@ -36,7 +36,6 @@
 
 #include "test_u_stream_common.h"
 
-//#include "file_server_connection_common.h"
 #include "file_server_defines.h"
 
 // forward declarations
@@ -89,28 +88,28 @@ struct FileServer_ModuleHandlerConfiguration
 {
   FileServer_ModuleHandlerConfiguration ()
    : Test_U_ModuleHandlerConfiguration ()
-//   , allocatorConfiguration (NULL)
    , connection (NULL)
    , connectionConfigurations (NULL)
    , fileIdentifier ()
    , outboundQueue (NULL)
    , program (FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER)
+   , audioStreamType (0)
+   , videoStreamType (FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE)
    , streamConfiguration (NULL)
-   , streamType (FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE)
    , subscriber (NULL)
    , subscribers (NULL)
   {
     inbound = true;
   }
 
-//  struct Common_Parser_FlexAllocatorConfiguration* allocatorConfiguration;
   FileServer_TCPIConnection_t*      connection;               // net target module
   Net_ConnectionConfigurations_t*   connectionConfigurations; // net target module
   Common_File_Identifier            fileIdentifier;           // file reader module
   Stream_IMessageQueue*             outboundQueue;            // event handler module
   unsigned int                      program;                  // MPEG TS decoder module
+  unsigned int                      audioStreamType;          // MPEG TS decoder module
+  unsigned int                      videoStreamType;          // MPEG TS decoder module
   FileServer_StreamConfiguration_t* streamConfiguration;      // net target module
-  unsigned int                      streamType;               // MPEG TS decoder module
   FileServer_ISessionNotify_t*      subscriber;               // event handler module
   FileServer_Subscribers_t*         subscribers;              // event handler module
 };
