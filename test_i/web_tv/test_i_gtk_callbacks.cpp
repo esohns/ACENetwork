@@ -765,7 +765,7 @@ idle_update_video_display_cb (gpointer userData_in)
                               NULL,
                               false);
 
-  return G_SOURCE_REMOVE;
+  return G_SOURCE_CONTINUE;
 }
 
 gboolean
@@ -1075,8 +1075,6 @@ drawingarea_draw_cb (GtkWidget* widget_in,
   }
 
   gtk_widget_queue_draw (widget_in);
-  //while (g_main_context_pending (NULL))
-  //  g_main_context_iteration (NULL, FALSE);
 
   return FALSE; // propagate further
 }
@@ -1116,7 +1114,7 @@ drawingarea_expose_event_cb (GtkWidget* widget_in,
 
   cairo_destroy (context_p); context_p = NULL;
 
-  return TRUE; // do not propagate
+  return FALSE; // propagate
 } // drawingarea_expose_event_cb
 #endif // GTK_CHECK_VERSION(3,0,0)
 
@@ -1796,7 +1794,7 @@ continue_:
     ACE_ASSERT (progressbar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
 
-    ACE_ASSERT (!data_p->progressData.eventSourceId);
+    //ACE_ASSERT (!data_p->progressData.eventSourceId);
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       data_p->progressData.eventSourceId =
         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -2013,6 +2011,15 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
   Common_UI_GTK_BuildersConstIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
+  Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+  ACE_ASSERT ((*iterator_3).second.second->delayConfiguration);
+  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
+  ACE_ASSERT (data_p->channels);
+  ACE_ASSERT (data_p->currentChannel);
+  channel_iterator = data_p->channels->find (data_p->currentChannel);
+  ACE_ASSERT (channel_iterator != data_p->channels->end ());
 
   GtkTreeIter iterator_2;
   gboolean result = gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget_in),
@@ -2054,6 +2061,18 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
 #else
   data_p->currentStream = resolution_s.width;
 #endif // ACE_WIN32 || ACE_WIN64
+
+  // set corresponding video framerate
+  for (Test_I_WebTV_ChannelResolutionsConstIterator_t iterator_2 = (*channel_iterator).second.resolutions.begin ();
+       iterator_2 != (*channel_iterator).second.resolutions.end ();
+       ++iterator_2)
+    if ((*iterator_2).resolution.width == resolution_s.width)
+    {
+      (*iterator_3).second.second->delayConfiguration->averageTokensPerInterval =
+          (*iterator_2).frameRate;
+      break;
+    } // end IF
+
 } // combobox_resolution_changed_cb
 
 gint
@@ -2068,12 +2087,10 @@ button_about_clicked_cb (GtkWidget* widget_in,
   struct Test_I_WebTV_UI_CBData* data_p =
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
-
   Common_UI_GTK_BuildersConstIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
@@ -2112,23 +2129,28 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (userData_in);
-  //struct Test_I_WebTV_UI_CBData* data_p =
-  //  static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-  //// sanity check(s)
-  //ACE_ASSERT (data_p);
 
-  //// step1: remove event sources
-  //{ ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->lock);
-  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
-  //       iterator != data_p->eventSourceIds.end ();
-  //       iterator++)
-  //    if (!g_source_remove (*iterator))
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-  //                  *iterator));
-  //  data_p->eventSourceIds.clear ();
-  //} // end lock scope
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+
+  // step1: remove all event sources
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, state_r.lock, FALSE);
+    for (Common_UI_GTK_EventSourceIdsIterator_t iterator = state_r.eventSourceIds.begin ();
+         iterator != state_r.eventSourceIds.end ();
+         iterator++)
+      if (!g_source_remove (*iterator))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    *iterator));
+    state_r.eventSourceIds.clear ();
+  } // end lock scope
 
   // step2: initiate shutdown sequence
   int result = -1;

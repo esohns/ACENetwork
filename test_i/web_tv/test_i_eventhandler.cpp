@@ -228,8 +228,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
            iterator_2 != (*iterator).keyValues.end ();
            ++iterator_2)
       {
-        if (!ACE_OS::strcmp((*iterator_2).first.c_str (),
-                            ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING)))
+        if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                             ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING)))
         {
           std::string regex_string =
               ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(?:[[:space:]xX]+)([[:digit:]]+)$");
@@ -263,7 +263,15 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #else
           converter >> resolution_s.resolution.height;
 #endif // ACE_WIN32 || ACE_WIN64
-          break;
+        } // end IF
+
+        if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                             ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_FRAMERATE_KEY_STRING)))
+        {
+          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+          converter.clear ();
+          converter.str ((*iterator_2).second);
+          converter >> resolution_s.frameRate;
         } // end IF
       } // end FOR
       resolution_s.URI = (*iterator).URL;

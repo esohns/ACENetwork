@@ -30,6 +30,7 @@
 #define TEST_I_WEBTV_CNF_INI_FILE                         "web_tv.ini"
 
 // M3U
+#define TEST_I_M3U_EXTINFO_FRAMERATE_KEY_STRING           "FRAME-RATE"
 #define TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING          "RESOLUTION"
 
 //----------------------------------------

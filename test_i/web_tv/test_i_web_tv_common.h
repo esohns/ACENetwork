@@ -62,6 +62,7 @@ struct Test_I_WebTV_ChannelSegment
 
 struct Test_I_WebTV_ChannelResolution
 {
+  unsigned int              frameRate;
   Common_Image_Resolution_t resolution;
   std::string               URI; // relative to channel baseURI
 };

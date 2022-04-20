@@ -278,6 +278,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
    , codecId (AV_CODEC_ID_NONE)
 #endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
+   , delayConfiguration (NULL)
    , deviceIdentifier ()
    , display ()
    , program (1)
@@ -304,6 +305,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
   enum AVCodecID                                   codecId;
 #endif // FFMPEG_SUPPORT
   Net_ConnectionConfigurations_t*                  connectionConfigurations;
+  struct Stream_Miscellaneous_DelayConfiguration*  delayConfiguration;
   struct Stream_Device_Identifier                  deviceIdentifier;
   struct Common_UI_DisplayDevice                   display;
   unsigned int                                     program;                  // MPEG TS decoder module

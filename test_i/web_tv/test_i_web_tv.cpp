@@ -753,6 +753,7 @@ do_work (const std::string& configurationFile_in,
   struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
   ALSA_configuration.asynch = false;
 #endif // ACE_WIN32 || ACE_WIN64
+  struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_3;
   //struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_4; // parser
   struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_5; // audio decoder
@@ -772,6 +773,9 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   //modulehandler_configuration_3.debug = true;
+  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
+  delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
+  modulehandler_configuration_3.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_3.deviceIdentifier.identifierDiscriminator =
     Stream_Device_Identifier::GUID;

@@ -313,11 +313,20 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                 Test_I_VideoDelay_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
+                 false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
                   Test_I_GTKCairo_Module (this,
                                           ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
 
   //++index_i;
 
