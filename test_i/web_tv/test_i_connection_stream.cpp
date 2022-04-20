@@ -224,18 +224,21 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                              ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   layout_in->append (module_p, NULL, 0);
+
   //module_p = NULL;
   //ACE_NEW_RETURN (module_p,
   //                Test_I_StatisticReport_Module (this,
   //                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
   //                false);
   //layout_in->append (module_p, NULL, 0);
-//  module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_HTTPGet_2_Module (this,
-//                                           ACE_TEXT_ALWAYS_CHAR ("HTTPGet")),
-//                  false);
-//  layout_in->append (module_p, NULL, 0);
+
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Defragment_2_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_MPEGTSDecoder_Module (this,
@@ -290,39 +293,33 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 
   ++index_i;
 
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_FileSink_Module (this,
+  //                                        ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, branch_p, index_i);
+
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_FileSink_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+                  Test_I_VideoDecoder_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_VideoResize_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_GTKCairo_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
 
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_VideoDecoder_Module (this,
-  //                                            ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, branch_p, index_i);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_VideoResize_Module (this,
-  //                                           ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, branch_p, index_i);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_GTKCairo_Module (this,
-  //                                        ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, branch_p, index_i);
-
-  ++index_i;
-//  module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_FileSink_Module (this,
-//                                          ACE_TEXT_ALWAYS_CHAR ("FileSink")),
-//                  false);
-//  layout_in->append (module_p, NULL, 0);
+  //++index_i;
 
   deleteModules_out = true;
 

@@ -605,7 +605,62 @@ idle_segment_download_complete_cb (gpointer userData_in)
       TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
   ACE_ASSERT (iconnection_manager_2);
   Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
+  Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
+  HTTP_Form_t HTTP_form;
+  HTTP_Headers_t HTTP_headers;
+  struct HTTP_Record* HTTP_record_p = NULL;
+  Test_I_Message::DATA_T* message_data_p = NULL;
+  Test_I_Message* message_p = NULL;
+  ACE_Message_Block* message_block_p = NULL;
+    Net_ConnectionConfigurationsIterator_t iterator_2 =
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+  Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+  ACE_ASSERT (data_p->channels);
+  ACE_ASSERT (data_p->currentChannel);
+  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
+    data_p->channels->find (data_p->currentChannel);
+  ACE_ASSERT (channel_iterator != data_p->channels->end ());
+  if ((data_p->handle == ACE_INVALID_HANDLE) ||
+      (*channel_iterator).second.segment.URLs.empty ())
+    return G_SOURCE_REMOVE;
+  std::string current_URL =
+      (*channel_iterator).second.segment.URLs.front ();
+  (*channel_iterator).second.segment.URLs.pop_front ();
+  bool is_URI_b = HTTP_Tools::URLIsURI (current_URL);
+  ACE_INET_Addr host_address;
+  std::string hostname_string, URI_string, URI_string_2, URL_string;
+  bool use_SSL = false;
 
+  if (is_URI_b)
+    URL_string = (*iterator_3).second.second->URL;
+  else
+    URL_string = current_URL;
+  if (!HTTP_Tools::parseURL (URL_string,
+                             host_address,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
+    return G_SOURCE_REMOVE;
+  } // end IF
+
+  if (is_URI_b)
+  {
+    size_t position = URI_string.find_last_of ('/', std::string::npos);
+    ACE_ASSERT (position != std::string::npos);
+    URI_string.erase (position + 1, std::string::npos);
+    URI_string_2 = URI_string;
+    URI_string_2 += current_URL;
+    URI_string = URI_string_2;
+  } // end IF
+
+  // send HTTP request
   ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -613,12 +668,102 @@ idle_segment_download_complete_cb (gpointer userData_in)
 #else
       iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
 #endif // ACE_WIN32 || ACE_WIN64
-  if (iconnection_p)
+  istream_connection_p =
+      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
+  const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
+      istream_connection_p->stream ();
+
+  ACE_NEW_NORETURN (HTTP_record_p,
+                    struct HTTP_Record ());
+  if (!HTTP_record_p)
   {
-    iconnection_p->close();
-    iconnection_p->decrease(); iconnection_p = NULL;
+    ACE_DEBUG ((LM_CRITICAL,
+               ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return G_SOURCE_REMOVE;
   } // end IF
-  data_p->handle = ACE_INVALID_HANDLE;
+  HTTP_record_p->form = HTTP_form;
+  HTTP_headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
+                                       hostname_string));
+  HTTP_record_p->headers = HTTP_headers;
+  HTTP_record_p->method =
+      (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
+                          : HTTP_Codes::HTTP_METHOD_POST);
+  HTTP_record_p->URI = URI_string;
+  HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
+
+  ACE_NEW_NORETURN (message_data_p,
+                    Test_I_Message::DATA_T ());
+  if (!message_data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+               ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    delete HTTP_record_p; HTTP_record_p = NULL;
+    return G_SOURCE_REMOVE;
+  } // end IF
+  // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
+  message_data_p->setPR (HTTP_record_p);
+
+  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
+  ACE_ASSERT (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator);
+allocate:
+  message_p =
+      static_cast<Test_I_Message*> (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->allocatorConfiguration->defaultBufferSize));
+  // keep retrying ?
+  if (!message_p &&
+      !static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
+    delete message_data_p; message_data_p = NULL;
+    return G_SOURCE_REMOVE;
+  } // end IF
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
+  message_p->initialize (message_data_p,
+                         stream_r.getR_2 ().getR ().sessionId,
+                         NULL);
+
+  message_block_p = message_p;
+  istream_connection_p->send (message_block_p);
+  message_p = NULL;
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("requesting: \"%s\"\n"),
+              ACE_TEXT (URI_string.c_str ())));
+
+  // clean up
+  iconnection_p->decrease (); iconnection_p = NULL;
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_update_video_display_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_video_display_cb"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  GtkDrawingArea* drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+  ACE_ASSERT (drawing_area_p);
+
+  gdk_window_invalidate_rect (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)),
+                              NULL,
+                              false);
 
   return G_SOURCE_REMOVE;
 }
@@ -668,7 +813,6 @@ idle_start_session_cb (gpointer userData_in)
 #else
       iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
 #endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iconnection_p);
   if (iconnection_p)
   {
     iconnection_p->close();
@@ -676,7 +820,10 @@ idle_start_session_cb (gpointer userData_in)
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   ACE_OS::sleep (2);
+#endif // ACE_WIN32 || ACE_WIN64
 
   Test_I_TCPConnector_2_t connector (true);
 #if defined (SSL_SUPPORT)
@@ -697,7 +844,8 @@ idle_start_session_cb (gpointer userData_in)
   struct Net_UserData user_data_s;
   ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
   std::string current_URL =
-      (*channel_iterator).second.segment.URLs.back ();
+      (*channel_iterator).second.segment.URLs.front ();
+  (*channel_iterator).second.segment.URLs.pop_front ();
   bool is_URI_b = HTTP_Tools::URLIsURI (current_URL);
 
   if (is_URI_b)
@@ -807,6 +955,15 @@ idle_start_session_cb (gpointer userData_in)
     } // end IF
   } // end lock scope
 
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+    data_p->videoUpdateEventSourceId =
+    g_timeout_add (COMMON_UI_REFRESH_DEFAULT_VIDEO_MS, // ms (?)
+                   idle_update_video_display_cb,
+                   userData_in);
+    ACE_ASSERT (data_p->videoUpdateEventSourceId > 0);
+    state_r.eventSourceIds.insert (data_p->videoUpdateEventSourceId);
+  } // end lock scope
+
   // send HTTP request
   ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
   iconnection_2 =
@@ -821,6 +978,13 @@ idle_start_session_cb (gpointer userData_in)
   ACE_ASSERT (istream_connection_p);
   const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
       istream_connection_p->stream ();
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING),
+                                                 false,
+                                                 false));
+  ACE_ASSERT (module_p);
+  data_p->dispatch = dynamic_cast<Common_IDispatch*> (module_p->writer ());
+  ACE_ASSERT (data_p->dispatch);
 
   ACE_NEW_NORETURN (HTTP_record_p,
                     struct HTTP_Record ());
@@ -885,6 +1049,76 @@ allocate:
 
   return G_SOURCE_REMOVE;
 }
+
+#if GTK_CHECK_VERSION (3,0,0)
+gboolean
+drawingarea_draw_cb (GtkWidget* widget_in,
+                     cairo_t* context_in,
+                     gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+
+  ACE_ASSERT (context_in);
+  struct Test_I_WebTV_UI_CBData* data_p =
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  if (!data_p->dispatch)
+    return FALSE; // propagate further
+
+  try {
+    data_p->dispatch->dispatch (context_in);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
+  }
+
+  gtk_widget_queue_draw (widget_in);
+  //while (g_main_context_pending (NULL))
+  //  g_main_context_iteration (NULL, FALSE);
+
+  return FALSE; // propagate further
+}
+#else
+gboolean
+drawingarea_expose_event_cb (GtkWidget* widget_in,
+                             GdkEvent* event_in,
+                             gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::drawingarea_expose_event_cb"));
+
+  ACE_UNUSED_ARG (event_in);
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  if (!data_p->dispatch)
+    return FALSE;
+
+  // sanity check(s)
+  cairo_t* context_p =
+    gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget_in)));
+  if (unlikely (!context_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gdk_cairo_create(), aborting\n")));
+    return FALSE;
+  } // end IF
+
+  try {
+    data_p->dispatch->dispatch (context_p);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
+  }
+
+  cairo_destroy (context_p); context_p = NULL;
+
+  return TRUE; // do not propagate
+} // drawingarea_expose_event_cb
+#endif // GTK_CHECK_VERSION(3,0,0)
 
 gboolean
 drawing_area_resize_end (gpointer userData_in)
@@ -1025,8 +1259,8 @@ idle_update_progress_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  ACE_TCHAR buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   int result = -1;
   float speed = 0.0F;
 
@@ -1046,14 +1280,14 @@ idle_update_progress_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer, ACE_TEXT ("%.2f %s"),
+    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
                               speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
   } // end IF
   gtk_progress_bar_set_text (progress_bar_p,
-                             ACE_TEXT_ALWAYS_CHAR (buffer));
+                             ACE_TEXT_ALWAYS_CHAR (buffer_a));
   gtk_progress_bar_pulse (progress_bar_p);
 
   // --> reschedule

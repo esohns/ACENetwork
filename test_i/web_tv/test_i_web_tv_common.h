@@ -21,6 +21,8 @@
 #ifndef TEST_I_WEBTV_COMMON_H
 #define TEST_I_WEBTV_COMMON_H
 
+#include <list>
+
 #include "ace/Date_Time.h"
 
 #include "common_isubscribe.h"
@@ -48,7 +50,7 @@ class Test_I_Message;
 class Test_I_SessionMessage;
 class Test_I_SessionMessage_2;
 
-typedef std::vector<std::string> Test_I_WebTV_ChannelSegmentURLs_t;
+typedef std::list<std::string> Test_I_WebTV_ChannelSegmentURLs_t;
 typedef Test_I_WebTV_ChannelSegmentURLs_t::iterator Test_I_WebTV_ChannelSegmentURLsIterator_t;
 typedef Test_I_WebTV_ChannelSegmentURLs_t::const_iterator Test_I_WebTV_ChannelSegmentURLsConstIterator_t;
 struct Test_I_WebTV_ChannelSegment
@@ -168,18 +170,22 @@ struct Test_I_WebTV_UI_CBData
    , channels (NULL)
    , currentChannel (0)
    , currentStream (0)
+   , dispatch (NULL)
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , subscribers ()
+   , videoUpdateEventSourceId (0)
   {}
 
   struct Test_I_WebTV_Configuration*    configuration;
   Test_I_WebTV_ChannelConfigurations_t* channels;
   unsigned int                          currentChannel;
   unsigned int                          currentStream;
+  Common_IDispatch*                     dispatch;
   ACE_HANDLE                            handle; // connection-
   struct Test_I_WebTV_UI_ProgressData   progressData;
   Test_I_Subscribers_t                  subscribers;
+  guint                                 videoUpdateEventSourceId;
 };
 #endif // GUI_SUPPORT
 

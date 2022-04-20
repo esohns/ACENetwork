@@ -37,6 +37,7 @@ gboolean idle_segment_download_complete_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
+gboolean idle_update_video_display_cb (gpointer);
 
 //------------------------------------------------------------------------------
 
@@ -54,6 +55,11 @@ G_MODULE_EXPORT void filechooserbutton_output_directory_set_cb (GtkWidget*, gpoi
 G_MODULE_EXPORT void togglebutton_display_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void combobox_display_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void togglebutton_fullscreen_toggled_cb (GtkToggleButton*, gpointer);
+#if GTK_CHECK_VERSION (3,0,0)
+G_MODULE_EXPORT gboolean drawingarea_draw_cb (GtkWidget*, cairo_t*, gpointer);
+#else
+G_MODULE_EXPORT gboolean drawingarea_expose_event_cb (GtkWidget*, GdkEvent*, gpointer);
+#endif // GTK_CHECK_VERSION (3,0,0)
 G_MODULE_EXPORT void drawingarea_size_allocate_cb (GtkWidget*, GdkRectangle*, gpointer);
 G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);

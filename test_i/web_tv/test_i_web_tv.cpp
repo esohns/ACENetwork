@@ -771,7 +771,7 @@ do_work (const std::string& configurationFile_in,
       STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
-  modulehandler_configuration_3.debug = true;
+  //modulehandler_configuration_3.debug = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_3.deviceIdentifier.identifierDiscriminator =
     Stream_Device_Identifier::GUID;
