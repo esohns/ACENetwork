@@ -833,7 +833,8 @@ idle_update_video_display_cb (gpointer userData_in)
   ACE_ASSERT (drawing_area_2);
 
   drawing_area_p =
-      (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2 : drawing_area_p);
+      (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
+                                                      : drawing_area_p);
   gdk_window_invalidate_rect (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)),
                               NULL,
                               false);
@@ -1561,7 +1562,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
   ACE_ASSERT (iconnection_manager_2);
 
-  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+//  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   bool success = false;
 
   if (gtk_toggle_button_get_active (toggleButton_in))
@@ -2143,6 +2144,9 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   Common_UI_GTK_BuildersConstIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
+  Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_2 =
+      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_2.end ());
 
   Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
       TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
@@ -2164,23 +2168,23 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   if (!stream_r.isRunning ())
     return;
 
+  GtkDrawingArea* drawing_area_p =
+      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+  ACE_ASSERT (drawing_area_p);
+  GtkDrawingArea* drawing_area_2 =
+      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  ACE_ASSERT (drawing_area_2);
+
   GtkWindow* window_p =
       GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)));
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (window_p);
-
-  if (gtk_toggle_button_get_active (toggleButton_in))
-  {
-    gtk_widget_show (GTK_WIDGET (window_p));
-    //  gtk_window_fullscreen (window_p);
-    gtk_window_maximize (window_p);
-  } // end IF
-  else
-  {
-    //  gtk_window_unfullscreen (window_p);
-    gtk_window_unmaximize (window_p);
-    gtk_widget_hide (GTK_WIDGET (window_p));
-  } // end ELSE
+  GtkWindow* window_2 =
+      GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)));
+  ACE_ASSERT (window_2);
 
   const Stream_Module_t* module_p = NULL;
   module_p =
@@ -2192,6 +2196,47 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
                ACE_TEXT (stream_r.name ().c_str ())));
     return;
   } // end IF
+
+  if (gtk_toggle_button_get_active (toggleButton_in))
+  {
+    gtk_widget_show (GTK_WIDGET (window_2));
+    gtk_window_maximize (window_2);
+    //  gtk_window_fullscreen (window_2);
+
+    gtk_window_iconify (window_p);
+
+    (*iterator_2).second.second->window =
+        gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
+  } // end IF
+  else
+  {
+    //  gtk_window_unfullscreen (window_2);
+    gtk_window_unmaximize (window_2);
+    gtk_widget_hide (GTK_WIDGET (window_2));
+
+    gtk_window_deiconify (window_p);
+
+    (*iterator_2).second.second->window =
+        gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+
+    g_signal_emit_by_name (G_OBJECT (drawing_area_p),
+                          ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
+                          userData_in);
+
+    // drop frames until resize signal AND session message have been processed
+    Stream_Visualization_IResize* iresize_p =
+        dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    ACE_ASSERT (iresize_p);
+    try {
+      iresize_p->resizing ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), returning\n")));
+      return;
+    }
+  } // end ELSE
+  ACE_ASSERT ((*iterator_2).second.second->window);
+
   Common_UI_IFullscreen* ifullscreen_p =
       dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   if (!ifullscreen_p)

@@ -618,11 +618,12 @@
   </object>
   <object class="GtkWindow" id="window_fullscreen">
     <property name="width_request">1920</property>
+    <property name="height_request">1080</property>
     <property name="app_paintable">True</property>
-    <property name="can_focus">False</property>
+    <property name="can_focus">True</property>
     <property name="can_default">True</property>
     <property name="receives_default">True</property>
-    <property name="events">GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_STRUCTURE_MASK</property>
+    <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
     <property name="no_show_all">True</property>
     <property name="double_buffered">False</property>
     <property name="resizable">False</property>
@@ -632,14 +633,9 @@
     <signal name="key-press-event" handler="window_fullscreen_key_press_event_cb" swapped="no"/>
     <child>
       <object class="GtkDrawingArea" id="drawingarea_fullscreen">
-        <property name="width_request">1920</property>
-        <property name="height_request">1080</property>
+        <property name="visible">True</property>
         <property name="app_paintable">True</property>
         <property name="can_focus">False</property>
-        <property name="can_default">True</property>
-        <property name="receives_default">True</property>
-        <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
-        <property name="no_show_all">True</property>
         <property name="double_buffered">False</property>
         <signal name="size-allocate" handler="drawingarea_size_allocate_cb" swapped="no"/>
         <signal name="expose-event" handler="drawingarea_expose_event_cb" swapped="no"/>
