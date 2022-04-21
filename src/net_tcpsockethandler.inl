@@ -324,7 +324,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
                   configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
@@ -340,7 +340,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
                   configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
 

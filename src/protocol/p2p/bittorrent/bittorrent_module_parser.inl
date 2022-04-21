@@ -584,11 +584,13 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   ACE_ASSERT (handshake_inout);
   ACE_ASSERT (inherited::sessionData_);
 
+#if defined (_DEBUG)
   // debug info
   if (inherited2::configuration_->debugParser)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (BitTorrent_Tools::HandShakeToString (*handshake_inout).c_str ())));
+#endif // _DEBUG
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, const_cast<ACE_MT_SYNCH::MUTEX&> (inherited::sessionData_->getR_2 ()));
     typename SessionMessageType::DATA_T::DATA_T& session_data_r =

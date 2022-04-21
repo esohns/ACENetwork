@@ -1398,9 +1398,9 @@ set_capture_format (struct Test_I_AVStream_UI_CBData* CBData_in)
   Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+//  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+//    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
+//  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif
 
   GtkComboBox* combo_box_p =
@@ -4231,10 +4231,10 @@ idle_update_info_display_cb (gpointer userData_in)
   struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
       static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
   ACE_ASSERT (ui_cb_data_base_p);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
+
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
@@ -4268,11 +4268,11 @@ idle_update_info_display_cb (gpointer userData_in)
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
   // sanity check(s)
-  ACE_ASSERT (ui_cb_data_p->configuration);
-#endif
+//  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+//    static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
+//  ACE_ASSERT (ui_cb_data_p->configuration);
+#endif // ACE_WIN32 || ACE_WIN64
   GtkSpinButton* spin_button_p = NULL;
   bool is_session_message = false;
   enum Common_UI_EventType* event_p = NULL;

@@ -222,11 +222,13 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
   messageQueue_ = configuration_->messageQueue;
   useYYScanBuffer_ = configuration_->useYYScanBuffer;
 
+#if defined (_DEBUG)
   HTTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                           scannerState_);
   //parser_.set_debug_level (trace_ ? 1 : 0); // binary (see bison manual)
   //yysetdebug (trace_ ? 1 : 0);
   yydebug = (configuration_->debugParser ? 1 : 0);
+#endif // _DEBUG
 
   isInitialized_ = true;
 

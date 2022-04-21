@@ -1367,7 +1367,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   long timer_id = -1;
 //  int group_id = -1;
   Net_IConnectionManagerBase* iconnection_manager_p = NULL;
-  Net_IStreamStatisticHandler_t* report_handler_p = NULL;
+//  Net_IStreamStatisticHandler_t* report_handler_p = NULL;
   //Test_I_AVStream_Client_Stream_IStatistic_t stream_report_handler;
   Stream_IStreamControlBase* stream_p = NULL, *stream_2 = NULL;
 #if defined (GUI_SUPPORT)
@@ -1518,7 +1518,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   (*modulehandler_iterator).second.second->connectionManager =
     connection_manager_p;
   iconnection_manager_p = connection_manager_p;
-  report_handler_p = connection_manager_p;
+//  report_handler_p = connection_manager_p;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iconnection_manager_p);
   ACE_ASSERT (report_handler_p);
@@ -2284,7 +2284,7 @@ ACE_TMAIN (int argc_in,
   Common_MessageStack_t* logstack_p = NULL;
   ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
-  struct Common_UI_CBData* ui_cb_data_p = NULL;
+//  struct Common_UI_CBData* ui_cb_data_p = NULL;
 #if defined (GTK_USE)
   Common_UI_GTK_Configuration_t* gtk_configuration_p = NULL;
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
@@ -2396,7 +2396,7 @@ ACE_TMAIN (int argc_in,
     V4L_configuration.GTKConfiguration.RCFiles.push_back (gtk_rc_filename);
   gtk_configuration_p = &V4L_configuration.GTKConfiguration;
 #endif // GTK_USE
-  ui_cb_data_p = &ui_cb_data;
+//  ui_cb_data_p = &ui_cb_data;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (ui_cb_data_p);
 #endif // GUI_SUPPORT

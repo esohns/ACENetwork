@@ -325,11 +325,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (headFragment_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
-  // debug info
+#if defined (_DEBUG)
   if (unlikely (inherited2::configuration_->debugParser))
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
+#endif // _DEBUG
 
   // set session data format
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =

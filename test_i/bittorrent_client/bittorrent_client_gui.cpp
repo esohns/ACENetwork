@@ -466,7 +466,9 @@ do_work (unsigned int numberOfDispatchThreads_in,
   struct BitTorrent_PeerStreamConfiguration peer_stream_configuration;
   struct BitTorrent_TrackerStreamConfiguration tracker_stream_configuration;
 
+#if defined (_DEBUG)
   CBData_in.configuration->parserConfiguration.debugScanner = true;
+#endif // _DEBUG
   peer_stream_configuration.messageAllocator = &peer_message_allocator;
   tracker_stream_configuration.messageAllocator =
     &tracker_message_allocator;

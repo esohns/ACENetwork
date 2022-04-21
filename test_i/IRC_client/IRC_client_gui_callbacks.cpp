@@ -770,12 +770,12 @@ idle_finalize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
   // sanity check(s)
-  struct IRC_Client_UI_CBData* data_p =
-    static_cast<struct IRC_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-
+//  struct IRC_Client_UI_CBData* data_p =
+//    static_cast<struct IRC_Client_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
@@ -1577,19 +1577,17 @@ button_about_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
 
   // sanity check(s)
-  struct IRC_Client_UI_CBData* data_p =
-    static_cast<IRC_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-
+//  struct IRC_Client_UI_CBData* data_p =
+//    static_cast<IRC_Client_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
+//  ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // retrieve about dialog handle
@@ -1984,18 +1982,16 @@ entry_send_changed_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::entry_send_changed_cb"));
 
   // sanity check(s)
-  struct IRC_Client_UI_CBData* data_p =
-    static_cast<IRC_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-
+//  struct IRC_Client_UI_CBData* data_p =
+//    static_cast<IRC_Client_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   GtkEntry* entry_p = GTK_ENTRY (widget_in);
@@ -2021,18 +2017,16 @@ entry_send_kb_focused_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (event_in);
 
   // sanity check(s)
-  struct IRC_Client_UI_CBData* data_p =
-    static_cast<IRC_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-
+//  struct IRC_Client_UI_CBData* data_p =
+//    static_cast<IRC_Client_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // make the "change" button the default widget...
@@ -2894,20 +2888,20 @@ switch_channel_cb (GtkNotebook* notebook_in,
   ACE_UNUSED_ARG (page_in);
 
   // sanity check(s)
-  struct IRC_Client_UI_ConnectionCBData* data_p =
-    static_cast<IRC_Client_UI_ConnectionCBData*> (userData_in);
-  ACE_ASSERT (data_p);
-
+//  struct IRC_Client_UI_ConnectionCBData* data_p =
+//    static_cast<IRC_Client_UI_ConnectionCBData*> (userData_in);
+//  ACE_ASSERT (data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
+  // sanity check(s)
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // check whether the switch was to the server log tab

@@ -77,15 +77,15 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
   {
     debugScanner_ = COMMON_PARSER_DEFAULT_LEX_TRACE;
     debugParser_ = COMMON_PARSER_DEFAULT_YACC_TRACE;
-    //crunchMessages_ = IRC_DEFAULT_CRUNCH_MESSAGES;
   } // end IF
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.parserConfiguration);
 
+#if defined (_DEBUG)
   debugScanner_ = configuration_in.parserConfiguration->debugScanner;
   debugParser_ = configuration_in.parserConfiguration->debugParser;
-  //crunchMessages_ = configuration_in.crunchMessages;
+#endif // _DEBUG
 
   return inherited::initialize (configuration_in,
                                 allocator_in);

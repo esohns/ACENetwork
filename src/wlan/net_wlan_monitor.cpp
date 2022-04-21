@@ -878,9 +878,8 @@ nla_put_failure:
       struct Net_WLAN_IEEE802_11_InformationElement* information_element_p =
           NULL;
       std::string ssid_string;
-#if defined (_DEBUG)
       char buffer_a[IF_NAMESIZE + 1];
-#endif // _DEBUG
+      ACE_OS::memset (buffer_a, 0, sizeof (char[IF_NAMESIZE + 1]));
       struct Net_WLAN_AccessPointState state_s;
 
       if (//!nlattr_a[NL80211_ATTR_SCAN_FREQUENCIES] ||
@@ -913,8 +912,6 @@ nla_put_failure:
         return NL_STOP;
       } // end IF
 
-#if defined (_DEBUG)
-      ACE_OS::memset (buffer_a, 0, sizeof (char[IF_NAMESIZE + 1]));
       if (unlikely (!::if_indextoname (if_index_i,
                                        buffer_a)))
       {
@@ -923,7 +920,6 @@ nla_put_failure:
                     if_index_i));
         return NL_STOP;
       } // end IF
-#endif // _DEBUG
 
       state_s.frequency = nla_get_u32 (nlattr_2[NL80211_BSS_FREQUENCY]);
       state_s.lastSeen = nla_get_u32 (nlattr_2[NL80211_BSS_SEEN_MS_AGO]);

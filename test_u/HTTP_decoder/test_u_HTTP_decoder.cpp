@@ -505,9 +505,11 @@ do_work (unsigned int bufferSize_in,
   ACE_ASSERT (connection_manager_p);
 
   // *********************** parser configuration data *************************
+#if defined (_DEBUG)
   configuration.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)
     configuration.parserConfiguration.debugScanner = true;
+#endif // _DEBUG
   // *********************** socket configuration data *************************
   Test_U_ConnectionConfiguration connection_configuration;
   int result =

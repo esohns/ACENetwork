@@ -107,11 +107,14 @@ PCP_ParserDriver::initialize (const struct Common_FlexBisonParserConfiguration& 
 
   configuration_ =
       &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+#if defined (_DEBUG)
   trace_ = configuration_->debugScanner;
+#endif // _DEBUG
 
   messageQueue_ = configuration_->messageQueue;
   useYYScanBuffer_ = configuration_->useYYScanBuffer;
 
+#if defined (_DEBUG)
   // trace ?
   PCP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                          scannerState_);
@@ -120,6 +123,7 @@ PCP_ParserDriver::initialize (const struct Common_FlexBisonParserConfiguration& 
   //                                         : 0); // binary (see bison manual)
   yydebug = (trace_ ? 1 : 0);
 #endif
+#endif // _DEBUG
 
   // OK
   initialized_ = true;

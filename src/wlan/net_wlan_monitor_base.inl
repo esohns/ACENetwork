@@ -1089,7 +1089,9 @@ reset_state:
       std::string scan_time_string;
       ACE_High_Res_Timer timer;
 #elif defined (NL80211_USE)
+#if defined (_DEBUG)
       nl80211CBData_.timestamp = COMMON_TIME_NOW;
+#endif // _DEBUG
 #endif // WEXT_USE || NL80211_USE
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("\"%s\": scanning...\n"),

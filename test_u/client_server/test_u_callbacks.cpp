@@ -1005,11 +1005,9 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
     static_cast<struct Client_Configuration*> (data_p->configuration);
   ACE_ASSERT (configuration_p);
   ACE_ASSERT (configuration_p->timeoutHandler);
-
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // schedule action interval timer ?
   if (configuration_p->signalHandlerConfiguration.actionTimerId == -1)

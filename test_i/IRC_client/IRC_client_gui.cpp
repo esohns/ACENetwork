@@ -468,8 +468,10 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   //user_data.connectionConfiguration = &configuration.connectionConfiguration;
 
+#if defined (_DEBUG)
   CBData_in.configuration->parserConfiguration.debugParser = debug_in;
   CBData_in.configuration->parserConfiguration.debugScanner = debug_in;
+#endif // _DEBUG
   ////////////////////// socket handler configuration //////////////////////////
   IRC_Client_ConnectionConfiguration connection_configuration;
   connection_configuration.allocatorConfiguration = &allocator_configuration;

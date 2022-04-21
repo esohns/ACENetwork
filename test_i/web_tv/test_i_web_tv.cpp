@@ -710,9 +710,11 @@ do_work (const std::string& configurationFile_in,
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
+#if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
+#endif // _DEBUG
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration;

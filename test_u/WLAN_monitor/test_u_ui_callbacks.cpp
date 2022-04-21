@@ -1709,11 +1709,9 @@ togglebutton_backgroundscan_toggled_cb (GtkToggleButton* toggleButton_in,
     static_cast<struct WLANMonitor_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
   ACE_ASSERT (data_p->configuration);
-
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // update configuration
   data_p->configuration->WLANMonitorConfiguration.enableBackgroundScans =

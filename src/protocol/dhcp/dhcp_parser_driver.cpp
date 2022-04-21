@@ -107,14 +107,18 @@ DHCP_ParserDriver::initialize (const struct Common_FlexBisonParserConfiguration&
 
   configuration_ =
       &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+#if defined (_DEBUG)
   trace_ = configuration_->debugScanner;
+#endif // _DEBUG
 
   messageQueue_ = configuration_->messageQueue;
   useYYScanBuffer_ = configuration_->useYYScanBuffer;
 
   // trace ?
+#if defined (_DEBUG)
   DHCP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                           scannerState_);
+#endif // _DEBUG
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)

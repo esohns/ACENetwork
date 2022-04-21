@@ -21,6 +21,8 @@
 #ifndef WLAN_MONITOR_CONFIGURATION_H
 #define WLAN_MONITOR_CONFIGURATION_H
 
+#include "common_timer_common.h"
+
 #include "net_common.h"
 #include "net_configuration.h"
 

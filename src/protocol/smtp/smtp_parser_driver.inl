@@ -110,6 +110,7 @@ SMTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
   ACE_ASSERT (scannerState_);
   //parser_.set (scannerState_);
 
+#if defined (_DEBUG)
   // trace ?
   SMTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                           scannerState_);
@@ -118,6 +119,7 @@ SMTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
   //                                         : 0); // binary (see bison manual)
   yydebug = (configuration_->debugParser ? 1 : 0);
 #endif // YYDEBUG
+#endif // _DEBUG
 
   // OK
   initialized_ = true;

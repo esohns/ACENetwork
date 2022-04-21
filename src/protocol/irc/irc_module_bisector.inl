@@ -188,8 +188,10 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
 
   //  return false;
   //} // end IF
+#if defined (_DEBUG)
   IRC_Bisector_set_debug ((configuration_in.parserConfiguration->debugScanner ? 1 : 0),
                           context_);
+#endif // _DEBUG
 
   result = inherited::initialize (configuration_in,
                                   allocator_in);

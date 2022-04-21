@@ -714,8 +714,12 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   struct Common_FlexBisonParserConfiguration parser_configuration = *configuration_;
   parser_configuration.block = false;
   parser_configuration.messageQueue = NULL;
+#if defined (_DEBUG)
   PARSER_T parser (parser_configuration.debugScanner,
                    parser_configuration.debugParser);
+#else
+  PARSER_T parser (false, false);
+#endif // _DEBUG
   if (!parser.initialize (parser_configuration))
   {
     ACE_DEBUG ((LM_ERROR,

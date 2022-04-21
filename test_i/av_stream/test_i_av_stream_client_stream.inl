@@ -1193,9 +1193,9 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
   Test_I_AVStream_Client_ALSA_V4L_StreamSessionData& session_data_r =
     const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (inherited::sessionData_->getR ());
   // *TODO*: remove type inferences
-  typename Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator =
-      const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+//  typename Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator =
+//      const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+//  ACE_ASSERT (iterator != configuration_in.end ());
   ACE_ASSERT (session_data_r.formats.empty ());
   session_data_r.formats.push_back (configuration_in.configuration_->format);
   session_data_r.stream = this;
