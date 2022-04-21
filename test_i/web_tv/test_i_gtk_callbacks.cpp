@@ -21,7 +21,9 @@
 
 #include "test_i_gtk_callbacks.h"
 
+#include <iomanip>
 #include <limits>
+#include <regex>
 #include <sstream>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -30,6 +32,8 @@
 #include "netinet/ether.h"
 #include "ifaddrs.h"
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include "gdk/gdkkeysyms.h"
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
@@ -584,6 +588,63 @@ idle_initialize_UI_cb (gpointer userData_in)
   return G_SOURCE_REMOVE;
 }
 
+void
+add_segment_URIs (const std::string& URI_in,
+                  Test_I_WebTV_ChannelSegmentURLs_t& URIs_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("::add_segment_URIs"));
+
+  size_t position = URI_in.find_last_of ('/', std::string::npos);
+  ACE_ASSERT (position != std::string::npos);
+  std::string URI_string_tail =
+      URI_in.substr (position + 1, std::string::npos);
+  std::string URI_string_head = URI_in;
+  URI_string_head.erase (position + 1, std::string::npos);
+
+  std::string regex_string =
+      ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([[:alnum:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(.ts)$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  if (unlikely(!std::regex_match (URI_string_tail,
+                                  match_results,
+                                  regex,
+                                  std::regex_constants::match_default)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                ACE_TEXT (URI_in.c_str ())));
+    return;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  std::stringstream converter;
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter.str (match_results[9].str ());
+  unsigned int index_i = 0;
+  converter >> index_i;
+  URI_string_head += (match_results[1].str () +
+                      match_results[2].str () +
+                      match_results[3].str () +
+                      match_results[4].str () +
+                      match_results[5].str () +
+                      match_results[6].str () +
+                      match_results[7].str () +
+                      match_results[8].str ());
+  std::string URI_string;
+  for (unsigned int i = 0;
+       i < TEST_I_WEBTV_NUMBER_OF_SEGMENTS_TO_PRELOAD;
+       ++i)
+  {
+    URI_string = URI_string_head;
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << std::setw (5) << std::setfill ('0') << ++index_i;
+    URI_string += converter.str ();
+    URI_string += match_results[10].str ();
+    URIs_out.push_back (URI_string);
+  } // end FOR
+}
+
 gboolean
 idle_segment_download_complete_cb (gpointer userData_in)
 {
@@ -626,9 +687,11 @@ idle_segment_download_complete_cb (gpointer userData_in)
   if ((data_p->handle == ACE_INVALID_HANDLE) ||
       (*channel_iterator).second.segment.URLs.empty ())
     return G_SOURCE_REMOVE;
-  std::string current_URL =
-      (*channel_iterator).second.segment.URLs.front ();
+  std::string current_URL = (*channel_iterator).second.segment.URLs.front ();
   (*channel_iterator).second.segment.URLs.pop_front ();
+  if ((*channel_iterator).second.segment.URLs.empty ())
+    add_segment_URIs (current_URL,
+                      (*channel_iterator).second.segment.URLs);
   bool is_URI_b = HTTP_Tools::URLIsURI (current_URL);
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URI_string_2, URL_string;
@@ -760,7 +823,17 @@ idle_update_video_display_cb (gpointer userData_in)
     GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
+  GtkToggleButton* toggle_button_p =
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  GtkDrawingArea* drawing_area_2 =
+      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  ACE_ASSERT (drawing_area_2);
 
+  drawing_area_p =
+      (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2 : drawing_area_p);
   gdk_window_invalidate_rect (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)),
                               NULL,
                               false);
@@ -1047,6 +1120,16 @@ allocate:
   // clean up
   iconnection_2->decrease (); iconnection_2 = NULL;
 
+  GtkToggleButton* toggle_button_p =
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  ACE_ASSERT (gtk_toggle_button_get_active (toggle_button_p));
+  gtk_button_set_label (GTK_BUTTON (toggle_button_p),
+                        GTK_STOCK_MEDIA_STOP);
+  un_toggling_play = true;
+  gtk_toggle_button_toggled (toggle_button_p);
+
   return G_SOURCE_REMOVE;
 }
 
@@ -1206,7 +1289,9 @@ drawing_area_resize_end (gpointer userData_in)
   }
 
   // step2
-  stream_r.control (STREAM_CONTROL_RESIZE, false);
+  stream_r.notify (STREAM_SESSION_MESSAGE_RESIZE,
+                   false, // recurse upstream ?
+                   true); // expedite ?
 
   return FALSE;
 } // drawing_area_resize_end
@@ -1438,93 +1523,6 @@ idle_update_info_display_cb (gpointer userData_in)
   return G_SOURCE_CONTINUE;
 }
 
-//gboolean
-//idle_update_log_display_cb (gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
-//
-//  struct Test_I_WebTV_UI_CBData* data_p =
-//      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-//
-//  // sanity check(s)
-//  ACE_ASSERT (data_p);
-//
-//  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-//
-//  Common_UI_GTK_BuildersConstIterator_t iterator =
-//      data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  // sanity check(s)
-//  ACE_ASSERT (iterator != data_p->builders.end ());
-//
-//  GtkTextView* view_p =
-//    GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
-//                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TEXTVIEW_NAME)));
-//  ACE_ASSERT (view_p);
-//  GtkTextBuffer* buffer_p = gtk_text_view_get_buffer (view_p);
-//  ACE_ASSERT (buffer_p);
-//
-//  GtkTextIter text_iterator;
-//  gtk_text_buffer_get_end_iter (buffer_p,
-//                                &text_iterator);
-//
-//  gchar* string_p = NULL;
-//  // sanity check
-//  if (data_p->logStack.empty ())
-//    return G_SOURCE_CONTINUE;
-//
-//  // step1: convert text
-//  for (Common_MessageStackConstIterator_t iterator_2 = data_p->logStack.begin ();
-//       iterator_2 != data_p->logStack.end ();
-//       iterator_2++)
-//  {
-//    string_p = Common_UI_GTK_Tools::Locale2UTF8 (*iterator_2);
-//    if (!string_p)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
-//                  ACE_TEXT ((*iterator_2).c_str ())));
-//      return G_SOURCE_REMOVE;
-//    } // end IF
-//
-//    // step2: display text
-//    gtk_text_buffer_insert (buffer_p,
-//                            &text_iterator,
-//                            string_p,
-//                            -1);
-//
-//    // clean up
-//    g_free (string_p);
-//  } // end FOR
-//
-//  data_p->logStack.clear ();
-//
-//  // step3: scroll the view accordingly
-////  // move the iterator to the beginning of line, so it doesn't scroll
-////  // in horizontal direction
-////  gtk_text_iter_set_line_offset (&text_iterator, 0);
-//
-////  // ...and place the mark at iter. The mark will stay there after insertion
-////  // because it has "right" gravity
-////  GtkTextMark* text_mark_p =
-////      gtk_text_buffer_get_mark (buffer_p,
-////                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SCROLLMARK_NAME));
-//////  gtk_text_buffer_move_mark (buffer_p,
-//////                             text_mark_p,
-//////                             &text_iterator);
-//
-////  // scroll the mark onscreen
-////  gtk_text_view_scroll_mark_onscreen (view_p,
-////                                      text_mark_p);
-//  //GtkAdjustment* adjustment_p =
-//  //    GTK_ADJUSTMENT (gtk_builder_get_object ((*iterator).second.second,
-//  //                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ADJUSTMENT_NAME)));
-//  //ACE_ASSERT (adjustment_p);
-//  //gtk_adjustment_set_value (adjustment_p,
-//  //                          adjustment_p->upper - adjustment_p->page_size));
-//
-//  return G_SOURCE_CONTINUE;
-//}
-
 /////////////////////////////////////////
 
 #ifdef __cplusplus
@@ -1559,6 +1557,9 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
+  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
+      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_2);
 
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   bool success = false;
@@ -1596,6 +1597,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration.end ());
     (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
     (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
+    Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_6 =
+        data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_6 != data_p->configuration->streamConfiguration_2.end ());
+    ACE_ASSERT ((*iterator_6).second.second->delayConfiguration);
     Test_I_TCPConnector_t connector (true);
 #if defined (SSL_SUPPORT)
     Test_I_SSLConnector_t ssl_connector (true);
@@ -1673,7 +1678,11 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       if (((*iterator_5).resolution.width == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.width) &&
           ((*iterator_5).resolution.height == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.height))
 #endif // ACE_WIN32 || ACE_WIN64
+      {
+        (*iterator_6).second.second->delayConfiguration->averageTokensPerInterval =
+            (*iterator_5).frameRate;
         URI_string = (*iterator_5).URI;
+      } // end IF
     ACE_ASSERT (!URI_string.empty ());
     (*iterator_3).second.second->URL.clear ();
     if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
@@ -1821,20 +1830,9 @@ continue_:
 
   // --> disconnect
 
-  ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
-  iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
-#else
-    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
-#endif // ACE_WIN32 || ACE_WIN64
-  if (iconnection_p)
-  {
-    iconnection_p->close ();
-    iconnection_p->decrease (); iconnection_p = NULL;
-  } // end IF
-  data_p->handle = ACE_INVALID_HANDLE;
   iconnection_manager_p->abort ();
+  iconnection_manager_2->abort ();
+  data_p->handle = ACE_INVALID_HANDLE;
 
   return;
 
@@ -1994,6 +1992,59 @@ button_load_clicked_cb (GtkWidget* widget_in,
 } // button_load_clicked_cb
 
 void
+combobox_channel_changed_cb (GtkWidget* widget_in,
+                             gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::combobox_channel_changed_cb"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+  ACE_ASSERT ((*iterator_3).second.second->delayConfiguration);
+  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
+  ACE_ASSERT (data_p->channels);
+
+  GtkTreeIter iterator_2;
+  gboolean result = gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget_in),
+                                                   &iterator_2);
+  ACE_ASSERT (result);
+  GtkListStore* list_store_p =
+      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME)));
+  ACE_ASSERT (list_store_p);
+#if GTK_CHECK_VERSION (2,30,0)
+  GValue value = G_VALUE_INIT;
+#else
+  GValue value;
+  ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                           &iterator_2,
+                           1, &value);
+  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+  data_p->currentChannel = g_value_get_uint (&value);
+  g_value_unset (&value);
+
+  list_store_p =
+      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
+  ACE_ASSERT (list_store_p);
+  gtk_list_store_clear (list_store_p);
+} // combobox_channel_changed_cb
+
+void
 combobox_resolution_changed_cb (GtkWidget* widget_in,
                                 gpointer userData_in)
 {
@@ -2072,8 +2123,165 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
           (*iterator_2).frameRate;
       break;
     } // end IF
-
 } // combobox_resolution_changed_cb
+
+void
+togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
+                                    gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::togglebutton_fullscreen_toggled_cb"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
+      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_p);
+  if (data_p->handle == ACE_INVALID_HANDLE)
+    return;
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (iconnection_p);
+  Test_I_IStreamConnection_2_t* istream_connection_p =
+      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
+  Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
+      const_cast<Test_I_IStreamConnection_2_t::STREAM_T&> (istream_connection_p->stream ());
+  if (!stream_r.isRunning ())
+    return;
+
+  GtkWindow* window_p =
+      GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)));
+  ACE_ASSERT (window_p);
+
+  if (gtk_toggle_button_get_active (toggleButton_in))
+  {
+    gtk_widget_show (GTK_WIDGET (window_p));
+    //  gtk_window_fullscreen (window_p);
+    gtk_window_maximize (window_p);
+  } // end IF
+  else
+  {
+    //  gtk_window_unfullscreen (window_p);
+    gtk_window_unmaximize (window_p);
+    gtk_widget_hide (GTK_WIDGET (window_p));
+  } // end ELSE
+
+  const Stream_Module_t* module_p = NULL;
+  module_p =
+      stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("%s: failed to Stream_IStream::find(\"Display\"), returning\n"),
+               ACE_TEXT (stream_r.name ().c_str ())));
+    return;
+  } // end IF
+  Common_UI_IFullscreen* ifullscreen_p =
+      dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (!ifullscreen_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("%s:Display: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
+               ACE_TEXT (stream_r.name ().c_str ()),
+               const_cast<Stream_Module_t*> (module_p)->writer ()));
+    return;
+  } // end IF
+  try {
+    ifullscreen_p->toggle ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("caught exception in Common_UI_IFullscreen::toggle(), returning\n")));
+    return;
+  }
+} // togglebutton_fullscreen_toggled_cb
+
+gboolean
+key_cb (GtkWidget* widget_in,
+        GdkEventKey* eventKey_in,
+        gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::key_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+
+  // sanity check(s)
+  ACE_ASSERT (eventKey_in);
+  struct Test_I_WebTV_UI_CBData* data_p =
+      reinterpret_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  switch (eventKey_in->keyval)
+  {
+#if GTK_CHECK_VERSION(3,0,0)
+    case GDK_KEY_Escape:
+    case GDK_KEY_f:
+    case GDK_KEY_F:
+#else
+    case GDK_Escape:
+    case GDK_f:
+    case GDK_F:
+#endif // GTK_CHECK_VERSION(3,0,0)
+    {
+      bool is_active_b = false;
+      GtkToggleButton* toggle_button_p =
+          GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+      ACE_ASSERT (toggle_button_p);
+      is_active_b = gtk_toggle_button_get_active (toggle_button_p);
+
+     // sanity check(s)
+#if GTK_CHECK_VERSION(3,0,0)
+      if ((eventKey_in->keyval == GDK_KEY_Escape) &&
+#else
+      if ((eventKey_in->keyval == GDK_Escape) &&
+#endif // GTK_CHECK_VERSION(3,0,0)
+          !is_active_b)
+        break; // <-- not in fullscreen mode, nothing to do
+
+      gtk_toggle_button_set_active (toggle_button_p,
+                                   !is_active_b);
+
+      break;
+    }
+    default:
+      return FALSE; // propagate
+  } // end SWITCH
+
+  return TRUE; // done (do not propagate further)
+}
+
+gboolean
+window_fullscreen_key_press_event_cb (GtkWidget* widget_in,
+                                      GdkEventKey* eventKey_in,
+                                      gpointer userData_in)
+{
+  return key_cb (widget_in,
+                 eventKey_in,
+                 userData_in);
+}
 
 gint
 button_about_clicked_cb (GtkWidget* widget_in,
@@ -2093,7 +2301,6 @@ button_about_clicked_cb (GtkWidget* widget_in,
   const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
   Common_UI_GTK_BuildersConstIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // retrieve about dialog handle

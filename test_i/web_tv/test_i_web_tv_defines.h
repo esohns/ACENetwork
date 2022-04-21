@@ -29,6 +29,8 @@
 
 #define TEST_I_WEBTV_CNF_INI_FILE                         "web_tv.ini"
 
+#define TEST_I_WEBTV_NUMBER_OF_SEGMENTS_TO_PRELOAD        100
+
 // M3U
 #define TEST_I_M3U_EXTINFO_FRAMERATE_KEY_STRING           "FRAME-RATE"
 #define TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING          "RESOLUTION"
@@ -61,6 +63,7 @@
 #define TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME        "togglebutton_fullscreen"
 #define TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME              "togglebutton_play"
 #define TEST_I_UI_GTK_TOGGLEBUTTON_SAVE_NAME              "togglebutton_save"
+#define TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME              "window_fullscreen"
 #endif // GTK_SUPPORT
 
 #endif

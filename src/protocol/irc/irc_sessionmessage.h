@@ -80,7 +80,8 @@ class IRC_SessionMessage_T
   IRC_SessionMessage_T (Stream_SessionId_t,
                         enum Stream_SessionMessageType,
                         SessionDataType*&,              // session data container handle
-                        UserDataType*);
+                        UserDataType*,
+                        bool); // expedited ?
     // *NOTE*: to be used by message allocators
   IRC_SessionMessage_T (Stream_SessionId_t,
                         ACE_Allocator*); // message allocator

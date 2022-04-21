@@ -54,7 +54,8 @@ class IRC_Client_SessionMessage
   IRC_Client_SessionMessage (Stream_SessionId_t,
                              enum Stream_SessionMessageType,
                              IRC_Client_SessionData_t*&,     // session data container handle
-                             struct Stream_UserData*);
+                             struct Stream_UserData*,
+                             bool); // expedited ?
   // *NOTE*: to be used by message allocators
   IRC_Client_SessionMessage (Stream_SessionId_t,
                              ACE_Allocator*); // message allocator

@@ -94,7 +94,8 @@ class BitTorrent_SessionMessage_T
   BitTorrent_SessionMessage_T (Stream_SessionId_t,
                                enum Stream_SessionMessageType,
                                Stream_SessionData_T<SessionDataType>*&, // session data container handle
-                               UserDataType*);
+                               UserDataType*,
+                               bool); // expedited ?
     // *NOTE*: to be used by message allocators
   BitTorrent_SessionMessage_T (Stream_SessionId_t,
                                ACE_Allocator*); // message allocator

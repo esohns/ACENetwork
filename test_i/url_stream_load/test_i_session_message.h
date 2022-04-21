@@ -57,12 +57,12 @@ class Test_I_SessionMessage
                                                  Test_I_SessionMessage>;
 
  public:
-  // *NOTE*: assumes responsibility for the second argument !
-  // *TODO*: (using gcc) cannot pass reference to pointer for some reason
+  // *NOTE*: assumes responsibility for the third argument !
   Test_I_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
                          Test_I_URLStreamLoad_SessionData_t*&, // session data container handle
-                         struct Stream_UserData*);
+                         struct Stream_UserData*,
+                         bool); // expedited ?
   // copy ctor to be used by duplicate()
   Test_I_SessionMessage (const Test_I_SessionMessage&);
   inline virtual ~Test_I_SessionMessage () {}
@@ -104,12 +104,12 @@ class Test_I_SessionMessage_2
                                                  Test_I_SessionMessage_2>;
 
  public:
-  // *NOTE*: assumes responsibility for the second argument !
-  // *TODO*: (using gcc) cannot pass reference to pointer for some reason
+  // *NOTE*: assumes responsibility for the third argument !
   Test_I_SessionMessage_2 (Stream_SessionId_t,
                            enum Stream_SessionMessageType,
                            Test_I_URLStreamLoad_SessionData_2_t*&, // session data container handle
-                           struct Stream_UserData*);
+                           struct Stream_UserData*,
+                           bool); // expedited ?
   // copy ctor to be used by duplicate()
   Test_I_SessionMessage_2 (const Test_I_SessionMessage_2&);
   inline virtual ~Test_I_SessionMessage_2 () {}

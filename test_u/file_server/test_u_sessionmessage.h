@@ -60,7 +60,8 @@ class Test_U_SessionMessage
   Test_U_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
                          FileServer_SessionData_t*&,     // session data handle
-                         struct Stream_UserData*);
+                         struct Stream_UserData*,
+                         bool); // expedited ?
   // *NOTE*: to be used by message allocators
   Test_U_SessionMessage (Stream_SessionId_t,
                          ACE_Allocator*); // message allocator

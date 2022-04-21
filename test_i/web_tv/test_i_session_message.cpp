@@ -28,11 +28,13 @@
 Test_I_SessionMessage::Test_I_SessionMessage (Stream_SessionId_t sessionId_in,
                                               enum Stream_SessionMessageType messageType_in,
                                               Test_I_WebTV_SessionData_t*& sessionData_in,
-                                              struct Stream_UserData* userData_in)
+                                              struct Stream_UserData* userData_in,
+                                              bool expedited_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_in,
-              userData_in)
+              userData_in,
+              expedited_in) // expedited ?
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage::Test_I_SessionMessage"));
 
@@ -112,11 +114,13 @@ Test_I_SessionMessage::duplicate (void) const
 Test_I_SessionMessage_2::Test_I_SessionMessage_2 (Stream_SessionId_t sessionId_in,
                                                   enum Stream_SessionMessageType messageType_in,
                                                   Test_I_WebTV_SessionData_2_t*& sessionData_in,
-                                                  struct Stream_UserData* userData_in)
+                                                  struct Stream_UserData* userData_in,
+                                                  bool expedited_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_in,
-              userData_in)
+              userData_in,
+              expedited_in) // expedited ?
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::Test_I_SessionMessage_2"));
 

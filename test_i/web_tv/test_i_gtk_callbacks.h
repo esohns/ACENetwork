@@ -63,6 +63,7 @@ G_MODULE_EXPORT gboolean drawingarea_expose_event_cb (GtkWidget*, GdkEvent*, gpo
 G_MODULE_EXPORT void drawingarea_size_allocate_cb (GtkWidget*, GdkRectangle*, gpointer);
 G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gboolean window_fullscreen_key_press_event_cb (GtkWidget*, GdkEventKey*, gpointer);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

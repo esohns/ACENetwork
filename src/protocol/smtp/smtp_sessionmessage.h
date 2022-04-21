@@ -89,7 +89,8 @@ class SMTP_SessionMessage_T
   SMTP_SessionMessage_T (Stream_SessionId_t,
                          enum Stream_SessionMessageType, // session message type
                          SessionDataType*&,              // session data container handle
-                         UserDataType*);                 // user data handle
+                         UserDataType*,                  // user data handle
+                         bool);                          // expedited ?
   // *NOTE*: to be used by message allocators
   SMTP_SessionMessage_T (Stream_SessionId_t,
                          ACE_Allocator*); // message allocator

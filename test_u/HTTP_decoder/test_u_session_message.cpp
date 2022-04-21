@@ -19,8 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
-//#include "test_u_HTTP_decoder_stream_common.h"
 #include "test_u_session_message.h"
 
 #include "ace/Malloc_Base.h"
@@ -30,11 +28,13 @@
 Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
                                               enum Stream_SessionMessageType messageType_in,
                                               Test_U_HTTPDecoder_SessionData_t*& sessionData_in,
-                                              struct Stream_UserData* userData_in)
+                                              struct Stream_UserData* userData_in,
+                                              bool expedited_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_in,
-              userData_in)
+              userData_in,
+              expedited_in) // expedited ?
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 

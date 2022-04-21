@@ -29,11 +29,13 @@ IRC_SessionMessage_T<SessionDataType,
                      UserDataType>::IRC_SessionMessage_T (Stream_SessionId_t sessionId_in,
                                                           enum Stream_SessionMessageType messageType_in,
                                                           SessionDataType*& sessionData_inout,
-                                                          UserDataType* userData_in)
+                                                          UserDataType* userData_in,
+                                                          bool expedited_in)
  : inherited (sessionId_in,
               messageType_in,
               sessionData_inout,
-              userData_in)
+              userData_in,
+              expedited_in) // expedited ?
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_SessionMessage_T::IRC_SessionMessage_T"));
 

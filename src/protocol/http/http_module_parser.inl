@@ -232,7 +232,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     session_data_container_p->increase ();
   if (unlikely (!inherited::putSessionMessage (STREAM_SESSION_MESSAGE_STEP,
                                                session_data_container_p,
-                                               NULL)))
+                                               NULL,
+                                               false))) // expedited ?
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
                 inherited::name (),

@@ -298,19 +298,21 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
        iterator != data_r.M3UPlaylist->elements.end ();
        ++iterator)
   {
-    if (iterator == data_r.M3UPlaylist->elements.begin ())
-    {
-
-    } // end IF
-    else if (iterator == iterator_2)
-    {
-
-    } // end ELSE IF
+    // *TODO*: process times
     (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
   } // end FOR
+  // keep the most recent 5% entries
+  ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
+  Test_I_WebTV_ChannelSegmentURLsIterator_t iterator_3 =
+      (*channel_iterator).second.segment.URLs.begin ();
+  unsigned int number_to_erase =
+      (static_cast<float> ((*channel_iterator).second.segment.URLs.size ()) * 0.95);
+  std::advance (iterator_3, number_to_erase);
+  (*channel_iterator).second.segment.URLs.erase ((*channel_iterator).second.segment.URLs.begin (),
+                                                 iterator_3);
 
-  guint event_source_id =
-      g_idle_add (idle_start_session_cb, CBData_);
+  guint event_source_id = g_idle_add (idle_start_session_cb,
+                                      CBData_);
   if (unlikely (event_source_id == 0))
   {
     ACE_DEBUG ((LM_ERROR,

@@ -58,11 +58,12 @@ class Test_U_SessionMessage
                                                  Test_U_SessionMessage>;
 
  public:
-  // *NOTE*: assumes responsibility for the second argument !
+  // *NOTE*: assumes responsibility for the third argument !
   Test_U_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
                          Test_U_StreamSessionData_t*&, // session data handle
-                         struct Stream_UserData*);
+                         struct Stream_UserData*,
+                         bool); // expedited ?
     // *NOTE*: to be used by message allocators
   Test_U_SessionMessage (Stream_SessionId_t,
                          ACE_Allocator*); // message allocator
