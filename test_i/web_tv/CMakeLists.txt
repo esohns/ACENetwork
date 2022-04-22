@@ -105,6 +105,8 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_session_message.h
      test_i_signalhandler.cpp
      test_i_signalhandler.h
+     test_i_timeouthandler.cpp
+     test_i_timeouthandler.h
      test_i_web_tv.cpp
      test_i_web_tv_common.h
      test_i_web_tv_defines.h

@@ -816,9 +816,9 @@ do_work (//bool requestBroadcastReplies_in,
   event_dispatch_state_s.configuration = &configuration_in.dispatchConfiguration;
 
   ACE_Time_Value deadline = ACE_Time_Value::zero;
-  PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-      connection_manager_p;
-  ACE_ASSERT (iconnection_manager_p);
+//  PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+//      connection_manager_p;
+//  ACE_ASSERT (iconnection_manager_p);
 //  int group_id = -1;
   ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;

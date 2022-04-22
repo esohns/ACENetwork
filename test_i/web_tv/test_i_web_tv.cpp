@@ -649,10 +649,14 @@ do_work (const std::string& configurationFile_in,
   } // end IF
 #endif // SSL_SUPPORT
 
+  ACE_Thread_Mutex timeout_handler_lock;
+  Test_I_TimeoutHandler timeout_handler;
+  timeout_handler.lock_ = &timeout_handler_lock;
 #if defined (GUI_SUPPORT)
   Test_I_EventHandler message_handler (&CBData_in);
   CBData_in.channels = &channels;
   CBData_in.currentChannel = channel_in;
+  CBData_in.timeoutHandler = &timeout_handler;
 #else
   Test_I_EventHandler message_handler;
 #endif // GUI_SUPPORT
@@ -855,6 +859,7 @@ do_work (const std::string& configurationFile_in,
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
+  timer_configuration.dispatch = COMMON_TIMER_DISPATCH_REACTOR;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
@@ -875,36 +880,6 @@ do_work (const std::string& configurationFile_in,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     goto clean;
   } // end IF
-
-  //// step0d: initialize regular (global) statistic reporting
-  //Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
-  //                                                     connection_manager_p,
-  //                                                     false);
-  ////Stream_StatisticHandler_Proactor_t statistic_handler_proactor (ACTION_REPORT,
-  ////                                                               connection_manager_p,
-  ////                                                               false);
-  //long timer_id = -1;
-  //if (statisticReportingInterval_in)
-  //{
-  //  ACE_Event_Handler* handler_p = &statistic_handler;
-  //  ACE_Time_Value interval (statisticReportingInterval_in, 0);
-  //  timer_id =
-  //    timer_manager_p->schedule_timer (handler_p,                  // event handler
-  //                                     NULL,                       // ACT
-  //                                     COMMON_TIME_NOW + interval, // first wakeup time
-  //                                     interval);                  // interval
-  //  if (timer_id == -1)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
-
-  //    // clean up
-  //    timer_manager_p->stop ();
-  //    delete stream_p;
-
-  //    return;
-  //  } // end IF
-  //} // end IF
 
   // step0c: initialize signal handling
   //CBData_in.configuration->signalHandlerConfiguration.hasUI =

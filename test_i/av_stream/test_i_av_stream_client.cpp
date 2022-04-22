@@ -1521,7 +1521,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 //  report_handler_p = connection_manager_p;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iconnection_manager_p);
-  ACE_ASSERT (report_handler_p);
+//  ACE_ASSERT (report_handler_p);
   Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                             NULL,
                                             false);
@@ -2398,7 +2398,7 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
 //  ui_cb_data_p = &ui_cb_data;
 #endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (ui_cb_data_p);
+//  ACE_ASSERT (ui_cb_data_p);
 #endif // GUI_SUPPORT
 
   // step1d: initialize logging and/or tracing

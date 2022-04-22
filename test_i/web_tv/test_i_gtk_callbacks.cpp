@@ -41,6 +41,7 @@
 #include "common_file_tools.h"
 
 #include "common_timer_manager.h"
+#include "common_timer_manager_common.h"
 
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_defines.h"
@@ -589,16 +590,16 @@ idle_initialize_UI_cb (gpointer userData_in)
 }
 
 void
-add_segment_URIs (const std::string& URI_in,
+add_segment_URIs (const std::string& lastURI_in,
                   Test_I_WebTV_ChannelSegmentURLs_t& URIs_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::add_segment_URIs"));
 
-  size_t position = URI_in.find_last_of ('/', std::string::npos);
+  size_t position = lastURI_in.find_last_of ('/', std::string::npos);
   ACE_ASSERT (position != std::string::npos);
   std::string URI_string_tail =
-      URI_in.substr (position + 1, std::string::npos);
-  std::string URI_string_head = URI_in;
+      lastURI_in.substr (position + 1, std::string::npos);
+  std::string URI_string_head = lastURI_in;
   URI_string_head.erase (position + 1, std::string::npos);
 
   std::string regex_string =
@@ -612,7 +613,7 @@ add_segment_URIs (const std::string& URI_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                ACE_TEXT (URI_in.c_str ())));
+                ACE_TEXT (lastURI_in.c_str ())));
     return;
   } // end IF
   ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -654,149 +655,20 @@ idle_segment_download_complete_cb (gpointer userData_in)
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
-  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
-      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
-  ACE_ASSERT (iconnection_manager_2);
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
-  Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
-  HTTP_Form_t HTTP_form;
-  HTTP_Headers_t HTTP_headers;
-  struct HTTP_Record* HTTP_record_p = NULL;
-  Test_I_Message::DATA_T* message_data_p = NULL;
-  Test_I_Message* message_p = NULL;
-  ACE_Message_Block* message_block_p = NULL;
-    Net_ConnectionConfigurationsIterator_t iterator_2 =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
   ACE_ASSERT (data_p->channels);
   ACE_ASSERT (data_p->currentChannel);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
     data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
-  if ((data_p->handle == ACE_INVALID_HANDLE) ||
-      (*channel_iterator).second.segment.URLs.empty ())
-    return G_SOURCE_REMOVE;
-  std::string current_URL = (*channel_iterator).second.segment.URLs.front ();
-  (*channel_iterator).second.segment.URLs.pop_front ();
-  if ((*channel_iterator).second.segment.URLs.empty ())
-    add_segment_URIs (current_URL,
-                      (*channel_iterator).second.segment.URLs);
-  bool is_URI_b = HTTP_Tools::URLIsURI (current_URL);
-  ACE_INET_Addr host_address;
-  std::string hostname_string, URI_string, URI_string_2, URL_string;
-  bool use_SSL = false;
-
-  if (is_URI_b)
-    URL_string = (*iterator_3).second.second->URL;
-  else
-    URL_string = current_URL;
-  if (!HTTP_Tools::parseURL (URL_string,
-                             host_address,
-                             hostname_string,
-                             URI_string,
-                             use_SSL))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-                ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
-    return G_SOURCE_REMOVE;
-  } // end IF
-
-  if (is_URI_b)
-  {
-    size_t position = URI_string.find_last_of ('/', std::string::npos);
-    ACE_ASSERT (position != std::string::npos);
-    URI_string.erase (position + 1, std::string::npos);
-    URI_string_2 = URI_string;
-    URI_string_2 += current_URL;
-    URI_string = URI_string_2;
-  } // end IF
-
-  // send HTTP request
-  ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
-  iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
-#else
-      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
-#endif // ACE_WIN32 || ACE_WIN64
-  istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
-  ACE_ASSERT (istream_connection_p);
-  const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
-      istream_connection_p->stream ();
-
-  ACE_NEW_NORETURN (HTTP_record_p,
-                    struct HTTP_Record ());
-  if (!HTTP_record_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-               ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  HTTP_record_p->form = HTTP_form;
-  HTTP_headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
-                                       hostname_string));
-  HTTP_record_p->headers = HTTP_headers;
-  HTTP_record_p->method =
-      (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
-                          : HTTP_Codes::HTTP_METHOD_POST);
-  HTTP_record_p->URI = URI_string;
-  HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
-
-  ACE_NEW_NORETURN (message_data_p,
-                    Test_I_Message::DATA_T ());
-  if (!message_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-               ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    delete HTTP_record_p; HTTP_record_p = NULL;
-    return G_SOURCE_REMOVE;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
-  message_data_p->setPR (HTTP_record_p);
-
-  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
-  ACE_ASSERT (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator);
-allocate:
-  message_p =
-      static_cast<Test_I_Message*> (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->allocatorConfiguration->defaultBufferSize));
-  // keep retrying ?
-  if (!message_p &&
-      !static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->block ())
-    goto allocate;
-  if (!message_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
-    delete message_data_p; message_data_p = NULL;
-    return G_SOURCE_REMOVE;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-  message_p->initialize (message_data_p,
-                         stream_r.getR_2 ().getR ().sessionId,
-                         NULL);
-
-  message_block_p = message_p;
-  istream_connection_p->send (message_block_p);
-  message_p = NULL;
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("requesting: \"%s\"\n"),
-              ACE_TEXT (URI_string.c_str ())));
-
-  // clean up
-  iconnection_p->decrease (); iconnection_p = NULL;
+  ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
+  ACE_ASSERT (data_p->timeoutHandler->lock_);
+  std::string current_URL;
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, *data_p->timeoutHandler->lock_, G_SOURCE_REMOVE);
+    current_URL = (*channel_iterator).second.segment.URLs.back ();
+    if ((*channel_iterator).second.segment.URLs.size () <= 10)
+      add_segment_URIs (current_URL,
+                       (*channel_iterator).second.segment.URLs);
+  } // end lock scope
 
   return G_SOURCE_REMOVE;
 }
@@ -874,6 +746,7 @@ idle_start_session_cb (gpointer userData_in)
       data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
   ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
+  ACE_ASSERT (data_p->timeoutHandler);
 
   // close connection
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
@@ -896,7 +769,7 @@ idle_start_session_cb (gpointer userData_in)
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  ACE_OS::sleep (2);
+  ACE_OS::sleep (2); // *TODO*: why ?
 #endif // ACE_WIN32 || ACE_WIN64
 
   Test_I_TCPConnector_2_t connector (true);
@@ -904,14 +777,6 @@ idle_start_session_cb (gpointer userData_in)
   Test_I_SSLConnector_2_t ssl_connector (true);
 #endif // SSL_SUPPORT
   Test_I_AsynchTCPConnector_2_t asynch_connector (true);
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_2 = NULL;
-  Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
-  HTTP_Form_t HTTP_form;
-  HTTP_Headers_t HTTP_headers;
-  struct HTTP_Record* HTTP_record_p = NULL;
-  Test_I_Message::DATA_T* message_data_p = NULL;
-  Test_I_Message* message_p = NULL;
-  ACE_Message_Block* message_block_p = NULL;
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URI_string_2, URL_string;
   bool use_SSL = false;
@@ -1007,6 +872,26 @@ idle_start_session_cb (gpointer userData_in)
               ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_2 = NULL;
+  Test_I_IStreamConnection_2_t* istream_connection_2 = NULL;
+  iconnection_2 =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  istream_connection_2 =
+      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_2);
+  ACE_ASSERT (istream_connection_2);
+  const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
+      istream_connection_2->stream ();
+  const Stream_Module_t* module_p =
+      stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+  ACE_ASSERT (module_p);
+  data_p->dispatch =
+      dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  ACE_ASSERT (data_p->dispatch);
+
   //ACE_ASSERT (!data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     data_p->progressData.eventSourceId =
@@ -1038,89 +923,6 @@ idle_start_session_cb (gpointer userData_in)
     state_r.eventSourceIds.insert (data_p->videoUpdateEventSourceId);
   } // end lock scope
 
-  // send HTTP request
-  ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
-  iconnection_2 =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
-#else
-      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
-#endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iconnection_2);
-  istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_2);
-  ACE_ASSERT (istream_connection_p);
-  const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
-      istream_connection_p->stream ();
-  Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING),
-                                                 false,
-                                                 false));
-  ACE_ASSERT (module_p);
-  data_p->dispatch = dynamic_cast<Common_IDispatch*> (module_p->writer ());
-  ACE_ASSERT (data_p->dispatch);
-
-  ACE_NEW_NORETURN (HTTP_record_p,
-                    struct HTTP_Record ());
-  if (!HTTP_record_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-               ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  HTTP_record_p->form = HTTP_form;
-  HTTP_headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
-                                       hostname_string));
-  HTTP_record_p->headers = HTTP_headers;
-  HTTP_record_p->method =
-      (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
-                          : HTTP_Codes::HTTP_METHOD_POST);
-  HTTP_record_p->URI = URI_string;
-  HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
-
-  ACE_NEW_NORETURN (message_data_p,
-                    Test_I_Message::DATA_T ());
-  if (!message_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-               ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    delete HTTP_record_p; HTTP_record_p = NULL;
-    return G_SOURCE_REMOVE;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
-  message_data_p->setPR (HTTP_record_p);
-
-  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
-  ACE_ASSERT (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator);
-allocate:
-  message_p =
-      static_cast<Test_I_Message*> (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->allocatorConfiguration->defaultBufferSize));
-  // keep retrying ?
-  if (!message_p &&
-      !static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->block ())
-    goto allocate;
-  if (!message_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
-    delete message_data_p; message_data_p = NULL;
-    return G_SOURCE_REMOVE;
-  } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-  message_p->initialize (message_data_p,
-                         stream_r.getR_2 ().getR ().sessionId,
-                         NULL);
-
-  message_block_p = message_p;
-  istream_connection_p->send (message_block_p);
-  message_p = NULL;
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("requesting: \"%s\"\n"),
-              ACE_TEXT (URI_string.c_str ())));
-
-  // clean up
-  iconnection_2->decrease (); iconnection_2 = NULL;
-
   GtkToggleButton* toggle_button_p =
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
@@ -1130,6 +932,27 @@ allocate:
                         GTK_STOCK_MEDIA_STOP);
   un_toggling_play = true;
   gtk_toggle_button_toggled (toggle_button_p);
+
+  // schedule timer
+  data_p->timeoutHandler->initialize (data_p->handle,
+                                      &(*channel_iterator).second.segment,
+                                      (*iterator_3).second.second->URL,
+                                      static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->allocatorConfiguration,
+                                      static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->messageAllocator);
+  data_p->timeoutHandler->interval_.sec ((*channel_iterator).second.segment.length);
+  // start first download now
+  data_p->timeoutHandler->handle (NULL);
+  // schedule regular downloads in-between buffers
+  data_p->timeoutHandler->timerId_ =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (data_p->timeoutHandler,
+                                                                  NULL,
+                                                                  ACE_Time_Value ((*channel_iterator).second.segment.length / 2, 0),
+                                                                  data_p->timeoutHandler->interval_);
+  ACE_ASSERT (data_p->timeoutHandler->timerId_);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("scheduled segment download interval timer (id: %d, interval: %#T)\n"),
+              data_p->timeoutHandler->timerId_,
+              &data_p->timeoutHandler->interval_));
 
   return G_SOURCE_REMOVE;
 }

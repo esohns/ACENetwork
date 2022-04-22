@@ -664,17 +664,13 @@ idle_start_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_start_UI_cb"));
 
-  struct PCPClient_UI_CBData* data_p =
-      static_cast<struct PCPClient_UI_CBData*> (userData_in);
-
   // sanity check(s)
-  ACE_ASSERT (data_p);
-
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+//  struct PCPClient_UI_CBData* data_p =
+//      static_cast<struct PCPClient_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   //GtkAction* action_p =
   //  GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
@@ -695,17 +691,13 @@ idle_end_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_end_UI_cb"));
 
-  PCPClient_UI_CBData* data_p =
-      static_cast<PCPClient_UI_CBData*> (userData_in);
-
   // sanity check(s)
-  ACE_ASSERT (data_p);
-
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+//  PCPClient_UI_CBData* data_p =
+//      static_cast<PCPClient_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   //GtkAction* action_p =
   //  //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
@@ -1547,9 +1539,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 
     Net_ConnectionConfigurationsIterator_t iterator_3;
-    PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-      connection_manager_p;
-    ACE_ASSERT (iconnection_manager_p);
+//    PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+//      connection_manager_p;
+//    ACE_ASSERT (iconnection_manager_p);
     PCPClient_InboundConnector_t connector (true);
     PCPClient_InboundAsynchConnector_t asynch_connector (true);
     PCPClient_InboundConnectorMcast_t connector_mcast (true);

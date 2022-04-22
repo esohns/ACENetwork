@@ -43,6 +43,8 @@
 #endif // WXWIDGETS_SUPPORT
 #endif // GUI_SUPPORT
 
+#include "test_i_timeouthandler.h"
+
 #include "test_i_web_tv_stream_common.h"
 
 // forward declarations
@@ -57,6 +59,7 @@ struct Test_I_WebTV_ChannelSegment
 {
   ACE_Time_Value                    start;
   ACE_Time_Value                    end;
+  unsigned int                      length; // s
   Test_I_WebTV_ChannelSegmentURLs_t URLs;
 };
 
@@ -175,6 +178,7 @@ struct Test_I_WebTV_UI_CBData
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , subscribers ()
+   , timeoutHandler (NULL)
    , videoUpdateEventSourceId (0)
   {}
 
@@ -186,6 +190,7 @@ struct Test_I_WebTV_UI_CBData
   ACE_HANDLE                            handle; // connection-
   struct Test_I_WebTV_UI_ProgressData   progressData;
   Test_I_Subscribers_t                  subscribers;
+  Test_I_TimeoutHandler*                timeoutHandler;
   guint                                 videoUpdateEventSourceId;
 };
 #endif // GUI_SUPPORT

@@ -254,9 +254,9 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
   ACE_ASSERT (!inherited::isInitialized_);
 
   // update configuration
-  inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != const_cast<inherited::CONFIGURATION_T&> (configuration_in).end ());
+//  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+//    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+//  ACE_ASSERT (iterator != const_cast<inherited::CONFIGURATION_T&> (configuration_in).end ());
   //(*iterator).second.second->stream = this;
 
 //  bool result = false;

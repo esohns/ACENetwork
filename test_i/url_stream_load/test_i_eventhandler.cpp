@@ -86,9 +86,10 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
+#if defined (_DEBUG)
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   ACE_ASSERT (iterator == sessionDataMap_.end ());
-
+#endif // _DEBUG
   sessionDataMap_.insert (std::make_pair (sessionId_in,
                                           &const_cast<struct Test_I_URLStreamLoad_SessionData&> (sessionData_in)));
 

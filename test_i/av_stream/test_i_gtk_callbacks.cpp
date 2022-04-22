@@ -1649,9 +1649,9 @@ update_buffer_size (struct Test_I_AVStream_UI_CBData* CBData_in)
   Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+//  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+//    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
+//  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif
 
   GtkSpinButton* spin_button_p =
@@ -2144,17 +2144,16 @@ idle_initialize_source_UI_cb (gpointer userData_in)
     }
   } // end SWITCH
 #else
+  // sanity check(s)
   struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
     static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
-  // sanity check(s)
   ACE_ASSERT (ui_cb_data_p->configuration);
-
   Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
-  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+//  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+//    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
+//  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
 #endif // ACE_WIN32 || ACE_WIN64
 
   Common_UI_GTK_BuildersConstIterator_t iterator =
@@ -3939,18 +3938,16 @@ idle_start_target_UI_cb (gpointer userData_in)
   STREAM_TRACE (ACE_TEXT ("::idle_start_target_UI_cb"));
 
   // sanity check(s)
-  struct Test_I_AVStream_UI_CBData* ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
-  ACE_ASSERT (ui_cb_data_p);
+//  struct Test_I_AVStream_UI_CBData* ui_cb_data_p =
+//    static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
+//  ACE_ASSERT (ui_cb_data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
   Common_UI_GTK_BuildersConstIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   GtkAction* action_p =
@@ -4175,17 +4172,18 @@ idle_finalize_source_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_UNUSED_ARG (userData_in);
 #else
-  struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
-    static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
-
   // sanity check(s)
-  ACE_ASSERT (ui_cb_data_base_p);
+//  struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
+//    static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
+//  ACE_ASSERT (ui_cb_data_base_p);
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+  // sanity check(s)
   struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
     static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
+  ACE_ASSERT (ui_cb_data_p);
 
   // clean up
   int result = -1;

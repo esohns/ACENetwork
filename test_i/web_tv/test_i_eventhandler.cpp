@@ -310,6 +310,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   std::advance (iterator_3, number_to_erase);
   (*channel_iterator).second.segment.URLs.erase ((*channel_iterator).second.segment.URLs.begin (),
                                                  iterator_3);
+  (*channel_iterator).second.segment.length =
+      (*data_r.M3UPlaylist->elements.begin ()).Length;
 
   guint event_source_id = g_idle_add (idle_start_session_cb,
                                       CBData_);
