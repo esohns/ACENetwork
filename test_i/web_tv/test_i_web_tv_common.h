@@ -78,6 +78,7 @@ typedef Test_I_WebTV_ChannelResolutions_t::const_iterator Test_I_WebTV_ChannelRe
 struct Test_I_WebTV_ChannelConfiguration
 {
   std::string                        baseURI; // sub-URI (if any) of the individual streams
+  unsigned int                       indexPositions; // i.e. for computing leading "0"s
   std::string                        mainURL; // program-
   std::string                        name;
   Test_I_WebTV_ChannelResolutions_t  resolutions;

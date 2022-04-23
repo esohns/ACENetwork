@@ -518,7 +518,7 @@ HTTP_Tools::URLIsURI (const std::string& URL_in)
   // sanity check(s)
   ACE_ASSERT (!URL_in.empty ());
 
-  std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^[^/]+(?:/(?:[^/])*)*(?:/)?$");
+  std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^[^/]+(?:/(?:[^/])+)*(?:/)?$");
   std::regex regex (regex_string);
   std::smatch match_results;
   return std::regex_match (URL_in,

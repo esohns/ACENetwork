@@ -25,6 +25,7 @@
 #define TEST_I_WEBTV_CNF_CHANNELS_SECTION_HEADER          "channels"
 #define TEST_I_WEBTV_CNF_CHANNEL_NUMBER_KEY               "number"
 #define TEST_I_WEBTV_CNF_CHANNEL_NAME_KEY                 "name"
+#define TEST_I_WEBTV_CNF_CHANNEL_INDEX_POSITIONS_KEY      "index_positions"
 #define TEST_I_WEBTV_CNF_CHANNEL_URL_KEY                  "URL"
 
 #define TEST_I_WEBTV_CNF_INI_FILE                         "web_tv.ini"

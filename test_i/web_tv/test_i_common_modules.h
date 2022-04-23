@@ -35,6 +35,9 @@
 #include "stream_dev_target_alsa.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
+#if defined (FAAD_SUPPORT)
+#include "stream_dec_faad_decoder.h"
+#endif // FAAD_SUPPORT
 #if defined (FFMPEG_SUPPORT)
 #include "stream_dec_libav_audio_decoder.h"
 #include "stream_dec_libav_decoder.h"
@@ -282,6 +285,23 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,                       
                               Stream_INotify_t,                                        // stream notification interface type
                               Test_I_Defragment_2);                                    // writer type
 
+
+#if defined (FAAD_SUPPORT)
+typedef Stream_Decoder_FAAD_T<ACE_MT_SYNCH,
+                              Common_TimePolicy_t,
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_2,
+                              Stream_ControlMessage_t,
+                              Test_I_Message,
+                              Test_I_SessionMessage_2,
+                              Test_I_WebTV_SessionData_2_t,
+                              struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_FAADDecoder;
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,                                      // session data type
+                             enum Stream_SessionMessageType,                                  // session event type
+                             struct Test_I_WebTV_ModuleHandlerConfiguration_2,                // module handler configuration type
+                             libacestream_default_dec_faad_decoder_module_name_string,
+                             Stream_INotify_t,                                                // stream notification interface type
+                             Test_I_FAADDecoder);                                             // writer type
+#endif // FAAD_SUPPORT
 #if defined (FFMPEG_SUPPORT)
 typedef Stream_Decoder_LibAVAudioDecoder_T<ACE_MT_SYNCH,
                                            Common_TimePolicy_t,

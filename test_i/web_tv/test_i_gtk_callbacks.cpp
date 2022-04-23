@@ -171,6 +171,10 @@ load_resolutions (GtkListStore* listStore_in,
                        -1);
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("loaded resolution %ux%u\n"),
+                (*iterator_2).resolution.width,
+                (*iterator_2).resolution.height));
   } // end FOR
 }
 
@@ -188,6 +192,7 @@ idle_load_channel_configuration_cb (gpointer userData_in)
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
       data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
+  ACE_ASSERT (!(*channel_iterator).second.resolutions.empty ());
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -329,7 +334,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   if (!cell_renderer_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
-               ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
+                ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
     return G_SOURCE_REMOVE;
   } // end IF
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box_p),
@@ -591,46 +596,76 @@ idle_initialize_UI_cb (gpointer userData_in)
 
 void
 add_segment_URIs (const std::string& lastURI_in,
-                  Test_I_WebTV_ChannelSegmentURLs_t& URIs_out)
+                  Test_I_WebTV_ChannelSegmentURLs_t& URIs_out,
+                  unsigned int indexPositions_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::add_segment_URIs"));
 
-  size_t position = lastURI_in.find_last_of ('/', std::string::npos);
-  ACE_ASSERT (position != std::string::npos);
-  std::string URI_string_tail =
-      lastURI_in.substr (position + 1, std::string::npos);
-  std::string URI_string_head = lastURI_in;
-  URI_string_head.erase (position + 1, std::string::npos);
-
-  std::string regex_string =
-      ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([[:alnum:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(.ts)$");
-  std::regex regex (regex_string);
+  std::string URI_string_head, URI_string_tail;
+  std::regex regex;
   std::smatch match_results;
-  if (unlikely(!std::regex_match (URI_string_tail,
-                                  match_results,
-                                  regex,
-                                  std::regex_constants::match_default)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                ACE_TEXT (lastURI_in.c_str ())));
-    return;
-  } // end IF
-  ACE_ASSERT (match_results.ready () && !match_results.empty ());
   std::stringstream converter;
-  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-  converter.clear ();
-  converter.str (match_results[9].str ());
   unsigned int index_i = 0;
-  converter >> index_i;
-  URI_string_head += (match_results[1].str () +
-                      match_results[2].str () +
-                      match_results[3].str () +
-                      match_results[4].str () +
-                      match_results[5].str () +
-                      match_results[6].str () +
-                      match_results[7].str () +
-                      match_results[8].str ());
+
+  size_t position = lastURI_in.find_last_of ('/', std::string::npos);
+  if (position != std::string::npos)
+  {
+    URI_string_tail =
+        lastURI_in.substr (position + 1, std::string::npos);
+    URI_string_head = lastURI_in;
+    URI_string_head.erase (position + 1, std::string::npos);
+
+    std::string regex_string =
+        ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([[:alnum:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(.ts)$");
+    regex.assign (regex_string);
+    if (unlikely(!std::regex_match (URI_string_tail,
+                                    match_results,
+                                    regex,
+                                    std::regex_constants::match_default)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                  ACE_TEXT (lastURI_in.c_str ())));
+      return;
+    } // end IF
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter.str (match_results[9].str ());
+    converter >> index_i;
+    URI_string_head += (match_results[1].str () +
+                        match_results[2].str () +
+                        match_results[3].str () +
+                        match_results[4].str () +
+                        match_results[5].str () +
+                        match_results[6].str () +
+                        match_results[7].str () +
+                        match_results[8].str ());
+    URI_string_tail = match_results[10].str ();
+  } // end IF
+  else
+  {
+    std::string regex_string =
+        ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(.ts)$");
+    regex.assign (regex_string);
+    if (unlikely(!std::regex_match (lastURI_in,
+                                    match_results,
+                                    regex,
+                                    std::regex_constants::match_default)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                 ACE_TEXT (lastURI_in.c_str ())));
+      return;
+    } // end IF
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter.str (match_results[1].str ());
+    converter >> index_i;
+    URI_string_tail = match_results[2].str ();
+  } // end ELSE
+
   std::string URI_string;
   for (unsigned int i = 0;
        i < TEST_I_WEBTV_NUMBER_OF_SEGMENTS_TO_PRELOAD;
@@ -639,9 +674,12 @@ add_segment_URIs (const std::string& lastURI_in,
     URI_string = URI_string_head;
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter.clear ();
-    converter << std::setw (5) << std::setfill ('0') << ++index_i;
+    if (indexPositions_in)
+      converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
+    else
+      converter << ++index_i;
     URI_string += converter.str ();
-    URI_string += match_results[10].str ();
+    URI_string += URI_string_tail;
     URIs_out.push_back (URI_string);
   } // end FOR
 }
@@ -667,7 +705,8 @@ idle_segment_download_complete_cb (gpointer userData_in)
     current_URL = (*channel_iterator).second.segment.URLs.back ();
     if ((*channel_iterator).second.segment.URLs.size () <= 10)
       add_segment_URIs (current_URL,
-                       (*channel_iterator).second.segment.URLs);
+                        (*channel_iterator).second.segment.URLs,
+                        (*channel_iterator).second.indexPositions);
   } // end lock scope
 
   return G_SOURCE_REMOVE;
@@ -1520,16 +1559,22 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                  ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
       return;
     } // end IF
-    (*iterator_3).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
-    (*iterator_3).second.second->URL +=
-        (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
-    (*iterator_3).second.second->URL += ACE_TEXT_ALWAYS_CHAR ("://");
-    (*iterator_3).second.second->URL += hostname_string;
-    size_t position = URI_string_2.find_last_of ('/', std::string::npos);
-    ACE_ASSERT (position != std::string::npos);
-    URI_string_2.erase (position + 1, std::string::npos);
-    (*iterator_3).second.second->URL += URI_string_2;
-    (*iterator_3).second.second->URL += URI_string;
+    bool is_URI_b = HTTP_Tools::URLIsURI (URI_string);
+    if (is_URI_b)
+    {
+      (*iterator_3).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
+      (*iterator_3).second.second->URL +=
+          (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
+      (*iterator_3).second.second->URL += ACE_TEXT_ALWAYS_CHAR ("://");
+      (*iterator_3).second.second->URL += hostname_string;
+      size_t position = URI_string_2.find_last_of ('/', std::string::npos);
+      ACE_ASSERT (position != std::string::npos);
+      URI_string_2.erase (position + 1, std::string::npos);
+      (*iterator_3).second.second->URL += URI_string_2;
+      (*iterator_3).second.second->URL += URI_string;
+    } // end IF
+    else
+      (*iterator_3).second.second->URL = URI_string;
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address =
         host_address;
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
@@ -1899,7 +1944,8 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
   GtkTreeIter iterator_2;
   gboolean result = gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget_in),
                                                    &iterator_2);
-  ACE_ASSERT (result);
+  if (result == FALSE)
+    return; // changed channel ?
   GtkListStore* list_store_p =
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
@@ -2043,8 +2089,8 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
         gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
 
     g_signal_emit_by_name (G_OBJECT (drawing_area_p),
-                          ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
-                          userData_in);
+                           ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
+                           userData_in);
 
     // drop frames until resize signal AND session message have been processed
     Stream_Visualization_IResize* iresize_p =

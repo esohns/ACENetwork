@@ -366,6 +366,14 @@ install (TARGETS ${PROJECT_NAME}
          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
+if (UNIX)
+ install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
+          DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}" COMPONENT config)
+elseif (WIN32)
+ install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
+          DESTINATION "etc" COMPONENT config)
+#          DESTINATION "$ENV{APPDATA}/${PROJECT_NAME}" COMPONENT config)
+endif ()
 
 # ////////////////////////////////////////
 

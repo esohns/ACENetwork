@@ -220,8 +220,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   {
     struct Test_I_WebTV_ChannelResolution resolution_s;
     std::istringstream converter;
-    for (M3U_ElementsIterator_t iterator = data_r.M3UPlaylist->elements.begin ();
-         iterator != data_r.M3UPlaylist->elements.end ();
+    for (M3U_StreamInf_ElementsIterator_t iterator = data_r.M3UPlaylist->stream_inf_elements.begin ();
+         iterator != data_r.M3UPlaylist->stream_inf_elements.end ();
          ++iterator)
     {
       for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
@@ -275,7 +275,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
         } // end IF
       } // end FOR
       resolution_s.URI = (*iterator).URL;
-      (*channel_iterator).second.resolutions.push_back(resolution_s);
+      (*channel_iterator).second.resolutions.push_back (resolution_s);
     } // end FOR
 
     guint event_source_id =
@@ -292,15 +292,34 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   } // end IF
 
   // process playlist data
-  M3U_ElementsIterator_t iterator_2 = data_r.M3UPlaylist->elements.end ();
+  M3U_StreamInf_ElementsIterator_t iterator_2 =
+      data_r.M3UPlaylist->stream_inf_elements.end ();
   std::advance (iterator_2, -1);
-  for (M3U_ElementsIterator_t iterator = data_r.M3UPlaylist->elements.begin ();
-       iterator != data_r.M3UPlaylist->elements.end ();
-       ++iterator)
+  if (!data_r.M3UPlaylist->ext_inf_elements.empty ())
   {
-    // *TODO*: process times
-    (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
-  } // end FOR
+    for (M3U_ExtInf_ElementsIterator_t iterator = data_r.M3UPlaylist->ext_inf_elements.begin ();
+         iterator != data_r.M3UPlaylist->ext_inf_elements.end ();
+         ++iterator)
+    {
+      // *TODO*: process times
+      (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
+    } // end FOR
+    (*channel_iterator).second.segment.length =
+        (*data_r.M3UPlaylist->ext_inf_elements.begin ()).Length;
+  } // end IF
+  else
+  {
+    for (M3U_StreamInf_ElementsIterator_t iterator = data_r.M3UPlaylist->stream_inf_elements.begin ();
+         iterator != data_r.M3UPlaylist->stream_inf_elements.end ();
+         ++iterator)
+    {
+      // *TODO*: process times
+      (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
+    } // end FOR
+    (*channel_iterator).second.segment.length =
+        (*data_r.M3UPlaylist->stream_inf_elements.begin ()).Length;
+  } // end ELSE
+
   // keep the most recent 5% entries
   ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
   Test_I_WebTV_ChannelSegmentURLsIterator_t iterator_3 =
@@ -310,8 +329,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   std::advance (iterator_3, number_to_erase);
   (*channel_iterator).second.segment.URLs.erase ((*channel_iterator).second.segment.URLs.begin (),
                                                  iterator_3);
-  (*channel_iterator).second.segment.length =
-      (*data_r.M3UPlaylist->elements.begin ()).Length;
 
   guint event_source_id = g_idle_add (idle_start_session_cb,
                                       CBData_);

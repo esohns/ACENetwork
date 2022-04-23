@@ -525,6 +525,9 @@ do_parse_configuration_file (const std::string& fileName_in,
           if (!ACE_OS::strcmp (item_name.c_str (),
                               ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NUMBER_KEY)))
             channel_number = item_value_2;
+          else if (!ACE_OS::strcmp (item_name.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_INDEX_POSITIONS_KEY)))
+            channel_configuration_s.indexPositions = item_value_2;
           break;
         }
         case ACE_Configuration::STRING:
@@ -541,11 +544,15 @@ do_parse_configuration_file (const std::string& fileName_in,
             return false;
           } // end IF
           if (!ACE_OS::strcmp (item_name.c_str (),
-                              ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NUMBER_KEY)))
+                               ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NUMBER_KEY)))
             channel_number = ACE_OS::atoi (item_value.c_str ());
           else if (!ACE_OS::strcmp (item_name.c_str (),
-                               ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NAME_KEY)))
+                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_NAME_KEY)))
             channel_configuration_s.name = item_value.c_str ();
+          else if (!ACE_OS::strcmp (item_name.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_INDEX_POSITIONS_KEY)))
+            channel_configuration_s.indexPositions =
+                ACE_OS::atoi (item_value.c_str ());
           else if (!ACE_OS::strcmp (item_name.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_URL_KEY)))
             channel_configuration_s.mainURL = item_value.c_str ();
@@ -820,6 +827,9 @@ do_work (const std::string& configurationFile_in,
   //modulehandler_configuration_3.targetFileName = outputDirectory_in;
   modulehandler_configuration_3.waitForConnect = false;
   struct Test_I_WebTV_StreamConfiguration_2 stream_configuration_2;
+  stream_configuration_2.mediaType.audio.channels = 2;
+  stream_configuration_2.mediaType.audio.format = AV_SAMPLE_FMT_S16;
+  stream_configuration_2.mediaType.audio.sampleRate = 48000;
   stream_configuration_2.messageAllocator = &message_allocator_2;
   stream_configuration_2.module = &event_handler_module_2;
   stream_configuration_2.printFinalReport = true;

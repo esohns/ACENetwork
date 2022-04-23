@@ -93,6 +93,7 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   ACE_ASSERT (iconnection_manager_p);
   std::string current_URL;
   ACE_ASSERT (lock_);
+  ACE_ASSERT (!segment_->URLs.empty ());
   { ACE_GUARD (ACE_Thread_Mutex, aGuard, *lock_);
     current_URL = segment_->URLs.front ();
     segment_->URLs.pop_front ();

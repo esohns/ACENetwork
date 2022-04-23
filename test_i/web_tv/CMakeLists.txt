@@ -1,4 +1,6 @@
 include (ffmpeg)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
+include (faad)
 
 #set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 #include (PreXMLImplementation)
@@ -247,9 +249,26 @@ endif ()
 
 ##########################################
 
+set (configuration_file "web_tv.ini")
+set (configuration_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/etc/${configuration_file}")
+
+set (ui_definition_file "")
+set (ui_rc_file "resources.rc")
+if (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  if (GTK2_USE)
+   set (ui_definition_file "test_i.gtk2")
+  elseif (GTK3_USE)
+   set (ui_definition_file "test_i.gtk3")
+  endif ()
+ endif (GTK_SUPPORT)
+ set (ui_definition_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/etc/${ui_definition_file}")
+ set (ui_rc_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/etc/${ui_rc_file}")
+endif (GUI_SUPPORT)
+
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -r -t"
+                         ARGS "-c${configuration_file} -e${ui_rc_file} -g${ui_definition_file} -l -r -t -u 1"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
