@@ -140,7 +140,7 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   // send HTTP request
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
 #else
       iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
 #endif // ACE_WIN32 || ACE_WIN64

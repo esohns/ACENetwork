@@ -1469,7 +1469,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       (*directshow_modulehandler_iterator).second.second->connectionManager =
         directshow_tcp_connection_manager_p;
       iconnection_manager_p = directshow_tcp_connection_manager_p;
-      report_handler_p = directshow_tcp_connection_manager_p;
+      //report_handler_p = directshow_tcp_connection_manager_p;
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1493,7 +1493,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       (*mediafoundation_modulehandler_iterator).second.second->connectionManager =
         mediafoundation_tcp_connection_manager_p;
       iconnection_manager_p = mediafoundation_tcp_connection_manager_p;
-      report_handler_p = mediafoundation_tcp_connection_manager_p;
+      //report_handler_p = mediafoundation_tcp_connection_manager_p;
       break;
     }
     default:
@@ -2314,7 +2314,7 @@ ACE_TMAIN (int argc_in,
       directshow_ui_cb_data.mediaFramework = media_framework_e;
       //directshow_ui_cb_data.progressData.state =
       //  &directshow_ui_cb_data;
-      ui_cb_data_p = &directshow_ui_cb_data;
+      //ui_cb_data_p = &directshow_ui_cb_data;
       directshow_ui_cb_data.configuration = &directshow_configuration;
 #if defined (GTK_USE)
       directshow_ui_cb_data.UIState = &state_r;
@@ -2342,7 +2342,7 @@ ACE_TMAIN (int argc_in,
       mediafoundation_ui_cb_data.mediaFramework = media_framework_e;
       //mediafoundation_ui_cb_data.progressData.state =
       //  &mediafoundation_ui_cb_data;
-      ui_cb_data_p = &mediafoundation_ui_cb_data;
+      //ui_cb_data_p = &mediafoundation_ui_cb_data;
       mediafoundation_ui_cb_data.configuration = &mediafoundation_configuration;
 #if defined (GTK_USE)
       mediafoundation_ui_cb_data.UIState = &state_r;

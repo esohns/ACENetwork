@@ -171,10 +171,17 @@ load_resolutions (GtkListStore* listStore_in,
                        -1);
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("loaded resolution %ux%u\n"),
+                (*iterator_2).resolution.cx,
+                (*iterator_2).resolution.cy));
+#else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("loaded resolution %ux%u\n"),
                 (*iterator_2).resolution.width,
                 (*iterator_2).resolution.height));
+#endif // ACE_WIN32 || ACE_WIN64
   } // end FOR
 }
 
@@ -1987,7 +1994,11 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
   for (Test_I_WebTV_ChannelResolutionsConstIterator_t iterator_2 = (*channel_iterator).second.resolutions.begin ();
        iterator_2 != (*channel_iterator).second.resolutions.end ();
        ++iterator_2)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((*iterator_2).resolution.cx == resolution_s.cx)
+#else
     if ((*iterator_2).resolution.width == resolution_s.width)
+#endif // ACE_WIN32 || ACE_WIN64
     {
       (*iterator_3).second.second->delayConfiguration->averageTokensPerInterval =
           (*iterator_2).frameRate;
