@@ -171,7 +171,7 @@ class Net_WLAN_Monitor_Base_T
 
   // implement Common_ITimerHandler
   // *NOTE*: the scan timer is one-shot and restarted during the state-change
-  inline virtual const long get () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
+  inline virtual const long get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
   virtual void handle (const void*);
 #endif // ACE_WIN32 || ACE_WIN64
 

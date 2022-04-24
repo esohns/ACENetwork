@@ -81,6 +81,25 @@ class Test_I_SessionMessage;
 class Test_I_Message;
 
 // declare module(s)
+typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_WebTV_ModuleHandlerConfiguration_2,
+                               Stream_ControlMessage_t,
+                               Test_I_Message,
+                               Test_I_SessionMessage_2,
+                               enum Stream_ControlType,
+                               enum Stream_SessionMessageType,
+                               struct Stream_UserData> Test_I_TaskBaseSynch_t;
+typedef Stream_TaskBaseAsynch_T<ACE_MT_SYNCH,
+                                Common_TimePolicy_t,
+                                struct Test_I_WebTV_ModuleHandlerConfiguration_2,
+                                Stream_ControlMessage_t,
+                                Test_I_Message,
+                                Test_I_SessionMessage_2,
+                                enum Stream_ControlType,
+                                enum Stream_SessionMessageType,
+                                struct Stream_UserData> Test_I_TaskBaseAsynch_t;
+
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct Test_I_WebTV_ModuleHandlerConfiguration,
@@ -333,13 +352,7 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,                       
                               Stream_INotify_t,                                          // stream notification interface type
                               Test_I_VideoDecoder);                                      // writer type
 
-typedef Stream_Visualization_LibAVResize_T<ACE_MT_SYNCH,
-                                           Common_TimePolicy_t,
-                                           struct Test_I_WebTV_ModuleHandlerConfiguration_2,
-                                           Stream_ControlMessage_t,
-                                           Test_I_Message,
-                                           Test_I_SessionMessage_2,
-                                           Test_I_WebTV_SessionData_2_t,
+typedef Stream_Visualization_LibAVResize_T<Test_I_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_VideoResize;
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,                // session data type
                               enum Stream_SessionMessageType,                   // session event type

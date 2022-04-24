@@ -112,7 +112,7 @@ class Net_WLAN_IMonitorBase
 // , virtual public Common_IStateMachine_T<enum Net_WLAN_MonitorState>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
- , public Common_IGet_2_T<HANDLE>
+ , public Common_IGet_3_T<HANDLE>
 #endif // WLANAPI_USE
  , public Common_IGet_4_T<WLAN_SIGNAL_QUALITY>
 #else

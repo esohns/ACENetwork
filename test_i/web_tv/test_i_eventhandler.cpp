@@ -292,9 +292,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   } // end IF
 
   // process playlist data
-  M3U_StreamInf_ElementsIterator_t iterator_2 =
-      data_r.M3UPlaylist->stream_inf_elements.end ();
-  std::advance (iterator_2, -1);
   if (!data_r.M3UPlaylist->ext_inf_elements.empty ())
   {
     for (M3U_ExtInf_ElementsIterator_t iterator = data_r.M3UPlaylist->ext_inf_elements.begin ();
@@ -532,8 +529,10 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     {
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-      guint event_source_id = g_idle_add (idle_segment_download_complete_cb,
-                                          CBData_);
+      guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                                               idle_segment_download_complete_cb,
+                                               CBData_,
+                                               NULL);
       if (event_source_id == 0)
       {
         ACE_DEBUG ((LM_ERROR,

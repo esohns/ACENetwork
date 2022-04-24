@@ -786,7 +786,8 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   //modulehandler_configuration_3.debug = true;
-  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
+  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
+  //delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
   modulehandler_configuration_3.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -881,9 +882,9 @@ do_work (const std::string& configurationFile_in,
 
   // step0b: initialize event dispatch
   configuration_in.dispatchConfiguration.numberOfReactorThreads =
-    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS : 0);
+    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS : 0);
   configuration_in.dispatchConfiguration.numberOfProactorThreads =
-    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS : 0);
+    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS : 0);
   if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1201,8 +1202,8 @@ ACE_TMAIN (int argc_in,
   // step1a set defaults
   configuration_path =
       Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
-                                                       true); // configuration-
+                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                        true); // configuration-
   configuration_file = configuration_path;
   configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_INI_FILE);

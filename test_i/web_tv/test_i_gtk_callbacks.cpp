@@ -209,6 +209,25 @@ idle_load_channel_configuration_cb (gpointer userData_in)
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
 
+  // close connection
+  Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+      TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (iconnection_manager_p);
+  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
+  ACE_ASSERT (data_p->handle);
+  iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  if (iconnection_p)
+  {
+    iconnection_p->close();
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+  data_p->handle = ACE_INVALID_HANDLE;
+
   // update configuration
   GtkListStore* liststore_p =
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,

@@ -169,7 +169,7 @@ class Net_WLAN_Monitor_T<//AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  inline virtual const HANDLE get_2 () const { return inherited::clientHandle_; }
+  inline virtual const HANDLE get_3 () const { return inherited::clientHandle_; }
   //inline virtual const WLAN_SIGNAL_QUALITY get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (inherited::clientHandle_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : GUID_NULL)); }
 

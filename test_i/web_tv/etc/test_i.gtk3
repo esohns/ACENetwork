@@ -54,16 +54,6 @@
       <column type="guint"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="liststore_resolution">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name width -->
-      <column type="guint"/>
-      <!-- column-name height -->
-      <column type="guint"/>
-    </columns>
-  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
@@ -181,9 +171,6 @@
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                            <child>
-                              <placeholder/>
-                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -275,6 +262,7 @@
                           <object class="GtkFrame" id="frame_channel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="halign">start</property>
                             <property name="label_xalign">0</property>
                             <child>
                               <object class="GtkAlignment" id="alignment_channel">
@@ -284,6 +272,7 @@
                                   <object class="GtkBox" id="box_main_8">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkComboBox" id="combobox_channel">
@@ -297,7 +286,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -314,7 +303,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -322,6 +311,7 @@
                           <object class="GtkFrame" id="frame_configuration">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="halign">start</property>
                             <property name="label_xalign">0</property>
                             <child>
                               <object class="GtkAlignment" id="alignment_configuration">
@@ -331,6 +321,7 @@
                                   <object class="GtkBox" id="box_main_9">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
                                     <property name="orientation">vertical</property>
                                     <child>
                                       <object class="GtkComboBox" id="combobox_resolution">
@@ -344,7 +335,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -361,7 +352,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -376,6 +367,7 @@
                       <object class="GtkFrame" id="frame_save">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
                         <property name="label_xalign">0</property>
                         <child>
                           <object class="GtkAlignment" id="aligment_save">
@@ -440,6 +432,7 @@
                       <object class="GtkFrame" id="frame_display">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
                         <property name="label_xalign">0</property>
                         <child>
                           <object class="GtkAlignment" id="alignment_display">
@@ -508,14 +501,14 @@
                                         </child>
                                       </object>
                                       <packing>
-                                        <property name="expand">True</property>
+                                        <property name="expand">False</property>
                                         <property name="fill">True</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="expand">True</property>
+                                    <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
@@ -620,6 +613,16 @@
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkListStore" id="liststore_resolution">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name width -->
+      <column type="guint"/>
+      <!-- column-name height -->
+      <column type="guint"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="liststore_display">
     <columns>
       <!-- column-name text -->
@@ -630,17 +633,20 @@
   </object>
   <object class="GtkWindow" id="window_fullscreen">
     <property name="can_focus">False</property>
+    <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
     <property name="resizable">False</property>
-    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
     <property name="decorated">False</property>
     <property name="deletable">False</property>
+    <signal name="key-press-event" handler="window_fullscreen_key_press_event_cb" swapped="no"/>
     <child>
       <object class="GtkDrawingArea" id="drawingarea_fullscreen">
         <property name="visible">True</property>
         <property name="app_paintable">True</property>
         <property name="can_focus">False</property>
-        <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
         <property name="double_buffered">False</property>
+        <signal name="draw" handler="drawingarea_draw_cb" swapped="no"/>
+        <signal name="size-allocate" handler="drawingarea_size_allocate_cb" swapped="no"/>
       </object>
     </child>
   </object>

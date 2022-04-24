@@ -74,7 +74,7 @@ load_wlan_interfaces (GtkListStore* listStore_in
 #endif // ACE_WIN32 || ACE_WIN64
   Net_InterfaceIdentifiers_t interface_identifiers_a =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_WLAN_Tools::getInterfaces (iwlanmonitor_p->get_2 ());
+      Net_WLAN_Tools::getInterfaces (iwlanmonitor_p->get_3 ());
 #elif defined (ACE_LINUX)
 #if defined (WEXT_USE)
       Net_WLAN_Tools::getInterfaces (AF_UNSPEC, 0);
@@ -1327,7 +1327,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, ui_cb_data_p->UIState->lock);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-    load_ssids (ui_cb_data_p->monitor->get_2 (),
+    load_ssids (ui_cb_data_p->monitor->get_3 (),
                 ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #endif // WLANAPI_USE
 #else
@@ -1356,7 +1356,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-      Net_WLAN_Tools::associatedSSID (ui_cb_data_p->monitor->get_2 (),
+      Net_WLAN_Tools::associatedSSID (ui_cb_data_p->monitor->get_3 (),
                                       ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
       ACE_TEXT_ALWAYS_CHAR ("");
@@ -1459,7 +1459,7 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-    Net_WLAN_Tools::associatedSSID (ui_cb_data_p->monitor->get_2 (),
+    Net_WLAN_Tools::associatedSSID (ui_cb_data_p->monitor->get_3 (),
                                     ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
   ACE_TEXT_ALWAYS_CHAR ("");
@@ -1728,7 +1728,7 @@ togglebutton_backgroundscan_toggled_cb (GtkToggleButton* toggleButton_in,
   //if (!iinetwlanmonitor_p->isRunning ())
   //  return; // nothing to do
 
-  Net_WLAN_Tools::setDeviceSettingBool (iwlanmonitor_p->get_2 (),
+  Net_WLAN_Tools::setDeviceSettingBool (iwlanmonitor_p->get_3 (),
                                         data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
                                         wlan_intf_opcode_background_scan_enabled,
                                         data_p->configuration->WLANMonitorConfiguration.enableBackgroundScans);

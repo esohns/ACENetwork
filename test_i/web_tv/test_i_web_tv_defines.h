@@ -30,7 +30,10 @@
 
 #define TEST_I_WEBTV_CNF_INI_FILE                         "web_tv.ini"
 
+// *NOTE*: preload, NOT download
 #define TEST_I_WEBTV_NUMBER_OF_SEGMENTS_TO_PRELOAD        100
+
+#define TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS           2
 
 // M3U
 #define TEST_I_M3U_EXTINFO_FRAMERATE_KEY_STRING           "FRAME-RATE"

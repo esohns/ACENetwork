@@ -88,12 +88,10 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   ACE_UNUSED_ARG (arg_in);
 
   // sanity check(s)
-  typename Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
-    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
-  ACE_ASSERT (iconnection_manager_p);
   std::string current_URL;
+  if (unlikely (segment_->URLs.size () == 1))
+    return; // '1' because at least one URL is required to compute subsequent URLs
   ACE_ASSERT (lock_);
-  ACE_ASSERT (!segment_->URLs.empty ());
   { ACE_GUARD (ACE_Thread_Mutex, aGuard, *lock_);
     current_URL = segment_->URLs.front ();
     segment_->URLs.pop_front ();
@@ -102,6 +100,9 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URI_string_2, URL_string;
   bool use_SSL = false;
+  typename Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
+    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_p);
   Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
   Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
   HTTP_Form_t HTTP_form;
