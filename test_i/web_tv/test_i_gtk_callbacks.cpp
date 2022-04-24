@@ -223,7 +223,7 @@ idle_load_channel_configuration_cb (gpointer userData_in)
 #endif // ACE_WIN32 || ACE_WIN64
   if (iconnection_p)
   {
-    iconnection_p->close();
+    iconnection_p->close ();
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;

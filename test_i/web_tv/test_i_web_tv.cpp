@@ -785,7 +785,9 @@ do_work (const std::string& configurationFile_in,
       STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+#if defined (_DEBUG)
   //modulehandler_configuration_3.debug = true;
+#endif // _DEBUG
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   //delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
@@ -795,11 +797,14 @@ do_work (const std::string& configurationFile_in,
     Stream_Device_Identifier::GUID;
   modulehandler_configuration_3.deviceIdentifier.identifier._guid =
     Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false); // playback
+  modulehandler_configuration_3.deviceType = AV_HWDEVICE_TYPE_DXVA2;
+  //modulehandler_configuration_3.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   struct tWAVEFORMATEX* waveformatex_p =
     Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_3.deviceIdentifier.identifier._guid);
 #else
   modulehandler_configuration_3.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
+  modulehandler_configuration_3.deviceType = AV_HWDEVICE_TYPE_VAAPI;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

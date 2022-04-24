@@ -280,6 +280,9 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
    , connectionConfigurations (NULL)
    , delayConfiguration (NULL)
    , deviceIdentifier ()
+#if defined (FFMPEG_SUPPORT)
+   , deviceType (AV_HWDEVICE_TYPE_NONE)
+#endif // FFMPEG_SUPPORT
    , display ()
    , program (1)
    , audioStreamType (15) // AAC
@@ -307,6 +310,9 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
   Net_ConnectionConfigurations_t*                  connectionConfigurations;
   struct Stream_Miscellaneous_DelayConfiguration*  delayConfiguration;
   struct Stream_Device_Identifier                  deviceIdentifier;
+#if defined (FFMPEG_SUPPORT)
+  enum AVHWDeviceType                              deviceType;
+#endif // FFMPEG_SUPPORT
   struct Common_UI_DisplayDevice                   display;
   unsigned int                                     program;                  // MPEG TS decoder module
   unsigned int                                     audioStreamType;          // MPEG TS decoder module
