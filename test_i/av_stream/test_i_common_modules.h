@@ -199,6 +199,25 @@ typedef Stream_Dev_Cam_Source_MediaFoundation_T<ACE_MT_SYNCH,
                                                 struct Stream_UserData,
                                                 struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat> Test_I_Stream_MediaFoundation_CamSource;
 #else
+typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                               Stream_ControlMessage_t,
+                               Test_I_AVStream_Client_ALSA_V4L_Message,
+                               Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                               enum Stream_ControlType,
+                               enum Stream_SessionMessageType,
+                               struct Stream_UserData> Test_I_ALSA_V4L_TaskBaseSynch_t;
+typedef Stream_TaskBaseAsynch_T<ACE_MT_SYNCH,
+                                Common_TimePolicy_t,
+                                struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                                Stream_ControlMessage_t,
+                                Test_I_AVStream_Client_ALSA_V4L_Message,
+                                Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                enum Stream_ControlType,
+                                enum Stream_SessionMessageType,
+                                struct Stream_UserData> Test_I_ALSA_V4L_TaskBaseAsynch_t;
+
 typedef Stream_Module_CamSource_V4L_T<ACE_MT_SYNCH,
                                       Stream_ControlMessage_t,
                                       Test_I_AVStream_Client_ALSA_V4L_Message,
@@ -569,6 +588,25 @@ typedef Stream_Miscellaneous_Distributor_WriterTask_T<ACE_MT_SYNCH,
 //                                                      Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
 //                                                      Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t> Test_I_AVStream_Client_MediaFoundation_Module_Statistic_WriterTask_t;
 #else
+typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+                               Stream_ControlMessage_t,
+                               Test_I_AVStream_Server_Message,
+                               Test_I_AVStream_Server_SessionMessage,
+                               enum Stream_ControlType,
+                               enum Stream_SessionMessageType,
+                               struct Stream_UserData> Test_I_Server_TaskBaseSynch_t;
+typedef Stream_TaskBaseAsynch_T<ACE_MT_SYNCH,
+                                Common_TimePolicy_t,
+                                struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+                                Stream_ControlMessage_t,
+                                Test_I_AVStream_Server_Message,
+                                Test_I_AVStream_Server_SessionMessage,
+                                enum Stream_ControlType,
+                                enum Stream_SessionMessageType,
+                                struct Stream_UserData> Test_I_Server_TaskBaseAsynch_t;
+
 typedef Test_I_AVStream_Parser_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
@@ -717,22 +755,10 @@ typedef Stream_Visualization_LibAVResize_T<Test_I_DirectShow_TaskBaseSynch_t,
 typedef Stream_Visualization_LibAVResize_T<Test_I_MediaFoundation_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat> Test_I_AVStream_Client_MediaFoundation_Resize;
 #else
-typedef Stream_Decoder_LibAVConverter_T<ACE_MT_SYNCH,
-                                        Common_TimePolicy_t,
-                                        struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                                        Stream_ControlMessage_t,
-                                        Test_I_AVStream_Client_ALSA_V4L_Message,
-                                        Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
-                                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+typedef Stream_Decoder_LibAVConverter_T<Test_I_ALSA_V4L_TaskBaseSynch_t,
                                         struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_V4L_Converter;
 
-typedef Stream_Visualization_LibAVResize_T<ACE_MT_SYNCH,
-                                           Common_TimePolicy_t,
-                                           struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                                           Stream_ControlMessage_t,
-                                           Test_I_AVStream_Client_ALSA_V4L_Message,
-                                           Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
-                                           Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+typedef Stream_Visualization_LibAVResize_T<Test_I_ALSA_V4L_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_V4L_Resize;
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
@@ -887,13 +913,7 @@ typedef Stream_Vis_Target_MediaFoundation_T<ACE_MT_SYNCH,
 #else
 #if defined (GUI_SUPPORT)
 #if defined (FFMPEG_SUPPORT)
-typedef Stream_Visualization_LibAVResize_T<ACE_MT_SYNCH,
-                                           Common_TimePolicy_t,
-                                           struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-                                           Stream_ControlMessage_t,
-                                           Test_I_AVStream_Server_Message,
-                                           Test_I_AVStream_Server_SessionMessage,
-                                           Test_I_AVStream_Server_StreamSessionData_t,
+typedef Stream_Visualization_LibAVResize_T<Test_I_Server_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Resize;
 #endif // FFMPEG_SUPPORT
 #if defined (GTK_SUPPORT)
