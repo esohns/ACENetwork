@@ -287,6 +287,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
    , program (1)
    , audioStreamType (15) // AAC
    , videoStreamType (27) // H264
+   , queue (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
@@ -299,7 +300,6 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   {
-    concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
     inbound = true;
   }
 
@@ -317,6 +317,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
   unsigned int                                     program;                  // MPEG TS decoder module
   unsigned int                                     audioStreamType;          // MPEG TS decoder module
   unsigned int                                     videoStreamType;          // MPEG TS decoder module
+  ACE_Message_Queue_Base*                          queue;
   Test_I_ISessionNotify_2_t*                       subscriber;
   Test_I_Subscribers_2_t*                          subscribers;
   std::string                                      targetFileName; // dump module
@@ -355,5 +356,9 @@ struct Test_I_WebTV_StreamState_2
 
   Test_I_WebTV_SessionData_2* sessionData;
 };
+
+typedef Stream_MessageQueue_T<ACE_MT_SYNCH,
+                              Common_TimePolicy_t,
+                              Test_I_SessionMessage_2> Test_I_WebTV_MessageQueue_t;
 
 #endif

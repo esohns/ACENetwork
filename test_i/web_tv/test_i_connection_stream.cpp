@@ -48,7 +48,7 @@ bool
 Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
                                bool& deleteModules_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream::load"));
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -212,7 +212,7 @@ bool
 Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                  bool& deleteModules_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::load"));
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -221,7 +221,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_HTTPMarshal_2_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                                               ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   layout_in->append (module_p, NULL, 0);
 
@@ -234,113 +234,10 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_Defragment_2_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  Test_I_QueueTarget_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
-
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_MPEGTSDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Defragment_2_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-
-  typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
-  unsigned int index_i = 0;
-
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Splitter_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  branch_p = module_p;
-  configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
-  configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
-  Stream_IDistributorModule* idistributor_p =
-      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
-  ACE_ASSERT (idistributor_p);
-  idistributor_p->initialize (configuration_->configuration_->branches);
-
-  module_p = NULL;
-//#if defined (FAAD_SUPPORT)
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_FAADDecoder_Module (this,
-//                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
-//                  false);
-//  layout_in->append (module_p, branch_p, index_i);
-//  module_p = NULL;
-//#else
-#if defined (FFMPEG_SUPPORT)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_AudioDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
-#endif // FAAD_SUPPORT || FFMPEG_SUPPORT
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_WASAPIOut_Module (this,
-                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_RENDER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-#else
-  ACE_NEW_RETURN (module_p,
-                  Test_I_ALSA_Module (this,
-                                      ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-#endif // ACE_WIN32 || ACE_WIN64
-
-  ++index_i;
-
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_FileSink_Module (this,
-  //                                        ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, branch_p, index_i);
-
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  //Test_I_VideoHWDecoder_Module (this,
-                  //                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
-                  Test_I_VideoDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_VideoResize_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                 Test_I_VideoDelay_Module (this,
-                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
-                 false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_GTKCairo_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
-
-  //++index_i;
 
   deleteModules_out = true;
 
@@ -359,11 +256,11 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  Test_I_WebTV_SessionData_2* session_data_p = NULL;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
-  Stream_Module_t* module_p = NULL;
+  //Test_I_WebTV_SessionData_2* session_data_p = NULL;
+  //inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  //Stream_Module_t* module_p = NULL;
 //  Test_I_Net_Writer_t* netIO_impl_p = NULL;
-  Test_I_HTTPParser* parser_impl_p = NULL;
+  //Test_I_HTTPParser* parser_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -380,39 +277,39 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
-  session_data_p =
-    &const_cast<Test_I_WebTV_SessionData_2&> (inherited::sessionData_->getR ());
-  iterator =
-      const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+  //ACE_ASSERT (inherited::sessionData_);
+  //session_data_p =
+  //  &const_cast<Test_I_WebTV_SessionData_2&> (inherited::sessionData_->getR ());
+  //iterator =
+  //    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  //ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
-  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
-  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  //session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+  //session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
 
   // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
   // ******************* Net IO ************************
-  module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("Marshal")));
-    goto failed;
-  } // end IF
-  parser_impl_p = dynamic_cast<Test_I_HTTPParser*> (module_p->writer ());
-  if (!parser_impl_p)
-  {
+  //module_p =
+  //  const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+  //if (!module_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
+  //              ACE_TEXT (stream_name_string_),
+  //              ACE_TEXT ("Marshal")));
+  //  goto failed;
+  //} // end IF
+  //parser_impl_p = dynamic_cast<Test_I_HTTPParser*> (module_p->writer ());
+  //if (!parser_impl_p)
+  //{
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("%s/%s: dynamic_cast<Test_I_HTTPParser> failed, aborting\n"),
 //                ACE_TEXT (stream_name_string_),
 //                ACE_TEXT (module_p->name ())));
 //    goto failed;
-  } // end IF
+  //} // end IF
 //  parser_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it

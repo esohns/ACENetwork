@@ -41,7 +41,7 @@
 
 // stream
 #define TEST_I_DEFAULT_BUFFER_SIZE                       16384 // bytes
-#define TEST_I_MAX_MESSAGES                              0 // 0 --> no limits
+#define TEST_I_MAX_MESSAGES                              std::numeric_limits<size_t>::max ()
 
 // (asynchronous) connections
 #define TEST_I_CONNECTION_ASYNCH_TIMEOUT                 60 // second(s)

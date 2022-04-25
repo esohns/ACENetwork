@@ -103,6 +103,7 @@
 #include "test_i_module_eventhandler.h"
 #include "test_i_session_message.h"
 #include "test_i_signalhandler.h"
+#include "test_i_stream.h"
 
 #include "test_i_web_tv_common.h"
 #include "test_i_web_tv_defines.h"
@@ -115,6 +116,7 @@
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream");
 const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR("WebTVStream_2");
+const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR("WebTVInputStream");
 
 void
 do_print_usage (const std::string& programName_in)
@@ -656,6 +658,7 @@ do_work (const std::string& configurationFile_in,
   } // end IF
 #endif // SSL_SUPPORT
 
+  Test_I_Stream input_stream;
   ACE_Thread_Mutex timeout_handler_lock;
   Test_I_TimeoutHandler timeout_handler;
   timeout_handler.lock_ = &timeout_handler_lock;
@@ -663,6 +666,7 @@ do_work (const std::string& configurationFile_in,
   Test_I_EventHandler message_handler (&CBData_in);
   CBData_in.channels = &channels;
   CBData_in.currentChannel = channel_in;
+  CBData_in.stream = &input_stream;
   CBData_in.timeoutHandler = &timeout_handler;
 #else
   Test_I_EventHandler message_handler;
@@ -727,6 +731,8 @@ do_work (const std::string& configurationFile_in,
     configuration_in.parserConfiguration.debugScanner = true;
 #endif // _DEBUG
   // ********************** module configuration data **************************
+  Test_I_WebTV_MessageQueue_t message_queue (TEST_I_MAX_MESSAGES,
+                                             NULL);
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_2; // marshal
@@ -782,7 +788,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_3.codecId = AV_CODEC_ID_H264;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_3.concurrency =
-      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+      STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
 #if defined (_DEBUG)
@@ -825,35 +831,46 @@ do_work (const std::string& configurationFile_in,
   struct Common_FlexBisonParserConfiguration parserConfiguration_3;
   modulehandler_configuration_3.parserConfiguration =
     &parserConfiguration_3;
+  modulehandler_configuration_3.queue = &message_queue;
   modulehandler_configuration_3.statisticReportingInterval =
     statisticReportingInterval_in;
   modulehandler_configuration_3.subscriber = &message_handler;
-  modulehandler_configuration_3.targetFileName =
-    ACE_TEXT_ALWAYS_CHAR ("webtv.264");
+//  modulehandler_configuration_3.targetFileName =
+//    ACE_TEXT_ALWAYS_CHAR ("webtv.264");
   //modulehandler_configuration_3.targetFileName = outputDirectory_in;
   modulehandler_configuration_3.waitForConnect = false;
-  struct Test_I_WebTV_StreamConfiguration_2 stream_configuration_2;
-  stream_configuration_2.mediaType.audio.channels = 2;
-  stream_configuration_2.mediaType.audio.format = AV_SAMPLE_FMT_S16;
-  stream_configuration_2.mediaType.audio.sampleRate = 48000;
-  stream_configuration_2.messageAllocator = &message_allocator_2;
-  stream_configuration_2.module = &event_handler_module_2;
-  stream_configuration_2.printFinalReport = true;
-  configuration_in.streamConfiguration_2.initialize (module_configuration,
+  struct Test_I_WebTV_StreamConfiguration_2 stream_configuration_3; // input-
+  stream_configuration_3.mediaType.audio.channels = 2;
+  stream_configuration_3.mediaType.audio.format = AV_SAMPLE_FMT_S16;
+  stream_configuration_3.mediaType.audio.sampleRate = 48000;
+  stream_configuration_3.messageAllocator = &message_allocator_2;
+  stream_configuration_3.cloneModule = false;
+  stream_configuration_3.module = &event_handler_module_2;
+  stream_configuration_3.printFinalReport = true;
+  configuration_in.streamConfiguration_3.initialize (module_configuration,
                                                      modulehandler_configuration_3,
-                                                     stream_configuration_2);
+                                                     stream_configuration_3);
 
-  //modulehandler_configuration_4 = modulehandler_configuration_3;
-  //struct Common_FlexBisonParserConfiguration parserConfiguration_4;
-  //modulehandler_configuration_4.parserConfiguration = &parserConfiguration_4;
-  //configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING),
-  //                                                               std::make_pair (&module_configuration,
-  //                                                                               &modulehandler_configuration_4)));
   modulehandler_configuration_5 = modulehandler_configuration_3;
   modulehandler_configuration_5.codecId = AV_CODEC_ID_AAC;
-  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
+  configuration_in.streamConfiguration_3.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_5)));
+
+  struct Test_I_WebTV_StreamConfiguration_2 stream_configuration_2;
+  stream_configuration_2.messageAllocator = &message_allocator_2;
+  stream_configuration_2.cloneModule = true;
+  stream_configuration_2.module = &event_handler_module_2;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_6;
+  modulehandler_configuration_6 = modulehandler_configuration_3;
+  modulehandler_configuration_6.concurrency =
+      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+  struct Common_FlexBisonParserConfiguration parserConfiguration_4;
+  modulehandler_configuration_6.parserConfiguration =
+      &parserConfiguration_4;
+  configuration_in.streamConfiguration_2.initialize (module_configuration,
+                                                     modulehandler_configuration_6,
+                                                     stream_configuration_2);
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -962,6 +979,14 @@ do_work (const std::string& configurationFile_in,
     ACE_UNUSED_ARG (was_visible_b);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
+#else
+  if (!input_stream.initialize (configuration_in.streamConfiguration_3))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("failed to Test_I_Stream::initialize(), returning\n")));
+    goto clean;
+  } // end IF
+  input_stream.start ();
 #endif // GUI_SUPPORT
 
   // *WARNING*: from this point on, clean up any remote connections !
@@ -978,17 +1003,6 @@ do_work (const std::string& configurationFile_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
-
-    // clean up
-    //		{ // synch access
-    //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-    //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-    //					 iterator != CBData_in.event_source_ids.end();
-    //					 iterator++)
-    //				g_source_remove(*iterator);
-    //		} // end lock scope
-
     goto clean;
   } // end IF
 
@@ -1011,35 +1025,11 @@ do_work (const std::string& configurationFile_in,
   Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                        true);
 
+  input_stream.stop (true,   // wait for completion ?
+                     false,  // recurse ?
+                     false); // high priority
+
   timer_manager_p->stop ();
-
-  //		{ // synch access
-  //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //					 iterator != CBData_in.event_source_ids.end();
-  //					 iterator++)
-  //				g_source_remove(*iterator);
-  //		} // end lock scope
-  //timer_manager_p->stop ();
-
-  //  { // synch access
-  //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //		for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //				 iterator != CBData_in.event_source_ids.end();
-  //				 iterator++)
-  //			g_source_remove(*iterator);
-  //	} // end lock scope
-
-  //if (!interfaceDefinitionFile_in.empty ())
-  //{
-  //  int result = event_handler_module.close (ACE_Module_Base::M_DELETE_NONE);
-  //  if (result == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
-  //                event_handler_module.name ()));
-  //} // end IF
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -1049,7 +1039,6 @@ do_work (const std::string& configurationFile_in,
 clean:
   Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                        true);
-  timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
@@ -1059,6 +1048,12 @@ clean:
     ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
+  input_stream.stop (true,   // wait for completion ?
+                     false,  // recurse ?
+                     false); // high priority
+
+  timer_manager_p->stop ();
 }
 
 void

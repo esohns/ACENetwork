@@ -145,6 +145,8 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
 #else
       iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
 #endif // ACE_WIN32 || ACE_WIN64
+  if (unlikely (!iconnection_p))
+    return;
   istream_connection_p =
       dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
@@ -157,6 +159,7 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    iconnection_p->decrease (); iconnection_p = NULL;
     return;
   } // end IF
   HTTP_record_p->form = HTTP_form;
@@ -176,6 +179,7 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
     delete HTTP_record_p; HTTP_record_p = NULL;
+    iconnection_p->decrease (); iconnection_p = NULL;
     return;
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
@@ -193,6 +197,7 @@ allocate:
     ACE_DEBUG ((LM_CRITICAL,
                ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
     delete message_data_p; message_data_p = NULL;
+    iconnection_p->decrease (); iconnection_p = NULL;
     return;
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)

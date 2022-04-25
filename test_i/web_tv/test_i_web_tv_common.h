@@ -51,6 +51,7 @@
 class Test_I_Message;
 class Test_I_SessionMessage;
 class Test_I_SessionMessage_2;
+class Test_I_Stream;
 
 typedef std::list<std::string> Test_I_WebTV_ChannelSegmentURLs_t;
 typedef Test_I_WebTV_ChannelSegmentURLs_t::iterator Test_I_WebTV_ChannelSegmentURLsIterator_t;
@@ -112,6 +113,7 @@ struct Test_I_WebTV_Configuration
    , connectionConfigurations ()
    , streamConfiguration ()
    , streamConfiguration_2 ()
+   , streamConfiguration_3 ()
   {}
 
   // **************************** socket data **********************************
@@ -119,6 +121,7 @@ struct Test_I_WebTV_Configuration
   // **************************** stream data **********************************
   Test_I_WebTV_StreamConfiguration_t   streamConfiguration;
   Test_I_WebTV_StreamConfiguration_2_t streamConfiguration_2;
+  Test_I_WebTV_StreamConfiguration_2_t streamConfiguration_3; // input
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -178,6 +181,7 @@ struct Test_I_WebTV_UI_CBData
    , dispatch (NULL)
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
+   , stream (NULL)
    , subscribers ()
    , timeoutHandler (NULL)
    , videoUpdateEventSourceId (0)
@@ -190,6 +194,7 @@ struct Test_I_WebTV_UI_CBData
   Common_IDispatch*                     dispatch;
   ACE_HANDLE                            handle; // connection-
   struct Test_I_WebTV_UI_ProgressData   progressData;
+  Test_I_Stream*                        stream; // input-
   Test_I_Subscribers_t                  subscribers;
   Test_I_TimeoutHandler*                timeoutHandler;
   guint                                 videoUpdateEventSourceId;

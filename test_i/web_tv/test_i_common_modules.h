@@ -50,6 +50,8 @@
 #include "stream_misc_defragment.h"
 #include "stream_misc_delay.h"
 #include "stream_misc_media_splitter.h"
+#include "stream_misc_queue_source.h"
+#include "stream_misc_queue_target.h"
 
 //#include "stream_stat_statistic_report.h"
 
@@ -74,12 +76,10 @@
 #include "http_network.h"
 
 #include "test_i_common.h"
+#include "test_i_message.h"
+#include "test_i_session_message.h"
 
 #include "test_i_web_tv_stream_common.h"
-
-// forward declarations
-class Test_I_SessionMessage;
-class Test_I_Message;
 
 // declare module(s)
 typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
@@ -202,6 +202,20 @@ DATASTREAM_MODULE_DUPLEX (Test_I_WebTV_SessionData_2,                // session 
                          Test_I_HTTPParser_2,                                      // writer type
                          Test_I_HTTPMarshal_2);                                    // name
 
+typedef Stream_Module_QueueWriter_T<ACE_MT_SYNCH,
+                                    Common_TimePolicy_t,
+                                    struct Test_I_WebTV_ModuleHandlerConfiguration_2,
+                                    Stream_ControlMessage_t,
+                                    Test_I_Message,
+                                    Test_I_SessionMessage_2,
+                                    struct Stream_UserData> Test_I_QueueTarget;
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,                          // session data type
+                              enum Stream_SessionMessageType,                      // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_2,    // module handler configuration type
+                              libacestream_default_misc_queue_module_name_string,
+                              Stream_INotify_t,                                    // stream notification interface type
+                              Test_I_QueueTarget);                                 // writer type
+
 //typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
 //                                                      Common_TimePolicy_t,
 //                                                      struct Test_I_WebTV_ModuleHandlerConfiguration_2,
@@ -233,18 +247,25 @@ DATASTREAM_MODULE_DUPLEX (Test_I_WebTV_SessionData_2,                // session 
 //                          Test_I_StatisticReport_WriterTask_2_t,                    // writer type
 //                          Test_I_StatisticReport_2);                                // name
 
-//typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
-//                                            Common_TimePolicy_t,
-//                                            struct Test_I_WebTV_ModuleHandlerConfiguration_2,
-//                                            Stream_ControlMessage_t,
-//                                            Test_I_Message,
-//                                            Test_I_SessionMessage_2> Test_I_HTTPGet_2;
-//DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,   // session data type
-//                              enum Stream_SessionMessageType,            // session event type
-//                              struct Test_I_WebTV_ModuleHandlerConfiguration_2, // module handler configuration type
-//                              libacestream_default_net_http_get_module_name_string,
-//                              Stream_INotify_t,                          // stream notification interface type
-//                              Test_I_HTTPGet_2);                           // writer type
+typedef Stream_Module_QueueReader_T<ACE_MT_SYNCH,
+                                    Stream_ControlMessage_t,
+                                    Test_I_Message,
+                                    Test_I_SessionMessage_2,
+                                    struct Test_I_WebTV_ModuleHandlerConfiguration_2,
+                                    enum Stream_ControlType,
+                                    enum Stream_SessionMessageType,
+                                    struct Test_I_WebTV_StreamState_2,
+                                    Test_I_WebTV_SessionData_2,          // session data
+                                    Test_I_WebTV_SessionData_2_t, // session message payload (reference counted)
+                                    struct Stream_Statistic,
+                                    Common_Timer_Manager_t,
+                                    struct Stream_UserData> Test_I_QueueSource;
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_2,                          // session data type
+                              enum Stream_SessionMessageType,                      // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_2,    // module handler configuration type
+                              libacestream_default_misc_queue_module_name_string,
+                              Stream_INotify_t,                                    // stream notification interface type
+                              Test_I_QueueSource);                                 // writer type
 
 typedef Stream_Decoder_MPEG_TS_Decoder_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,

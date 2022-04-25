@@ -63,6 +63,7 @@
 #include "test_i_connection_stream.h"
 #include "test_i_message.h"
 #include "test_i_session_message.h"
+#include "test_i_stream.h"
 #include "test_i_web_tv_common.h"
 #include "test_i_web_tv_defines.h"
 
@@ -436,8 +437,8 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   NULL);
 
   Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
-    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+    data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_3.end ());
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
@@ -851,6 +852,7 @@ idle_start_session_cb (gpointer userData_in)
       (*channel_iterator).second.segment.URLs.front ();
   (*channel_iterator).second.segment.URLs.pop_front ();
   bool is_URI_b = HTTP_Tools::URLIsURI (current_URL);
+//  Common_ISetP_T<GdkWindow>* isetp_p = NULL;
 
   if (is_URI_b)
     URL_string = (*iterator_3).second.second->URL;
@@ -937,25 +939,33 @@ idle_start_session_cb (gpointer userData_in)
               ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_2 = NULL;
-  Test_I_IStreamConnection_2_t* istream_connection_2 = NULL;
-  iconnection_2 =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
-#else
-      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
-#endif // ACE_WIN32 || ACE_WIN64
-  istream_connection_2 =
-      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_2);
-  ACE_ASSERT (istream_connection_2);
-  const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
-      istream_connection_2->stream ();
+//  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_2 = NULL;
+//  Test_I_IStreamConnection_2_t* istream_connection_2 = NULL;
+//  iconnection_2 =
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+//#else
+//      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+//#endif // ACE_WIN32 || ACE_WIN64
+//  istream_connection_2 =
+//      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_2);
+//  ACE_ASSERT (istream_connection_2);
+//  const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
+//      istream_connection_2->stream ();
   const Stream_Module_t* module_p =
-      stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+      data_p->stream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   ACE_ASSERT (module_p);
   data_p->dispatch =
       dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   ACE_ASSERT (data_p->dispatch);
+//  isetp_p =
+//      dynamic_cast<Common_ISetP_T<GdkWindow>*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+//  ACE_ASSERT (isetp_p);
+//  GtkDrawingArea* drawing_area_p =
+//      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+//                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+//  ACE_ASSERT (drawing_area_p);
+//  isetp_p->setP (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)));
 
   //ACE_ASSERT (!data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
@@ -1127,8 +1137,8 @@ drawing_area_resize_end (gpointer userData_in)
              allocation_s.width, allocation_s.height));
 
   Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+      data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_3.end ());
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   (*iterator_3).second.second->outputFormat.video.resolution.cy =
     allocation_s.height;
@@ -1451,7 +1461,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT (iconnection_manager_2);
 
 //  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-  bool success = false;
+//  bool success = false;
 
   if (gtk_toggle_button_get_active (toggleButton_in))
   {
@@ -1487,8 +1497,8 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
     (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
     Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_6 =
-        data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_6 != data_p->configuration->streamConfiguration_2.end ());
+        data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_6 != data_p->configuration->streamConfiguration_3.end ());
     ACE_ASSERT ((*iterator_6).second.second->delayConfiguration);
     Test_I_TCPConnector_t connector (true);
 #if defined (SSL_SUPPORT)
@@ -1534,10 +1544,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cx =
+    data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.cx =
         g_value_get_uint (&value);
 #else
-    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.width =
+    data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.width =
         g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
@@ -1546,10 +1556,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                               2, &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cy =
+    data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.cy =
         g_value_get_uint (&value);
 #else
-    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.height =
+    data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.height =
         g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
@@ -1561,11 +1571,11 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
          iterator_5 != (*channel_iterator).second.resolutions.end ();
          ++iterator_5)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (((*iterator_5).resolution.cx == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cx) &&
-          ((*iterator_5).resolution.cy == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.cy))
+      if (((*iterator_5).resolution.cx == data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.cx) &&
+          ((*iterator_5).resolution.cy == data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.cy))
 #else
-      if (((*iterator_5).resolution.width == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.width) &&
-          ((*iterator_5).resolution.height == data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution.height))
+      if (((*iterator_5).resolution.width == data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.width) &&
+          ((*iterator_5).resolution.height == data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.height))
 #endif // ACE_WIN32 || ACE_WIN64
       {
         (*iterator_6).second.second->delayConfiguration->averageTokensPerInterval =
@@ -1624,6 +1634,16 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
 //    ACE_ASSERT (Common_File_Tools::isDirectory ((*iterator_3).second.second->targetFileName));
 
+continue_:
+    // step2: start processing stream
+    if (unlikely (!data_p->stream->initialize (data_p->configuration->streamConfiguration_3)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("failed to Test_I_Stream::initialize(), returning\n")));
+      return;
+    } // end IF
+    data_p->stream->start ();
+
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
     {
@@ -1679,12 +1699,6 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
-    success = true;
-
-continue_:
-    if (!success)
-      goto error;
-
     // step3: start progress reporting
 //    spinner_p =
 //      GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
@@ -1724,10 +1738,30 @@ continue_:
   } // end IF
 
   // --> disconnect
+  
+  if (likely (data_p->timeoutHandler->timerId_))
+  {
+    int result =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->timeoutHandler->timerId_,
+                                                                NULL);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
+                  data_p->timeoutHandler->timerId_));
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("cancelled interval timer (id: %d)\n"),
+                  data_p->timeoutHandler->timerId_));
+    data_p->timeoutHandler->timerId_ = 0;
+  } // end IF
 
   iconnection_manager_p->abort ();
   iconnection_manager_2->abort ();
   data_p->handle = ACE_INVALID_HANDLE;
+
+  data_p->stream->stop (false, // wait for completion ?
+                        false, // recurse ?
+                        true); // high priority
 
   return;
 
@@ -1904,12 +1938,6 @@ combobox_channel_changed_cb (GtkWidget* widget_in,
   Common_UI_GTK_BuildersConstIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
-  Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
-  ACE_ASSERT ((*iterator_3).second.second->delayConfiguration);
-  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
-  ACE_ASSERT (data_p->channels);
 
   GtkTreeIter iterator_2;
   gboolean result = gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget_in),
@@ -1958,8 +1986,8 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
   Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+      data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_3.end ());
   ACE_ASSERT ((*iterator_3).second.second->delayConfiguration);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
   ACE_ASSERT (data_p->channels);
@@ -2044,8 +2072,8 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
   Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_2 =
-      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_2.end ());
+      data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_3.end ());
 
   Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
       TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
