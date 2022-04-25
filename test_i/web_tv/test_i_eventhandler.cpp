@@ -525,6 +525,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       event_e = COMMON_UI_EVENT_CONNECT; break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
       event_e = COMMON_UI_EVENT_DISCONNECT; break;
+    case STREAM_SESSION_MESSAGE_RESIZE:
+      event_e = COMMON_UI_EVENT_RESIZE; break;
     case STREAM_SESSION_MESSAGE_STEP:
     {
 #if defined (GUI_SUPPORT)

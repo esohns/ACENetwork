@@ -731,7 +731,7 @@ do_work (const std::string& configurationFile_in,
     configuration_in.parserConfiguration.debugScanner = true;
 #endif // _DEBUG
   // ********************** module configuration data **************************
-  Test_I_WebTV_MessageQueue_t message_queue (TEST_I_MAX_MESSAGES,
+  Test_I_WebTV_MessageQueue_t message_queue (STREAM_QUEUE_MAX_SLOTS,
                                              NULL);
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration;
@@ -794,8 +794,8 @@ do_work (const std::string& configurationFile_in,
 #if defined (_DEBUG)
   //modulehandler_configuration_3.debug = true;
 #endif // _DEBUG
-  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
-  //delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
+  //delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
+  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
   modulehandler_configuration_3.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

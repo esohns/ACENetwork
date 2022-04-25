@@ -1125,9 +1125,6 @@ drawing_area_resize_end (gpointer userData_in)
                                                 (gtk_toggle_button_get_active (toggle_button_p) ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)
                                                                                                 : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME))));
   ACE_ASSERT (drawing_area_p);
-  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
-      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
-  ACE_ASSERT (iconnection_manager_2);
 
   GtkAllocation allocation_s;
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
@@ -1151,21 +1148,8 @@ drawing_area_resize_end (gpointer userData_in)
       allocation_s.width;
 #endif // ACE_WIN32 || ACE_WIN64
 
-  if (data_p->handle == ACE_INVALID_HANDLE)
-    return FALSE;
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
-#else
-      iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
-#endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iconnection_p);
-  Test_I_IStreamConnection_2_t* istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
-  ACE_ASSERT (istream_connection_p);
-  Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
-      const_cast<Test_I_IStreamConnection_2_t::STREAM_T&> (istream_connection_p->stream ());
-  if (!stream_r.isRunning ())
+  ACE_ASSERT (data_p->stream);
+  if (!data_p->stream->isRunning ())
     return FALSE;
 
   // *NOTE*: two things need doing:
@@ -1174,7 +1158,7 @@ drawing_area_resize_end (gpointer userData_in)
 
   // step1:
   const Stream_Module_t* module_p =
-      stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+    data_p->stream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   ACE_ASSERT (module_p);
   Stream_Visualization_IResize* iresize_p =
       dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
@@ -1188,9 +1172,9 @@ drawing_area_resize_end (gpointer userData_in)
   }
 
   // step2
-  stream_r.notify (STREAM_SESSION_MESSAGE_RESIZE,
-                   false, // recurse upstream ?
-                   true); // expedite ?
+  data_p->stream->notify (STREAM_SESSION_MESSAGE_RESIZE,
+                          false, // recurse upstream ?
+                          true); // expedite ?
 
   return FALSE;
 } // drawing_area_resize_end
@@ -1385,6 +1369,7 @@ idle_update_info_display_cb (gpointer userData_in)
           break;
         }
         case COMMON_UI_EVENT_STATISTIC:
+        case COMMON_UI_EVENT_RESIZE:
         {
           spin_button_p =
               GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -1636,6 +1621,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
 
 continue_:
     // step2: start processing stream
+    data_p->dispatch = NULL;
     if (unlikely (!data_p->stream->initialize (data_p->configuration->streamConfiguration_3)))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1738,7 +1724,7 @@ continue_:
   } // end IF
 
   // --> disconnect
-  
+
   if (likely (data_p->timeoutHandler->timerId_))
   {
     int result =
@@ -2074,25 +2060,8 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   Test_I_WebTV_StreamConfiguration_2_t::ITERATOR_T iterator_2 =
       data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_3.end ());
-
-  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
-      TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
-  ACE_ASSERT (iconnection_manager_p);
-  if (data_p->handle == ACE_INVALID_HANDLE)
-    return;
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
-#else
-      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
-#endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iconnection_p);
-  Test_I_IStreamConnection_2_t* istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
-  ACE_ASSERT (istream_connection_p);
-  Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
-      const_cast<Test_I_IStreamConnection_2_t::STREAM_T&> (istream_connection_p->stream ());
-  if (!stream_r.isRunning ())
+  ACE_ASSERT (data_p->stream);
+  if (!data_p->stream->isRunning ())
     return;
 
   GtkDrawingArea* drawing_area_p =
@@ -2115,12 +2084,12 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
   const Stream_Module_t* module_p = NULL;
   module_p =
-      stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+    data_p->stream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("%s: failed to Stream_IStream::find(\"Display\"), returning\n"),
-               ACE_TEXT (stream_r.name ().c_str ())));
+               ACE_TEXT (data_p->stream->name ().c_str ())));
     return;
   } // end IF
 
@@ -2169,8 +2138,9 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   if (!ifullscreen_p)
   {
     ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("%s:Display: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
-               ACE_TEXT (stream_r.name ().c_str ()),
+               ACE_TEXT ("%s:%s: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
+               ACE_TEXT (data_p->stream->name ().c_str ()),
+               module_p->name (),
                const_cast<Stream_Module_t*> (module_p)->writer ()));
     return;
   } // end IF
