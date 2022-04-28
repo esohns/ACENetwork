@@ -182,6 +182,7 @@ struct Test_I_WebTV_UI_CBData
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , stream (NULL)
+   , streamSessionId (0)
    , subscribers ()
    , timeoutHandler (NULL)
    , videoUpdateEventSourceId (0)
@@ -195,6 +196,7 @@ struct Test_I_WebTV_UI_CBData
   ACE_HANDLE                            handle; // connection-
   struct Test_I_WebTV_UI_ProgressData   progressData;
   Test_I_Stream*                        stream; // input-
+  Stream_SessionId_t                    streamSessionId;
   Test_I_Subscribers_t                  subscribers;
   Test_I_TimeoutHandler*                timeoutHandler;
   guint                                 videoUpdateEventSourceId;

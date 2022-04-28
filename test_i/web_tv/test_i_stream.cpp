@@ -138,8 +138,8 @@ Test_I_Stream::load (Stream_ILayout* layout_in,
 
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                           //Test_I_VideoHWDecoder_Module (this,
-                           //                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                  //Test_I_VideoHWDecoder_Module (this,
+                  //                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
                   Test_I_VideoDecoder_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
                   false);

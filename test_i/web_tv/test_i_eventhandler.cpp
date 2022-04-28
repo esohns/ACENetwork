@@ -44,6 +44,7 @@
 #include "net_macros.h"
 
 #include "test_i_defines.h"
+#include "test_i_stream.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
@@ -153,8 +154,10 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
 
-  guint event_source_id = g_idle_add (idle_end_session_cb,
-                                      CBData_);
+  guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                                           idle_end_session_cb,
+                                           CBData_,
+                                           NULL);
   if (event_source_id == 0)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -162,6 +165,18 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
     return;
   } // end IF
   state_r.eventSourceIds.insert (event_source_id);
+
+  if (sessionId_in == CBData_->streamSessionId)
+  {
+    guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                                             idle_end_session_2,
+                                             CBData_,
+                                             NULL);
+    ACE_ASSERT (event_source_id);
+    state_r.eventSourceIds.insert (event_source_id);
+  } // end IF
+
+  state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -391,20 +406,11 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       break;
     }
     case STREAM_SESSION_MESSAGE_CONNECT:
-    {
-      event_e = COMMON_UI_EVENT_CONNECT;
-      break;
-    }
+      event_e = COMMON_UI_EVENT_CONNECT; break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
-    {
-      event_e = COMMON_UI_EVENT_DISCONNECT;
-      break;
-    }
+      event_e = COMMON_UI_EVENT_DISCONNECT; break;
     case STREAM_SESSION_MESSAGE_STEP:
-    {
-      event_e = COMMON_UI_EVENT_STEP;
-      break;
-    }
+      event_e = COMMON_UI_EVENT_STEP; break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)

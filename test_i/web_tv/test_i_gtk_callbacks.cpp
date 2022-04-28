@@ -121,14 +121,74 @@ idle_end_session_cb (gpointer userData_in)
   gtk_progress_bar_set_fraction (progressbar_p, 0.0);
   gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), FALSE);
 
-  if (gtk_toggle_button_get_active (toggle_button_p))
-  {
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_end_session_2 (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_2"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+  ACE_ASSERT (toggle_button_p);
+
+  // stop progress reporting
+//  GtkSpinner* spinner_p =
+//    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
+//                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
+//  ACE_ASSERT (spinner_p);
+//  gtk_spinner_stop (spinner_p);
+//  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
+
+  //ACE_ASSERT (data_p->progressData.eventSourceId);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+    if (!g_source_remove (data_p->progressData.eventSourceId))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                  data_p->progressData.eventSourceId));
+    state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
+    data_p->progressData.eventSourceId = 0;
+
+    if (data_p->videoUpdateEventSourceId &&
+        !g_source_remove (data_p->videoUpdateEventSourceId))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                  data_p->videoUpdateEventSourceId));
+    state_r.eventSourceIds.erase (data_p->videoUpdateEventSourceId);
+    data_p->videoUpdateEventSourceId = 0;
+  } // end lock scope
+
+  GtkProgressBar* progressbar_p =
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
+  ACE_ASSERT (progressbar_p);
+  // *NOTE*: this disables "activity mode" (in Gtk2)
+  gtk_progress_bar_set_fraction (progressbar_p, 0.0);
+  gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), FALSE);
+
+  //if (gtk_toggle_button_get_active (toggle_button_p))
+  //{
     gtk_button_set_label (GTK_BUTTON (toggle_button_p),
                           GTK_STOCK_MEDIA_PLAY);
 
-    un_toggling_play = true;
-    gtk_toggle_button_toggled (toggle_button_p);
-  } // end IF
+  //  un_toggling_play = true;
+  //  gtk_toggle_button_toggled (toggle_button_p);
+  //} // end IF
 
   return G_SOURCE_REMOVE;
 }
@@ -1629,6 +1689,7 @@ continue_:
       return;
     } // end IF
     data_p->stream->start ();
+    data_p->streamSessionId = data_p->stream->getR_2 ().getR ().sessionId;
 
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
@@ -2298,6 +2359,10 @@ button_quit_clicked_cb (GtkWidget* widget_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
                     *iterator));
+      else
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("removed event source (id: %u)\n"),
+                    *iterator));
     state_r.eventSourceIds.clear ();
   } // end lock scope
 
@@ -2307,7 +2372,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   int signal = SIGINT;
 #else
   int signal = SIGQUIT;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   result = ACE_OS::raise (signal);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
