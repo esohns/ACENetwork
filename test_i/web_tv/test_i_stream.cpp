@@ -97,22 +97,23 @@ Test_I_Stream::load (Stream_ILayout* layout_in,
   idistributor_p->initialize (configuration_->configuration_->branches);
 
   module_p = NULL;
-//#if defined (FAAD_SUPPORT)
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_FAADDecoder_Module (this,
-//                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
-//                  false);
-//  layout_in->append (module_p, branch_p, index_i);
-//  module_p = NULL;
-//#else
-#if defined (FFMPEG_SUPPORT)
+#if defined (FAAD_SUPPORT)
   ACE_NEW_RETURN (module_p,
-                  Test_I_AudioDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
+                  Test_I_FAADDecoder_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
-#endif // FAAD_SUPPORT || FFMPEG_SUPPORT
+#else
+#if defined (FFMPEG_SUPPORT)
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_AudioDecoder_Module (this,
+  //                                            ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, branch_p, index_i);
+  //module_p = NULL;
+#endif // FFMPEG_SUPPORT
+#endif // FAAD_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_NEW_RETURN (module_p,
                   Test_I_WASAPIOut_Module (this,
@@ -138,10 +139,10 @@ Test_I_Stream::load (Stream_ILayout* layout_in,
 
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  //Test_I_VideoHWDecoder_Module (this,
-                  //                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
-                  Test_I_VideoDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                  Test_I_VideoHWDecoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                  //Test_I_VideoDecoder_Module (this,
+                  //                            ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;

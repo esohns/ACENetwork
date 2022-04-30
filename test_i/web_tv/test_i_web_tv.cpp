@@ -61,6 +61,7 @@
 #include "common_timer_tools.h"
 
 #if defined (GUI_SUPPORT)
+#include "common_ui_tools.h"
 #if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
@@ -828,6 +829,7 @@ do_work (const std::string& configurationFile_in,
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_3.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT
+  modulehandler_configuration_3.display = Common_UI_Tools::getDefaultDisplay ();
   struct Common_FlexBisonParserConfiguration parserConfiguration_3;
   modulehandler_configuration_3.parserConfiguration =
     &parserConfiguration_3;

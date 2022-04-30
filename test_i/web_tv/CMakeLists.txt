@@ -293,11 +293,15 @@ elseif (WIN32)
  if (SSL_SUPPORT)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)
+ if (FAAD_SUPPORT)
+  file (TO_CMAKE_PATH "${faad_LIB_DIR}" FAAD_PATH)
+ endif (FAAD_SUPPORT)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_2_LIB_DIR}" FFMPEG_2_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_PATH}
+                           ${FAAD_PATH}
                            ${FFMPEG_PATH}
                            ${FFMPEG_2_PATH}
                            ${GTK_PATH}

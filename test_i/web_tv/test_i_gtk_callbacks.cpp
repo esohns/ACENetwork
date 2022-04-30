@@ -190,6 +190,18 @@ idle_end_session_2 (gpointer userData_in)
   //  gtk_toggle_button_toggled (toggle_button_p);
   //} // end IF
 
+  // step1: update widgets
+  GtkFrame* frame_p =
+    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_CHANNEL_NAME)));
+  ACE_ASSERT (frame_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p), TRUE);
+  frame_p =
+      GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME)));
+  ACE_ASSERT (frame_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p), TRUE);
+
   return G_SOURCE_REMOVE;
 }
 
@@ -302,18 +314,16 @@ idle_load_channel_configuration_cb (gpointer userData_in)
   ACE_ASSERT (combo_box_p);
   gtk_combo_box_set_active (combo_box_p, 0);
 
-  GtkButton* button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BUTTON_LOAD_NAME)));
-  ACE_ASSERT (button_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (button_p),
-                            TRUE);
+  //GtkButton* button_p =
+  //  GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+  //                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BUTTON_LOAD_NAME)));
+  //ACE_ASSERT (button_p);
+  //gtk_widget_set_sensitive (GTK_WIDGET (button_p), TRUE);
   GtkToggleButton* toggle_button_p =
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p),
-                            TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), TRUE);
 
   return G_SOURCE_REMOVE;
 }
@@ -1567,6 +1577,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     bool use_SSL = false;
     struct Net_UserData user_data_s;
 
+    data_p->configuration->parserConfiguration.messageQueue = NULL;
+    (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
+    (*iterator_6).second.second->parserConfiguration->messageQueue = NULL;
+
     // retrieve stream URL
     GtkComboBox* combo_box_p =
         GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -1857,6 +1871,12 @@ button_load_clicked_cb (GtkWidget* widget_in,
   Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+  Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_4 =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
+  ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration.end ());
+
+  data_p->configuration->parserConfiguration.messageQueue = NULL;
+  (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
 
   gtk_widget_set_sensitive (widget_in, FALSE);
 
@@ -2007,11 +2027,24 @@ combobox_channel_changed_cb (GtkWidget* widget_in,
   data_p->currentChannel = g_value_get_uint (&value);
   g_value_unset (&value);
 
+  GtkButton* button_p =
+    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BUTTON_LOAD_NAME)));
+  ACE_ASSERT (button_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (button_p), TRUE);
+
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), FALSE);
+
   list_store_p =
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
   ACE_ASSERT (list_store_p);
   gtk_list_store_clear (list_store_p);
+  data_p->currentStream = 0;
 } // combobox_channel_changed_cb
 
 void

@@ -294,7 +294,10 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     } // end FOR
 
     guint event_source_id =
-        g_idle_add (idle_load_channel_configuration_cb, CBData_);
+        g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                         idle_load_channel_configuration_cb,
+                         CBData_,
+                         NULL);
     if (unlikely (event_source_id == 0))
     {
       ACE_DEBUG ((LM_ERROR,

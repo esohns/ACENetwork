@@ -54,6 +54,16 @@
       <column type="guint"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="liststore_resolution">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name width -->
+      <column type="guint"/>
+      <!-- column-name height -->
+      <column type="guint"/>
+    </columns>
+  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
@@ -188,12 +198,13 @@
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">connections</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -202,12 +213,13 @@
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">session messages</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -216,12 +228,13 @@
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">data messages</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
@@ -230,19 +243,20 @@
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">bytes</property>
                                 <property name="editable">False</property>
                                 <property name="has_frame">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">3</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -286,12 +300,9 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">False</property>
+                                        <property name="fill">True</property>
                                         <property name="position">0</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
@@ -303,7 +314,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">False</property>
+                            <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -335,12 +346,9 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">False</property>
+                                        <property name="fill">True</property>
                                         <property name="position">0</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
@@ -352,7 +360,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">False</property>
+                            <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -612,16 +620,6 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkListStore" id="liststore_resolution">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name width -->
-      <column type="guint"/>
-      <!-- column-name height -->
-      <column type="guint"/>
-    </columns>
   </object>
   <object class="GtkListStore" id="liststore_display">
     <columns>
