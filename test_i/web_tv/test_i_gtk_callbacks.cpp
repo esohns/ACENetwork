@@ -1637,8 +1637,9 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
           ((*iterator_5).resolution.height == data_p->configuration->streamConfiguration_3.configuration_->mediaType.video.resolution.height))
 #endif // ACE_WIN32 || ACE_WIN64
       {
+        (*iterator_6).second.second->delayConfiguration->interval.msec (static_cast<long> (10000 / (*iterator_5).frameRate));
         (*iterator_6).second.second->delayConfiguration->averageTokensPerInterval =
-            (*iterator_5).frameRate;
+            10; // i.e. 10x updates/sec
         URI_string = (*iterator_5).URI;
       } // end IF
     ACE_ASSERT (!URI_string.empty ());

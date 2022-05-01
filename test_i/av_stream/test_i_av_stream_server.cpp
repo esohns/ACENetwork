@@ -1194,8 +1194,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end SWITCH
 #else
   Test_I_AVStream_Server_MessageAllocator_t message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
-                                                      &heap_allocator,     // heap allocator handle
-                                                      true);               // block ?
+                                                               &heap_allocator,     // heap allocator handle
+                                                               true);               // block ?
   allocator_p = &message_allocator;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (allocator_p);

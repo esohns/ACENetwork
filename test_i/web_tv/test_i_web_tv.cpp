@@ -795,7 +795,7 @@ do_work (const std::string& configurationFile_in,
 #if defined (_DEBUG)
   //modulehandler_configuration_3.debug = true;
 #endif // _DEBUG
-  //delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
+//  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
   modulehandler_configuration_3.delayConfiguration = &delay_configuration;
