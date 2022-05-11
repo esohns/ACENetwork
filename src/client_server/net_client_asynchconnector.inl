@@ -48,8 +48,8 @@ Net_Client_AsynchConnector_T<HandlerType,
  , handles_ ()
  , managed_ (managed_in)
  , SAP_ ()
- , condition_ (lock_)
  , lock_ ()
+ , condition_ (lock_)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -676,8 +676,8 @@ Net_Client_AsynchConnector_T<HandlerType,
  : configuration_ (NULL)
  , managed_ (managed_in)
  , SAP_ ()
- , condition_ (lock_)
  , lock_ ()
+ , condition_ (lock_)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -859,8 +859,8 @@ Net_Client_AsynchConnector_T<HandlerType,
  : configuration_ (NULL)
  , managed_ (managed_in)
  , SAP_ ()
- , condition_ (lock_)
  , lock_ ()
+ , condition_ (lock_)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 

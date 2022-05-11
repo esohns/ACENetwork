@@ -45,11 +45,11 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
  : resetTimeoutHandler_ (this)
  , resetTimeoutHandlerId_ (-1)
  , resetTimeoutInterval_ (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000)
- , condition_ (lock_)
  , connections_ ()
  , isActive_ (true)
  , isInitialized_ (false)
  , lock_ ()
+ , condition_ (lock_)
  , maximumNumberOfConnections_ (NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN)
  , configuration_ (NULL)
  , userData_ (NULL)
@@ -73,14 +73,13 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::~Net_Connection_Manager_T"));
 
-  int result = -1;
   if (unlikely (resetTimeoutHandlerId_ != -1))
   {
     Common_ITimer_Manager_t* timer_interface_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
     const void* act_p = NULL;
-    result = timer_interface_p->cancel_timer (resetTimeoutHandlerId_,
-                                              &act_p);
+    int result = timer_interface_p->cancel_timer (resetTimeoutHandlerId_,
+                                                  &act_p);
     if (unlikely (result <= 0))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),

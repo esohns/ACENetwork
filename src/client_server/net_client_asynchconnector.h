@@ -145,8 +145,8 @@ class Net_Client_AsynchConnector_T
                                    const AddressType&,                // remote address
                                    const AddressType&);               // local address
 
-  ACE_SYNCH_CONDITION   condition_;
   ACE_SYNCH_MUTEX       lock_;
+  ACE_SYNCH_CONDITION   condition_;
 };
 
 //////////////////////////////////////////
@@ -252,8 +252,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    const ACE_INET_Addr&,              // remote address
                                    const ACE_INET_Addr&);             // local address
 
-  ACE_SYNCH_CONDITION condition_;
   ACE_SYNCH_MUTEX     lock_;
+  ACE_SYNCH_CONDITION condition_;
 };
 
 //////////////////////////////////////////
@@ -347,8 +347,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    const Net_Netlink_Addr&,           // remote address
                                    const Net_Netlink_Addr&);          // local address
 
-  ACE_SYNCH_CONDITION condition_;
   ACE_SYNCH_MUTEX     lock_;
+  ACE_SYNCH_CONDITION condition_;
 };
 #endif // NETLINK_SUPPORT
 
