@@ -414,8 +414,9 @@ HTTP_Tools::parseURL (const std::string& URL_in,
 
   // step1: split protocol/hostname/port
   std::string regex_string =
-    ACE_TEXT_ALWAYS_CHAR ("^(?:http(s)?://)?([[:alnum:]-.]+)(?:\\:([[:digit:]]{1,5}))?(.+)?$");
-  std::regex regex (regex_string);
+    ACE_TEXT_ALWAYS_CHAR ("^(?:http(s)?://)?([[:alnum:]\\-.]+)(?:\\:([[:digit:]]{1,5}))?(.+)?$");
+  std::regex regex (regex_string,
+                    std::regex::ECMAScript);
   std::smatch match_results;
   if (!std::regex_match (URL_in,
                          match_results,
