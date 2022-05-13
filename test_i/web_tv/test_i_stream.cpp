@@ -138,12 +138,17 @@ Test_I_Stream::load (Stream_ILayout* layout_in,
 //layout_in->append (module_p, branch_p, index_i);
 
   module_p = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_NEW_RETURN (module_p,
-//                  Test_I_VideoHWDecoder_Module (this,
-//                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                  Test_I_VideoHWDecoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                  false);
+#else
+  ACE_NEW_RETURN (module_p,
                   Test_I_VideoDecoder_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
                   false);
+#endif // ACE_WIN32 || ACE_WIN64
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
