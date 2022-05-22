@@ -32,6 +32,8 @@
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_timer_tools.h"
+
 #if defined (GUI_SUPPORT)
 #include "common_ui_common.h"
 #if defined (GTK_USE)
@@ -310,13 +312,18 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   } // end IF
 
   // process playlist data
+  int UTC_offset_i = 0;
+  (*channel_iterator).second.segment.start =
+      Common_Timer_Tools::ISO8601ToTimestamp (data_r.M3UPlaylist->key,
+                                              UTC_offset_i);
+  unsigned int seconds_i = 0;
   if (!data_r.M3UPlaylist->ext_inf_elements.empty ())
   {
     for (M3U_ExtInf_ElementsIterator_t iterator = data_r.M3UPlaylist->ext_inf_elements.begin ();
          iterator != data_r.M3UPlaylist->ext_inf_elements.end ();
          ++iterator)
     {
-      // *TODO*: process times
+      seconds_i += (*iterator).Length;
       (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
     } // end FOR
     (*channel_iterator).second.segment.length =
@@ -328,12 +335,36 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
          iterator != data_r.M3UPlaylist->stream_inf_elements.end ();
          ++iterator)
     {
-      // *TODO*: process times
+      seconds_i += (*iterator).Length;
       (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
     } // end FOR
     (*channel_iterator).second.segment.length =
         (*data_r.M3UPlaylist->stream_inf_elements.begin ()).Length;
   } // end ELSE
+  (*channel_iterator).second.segment.end =
+      (*channel_iterator).second.segment.start;
+  (*channel_iterator).second.segment.end += static_cast<time_t> (seconds_i);
+  // convert times
+  if (UTC_offset_i)
+  {
+    (*channel_iterator).second.segment.start =
+        Common_Timer_Tools::localToUTC ((*channel_iterator).second.segment.start,
+                                        UTC_offset_i,
+                                        true);
+    (*channel_iterator).second.segment.end =
+        Common_Timer_Tools::localToUTC ((*channel_iterator).second.segment.end,
+                                        UTC_offset_i,
+                                        true);
+  } // end IF
+  (*channel_iterator).second.segment.start =
+      Common_Timer_Tools::UTCToLocal ((*channel_iterator).second.segment.start);
+  (*channel_iterator).second.segment.end =
+      Common_Timer_Tools::UTCToLocal ((*channel_iterator).second.segment.end);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("received segment data (%u second(s) start %T, end: %T\n"),
+              seconds_i,
+              &(*channel_iterator).second.segment.start,
+              &(*channel_iterator).second.segment.end));
 
   // keep the most recent 5% entries
   ACE_ASSERT (!(*channel_iterator).second.segment.URLs.empty ());
