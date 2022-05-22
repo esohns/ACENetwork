@@ -192,11 +192,8 @@ target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Test_U)
 #target_link_libraries (${EXECUTABLE_SOURCE} Common)
 
 # add PCH
-set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-if (UNIX)
- cotire (${EXECUTABLE_SOURCE})
-endif (UNIX)
+target_precompile_headers (${EXECUTABLE_SOURCE}
+                           PUBLIC stdafx.h)
 
 install (TARGETS ${EXECUTABLE_SOURCE}
          EXPORT ${PROJECT_NAME}Targets
@@ -318,9 +315,8 @@ target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Test_U)
 
 # add PCH
-set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${EXECUTABLE_TARGET})
+target_precompile_headers (${EXECUTABLE_TARGET}
+                           REUSE_FROM ${EXECUTABLE_SOURCE})
 
 install (TARGETS ${EXECUTABLE_TARGET}
          EXPORT ${PROJECT_NAME}Targets

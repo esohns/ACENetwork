@@ -168,8 +168,6 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
 
 # add PCH
-#set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${EXECUTABLE})
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
 
