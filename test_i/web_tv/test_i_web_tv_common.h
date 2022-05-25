@@ -62,6 +62,14 @@ struct Test_I_WebTV_ChannelSegment
   ACE_Time_Value                    end;
   unsigned int                      length; // s
   Test_I_WebTV_ChannelSegmentURLs_t URLs;
+
+  void clear ()
+  {
+    start = ACE_Time_Value::zero;
+    end = ACE_Time_Value::zero;
+    length = 0;
+    URLs.clear ();
+  }
 };
 
 struct Test_I_WebTV_ChannelResolution
@@ -81,9 +89,21 @@ struct Test_I_WebTV_ChannelConfiguration
   std::string                        baseURI; // sub-URI (if any) of the individual streams
   unsigned int                       indexPositions; // i.e. for computing leading "0"s
   std::string                        mainURL; // program-
+  unsigned int                       maxIndex; // wrap around (to 1 (!)) after this
   std::string                        name;
   Test_I_WebTV_ChannelResolutions_t  resolutions;
   struct Test_I_WebTV_ChannelSegment segment;
+
+  void clear ()
+  {
+    baseURI.clear ();
+    indexPositions = 0;
+    mainURL.clear ();
+    maxIndex = 0;
+    name.clear ();
+    resolutions.clear ();
+    segment.clear ();
+  }
 };
 typedef std::map<unsigned int, struct Test_I_WebTV_ChannelConfiguration> Test_I_WebTV_ChannelConfigurations_t;
 typedef Test_I_WebTV_ChannelConfigurations_t::iterator Test_I_WebTV_ChannelConfigurationsIterator_t;

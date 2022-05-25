@@ -637,12 +637,12 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
-  modulehandler_configuration.clone = true;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CLONE;
   //modulehandler_configuration.connectionManager = connection_manager_p;
 //  configuration_in.parserConfiguration.debugParser = true;
 //  configuration_in.parserConfiguration.debugScanner = true;

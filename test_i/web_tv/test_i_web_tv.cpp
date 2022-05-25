@@ -531,6 +531,9 @@ do_parse_configuration_file (const std::string& fileName_in,
           else if (!ACE_OS::strcmp (item_name.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_INDEX_POSITIONS_KEY)))
             channel_configuration_s.indexPositions = item_value_2;
+          else if (!ACE_OS::strcmp (item_name.c_str (),
+                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_MAX_INDEX_KEY)))
+            channel_configuration_s.maxIndex = item_value_2;
           break;
         }
         case ACE_Configuration::STRING:
@@ -557,6 +560,10 @@ do_parse_configuration_file (const std::string& fileName_in,
             channel_configuration_s.indexPositions =
                 ACE_OS::atoi (item_value.c_str ());
           else if (!ACE_OS::strcmp (item_name.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_MAX_INDEX_KEY)))
+            channel_configuration_s.maxIndex =
+                ACE_OS::atoi (item_value.c_str ());
+          else if (!ACE_OS::strcmp (item_name.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_URL_KEY)))
             channel_configuration_s.mainURL = item_value.c_str ();
           break;
@@ -572,6 +579,7 @@ do_parse_configuration_file (const std::string& fileName_in,
       ++index_2;
     } // end WHILE
     configuration_inout.insert (std::make_pair (channel_number, channel_configuration_s));
+    channel_configuration_s.clear ();
     ++index;
   } // end WHILE
   ACE_DEBUG ((LM_DEBUG,
@@ -740,12 +748,13 @@ do_work (const std::string& configurationFile_in,
   struct Test_I_WebTV_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
-  modulehandler_configuration.clone = true;
+  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
       STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+  modulehandler_configuration.messageAllocator = &message_allocator;
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration.statisticReportingInterval =
@@ -783,7 +792,6 @@ do_work (const std::string& configurationFile_in,
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_3.allocatorConfiguration =
     &allocator_configuration;
-  modulehandler_configuration_3.clone = true;
   modulehandler_configuration_3.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_3.codecId = AV_CODEC_ID_H264;
@@ -792,9 +800,10 @@ do_work (const std::string& configurationFile_in,
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_3.connectionConfigurations =
     &configuration_in.connectionConfigurations;
-#if defined (_DEBUG)
+//#if defined (_DEBUG)
   //modulehandler_configuration_3.debug = true;
-#endif // _DEBUG
+//#endif // _DEBUG
+  modulehandler_configuration_3.defragmentMode = STREAM_DEFRAGMENT_CLONE;
 //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
@@ -1030,6 +1039,9 @@ do_work (const std::string& configurationFile_in,
   input_stream.stop (true,   // wait for completion ?
                      false,  // recurse ?
                      false); // high priority
+  input_stream.remove (&event_handler_module_2,
+                       true,   // lock ?
+                       false); // reset ?
 
   timer_manager_p->stop ();
 

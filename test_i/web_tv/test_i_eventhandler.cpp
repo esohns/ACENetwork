@@ -32,6 +32,8 @@
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_parser_m3u_defines.h"
+
 #include "common_timer_tools.h"
 
 #if defined (GUI_SUPPORT)
@@ -313,33 +315,56 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   // process playlist data
   int UTC_offset_i = 0;
-  (*channel_iterator).second.segment.start =
-      Common_Timer_Tools::ISO8601ToTimestamp (data_r.M3UPlaylist->key,
-                                              UTC_offset_i);
   unsigned int seconds_i = 0;
   if (!data_r.M3UPlaylist->ext_inf_elements.empty ())
   {
-    for (M3U_ExtInf_ElementsIterator_t iterator = data_r.M3UPlaylist->ext_inf_elements.begin ();
+    M3U_ExtInf_ElementsIterator_t iterator =
+        data_r.M3UPlaylist->ext_inf_elements.begin ();
+    for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
+         iterator_2 != (*iterator).keyValues.end ();
+         ++iterator_2)
+      if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                           ACE_TEXT_ALWAYS_CHAR (COMMON_PARSER_M3U_EXT_X_PROGRAM_DATE_TIME)))
+      {
+        (*channel_iterator).second.segment.start =
+            Common_Timer_Tools::ISO8601ToTimestamp ((*iterator_2).second,
+                                                    UTC_offset_i);
+        break;
+      } // end IF
+    // *WARNING*: lengths might not be uniform
+    (*channel_iterator).second.segment.length = (*iterator).Length;
+    for (;
          iterator != data_r.M3UPlaylist->ext_inf_elements.end ();
          ++iterator)
     {
       seconds_i += (*iterator).Length;
       (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
     } // end FOR
-    (*channel_iterator).second.segment.length =
-        (*data_r.M3UPlaylist->ext_inf_elements.begin ()).Length;
   } // end IF
   else
   {
-    for (M3U_StreamInf_ElementsIterator_t iterator = data_r.M3UPlaylist->stream_inf_elements.begin ();
+    M3U_StreamInf_ElementsIterator_t iterator =
+        data_r.M3UPlaylist->stream_inf_elements.begin ();
+    for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
+         iterator_2 != (*iterator).keyValues.end ();
+         ++iterator_2)
+      if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                           ACE_TEXT_ALWAYS_CHAR (COMMON_PARSER_M3U_EXT_X_PROGRAM_DATE_TIME)))
+      {
+        (*channel_iterator).second.segment.start =
+            Common_Timer_Tools::ISO8601ToTimestamp ((*iterator_2).second,
+                                                    UTC_offset_i);
+        break;
+      } // end IF
+    // *WARNING*: lengths might not be uniform
+    (*channel_iterator).second.segment.length = (*iterator).Length;
+    for (;
          iterator != data_r.M3UPlaylist->stream_inf_elements.end ();
          ++iterator)
     {
       seconds_i += (*iterator).Length;
       (*channel_iterator).second.segment.URLs.push_back ((*iterator).URL);
     } // end FOR
-    (*channel_iterator).second.segment.length =
-        (*data_r.M3UPlaylist->stream_inf_elements.begin ()).Length;
   } // end ELSE
   (*channel_iterator).second.segment.end =
       (*channel_iterator).second.segment.start;
@@ -361,7 +386,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   (*channel_iterator).second.segment.end =
       Common_Timer_Tools::UTCToLocal ((*channel_iterator).second.segment.end);
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("received segment data (%u second(s) start %T, end: %T\n"),
+              ACE_TEXT ("received segment data (%u second(s): start %#T, end: %#T\n"),
               seconds_i,
               &(*channel_iterator).second.segment.start,
               &(*channel_iterator).second.segment.end));

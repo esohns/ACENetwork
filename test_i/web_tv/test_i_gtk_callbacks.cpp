@@ -694,23 +694,32 @@ idle_initialize_UI_cb (gpointer userData_in)
 void
 add_segment_URIs (const std::string& lastURI_in,
                   Test_I_WebTV_ChannelSegmentURLs_t& URIs_out,
+                  unsigned int maxIndex_in,
                   unsigned int indexPositions_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::add_segment_URIs"));
 
-  std::string URI_string_head, URI_string_tail;
+  std::string URI_string_head, URI_string_head_2, URI_string_tail;
   std::regex regex;
   std::smatch match_results;
   std::stringstream converter;
-  unsigned int index_i = 0;
+  unsigned int index_i = 0, index_2 = 0;
+  bool URI_has_path = false;
 
   size_t position = lastURI_in.find_last_of ('/', std::string::npos);
   if (position != std::string::npos)
   {
+    URI_has_path = true;
     URI_string_tail =
         lastURI_in.substr (position + 1, std::string::npos);
     URI_string_head = lastURI_in;
-    URI_string_head.erase (position + 1, std::string::npos);
+    position = lastURI_in.find ('/', 0);
+    URI_string_head.erase (position, std::string::npos);
+
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter.str (lastURI_in.substr (position + 1, indexPositions_in));
+    converter >> index_2;
 
     std::string regex_string =
         ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([[:alnum:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(.ts)$");
@@ -730,14 +739,14 @@ add_segment_URIs (const std::string& lastURI_in,
     converter.clear ();
     converter.str (match_results[9].str ());
     converter >> index_i;
-    URI_string_head += (match_results[1].str () +
-                        match_results[2].str () +
-                        match_results[3].str () +
-                        match_results[4].str () +
-                        match_results[5].str () +
-                        match_results[6].str () +
-                        match_results[7].str () +
-                        match_results[8].str ());
+    URI_string_head_2 = (match_results[1].str () +
+                         match_results[2].str () +
+                         match_results[3].str () +
+                         match_results[4].str () +
+                         match_results[5].str () +
+                         match_results[6].str () +
+                         match_results[7].str () +
+                         match_results[8].str ());
     URI_string_tail = match_results[10].str ();
   } // end IF
   else
@@ -769,12 +778,29 @@ add_segment_URIs (const std::string& lastURI_in,
        ++i)
   {
     URI_string = URI_string_head;
+    if (URI_has_path)
+    {
+      URI_string += '/';
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
+      URI_string += converter.str ();
+      URI_string += '/';
+      URI_string += URI_string_head_2;
+    } // end IF
+
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter.clear ();
     if (indexPositions_in)
       converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
     else
       converter << ++index_i;
+    if (maxIndex_in &&
+        (index_i == maxIndex_in))
+    {
+      index_i = 1;
+      ++index_2;
+    } // end IF
     URI_string += converter.str ();
     URI_string += URI_string_tail;
     URIs_out.push_back (URI_string);
@@ -803,6 +829,7 @@ idle_segment_download_complete_cb (gpointer userData_in)
     if ((*channel_iterator).second.segment.URLs.size () <= 10)
       add_segment_URIs (current_URL,
                         (*channel_iterator).second.segment.URLs,
+                        (*channel_iterator).second.maxIndex,
                         (*channel_iterator).second.indexPositions);
   } // end lock scope
 
@@ -1641,6 +1668,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
         (*iterator_6).second.second->delayConfiguration->averageTokensPerInterval =
             1;
         URI_string = (*iterator_5).URI;
+        break;
       } // end IF
     ACE_ASSERT (!URI_string.empty ());
     (*iterator_3).second.second->URL.clear ();

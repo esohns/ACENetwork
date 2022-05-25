@@ -184,17 +184,10 @@ Test_I_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Stream::initialize"));
 
-  // sanity check(s)
-  ACE_ASSERT (!inherited::isRunning ());
-
-  //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   Test_I_WebTV_SessionData_2* session_data_p = NULL;
   inherited::CONFIGURATION_T::ITERATOR_T iterator;
-//  Stream_Module_t* module_p = NULL;
-  //  Test_I_Net_Writer_t* netIO_impl_p = NULL;
-//  Test_I_HTTPParser* parser_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
