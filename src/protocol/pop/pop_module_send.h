@@ -87,6 +87,7 @@ class POP_Module_Send_T
   ACE_UNIMPLEMENTED_FUNC (POP_Module_Send_T& operator= (const POP_Module_Send_T&))
 
   POP_IConnection_t* connection_;
+  unsigned int       index_; // maildrop-
 };
 
 // include template definition

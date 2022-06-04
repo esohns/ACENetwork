@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <regex>
 #include <string>
 
 #include "ace/Log_Msg.h"
@@ -53,6 +54,7 @@ POP_Module_Send_T<ACE_SYNCH_USE,
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
  , connection_ (NULL)
+ , index_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("POP_Module_Send_T::POP_Module_Send_T"));
 
@@ -100,12 +102,13 @@ POP_Module_Send_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("POP_Module_Send_T::handleDataMessage"));
 
-  ACE_UNUSED_ARG (passMessageDownstream_out);
+  passMessageDownstream_out = false;
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->allocatorConfiguration);
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
+  ACE_ASSERT (inherited::configuration_->protocolConfiguration->parser);
   ACE_ASSERT (inherited::configuration_->request);
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (connection_);
@@ -136,7 +139,6 @@ POP_Module_Send_T<ACE_SYNCH_USE,
 
   ConnectionStateType& state_r =
     const_cast<ConnectionStateType&> (connection_->state ());
-continue_:
   switch (state_r.protocolState)
   {
     case POP_STATE_INVALID:
@@ -148,49 +150,9 @@ continue_:
       state_r.protocolState = POP_STATE_GREETING_RECEIVED;
       ++state_r.protocolState;
 
-      // retrieve any supported authentication mechanisms
-      std::vector<std::string> authentication_mechanisms_a;
-      std::string authentication_mechanisms;
-      for (POP_TextConstIterator_t iterator = data_r.text.begin ();
-           iterator != data_r.text.end ();
-           ++iterator)
-      {
-        if ((*iterator).find (ACE_TEXT_ALWAYS_CHAR ("AUTH ")))
-          continue;
-        authentication_mechanisms = *iterator;
-        authentication_mechanisms.erase (0, 5);
-        std::istringstream string_stream (authentication_mechanisms);
-        std::string authentication_mechanism;
-        while (!string_stream.eof ())
-        {
-          std::getline (string_stream, authentication_mechanism, ' ');
-          authentication_mechanisms_a.push_back (authentication_mechanism);
-        } // end WHILE
-        break;
-      } // end FOR
-      if (authentication_mechanisms_a.empty ())
-        goto no_authentication_;
-
-      // try AUTH LOGIN ?
-      if (std::find (authentication_mechanisms_a.begin (),
-                     authentication_mechanisms_a.end (),
-                     ACE_TEXT_ALWAYS_CHAR ("LOGIN")) != authentication_mechanisms_a.end ())
-      {
-        // --> send AUTH [LOGIN]
-        // *TODO*: support more authentication mechanisms
-        data_p->request.command = POP_Codes::POP_COMMAND_AUTH_USER;
-        break;
-      } // end IF
-      ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("%s: no supported authentication mechanisms (was: %s), continuing\n"),
-                  inherited::mod_->name (),
-                  ACE_TEXT (authentication_mechanisms.c_str ())));
-
-no_authentication_:
-      // proceed without authentication
-      state_r.protocolState = POP_STATE_AUTH_LOGIN_PASSWORD_SENT;
-
-      data_p->request.command = POP_Codes::POP_COMMAND_TRANS_STAT;
+      // *TODO*: support more authentication mechanisms
+      data_p->request.command = POP_Codes::POP_COMMAND_AUTH_USER;
+      data_p->request.parameters.push_back (inherited::configuration_->protocolConfiguration->username);
       break;
     }
     case POP_STATE_AUTH_LOGIN_USER_SENT:
@@ -202,33 +164,79 @@ no_authentication_:
       ++state_r.protocolState;
 
       data_p->request.command = POP_Codes::POP_COMMAND_AUTH_PASS;
-      data_p->request.parameters.push_back (Common_Math_Tools::encodeBase64 (inherited::configuration_->protocolConfiguration->password.c_str (),
-                                                                             inherited::configuration_->protocolConfiguration->password.size ()));
+      data_p->request.parameters.push_back (inherited::configuration_->protocolConfiguration->password);
       break;
     }
-next_message:
     case POP_STATE_AUTH_LOGIN_PASSWORD_SENT:
     {
       if (!POP_Tools::isSuccess (data_r.status[0]))
         goto protocol_error;
 
       // --> AUTH [LOGIN] password has been sent; send STAT
-      ++state_r.protocolState; ++state_r.protocolState;
+      state_r.protocolState = POP_STATE_TRANS_STAT_SENT;
 
       data_p->request.command = POP_Codes::POP_COMMAND_TRANS_STAT;
-      data_p->request.parameters = inherited::configuration_->request->parameters;
       break;
     }
     case POP_STATE_TRANS_STAT_SENT:
     {
       if (!POP_Tools::isSuccess (data_r.status[0]))
         goto protocol_error;
+      ACE_ASSERT (!data_r.text.empty ());
+
+      // process STAT response
+      std::string regex_string =
+        ACE_TEXT_ALWAYS_CHAR("^([[:digit:]]+) ([[:digit:]]+)$");
+      std::regex regex (regex_string);
+      std::smatch match_results;
+      if (!std::regex_match (data_r.text[0],
+                             match_results,
+                             regex,
+                             std::regex_constants::match_default))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to parse STAT return value (was: \"%s\"), returning\n"),
+                    inherited::mod_->name (),
+                    ACE_TEXT (data_r.text[0].c_str ())));
+        delete data_p; data_p = NULL;
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+      ACE_ASSERT (match_results[1].matched);
+      ACE_ASSERT (match_results[2].matched);
+      std::istringstream converter;
+      converter.str (match_results[1].str ());
+      converter >> state_r.mailDropMessages;
+      converter.clear ();
+      converter.str (match_results[2].str ());
+      unsigned int number_of_message_bytes = 0;
+      converter >> number_of_message_bytes;
+
+      if (!state_r.mailDropMessages)
+      {
+        // --> STAT has been sent; send QUIT
+        state_r.protocolState = POP_STATE_TRANS_QUIT_SENT;
+
+        data_p->request.command = POP_Codes::POP_COMMAND_TRANS_QUIT;
+
+        break;
+      } // end IF
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: maildrop consists of %u message(s) (%u byte(s))\n"),
+                  inherited::mod_->name (),
+                  state_r.mailDropMessages,
+                  number_of_message_bytes));
 
       // --> STAT has been sent; send RETR(s)
-      ++state_r.protocolState;
+      state_r.protocolState = POP_STATE_TRANS_RETR_SENT;
 
       data_p->request.command = POP_Codes::POP_COMMAND_TRANS_RETR;
-      data_p->request.parameters = inherited::configuration_->request->parameters;
+      index_ = 1;
+      std::ostringstream converter_2;
+      converter_2 << index_;
+      data_p->request.parameters.push_back (converter_2.str ());
+
+      inherited::configuration_->protocolConfiguration->parser->expectMultiline (true);
       break;
     }
     case POP_STATE_TRANS_RETR_SENT:
@@ -236,12 +244,31 @@ next_message:
       if (!POP_Tools::isSuccess (data_r.status[0]))
         goto protocol_error;
 
-      // --> STAT has been sent; send DELE(s)
-      ++state_r.protocolState;
+      // process message(s) --> send downstream
+      passMessageDownstream_out = true;
 
-      // --> RETR has been sent; send DELE
-      data_p->request.command = POP_Codes::POP_COMMAND_TRANS_DELE;
-      data_p->request.parameters = inherited::configuration_->request->parameters;
+      std::ostringstream converter;
+      ++index_;
+      if (index_ > state_r.mailDropMessages)
+      {
+        // --> RETR(s) has/have been sent; send DELE(s)
+        state_r.protocolState = POP_STATE_TRANS_DELE_SENT;
+
+        data_p->request.command = POP_Codes::POP_COMMAND_TRANS_DELE;
+        index_ = 1;
+        converter << index_;
+        data_p->request.parameters.push_back (converter.str ());
+        inherited::configuration_->protocolConfiguration->parser->expectMultiline (false);
+        break;
+      } // end IF
+
+      // --> RETR has/have been sent; retrieve next message(s)
+      state_r.protocolState = POP_STATE_TRANS_RETR_SENT;
+
+      data_p->request.command = POP_Codes::POP_COMMAND_TRANS_RETR;
+      converter << index_;
+      data_p->request.parameters.push_back (converter.str ());
+
       break;
     }
     case POP_STATE_TRANS_DELE_SENT:
@@ -249,10 +276,25 @@ next_message:
       if (!POP_Tools::isSuccess (data_r.status[0]))
         goto protocol_error;
 
-      // --> DELE has been sent; retrieve next message(s)
-      state_r.protocolState = POP_STATE_AUTH_LOGIN_PASSWORD_SENT;
+      ++index_;
+      if (index_ > state_r.mailDropMessages)
+      {
+        // --> DELE(s) has/have been sent; send QUIT
+        state_r.protocolState = POP_STATE_TRANS_QUIT_SENT;
 
-      goto next_message;
+        data_p->request.command = POP_Codes::POP_COMMAND_TRANS_QUIT;
+
+        break;
+      } // end IF
+
+      // --> DELE has been sent; delete next message(s)
+      state_r.protocolState = POP_STATE_TRANS_DELE_SENT;
+
+      std::ostringstream converter;
+      converter << index_;
+      data_p->request.parameters.push_back (converter.str ());
+
+      break;
     }
     case POP_STATE_TRANS_QUIT_SENT:
     {
@@ -322,6 +364,11 @@ next_message:
     goto error;
   } // end IF
 
+  if (!passMessageDownstream_out)
+  {
+    message_inout->release (); message_inout = NULL;
+  } // end IF
+
   return;
 
 protocol_error:
@@ -337,6 +384,10 @@ error:
     delete data_container_2;
   if (message_p)
     message_p->release ();
+  if (!passMessageDownstream_out)
+  {
+    message_inout->release (); message_inout = NULL;
+  } // end IF
 }
 
 template <ACE_SYNCH_DECL,

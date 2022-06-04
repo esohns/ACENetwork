@@ -681,7 +681,8 @@ void yyfree ( void * , yyscan_t yyscanner );
 #define text_begin 2
 #define text 3
 #define multiline_text 4
-#define multiline_text_dot 5
+#define multiline_text_begin 5
+#define multiline_text_dot 6
 
 #endif
 

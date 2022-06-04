@@ -35,6 +35,7 @@ POP_ParserDriver_T<SessionMessageType>::POP_ParserDriver_T ()
  : fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
+ , expectMultiline_ (false)
  , configuration_ (NULL)
  , finished_ (false)
 //, parser_ (this,               // driver
@@ -565,7 +566,7 @@ POP_ParserDriver_T<SessionMessageType>::scan_begin ()
   ACE_ASSERT (fragment_);
 
   // reset scanner state
-  POP_Scanner_reset (scannerState_);
+  //POP_Scanner_reset (scannerState_);
 
   // create/initialize a new buffer state
   if (configuration_->useYYScanBuffer)

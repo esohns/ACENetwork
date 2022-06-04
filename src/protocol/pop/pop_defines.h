@@ -51,4 +51,7 @@
 #define POP_DEFAULT_SERVER_PORT                          110 // TCP
 #define POP_DEFAULT_TLS_SERVER_PORT                      995 // POP3S (implicit TLS)
 
+#define POP_DEFAULT_BUFFER_SIZE                          16384 // bytes
+
+
 #endif

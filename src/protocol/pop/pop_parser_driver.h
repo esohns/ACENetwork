@@ -64,6 +64,10 @@ class POP_ParserDriver_T
 
   // implement Common_IYaccStreamParser_T
   inline virtual struct POP_Record& current () { ACE_ASSERT (record_); return *record_; }
+
+  inline virtual void expectMultiline (bool expectMultiline_in) { expectMultiline_ = expectMultiline_in; }
+  inline virtual bool expectMultiline () { return expectMultiline_; }
+
   ////////////////////////////////////////
   //virtual void record (struct POP_Record*&); // data record
 
@@ -83,6 +87,8 @@ class POP_ParserDriver_T
 
   // target
   struct POP_Record*                         record_;
+
+  bool                                       expectMultiline_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (POP_ParserDriver_T (const POP_ParserDriver_T&))

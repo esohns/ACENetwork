@@ -51,7 +51,7 @@ struct YYLTYPE;
 
 union yytoken
 {
-  ACE_UINT16   ival;
+  ACE_UINT32   ival;
   std::string* sval;
 };
 typedef yytoken yytoken_t;

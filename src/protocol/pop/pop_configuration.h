@@ -55,7 +55,9 @@ struct POP_AllocatorConfiguration
 {
   POP_AllocatorConfiguration ()
    : Common_Parser_FlexAllocatorConfiguration ()
-  {}
+  {
+    defaultBufferSize = POP_DEFAULT_BUFFER_SIZE;
+  }
 };
 
 //typedef Common_INotify_T<unsigned int,
@@ -63,19 +65,18 @@ struct POP_AllocatorConfiguration
 //                         POP_Record,
 //                         POP_SessionMessage> POP_IStreamNotify_t;
 
+class POP_IParser;
 struct POP_ProtocolConfiguration
 {
   POP_ProtocolConfiguration ()
-   : domain (static_cast<u_short> (0),
-             ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST),
-             AF_INET)
+   : parser (NULL)
    , username ()
    , password ()
   {}
 
-  ACE_INET_Addr domain; // i.e. external address
-  std::string   username;
-  std::string   password;
+  POP_IParser* parser;
+  std::string  username;
+  std::string  password;
 };
 
 struct POP_ModuleHandlerConfiguration

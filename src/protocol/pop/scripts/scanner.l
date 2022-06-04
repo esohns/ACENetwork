@@ -58,7 +58,7 @@ int POP_Scanner_reset (yyscan_t);
 
 %option prefix="POP_Scanner_"
 
-%option header-file="POP_Scanner.h" outfile="POP_Scanner.cpp"
+%option header-file="pop_scanner.h" outfile="pop_scanner.cpp"
 %option batch 8bit never-interactive yylineno
 %option nodefault nostdinit yywrap nomain nounput
 /* %option c++ yyclass="POP_Scanner" */
@@ -80,11 +80,10 @@ int POP_Scanner_reset (yyscan_t);
 
 /* *NOTE*: see RFC 1531 page 13ff. */
 OCTET          [\x00-\xFF]
-LETTER         [[:alpha:]]
-DIGIT          [[:digit:]]
+OCTET_NO_CR    [\x00-\xFF]{-}[\x0D]
 DOT            \x2E
 ERR            -ERR
-OK             +OK
+OK             \+OK
 CRLF           \x0D\x0A
 MINUS          \x2D
 PLUS           \x2B
@@ -94,6 +93,7 @@ SPACE          \x20
 %s             text_begin
 %s             text
 %s             multiline_text
+%s             multiline_text_begin
 %s             multiline_text_dot
 
 %{
@@ -123,7 +123,7 @@ SPACE          \x20
                              yyless (0); }
 } // end <INITIAL>
 <reply_code>{
-\+OK                       { driver->offset (yyleng);
+{OK}                       { driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -131,7 +131,7 @@ SPACE          \x20
                              BEGIN(text_begin);
                              return yytokentype::REPLY_CODE;
                              /* return yy::POP_Parser::token::REPLY_CODE; */ }
--ERR                       { driver->offset (yyleng);
+{ERR}                      { driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -141,45 +141,64 @@ SPACE          \x20
                              /* return yy::POP_Parser::token::REPLY_CODE; */ }
 } // end <reply_code>
 <text_begin>{
-{SPACE}                    { driver->offset (yyleng);
+{SPACE}+                   { driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
-                             BEGIN(text);
+                             if (driver->expectMultiline ())
+                               BEGIN(multiline_text_begin);
+                             else
+                               BEGIN(text);
                            }
-} // end <text_begin>
-<multiline_text>{
-{DOT}                      { yyless (0);
-                             BEGIN(multiline_text_dot); }
-[^\.]+                     { driver->offset (yyleng);
-                             ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext); }
 {CRLF}                     { driver->offset (yyleng);
+                             if (driver->expectMultiline ())
+                               BEGIN(multiline_text_begin);
+                             else
+                             {
+                               BEGIN(reply_code);
+                               return yytokentype::REPLY_TEXT_END;
+                             }
+                             /* return yy::POP_Parser::token::REPLY_TEXT_END; */ }
+} // end <text_begin>
+<multiline_text_begin>{
+{DOT}/{CRLF}               { driver->offset (yyleng);
                              BEGIN(reply_code);
-                             return yytokentype::REPLY_TEXT;
-                             /* return yy::POP_Parser::token::REPLY_TEXT; */ }
-} // end <multiline_text>
-<multiline_text_dot>{
-{DOT}{CRLF}                { driver->offset (yyleng);
-                             BEGIN(INITIAL);
                              return yytokentype::REPLY_TEXT_END;
                              /* return yy::POP_Parser::token::REPLY_TEXT_END; */ }
-\.                         { driver->offset (yyleng);
+{DOT}                      { driver->offset (yyleng); /* byte-stuffing */
+                             ACE_NEW_NORETURN (yylval->sval,
+                                               std::string ());
+                             ACE_ASSERT (yylval->sval);
+                             BEGIN(multiline_text); }
+{OCTET}{1}                 { driver->offset (yyleng);
+                             ACE_NEW_NORETURN (yylval->sval,
+                                               std::string ());
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext);
                              BEGIN(multiline_text); }
-} // end <multiline_text_dot>
+} // end <multiline_text_begin>
 <text>{
 {CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY_TEXT_END;
                              /* return yy::POP_Parser::token::REPLY; */ }
-{OCTET}*/{CRLF}            { driver->offset (yyleng);
+{OCTET_NO_CR}*/{CRLF}      { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT;
                              /* return yy::POP_Parser::token::REPLY_TEXT; */ }
 } // end <text>
+<multiline_text>{
+{CRLF}                     { driver->offset (yyleng);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->append (yytext);
+                             BEGIN(multiline_text_begin);
+                             return yytokentype::REPLY_TEXT;
+                             /* return yy::POP_Parser::token::REPLY_TEXT; */ }
+{OCTET_NO_CR}*/{CRLF}      { driver->offset (yyleng);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->append (yytext); }
+} // end <multiline_text>
 <<EOF>>                    { yyterminate(); }
 <*>{OCTET}{1}              { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */

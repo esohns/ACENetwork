@@ -40,6 +40,10 @@ class POP_IParser
                                      struct POP_Record> IPARSER_T;
 
   using IPARSER_T::error;
+
+  // API
+  virtual void expectMultiline (bool) = 0;
+  virtual bool expectMultiline () = 0;
 };
 
 #endif

@@ -53,9 +53,11 @@ struct POP_ConnectionState
 {
   POP_ConnectionState ()
    : Net_StreamConnectionState ()
+   , mailDropMessages (0)
    , protocolState (POP_STATE_INVALID)
   {}
 
+  unsigned int           mailDropMessages;
   enum POP_ProtocolState protocolState;
 };
 

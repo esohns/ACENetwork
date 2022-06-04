@@ -149,8 +149,34 @@ POP_Tools::CommandToString (POP_Command_t command_in)
 
   switch (command_in)
   {
-    case POP_Codes::POP_COMMAND_QUIT:
-      result = ACE_TEXT_ALWAYS_CHAR ("QUIT"); break;
+    case POP_Codes::POP_COMMAND_AUTH_USER:
+      result = ACE_TEXT_ALWAYS_CHAR ("USER"); break;
+    case POP_Codes::POP_COMMAND_AUTH_PASS:
+      result = ACE_TEXT_ALWAYS_CHAR("PASS"); break;
+    case POP_Codes::POP_COMMAND_AUTH_APOP:
+      result = ACE_TEXT_ALWAYS_CHAR("APOP"); break;
+    case POP_Codes::POP_COMMAND_AUTH_QUIT:
+      result = ACE_TEXT_ALWAYS_CHAR("QUIT"); break;
+    case POP_Codes::POP_COMMAND_TRANS_STAT:
+      result = ACE_TEXT_ALWAYS_CHAR("STAT"); break;
+    case POP_Codes::POP_COMMAND_TRANS_LIST:
+      result = ACE_TEXT_ALWAYS_CHAR("LIST"); break;
+    case POP_Codes::POP_COMMAND_TRANS_RETR:
+      result = ACE_TEXT_ALWAYS_CHAR("RETR"); break;
+    case POP_Codes::POP_COMMAND_TRANS_DELE:
+      result = ACE_TEXT_ALWAYS_CHAR("DELE"); break;
+    case POP_Codes::POP_COMMAND_TRANS_NOOP:
+      result = ACE_TEXT_ALWAYS_CHAR("NOOP"); break;
+    case POP_Codes::POP_COMMAND_TRANS_RSET:
+      result = ACE_TEXT_ALWAYS_CHAR("RSET"); break;
+    case POP_Codes::POP_COMMAND_TRANS_QUIT:
+      result = ACE_TEXT_ALWAYS_CHAR("QUIT"); break;
+    case POP_Codes::POP_COMMAND_TRANS_TOP:
+      result = ACE_TEXT_ALWAYS_CHAR("TOP"); break;
+    case POP_Codes::POP_COMMAND_TRANS_UIDL:
+      result = ACE_TEXT_ALWAYS_CHAR("UIDL"); break;
+    case POP_Codes::POP_COMMAND_UPDAT_QUIT:
+      result = ACE_TEXT_ALWAYS_CHAR("QUIT"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -179,20 +205,28 @@ POP_Tools::StateToString (enum POP_ProtocolState state_in)
       result = ACE_TEXT_ALWAYS_CHAR ("AUTH_LOGIN_USER_SENT"); break;
     case POP_STATE_AUTH_LOGIN_PASSWORD_SENT:
       result = ACE_TEXT_ALWAYS_CHAR ("AUTH_LOGIN_PASSWORD_SENT"); break;
-    //case POP_STATE_AUTH_COMPLETE:
-    //  result = ACE_TEXT_ALWAYS_CHAR ("AUTH_COMPLETE"); break;
-    //case POP_STATE_MAIL_SENT:
-    //  result = ACE_TEXT_ALWAYS_CHAR ("MAIL_SENT"); break;
-    //case POP_STATE_RCPT_SENT:
-    //  result = ACE_TEXT_ALWAYS_CHAR ("RCPT_SENT"); break;
-    //case POP_STATE_RCPTS_SENT:
-    //  result = ACE_TEXT_ALWAYS_CHAR ("RCPTS_SENT"); break;
-    //case POP_STATE_DATA_SENT:
-    //  result = ACE_TEXT_ALWAYS_CHAR ("DATA_SENT"); break;
-    //case POP_STATE_DATA_2_SENT:
-    //  result = ACE_TEXT_ALWAYS_CHAR ("DATA_2_SENT"); break;
-    case POP_STATE_QUIT_SENT:
-      result = ACE_TEXT_ALWAYS_CHAR ("QUIT_SENT"); break;
+    case POP_STATE_AUTH_APOP_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTH_APOP_SENT"); break;
+    case POP_STATE_AUTH_QUIT_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTH_QUIT_SENT"); break;
+    case POP_STATE_TRANS_LIST_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("TRANS_LIST_SENT"); break;
+    case POP_STATE_TRANS_RETR_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("TRANS_RETR_SENT"); break;
+    case POP_STATE_TRANS_DELE_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("TRANS_DELE_SENT"); break;
+    case POP_STATE_TRANS_NOOP_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("TRANS_NOOP_SENT"); break;
+    case POP_STATE_TRANS_RSET_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("TRANS_RSET_SENT"); break;
+    case POP_STATE_TRANS_QUIT_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR("TRANS_QUIT_SENT"); break;
+    case POP_STATE_TRANS_TOP_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR("TRANS_TOP_SENT"); break;
+    case POP_STATE_TRANS_UIDL_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR("TRANS_UIDL_SENT"); break;
+    case POP_STATE_UPDAT_QUIT_SENT:
+      result = ACE_TEXT_ALWAYS_CHAR("UPDAT_QUIT_SENT"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
