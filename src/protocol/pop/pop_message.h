@@ -70,11 +70,11 @@ template <typename MessageType = enum Stream_MessageType>
 class POP_Message_T
  : public Stream_DataMessageBase_2<POP_MessageData_t,
                                    MessageType,
-                                   Stream_CommandType_t>
+                                   POP_Command_t>
 {
   typedef Stream_DataMessageBase_2<POP_MessageData_t,
                                    MessageType,
-                                   Stream_CommandType_t> inherited;
+                                   POP_Command_t> inherited;
 
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -82,24 +82,24 @@ class POP_Message_T
                                                  Stream_ControlMessage_t,
                                                  POP_Message_T<MessageType>,
                                                  POP_SessionMessage_T<POP_Stream_SessionData_t,
-                                                                       struct Stream_UserData> >;
+                                                                      struct Stream_UserData> >;
   friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
                                                struct POP_AllocatorConfiguration,
                                                Stream_ControlMessage_t,
                                                POP_Message_T<MessageType>,
                                                POP_SessionMessage_T<POP_Stream_SessionData_t,
-                                                                     struct Stream_UserData> >;
+                                                                    struct Stream_UserData> >;
 
  public:
   // convenient types
   typedef POP_Message_T<MessageType> OWN_TYPE_T;
 
   POP_Message_T (Stream_SessionId_t, // session id
-                  unsigned int);      // size
+                 unsigned int);      // size
   inline virtual ~POP_Message_T () {}
 
   //virtual Stream_CommandType_t command () const; // return value: message type
-  inline static std::string CommandToString (Stream_CommandType_t command_in) { return POP_Tools::CommandToString (command_in); }
+  inline static std::string CommandToString (POP_Command_t command_in) { return POP_Tools::CommandToString (command_in); }
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -112,9 +112,9 @@ class POP_Message_T
  protected:
   // *NOTE*: to be used by allocators
   POP_Message_T (Stream_SessionId_t, // session id
-                  ACE_Data_Block*,    // data block to use
-                  ACE_Allocator*,     // message allocator
-                  bool = true);       // increment running message counter ?
+                 ACE_Data_Block*,    // data block to use
+                 ACE_Allocator*,     // message allocator
+                 bool = true);       // increment running message counter ?
 //   POP_Message_T (ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and derived classes
