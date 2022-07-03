@@ -44,7 +44,7 @@ class server
 
   struct Server_Configuration configuration_;
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Net_AllocatorConfiguration> heap_allocator_;
+                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator_;
   struct Server_UI_CBData CBData_;
   struct Common_EventDispatchState event_dispatch_state_;
 };

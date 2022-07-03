@@ -1,15 +1,15 @@
 if (UNIX)
- pkg_check_modules (PKG_NETLINK REQUIRED libnl-3.0)
+ pkg_check_modules (PKG_NETLINK libnl-3.0)
  if (PKG_NETLINK_FOUND)
-   set (NETLINK_FOUND TRUE)
+  set (NETLINK_FOUND TRUE)
+  set (NETLINK_INCLUDE_DIRS ${PKG_NETLINK_INCLUDE_DIRS})
+  set (NETLINK_LIBRARIES ${PKG_NETLINK_LIBRARIES})
  endif (PKG_NETLINK_FOUND)
- 
- if (NETLINK_FOUND)
-  option (NETLINK_SUPPORT "enable netlink support" ON)
- endif (NETLINK_FOUND)
+endif (UNIX)
 
+if (NETLINK_FOUND)
+ option (NETLINK_SUPPORT "enable netlink support" ON)
  if (NETLINK_SUPPORT)
   add_definitions (-DNETLINK_SUPPORT)
  endif (NETLINK_SUPPORT)
-endif (UNIX)
-
+endif (NETLINK_FOUND)

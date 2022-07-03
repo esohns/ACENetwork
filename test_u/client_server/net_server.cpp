@@ -574,7 +574,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_AllocatorConfiguration> heap_allocator;
+                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,

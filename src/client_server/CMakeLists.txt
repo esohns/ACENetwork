@@ -203,7 +203,7 @@ endif ()
 
 # add PCH
 target_precompile_headers (${PROJECT_NAME}_Server
-                           PUBLIC stdafx.h)
+                           REUSE_FROM ${PROJECT_NAME}_Client)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Client ${PROJECT_NAME}_Server

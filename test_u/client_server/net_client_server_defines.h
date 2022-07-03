@@ -24,6 +24,22 @@
 #define TEST_U_STREAM_MODULE_HEADERPARSER_NAME          "HeaderParser"
 #define TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME       "ProtocolHandler"
 
+// define behaviour
+#define NET_CLIENT_DEFAULT_CONNECT_PROBABILITY          0.5F // 50%
+#define NET_CLIENT_DEFAULT_ABORT_PROBABILITY            0.2F // 20%
+#define NET_CLIENT_DEFAULT_DEFAULT_MODE                 Net_Client_TimeoutHandler::ACTION_NORMAL
+ 
+#define NET_CLIENT_DEFAULT_MAX_NUM_OPEN_CONNECTIONS     0
+#define NET_CLIENT_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST
+#define NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL      0
+#define NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL         0 // ms {0: OFF}
+#define NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL         20 // ms
+#define NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL       1 // ms
+
+// *** UI ***
+#define NET_CLIENT_UI_FILE                              "net_client.glade"
+#define NET_SERVER_UI_FILE                              "net_server.glade"
+
 // -----------------------------------------------------------------------------
 
 #define NET_UI_GTK_EVENT_RESOLUTION                     200 // ms --> 5 FPS

@@ -54,7 +54,4 @@
 // *** socket ***
 #define NET_SERVER_SOCKET_DEFAULT_LINGER                       false  // SO_LINGER
 
-// *** UI ***
-#define NET_SERVER_UI_FILE                                     "net_server.glade"
-
 #endif

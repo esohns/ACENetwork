@@ -1,7 +1,6 @@
-#include "ace/Synch.h"
 #include "net_server_wxui.h"
 
-#include <wx/xrc/xmlres.h>
+#include "wx/xrc/xmlres.h"
 
 #include "ace/config-lite.h"
 #include "ace/Log_Msg.h"
@@ -27,7 +26,7 @@
 #include "test_u_eventhandler.h"
 #include "test_u_module_eventhandler.h"
 
-extern const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetServerStream");
+//extern const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetServerStream");
 
 dialog_main::dialog_main (wxWindow* parent,
                           wxWindowID id,
@@ -77,7 +76,11 @@ bool
 server::OnInit_2 ()
 {
   // initialize randomness
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Tools::initialize (false, true);
+#else
   Common_Tools::initialize (true);
+#endif // ACE_WIN32 || ACE_WIN64
 
   std::string log_file_name =
       Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
@@ -106,9 +109,9 @@ server::OnInit_2 ()
                                                &(this->heap_allocator_), // heap allocator handle
                                                true));                   // block ?
 
-  Test_U_EventHandler* ui_event_handler_p = NULL;
+  Test_U_EventHandler_t* ui_event_handler_p = NULL;
   ACE_NEW_NORETURN (ui_event_handler_p,
-                    Test_U_EventHandler (&CBData_));
+                    Test_U_EventHandler_t (&CBData_));
   Test_U_Module_EventHandler_Module* event_handler_module_p = NULL;
   ACE_NEW_NORETURN (event_handler_module_p,
                     Test_U_Module_EventHandler_Module (NULL,
@@ -118,14 +121,15 @@ server::OnInit_2 ()
 //  configuration_.protocolConfiguration.pingInterval = pingInterval_in;
   configuration_.protocolConfiguration.printPongMessages = false;
   // ********************** stream configuration data **************************
-  configuration_.streamConfiguration.configuration_.cloneModule = true;
-  configuration_.streamConfiguration.configuration_.messageAllocator =
+  configuration_.streamConfiguration.configuration_->cloneModule = true;
+  configuration_.streamConfiguration.configuration_->messageAllocator =
     message_allocator_p;
-  configuration_.streamConfiguration.configuration_.module =
+  configuration_.streamConfiguration.configuration_->module =
       event_handler_module_p;
 
   struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_U_StreamConfiguration stream_configuration;
   modulehandler_configuration.printFinalReport = true;
   modulehandler_configuration.protocolConfiguration =
     &configuration_.protocolConfiguration;
@@ -138,11 +142,10 @@ server::OnInit_2 ()
   modulehandler_configuration.lock = &CBData_.UIState->subscribersLock;
   configuration_.streamConfiguration.initialize (module_configuration,
                                                  modulehandler_configuration,
-                                                 configuration_.streamConfiguration.allocatorConfiguration_,
-                                                 configuration_.streamConfiguration.configuration_);
+                                                 stream_configuration);
 
   // *TODO*: is this correct ?
-  configuration_.streamConfiguration.configuration_.serializeOutput =
+  configuration_.streamConfiguration.configuration_->serializeOutput =
     false;
 
   // ********************** connection configuration data **********************
@@ -152,39 +155,37 @@ server::OnInit_2 ()
   {
     ACE_NEW_NORETURN (connection_configuration_2,
                       Test_U_UDPConnectionConfiguration ());
+    connection_configuration_2->allocatorConfiguration =
+      &configuration_.allocatorConfiguration,
     connection_configuration_2->messageAllocator = message_allocator_p;
-    connection_configuration_2->initialize (configuration_.allocatorConfiguration,
-                                            configuration_.streamConfiguration);
+    connection_configuration_2->streamConfiguration =
+      &configuration_.streamConfiguration;
     configuration_.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     connection_configuration_2));
   } // end IF
   else
   {
-    configuration_.listenerConfiguration.messageAllocator =
-        message_allocator_p;
-    configuration_.listenerConfiguration.connectionConfiguration =
-        connection_configuration_p;
-
     ACE_NEW_NORETURN (connection_configuration_p,
                       Test_U_TCPConnectionConfiguration ());
+    connection_configuration_p->allocatorConfiguration =
+      &configuration_.allocatorConfiguration,
     connection_configuration_p->messageAllocator = message_allocator_p;
-    connection_configuration_p->address.set_port_number (NET_SERVER_DEFAULT_LISTENING_PORT,
-                                                         1);
-    connection_configuration_p->initialize (configuration_.allocatorConfiguration,
-                                            configuration_.streamConfiguration);
+    connection_configuration_p->socketConfiguration.address.set_port_number (NET_SERVER_DEFAULT_LISTENING_PORT,
+                                                                             1);
+    connection_configuration_p->streamConfiguration =
+      &configuration_.streamConfiguration;
     configuration_.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     connection_configuration_p));
   } // end ELSE
 
   // step2: initialize event dispatch
-  event_dispatch_state_.configuration =
-    &configuration_.dispatchConfiguration;
+  event_dispatch_state_.configuration = &configuration_.dispatchConfiguration;
   if (false) //(useReactor_in) *TODO*
     configuration_.dispatchConfiguration.numberOfReactorThreads =
-      NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
+      NET_SERVER_DEFAULT_NUMBER_OF_REACTOR_DISPATCH_THREADS;
   else
     configuration_.dispatchConfiguration.numberOfProactorThreads =
-      NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
+      NET_SERVER_DEFAULT_NUMBER_OF_PROACTOR_DISPATCH_THREADS;
   if (!Common_Tools::initializeEventDispatch (configuration_.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -199,10 +200,12 @@ server::OnInit_2 ()
     TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   ACE_ASSERT (connection_manager_2);
-  connection_manager_p->initialize (0);
+  connection_manager_p->initialize (0,
+                                    ACE_Time_Value::zero);
   connection_manager_p->set (*connection_configuration_p,
                              NULL);
-  connection_manager_2->initialize (0);
+  connection_manager_2->initialize (0,
+                                    ACE_Time_Value::zero);
   connection_manager_2->set (*connection_configuration_2,
                              NULL);
 
@@ -220,9 +223,11 @@ server::OnInit_2 ()
 //    if (useReactor_in)
 //      configuration_in.listener = SERVER_LISTENER_SINGLETON::instance ();
 //    else
-    configuration_.listener = SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+    configuration_.TCPListener =
+      SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
 
-    if (!configuration_.listener->initialize (configuration_.listenerConfiguration))
+    ACE_ASSERT (connection_configuration_p);
+    if (!configuration_.TCPListener->initialize (*connection_configuration_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, aborting\n")));
@@ -247,8 +252,9 @@ server::OnInit_2 ()
 //    if (useReactor_in)
 //      configuration_in.connector = &udp_connector;
 //    else
-      configuration_.connector = &udp_asynch_connector;
-    if (!configuration_.connector->initialize (*connection_configuration_2))
+      configuration_.UDPConnector = &udp_asynch_connector;
+      ACE_ASSERT (connection_configuration_2);
+    if (!configuration_.UDPConnector->initialize (*connection_configuration_2))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector, aborting\n")));
@@ -256,9 +262,9 @@ server::OnInit_2 ()
     } // end IF
 
     ACE_HANDLE handle_h =
-      configuration_.connector->connect (connection_configuration_2->listenAddress);
+      configuration_.UDPConnector->connect (connection_configuration_2->socketConfiguration.listenAddress);
     Test_U_UDPConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-    if (configuration_.connector->useReactor ())
+    if (configuration_.UDPConnector->useReactor ())
     {
       if (handle_h != ACE_INVALID_HANDLE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -273,14 +279,14 @@ server::OnInit_2 ()
     {
       // step1: wait for the connection to register with the manager
       // *TODO*: avoid these tight loops
-      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S, 0);
       ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
       // *TODO*: this may not be accurate/applicable for/to all protocols
       do
       {
         // *TODO*: avoid these tight loops
         iconnection_p =
-          connection_manager_2->get (connection_configuration_2->listenAddress,
+          connection_manager_2->get (connection_configuration_2->socketConfiguration.listenAddress,
                                      false);
         if (iconnection_p)
           break;
@@ -290,7 +296,7 @@ server::OnInit_2 ()
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_2->listenAddress).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_2->socketConfiguration.listenAddress).c_str ())));
       return false;
     } // end IF
     iconnection_p->decrease ();

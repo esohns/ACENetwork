@@ -1858,7 +1858,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
     return;
   } // end IF
-  ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
+  ACE_OS::memset (thread_name_p, 0, sizeof (char[BUFSIZ]));
   const char* thread_name_2 = thread_name_p;
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
@@ -1875,13 +1875,13 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                              NULL,                             // stack
                              0,                                // stack size
                              &thread_name_2);                  // name
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
 
     // clean up
-    delete thread_name_p;
+    delete [] thread_name_p;
     delete connection_thread_data_p;
 
     return;
@@ -1894,7 +1894,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("started connection thread (id was: %u)...\n"),
               thread_id));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // setup progress updates
   //if (data_p->progressData.cursorType == GDK_LAST_CURSOR)
@@ -1913,9 +1913,6 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   //    ACE_DEBUG ((LM_ERROR,
   //                ACE_TEXT ("failed to gdk_cursor_new(): \"%m\", returning\n")));
 
-  //    // clean up
-  //    delete thread_name_p;
-  //    delete connection_thread_data_p;
   //    ACE_THR_FUNC_RETURN exit_status;
   //    result = thread_manager_p->join (thread_id, &exit_status);
   //    if (result == -1)
@@ -1928,6 +1925,10 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   //  } // end IF
   //  gdk_window_set_cursor (window_2, cursor_p);
   //} // end IF
+
+  // clean up
+  delete [] thread_name_p; thread_name_p = NULL;
+
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_PROGRESSBAR)));

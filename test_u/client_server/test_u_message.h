@@ -51,7 +51,7 @@ class Test_U_Message
 
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_AllocatorConfiguration,
+                                                 struct Common_Parser_FlexAllocatorConfiguration,
                                                  Stream_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;

@@ -3,8 +3,8 @@ include (SetCppExceptions)
 
 include (Threads)
 
-include (SSLConfig)
 include (NetlinkConfig)
+include (SSLConfig)
 
 include (ACE)
 

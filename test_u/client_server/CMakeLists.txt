@@ -1,20 +1,3 @@
-if (UNIX)
- if (NETLINK_SUPPORT)
-  include_directories (${PKG_LIBNL_INCLUDE_DIRS})
-  add_definitions (-DNETLINK_SUPPORT)
- endif (NETLINK_SUPPORT)
-endif (UNIX)
-
-if (UNIX)
-# *NOTE*: Common requires libcap
-# pkg_check_modules (PKG_CAP REQUIRED libcap)
- if (NETLINK_SUPPORT)
-  pkg_check_modules (PKG_LIBNL REQUIRED libnl-3.0)
- endif (NETLINK_SUPPORT)
-# pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-# pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
-endif (UNIX)
-
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
@@ -40,24 +23,10 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 add_definitions (-DACESTREAM_HAS_DLL)
 
-#find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
-#              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${ACENetwork_DIR})
-# message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
-#endif ()
-#add_definitions (-DACENETWORK_HAS_DLL)
-
+if (NETLINK_SUPPORT)
+ include_directories (${NETLINK_INCLUDE_DIRS})
+endif (NETLINK_SUPPORT)
 if (UNIX)
-# include_directories (${PKG_CAP_INCLUDE_DIRS})
- if (NETLINK_SUPPORT)
-  include_directories (${PKG_LIBNL_INCLUDE_DIRS})
- endif (NETLINK_SUPPORT)
-# include_directories (${PKG_DBUS_INCLUDE_DIRS})
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -69,8 +38,6 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
-
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -99,7 +66,7 @@ set (${EXECUTABLE_SOURCE}_SRCS
      net_client_timeouthandler.cpp
      net_client_timeouthandler.h
 #     stdafx.cpp
-     stdafx.h
+#     stdafx.h
      test_u_client_common.h
      test_u_common_modules.h
      test_u_configuration.h
@@ -126,17 +93,18 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_udpconnection.cpp
      test_u_udpconnection.h)
 if (GUI_SUPPORT)
- if (GTK_USE)
+ if (GTK_SUPPORT)
   set (${EXECUTABLE_SOURCE}_SRCS
        ${${EXECUTABLE_SOURCE}_SRCS}
        test_u_callbacks.cpp
        test_u_callbacks.h)
- elseif (WXWIDGETS_USE)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
   set (${EXECUTABLE_SOURCE}_SRCS
        ${${EXECUTABLE_SOURCE}_SRCS}
        net_server_wxui_base.cpp
        net_server_wxui_base.h)
- endif ()
+ endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 
 add_executable (${EXECUTABLE_SOURCE}
@@ -159,25 +127,18 @@ add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Client)
 target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_SOURCE} X11)
-endif ()
-target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
+endif (UNIX)
 if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE_SOURCE} ${SSL_LIBRARIES})
-
+endif (SSL_SUPPORT)
+target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
+if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
-
 target_link_libraries (${EXECUTABLE_SOURCE} Common)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonLog)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonSignal)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonTimer)
-
-if (UNIX)
-# set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES LINK_FLAGS -nostartfiles)
-elseif (WIN32)
- # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
-# set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
-endif ()
 
 target_link_libraries (${EXECUTABLE_SOURCE} ACEStream)
 target_link_libraries (${EXECUTABLE_SOURCE} ACEStream_Miscellaneous)
@@ -185,11 +146,7 @@ target_link_libraries (${EXECUTABLE_SOURCE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE_SOURCE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_WLAN)
-
 target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Test_U)
-
-#target_link_libraries (${EXECUTABLE_SOURCE} Common)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE_SOURCE}
@@ -214,7 +171,7 @@ set (${EXECUTABLE_TARGET}_SRCS
      net_server_signalhandler.h
      net_server_stream_common.h
 #     stdafx.cpp
-     stdafx.h
+#     stdafx.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_common.h
@@ -241,12 +198,13 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_udpconnection.cpp
      test_u_udpconnection.h)
 if (GUI_SUPPORT)
- if (GTK_USE)
+ if (GTK_SUPPORT)
   set (${EXECUTABLE_TARGET}_SRCS
        ${${EXECUTABLE_TARGET}_SRCS}
        test_u_callbacks.cpp
        test_u_callbacks.h)
- elseif (WXWIDGETS_USE)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
   set (${EXECUTABLE_TARGET}_SRCS
        ${${EXECUTABLE_TARGET}_SRCS}
        net_server_wxui.cpp
@@ -254,8 +212,10 @@ if (GUI_SUPPORT)
        net_server_wxui_callbacks.cpp
        net_server_wxui_base.cpp
        net_server_wxui_base.h)
+ endif (WXWIDGETS_SUPPORT)
+ if (WXWIDGETS_USE)
   list (REMOVE_ITEM ${EXECUTABLE_TARGET}_SRCS net_server.cpp)
- endif ()
+ endif (WXWIDGETS_USE)
 endif (GUI_SUPPORT)
 
 add_executable (${EXECUTABLE_TARGET}
@@ -279,16 +239,14 @@ add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_THREAD_LIBS_INIT})
-
 if (UNIX)
  target_link_libraries (${EXECUTABLE_TARGET} X11)
 endif (UNIX)
-
-target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
-
 if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE_TARGET} ${SSL_LIBRARIES})
-
+endif (SSL_SUPPORT)
+target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
+if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE_TARGET} ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
 
@@ -297,13 +255,6 @@ target_link_libraries (${EXECUTABLE_TARGET} CommonLog)
 target_link_libraries (${EXECUTABLE_TARGET} CommonSignal)
 target_link_libraries (${EXECUTABLE_TARGET} CommonTimer)
 
-if (UNIX)
-# set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS -nostartfiles)
-elseif (WIN32)
- # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
-# set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
-endif ()
-
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream)
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Network)
@@ -311,7 +262,6 @@ target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
-
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Test_U)
 
 # add PCH

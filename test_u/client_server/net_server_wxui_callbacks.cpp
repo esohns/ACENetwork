@@ -40,48 +40,43 @@ dialog_main::togglebutton_listen_cb(wxCommandEvent &event)  // wxGlade: dialog_m
   server* server_p =
       dynamic_cast<server*> (static_cast<wxApp*> (wxApp::GetInstance ()));
   ACE_ASSERT (server_p);
-  ACE_ASSERT (server_p->configuration_.listener);
+  ACE_ASSERT (server_p->configuration_.TCPListener);
 
   if (event.IsChecked ())
-  {
-    ACE_thread_t thread_id;
-    server_p->configuration_.listener->start (thread_id);
-  } // end IF
+    server_p->configuration_.TCPListener->start (NULL);
   else
-  {
-    server_p->configuration_.listener->stop (true,
-                                             true);
-  } // end ELSE
+    server_p->configuration_.TCPListener->stop (true,   // wait ?
+                                                false); // high priority ?
 }
 
 void
-dialog_main::button_close_cb(wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
+dialog_main::button_close_cb (wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
 {
-  event.Skip();
+  event.Skip ();
 }
 
 void
-dialog_main::button_report_cb(wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
+dialog_main::button_report_cb (wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
 {
-  event.Skip();
+  event.Skip ();
 }
 
 void
-dialog_main::button_about_cb(wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
+dialog_main::button_about_cb (wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
 {
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("button about, clicked\n")));
 
-  event.Skip();
+  event.Skip ();
 }
 
 void
-dialog_main::button_quit_cb(wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
+dialog_main::button_quit_cb (wxCommandEvent &event)  // wxGlade: dialog_main.<event_handler>
 {
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("button quit, clicked\n")));
 
-  event.Skip();
+  event.Skip ();
 
   this->Close (true);
 }

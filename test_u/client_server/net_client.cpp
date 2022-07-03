@@ -552,7 +552,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Common_AllocatorConfiguration> heap_allocator;
+                         struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -667,13 +667,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Test_U_TCPConnectionManager_t* connection_manager_p =
     TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-    connection_manager_p;
+//  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+//    connection_manager_p;
   Test_U_UDPConnectionManager_t* connection_manager_2 =
     TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_2);
-  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
-    connection_manager_2;
+//  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
+//    connection_manager_2;
 
   Client_TCP_AsynchConnector_t asynch_tcp_connector (true);
   Client_TCP_Connector_t tcp_connector (true);
@@ -1013,8 +1013,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
 #else
-          iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
-#endif
+          connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     else
     {

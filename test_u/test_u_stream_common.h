@@ -63,15 +63,11 @@ struct Test_U_ModuleHandlerConfiguration
   Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    , streamConfiguration (NULL)
-//   , subscriber (NULL)
-//   , subscribers (NULL)
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   }
 
   Test_U_StreamConfiguration_t* streamConfiguration;
-//  Test_U_ISessionNotify_t*      subscriber;
-//  Test_U_Subscribers_t*         subscribers;
 };
 
 struct Test_U_StreamConfiguration

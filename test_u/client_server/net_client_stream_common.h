@@ -30,12 +30,8 @@
 #include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 
-//typedef Stream_ControlMessage_T<enum Stream_ControlType,
-//                                enum Stream_ControlMessageType,
-//                                struct Common_Parser_FlexAllocatorConfiguration> Test_U_ControlMessage_t;
-
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Common_AllocatorConfiguration,
+                                          struct Common_Parser_FlexAllocatorConfiguration,
                                           Stream_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;
