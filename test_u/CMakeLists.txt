@@ -306,13 +306,14 @@ export (TARGETS ${PROJECT_NAME}_Test_U
 add_subdirectory (client_server)
 add_subdirectory (DHCP_client)
 add_subdirectory (file_server)
+add_subdirectory (GeoIp2_client)
 add_subdirectory (HTTP_decoder)
 add_subdirectory (PCP_client)
 add_subdirectory (WLAN_monitor)
 
 add_custom_target (test_u ALL
                    COMMENT "building test_u...")
-add_dependencies (test_u client server dhcp_client file_server http_decoder pcp_client wlan_monitor)
+add_dependencies (test_u client server dhcp_client file_server geoip2_client http_decoder pcp_client wlan_monitor)
 
 cmake_policy (SET CMP0012 NEW)
 if (NOT BUILD_TEST_U)

@@ -362,7 +362,7 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
     return return_value;
   } // end IF
-  ACE_OS::memset(&buffer_a, 0, sizeof(char[BUFSIZ]));
+  ACE_OS::memset (&buffer_a, 0, sizeof(char[BUFSIZ]));
   result = inet_addr.addr_to_string (buffer_a,
                                      sizeof (char[BUFSIZ]),
                                      1); // want IP address, not hostname !
