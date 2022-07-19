@@ -462,6 +462,9 @@ do_work (const std::string& databaseFilePath_in,
 
   ip_address_string =
     Net_Common_Tools::IPAddressToString (IPAddress_in, true, false);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("looking up location of address \"%s\"\n"),
+              ACE_TEXT (ip_address_string.c_str ())));
   result_2 = MMDB_lookup_string (&mmdb_s,
                                  ip_address_string.c_str (),
                                  &gai_error,
@@ -551,7 +554,7 @@ clean_up:
 
   //timer_manager_p->stop ();
   //timer_manager_p->wait ();
-  Common_Timer_Tools::finalize ();
+//  Common_Timer_Tools::finalize ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -655,14 +658,24 @@ ACE_TMAIN (int argc_in,
 //  UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
 //  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
 //#endif // GUI_SUPPORT
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct _GUID interface_s = Net_Common_Tools::getDefaultInterface_2 ();
+#else
+  std::string interface_s = Net_Common_Tools::getDefaultInterface ();
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_INET_Addr ip_address;
   if (unlikely (!Net_Common_Tools::interfaceToExternalIPAddress (interface_s,
                                                                  ip_address)))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interface_s).c_str ())));
+#else
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), aborting\n"),
+               ACE_TEXT (interface_s.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

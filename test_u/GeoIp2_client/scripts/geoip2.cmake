@@ -5,6 +5,21 @@ if (UNIX)
   set (GEOIP2_FOUND TRUE)
   set (GEOIP2_INCLUDE_DIRS "${PKG_GEOIP2_INCLUDE_DIRS}")
   set (GEOIP2_LIBRARIES "${PKG_GEOIP2_LIBRARIES}")
+ else ()
+  find_library (GEOIP2_LIBRARY libmaxminddb.a
+                PATHS $ENV{LIB_ROOT}/libmaxminddb/src
+                PATH_SUFFIXES .libs
+                DOC "searching for libmaxminddb.a"
+                NO_DEFAULT_PATH)
+  if (NOT GEOIP2_LIBRARY)
+   message (WARNING "could not find libmaxminddb.a, continuing")
+  else ()
+   message (STATUS "Found libmaxminddb.a library \"${GEOIP2_LIBRARY}\"")
+   set (GEOIP2_FOUND TRUE)
+   set (GEOIP2_INCLUDE_DIRS "$ENV{LIB_ROOT}/libmaxminddb/include")
+   set (GEOIP2_LIBRARIES "${GEOIP2_LIBRARY}")
+   set (GEOIP2_LIB_DIR "$ENV{LIB_ROOT}/libmaxminddb/src/.libs")
+  endif (NOT GEOIP2_LIBRARY)
  endif (PKG_GEOIP2_FOUND)
 elseif (WIN32)
  if (VCPKG_SUPPORT)
