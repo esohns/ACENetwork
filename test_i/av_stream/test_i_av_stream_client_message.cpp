@@ -415,8 +415,8 @@ Test_I_AVStream_Client_ALSA_V4L_Message::release (void)
   if (reference_count > 0)
     return NULL; // done
 
-  if ((inherited::data_.device == -1) || // not a device data buffer
-      inherited::data_.release)          // clean up (device data)
+  if ((inherited::data_.fileDescriptor == -1) || // not a device data buffer
+      inherited::data_.release)                  // clean up (device data)
     return inherited::release ();
 
   // reset reference counter/message
@@ -457,7 +457,7 @@ Test_I_AVStream_Client_ALSA_V4L_Message::release (void)
     //         Unfortunately this does not work, the fields are 0-ed by the driver
     //         --> maintain a mapping: buffer index <--> buffer handle
     //        buffer.reserved = reinterpret_cast<unsigned long> (message_block_p);
-  result = v4l2_ioctl (inherited::data_.device,
+  result = v4l2_ioctl (inherited::data_.fileDescriptor,
                        VIDIOC_QBUF,
                        &buffer);
   if (result == -1)
@@ -466,7 +466,7 @@ Test_I_AVStream_Client_ALSA_V4L_Message::release (void)
     if (error != EINVAL) // 22
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to V4L_ioctl(%d,%s): \"%m\", continuing\n"),
-                  inherited::data_.device, ACE_TEXT ("VIDIOC_QBUF")));
+                  inherited::data_.fileDescriptor, ACE_TEXT ("VIDIOC_QBUF")));
   } // end IF
 
     //  unsigned int done = 0;
