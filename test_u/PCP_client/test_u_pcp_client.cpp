@@ -1073,8 +1073,8 @@ do_work (//bool requestBroadcastReplies_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
       connection_manager_p->abort ();
       connection_manager_p->wait ();
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                           true);
+      Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                                 true); // wait ?
       return;
     } // end IF
     iconnection_p =

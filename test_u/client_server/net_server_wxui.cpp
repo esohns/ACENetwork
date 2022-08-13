@@ -5,7 +5,7 @@
 #include "ace/config-lite.h"
 #include "ace/Log_Msg.h"
 
-#include "common_tools.h"
+#include "common_event_tools.h"
 
 #include "common_log_tools.h"
 
@@ -186,10 +186,10 @@ server::OnInit_2 ()
   else
     configuration_.dispatchConfiguration.numberOfProactorThreads =
       NET_SERVER_DEFAULT_NUMBER_OF_PROACTOR_DISPATCH_THREADS;
-  if (!Common_Tools::initializeEventDispatch (configuration_.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration_.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), aborting\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), aborting\n")));
     return false;
   } // end IF
 
@@ -210,7 +210,7 @@ server::OnInit_2 ()
                              NULL);
 
   // step4b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, aborting\n")));
