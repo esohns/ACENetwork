@@ -21,14 +21,10 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
-#include "common.h"
-#include "common_configuration.h"
-#include "common_defines.h"
+#include "common_event_common.h"
+#include "common_event_defines.h"
 
-//#include "common_timer_common.h"
-
-//#include "stream_common.h"
-//#include "stream_configuration.h"
+#include "common_parser_common.h"
 
 // forward declarations
 //class Stream_IAllocator;
@@ -50,6 +46,7 @@
 //typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
 //typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
 
+struct Common_FlexBisonParserConfiguration;
 struct Net_SessionConfiguration
 {
   Net_SessionConfiguration ()

@@ -30,8 +30,10 @@
 #include "ace/Reactor.h"
 
 #include "common_icontrol.h"
+
+#include "common_event_tools.h"
+
 #include "common_timer_manager_common.h"
-#include "common_tools.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -104,6 +106,8 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
   } // end SWITCH
 
   // -------------------------------------
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->dispatchState);
 
   typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     NULL;
@@ -183,7 +187,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_2->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
-                                         false);                                    // don't block
+    Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                               false);                                    // don't block
   } // end IF
 }

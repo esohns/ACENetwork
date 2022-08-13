@@ -45,9 +45,9 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common_file_tools.h"
-#include "common_tools.h"
+
+#include "common_event_tools.h"
 
 #include "common_log_tools.h"
 #include "common_logger.h"
@@ -702,10 +702,10 @@ do_work (
     configuration.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
   } // end ELSE
-  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
     goto error;
   } // end IF
 
@@ -866,7 +866,7 @@ do_work (
 #endif // GUI_SUPPORT
 
   // step4b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, aborting\n")));
@@ -1002,7 +1002,7 @@ do_work (
   // *NOTE*: from this point on, clean up any remote connections !
 
   if (!useUDP_in)
-    Common_Tools::dispatchEvents (event_dispatch_state_s);
+    Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
   stop_event_dispatch = false;
 
   // clean up
@@ -1041,8 +1041,8 @@ error:
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   if (stop_event_dispatch)
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         true);
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               true); // wait ?
   if (configuration.listener &&
       !useUDP_in)
     configuration.listener->stop ();

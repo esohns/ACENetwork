@@ -48,7 +48,8 @@
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 #include "common_file_tools.h"
-#include "common_tools.h"
+
+#include "common_event_tools.h"
 
 #include "common_logger.h"
 #include "common_log_tools.h"
@@ -625,10 +626,10 @@ do_work (bool autoAssociate_in,
   else
     configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
-  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
   event_dispatch_state_s.configuration =

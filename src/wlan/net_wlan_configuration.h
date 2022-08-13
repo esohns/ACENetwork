@@ -25,20 +25,18 @@
 
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <guiddef.h>
-#include <Ks.h>
-#include <wlanapi.h>
+#include "guiddef.h"
+#include "Ks.h"
+#include "wlanapi.h"
 #else
 #if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include "ace/INET_Addr.h"
-#include "ace/Singleton.h"
-#include "ace/Synch_Traits.h"
+#include "ace/Basic_Types.h"
 
-#include "common_time_common.h"
+#include "common_event_common.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_timer_common.h"

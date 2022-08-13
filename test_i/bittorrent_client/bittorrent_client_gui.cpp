@@ -44,7 +44,7 @@
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
-#include "common_tools.h"
+#include "common_event_tools.h"
 
 #include "common_log_tools.h"
 
@@ -543,7 +543,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   else
     CBData_in.configuration->dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
-  if (!Common_Tools::initializeEventDispatch (CBData_in.configuration->dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (CBData_in.configuration->dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returning\n")));
@@ -632,7 +632,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   // step6: initialize worker(s)
 //  int group_id = -1;
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -649,7 +649,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  Common_Tools::dispatchEvents (event_dispatch_state_s);
+  Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
 
   // step8: clean up
 #if defined (GTK_USE)

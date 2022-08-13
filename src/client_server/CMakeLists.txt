@@ -26,6 +26,8 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/input>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/event>)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/parser>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/signal>)
@@ -73,6 +75,8 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/error>)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/event>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC

@@ -137,7 +137,7 @@ add_dependencies (${EXECUTABLE} ACEStream_Statistic)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
-target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
 # set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS -nostartfiles)
 elseif (WIN32)
@@ -146,26 +146,27 @@ elseif (WIN32)
 endif ()
 
 if (UNIX)
- target_link_libraries (${EXECUTABLE} X11)
+ target_link_libraries (${EXECUTABLE} PUBLIC X11)
 endif (UNIX)
 
-target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
-target_link_libraries (${EXECUTABLE} Common)
-target_link_libraries (${EXECUTABLE} CommonLog)
-target_link_libraries (${EXECUTABLE} CommonSignal)
-target_link_libraries (${EXECUTABLE} CommonTimer)
+target_link_libraries (${EXECUTABLE} PUBLIC Common)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonEvent)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonLog)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonSignal)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 
-target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACEStream_Miscellaneous)
-target_link_libraries (${EXECUTABLE} ACEStream_Network)
-target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
 
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
 #target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_DHCP)
 
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_U)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE}

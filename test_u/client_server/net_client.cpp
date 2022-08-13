@@ -46,9 +46,9 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common_file_tools.h"
-#include "common_tools.h"
+
+#include "common_event_tools.h"
 
 #include "common_logger.h"
 #include "common_log_tools.h"
@@ -939,7 +939,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #endif // GUI_SUPPORT
 
   // step1b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState))
+  if (!Common_Event_Tools::startEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
@@ -982,8 +982,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
-                                             false); // don't block
+        Common_Event_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
+                                                   false); // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1040,8 +1040,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
-                                             false);                                                     // don't block
+        Common_Event_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
+                                                   false);                                                     // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1070,7 +1070,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   if (UIDefinitionFile_in.empty ())
   {
     // step2: dispatch events
-    Common_Tools::dispatchEvents (*configuration_in.signalHandlerConfiguration.dispatchState);
+    Common_Event_Tools::dispatchEvents (*configuration_in.signalHandlerConfiguration.dispatchState);
   } // end IF
   else
   {
@@ -1105,8 +1105,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
 
   // step5: stop reactor (&& proactor, if applicable)
-  Common_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
-                                       false); // don't block
+  Common_Event_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
+                                             false); // don't block
 
 //  { // synch access
 //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
@@ -1462,7 +1462,7 @@ ACE_TMAIN (int argc_in,
     configuration.dispatchConfiguration.numberOfProactorThreads =
       number_of_dispatch_threads;
   } // end ELSE
-  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, aborting\n")));

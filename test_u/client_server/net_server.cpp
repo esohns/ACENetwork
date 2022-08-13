@@ -46,9 +46,9 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common_file_tools.h"
-#include "common_tools.h"
+
+#include "common_event_tools.h"
 
 #include "common_logger.h"
 #include "common_log_tools.h"
@@ -705,10 +705,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
       COMMON_PROACTOR_POSIX_SIG;
 #endif // ACE_WIN32 || ACE_WIN64
   } // end ELSE
-  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
 
@@ -853,7 +853,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GUI_SUPPORT
 
   // step4b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
@@ -905,8 +905,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                           true);
+      Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                                 true); // wait ?
       Common_Timer_Tools::finalize ();
       return;
     } // end IF
@@ -944,8 +944,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize TCP listener, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         true);
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               true); // wait ?
 
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
@@ -965,8 +965,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize SSL listener, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         true);
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               true); // wait ?
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -998,8 +998,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
                 ACE_TEXT (certificateFile_in.c_str ()),
                 ACE_TEXT (privateKeyFile_in.c_str ())));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         true);
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               true); // wait ?
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1065,8 +1065,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
 
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         true);
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               true); // wait ?
 #if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1118,8 +1118,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p_2->socketConfiguration.listenAddress).c_str ())));
 
-      Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                           true);
+      Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                                 true); // wait ?
 #if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
@@ -1136,7 +1136,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  Common_Tools::dispatchEvents (event_dispatch_state_s);
+  Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
 
   // clean up
   // *NOTE*: listener has stopped, interval timer has been cancelled,

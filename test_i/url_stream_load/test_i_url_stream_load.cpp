@@ -44,15 +44,14 @@
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
-//#include "ace/Synch.h"
 #include "ace/Version.h"
 
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common.h"
-#include "common_tools.h"
+
+#include "common_event_tools.h"
 
 #include "common_log_tools.h"
 #include "common_logger.h"
@@ -738,10 +737,10 @@ do_work (bool debugParser_in,
     ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS : 0);
   configuration_in.dispatchConfiguration.numberOfProactorThreads =
     ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS : 0);
-  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
     goto clean;
   } // end IF
 
@@ -853,7 +852,7 @@ do_work (bool debugParser_in,
   // - perform statistics collecting/reporting
 
   // step1a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
@@ -887,8 +886,8 @@ do_work (bool debugParser_in,
   connection_manager_2->abort ();
   connection_manager_2->wait ();
 
-  Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                       true);
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true); // wait ?
 
   timer_manager_p->stop ();
 
@@ -926,8 +925,8 @@ do_work (bool debugParser_in,
   return;
 
 clean:
-  Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                       true);
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true); // wait ?
   timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())

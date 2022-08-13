@@ -24,8 +24,9 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
+#include "common_event_tools.h"
+
 #include "common_timer_manager_common.h"
-#include "common_tools.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -146,6 +147,9 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   } // end SWITCH
 
   // -------------------------------------
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->dispatchState);
+  ACE_ASSERT (inherited::configuration_->dispatchState->configuration);
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
   // abort ?
@@ -395,7 +399,7 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // stop event dispatch ?
     if (inherited::configuration_->stopEventDispatchOnShutdown)
-      Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
-                                           false); // don't block
+      Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                                 false); // don't block
   } // end IF
 }

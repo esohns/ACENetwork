@@ -175,6 +175,7 @@ elseif (WIN32)
 endif ()
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonEvent)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonLog)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonParser)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonParser_M3U)

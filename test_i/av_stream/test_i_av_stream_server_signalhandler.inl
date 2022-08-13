@@ -20,8 +20,9 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_event_tools.h"
+
 #include "common_timer_manager_common.h"
-#include "common_tools.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -54,9 +55,6 @@ Test_I_AVStream_Server_SignalHandler_T<ConfigurationType,
                                        UDPConnectionManagerType>::handle (const struct Common_Signal& signal_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_SignalHandler_T::handle"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
 
   int result = -1;
   bool close_all = false;
@@ -118,6 +116,9 @@ Test_I_AVStream_Server_SignalHandler_T<ConfigurationType,
   } // end SWITCH
 
   // ------------------------------------
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->connectionManager);
+  ACE_ASSERT (inherited::configuration_->dispatchState);
 
   // print statistic ?
   if (statistic &&
@@ -131,9 +132,6 @@ Test_I_AVStream_Server_SignalHandler_T<ConfigurationType,
       return;
     }
   } // end IF
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_->connectionManager);
 
   //Test_I_Target_IInetConnectionManager_t* connection_manager_p =
   //  TEST_I_TARGET_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -201,7 +199,7 @@ Test_I_AVStream_Server_SignalHandler_T<ConfigurationType,
     inherited::configuration_->connectionManager->wait ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
-                                         false);                                    // don't block
+    Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                               false);                                    // don't block
   } // end IF
 }

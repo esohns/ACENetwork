@@ -46,7 +46,8 @@
 #endif // HAVE_CONFIG_H
 #include "common.h"
 #include "common_file_tools.h"
-#include "common_tools.h"
+
+#include "common_event_tools.h"
 
 #include "common_log_tools.h"
 #if defined (GUI_SUPPORT)
@@ -833,10 +834,10 @@ do_work (bool requestBroadcastReplies_in,
   else
     configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
-  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -932,7 +933,7 @@ do_work (bool requestBroadcastReplies_in,
   // - dispatch UI events (if any)
 
   // step1a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
@@ -1296,7 +1297,7 @@ allocate:
   } // end IF
   else
 #endif // GUI_SUPPORT
-    Common_Tools::dispatchEvents (event_dispatch_state_s);
+    Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -1311,8 +1312,8 @@ allocate:
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   connection_manager_p->wait ();
-  Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                       true);
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true); // wait ?
 
 //  if (!UIDefinitionFileName_in.empty ())
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);

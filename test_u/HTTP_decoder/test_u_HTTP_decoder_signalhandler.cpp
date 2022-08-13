@@ -23,8 +23,7 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "common_timer_manager.h"
-#include "common_tools.h"
+#include "common_event_tools.h"
 
 #include "net_macros.h"
 
@@ -43,8 +42,6 @@ void
 Test_U_Protocol_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::handle"));
-
-//  int result = -1;
 
   bool statistic = false;
   bool shutdown = false;
@@ -101,6 +98,8 @@ Test_U_Protocol_SignalHandler::handle (const struct Common_Signal& signal_in)
   } // end SWITCH
 
   // ------------------------------------
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->dispatchState);
 
   // print statistic ?
   if (statistic)
@@ -150,8 +149,8 @@ Test_U_Protocol_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
-                                         false);                                   // don't block
+    Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                               false);                                   // don't block
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF

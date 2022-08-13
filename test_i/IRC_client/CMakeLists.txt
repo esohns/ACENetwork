@@ -172,28 +172,29 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 if (UNIX)
- target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
- target_link_libraries (${EXECUTABLE} X11)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+ target_link_libraries (${EXECUTABLE} PUBLIC X11)
 elseif (WIN32)
  target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 endif ()
 
-target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
-target_link_libraries (${EXECUTABLE} Common)
-target_link_libraries (${EXECUTABLE} CommonLog)
-target_link_libraries (${EXECUTABLE} CommonSignal)
-target_link_libraries (${EXECUTABLE} CommonTimer)
+target_link_libraries (${EXECUTABLE} PUBLIC Common)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonEvent)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonLog)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonSignal)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 
-target_link_libraries (${EXECUTABLE} ACEStream)
-target_link_libraries (${EXECUTABLE} ACEStream_Miscellaneous)
-target_link_libraries (${EXECUTABLE} ACEStream_Network)
-target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
 
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_IRC)
 
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE}
@@ -289,28 +290,29 @@ add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 if (UNIX)
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
- target_link_libraries (${EXECUTABLE_GUI} X11)
+ target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+ target_link_libraries (${EXECUTABLE_GUI} PUBLIC X11)
 elseif (WIN32)
  target_link_options (${EXECUTABLE_GUI} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 endif ()
 
-target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${ACE_LIBRARY})
 
-target_link_libraries (${EXECUTABLE_GUI} Common)
-target_link_libraries (${EXECUTABLE_GUI} CommonLog)
-target_link_libraries (${EXECUTABLE_GUI} CommonSignal)
-target_link_libraries (${EXECUTABLE_GUI} CommonTimer)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC Common)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonEvent)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonLog)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonSignal)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonTimer)
 
-target_link_libraries (${EXECUTABLE_GUI} ACEStream)
-target_link_libraries (${EXECUTABLE_GUI} ACEStream_Miscellaneous)
-target_link_libraries (${EXECUTABLE_GUI} ACEStream_Network)
-target_link_libraries (${EXECUTABLE_GUI} ACEStream_Statistic)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Miscellaneous)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Network)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Statistic)
 
-target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${PROJECT_NAME}_Protocol_IRC)
 
-target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE_GUI}

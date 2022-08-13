@@ -25,7 +25,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_tools.h"
+#include "common_event_tools.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -55,6 +55,9 @@ void
 IRC_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
+
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->dispatchState);
 
   IRC_Client_Connection_Manager_t* connection_manager_p =
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -175,9 +178,7 @@ done_connect:
 #endif // GUI_SUPPORT
 
     // step2: stop event dispatch
-    ACE_ASSERT (inherited::configuration_);
-    ACE_ASSERT (inherited::configuration_->dispatchState);
-    Common_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
-                                         false);                                    // don't block
+    Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                               false);                                    // don't block
   } // end IF
 }

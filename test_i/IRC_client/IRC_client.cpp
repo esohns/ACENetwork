@@ -65,7 +65,8 @@ using namespace std;
 #endif // HAVE_CONFIG_H
 
 #include "common_defines.h"
-#include "common_tools.h"
+
+#include "common_event_tools.h"
 
 #include "common_log_tools.h"
 
@@ -672,8 +673,8 @@ clean_up:
   if (connection_p)
     connection_p->decrease ();
 
-  Common_Tools::finalizeEventDispatch (*thread_data_p->dispatchState,
-                                       false);                        // don't block
+  Common_Event_Tools::finalizeEventDispatch (*thread_data_p->dispatchState,
+                                             false);                        // don't block
 
   return return_value;
 }
@@ -752,10 +753,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   configuration_in.dispatchConfiguration.numberOfProactorThreads =
       ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
                                                                                            : 0);
-  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
+  if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -845,10 +846,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::startEventDispatch(), returning\n")));
     return;
   } // end IF
 
@@ -876,8 +877,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (serverAddress_in).c_str ())));
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         false);                 // don't block
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               false);                 // don't block
     return;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
@@ -905,8 +906,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
     connection_manager_p->abort ();
     connection_manager_p->wait ();
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         false);                 // don't block
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               false);                 // don't block
     return;
   } // end IF
   ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
@@ -933,11 +934,11 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
     connection_manager_p->abort ();
     connection_manager_p->wait ();
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                         false);                 // don't block
+    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                               false);                 // don't block
     return;
   } // end IF
-  Common_Tools::dispatchEvents (event_dispatch_state_s);
+  Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
   // *NOTE*: awoken by the worker thread (see above)...
   if (connection_manager_p->count () < 1)
   {
@@ -990,10 +991,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // step6b: dispatch events
   event_dispatch_state_s.proactorGroupId = -1;
   event_dispatch_state_s.reactorGroupId = -1;
-  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
+  if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
+                ACE_TEXT ("failed to Common_Event_Tools::startEventDispatch(), returning\n")));
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
     COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (true, true);
@@ -1003,7 +1004,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     connection_manager_p->wait ();
     return;
   } // end IF
-  Common_Tools::dispatchEvents (event_dispatch_state_s);
+  Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
 
   // step7: clean up
 #if defined (GUI_SUPPORT)

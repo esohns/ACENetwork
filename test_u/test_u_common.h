@@ -23,6 +23,8 @@
 
 #include "common_configuration.h"
 
+#include "common_event_common.h"
+
 #include "common_signal_common.h"
 
 #if defined (GUI_SUPPORT)
