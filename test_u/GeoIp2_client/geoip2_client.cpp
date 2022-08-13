@@ -524,7 +524,7 @@ do_work (const std::string& databaseFilePath_in,
     goto clean_up;
   } // end IF
   ACE_ASSERT (entry_data_s.type == MMDB_DATA_TYPE_DOUBLE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("latitude: ") << entry_data_s.double_value;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("latitude: ") << std::fixed << entry_data_s.double_value;
   result =
     MMDB_get_value (&result_2.entry,
                     &entry_data_s,
@@ -544,7 +544,7 @@ do_work (const std::string& databaseFilePath_in,
     goto clean_up;
   } // end IF
   ACE_ASSERT (entry_data_s.type == MMDB_DATA_TYPE_DOUBLE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR (", longitude: ") << entry_data_s.double_value;
+  std::cout << ACE_TEXT_ALWAYS_CHAR (", longitude: ") << std::fixed << entry_data_s.double_value;
   std::cout << std::endl;
 
 clean_up:

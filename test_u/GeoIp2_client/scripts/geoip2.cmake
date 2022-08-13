@@ -1,6 +1,6 @@
 set (GEOIP2_SUPPORT_DEFAULT ON)
 if (UNIX)
- pkg_check_modules (PKG_GEOIP2 GeoIp2)
+ pkg_check_modules (PKG_GEOIP2 libmaxminddb)
  if (PKG_GEOIP2_FOUND)
   set (GEOIP2_FOUND TRUE)
   set (GEOIP2_INCLUDE_DIRS "${PKG_GEOIP2_INCLUDE_DIRS}")
