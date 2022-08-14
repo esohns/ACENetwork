@@ -24,11 +24,11 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <limits>
 
-#include <iphlpapi.h>
+#include "iphlpapi.h"
 #else
-#include <netinet/ether.h>
-#include <ifaddrs.h>
-#endif
+#include "netinet/ether.h"
+#include "ifaddrs.h"
+#endif // ACE_WIN32 || ACE_WIN64
 #include <sstream>
 
 #include "ace/Guard_T.h"
@@ -213,21 +213,21 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<gdouble> (std::numeric_limits<ACE_UINT64>::max ()));
 
   spin_button_p =
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -306,7 +306,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
 
   size_t pdu_size_i =
     NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->allocatorConfiguration->defaultBufferSize +
@@ -1210,7 +1210,7 @@ allocate:
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
   message_p->initialize (DHCP_record,
-                         message_p->sessionId (),
+                         1,//message_p->sessionId (),
                          NULL);
 
   DHCPClient_IConnectionManager_t* iconnection_manager_p =

@@ -160,17 +160,17 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [0x%@/0x%@]: %s %s %s (total: %d)\n"),
               this, handle_h,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address, false, false).c_str ()),
               (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address, false, false).c_str ()),
               manager_p->count ()));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [%@/%d]: %s %s %s (total: %d)\n"),
               this, handle_h,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address, false, false).c_str ()),
               (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address, false, false).c_str ()),
               manager_p->count ()));
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG

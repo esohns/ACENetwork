@@ -444,6 +444,14 @@ Net_Common_Tools::matchIPAddress (std::string& address_in)
 }
 
 bool
+Net_Common_Tools::isBroadcast (const ACE_INET_Addr& address_in)
+{
+  NETWORK_TRACE ("Net_Common_Tools::isBroadcast");
+
+  return (address_in.get_ip_address () == 0xFFFFFFFF);
+}
+
+bool
 Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE ("Net_Common_Tools::isLocal");
@@ -3775,6 +3783,37 @@ Net_Common_Tools::getHostname (std::string& hostname_out)
   hostname_out = Common_Tools::getHostName ();
 
   return !hostname_out.empty ();
+}
+
+bool
+Net_Common_Tools::setBroadcast (ACE_HANDLE handle_in,
+                                int option_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setBroadcast"));
+
+  // sanity check(s)
+  ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
+
+  int result = -1;
+
+  int optval = option_in;
+  int optlen = sizeof (optval);
+  result = ACE_OS::setsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_BROADCAST,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (unlikely (result))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,%s,%d): \"%m\", aborting\n"),
+                handle_in,
+                ACE_TEXT ("SO_BROADCAST"),
+                option_in));
+    return false;
+  } // end IF
+
+  return true;
 }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

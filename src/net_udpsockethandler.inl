@@ -233,7 +233,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     inherited2::peer_.open ((configuration_p->writeOnly ? (configuration_p->sourcePort ? source_SAP
                                                                                        : inet_addr_sap_any)
                                                         : configuration_p->listenAddress), // local SAP
-                            ACE_PROTOCOL_FAMILY_INET,                                      // protocol family
+                            PF_INET,                                                       // protocol family
                             0,                                                             // protocol
                             configuration_p->reuseAddress);                                // reuse_addr
   if (unlikely (result == -1))
@@ -724,19 +724,19 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   result =
     inherited2::peer_.open (configuration_p->peerAddress,                                         // remote SAP
                             (configuration_p->writeOnly ? (configuration_p->sourcePort ? source_SAP
-                                                                                                     : inet_addr_sap_any)
+                                                                                       : inet_addr_sap_any)
                                                                : configuration_p->listenAddress), // local SAP
-                            ACE_PROTOCOL_FAMILY_INET,                                                    // protocol family
-                            0,                                                                           // protocol
-                            1);                                                                          // reuse_addr
+                            PF_INET,                                                              // protocol family
+                            0,                                                                    // protocol
+                            1);                                                                   // reuse_addr
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_CODgram::open(%s,%s): \"%m\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->peerAddress).c_str ()),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString ((configuration_p->writeOnly ? (configuration_p->sourcePort ? source_SAP
-                                                                                                                                        : inet_addr_sap_any)
-                                                                                                  : configuration_p->listenAddress)).c_str ())));
+                                                                                                                          : inet_addr_sap_any)
+                                                                                           : configuration_p->listenAddress)).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)

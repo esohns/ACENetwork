@@ -227,6 +227,7 @@ class Net_Common_Tools
   // *NOTE*: (see also: ace/INET_Addr.h:237)
   static ACE_INET_Addr stringToIPAddress (std::string&,        // host name (DNS name or dotted-decimal)
                                           unsigned short = 0); // port# if none provided (i.e. no trailing ":x")
+  static bool isBroadcast (const ACE_INET_Addr&);
   static bool isLocal (const ACE_INET_Addr&);
 
   // transport layer
@@ -249,11 +250,14 @@ class Net_Common_Tools
   // --- socket API ---
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_SDK_VERSION(0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_SDK_VERSION (0x0602) // _WIN32_WINNT_WIN8
   // *NOTE*: applies to TCP sockets only (see also: SO_MAX_MSG_SIZE)
   static bool setLoopBackFastPath (ACE_HANDLE); // socket handle
 #endif // _WIN32_WINNT_WIN8
 #endif // ACE_WIN32 || ACE_WIN64
+
+  static bool setBroadcast (ACE_HANDLE, // socket handle
+                            int);       // option
 
   // MTU
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -38,12 +38,11 @@ class DHCP_Codes
   enum OptionFieldType
   {
     DHCP_OPTION_FIELDTYPE_ADDRESS = 0,
-    // *TODO*: extract this idea from ACEStream  (i.e. Stream_MessageBase_T)
-    //         and add it ACENetwork
     DHCP_OPTION_FIELDTYPE_COMMAND, // reserved: option DHCP_MESSAGETYPE (53)
     DHCP_OPTION_FIELDTYPE_INTEGER,
     DHCP_OPTION_FIELDTYPE_STRING,
     DHCP_OPTION_FIELDTYPE_ADDRESSES, // see e.g. RFC-7291
+    DHCP_OPTION_FIELDTYPE_LENGTH, // variable-length
     /////////////////////////////////////
     DHCP_OPTION_FIELDTYPE_MAX,
     DHCP_OPTION_FIELDTYPE_INVALID
@@ -203,6 +202,13 @@ class DHCP_Codes
     //////////////////////////////////////
     // *NOTE*: see RFC-3442
     DHCP_OPTION_CLASSLESSROUTE = 121,
+    //////////////////////////////////////
+    // *NOTE*: see RFC-6225
+    DHCP_OPTION_GEOCONF = 123,
+    //////////////////////////////////////
+    // *NOTE*: see RFC-3925
+    DHCP_OPTION_VENDOR_CLASS = 124,
+    DHCP_OPTION_VENDOR_SPECIFIC_INFORMATION,
     //////////////////////////////////////
     //DHCP_OPTION_RESERVED_START = 128,
     // *NOTE*: see RFC-7291

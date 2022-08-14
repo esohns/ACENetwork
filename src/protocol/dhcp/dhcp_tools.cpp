@@ -269,6 +269,11 @@ next_list:
         } // end ELSE
         break;
       }
+      case DHCP_Codes::DHCP_OPTION_FIELDTYPE_LENGTH:
+      {
+        unsigned int num_bytes = (*iterator).second.size ();
+        break;
+      }
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -376,6 +381,110 @@ DHCP_Tools::OptionToString (DHCP_Option_t option_in)
       result = ACE_TEXT_ALWAYS_CHAR ("DHCP_RENEWALT1TIME"); break;
     case DHCP_Codes::DHCP_OPTION_DHCP_REBINDINGT2TIME:
       result = ACE_TEXT_ALWAYS_CHAR ("DHCP_REBINDINGT2TIME"); break;
+    case DHCP_Codes::DHCP_OPTION_DHCP_VENDORCLASSIDENTIFIER:
+      result = ACE_TEXT_ALWAYS_CHAR ("DHCP_VENDORCLASSIDENTIFIER"); break;
+    case DHCP_Codes::DHCP_OPTION_DHCP_CLIENTIDENTIFIER:
+      result = ACE_TEXT_ALWAYS_CHAR("DHCP_CLIENTIDENTIFIER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_NETWAREIP_DOMAINNAME:
+      result = ACE_TEXT_ALWAYS_CHAR ("NETWAREIP_DOMAINNAME"); break;
+    case DHCP_Codes::DHCP_OPTION_NETWAREIP_INFORMATION:
+      result = ACE_TEXT_ALWAYS_CHAR ("NETWAREIP_INFORMATION"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_NISP_DOMAIN:
+      result = ACE_TEXT_ALWAYS_CHAR ("NISP_DOMAIN"); break;
+    case DHCP_Codes::DHCP_OPTION_NISP_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("NISP_SERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_TFTP_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("TFTP_SERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_BOOTFILE:
+      result = ACE_TEXT_ALWAYS_CHAR ("BOOTFILE"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_MIP_HOMEAGENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("MIP_HOMEAGENT"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_SMTP_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("SMTP_SERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_POP3_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("POP3_SERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_NNTP_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("NNTP_SERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_WWW_DEFAULTSERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("WWW_DEFAULTSERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_FINGER_DEFAULTSERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("FINGER_DEFAULTSERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_IRC_DEFAULTSERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("IRC_DEFAULTSERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_STREETTALK_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("STREETTALK_SERVER"); break;
+    case DHCP_Codes::DHCP_OPTION_STREETTALK_DIRECTORYASSISTANCESERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("STREETTALK_DIRECTORYASSISTANCESERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_USERCLASS:
+      result = ACE_TEXT_ALWAYS_CHAR ("USERCLASS"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_SLP_DIRECTORYAGENT:
+      result = ACE_TEXT_ALWAYS_CHAR ("SLP_DIRECTORYAGENT"); break;
+    case DHCP_Codes::DHCP_OPTION_SLP_SERVICESCOPE:
+      result = ACE_TEXT_ALWAYS_CHAR ("SLP_SERVICESCOPE"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_RAPIDCOMMIT:
+      result = ACE_TEXT_ALWAYS_CHAR ("RAPIDCOMMIT"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_CLIENTFQDN:
+      result = ACE_TEXT_ALWAYS_CHAR ("CLIENTFQDN"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_RELAYAGENTINFORMATION:
+      result = ACE_TEXT_ALWAYS_CHAR ("RELAYAGENTINFORMATION"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_ISNS_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("ISNS_SERVER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_NDS_SERVER:
+      result = ACE_TEXT_ALWAYS_CHAR ("NDS_SERVER"); break;
+    case DHCP_Codes::DHCP_OPTION_NDS_TREE:
+      result = ACE_TEXT_ALWAYS_CHAR ("NDS_TREE"); break;
+    case DHCP_Codes::DHCP_OPTION_NDS_CONTEXT:
+      result = ACE_TEXT_ALWAYS_CHAR ("NDS_CONTEXT"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_BCMCCS_DOMAINNAMELIST:
+      result = ACE_TEXT_ALWAYS_CHAR ("BCMCCS_DOMAINNAMELIST"); break;
+    case DHCP_Codes::DHCP_OPTION_BCMCCS_IPADDRESS:
+      result = ACE_TEXT_ALWAYS_CHAR ("BCMCCS_IPADDRESS"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_AUTHENTICATION:
+      result = ACE_TEXT_ALWAYS_CHAR ("AUTHENTICATION"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_CLIENTLASTTRANSACTIONTIME:
+      result = ACE_TEXT_ALWAYS_CHAR ("CLIENTLASTTRANSACTIONTIME"); break;
+    case DHCP_Codes::DHCP_OPTION_CLIENTASSOCIATEDIP:
+      result = ACE_TEXT_ALWAYS_CHAR ("CLIENTASSOCIATEDIP"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_IPXE_CLIENTSYSTEMARCHITECTURETYPE:
+      result = ACE_TEXT_ALWAYS_CHAR ("IPXE_CLIENTSYSTEMARCHITECTURETYPE"); break;
+    case DHCP_Codes::DHCP_OPTION_IPXE_CLIENTNETWORKINTERFACEIDENTIFIER:
+      result = ACE_TEXT_ALWAYS_CHAR ("IPXE_CLIENTNETWORKINTERFACEIDENTIFIER"); break;
+    case DHCP_Codes::DHCP_OPTION_IPXE_CLIENTMACHINEIDENTIFIER:
+      result = ACE_TEXT_ALWAYS_CHAR ("IPXE_CLIENTMACHINEIDENTIFIER"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_CLASSLESSROUTE:
+      result = ACE_TEXT_ALWAYS_CHAR ("CLASSLESSROUTE"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_GEOCONF:
+      result = ACE_TEXT_ALWAYS_CHAR ("GEOCONF"); break;
+    //
+    case DHCP_Codes::DHCP_OPTION_VENDOR_CLASS:
+      result = ACE_TEXT_ALWAYS_CHAR ("VENDOR_CLASS"); break;
+    case DHCP_Codes::DHCP_OPTION_VENDOR_SPECIFIC_INFORMATION:
+      result = ACE_TEXT_ALWAYS_CHAR ("VENDOR_SPECIFIC_INFORMATION"); break;
     //
     case DHCP_Codes::DHCP_OPTION_PCP_SERVER:
       result = ACE_TEXT_ALWAYS_CHAR ("PCP_SERVER"); break;
@@ -491,6 +600,8 @@ DHCP_Tools::OptionToFieldType (DHCP_Option_t option_in)
     case DHCP_Codes::DHCP_OPTION_DOMAINNAME:
     case DHCP_Codes::DHCP_OPTION_VENDORSPECIFICINFORMATION:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_STRING;
+    case DHCP_Codes::DHCP_OPTION_VENDOR_SPECIFIC_INFORMATION:
+      return DHCP_Codes::DHCP_OPTION_FIELDTYPE_LENGTH;
     case DHCP_Codes::DHCP_OPTION_PCP_SERVER:
       return DHCP_Codes::DHCP_OPTION_FIELDTYPE_ADDRESSES;
     default:

@@ -114,7 +114,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   if (unlikely (inherited::configuration_->writeOnly))
-  { ACE_ASSERT (inherited::configuration_->connect);
+  { //ACE_ASSERT (inherited::configuration_->connect);
   } // end IF
   ACE_ASSERT (proactor_p);
 
@@ -225,7 +225,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   if (likely (!inherited::configuration_->writeOnly))
     source_SAP = inherited::configuration_->listenAddress;
   result = inherited2::open (source_SAP,                               // local SAP
-                             ACE_PROTOCOL_FAMILY_INET,                 // protocol family
+                             PF_INET,                                  // protocol family
                              0,                                        // protocol
                              inherited::configuration_->reuseAddress); // reuse_addr
   if (unlikely (result == -1))
@@ -253,12 +253,12 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("opened socket %s (handle: 0x%@)\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ()),
               handle));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("opened socket %s (handle: %d)\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ()),
               handle));
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -390,6 +390,16 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   // step1: connect ?
   if (likely (inherited::configuration_->connect))
   { ACE_ASSERT (!inherited::configuration_->peerAddress.is_any ());
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // ...For connectionless sockets, name can indicate any valid address,
+    // including a broadcast address.However, to connect to a broadcast address,
+    // a socket must use setsockopt to enable the SO_BROADCAST option.Otherwise,
+    // connect will fail with the error code WSAEACCES.
+    if (Net_Common_Tools::isBroadcast (inherited::configuration_->peerAddress))
+      Net_Common_Tools::setBroadcast (writeHandle_, 1);
+#endif // ACE_WIN32 || ACE_WIN64
+  
     result =
         ACE_OS::connect (writeHandle_,
                          reinterpret_cast<struct sockaddr*> (inherited::configuration_->peerAddress.get_addr ()),
@@ -816,7 +826,7 @@ receive:
     inputStream_.recv (message_inout,                        // buffer
                        bytes_received,                       // #bytes received
                        0,                                    // flags
-                       ACE_PROTOCOL_FAMILY_INET,             // protocol family
+                       PF_INET,                              // protocol family
                        NULL,                                 // asynchronous completion token
                        0,                                    // priority
                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -1174,12 +1184,12 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("opened socket %s (handle: 0x%@)\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ()),
               handle));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("opened socket %s (handle: %d)\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ()),
               handle));
 #endif // ACE_WIN32 || ACE_WIN64
   if (likely (!inherited::configuration_->writeOnly))
@@ -1643,7 +1653,7 @@ receive:
     inputStream_.recv (message_inout,                        // buffer
                        bytes_received,                       // #bytes received
                        0,                                    // flags
-                       ACE_PROTOCOL_FAMILY_INET,             // protocol family
+                       PF_INET,                              // protocol family
                        NULL,                                 // asynchronous completion token
                        0,                                    // priority
                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
