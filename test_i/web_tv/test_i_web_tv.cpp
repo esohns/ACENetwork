@@ -771,7 +771,7 @@ do_work (const std::string& configurationFile_in,
                                                    modulehandler_configuration,
                                                    stream_configuration);
   modulehandler_configuration_2 = modulehandler_configuration;
-  struct Common_FlexBisonParserConfiguration parserConfiguration_2;
+  struct HTTP_ParserConfiguration parserConfiguration_2;
   modulehandler_configuration_2.parserConfiguration = &parserConfiguration_2;
   configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
                                                                std::make_pair (&module_configuration,
@@ -839,7 +839,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_3.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_3.display = Common_UI_Tools::getDefaultDisplay ();
-  struct Common_FlexBisonParserConfiguration parserConfiguration_3;
+  struct HTTP_ParserConfiguration parserConfiguration_3;
   modulehandler_configuration_3.parserConfiguration =
     &parserConfiguration_3;
   modulehandler_configuration_3.queue = &message_queue;
@@ -876,7 +876,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_6 = modulehandler_configuration_3;
   modulehandler_configuration_6.concurrency =
       STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-  struct Common_FlexBisonParserConfiguration parserConfiguration_4;
+  struct HTTP_ParserConfiguration parserConfiguration_4;
   modulehandler_configuration_6.parserConfiguration =
       &parserConfiguration_4;
   configuration_in.streamConfiguration_2.initialize (module_configuration,

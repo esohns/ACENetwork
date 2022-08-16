@@ -93,7 +93,10 @@ connection_setup_function (void* arg_in)
     ACE_ASSERT (iterator != state_r.builders.end ());
 
     // retrieve progress bar handle
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     progress_bar_p =
       GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_PROGRESSBAR)));
@@ -123,7 +126,10 @@ connection_setup_function (void* arg_in)
       gtk_statusbar_get_context_id (statusbar_p,
                                     data_p->phonebookEntry.hostName.c_str ());
                                     //string_p);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     //g_free (string_p);
   } // end lock scope
 
@@ -255,10 +261,16 @@ connection_setup_function (void* arg_in)
                     ACE_TEXT (converter.str ().c_str ())));
         goto remove_page;
       } // end IF
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
       gtk_progress_bar_set_text (progress_bar_p,
                                  string_p);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
       g_free (string_p); string_p = NULL;
 
       result_3 =
@@ -305,11 +317,17 @@ connection_failed:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"): \"%m\", continuing\n"),
                   ACE_TEXT (converter.str ().c_str ())));
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     gtk_statusbar_push (statusbar_p,
                         data_p->CBData->contextId,
                         string_p);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     g_free (string_p); string_p = NULL;
 
     goto remove_page;
@@ -350,7 +368,7 @@ connection_failed:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<IRC_Client_IStreamConnection_t>(%@): \"%m\", aborting\n"),
                 connection_2));
-    connection_2->close ();
+    connection_2->abort ();
     connection_2->decrease (); connection_2 = NULL;
 
     goto remove_page;
@@ -373,7 +391,7 @@ connection_failed:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<IRC_IControl>(0x%@) failed, returning\n"),
                 const_cast<Stream_Module_t*> (module_p)->writer ()));
-    connection_2->close ();
+    connection_2->abort ();
     connection_2->decrease (); connection_2 = NULL;
 
     goto remove_page;
@@ -408,7 +426,7 @@ connection_failed:
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_IControl::registerc(), returning\n")));
-    connection_2->close ();
+    connection_2->abort ();
     connection_2->decrease (); connection_2 = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);

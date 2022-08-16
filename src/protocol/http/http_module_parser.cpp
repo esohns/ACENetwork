@@ -19,11 +19,9 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "http_module_parser.h"
 
 #include "http_defines.h"
-#include "http_scanner.h"
 
 //HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[] =
 const char libacenetwork_protocol_default_http_parser_module_name_string[] =

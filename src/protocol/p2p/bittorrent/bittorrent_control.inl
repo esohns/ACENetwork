@@ -674,7 +674,7 @@ BitTorrent_Control_T<SessionAsynchType,
                       tracker_connection_id));
         else
         {
-          iconnection_p->close ();
+          iconnection_p->abort ();
           iconnection_p->decrease (); iconnection_p = NULL;
         } // end IF
 
@@ -721,7 +721,7 @@ BitTorrent_Control_T<SessionAsynchType,
                       tracker_connection_id));
         else
         {
-          iconnection_p->close ();
+          iconnection_p->abort ();
           iconnection_p->decrease (); iconnection_p = NULL;
         } // end IF
         (*iterator).second->wait ();

@@ -72,7 +72,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
   } // end IF
 
   // step2: setup auto-scrolling
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
   view_ =
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TEXTVIEW_CONNECTION)));
@@ -87,7 +90,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
                                ACE_TEXT_ALWAYS_CHAR ("scroll"),
                                &text_iter,
                                TRUE);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 }
 
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_MessageHandler_T (IRC_Client_GUI_IConnection* connection_in,
@@ -149,12 +155,22 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
       return;
     } // end IF
     if (gdkLockedAccess_in)
+    {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+    } // end IF
     view_ =
       GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TEXTVIEW_CONNECTION)));
     if (gdkLockedAccess_in)
+    {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+    } // end IF
     ACE_ASSERT (view_);
 //  } // end lock scope
 
@@ -182,7 +198,12 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
   // load widget tree
   GError* error_p = NULL;
   if (gdkLockedAccess_in)
+  {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+  } // end IF
   gtk_builder_add_from_file (builder_p,
                              ui_definition_filename.c_str (),
                              &error_p);
@@ -195,11 +216,21 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
     g_error_free (error_p); error_p = NULL;
     g_object_unref (G_OBJECT (builder_p));
     if (gdkLockedAccess_in)
+    {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+    } // end IF
     return;
   } // end IF
   if (gdkLockedAccess_in)
+  {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+  } // end IF
 
   // setup auto-scrolling in textview
   GtkTextView* text_view_p =
@@ -737,7 +768,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::setTopic (const std::s
   // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // retrieve label handle
   GtkLabel* label_p =
@@ -747,7 +781,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::setTopic (const std::s
   gtk_label_set_text (label_p,
                       topic_in.c_str ());
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 }
 
 void
@@ -826,7 +863,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::clearMembers (bool loc
   // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // retrieve channel liststore handle
   GtkListStore* list_store_p =
@@ -837,7 +877,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::clearMembers (bool loc
   // clear liststore
   gtk_list_store_clear (list_store_p);
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   if (lockedAccess_in)
   {
@@ -899,7 +942,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::add (const std::string
   // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // retrieve channel liststore handle
   GtkListStore* list_store_p =
@@ -928,7 +974,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::add (const std::string
 
   // clean up
   //g_free (string_p);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   if (lockedAccess_in)
   {
@@ -974,7 +1023,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::remove (const std::str
   // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // retrieve channel liststore handle
   GtkListStore* list_store_p =
@@ -989,7 +1041,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::remove (const std::str
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"): \"%m\", returning\n"),
                 ACE_TEXT (nick_in.c_str ())));
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     goto clean_up;
   } // end IF
 
@@ -1001,7 +1056,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::remove (const std::str
                 ACE_TEXT ("failed to gtk_tree_model_get_iter_first(%@), returning\n"),
                 list_store_p));
     g_free (string_p); string_p = NULL;
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     goto clean_up;
   } // end IF
   //   GValue current_value;
@@ -1038,7 +1096,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::remove (const std::str
                 ACE_TEXT ("failed to remove nickname (was: \"%s\"), continuing\n"),
                 ACE_TEXT (nick_in.c_str ())));
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
 clean_up:
   if (lockedAccess_in)
@@ -1085,7 +1146,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::members (const string_
     isFirstMemberListMsg_ = false;
   } // end IF
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // retrieve channel liststore handle
   GtkListStore* list_store_p =
@@ -1118,7 +1182,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::members (const string_
                         -1);
     //g_free (string_p); string_p = NULL;
   } // end FOR
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   if (lockedAccess_in)
   {
@@ -1157,7 +1224,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::endMembers (bool locke
 
   isFirstMemberListMsg_ = true;
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // retrieve treeview handle
   GtkTreeView* tree_view_p =
@@ -1166,7 +1236,10 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::endMembers (bool locke
   ACE_ASSERT (tree_view_p);
   gtk_widget_set_sensitive (GTK_WIDGET (tree_view_p), TRUE);
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   if (lockedAccess_in)
   {

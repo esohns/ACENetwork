@@ -27,6 +27,8 @@
 #include "stream_common.h"
 #include "stream_task_base_synch.h"
 
+extern const char libacenetwork_protocol_default_http_streamer_module_name_string[];
+
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////

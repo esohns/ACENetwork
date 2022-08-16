@@ -99,7 +99,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Connection_
 
   // load widget tree
   GError* error_p = NULL;
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
   gtk_builder_add_from_file (builder_p,
                              ui_definition_filename.c_str (),
                              &error_p);
@@ -111,10 +114,16 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Connection_
                 ACE_TEXT (error_p->message)));
     g_error_free (error_p); error_p = NULL;
     g_object_unref (G_OBJECT (builder_p)); builder_p = NULL;
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     return;
   } // end IF
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // retrieve server tab channels store
   GtkListStore* list_store_p =
@@ -619,9 +628,15 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::start (Stream_SessionId_t 
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_BUTTON_DISCONNECT)));
   ACE_ASSERT (button_p);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
   gtk_widget_set_sensitive (GTK_WIDGET (button_p), TRUE);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
 //   ACE_DEBUG((LM_DEBUG,
 //              ACE_TEXT("connected...\n")));
@@ -709,7 +724,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           ACE_ASSERT (sessionState_);
           sessionState_->nickName = record_r.parameters_.front ();
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // --> display (starting) nickname
           // set server tab nickname label
@@ -735,7 +753,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           ACE_ASSERT (hbox_p);
           gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), TRUE);
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // *WARNING*: falls through !
         }
@@ -831,7 +852,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         }
         case IRC_Codes::RPL_UNAWAY:           // 305
         {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
           ACE_ASSERT (sessionState_);
@@ -844,7 +868,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           ACE_ASSERT (toggle_button_p);
           gtk_toggle_button_set_active (toggle_button_p, FALSE);
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           log (record_r);
 
@@ -852,7 +879,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         }
         case IRC_Codes::RPL_NOWAWAY:          // 306
         {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // *WARNING*: needs the lock protection, otherwise there is a race...
           ACE_ASSERT (sessionState_);
@@ -865,7 +895,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           ACE_ASSERT (toggle_button_p);
           gtk_toggle_button_set_active (toggle_button_p, TRUE);
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           log (record_r);
 
@@ -892,7 +925,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         }
         case IRC_Codes::RPL_LISTSTART:        // 321
         {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // retrieve server tab channels store
           GtkListStore* liststore_p =
@@ -903,7 +939,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           // clear the store
           gtk_list_store_clear (liststore_p);
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // *WARNING*: falls through !
         }
@@ -926,7 +965,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         }
         case IRC_Codes::RPL_LIST:             // 322
         {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // retrieve server tab channels store
           GtkListStore* list_store_p =
@@ -954,7 +996,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
                         ACE_TEXT ((*param_iterator).c_str ())));
 
             // clean up
+#if GTK_CHECK_VERSION (3,6,0)
+#else
             gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
             break;
           } // end IF
@@ -971,7 +1016,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
 
               // clean up
               g_free (string_p);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
               gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
               break;
             } // end IF
@@ -989,7 +1037,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           // clean up
           g_free (string_p);
           g_free (string_2);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           break;
         }
@@ -1047,7 +1098,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           converter >> hop_count;
           real_name = record_r.parameters_.back ().substr (ws_position + 1);
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // retrieve server tab users store
           Common_UI_GTK_BuildersIterator_t iterator_3 =
@@ -1060,7 +1114,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
                         ACE_TEXT (CBData_.label.c_str ())));
 
             // clean up
+#if GTK_CHECK_VERSION (3,6,0)
+#else
             gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
             break;
           } // end IF
@@ -1081,7 +1138,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           if (nickname == sessionState_->nickName)
           {
             // clean up
+#if GTK_CHECK_VERSION (3,6,0)
+#else
             gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
             break;
           } // end IF
 
@@ -1130,7 +1190,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           // clean up
           //g_free (string_p);
           //g_free (string_2);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           break;
         }
@@ -1286,7 +1349,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
 
           // --> display (changed) nickname
           // step1: set server tab nickname label
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           GtkLabel* label_p =
             GTK_LABEL (gtk_builder_get_object ((*iterator).second.second,
@@ -1298,7 +1364,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           gtk_label_set_markup (label_p,
                                 nickname_string.c_str ());
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
           gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
           // step2: update channel tab nickname label(s)
           for (MESSAGE_HANDLERSITERATOR_T iterator = messageHandlers_.begin ();
@@ -1674,7 +1743,12 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::getActiveHandler (bool loc
   } // end IF
 
   if (gdkLockedAccess_in)
+  {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+  } // end IF
   // retrieve server tab channel tabs handle
   notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
@@ -1687,7 +1761,12 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::getActiveHandler (bool loc
                 ACE_TEXT ("failed to gtk_notebook_get_current_page(%@): no pages, aborting\n"),
                 notebook_p));
     if (gdkLockedAccess_in)
+    {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+    } // end IF
     goto clean_up;
   } // end IF
   widget_p = gtk_notebook_get_nth_page (notebook_p,
@@ -1871,7 +1950,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::error (const IRC_Record& m
     return;
   } // end IF
 
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
   // error --> print on statusbar
   GtkStatusbar* statusbar_p =
     GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
@@ -1880,7 +1962,10 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::error (const IRC_Record& m
   gtk_statusbar_push (statusbar_p,
                       contextId_,
                       IRC_Tools::dump (message_in).c_str ());
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   if (lockedAccess_in)
   {
@@ -1926,7 +2011,12 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::exists (const std::string&
     } // end IF
 
     if (gdkLockedAccess_in)
+    {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+    }
     // retrieve server tab channel tabs handle
     GtkNotebook* notebook_p =
         GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
@@ -1953,7 +2043,12 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::exists (const std::string&
       } // end IF
     } // end FOR
     if (gdkLockedAccess_in)
+    {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+    } // end IF
   } // end lock scope
 
   return result;
@@ -2054,13 +2149,19 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::createMessageHandler (cons
         state_r.builders.find (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN);
       // sanity check(s)
       ACE_ASSERT (iterator != state_r.builders.end ());
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
       GtkHBox* hbox_p =
         GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
                                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_HBOX_SEND)));
       ACE_ASSERT (hbox_p);
       gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), TRUE);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
       gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     } // end IF
   } // end lock scope
 

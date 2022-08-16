@@ -863,7 +863,7 @@ idle_finalize_UI_cb (gpointer userData_in)
 #endif // ACE_WIN32 || ACE_WIN64
     if (iconnection_p)
     {
-      iconnection_p->close ();
+      iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end ELSE
     data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
@@ -878,7 +878,7 @@ idle_finalize_UI_cb (gpointer userData_in)
 #endif // ACE_WIN32 || ACE_WIN64
     if (iconnection_p)
     {
-      iconnection_p->close ();
+      iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end ELSE
     data_p->configuration->handle = ACE_INVALID_HANDLE;
@@ -1887,7 +1887,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 #endif // ACE_WIN32 || ACE_WIN64
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
@@ -1902,7 +1902,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 #endif // ACE_WIN32 || ACE_WIN64
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->handle = ACE_INVALID_HANDLE;
@@ -2206,7 +2206,7 @@ continue_:
 #endif
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
@@ -2221,7 +2221,7 @@ continue_:
 #endif
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->handle = ACE_INVALID_HANDLE;

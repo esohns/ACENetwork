@@ -31,19 +31,20 @@
 #include "http_common.h"
 
 class HTTP_IParser
- : public Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
+ : public Common_IYaccRecordParser_T<struct HTTP_ParserConfiguration,
                                      struct HTTP_Record>
  , public Common_ILexScanner_T<struct Common_FlexScannerState,
                                HTTP_IParser>
 {
  public:
   // convenient types
-  typedef Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
+  typedef Common_IYaccRecordParser_T<struct HTTP_ParserConfiguration,
                                      struct HTTP_Record> IPARSER_T;
 
   using IPARSER_T::error;
 
-  virtual unsigned int currentChunkSize () = 0; // current chunk size
+  virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
+  virtual unsigned int currentChunkSize () = 0; // returns: current chunk size
 
   ////////////////////////////////////////
   // callbacks

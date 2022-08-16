@@ -248,7 +248,7 @@ PRODUCT         {PRODUCT_TOKEN}(\/{PRODUCT_VERSION}){0,1}
 FIELD_NAME      {TOKEN}+
 /* ({TEXT}|[{TOKEN}{T_SPECIALS}{QUOTED_STRING}]*|{LWS})* */
 FIELD_VALUE     {TOKEN}+
-HEADER          {FIELD_NAME}:{SP}{FIELD_VALUE}
+HEADER          {FIELD_NAME}:({SP}{FIELD_VALUE}){0,1}
 
 /* General Headers */
 HEADER_DATE     Date:{SP}{DATE}
@@ -538,6 +538,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                ACE_TEXT ("invalid/unknown transfer encoding (was: \"%s\"), continuing\n"),
                                                ACE_TEXT ((*iterator).second.c_str ())));
                                } // end IF
+                               else
+                                 BEGIN (INITIAL); // no data
                              } // end ELSE
                              yylval->ival = 2;
 //                             return yy::HTTP_Parser::token::DELIMITER;

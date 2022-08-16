@@ -131,6 +131,7 @@ struct Test_I_WebTV_Configuration
    : Test_I_Configuration ()
 #endif // GUI_SUPPORT
    , connectionConfigurations ()
+   , parserConfiguration ()
    , streamConfiguration ()
    , streamConfiguration_2 ()
    , streamConfiguration_3 ()
@@ -138,6 +139,8 @@ struct Test_I_WebTV_Configuration
 
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t       connectionConfigurations;
+  // **************************** parser data **********************************
+  struct HTTP_ParserConfiguration      parserConfiguration;
   // **************************** stream data **********************************
   Test_I_WebTV_StreamConfiguration_t   streamConfiguration;
   Test_I_WebTV_StreamConfiguration_2_t streamConfiguration_2;

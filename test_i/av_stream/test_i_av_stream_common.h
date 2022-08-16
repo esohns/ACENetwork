@@ -253,6 +253,7 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
    , pixelBuffer (NULL)
    , pixelBufferLock (NULL)
 #endif // GTK_USE
+   , parserConfiguration (NULL)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     , window ()
 #else
@@ -288,6 +289,7 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
   GdkPixbuf*                                           pixelBuffer;
   ACE_SYNCH_MUTEX*                                     pixelBufferLock;
 #endif // GTK_USE
+  struct Common_FlexBisonParserConfiguration*          parserConfiguration;                  // parser module(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND                                                 window;
 #else

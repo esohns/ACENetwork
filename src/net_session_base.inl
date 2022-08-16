@@ -106,7 +106,7 @@ Net_SessionBase_T<AddressType,
                     *iterator));
         continue;
       } // end IF
-      iconnection_p->close ();
+      iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end FOR
   } // end lock scope
@@ -315,8 +315,8 @@ Net_SessionBase_T<AddressType,
 error:
   if (iconnection_p)
   {
-    iconnection_p->close ();
-    iconnection_p->decrease ();
+    iconnection_p->abort ();
+    iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
 }
 
@@ -357,7 +357,7 @@ Net_SessionBase_T<AddressType,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return;
   } // end IF
-  connection_p->close ();
+  connection_p->abort ();
   connection_p->decrease (); connection_p = NULL;
 }
 
@@ -404,7 +404,7 @@ Net_SessionBase_T<AddressType,
                     *iterator));
         continue;
       } // end IF
-      iconnection_p->close ();
+      iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end FOR
 

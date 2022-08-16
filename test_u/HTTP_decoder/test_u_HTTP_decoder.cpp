@@ -813,7 +813,7 @@ do_work (unsigned int bufferSize_in,
                 connection_p));
 
     // clean up
-    connection_p->close ();
+    connection_p->abort ();
     connection_p->decrease (); connection_p = NULL;
 
     goto clean_up;
@@ -848,7 +848,7 @@ do_work (unsigned int bufferSize_in,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
 
     // clean up
-    connection_p->close ();
+    connection_p->abort ();
     connection_p->decrease (); connection_p = NULL;
 //    delete message_data_p;
     delete record_p;
@@ -869,7 +869,7 @@ do_work (unsigned int bufferSize_in,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
 
     // clean up
-    connection_p->close ();
+    connection_p->abort ();
     connection_p->decrease (); connection_p = NULL;
 //    delete message_data_p;
     delete record_p;
@@ -894,7 +894,7 @@ allocate:
                 ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
 
     // clean up
-    connection_p->close ();
+    connection_p->abort ();
     connection_p->decrease (); connection_p = NULL;
     message_data_container_p->decrease (); message_data_container_p = NULL;
 

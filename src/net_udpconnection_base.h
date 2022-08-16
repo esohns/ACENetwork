@@ -98,6 +98,8 @@ class Net_UDPConnectionBase_T
   inline Net_UDPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual ~Net_UDPConnectionBase_T () {}
 
+  using inherited::close;
+
   // implement (part of) Net_ITransportLayer_T
   // *TODO*: these shouldn't be necessary, remove ASAP
   inline virtual enum Common_EventDispatchType dispatch () { return inherited2::dispatch_; }
@@ -111,7 +113,7 @@ class Net_UDPConnectionBase_T
   // *NOTE*: stream any received data for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: send stream data to the peer
-  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
+  virtual int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE);
 
   // implement (part of) Net_IStreamConnection_T
   virtual bool initiate_read ();
@@ -120,6 +122,8 @@ class Net_UDPConnectionBase_T
   virtual void info (ACE_HANDLE&,           // return value: handle
                      ACE_INET_Addr&,        // return value: local SAP
                      ACE_INET_Addr&) const; // return value: peer SAP
+  // *NOTE*: override to cover write-only connections
+  virtual void abort ();
 
   // implement Common_IReset
   virtual void reset ();

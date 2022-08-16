@@ -127,7 +127,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   } // end IF
 
   // load widget tree
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
   gtk_builder_add_from_file (builder_p,
                              ui_definition_filename.c_str (),
                              &error_p);
@@ -138,10 +141,16 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                 ACE_TEXT (ui_definition_filename.c_str ()),
                 ACE_TEXT (error_p->message)));
     g_error_free (error_p); error_p = NULL;
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     goto error;
   } // end IF
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
   // connect signal(s)
   button_p =
@@ -355,7 +364,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+#if GTK_CHECK_VERSION (3,6,0)
+#else
   gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
   Common_UI_GTK_BuildersIterator_t iterator =
       CBData_.state->builders.find (CBData_.label);
   // sanity check(s)
@@ -439,7 +451,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                               TRUE);
 //   gdk_window_process_all_updates();
 
-//  gdk_threads_leave ();
+#if GTK_CHECK_VERSION (3,6,0)
+#else
+  gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 }

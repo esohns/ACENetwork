@@ -229,10 +229,10 @@ continue_:
   if (do_abort)
   { ACE_ASSERT (connection_p);
     try {
-      connection_p->close ();
+      connection_p->abort ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), returning\n")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::abort(), returning\n")));
       connection_p->decrease (); connection_p = NULL;
       if (connection_2)
       {

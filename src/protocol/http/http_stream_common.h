@@ -93,6 +93,7 @@ struct HTTP_ModuleHandlerConfiguration
    , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
    , HTTPForm ()
    , HTTPHeaders ()
+   , parserConfiguration (NULL)
    , printProgressDot (false)
    , URL ()
    , waitForConnect (true)
@@ -100,13 +101,14 @@ struct HTTP_ModuleHandlerConfiguration
     printFinalReport = true;
   };
 
-  bool           closeAfterReception; // HTTP get module
-  bool           crunchMessages; // HTTP parser module
-  HTTP_Form_t    HTTPForm; // HTTP get module
-  HTTP_Headers_t HTTPHeaders; // HTTP get module
-  bool           printProgressDot; // file writer module
-  std::string    URL;
-  bool           waitForConnect; // HTTP get module
+  bool                             closeAfterReception; // HTTP get module
+  bool                             crunchMessages; // HTTP parser module
+  HTTP_Form_t                      HTTPForm; // HTTP get module
+  HTTP_Headers_t                   HTTPHeaders; // HTTP get module
+  struct HTTP_ParserConfiguration* parserConfiguration; // parser module(s)
+  bool                             printProgressDot; // file writer module
+  std::string                      URL;
+  bool                             waitForConnect; // HTTP get module
 };
 
 //struct HTTP_ProtocolConfiguration;

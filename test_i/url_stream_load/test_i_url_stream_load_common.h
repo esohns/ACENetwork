@@ -80,14 +80,15 @@ struct Test_I_URLStreamLoad_Configuration
 #else
    : Test_I_Configuration ()
 #endif // GUI_SUPPORT
+   , parserConfiguration ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
    , streamConfiguration_2 ()
-   //, protocolConfiguration ()
-//   , userData ()
   {}
 
+  // **************************** parser data **********************************
+  struct HTTP_ParserConfiguration                        parserConfiguration;
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
@@ -95,10 +96,6 @@ struct Test_I_URLStreamLoad_Configuration
   // **************************** stream data **********************************
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration;
   Test_I_URLStreamLoad_StreamConfiguration_2_t           streamConfiguration_2;
-  // *************************** protocol data *********************************
-  //struct HTTP_ProtocolConfiguration                      protocolConfiguration;
-
-//  struct HTTP_Stream_UserData                            userData;
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,

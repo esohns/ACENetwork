@@ -126,46 +126,40 @@ struct BitTorrent_PeerModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    , destination ()
    , outboundStreamName ()
+   , parserConfiguration (NULL)
    , protocolConfiguration (NULL)
-   //, session (NULL)
-//   , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {
     demultiplex = true;
   }
 
-  std::string                              destination; // folder
-  std::string                              outboundStreamName; // aggregator
-  struct BitTorrent_ProtocolConfiguration* protocolConfiguration;
-  //BitTorrent_ISession_t*                   session;
-//  struct BitTorrent_StreamConfiguration*   streamConfiguration;
-  BitTorrent_IPeerNotify_t*                subscriber;  // (initial) subscriber
-  BitTorrent_IPeerSubscribers_t*           subscribers;
+  std::string                                 destination; // folder
+  std::string                                 outboundStreamName; // aggregator
+  struct Common_FlexBisonParserConfiguration* parserConfiguration;                  // parser module(s)
+  struct BitTorrent_ProtocolConfiguration*    protocolConfiguration;
+  BitTorrent_IPeerNotify_t*                   subscriber;  // (initial) subscriber
+  BitTorrent_IPeerSubscribers_t*              subscribers;
 };
 struct BitTorrent_TrackerModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
   BitTorrent_TrackerModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-//   , CBData (NULL)
    , destination ()
    , outboundStreamName ()
+   , parserConfiguration (NULL)
    , protocolConfiguration (NULL)
-   //, session (NULL)
-//   , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {}
 
-//  struct Common_UI_GTKState*               CBData;
-  std::string                              destination; // folder
-  std::string                              outboundStreamName; // aggregator
-  struct BitTorrent_ProtocolConfiguration* protocolConfiguration;
-  //BitTorrent_ISession_t*                   session;
-//  struct BitTorrent_StreamConfiguration*   streamConfiguration;
-  BitTorrent_ITrackerNotify_t*             subscriber;  // (initial) subscriber
-  BitTorrent_ITrackerSubscribers_t*        subscribers;
+  std::string                                 destination; // folder
+  std::string                                 outboundStreamName; // aggregator
+  struct HTTP_ParserConfiguration*            parserConfiguration;                  // parser module(s)
+  struct BitTorrent_ProtocolConfiguration*    protocolConfiguration;
+  BitTorrent_ITrackerNotify_t*                subscriber;  // (initial) subscriber
+  BitTorrent_ITrackerSubscribers_t*           subscribers;
 };
 
 struct BitTorrent_PeerModuleHandlerConfiguration;

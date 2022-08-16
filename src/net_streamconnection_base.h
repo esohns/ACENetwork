@@ -128,7 +128,7 @@ class Net_StreamConnectionBase_T
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::get_handle ()); }
 #endif // ACE_WIN32 || ACE_WIN64
   inline virtual ACE_Notification_Strategy* notification () { return static_cast<HandlerType*> (this); }
-  virtual void close ();
+  virtual void abort ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
   // -------------------------------------
   virtual void set (enum Net_ClientServerRole);
@@ -262,7 +262,7 @@ class Net_AsynchStreamConnectionBase_T
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::handle ()); }
 #endif // ACE_WIN32 || ACE_WIN64
   inline virtual ACE_Notification_Strategy* notification () { return this; }
-  virtual void close ();
+  virtual void abort ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
   // -------------------------------------
   virtual void set (enum Net_ClientServerRole);

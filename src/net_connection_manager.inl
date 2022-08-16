@@ -644,10 +644,10 @@ begin:
        iterator.advance ())
   { ACE_ASSERT (connection_p);
     try {
-      connection_p->close ();
+      connection_p->abort ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: caught exception in Net_IConnection_T::close(), continuing\n"),
+                  ACE_TEXT ("%u: caught exception in Net_IConnection_T::abort(), continuing\n"),
                   connection_p->id ()));
     }
     connection_p->decrease (); connection_p = NULL;
@@ -659,7 +659,7 @@ begin:
 
     if (likely (connections_a.size ()))
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("closed %u connection(s)\n"),
+                  ACE_TEXT ("aborted %u connection(s)\n"),
                   connections_a.size ()));
   } // end IF
 #endif // _DEBUG
@@ -741,10 +741,10 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   ACE_ASSERT (connection_p);
 
   try {
-    connection_p->close ();
+    connection_p->abort ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: caught exception in Net_IConnection_T::close(), continuing\n"),
+                ACE_TEXT ("%u: caught exception in Net_IConnection_T::abort(), continuing\n"),
                 connection_p->id ()));
   }
   connection_p->decrease ();
@@ -790,10 +790,10 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   ACE_ASSERT (connection_p);
 
   try {
-    connection_p->close ();
+    connection_p->abort ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: caught exception in Net_IConnection_T::close(), continuing\n"),
+                ACE_TEXT ("%u: caught exception in Net_IConnection_T::abort(), continuing\n"),
                 connection_p->id ()));
   }
   connection_p->decrease ();

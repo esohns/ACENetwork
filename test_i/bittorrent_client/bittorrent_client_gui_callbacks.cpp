@@ -91,7 +91,10 @@ session_handler_cb (void* arg_in)
     ACE_ASSERT (iterator != state_r.builders.end ());
 
     // retrieve progress bar handle
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     progress_bar_p =
       GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
@@ -121,7 +124,10 @@ session_handler_cb (void* arg_in)
       gtk_statusbar_get_context_id (statusbar_p,
                                     label_string.c_str ());
                                     //string_p);
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     //g_free (string_p);
   } // end lock scope
 

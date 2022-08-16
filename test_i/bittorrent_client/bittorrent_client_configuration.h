@@ -71,7 +71,8 @@ struct BitTorrent_Client_Configuration
    , peerConnectionConfigurations ()
    , trackerConnectionConfigurations ()
    ///////////////////////////////////////
-   , parserConfiguration ()
+   , peerParserConfiguration ()
+   , trackerParserConfiguration ()
    , peerStreamConfiguration ()
    , trackerStreamConfiguration ()
    ///////////////////////////////////////
@@ -97,7 +98,8 @@ struct BitTorrent_Client_Configuration
   Net_ConnectionConfigurations_t                      peerConnectionConfigurations;
   Net_ConnectionConfigurations_t                      trackerConnectionConfigurations;
   // ****************************** stream *************************************
-  struct Common_FlexBisonParserConfiguration          parserConfiguration;
+  struct Common_FlexBisonParserConfiguration          peerParserConfiguration;
+  struct HTTP_ParserConfiguration                     trackerParserConfiguration;
   BitTorrent_Client_PeerStreamConfiguration_t         peerStreamConfiguration;
   BitTorrent_Client_TrackerStreamConfiguration_t      trackerStreamConfiguration;
   // ***************************** protocol ************************************

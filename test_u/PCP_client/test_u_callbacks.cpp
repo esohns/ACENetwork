@@ -205,21 +205,21 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<gdouble> (std::numeric_limits<ACE_UINT64>::max ()));
 
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
@@ -438,128 +438,6 @@ idle_initialize_UI_cb (gpointer userData_in)
   // step6b: connect custom signals
   gtk_builder_connect_signals ((*iterator).second.second,
                                userData_in);
-  //GObject* object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 = g_signal_connect (object_p,
-  //                             ACE_TEXT_ALWAYS_CHAR ("toggled"),
-  //                             G_CALLBACK (toggleaction_listen_toggled_cb),
-  //                             userData_in);
-  //ACE_ASSERT (result_2);
-  //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_REPORT_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 = g_signal_connect (object_p,
-  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
-  //                             G_CALLBACK (action_report_activate_cb),
-  //                             userData_in);
-  //ACE_ASSERT (result_2);
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_MAP_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 = g_signal_connect (object_p,
-  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
-  //                             G_CALLBACK (action_map_activate_cb),
-  //                             userData_in);
-  //ACE_ASSERT (result_2);
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PEER_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 = g_signal_connect (object_p,
-  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
-  //                             G_CALLBACK (action_peer_activate_cb),
-  //                             userData_in);
-  //ACE_ASSERT (result_2);
-  //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_ANNOUNCE_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 = g_signal_connect (object_p,
-  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
-  //                             G_CALLBACK (action_announce_activate_cb),
-  //                             userData_in);
-  //ACE_ASSERT (result_2);
-  //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_AUTHENTICATE_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 = g_signal_connect (object_p,
-  //                             ACE_TEXT_ALWAYS_CHAR ("activate"),
-  //                             G_CALLBACK (action_authenticate_activate_cb),
-  //                             userData_in);
-  //ACE_ASSERT (result_2);
-
-  //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_COMBOBOX_INTERFACE_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 =
-  //    g_signal_connect (object_p,
-  //                      ACE_TEXT_ALWAYS_CHAR ("changed"),
-  //                      G_CALLBACK (combobox_interface_changed_cb),
-  //                      userData_in);
-  //ACE_ASSERT (result_2);
-
-  //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("value-changed"),
-  //                    G_CALLBACK (spinbutton_server_port_value_changed_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result_2);
-
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR(TEST_U_UI_GTK_TEXTVIEW_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 = g_signal_connect (object_p,
-  //                             ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
-  //                             G_CALLBACK (textview_size_allocate_cb),
-  //                             userData_in);
-  //ACE_ASSERT (result_2);
-
-  //-------------------------------------
-
-  //object_p =
-  //  gtk_builder_get_object ((*iterator).second.second,
-  //                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_CLEAR_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 =
-  //  g_signal_connect (object_p,
-  //                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                    G_CALLBACK (button_clear_clicked_cb),
-  //                    userData_in);
-  //ACE_ASSERT (result_2);
-  //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_ABOUT_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 =
-  //    g_signal_connect (object_p,
-  //                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                      G_CALLBACK (button_about_clicked_cb),
-  //                      userData_in);
-  //ACE_ASSERT (result_2);
-  //object_p =
-  //    gtk_builder_get_object ((*iterator).second.second,
-  //                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_BUTTON_QUIT_NAME));
-  //ACE_ASSERT (object_p);
-  //result_2 =
-  //    g_signal_connect (object_p,
-  //                      ACE_TEXT_ALWAYS_CHAR ("clicked"),
-  //                      G_CALLBACK (button_quit_clicked_cb),
-  //                      userData_in);
-  //ACE_ASSERT (result_2);
-  //ACE_UNUSED_ARG (result_2);
 
   //   // step8: use correct screen
   //   if (parentWidget_in)
@@ -844,7 +722,7 @@ idle_finalize_UI_cb (gpointer userData_in)
 #endif // ACE_WIN32 || ACE_WIN64
     if (iconnection_p)
     {
-      iconnection_p->close ();
+      iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end ELSE
     data_p->configuration->multicastHandle = ACE_INVALID_HANDLE;
@@ -859,7 +737,7 @@ idle_finalize_UI_cb (gpointer userData_in)
 #endif // ACE_WIN32 || ACE_WIN64
     if (iconnection_p)
     {
-      iconnection_p->close ();
+      iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end ELSE
     data_p->configuration->handle = ACE_INVALID_HANDLE;
@@ -1517,7 +1395,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 #endif // ACE_WIN32 || ACE_WIN64
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->multicastHandle = ACE_INVALID_HANDLE;
@@ -1532,7 +1410,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 #endif // ACE_WIN32 || ACE_WIN64
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->handle = ACE_INVALID_HANDLE;
@@ -1776,7 +1654,7 @@ continue_:
 #endif
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->multicastHandle = ACE_INVALID_HANDLE;
@@ -1791,7 +1669,7 @@ continue_:
 #endif
       if (iconnection_p)
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p = NULL;
       } // end ELSE
       data_p->configuration->handle = ACE_INVALID_HANDLE;
@@ -1825,7 +1703,7 @@ error:
 } // toggle_action_listen_toggled_cb
 
 void
-spinbutton_server_port_value_changed_cb (GtkWidget* widget_in,
+spinbutton_server_port_value_changed_cb (GtkSpinButton* spinButton_in,
                                          gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_server_port_value_changed_cb"));
@@ -1841,7 +1719,7 @@ spinbutton_server_port_value_changed_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->configuration);
 
   unsigned short port_number =
-    static_cast<unsigned short> (gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (widget_in)));
+    static_cast<unsigned short> (gtk_spin_button_get_value_as_int (spinButton_in));
   Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
@@ -1851,13 +1729,13 @@ spinbutton_server_port_value_changed_cb (GtkWidget* widget_in,
 
 // -----------------------------------------------------------------------------
 
-gint
-button_clear_clicked_cb (GtkWidget* widget_in,
+void
+button_clear_clicked_cb (GtkButton* button_in,
                          gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::button_clear_clicked_cb"));
 
-  ACE_UNUSED_ARG (widget_in);
+  ACE_UNUSED_ARG (button_in);
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
@@ -1867,7 +1745,6 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
   GtkTextView* view_p =
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TEXTVIEW_NAME)));
@@ -1876,19 +1753,18 @@ button_clear_clicked_cb (GtkWidget* widget_in,
 //    gtk_text_buffer_new (NULL); // text tag table --> create new
     gtk_text_view_get_buffer (view_p);
   ACE_ASSERT (buffer_p);
+
   gtk_text_buffer_set_text (buffer_p,
                             ACE_TEXT_ALWAYS_CHAR (""), 0);
-
-  return FALSE;
 } // button_clear_clicked_cb
 
-gint
-button_about_clicked_cb (GtkWidget* widget_in,
+void
+button_about_clicked_cb (GtkButton* button_in,
                          gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
-  ACE_UNUSED_ARG (widget_in);
+  ACE_UNUSED_ARG (button_in);
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
@@ -1898,18 +1774,10 @@ button_about_clicked_cb (GtkWidget* widget_in,
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  // retrieve about dialog handle
   GtkDialog* about_dialog =
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_ABOUT_NAME)));
-  if (!about_dialog)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gtk_builder_get_object(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (TEST_U_UI_GTK_DIALOG_ABOUT_NAME)));
-    return TRUE; // propagate
-  } // end IF
+  ACE_ASSERT (about_dialog);
 
   // run dialog
   gint result = gtk_dialog_run (about_dialog);
@@ -1921,37 +1789,35 @@ button_about_clicked_cb (GtkWidget* widget_in,
       break;
   } // end SWITCH
   gtk_widget_hide (GTK_WIDGET (about_dialog));
-
-  return FALSE;
 } // button_about_clicked_cb
 
-gint
-button_quit_clicked_cb (GtkWidget* widget_in,
+void
+button_quit_clicked_cb (GtkButton* button_in,
                         gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
   int result = -1;
 
-  ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (userData_in);
-  //Stream_GTK_CBData* data_p = static_cast<Stream_GTK_CBData*> (userData_in);
-  //// sanity check(s)
-  //ACE_ASSERT (data_p);
+  ACE_UNUSED_ARG (button_in);
 
-  //// step1: remove event sources
-  //{
-  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);
+  // sanity check(s)
+  struct PCPClient_UI_CBData* data_p =
+    static_cast<struct PCPClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
 
-  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
-  //       iterator != data_p->eventSourceIds.end ();
-  //       iterator++)
-  //    if (!g_source_remove (*iterator))
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-  //                  *iterator));
-  //  data_p->eventSourceIds.clear ();
-  //} // end lock scope
+  // step1: remove event sources
+  { ACE_GUARD (ACE_Thread_Mutex, aGuard, data_p->UIState->lock);
+    for (Common_UI_GTK_EventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
+         iterator != data_p->UIState->eventSourceIds.end ();
+         iterator++)
+      if (!g_source_remove (*iterator))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    *iterator));
+    data_p->UIState->eventSourceIds.clear ();
+  } // end lock scope
 
   // step2: initiate shutdown sequence
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1970,8 +1836,6 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   //         it from the signal handler
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
                                                       true); // high priority ?
-
-  return FALSE;
 } // button_quit_clicked_cb
 
 void

@@ -2010,7 +2010,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                     inherited::state_.trackerConnectionId));
       else
       {
-        iconnection_p->close ();
+        iconnection_p->abort ();
         iconnection_p->decrease (); iconnection_p= NULL;
       } // end ELSE
     } // end IF

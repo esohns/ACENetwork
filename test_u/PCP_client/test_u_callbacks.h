@@ -61,17 +61,17 @@ G_MODULE_EXPORT void entry_external_address_changed_cb (GtkEntry*, gpointer);
 G_MODULE_EXPORT void entry_internal_address_changed_cb (GtkEntry*, gpointer);
 G_MODULE_EXPORT void entry_remote_peer_address_changed_cb (GtkEntry*, gpointer);
 G_MODULE_EXPORT void entry_server_address_changed_cb (GtkEntry*, gpointer);
-G_MODULE_EXPORT void spinbutton_external_port_value_changed_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void spinbutton_internal_port_value_changed_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void spinbutton_remote_peer_port_value_changed_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void spinbutton_server_port_value_changed_cb (GtkWidget*, gpointer);
+//G_MODULE_EXPORT void spinbutton_external_port_value_changed_cb (GtkSpinButton*, gpointer);
+//G_MODULE_EXPORT void spinbutton_internal_port_value_changed_cb (GtkSpinButton*, gpointer);
+//G_MODULE_EXPORT void spinbutton_remote_peer_port_value_changed_cb (GtkSpinButton*, gpointer);
+G_MODULE_EXPORT void spinbutton_server_port_value_changed_cb (GtkSpinButton*, gpointer);
 G_MODULE_EXPORT void toggleaction_listen_toggled_cb (GtkToggleAction*, gpointer);
 
 /////////////////////////////////////////
 
-G_MODULE_EXPORT gint button_clear_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_clear_clicked_cb (GtkButton*, gpointer);
+G_MODULE_EXPORT void button_about_clicked_cb (GtkButton*, gpointer);
+G_MODULE_EXPORT void button_quit_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void textview_size_allocate_cb (GtkWidget*, GdkRectangle*, gpointer);
 #ifdef __cplusplus
 }

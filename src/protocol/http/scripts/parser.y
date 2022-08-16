@@ -221,7 +221,22 @@ void yyerror (YYLTYPE*, HTTP_IParser*, yyscan_t, const char*);
 
 %%
 %start              message;
-message:            head "delimiter" body            { $$ = $1 + $2 + $3; };
+message :           head "delimiter"                 { if (unlikely (iparser_p->headerOnly ()))
+                                                       {
+                                                         struct HTTP_Record& record_r =
+                                                           iparser_p->current ();
+                                                         struct HTTP_Record* record_p =
+                                                           &record_r;
+                                                         try {
+                                                           iparser_p->record (record_p);
+                                                         } catch (...) {
+                                                           ACE_DEBUG ((LM_ERROR,
+                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                         }
+                                                         YYACCEPT;
+                                                       } // end IF
+                                                     }
+                    body                             { $$ = $1 + $2 + $4; };
 head:               "method" head_rest1              { $$ = $1->size () + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();

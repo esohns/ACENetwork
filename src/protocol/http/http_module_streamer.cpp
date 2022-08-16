@@ -19,5 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "http_module_streamer.h"
+
+#include "http_defines.h"
+
+//HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[] =
+const char libacenetwork_protocol_default_http_streamer_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_STREAMER_NAME_STRING);

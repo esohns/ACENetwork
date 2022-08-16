@@ -130,16 +130,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #else
     std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
-    interface_identifier =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      Net_Common_Tools::IPAddressToInterface_2 (inherited::configuration_->peerAddress);
-#else
-      Net_Common_Tools::IPAddressToInterface (inherited::configuration_->peerAddress);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-      Net_Common_Tools::IPAddressToInterface (inherited::configuration_->peerAddress);
-#endif // ACE_WIN32 || ACE_WIN64
+    interface_identifier = inherited::configuration_->interfaceIdentifier;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
@@ -151,8 +142,8 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_WIN32 || ACE_WIN64
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s), aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
+                  ACE_TEXT ("invalid interface identifier (was: %s), aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
       goto error;
     } // end IF
     ACE_INET_Addr gateway_address;
@@ -325,56 +316,15 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(0x%@), aborting\n"),
-                    writeHandle_));
+                   ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(0x%@), aborting\n"),
+                   writeHandle_));
 #else
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(%d), aborting\n"),
-                    writeHandle_));
+                   ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(%d), aborting\n"),
+                   writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
-    } // end IF
-
-    // set source address ?
-    if (unlikely (inherited::configuration_->sourcePort))
-    {
-      //source_SAP.set (static_cast<u_short> (inherited::configuration_->sourcePort),
-      //                static_cast<ACE_UINT32> (INADDR_ANY),
-      //                1,
-      //                0);
-      result =
-        ACE_OS::bind (writeHandle_,
-                      reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
-                      source_SAP.get_addr_size ());
-      if (unlikely (result == -1))
-      {
-        int error = ACE_OS::last_error ();
-        ACE_UNUSED_ARG (error);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
-                    writeHandle_,
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
-                    writeHandle_,
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
-        goto error;
-      } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
-                  writeHandle_,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("bound write socket (handle: %d) to %s\n"),
-                  writeHandle_,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
   else
@@ -383,6 +333,53 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     writeHandle_ = handle;
   } // end ELSE    
   handle_sockets = true;
+
+  // set source address ?
+  if (unlikely (inherited::configuration_->sourcePort))
+  {
+    //source_SAP.set (static_cast<u_short> (inherited::configuration_->sourcePort),
+    //                static_cast<ACE_UINT32> (INADDR_ANY),
+    //                1,
+    //                0);
+    result =
+        ACE_OS::bind (writeHandle_,
+                      reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
+                      source_SAP.get_addr_size ());
+    if (unlikely (result == -1))
+    {
+      int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (error != WSAEINVAL) // 10022: already bound
+#else
+      if (error != EINVAL) // 22: already bound
+#endif // ACE_WIN32 || ACE_WIN64
+      {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
+                   writeHandle_,
+                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
+                   writeHandle_,
+                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+        goto error;
+      } // end IF
+    } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
+               writeHandle_,
+               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("bound write socket (handle: %d) to %s\n"),
+               writeHandle_,
+               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
 
   // step0: initialize base class
   inherited3::proactor (proactor_p);
@@ -1035,16 +1032,16 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  if (unlikely (inherited::configuration_->writeOnly))
-  { ACE_ASSERT (inherited::configuration_->connect);
-  } // end IF
+//  if (unlikely (inherited::configuration_->writeOnly))
+//  { ACE_ASSERT (inherited::configuration_->connect);
+//  } // end IF
   ACE_ASSERT (proactor_p);
 
   // step0: configure addresses
   if (unlikely (inherited::configuration_->sourcePort))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     struct _GUID interface_identifier;
 #else
     std::string interface_identifier;
@@ -1052,16 +1049,7 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 #else
     std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
-    interface_identifier =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      Net_Common_Tools::IPAddressToInterface_2 (inherited::configuration_->peerAddress);
-#else
-      Net_Common_Tools::IPAddressToInterface (inherited::configuration_->peerAddress);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-      Net_Common_Tools::IPAddressToInterface (inherited::configuration_->peerAddress);
-#endif // ACE_WIN32 || ACE_WIN64
+    interface_identifier = inherited::configuration_->interfaceIdentifier;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
@@ -1072,9 +1060,21 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
     if (unlikely (interface_identifier.empty ()))
 #endif // ACE_WIN32 || ACE_WIN64
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s), aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
+                  ACE_TEXT ("invalid interface identifier (was: %s), aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid interface identifier (was: %s), aborting\n"),
+                  ACE_TEXT (interface_identifier.c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid interface identifier (was: %s), aborting\n"),
+                  ACE_TEXT (interface_identifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
     ACE_INET_Addr gateway_address;
@@ -1097,7 +1097,7 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(%s): \"%m\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
@@ -1146,9 +1146,10 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 #endif // ACE_LINUX
   if (likely (!inherited::configuration_->writeOnly))
     source_SAP = inherited::configuration_->listenAddress;
-  result = inherited2::open (source_SAP, // local SAP
-                             NULL,       // interface identifier
-                             1);         // reuse_addr
+
+  result = inherited2::open (source_SAP,                               // local SAP
+                             NULL,                                     // interface identifier
+                             inherited::configuration_->reuseAddress); // reuse_addr
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1156,16 +1157,24 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
     goto error;
   } // end IF
-  result = inherited2::join (inherited::configuration_->listenAddress,
-                             1,
-                             NULL);
-  if (unlikely (result == -1))
+
+  if (likely (!inherited::configuration_->writeOnly))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::join(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->listenAddress).c_str ())));
-    goto error;
+    result = inherited2::join (inherited::configuration_->listenAddress, // address
+                               inherited::configuration_->reuseAddress,  // reuse_addr
+                               NULL);                                    // interface identifier
+    if (unlikely (result == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Dgram_Mcast::join(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->listenAddress).c_str ())));
+      goto error;
+    } // end IF
+    ACE_DEBUG( (LM_DEBUG,
+                ACE_TEXT ("joined multicast group (was: %s), continuing\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->listenAddress, false, false).c_str ())));
   } // end IF
+
 #if defined (ACE_LINUX)
   if (drop_capabilities)
   {
@@ -1179,6 +1188,7 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
     drop_privileges = false;
   } // end IF
 #endif // ACE_LINUX
+
   handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1220,45 +1230,27 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
                 writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64
 
-    // set source address ?
-    if (unlikely (inherited::configuration_->sourcePort))
-    {
-      //source_SAP.set (static_cast<u_short> (inherited::configuration_->sourcePort),
-      //                static_cast<ACE_UINT32> (INADDR_ANY),
-      //                1,
-      //                0);
-      result =
-        ACE_OS::bind (writeHandle_,
-                      reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
-                      source_SAP.get_addr_size ());
-      if (unlikely (result == -1))
+    // set socket option(s)
+    if (likely (inherited::configuration_->reuseAddress))
+    { ACE_ASSERT (inherited::configuration_->domain != PF_UNIX);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (unlikely (!Net_Common_Tools::setReuseAddress (writeHandle_)))
+#else
+      if (unlikely (!Net_Common_Tools::setReuseAddress (writeHandle_,
+                                                        inherited::configuration_->reusePort)))
+#endif // ACE_WIN32 || ACE_WIN64
       {
-        int error = ACE_OS::last_error ();
-        ACE_UNUSED_ARG (error);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
-                    writeHandle_,
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+                   ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(0x%@), aborting\n"),
+                   writeHandle_));
 #else
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
-                    writeHandle_,
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+                   ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(%d), aborting\n"),
+                   writeHandle_));
 #endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
-                  writeHandle_,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("bound write socket (handle: %d) to %s\n"),
-                  writeHandle_,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
   else
@@ -1267,6 +1259,53 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
     writeHandle_ = handle;
   } // end ELSE    
   handle_sockets = true;
+
+  // set source address ?
+  if (unlikely (inherited::configuration_->sourcePort))
+  {
+    //source_SAP.set (static_cast<u_short> (inherited::configuration_->sourcePort),
+    //                static_cast<ACE_UINT32> (INADDR_ANY),
+    //                1,
+    //                0);
+    result =
+        ACE_OS::bind (writeHandle_,
+                      reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
+                      source_SAP.get_addr_size ());
+    if (unlikely (result == -1))
+    {
+      int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (error != WSAEINVAL) // 10022: already bound
+#else
+      if (error != EINVAL) // 22: already bound
+#endif // ACE_WIN32 || ACE_WIN64
+      {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
+                   writeHandle_,
+                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
+                   writeHandle_,
+                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+        goto error;
+      } // end IF
+    } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
+               writeHandle_,
+               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+               ACE_TEXT ("bound write socket (handle: %d) to %s\n"),
+               writeHandle_,
+               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
 
   // step0: initialize base class
   inherited3::proactor (proactor_p);

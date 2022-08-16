@@ -392,9 +392,6 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   handle_out =
     (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly ? inherited::writeHandle_
                                                                                  : inherited::peer_.get_handle ());
-  localSAP_out.reset ();
-  peerSAP_out.reset ();
-
   if (likely (!inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
@@ -410,25 +407,42 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
-    peerSAP_out = inherited::address_;
-  else
+  peerSAP_out = inherited::address_;
+}
+
+template <ACE_SYNCH_DECL,
+          typename SocketHandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType>
+void
+Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                        SocketHandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        StreamType,
+                        UserDataType>::abort ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::abort"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+
+  inherited::abort ();
+
+  if (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly)
   {
-    result = inherited::peer_.get_remote_addr (peerSAP_out);
+    int result = inherited::handle_close (inherited::writeHandle_,
+                                          ACE_Event_Handler::ALL_EVENTS_MASK);
     if (unlikely (result == -1))
-    {
-      error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ENOTSOCK) && // 10038: Win32: socket already closed
-          (error != ENOTCONN))   // 10057: Win32: not connected
-#else
-      if ((error != EBADF) &&  //   9: Linux: socket already closed
-          (error != ENOTCONN)) // 107: Linux: not connected
-#endif // ACE_WIN32 || ACE_WIN64
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
-    } // end IF
-  } // end ELSE
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to Net_StreamConnectionBase_T::handle_close(): \"%m\", continuing\n"),
+                  this->id ()));
+    // *NOTE*: the caller retains any final reference(s)
+  } // end IF
 }
 
 template <ACE_SYNCH_DECL,
@@ -915,8 +929,6 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   handle_out =
     (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly ? inherited::writeHandle_
                                                                                  : inherited::HANDLER_T::SOCKET_T::get_handle ());
-  localSAP_out.reset ();
-  peerSAP_out.reset ();
 
   if (likely (!inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
   {
@@ -933,25 +945,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly))
-    peerSAP_out = inherited::address_;
-  else
-  {
-    result = inherited::HANDLER_T::SOCKET_T::get_remote_addr (peerSAP_out);
-    if (unlikely (result == -1))
-    {
-      error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if ((error != ENOTSOCK) && // 10038: Win32: socket already closed
-          (error != ENOTCONN))   // 10057: Win32: not connected
-#else
-      if ((error != EBADF) &&  //   9: Linux: socket already closed
-          (error != ENOTCONN)) // 107: Linux: not connected
-#endif // ACE_WIN32 || ACE_WIN64
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
-    } // end IF
-  } // end ELSE
+  peerSAP_out = inherited::address_;
 }
 
 template <typename SocketHandlerType,

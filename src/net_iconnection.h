@@ -94,10 +94,7 @@ class Net_IConnection_T
   virtual const StateType& state () const = 0;
   virtual enum Net_Connection_Status status () const = 0;
 
-  // *NOTE*: see ACE_Svc_Handler/ACE_Task_Base
-  //         (and net_common.h / ACE_Svc_Handler.h for reason codes)
-//  virtual int close (u_long = 0) = 0; // reason
-  virtual void close () = 0;
+  virtual void abort () = 0;
 
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&) = 0;

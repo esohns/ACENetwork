@@ -45,7 +45,6 @@ template <ACE_SYNCH_DECL,
 class Net_ConnectionBase_T
  : public Common_ReferenceCounter_T<ACE_SYNCH_USE>
  , virtual public Net_IConnection_T<AddressType,
-                                    //ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
  , public Common_IRegister
@@ -55,6 +54,9 @@ class Net_ConnectionBase_T
  public:
   // convenient types
   typedef Common_ReferenceCounter_T<ACE_SYNCH_USE> REFERENCECOUNTER_T;
+//  typedef Net_IConnection_T<AddressType,
+//                            StateType,
+//                            StatisticContainerType> ICONNECTION_T;
   typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
                                    AddressType,
                                    ConfigurationType,

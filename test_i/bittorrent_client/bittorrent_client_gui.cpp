@@ -515,7 +515,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   peer_modulehandler_configuration.streamConfiguration =
       &CBData_in.configuration->peerStreamConfiguration;
   peer_modulehandler_configuration.parserConfiguration =
-    &CBData_in.configuration->parserConfiguration;
+    &CBData_in.configuration->peerParserConfiguration;
 //  peer_modulehandler_configuration.protocolConfiguration =
 //      &CBData_in.configuration->protocolConfiguration;
   CBData_in.configuration->peerStreamConfiguration.initialize (module_configuration,
@@ -528,7 +528,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   tracker_modulehandler_configuration.streamConfiguration =
       &CBData_in.configuration->trackerStreamConfiguration;
   tracker_modulehandler_configuration.parserConfiguration =
-    &CBData_in.configuration->parserConfiguration;
+    &CBData_in.configuration->trackerParserConfiguration;
   CBData_in.configuration->trackerStreamConfiguration.initialize (module_configuration,
                                                                   tracker_modulehandler_configuration,
                                                                   tracker_stream_configuration);

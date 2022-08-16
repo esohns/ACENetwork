@@ -22,7 +22,11 @@
 #define TEST_U_PCP_CLIENT_DEFINES_H
 
 #define TEST_U_DEFAULT_GTK_RC_FILE                        "resources.rc"
-#define TEST_U_DEFAULT_GLADE_FILE                         "test_u.glade"
+#if defined (GTK2_USE)
+#define TEST_U_DEFAULT_GLADE_FILE                         "test_u.gtk2"
+#elif defined (GTK3_USE)
+#define TEST_U_DEFAULT_GLADE_FILE                         "test_u.gtk3"
+#endif // GTK2_USE || GTK3_USE
 #define TEST_U_THREAD_NAME                                "stream processor"
 
 //---------------------------------------

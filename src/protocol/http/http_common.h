@@ -27,6 +27,9 @@
 #include "ace/OS.h"
 
 #include "common_istatistic.h"
+#include "common_statistic_handler.h"
+
+#include "common_parser_common.h"
 
 #include "stream_common.h"
 #include "stream_data_base.h"
@@ -40,7 +43,6 @@
 struct HTTP_Record;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
-//struct HTTP_Stream_UserData;
 
 typedef Stream_ISessionDataNotify_T<struct HTTP_Stream_SessionData,
                                     enum Stream_SessionMessageType,
@@ -48,8 +50,8 @@ typedef Stream_ISessionDataNotify_T<struct HTTP_Stream_SessionData,
                                     HTTP_SessionMessage> HTTP_ISessionNotify_t;
 
 typedef Net_StreamStatistic_t HTTP_Statistic_t;
-typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
-//typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticHandler_t;
+typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_IStatisticReportingHandler_t;
+typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
 
   /************************************************************************/
   /* Comparator for case-insensitive comparison in STL assos. containers  */
@@ -77,7 +79,8 @@ typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
 //    return strcasecmp (lhs.c_str (), rhs.c_str ()) < 0 ;
 //  }
 //};
-struct ci_less : public std::binary_function<std::string, std::string, bool>
+struct ci_less
+ : public std::binary_function<std::string, std::string, bool>
 {
   bool operator() (const std::string& s1, const std::string& s2) const
   {
@@ -100,8 +103,7 @@ struct HTTP_Record
    , URI ()
    , version (HTTP_Codes::HTTP_VERSION_INVALID)
   {}
-  void operator+= (struct HTTP_Record rhs_in)
-  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+  inline void operator+= (struct HTTP_Record rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   HTTP_Form_t             form; // request
   HTTP_Headers_t          headers;
@@ -112,5 +114,16 @@ struct HTTP_Record
   HTTP_Codes::VersionType version;
 };
 typedef Stream_DataBase_T<struct HTTP_Record> HTTP_MessageData_t;
+
+struct HTTP_ParserConfiguration
+ : Common_FlexBisonParserConfiguration
+{
+  HTTP_ParserConfiguration ()
+   : Common_FlexBisonParserConfiguration ()
+   , headerOnly (false)
+  {}
+
+  bool headerOnly; // parse only message headers ?
+};
 
 #endif

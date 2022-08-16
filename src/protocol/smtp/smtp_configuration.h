@@ -85,11 +85,13 @@ struct SMTP_ModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
    , request (NULL)
+   , parserConfiguration (NULL)
    , protocolConfiguration (NULL)
   {}
 
-  struct SMTP_Request*               request;
-  struct SMTP_ProtocolConfiguration* protocolConfiguration;
+  struct SMTP_Request*                        request;
+  struct Common_FlexBisonParserConfiguration* parserConfiguration; // parser module(s)
+  struct SMTP_ProtocolConfiguration*          protocolConfiguration;
 };
 
 struct SMTP_StreamConfiguration

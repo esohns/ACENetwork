@@ -94,19 +94,16 @@ struct DHCP_ModuleHandlerConfiguration
   DHCP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
-//   , connection (NULL)
-//   , connectionConfigurations (NULL)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
+   , parserConfiguration (NULL)
    , protocolConfiguration (NULL)
   {
-    //crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
   }
 
-//  Test_U_IConnection_t*       connection; // UDP target/net IO module
-//  DHCP_ConnectionConfigurations_t*   connectionConfigurations;
-  bool                               printProgressDot; // file writer module
-  struct DHCP_ProtocolConfiguration* protocolConfiguration;
+  bool                                        printProgressDot; // file writer module
+  struct Common_FlexBisonParserConfiguration* parserConfiguration; // parser module(s)
+  struct DHCP_ProtocolConfiguration*          protocolConfiguration;
 };
 typedef std::map<std::string,
                  struct DHCP_ModuleHandlerConfiguration*> DHCP_ModuleHandlerConfigurations_t;

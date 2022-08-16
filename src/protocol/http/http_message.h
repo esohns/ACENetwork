@@ -51,12 +51,10 @@ template <//typename AllocatorConfigurationType,
           typename MessageType>
 class HTTP_Message_T
  : public Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
-//                                   AllocatorConfigurationType,
                                    MessageType,
                                    HTTP_Method_t>
 {
   typedef Stream_DataMessageBase_2<Stream_DataBase_T<struct HTTP_Record>,
-//                                   AllocatorConfigurationType,
                                    MessageType,
                                    HTTP_Method_t> inherited;
 

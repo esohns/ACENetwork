@@ -53,8 +53,8 @@ PCP_Session_T<StateType,
 
   if (likely (connection_))
   {
-    connection_->close ();
-    connection_->decrease ();
+    connection_->abort ();
+    connection_->decrease (); connection_ = NULL;
   } // end IF
 
   ConnectionManagerType* connection_manager_p =
@@ -146,7 +146,7 @@ allocate:
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (option_s);
   message_p->initialize (PCP_record,
-                         message_p->sessionId (),
+                         1, //message_p->sessionId (),
                          NULL);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -231,7 +231,7 @@ allocate:
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (filter_option_s);
   message_p->initialize (PCP_record,
-                         message_p->sessionId (),
+                         1, //message_p->sessionId (),
                          NULL);
 
   state_.nonce = PCP_record.map.nonce;
@@ -319,7 +319,7 @@ allocate:
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (option_s);
   message_p->initialize (PCP_record,
-                         message_p->sessionId (),
+                         1, //message_p->sessionId (),
                          NULL);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -393,7 +393,7 @@ allocate:
   option_s.nonce.nonce = static_cast<ACE_UINT32> (PCP_Tools::generateNonce ());
   PCP_record.options.push_back (option_s);
   message_p->initialize (PCP_record,
-                         message_p->sessionId (),
+                         1, //message_p->sessionId (),
                          NULL);
 
   ACE_Message_Block* message_block_p = message_p;

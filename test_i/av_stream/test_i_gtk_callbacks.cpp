@@ -1968,14 +1968,20 @@ stream_processing_function (void* arg_in)
     converter << session_data_p->sessionId;
 
     // retrieve status bar handle
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_enter ();
+#endif // GTK_CHECK_VERSION (3,6,0)
     statusbar_p =
       GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_STATUSBAR_NAME)));
     ACE_ASSERT (statusbar_p);
     context_id = gtk_statusbar_get_context_id (statusbar_p,
                                                converter.str ().c_str ());
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
 
     // set context ID
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -5495,8 +5501,8 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
                 directshow_udp_connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (directshow_ui_cb_data_p->configuration->handle));
               if (connection_p)
               {
-                connection_p->close ();
-                connection_p->decrease ();
+                connection_p->abort ();
+                connection_p->decrease (); connection_p = NULL;
               } // end ELSE
               directshow_ui_cb_data_p->configuration->handle = ACE_INVALID_HANDLE;
             } // end IF
@@ -5516,8 +5522,8 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
                 mediafoundation_udp_connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (mediafoundation_ui_cb_data_p->configuration->handle));
               if (connection_p)
               {
-                connection_p->close ();
-                connection_p->decrease ();
+                connection_p->abort ();
+                connection_p->decrease (); connection_p = NULL;
               } // end ELSE
               mediafoundation_ui_cb_data_p->configuration->handle = ACE_INVALID_HANDLE;
             } // end IF
@@ -5544,8 +5550,8 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
             udp_connection_manager_p->get (static_cast<Net_ConnectionId_t> (ui_cb_data_p->configuration->handle));
           if (connection_p)
           {
-            connection_p->close ();
-            connection_p->decrease ();
+            connection_p->abort ();
+            connection_p->decrease (); connection_p = NULL;
           } // end ELSE
           ui_cb_data_p->configuration->handle = ACE_INVALID_HANDLE;
         } // end IF
@@ -5938,8 +5944,8 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
             directshow_udp_connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (directshow_ui_cb_data_p->configuration->handle));
           if (connection_p)
           {
-            connection_p->close ();
-            connection_p->decrease ();
+            connection_p->abort ();
+            connection_p->decrease (); connection_p = NULL;
           } // end ELSE
           directshow_ui_cb_data_p->configuration->handle = ACE_INVALID_HANDLE;
         } // end IF
@@ -5953,8 +5959,8 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
             mediafoundation_udp_connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (mediafoundation_ui_cb_data_p->configuration->handle));
           if (connection_p)
           {
-            connection_p->close ();
-            connection_p->decrease ();
+            connection_p->abort ();
+            connection_p->decrease (); connection_p = NULL;
           } // end ELSE
           mediafoundation_ui_cb_data_p->configuration->handle =
             ACE_INVALID_HANDLE;
@@ -5980,8 +5986,8 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
         connection_manager_p->get (static_cast<Net_ConnectionId_t> (ui_cb_data_p->configuration->handle));
       if (connection_p)
       {
-        connection_p->close ();
-        connection_p->decrease ();
+        connection_p->abort ();
+        connection_p->decrease (); connection_p = NULL;
       } // end ELSE
       ui_cb_data_p->configuration->handle = ACE_INVALID_HANDLE;
     } // end IF

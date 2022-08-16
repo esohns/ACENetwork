@@ -46,12 +46,11 @@ Test_U_Module_EventHandler::handleDataMessage (Test_U_Message*& message_inout,
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
-
-  // forward the message to any subscriber(s)
-  const struct Test_U_HTTPDecoder_SessionData& session_data_r = inherited::sessionData_->getR ();
+  const struct Test_U_HTTPDecoder_SessionData& session_data_r =
+      inherited::sessionData_->getR ();
   ACE_ASSERT (session_data_r.connection);
 
-  session_data_r.connection->close ();
+  session_data_r.connection->abort ();
 }
 
 void

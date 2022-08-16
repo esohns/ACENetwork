@@ -720,9 +720,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           UserDataType>::close ()
+                           UserDataType>::abort ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::close"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::abort"));
 
   int result = -1;
 
@@ -740,12 +740,13 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%u: failed to ACE_OS::shutdown(0x%@): \"%m\", continuing\n"),
-                    id (),
-                    handle));
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to ACE_OS::shutdown(0x%@): \"%m\", continuing\n"),
+                  id (),
+                  handle));
 #else
-      if (error != EBADF) // 9: local close
+      if ((error != EBADF) &&  // 9  : local close
+          (error != ENOTCONN)) // 107: UDP ?
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::shutdown(%d): \"%m\", continuing\n"),
                     id (),
@@ -764,7 +765,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                     id (),
                     handle));
 #else
-      if (error != EBADF) // 9: local close: happens on Linux
+      if (error != EBADF) // 9: local close
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     id (),
@@ -1570,9 +1571,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 UserDataType>::close ()
+                                 UserDataType>::abort ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::close"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::abort"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
     if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
@@ -1616,8 +1617,38 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 
-  inherited::handle_close (inherited2::state_.handle,
-                           ACE_Event_Handler::ALL_EVENTS_MASK);
+   bool is_udp_write_only_b = false;
+   switch (this->transportLayer ())
+   {
+     case NET_TRANSPORTLAYER_TCP:
+     case NET_TRANSPORTLAYER_SSL:
+       break;
+     case NET_TRANSPORTLAYER_UDP:
+     {
+       // sanity check(s)
+       ACE_ASSERT (inherited2::configuration_);
+
+       Net_UDPSocketConfiguration_t* socket_configuration_p =
+           (Net_UDPSocketConfiguration_t*)&inherited2::configuration_->socketConfiguration;
+       is_udp_write_only_b = socket_configuration_p->writeOnly;
+       break;
+     }
+     default:
+     {
+       ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: invalid/unknown transport layer (was: %d), continuing\n"),
+                  id (),
+                  this->transportLayer ()));
+       break;
+     }
+   } // end SWITCH
+
+   if (is_udp_write_only_b)
+     handle_close (inherited2::state_.handle,
+                   ACE_Event_Handler::ALL_EVENTS_MASK);
+   else
+    inherited::handle_close (inherited2::state_.handle,
+                             ACE_Event_Handler::ALL_EVENTS_MASK);
 }
 
 template <typename HandlerType,

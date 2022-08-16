@@ -54,7 +54,7 @@ class HTTP_ParserDriver_T
   virtual ~HTTP_ParserDriver_T ();
 
   // implement (part of) HTTP_IParser
-  virtual bool initialize (const struct Common_FlexBisonParserConfiguration&);
+  virtual bool initialize (const struct HTTP_ParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
   inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); }
   inline virtual bool isBlocking () const { return blockInParse_; }
@@ -80,11 +80,11 @@ class HTTP_ParserDriver_T
   virtual void dump_state () const;
 
  protected:
-  struct Common_FlexBisonParserConfiguration* configuration_;
-  bool                                        finished_; // processed the whole entity ?
-  ACE_Message_Block*                          fragment_;
-  unsigned int                                offset_; // parsed entity bytes
-  struct HTTP_Record*                         record_;
+  struct HTTP_ParserConfiguration* configuration_;
+  bool                             finished_; // processed the whole entity ?
+  ACE_Message_Block*               fragment_;
+  unsigned int                     offset_; // parsed entity bytes
+  struct HTTP_Record*              record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T ())

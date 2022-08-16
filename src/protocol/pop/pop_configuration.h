@@ -86,11 +86,13 @@ struct POP_ModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
    , request (NULL)
+   , parserConfiguration (NULL)
    , protocolConfiguration (NULL)
   {}
 
-  struct POP_Request*               request;
-  struct POP_ProtocolConfiguration* protocolConfiguration;
+  struct POP_Request*                         request;
+  struct Common_FlexBisonParserConfiguration* parserConfiguration;      // parser module(s)
+  struct POP_ProtocolConfiguration*           protocolConfiguration;
 };
 
 struct POP_StreamConfiguration

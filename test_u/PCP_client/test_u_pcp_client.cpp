@@ -689,6 +689,7 @@ do_work (//bool requestBroadcastReplies_in,
   PCPClient_ConnectionConfiguration connection_configuration_inbound_multicast;
   connection_configuration_outbound_unicast.allocatorConfiguration =
     &configuration_in.allocatorConfiguration;
+  connection_configuration_outbound_unicast.delayRead = true;
   if (useReactor_in)
     ;
   else
@@ -742,6 +743,8 @@ do_work (//bool requestBroadcastReplies_in,
 //  struct PCPClient_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
       &configuration_in.allocatorConfiguration;
+  modulehandler_configuration.concurrency =
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
   modulehandler_configuration.parserConfiguration =

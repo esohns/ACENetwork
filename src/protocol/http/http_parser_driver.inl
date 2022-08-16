@@ -167,7 +167,7 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 
 template <typename SessionMessageType>
 bool
-HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBisonParserConfiguration& configuration_in)
+HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct HTTP_ParserConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::initialize"));
 
@@ -217,7 +217,7 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBis
   } // end IF
 
   configuration_ =
-      &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+      &const_cast<struct HTTP_ParserConfiguration&> (configuration_in);
   blockInParse_ = configuration_->block;
   messageQueue_ = configuration_->messageQueue;
   useYYScanBuffer_ = configuration_->useYYScanBuffer;

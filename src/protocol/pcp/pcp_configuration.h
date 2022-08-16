@@ -89,19 +89,16 @@ struct PCP_ModuleHandlerConfiguration
   PCP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
-//   , connection (NULL)
-//   , connectionConfigurations (NULL)
    , printProgressDot (PCP_DEFAULT_PRINT_PROGRESSDOT)
+   , parserConfiguration (NULL)
    , protocolConfiguration (NULL)
   {
-    //crunchMessages = PCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
   }
 
-//  Test_U_IConnection_t*       connection; // UDP target/net IO module
-//  PCP_ConnectionConfigurations_t*   connectionConfigurations;
-  bool                              printProgressDot; // file writer module
-  struct PCP_ProtocolConfiguration* protocolConfiguration;
+  bool                                        printProgressDot; // file writer module
+  struct Common_FlexBisonParserConfiguration* parserConfiguration; // parser module(s)
+  struct PCP_ProtocolConfiguration*           protocolConfiguration;
 };
 typedef std::map<std::string,
                  struct PCP_ModuleHandlerConfiguration*> PCP_ModuleHandlerConfigurations_t;

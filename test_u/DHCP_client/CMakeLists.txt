@@ -110,14 +110,16 @@ if (GUI_SUPPORT)
 endif (GUI_SUPPORT)
 
 set (${PROJECT_NAME}_DHCPClient_EXE_CFG
-     etc/test_u.glade
+     etc/test_u.gtk2
+     etc/test_u.gtk3
      etc/resources.rc)
 
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE}_EXE_SRCS}
-                etc/test_u.glade)
+                etc/test_u.gtk2
+                etc/test_u.gtk3)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)

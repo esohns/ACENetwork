@@ -1299,7 +1299,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
           connection_manager_p->get (connection_configuration_p->socketConfiguration.listenAddress,
                                      false);
         ACE_ASSERT (connection_p);
-        connection_p->close ();
+        connection_p->abort ();
         connection_p->decrease (); connection_p = NULL;
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("disconnected from %s\n"),

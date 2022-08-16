@@ -172,10 +172,10 @@ continue_2:
               close_connection_b)
           {
             ACE_DEBUG ((LM_DEBUG,
-                       ACE_TEXT ("%s: received all content, closing connection\n"),
+                       ACE_TEXT ("%s: received all content, aborting connection\n"),
                        inherited::mod_->name ()));
             ACE_ASSERT (session_data_r.connection);
-            session_data_r.connection->close ();
+            session_data_r.connection->abort ();
           } // end IF
         } // end lock scope
       } // end IF
