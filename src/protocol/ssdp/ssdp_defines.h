@@ -25,14 +25,18 @@
 #define SSDP_DEFAULT_SERVER_PORT                 1900
 #define SSDP_ADDRESS_IPV4_MULTICAST              "239.255.255.250"
 
+#define SSDP_DISCOVER_REQUEST_URI_STRING         "*"
+
 // headers
 #define SSDP_DISCOVER_S_HEADER_STRING            "S" // UUID header
-#define SSDP_DISCOVER_MAN_HEADER_STRING          "Man"
-#define SSDP_DISCOVER_SERVICE_TYPE_HEADER_STRING "ST"
-#define SSDP_DISCOVER_MX_HEADER_STRING           "MX"
+#define SSDP_DISCOVER_MAN_HEADER_STRING          "MAN"
+#define SSDP_DISCOVER_SERVICE_TYPE_HEADER_STRING "ST" // search target
+#define SSDP_DISCOVER_MX_HEADER_STRING           "MX" // seconds to delay response
 
-#define SSDP_DISCOVER_MAN_SSDP_DISCOVER_STRING   "ssdp:discover"
+#define SSDP_DISCOVER_S_HEADER_PREFIX_STRING     "uuid::"
+#define SSDP_DISCOVER_MAN_SSDP_DISCOVER_STRING   "\"ssdp:discover\""
 #define SSDP_DISCOVER_ST_SSDP_ALL_STRING         "ssdp:all"
+#define SSDP_DISCOVER_MX_DEFAULT_DELAY_S         1 // 1-5
 
 // stream
 #define SSDP_DEFAULT_MODULE_STREAMER_NAME_STRING "SSDPStreamer"

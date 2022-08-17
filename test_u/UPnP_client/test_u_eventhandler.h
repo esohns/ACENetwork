@@ -21,8 +21,6 @@
 #ifndef TEST_U_EVENTHANDLER_H
 #define TEST_U_EVENTHANDLER_H
 
-#include <map>
-
 #include "ace/Global_Macros.h"
 
 #include "common_inotify.h"
@@ -64,13 +62,45 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator= (const Test_U_EventHandler&))
 
-  typedef std::map<unsigned int, struct UPnP_Client_SessionData*> SESSION_DATA_MAP_T;
-  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
+#if defined (GUI_SUPPORT)
+  struct UPnP_Client_UI_CBData*   CBData_;
+#endif // GUI_SUPPORT
+  struct UPnP_Client_SessionData* sessionData_;
+};
+
+//////////////////////////////////////////
+
+class Test_U_EventHandler_2
+ : public UPnP_Client_ISessionNotify_t
+{
+ public:
+#if defined (GUI_SUPPORT)
+  Test_U_EventHandler_2 (struct UPnP_Client_UI_CBData*); // UI callback data handle
+#else
+  Test_U_EventHandler_2 ();
+#endif // GUI_SUPPORT
+  inline virtual ~Test_U_EventHandler_2 () {}
+
+  // implement Stream_ISessionDataNotify_T
+  virtual void start (Stream_SessionId_t,                    // session id
+                      const struct UPnP_Client_SessionData&); // session data
+  virtual void notify (Stream_SessionId_t,
+                       const Stream_SessionMessageType&);
+  virtual void end (Stream_SessionId_t);                // session id
+  virtual void notify (Stream_SessionId_t,              // session id
+                       const Test_U_Message&);          // (protocol) message
+  virtual void notify (Stream_SessionId_t,              // session id
+                       const Test_U_SessionMessage&);   // session message
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_2 ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_2 (const Test_U_EventHandler_2&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_2& operator= (const Test_U_EventHandler_2&))
 
 #if defined (GUI_SUPPORT)
-  struct UPnP_Client_UI_CBData* CBData_;
+  struct UPnP_Client_UI_CBData*   CBData_;
 #endif // GUI_SUPPORT
-  SESSION_DATA_MAP_T          sessionDataMap_;
+  struct UPnP_Client_SessionData* sessionData_;
 };
 
 #endif

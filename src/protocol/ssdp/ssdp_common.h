@@ -21,4 +21,12 @@
 #ifndef SSDP_COMMON_H
 #define SSDP_COMMON_H
 
+#include <string>
+#include <vector>
+
+struct SSDP_SessionState
+{
+  std::vector<std::string> services;
+};
+
 #endif

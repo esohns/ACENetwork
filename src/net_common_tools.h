@@ -301,8 +301,9 @@ class Net_Common_Tools
   static ACE_INET_Addr getBoundAddress (ACE_HANDLE);
   static int getProtocol (ACE_HANDLE); // socket handle
 
-//  // stream
-//  static std::string generateUniqueName (const std::string&); // prefix
+  // --- UUID ---
+  // see also: https://pubs.opengroup.org/onlinepubs/9629399/apdxa.htm
+  static std::string makeUUID ();
 
 #if defined (SSL_SUPPORT)
   // --- SSL ---

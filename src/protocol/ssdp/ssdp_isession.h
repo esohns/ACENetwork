@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Erik Sohns                                      *
- *   erik.sohns@web.de                                                     *
+ *   Copyright (C) 2009 by Erik Sohns   *
+ *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,41 +18,35 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HTTP_NETWORK_H
-#define HTTP_NETWORK_H
+#ifndef SSDP_ISESSION_T_H
+#define SSDP_ISESSION_T_H
 
-#include "net_common.h"
-#include "net_iconnection.h"
+#include <string>
 
-#include "http_common.h"
+#include "common_iget.h"
 
-// forward declarations
-//struct HTTP_StreamConfiguration;
-
-//class HTTP_ConnectionConfiguration
-// : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-//                                        struct HTTP_StreamConfiguration,
-//                                        NET_TRANSPORTLAYER_TCP>
-//{
-// public:
-//  HTTP_ConnectionConfiguration ()
-//   : Net_ConnectionConfiguration_T ()
-//  {}
-//};
-
-struct HTTP_ConnectionState
- : Net_StreamConnectionState
+template <typename StateType,
+          typename ConnectionConfigurationType,
+          typename UserData>
+class SSDP_ISession_T
+ : public Common_IGetR_T<StateType>
 {
-  HTTP_ConnectionState ()
-   : Net_StreamConnectionState ()
-   //, configuration (NULL)
-  {}
+ public:
+  inline virtual ~SSDP_ISession_T () {}
 
-  //HTTP_ConnectionConfiguration* configuration;
+  virtual void initialize (const ConnectionConfigurationType&, // HTTP-
+                           const UserData&) = 0;
+
+  // API
+  virtual void getDeviceDescription (const std::string&) = 0; // device description URL
+  virtual void getServiceDescription (const std::string&) = 0; // service description URL
+
+  ////////////////////////////////////////
+  // callbacks
+  // *TODO*: make these 'private'
+
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void notify (const struct HTTP_Record&) = 0; // SSDP response record
 };
-
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          struct HTTP_ConnectionState,
-                          HTTP_Statistic_t> HTTP_IConnection_t;
 
 #endif

@@ -353,17 +353,27 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_Message_Block* message_block_p = headFragment_;
   unsigned int bytes_to_skip = 0;
 
-  ACE_NEW_NORETURN (data_container_p,
-                    DATA_CONTAINER_T ());
-  if (!data_container_p)
+  ACE_NEW_NORETURN (data_p,
+                    DATA_T ());
+  if (!data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
     delete record_inout; record_inout = NULL;
     goto error;
   } // end IF
-  data_container_p->setPR (record_inout);
-  ACE_ASSERT (!record_inout);
+  *data_p = *record_inout;
+  delete record_inout; record_inout = NULL;
+
+  ACE_NEW_NORETURN (data_container_p,
+                    DATA_CONTAINER_T (data_p,
+                                      true)); // delete ?
+  if (!data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    goto error;
+  } // end IF
   data_container_2 = data_container_p;
   headFragment_->initialize (data_container_2,
                              headFragment_->sessionId (),
@@ -399,10 +409,14 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     message_block_p->rd_ptr (bytes_to_skip);
     iterator =
         data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-    ACE_ASSERT (iterator != data_p->headers.end ());
-    std::istringstream converter;
-    converter.str ((*iterator).second);
-    converter >> bytes_to_skip;
+    if (likely (iterator != data_p->headers.end ()))
+    {
+      std::istringstream converter;
+      converter.str ((*iterator).second);
+      converter >> bytes_to_skip;
+    } // end IF
+    else
+      bytes_to_skip = 0;
     ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
   } // end IF
   else

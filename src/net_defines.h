@@ -126,6 +126,10 @@
 #define NET_EXE_NETWORKMANAGER_STRING                                  "NetworkManager"
 #endif // ACE_WIN32 || ACE_WIN64
 
+// UUID
+#define NET_UUID_DCE_VERSION                                           1
+#define NET_UUID_DCE_VARIANT                                           2 // == DCE Variant
+
 // modules
 #define NET_MODULE_CLIENTSERVER_DIRECTORY_STRING                       "client_server"
 #define NET_MODULE_PROTOCOL_DIRECTORY_STRING                           "protocol"

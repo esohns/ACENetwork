@@ -46,10 +46,10 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class Test_U_Message
- : public HTTP_Message_T<//struct Common_Parser_FlexAllocatorConfiguration,
+ : public HTTP_Message_T<struct HTTP_Record,
                          enum Stream_MessageType>
 {
-  typedef HTTP_Message_T<//struct Common_Parser_FlexAllocatorConfiguration,
+  typedef HTTP_Message_T<struct HTTP_Record,
                          enum Stream_MessageType> inherited;
 
   // grant access to specific private ctors

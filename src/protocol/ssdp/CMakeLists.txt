@@ -88,17 +88,17 @@ set (source_files
      ssdp_codes.h
      ssdp_common.h
      ssdp_defines.h
+     ssdp_isession.h
      ssdp_module_streamer.cpp
      ssdp_module_streamer.h
      ssdp_module_streamer.inl
+     ssdp_session.cpp
+     ssdp_session.h
+     ssdp_session.inl
      ssdp_tools.cpp
      ssdp_tools.h)
 set (script_files)
-#     scripts/bisector.l
-#     scripts/scanner.l
-#     scripts/parser.y)
 set (table_files)
-#     etc/http_scanner.tab)
 
 #set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -169,12 +169,15 @@ export (TARGETS ${PROJECT_NAME}_Protocol_SSDP
 
 ############### install files ################
 install (FILES
-         http_codes.h
-         http_common.h
-         http_defines.h
-         http_module_streamer.h
-         http_module_streamer.inl
-         http_tools.h
+         ssdp_codes.h
+         ssdp_common.h
+         ssdp_defines.h
+         ssdp_isession.h
+         ssdp_module_streamer.h
+         ssdp_module_streamer.inl
+         ssdp_session.h
+         ssdp_session.inl
+         ssdp_tools.h
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_SSDP
          EXPORT ${PROJECT_NAME}Targets

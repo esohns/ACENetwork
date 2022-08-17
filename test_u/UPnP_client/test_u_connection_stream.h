@@ -44,7 +44,7 @@ class Test_U_SessionMessage;
 
 extern const char stream_name_string_[];
 
-class Test_U_InboundConnectionStream
+class Test_U_InboundSSDPConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
                                         stream_name_string_,
@@ -62,7 +62,7 @@ class Test_U_InboundConnectionStream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        UPnP_Client_ConnectionManager_t,
+                                        UPnP_Client_SSDP_ConnectionManager_t,
                                         struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -82,35 +82,25 @@ class Test_U_InboundConnectionStream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        UPnP_Client_ConnectionManager_t,
+                                        UPnP_Client_SSDP_ConnectionManager_t,
                                         struct Stream_UserData> inherited;
 
  public:
-  Test_U_InboundConnectionStream ();
-  inline virtual ~Test_U_InboundConnectionStream () { inherited::shutdown (); }
-
-//  using inherited::getR_2;
-  inline virtual const UPnP_Client_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
+  Test_U_InboundSSDPConnectionStream ();
+  inline virtual ~Test_U_InboundSSDPConnectionStream () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: layout
                      bool&);          // return value: delete modules ?
 
-  // implement Common_IInitialize_T
-  virtual bool initialize (const inherited::CONFIGURATION_T&,
-                           ACE_HANDLE);                       // socket handle
-
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream (const Test_U_InboundConnectionStream&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream& operator= (const Test_U_InboundConnectionStream&))
-
-  //// *TODO*: re-consider this API
-  //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  ACE_UNIMPLEMENTED_FUNC (Test_U_InboundSSDPConnectionStream (const Test_U_InboundSSDPConnectionStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_InboundSSDPConnectionStream& operator= (const Test_U_InboundSSDPConnectionStream&))
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class Test_U_OutboundConnectionStream
+class Test_U_OutboundSSDPConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
                                         stream_name_string_,
@@ -128,7 +118,7 @@ class Test_U_OutboundConnectionStream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        UPnP_Client_ConnectionManager_t,
+                                        UPnP_Client_SSDP_ConnectionManager_t,
                                         struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -148,15 +138,68 @@ class Test_U_OutboundConnectionStream
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        UPnP_Client_ConnectionManager_t,
+                                        UPnP_Client_SSDP_ConnectionManager_t,
                                         struct Stream_UserData> inherited;
 
  public:
-  Test_U_OutboundConnectionStream ();
-  inline virtual ~Test_U_OutboundConnectionStream () { inherited::shutdown (); }
+  Test_U_OutboundSSDPConnectionStream ();
+  inline virtual ~Test_U_OutboundSSDPConnectionStream () { inherited::shutdown (); }
 
-//  using inherited::getR_2;
-  inline virtual const UPnP_Client_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ILayout*, // return value: layout
+                     bool&);          // return value: delete modules ?
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundSSDPConnectionStream (const Test_U_OutboundSSDPConnectionStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundSSDPConnectionStream& operator= (const Test_U_OutboundSSDPConnectionStream&))
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+class Test_U_HTTP_ConnectionStream
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct UPnP_Client_StreamState,
+                                        struct UPnP_Client_StreamConfiguration,
+                                        struct Stream_Statistic,
+                                        Common_Timer_Manager_t,
+                                        struct UPnP_Client_ModuleHandlerConfiguration,
+                                        struct UPnP_Client_SessionData, // session data
+                                        UPnP_Client_SessionData_t,      // session data container (reference counted)
+                                        Stream_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        UPnP_Client_HTTP_ConnectionManager_t,
+                                        struct Stream_UserData>
+{
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct UPnP_Client_StreamState,
+                                        struct UPnP_Client_StreamConfiguration,
+                                        struct Stream_Statistic,
+                                        Common_Timer_Manager_t,
+                                        struct UPnP_Client_ModuleHandlerConfiguration,
+                                        struct UPnP_Client_SessionData,
+                                        UPnP_Client_SessionData_t,
+                                        Stream_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        UPnP_Client_HTTP_ConnectionManager_t,
+                                        struct Stream_UserData> inherited;
+
+ public:
+  Test_U_HTTP_ConnectionStream ();
+  inline virtual ~Test_U_HTTP_ConnectionStream () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: layout
@@ -167,11 +210,8 @@ class Test_U_OutboundConnectionStream
                            ACE_HANDLE);                       // socket handle
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream& operator= (const Test_U_OutboundConnectionStream&))
-
-  //// *TODO*: re-consider this API
-  //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  ACE_UNIMPLEMENTED_FUNC (Test_U_HTTP_ConnectionStream (const Test_U_HTTP_ConnectionStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_HTTP_ConnectionStream& operator= (const Test_U_HTTP_ConnectionStream&))
 };
 
 #endif

@@ -41,20 +41,9 @@ struct HTTP_ConnectionState;
 struct HTTP_ModuleHandlerConfiguration;
 struct HTTP_StreamConfiguration;
 
-//struct HTTP_AllocatorConfiguration
-// : Common_Parser_FlexAllocatorConfiguration
-//{
-//  HTTP_AllocatorConfiguration ()
-//   : Common_Parser_FlexAllocatorConfiguration ()
-//  {
-//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-//    //         'flex's yy_scan_buffer() method
-//    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-//  };
-//};
 
-typedef HTTP_Message_T<//struct Common_Parser_FlexAllocatorConfiguration,
-                       HTTP_MessageData_t> HTTP_Message_t;
+typedef HTTP_Message_T<struct HTTP_Record,
+                       enum Stream_MessageType> HTTP_Message_t;
 
 struct HTTP_Stream_SessionData
  : Stream_SessionData

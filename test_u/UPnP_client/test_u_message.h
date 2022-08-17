@@ -41,9 +41,11 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
- : public HTTP_Message_T<enum Stream_MessageType>
+ : public HTTP_Message_T<struct UPnP_Client_MessageData,
+                         enum Stream_MessageType>
 {
-  typedef HTTP_Message_T<enum Stream_MessageType> inherited;
+  typedef HTTP_Message_T<struct UPnP_Client_MessageData,
+                         enum Stream_MessageType> inherited;
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,

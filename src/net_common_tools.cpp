@@ -21,6 +21,7 @@
 
 #include "net_common_tools.h"
 
+#include <iomanip>
 #include <regex>
 #include <sstream>
 
@@ -4668,32 +4669,91 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
   return result;
 }
 
-//std::string
-//Net_Common_Tools::generateUniqueName (const std::string& prefix_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::generateUniqueName"));
+std::string
+Net_Common_Tools::makeUUID ()
+{
+  time_t time_i = ACE_OS::time (NULL);
+  uint16_t clock_sequence_i =
+    Common_Tools::getRandomNumber (static_cast<uint16_t> (0),
+                                   std::numeric_limits<uint16_t>::max ());
+  struct ether_addr ether_addr_s;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+  struct _GUID interface_identifier =
+    Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_3);
+  ether_addr_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress_2 (interface_identifier);
+#else
+  std::string interface_identifier =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+  ether_addr_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress (interface_identifier);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  std::string interface_identifier;
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+  ether_addr_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress (interface_identifier);
+#endif // ACE_WIN32 || ACE_WIN64
 
-//  std::string result;
+  struct dce_time_format
+  {
+    uint32_t time_low;
+    uint16_t time_mid;
+    union
+    {
+      uint16_t time_hi_and_version;
+#if defined (ACE_LITTLE_ENDIAN)
+      uint16_t time_hi:12,
+               version:4;
+#elif defined (ACE_BIG_ENDIAN)
+      uint16_t version:4,
+               time_hi:12;
+#else
+#error "ACE_BYTE_ORDER not defined"
+#endif // ACE_LITTLE_ENDIAN
+    };
+    union
+    {
+      uint8_t clock_seq_hi_and_reserved;
+#if defined (ACE_LITTLE_ENDIAN)
+      uint8_t clock_seq_hi:6,
+              variant:2;
+#elif defined (ACE_BIG_ENDIAN)
+      uint8_t variant:2,
+              clock_seq_hi:6;
+#else
+#error "ACE_BYTE_ORDER not defined"
+#endif // ACE_LITTLE_ENDIAN
+    };
+    uint8_t  clock_seq_low;
+    uint8_t  node[6];
+  };
+  struct dce_time_format dce_time_format_s;
+  dce_time_format_s.time_low = time_i & 0xFFFFFFFF;
+  dce_time_format_s.time_mid = (time_i >> 32) & 0xFFFF;
+  dce_time_format_s.time_hi = (time_i >> 48) & 0xFFFF;
+  dce_time_format_s.version = NET_UUID_DCE_VERSION;
+  dce_time_format_s.clock_seq_hi = (clock_sequence_i >> 8) & 0xFF;
+  dce_time_format_s.variant = NET_UUID_DCE_VARIANT;
+  dce_time_format_s.clock_seq_low = clock_sequence_i & 0xFF;
+  ACE_OS::memcpy (dce_time_format_s.node, ether_addr_s.ether_addr_octet, ETH_ALEN);
 
-//  // sanity check(s)
-//  ACE_ASSERT (prefix_in.size () <= (BUFSIZ - 6 + 1));
+  std::ostringstream converter;
+  converter << std::setfill ('0');
+  converter << std::hex << std::setw (8) << dce_time_format_s.time_low << std::dec << std::setw (1) << '-'
+            << std::hex << std::setw (4) << dce_time_format_s.time_mid << std::dec << std::setw (1) << '-'
+            << std::hex << std::setw (4) << dce_time_format_s.time_hi_and_version << std::dec << std::setw (1) << '-'
+            << std::hex << std::setw (2) << static_cast<uint16_t> (dce_time_format_s.clock_seq_hi_and_reserved) << static_cast<uint16_t> (dce_time_format_s.clock_seq_low) << std::setw (1) << std::dec << '-'
+            << std::hex << static_cast<uint16_t> (dce_time_format_s.node[0])
+            << std::hex << static_cast<uint16_t> (dce_time_format_s.node[1])
+            << std::hex << static_cast<uint16_t> (dce_time_format_s.node[2])
+            << std::hex << static_cast<uint16_t> (dce_time_format_s.node[3])
+            << std::hex << static_cast<uint16_t> (dce_time_format_s.node[4])
+            << std::hex << static_cast<uint16_t> (dce_time_format_s.node[5]);
 
-//  // *NOTE*: see also: man 3 mkstemp
-//  ACE_TCHAR buffer[BUFSIZ];
-//  if (unlikely (!prefix_in.empty ()))
-//    ACE_OS::strcpy (buffer, prefix_in.c_str ());
-//  ACE_OS::strcpy (buffer + prefix_in.size (), ACE_TEXT ("XXXXXX"));
-//  ACE_OS::mktemp (buffer);
-//  if (unlikely (!ACE_OS::strlen (buffer)))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
-//    return std::string ();
-//  } // end IF
-//  result = buffer;
-
-//  return result;
-//}
+  return converter.str ();
+}
 
 #if defined (SSL_SUPPORT)
 std::string

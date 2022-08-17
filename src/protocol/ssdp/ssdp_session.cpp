@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Erik Sohns                                      *
- *   erik.sohns@web.de                                                     *
+ *   Copyright (C) 2009 by Erik Sohns   *
+ *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,42 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "stdafx.h"
 
-#ifndef HTTP_NETWORK_H
-#define HTTP_NETWORK_H
-
-#include "net_common.h"
-#include "net_iconnection.h"
-
-#include "http_common.h"
-
-// forward declarations
-//struct HTTP_StreamConfiguration;
-
-//class HTTP_ConnectionConfiguration
-// : public Net_ConnectionConfiguration_T<struct Common_Parser_FlexAllocatorConfiguration,
-//                                        struct HTTP_StreamConfiguration,
-//                                        NET_TRANSPORTLAYER_TCP>
-//{
-// public:
-//  HTTP_ConnectionConfiguration ()
-//   : Net_ConnectionConfiguration_T ()
-//  {}
-//};
-
-struct HTTP_ConnectionState
- : Net_StreamConnectionState
-{
-  HTTP_ConnectionState ()
-   : Net_StreamConnectionState ()
-   //, configuration (NULL)
-  {}
-
-  //HTTP_ConnectionConfiguration* configuration;
-};
-
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          struct HTTP_ConnectionState,
-                          HTTP_Statistic_t> HTTP_IConnection_t;
-
-#endif
+#include "ssdp_session.h"

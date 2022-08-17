@@ -555,10 +555,23 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // GUI_SUPPORT
   UPnP_Client_MessageHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_U_EventHandler_2 ui_event_handler_2 (
+#if defined (GUI_SUPPORT)
+                                            &CBData_in);
+#else
+                                            NULL);
+#endif // GUI_SUPPORT
+  UPnP_Client_MessageHandler_Module event_handler_2 (NULL,
+                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
-  UPnP_Client_ConnectionManager_t* connection_manager_p =
-    UPNP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  SSDP_Session_t ssdp_session;
+  SSDP_AsynchSession_t asynch_ssdp_session;
+  UPnP_Client_SSDP_ConnectionManager_t* connection_manager_p =
+    UPNP_CLIENT_SSDP_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
+  UPnP_Client_HTTP_ConnectionManager_t* connection_manager_2 =
+    UPNP_CLIENT_HTTP_CONNECTIONMANAGER_SINGLETON::instance();
+  ACE_ASSERT (connection_manager_2);
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -568,6 +581,10 @@ do_work (//bool requestBroadcastReplies_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   CBData_in.progressData.state = &state_r;
+  if (useReactor_in)
+    CBData_in.session = &ssdp_session;
+  else
+    CBData_in.session = &asynch_ssdp_session;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -580,7 +597,7 @@ do_work (//bool requestBroadcastReplies_in,
   // *********************** socket configuration data *************************
   ACE_INET_Addr interface_address, gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier = interfaceIdentifier_in;
 #else
   std::string interface_identifier = interfaceIdentifier_in;
@@ -589,7 +606,7 @@ do_work (//bool requestBroadcastReplies_in,
   std::string interface_identifier = interfaceIdentifier_in;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   if (InlineIsEqualGUID (interface_identifier, GUID_NULL))
 #else
   if (interface_identifier.empty ())
@@ -599,7 +616,7 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     interface_identifier =
       Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP);
 #else
@@ -612,7 +629,7 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   if (InlineIsEqualGUID (interface_identifier, GUID_NULL))
 #else
   if (interface_identifier.empty ())
@@ -626,7 +643,7 @@ do_work (//bool requestBroadcastReplies_in,
     return;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   if (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
                                                  interface_address,
                                                  gateway_address))
@@ -642,7 +659,7 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(\"%s\"), aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
@@ -683,9 +700,11 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  UPnP_Client_ConnectionConfiguration connection_configuration_outbound_multicast;
-  UPnP_Client_ConnectionConfiguration connection_configuration_inbound_unicast;
-  UPnP_Client_ConnectionConfiguration connection_configuration_inbound_multicast;
+  UPnP_Client_SSDP_ConnectionConfiguration connection_configuration_outbound_multicast;
+  UPnP_Client_SSDP_ConnectionConfiguration connection_configuration_inbound_unicast;
+  UPnP_Client_SSDP_ConnectionConfiguration connection_configuration_inbound_multicast;
+  UPnP_Client_HTTP_ConnectionConfiguration connection_configuration_http;
+
   connection_configuration_outbound_multicast.allocatorConfiguration =
     &configuration_in.allocatorConfiguration;
   connection_configuration_outbound_multicast.delayRead = true;
@@ -737,13 +756,23 @@ do_work (//bool requestBroadcastReplies_in,
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct UPnP_Client_ModuleHandlerConfiguration modulehandler_configuration;
+  struct UPnP_Client_ModuleHandlerConfiguration modulehandler_configuration_2;
   struct UPnP_Client_StreamConfiguration stream_configuration;
   stream_configuration.cloneModule = true;
+  stream_configuration.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration;
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
+  stream_configuration.parserContext =
+    &configuration_in.parserContext;
   stream_configuration.printFinalReport = true;
+  struct UPnP_Client_StreamConfiguration stream_configuration_2;
+  stream_configuration_2 = stream_configuration;
+  stream_configuration_2.module =
+    (!UIDefinitionFileName_in.empty () ? &event_handler_2
+                                       : NULL);
 
   // ********************** module configuration data **************************
 //  struct UPnP_Client_StreamConfiguration stream_configuration;
@@ -761,8 +790,8 @@ do_work (//bool requestBroadcastReplies_in,
   modulehandler_configuration.statisticReportingInterval =
     (statisticReportingInterval_in ? ACE_Time_Value (statisticReportingInterval_in, 0)
                                    : ACE_Time_Value::zero);
-  modulehandler_configuration.streamConfiguration =
-    &configuration_in.streamConfiguration;
+  //modulehandler_configuration.streamConfiguration =
+  //  &configuration_in.streamConfiguration;
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
@@ -770,15 +799,15 @@ do_work (//bool requestBroadcastReplies_in,
   modulehandler_configuration.lock = &state_r.subscribersLock;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+  modulehandler_configuration_2 = modulehandler_configuration;
+  modulehandler_configuration_2.subscriber = &ui_event_handler_2;
 
-  stream_configuration.allocatorConfiguration =
-      &configuration_in.allocatorConfiguration;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
-  UPnP_Client_StreamConfiguration_t::ITERATOR_T iterator_2 =
-    configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != configuration_in.streamConfiguration.end ());
+  configuration_in.streamConfiguration_2.initialize (module_configuration,
+                                                     modulehandler_configuration_2,
+                                                     stream_configuration_2);
 
   // ********************** protocol configuration data ************************
   //configuration_in.protocolConfiguration.requestBroadcastReplies =
@@ -811,6 +840,23 @@ do_work (//bool requestBroadcastReplies_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In_2"),
                                                                     &connection_configuration_inbound_multicast));
 
+  connection_configuration_http.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration;
+  connection_configuration_http.socketConfiguration.interfaceIdentifier =
+    interface_identifier;
+  connection_configuration_http.socketConfiguration.reuseAddress = true;
+  connection_configuration_http.statisticReportingInterval =
+    statisticReportingInterval_in;
+  connection_configuration_http.messageAllocator = &message_allocator;
+  connection_configuration_http.streamConfiguration =
+    &configuration_in.streamConfiguration_2;
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("HTTP"),
+                                                                    &connection_configuration_http));
+  ssdp_session.initialize (connection_configuration_http,
+                           configuration_in.userData);
+  asynch_ssdp_session.initialize (connection_configuration_http,
+                                  configuration_in.userData);
+
   // step0b: initialize event dispatch
   if (useReactor_in)
     configuration_in.dispatchConfiguration.numberOfReactorThreads =
@@ -827,17 +873,17 @@ do_work (//bool requestBroadcastReplies_in,
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration = &configuration_in.dispatchConfiguration;
 
-  ACE_Time_Value deadline = ACE_Time_Value::zero;
-//  UPnP_Client_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-//      connection_manager_p;
-//  ACE_ASSERT (iconnection_manager_p);
-//  int group_id = -1;
+  //ACE_Time_Value deadline = ACE_Time_Value::zero;
   ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
-  // step0c: initialize connection manager
+  // step0c: initialize connection manager(s)
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
+  connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
+  connection_manager_2->set (connection_configuration_http,
+                             &configuration_in.userData);
 
   // step0d: initialize regular (global) statistic reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -849,6 +895,9 @@ do_work (//bool requestBroadcastReplies_in,
   HTTP_StatisticReportingHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                       connection_manager_p,
                                                       false);
+  HTTP_StatisticReportingHandler_t statistic_handler_2 (COMMON_STATISTIC_ACTION_REPORT,
+                                                        connection_manager_2,
+                                                        false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
@@ -975,14 +1024,14 @@ do_work (//bool requestBroadcastReplies_in,
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_InboundConnector_t> (connector_2,
-                                                                          *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
+                                                                          *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
                                                                           configuration_in.userData,
                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
                                                                           true, false);
     else
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_InboundAsynchConnector_t> (asynch_connector_2,
-                                                                                *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
+                                                                                *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
                                                                                 configuration_in.userData,
                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
                                                                                 true, false);
@@ -1017,17 +1066,17 @@ do_work (//bool requestBroadcastReplies_in,
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_InboundConnectorMcast_t> (connector_3,
-                                                                             *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
-                                                                             configuration_in.userData,
-                                                                             NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                             true, false);
+                                                                               *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
+                                                                               configuration_in.userData,
+                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                               true, false);
     else
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_InboundAsynchConnectorMcast_t> (asynch_connector_3,
-                                                                                   *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
-                                                                                   configuration_in.userData,
-                                                                                   NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                                   true, false);
+                                                                                     *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
+                                                                                     configuration_in.userData,
+                                                                                     NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                                     true, false);
     if (handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1062,14 +1111,14 @@ do_work (//bool requestBroadcastReplies_in,
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (connector,
-                                                                           *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
+                                                                           *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
                                                                            configuration_in.userData,
                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
                                                                            true, true);
     else
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnector_t> (asynch_connector,
-                                                                                 *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
+                                                                                 *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
                                                                                  configuration_in.userData,
                                                                                  NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
                                                                                  true, true);
@@ -1089,7 +1138,7 @@ do_work (//bool requestBroadcastReplies_in,
     ACE_ASSERT (iconnection_p);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%u: connected to %s\n"),
-                (*iterator_2).second.second->connection->id (),
+                iconnection_p->id (),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
     iterator =
@@ -1140,7 +1189,6 @@ do_work (//bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-      (*iterator_2).second.second->connection->decrease ();
       connection_manager_p->abort (false);
       connection_manager_p->wait (true);
       return;
@@ -1171,39 +1219,10 @@ do_work (//bool requestBroadcastReplies_in,
               ACE_TEXT ("finished working...\n")));
 
   timer_manager_p->stop ();
-  if (UIDefinitionFileName_in.empty ())
-    (*iterator_2).second.second->connection->decrease ();
   connection_manager_p->wait ();
   if (!UIDefinitionFileName_in.empty ())
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true); // wait ?
-
-//  if (!UIDefinitionFileName_in.empty ())
-//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
-  //		{ // synch access
-  //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //					 iterator != CBData_in.event_source_ids.end();
-  //					 iterator++)
-  //				g_source_remove(*iterator);
-  //		} // end lock scope
-  //timer_manager_p->stop ();
-
-  //  { // synch access
-  //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //		for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //				 iterator != CBData_in.event_source_ids.end();
-  //				 iterator++)
-  //			g_source_remove(*iterator);
-  //	} // end lock scope
-
-//  result = file_writer.close (ACE_Module_Base::M_DELETE_NONE);
-//  if (result == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
-//                file_writer.name ()));
 }
 
 void

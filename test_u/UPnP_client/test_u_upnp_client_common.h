@@ -24,16 +24,19 @@
 #include <list>
 #include <string>
 
-#include "ace/INET_Addr.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Singleton.h"
-#include "ace/Time_Value.h"
+#include "libxml/tree.h"
+#include "libxml/xpath.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "gtk/gtk.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
+#include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Singleton.h"
+#include "ace/Time_Value.h"
 
 #include "common.h"
 #include "common_istatistic.h"
@@ -57,6 +60,8 @@
 #include "stream_messageallocatorheap_base.h"
 #include "stream_session_data.h"
 
+#include "stream_module_htmlparser.h"
+
 #include "net_defines.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -78,6 +83,27 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
 
+
+struct UPnP_Client_MessageData
+ : HTTP_Record
+{
+  UPnP_Client_MessageData ()
+   : HTTP_Record ()
+   , HTMLDocument (NULL)
+  {}
+
+  virtual ~UPnP_Client_MessageData ()
+  {
+    if (HTMLDocument)
+      xmlFreeDoc (HTMLDocument);
+  }
+  inline void operator= (const struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); }
+  inline void operator+= (struct UPnP_Client_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
+  xmlDocPtr HTMLDocument;
+};
+typedef Stream_DataBase_T<struct UPnP_Client_MessageData> UPnP_Client_MessageData_t;
+
 typedef Net_IConnection_T<ACE_INET_Addr,
                           //UPnP_Client_ConnectionConfiguration,
                           struct HTTP_ConnectionState,
@@ -89,6 +115,8 @@ struct UPnP_Client_SessionData
    : Test_U_StreamSessionData ()
    , connection (NULL) // outbound
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   , parserContext (NULL)
+   , xPathObject (NULL)
   {}
   struct UPnP_Client_SessionData& operator= (const struct UPnP_Client_SessionData& rhs_in)
   {
@@ -96,14 +124,13 @@ struct UPnP_Client_SessionData
 
     format = rhs_in.format;
     connection = (connection ? connection : rhs_in.connection);
-    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
-                                              : targetFileName);
     return *this;
   }
 
-  enum Stream_Decoder_CompressionFormatType format;
-  UPnP_Client_IConnection_t*                connection;          // RELEASE
-  std::string                               targetFileName;      // file writer module
+  enum Stream_Decoder_CompressionFormatType             format;
+  UPnP_Client_IConnection_t*                            connection; // RELEASE
+  struct Stream_Module_HTMLParser_SAXParserContextBase* parserContext;
+  xmlXPathObjectPtr                                     xPathObject;
 };
 typedef Stream_SessionData_T<struct UPnP_Client_SessionData> UPnP_Client_SessionData_t;
 
@@ -145,10 +172,11 @@ struct UPnP_Client_ModuleHandlerConfiguration
    : HTTP_ModuleHandlerConfiguration ()
    , connection (NULL)
    , connectionConfigurations (NULL)
-   , streamConfiguration (NULL)
+   , mode (STREAM_MODULE_HTMLPARSER_MODE_DOM)
+   //, streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-   , targetFileName ()
+   , xPathQueryString()
   {
     inbound = true;
     passive = false;
@@ -156,10 +184,11 @@ struct UPnP_Client_ModuleHandlerConfiguration
 
   UPnP_Client_IConnection_t*         connection; // UDP target/net IO module
   Net_ConnectionConfigurations_t*    connectionConfigurations;
-  UPnP_Client_StreamConfiguration_t* streamConfiguration; // PCP discover module
+  enum Stream_Module_HTMLParser_Mode mode;
+  //UPnP_Client_StreamConfiguration_t* streamConfiguration; // PCP discover module
   UPnP_Client_ISessionNotify_t*      subscriber;
   UPnP_Client_Subscribers_t*         subscribers;
-  std::string                        targetFileName; // dump module
+  std::string                        xPathQueryString;
 };
 
 struct UPnP_Client_StreamConfiguration
@@ -167,10 +196,10 @@ struct UPnP_Client_StreamConfiguration
 {
   UPnP_Client_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
-   //, userData (NULL)
+   , parserContext (NULL)
   {}
 
-  //struct Net_UserData* userData;
+  struct Stream_Module_HTMLParser_SAXParserContextBase* parserContext; // XML-
 };
 
 struct UPnP_Client_StreamState
@@ -227,7 +256,9 @@ struct UPnP_Client_Configuration
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , parserConfiguration ()
+   , parserContext()
    , streamConfiguration ()
+   , streamConfiguration_2 ()
    , outboundHandle(ACE_INVALID_HANDLE)
    , multicastHandle (ACE_INVALID_HANDLE)
    , handle (ACE_INVALID_HANDLE)
@@ -235,20 +266,22 @@ struct UPnP_Client_Configuration
     parserConfiguration.headerOnly = true; // SSDP is header-only HTTP
   }
 
-  struct Common_Parser_FlexAllocatorConfiguration allocatorConfiguration;
+  struct Common_Parser_FlexAllocatorConfiguration      allocatorConfiguration;
   // **************************** signal data **********************************
-  struct UPnP_Client_SignalHandlerConfiguration   signalHandlerConfiguration;
+  struct UPnP_Client_SignalHandlerConfiguration        signalHandlerConfiguration;
   // **************************** socket data **********************************
-  Net_ConnectionConfigurations_t                  connectionConfigurations;
+  Net_ConnectionConfigurations_t                       connectionConfigurations;
   // **************************** parser data **********************************
-  struct HTTP_ParserConfiguration                 parserConfiguration;
+  struct HTTP_ParserConfiguration                      parserConfiguration; // SSDP/HTTP-
+  struct Stream_Module_HTMLParser_SAXParserContextBase parserContext; // XML-
   // **************************** stream data **********************************
-  UPnP_Client_StreamConfiguration_t               streamConfiguration;
+  UPnP_Client_StreamConfiguration_t                    streamConfiguration; // SSDP/HTTP-
+  UPnP_Client_StreamConfiguration_t                    streamConfiguration_2; // XML-
   // *************************** listener data *********************************
 
-  ACE_HANDLE                                      outboundHandle;  // output handle (multicast)
-  ACE_HANDLE                                      multicastHandle; // listen handle (multicast)
-  ACE_HANDLE                                      handle;          // listen handle (unicast)
+  ACE_HANDLE                                           outboundHandle;  // output handle (multicast)
+  ACE_HANDLE                                           multicastHandle; // listen handle (multicast)
+  ACE_HANDLE                                           handle;          // listen handle (unicast)
 };
 
 //////////////////////////////////////////
@@ -282,7 +315,7 @@ struct UPnP_Client_UI_CBData
    , gatewayAddress ()
    , interfaceAddress ()
    , progressData ()
-   //, session (NULL)
+   , session (NULL)
    , subscribers ()
   {}
 
@@ -291,7 +324,7 @@ struct UPnP_Client_UI_CBData
   ACE_INET_Addr                      gatewayAddress;
   ACE_INET_Addr                      interfaceAddress;
   struct UPnP_Client_UI_ProgressData progressData;
-  //UPnP_ISession_t*                   session;
+  SSDP_ISession_t*                   session;
   UPnP_Client_Subscribers_t          subscribers;
 };
 

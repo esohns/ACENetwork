@@ -35,19 +35,36 @@
 #include "test_u_message.h"
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 UPnP_Client_ConnectionConfiguration,
+                                 UPnP_Client_SSDP_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
-                                 struct Net_UserData> UPnP_Client_IConnectionManager_t;
+                                 struct Net_UserData> UPnP_Client_I_SSDP_ConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 UPnP_Client_ConnectionConfiguration,
+                                 UPnP_Client_SSDP_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
-                                 struct Net_UserData> UPnP_Client_ConnectionManager_t;
+                                 struct Net_UserData> UPnP_Client_SSDP_ConnectionManager_t;
 
-typedef ACE_Singleton<UPnP_Client_ConnectionManager_t,
-                      ACE_SYNCH_MUTEX> UPNP_CLIENT_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<UPnP_Client_SSDP_ConnectionManager_t,
+                      ACE_SYNCH_MUTEX> UPNP_CLIENT_SSDP_CONNECTIONMANAGER_SINGLETON;
+
+//////////////////////////////////////////
+
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 UPnP_Client_HTTP_ConnectionConfiguration,
+                                 struct HTTP_ConnectionState,
+                                 HTTP_Statistic_t,
+                                 struct Net_UserData> UPnP_Client_I_HTTP_ConnectionManager_t;
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 UPnP_Client_HTTP_ConnectionConfiguration,
+                                 struct HTTP_ConnectionState,
+                                 HTTP_Statistic_t,
+                                 struct Net_UserData> UPnP_Client_HTTP_ConnectionManager_t;
+
+typedef ACE_Singleton<UPnP_Client_HTTP_ConnectionManager_t,
+                      ACE_SYNCH_MUTEX> UPNP_CLIENT_HTTP_CONNECTIONMANAGER_SINGLETON;
 
 //////////////////////////////////////////
 

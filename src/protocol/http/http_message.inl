@@ -30,9 +30,9 @@
 #include "http_defines.h"
 #include "http_tools.h"
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::HTTP_Message_T (Stream_SessionId_t sessionId_in,
                                              unsigned int requestedSize_in)
  : inherited (sessionId_in,
@@ -42,10 +42,10 @@ HTTP_Message_T<//AllocatorConfigurationType,
 
 }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
-HTTP_Message_T<//AllocatorConfigurationType,
-               MessageType>::HTTP_Message_T (const HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
+               MessageType>::HTTP_Message_T (const HTTP_Message_T<RecordType,
                                                                   MessageType>& message_in)
  : inherited (message_in)
 {
@@ -53,9 +53,9 @@ HTTP_Message_T<//AllocatorConfigurationType,
 
 }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::HTTP_Message_T (Stream_SessionId_t sessionId_in,
                                              ACE_Data_Block* dataBlock_in,
                                              ACE_Allocator* messageAllocator_in,
@@ -78,9 +78,9 @@ HTTP_Message_T<//AllocatorConfigurationType,
 //
 // }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::~HTTP_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::~HTTP_Message_T"));
@@ -88,10 +88,10 @@ HTTP_Message_T<//AllocatorConfigurationType,
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
 HTTP_Method_t
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::command"));
@@ -106,10 +106,10 @@ HTTP_Message_T<//AllocatorConfigurationType,
   return record_r.method;
 }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
 std::string
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::CommandToString (HTTP_Method_t method_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::CommandToString"));
@@ -118,10 +118,10 @@ HTTP_Message_T<//AllocatorConfigurationType,
                                                        : HTTP_Tools::MethodToString (method_in));
 }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
 void
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::dump_state"));
@@ -159,10 +159,10 @@ HTTP_Message_T<//AllocatorConfigurationType,
   inherited::dump_state ();
 }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
 void
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::crunch ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::crunch"));
@@ -230,10 +230,10 @@ HTTP_Message_T<//AllocatorConfigurationType,
   } while (true);
 }
 
-template <//typename AllocatorConfigurationType,
+template <typename RecordType,
           typename MessageType>
 ACE_Message_Block*
-HTTP_Message_T<//AllocatorConfigurationType,
+HTTP_Message_T<RecordType,
                MessageType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::duplicate"));

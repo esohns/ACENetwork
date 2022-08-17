@@ -141,8 +141,8 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
     //} // end IF
 
     // step2: stop/abort(/wait) for connections
-    UPnP_Client_IConnectionManager_t* iconnection_manager_p =
-        UPNP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+    UPnP_Client_I_SSDP_ConnectionManager_t* iconnection_manager_p =
+        UPNP_CLIENT_SSDP_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
     iconnection_manager_p->stop (false, // wait ?
                                  true); // high priority ?
