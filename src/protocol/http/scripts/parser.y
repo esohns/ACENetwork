@@ -305,7 +305,7 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                        $$ = $1 + $2->size ();
                                                        /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
-                                                         ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s(.+)$");
+                                                         ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s*(.*)$");
                                                        std::regex regex (regex_string);
                                                        std::smatch match_results;
                                                        if (!std::regex_match (*$2,
@@ -322,7 +322,7 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                        ACE_ASSERT (!match_results.empty ());
                                                        ACE_ASSERT (match_results[1].matched);
                                                        ACE_ASSERT (match_results[2].matched);
-                                                       ACE_ASSERT (!match_results[2].str ().empty ());
+                                                       //ACE_ASSERT (!match_results[2].str ().empty ());
 
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();

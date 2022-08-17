@@ -1422,7 +1422,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                        ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->size ();
                                                        /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
-                                                         ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s(.+)$");
+                                                         ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s*(.*)$");
                                                        std::regex regex (regex_string);
                                                        std::smatch match_results;
                                                        if (!std::regex_match (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval),
@@ -1439,7 +1439,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                        ACE_ASSERT (!match_results.empty ());
                                                        ACE_ASSERT (match_results[1].matched);
                                                        ACE_ASSERT (match_results[2].matched);
-                                                       ACE_ASSERT (!match_results[2].str ().empty ());
+                                                       //ACE_ASSERT (!match_results[2].str ().empty ());
 
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();

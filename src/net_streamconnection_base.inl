@@ -1643,6 +1643,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
      }
    } // end SWITCH
 
+   // *TODO*: is this necessary at all ? *NOTE*: inherited::handle_close calls handle_close
    if (is_udp_write_only_b)
      handle_close (inherited2::state_.handle,
                    ACE_Event_Handler::ALL_EVENTS_MASK);

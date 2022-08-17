@@ -851,6 +851,16 @@ idle_update_info_display_cb (gpointer userData_in)
           is_session_message = true;
           break;
         }
+        case COMMON_UI_EVENT_STEP:
+        {
+          spin_button_p =
+              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          is_session_message = true;
+          break;
+        }
         default:
         {
           ACE_DEBUG ((LM_ERROR,

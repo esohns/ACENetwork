@@ -280,6 +280,13 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
       break;
     }
+    case STREAM_SESSION_MESSAGE_STEP:
+    {
+#if defined (GTK_USE)
+      event_e = COMMON_UI_EVENT_STEP;
+#endif // GTK_USE
+      break;
+    }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
