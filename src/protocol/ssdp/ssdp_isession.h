@@ -48,7 +48,8 @@ class SSDP_ISession_T
   // *TODO*: make these 'private'
 
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void notify (const struct HTTP_Record&) = 0; // SSDP response record
+  virtual void notifySSDPResponse (const struct HTTP_Record&) = 0; // SSDP response record
+  virtual void notifyServiceControlURI (const std::string&) = 0; // service control URI
 };
 
 #endif

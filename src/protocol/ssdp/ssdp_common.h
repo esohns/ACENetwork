@@ -26,7 +26,8 @@
 
 struct SSDP_SessionState
 {
-  std::vector<std::string> services;
+  std::string deviceDescriptionURL;
+  std::string serviceControlURL;
 };
 
 #endif

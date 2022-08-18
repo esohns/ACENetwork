@@ -57,7 +57,8 @@ class SSDP_Session_T
   ACE_UNIMPLEMENTED_FUNC (SSDP_Session_T& operator= (const SSDP_Session_T&))
 
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void notify (const struct HTTP_Record&); // SSDP response record
+  virtual void notifySSDPResponse (const struct HTTP_Record&); // SSDP response record
+  virtual void notifyServiceControlURI (const std::string&); // service control URI
 
   ConnectionConfigurationType* configuration_;
   HTTP_IConnection_t*          connection_;

@@ -118,6 +118,9 @@ SSDP_Session_T<StateType,
 {
   NETWORK_TRACE (ACE_TEXT ("SSDP_Session_T::getDeviceDescription"));
 
+  // step0: remember device description URL
+  state_.deviceDescriptionURL = URL_in;
+
   // step1: parse URL, update configuration
   std::string hostname_string, URI_string;
   bool use_SSL_b = false;
@@ -296,9 +299,9 @@ SSDP_Session_T<StateType,
                ConnectionManagerType,
                MessageType,
                ConnectorType,
-               UserData>::notify (const struct HTTP_Record& record_in)
+               UserData>::notifySSDPResponse (const struct HTTP_Record& record_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("SSDP_Session_T::notify"));
+  NETWORK_TRACE (ACE_TEXT ("SSDP_Session_T::notifySSDPResponse"));
 
   HTTP_HeadersConstIterator_t iterator =
     record_in.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_LOCATION_STRING));
@@ -310,4 +313,47 @@ SSDP_Session_T<StateType,
   if (!ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_ST_ROOT_DEVICE_STRING),
                        (*iterator_2).second.c_str ()))
     getDeviceDescription ((*iterator).second);
+}
+
+template <typename StateType,
+          typename ConnectionConfigurationType,
+          typename ConnectionManagerType,
+          typename MessageType,
+          typename ConnectorType,
+          typename UserData>
+void
+SSDP_Session_T<StateType,
+               ConnectionConfigurationType,
+               ConnectionManagerType,
+               MessageType,
+               ConnectorType,
+               UserData>::notifyServiceControlURI (const std::string& serviceControlURI_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("SSDP_Session_T::notifyServiceControlURI"));
+
+  // sanity check(s)
+  ACE_ASSERT (!state_.deviceDescriptionURL.empty ());
+
+  // step1: parse URL, update configuration
+  ACE_INET_Addr address;
+  std::string hostname_string, URI_string;
+  bool use_SSL_b = false;
+  if (unlikely (!HTTP_Tools::parseURL (state_.deviceDescriptionURL,
+                                       configuration_->socketConfiguration.address,
+                                       hostname_string,
+                                       URI_string,
+                                       use_SSL_b)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+               ACE_TEXT (state_.deviceDescriptionURL.c_str ())));
+    return;
+  } // end IF
+
+  state_.serviceControlURL = ACE_TEXT_ALWAYS_CHAR ("http");
+  if (use_SSL_b)
+    state_.serviceControlURL += ACE_TEXT_ALWAYS_CHAR ("s");
+  state_.serviceControlURL += ACE_TEXT_ALWAYS_CHAR ("://");
+  state_.serviceControlURL += hostname_string;
+  state_.serviceControlURL += serviceControlURI_in;
 }

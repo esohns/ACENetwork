@@ -30,7 +30,7 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
-#include "stream_module_htmlparser.h"
+#include "stream_module_xmlparser.h"
 #include "stream_module_xpathquery.h"
 
 //#include "stream_misc_dump.h"
@@ -168,15 +168,15 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
 //                                                      struct UPnP_Client_SessionData,
 //                                                      UPnP_Client_SessionData_t> UPnP_Client_Module_StatisticReport_WriterTask_t;
 
-typedef Stream_Module_HTMLParser_T<ACE_MT_SYNCH,
-                                   Common_TimePolicy_t,
-                                   struct UPnP_Client_ModuleHandlerConfiguration,
-                                   Stream_ControlMessage_t,
-                                   Test_U_Message,
-                                   Test_U_SessionMessage,
-                                   UPnP_Client_SessionData_t,
-                                   struct UPnP_Client_SessionData,
-                                   struct Stream_Module_HTMLParser_SAXParserContextBase> UPnP_Client_XMLParser;
+typedef Stream_Module_XMLParser_T<ACE_MT_SYNCH,
+                                  Common_TimePolicy_t,
+                                  struct UPnP_Client_ModuleHandlerConfiguration,
+                                  Stream_ControlMessage_t,
+                                  Test_U_Message,
+                                  Test_U_SessionMessage,
+                                  UPnP_Client_SessionData_t,
+                                  struct UPnP_Client_SessionData,
+                                  struct Stream_Module_XMLParser_SAXParserContextBase> UPnP_Client_XMLParser;
 
 typedef Stream_Module_XPathQuery_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
@@ -257,7 +257,7 @@ DATASTREAM_MODULE_DUPLEX (struct UPnP_Client_SessionData,                // sess
 DATASTREAM_MODULE_INPUT_ONLY (struct UPnP_Client_SessionData,                  // session data type
                               enum Stream_SessionMessageType,                  // session event type
                               struct UPnP_Client_ModuleHandlerConfiguration,   // module handler configuration type
-                              libacestream_default_html_parser_module_name_string,
+                              libacestream_default_xml_parser_module_name_string,
                               Stream_INotify_t,                                // stream notification interface type
                               UPnP_Client_XMLParser);                          // writer type
 

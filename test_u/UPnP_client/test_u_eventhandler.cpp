@@ -178,7 +178,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_->session);
-  CBData_->session->notify (record_r);
+  CBData_->session->notifySSDPResponse (record_r);
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -414,7 +414,7 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     const_cast<UPnP_Client_MessageData_t&> (message_in.getR ());
   struct UPnP_Client_MessageData& data_r =
     const_cast<struct UPnP_Client_MessageData&> (data_container_r.getR ());
-  ACE_ASSERT (data_r.HTMLDocument);
+  ACE_ASSERT (data_r.document);
   ACE_ASSERT (data_r.xPathObject);
   if (!data_r.xPathObject->nodesetval ||
       !data_r.xPathObject->nodesetval->nodeNr)
@@ -426,12 +426,12 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_->session);
-  CBData_->session->getServiceDescription ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children[0].content);
+  CBData_->session->notifyServiceControlURI ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children[0].content);
 #endif // GUI_SUPPORT
 
 continue_:
   xmlXPathFreeObject (data_r.xPathObject); data_r.xPathObject = NULL;
-  xmlFreeDoc (data_r.HTMLDocument); data_r.HTMLDocument = NULL;
+  xmlFreeDoc (data_r.document); data_r.document = NULL;
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)

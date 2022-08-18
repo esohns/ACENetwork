@@ -93,7 +93,6 @@ SSDP_Module_Streamer_T<ACE_SYNCH_USE,
   typename DataMessageType::DATA_T::DATA_T& data_r =
         const_cast<typename DataMessageType::DATA_T::DATA_T&> (data_container_r.getR ());
   std::string buffer;
-  bool is_request = true;
   std::ostringstream converter;
   HTTP_HeadersIterator_t iterator;
   std::string content_buffer;

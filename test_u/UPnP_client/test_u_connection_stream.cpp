@@ -166,7 +166,7 @@ Test_U_HTTP_ConnectionStream::load (Stream_ILayout* layout_inout,
   //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   UPnP_Client_XMLParser_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (MODULE_HTML_PARSER_DEFAULT_NAME_STRING)),
+                                                ACE_TEXT_ALWAYS_CHAR (MODULE_XML_PARSER_DEFAULT_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
