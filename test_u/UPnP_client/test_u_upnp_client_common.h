@@ -60,6 +60,8 @@
 #include "stream_messageallocatorheap_base.h"
 #include "stream_session_data.h"
 
+#include "stream_html_common.h"
+
 #include "stream_module_htmlparser.h"
 
 #include "net_defines.h"
@@ -83,6 +85,15 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
 
+struct UPnP_Client_AllocatorConfiguration
+ : Common_Parser_FlexAllocatorConfiguration
+{
+  UPnP_Client_AllocatorConfiguration ()
+   : Common_Parser_FlexAllocatorConfiguration ()
+  {
+    defaultBufferSize = STREAM_MESSAGE_DEFAULT_DATA_BUFFER_SIZE;
+  }
+};
 
 struct UPnP_Client_MessageData
  : HTTP_Record
@@ -90,17 +101,21 @@ struct UPnP_Client_MessageData
   UPnP_Client_MessageData ()
    : HTTP_Record ()
    , HTMLDocument (NULL)
+   , xPathObject (NULL)
   {}
 
   virtual ~UPnP_Client_MessageData ()
   {
     if (HTMLDocument)
       xmlFreeDoc (HTMLDocument);
+    if (xPathObject)
+      xmlXPathFreeObject (xPathObject);
   }
   inline void operator= (const struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); }
   inline void operator+= (struct UPnP_Client_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-  xmlDocPtr HTMLDocument;
+  xmlDocPtr         HTMLDocument;
+  xmlXPathObjectPtr xPathObject;
 };
 typedef Stream_DataBase_T<struct UPnP_Client_MessageData> UPnP_Client_MessageData_t;
 
@@ -116,7 +131,6 @@ struct UPnP_Client_SessionData
    , connection (NULL) // outbound
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
    , parserContext (NULL)
-   , xPathObject (NULL)
   {}
   struct UPnP_Client_SessionData& operator= (const struct UPnP_Client_SessionData& rhs_in)
   {
@@ -130,7 +144,6 @@ struct UPnP_Client_SessionData
   enum Stream_Decoder_CompressionFormatType             format;
   UPnP_Client_IConnection_t*                            connection; // RELEASE
   struct Stream_Module_HTMLParser_SAXParserContextBase* parserContext;
-  xmlXPathObjectPtr                                     xPathObject;
 };
 typedef Stream_SessionData_T<struct UPnP_Client_SessionData> UPnP_Client_SessionData_t;
 
@@ -173,10 +186,10 @@ struct UPnP_Client_ModuleHandlerConfiguration
    , connection (NULL)
    , connectionConfigurations (NULL)
    , mode (STREAM_MODULE_HTMLPARSER_MODE_DOM)
-   //, streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-   , xPathQueryString()
+   , xPathQueryString ()
+   , xPathNameSpaces ()
   {
     inbound = true;
     passive = false;
@@ -185,10 +198,10 @@ struct UPnP_Client_ModuleHandlerConfiguration
   UPnP_Client_IConnection_t*         connection; // UDP target/net IO module
   Net_ConnectionConfigurations_t*    connectionConfigurations;
   enum Stream_Module_HTMLParser_Mode mode;
-  //UPnP_Client_StreamConfiguration_t* streamConfiguration; // PCP discover module
   UPnP_Client_ISessionNotify_t*      subscriber;
   UPnP_Client_Subscribers_t*         subscribers;
   std::string                        xPathQueryString;
+  Stream_HTML_XPathNameSpaces_t      xPathNameSpaces;
 };
 
 struct UPnP_Client_StreamConfiguration
@@ -253,9 +266,11 @@ struct UPnP_Client_Configuration
    : Test_U_Configuration ()
 #endif // GUI_SUPPORT
    , allocatorConfiguration ()
+   , allocatorConfiguration_2 ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , parserConfiguration ()
+   , parserConfiguration_2 ()
    , parserContext()
    , streamConfiguration ()
    , streamConfiguration_2 ()
@@ -266,13 +281,15 @@ struct UPnP_Client_Configuration
     parserConfiguration.headerOnly = true; // SSDP is header-only HTTP
   }
 
-  struct Common_Parser_FlexAllocatorConfiguration      allocatorConfiguration;
+  struct Common_Parser_FlexAllocatorConfiguration      allocatorConfiguration; // SSDP/HTTP-
+  struct UPnP_Client_AllocatorConfiguration            allocatorConfiguration_2; // XML-
   // **************************** signal data **********************************
   struct UPnP_Client_SignalHandlerConfiguration        signalHandlerConfiguration;
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t                       connectionConfigurations;
   // **************************** parser data **********************************
   struct HTTP_ParserConfiguration                      parserConfiguration; // SSDP/HTTP-
+  struct HTTP_ParserConfiguration                      parserConfiguration_2; // XML-
   struct Stream_Module_HTMLParser_SAXParserContextBase parserContext; // XML-
   // **************************** stream data **********************************
   UPnP_Client_StreamConfiguration_t                    streamConfiguration; // SSDP/HTTP-
@@ -317,6 +334,7 @@ struct UPnP_Client_UI_CBData
    , progressData ()
    , session (NULL)
    , subscribers ()
+   , subscribers_2 ()
   {}
 
   struct UPnP_Client_Configuration*  configuration;
@@ -326,6 +344,7 @@ struct UPnP_Client_UI_CBData
   struct UPnP_Client_UI_ProgressData progressData;
   SSDP_ISession_t*                   session;
   UPnP_Client_Subscribers_t          subscribers;
+  UPnP_Client_Subscribers_t          subscribers_2;
 };
 
 struct UPnP_Client_ThreadData

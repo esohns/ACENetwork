@@ -770,6 +770,8 @@ do_work (//bool requestBroadcastReplies_in,
   stream_configuration.printFinalReport = true;
   struct UPnP_Client_StreamConfiguration stream_configuration_2;
   stream_configuration_2 = stream_configuration;
+  stream_configuration_2.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration_2;
   stream_configuration_2.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler_2
                                        : NULL);
@@ -800,7 +802,20 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   modulehandler_configuration_2 = modulehandler_configuration;
+  modulehandler_configuration_2.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration_2;
+  modulehandler_configuration_2.parserConfiguration =
+    &configuration_in.parserConfiguration_2;
+#if defined (GUI_SUPPORT)
   modulehandler_configuration_2.subscriber = &ui_event_handler_2;
+  modulehandler_configuration_2.subscribers = &CBData_in.subscribers_2;
+  ACE_SYNCH_RECURSIVE_MUTEX subscribers_lock_2;
+  modulehandler_configuration_2.lock = &subscribers_lock_2; // prevent deadlocks
+#endif // GUI_SUPPORT
+  modulehandler_configuration_2.xPathQueryString =
+    ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_MANAGEABLEDEVICE_STRING);
+  modulehandler_configuration_2.xPathNameSpaces.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING),
+                                                                           ACE_TEXT_ALWAYS_CHAR (UPNP_XML_DEVICE_ROOT_NAMESPACE_STRING)));
 
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
@@ -841,7 +856,7 @@ do_work (//bool requestBroadcastReplies_in,
                                                                     &connection_configuration_inbound_multicast));
 
   connection_configuration_http.allocatorConfiguration =
-    &configuration_in.allocatorConfiguration;
+    &configuration_in.allocatorConfiguration_2;
   connection_configuration_http.socketConfiguration.interfaceIdentifier =
     interface_identifier;
   connection_configuration_http.socketConfiguration.reuseAddress = true;
@@ -979,22 +994,22 @@ do_work (//bool requestBroadcastReplies_in,
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    UPnP_Client_OutboundConnectorMcast_t connector (true);
-    UPnP_Client_OutboundAsynchConnectorMcast_t asynch_connector (true);
+    UPnP_Client_OutboundConnector_t connector (true);
+    UPnP_Client_OutboundAsynchConnector_t asynch_connector (true);
     if (useReactor_in)
       handle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnectorMcast_t> (connector,
-                                                                                *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
-                                                                                configuration_in.userData,
-                                                                                NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                                true, true);
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (connector,
+                                                                           *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
+                                                                           configuration_in.userData,
+                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
+                                                                           true, true);
     else
       handle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnectorMcast_t> (asynch_connector,
-                                                                                      *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator).second),
-                                                                                      configuration_in.userData,
-                                                                                      NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                                      true, true);
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnector_t> (asynch_connector,
+                                                                                 *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator).second),
+                                                                                 configuration_in.userData,
+                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
+                                                                                 true, true);
     if (unlikely (handle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1011,7 +1026,7 @@ do_work (//bool requestBroadcastReplies_in,
     ACE_ASSERT (iconnection_p);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%u: connected to %s\n"),
-                (*iterator_2).second.second->connection->id (),
+                iconnection_p->id (),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -1300,6 +1315,7 @@ ACE_TMAIN (int argc_in,
   // start profile timer...
   process_profile.start ();
 
+  xmlInitParser ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Common_Tools::initialize (false,  // COM ?
                             true);  // RNG ?
@@ -1761,6 +1777,7 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_mask);
   Common_Log_Tools::finalizeLogging ();
   Common_Tools::finalize ();
+  xmlCleanupParser ();
 
   // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

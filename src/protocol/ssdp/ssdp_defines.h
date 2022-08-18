@@ -34,8 +34,9 @@
 #define SSDP_DISCOVER_MX_HEADER_STRING           "MX" // seconds to delay response
 
 #define SSDP_DISCOVER_S_HEADER_PREFIX_STRING     "uuid::"
-#define SSDP_DISCOVER_MAN_SSDP_DISCOVER_STRING   "\"ssdp:discover\""
+#define SSDP_DISCOVER_MAN_SSDP_DISCOVER_STRING   "ssdp:discover"
 #define SSDP_DISCOVER_ST_SSDP_ALL_STRING         "ssdp:all"
+#define SSDP_DISCOVER_ST_ROOT_DEVICE_STRING      "upnp:rootdevice"
 #define SSDP_DISCOVER_MX_DEFAULT_DELAY_S         1 // 1-5
 
 // stream

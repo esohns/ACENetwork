@@ -498,8 +498,9 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   ACE_ASSERT (!match_results_3.empty ());
 
   result =
-      address_out.set ((useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT),
+      address_out.set (port ? port : (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT),
                        match_results[2].str ().c_str (),
+                       1, // encode port number
                        AF_INET);
   if (unlikely (result == -1))
   {

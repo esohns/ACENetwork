@@ -23,6 +23,11 @@
 
 #define UPNP_DEFAULT_CLIENT_PORT                          10101
 
+#define UPNP_XML_DEVICE_ROOT_NAMESPACE_STRING             "urn:schemas-upnp-org:device-1-0"
+
+#define UPNP_CLIENT_XPATH_QUERY_MANAGEABLEDEVICE_STRING   "/ns:root/ns:device/ns:serviceList/ns:service[ns:serviceId='urn:dslforum-org:serviceId:Layer3Forwarding1']/ns:controlURL"
+#define UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING     "ns"
+
 #define TEST_U_DEFAULT_GTK_RC_FILE                        "resources.rc"
 #if defined (GTK2_USE)
 #define TEST_U_DEFAULT_GLADE_FILE                         "test_u.gtk2"

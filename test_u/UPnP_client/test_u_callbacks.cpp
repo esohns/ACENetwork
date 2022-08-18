@@ -1055,8 +1055,11 @@ action_discovery_activate_cb (GtkAction* action_in,
                                             UUID_string));
   record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
                                             Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST((*iterator_2).second)->socketConfiguration.peerAddress, false, false)));
+  std::string temp_string = "\"";
+  temp_string += ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_MAN_SSDP_DISCOVER_STRING);
+  temp_string += "\"";
   record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_MAN_HEADER_STRING),
-                                            ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_MAN_SSDP_DISCOVER_STRING)));
+                                            temp_string));
   record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_SERVICE_TYPE_HEADER_STRING),
                                             ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_ST_SSDP_ALL_STRING)));
   std::ostringstream converter;
@@ -1528,18 +1531,18 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->outboundHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnectorMcast_t> (connector_out,
-                                                                                *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                                data_p->configuration->userData,
-                                                                                NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                                true, true);
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (connector_out,
+                                                                           *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                           data_p->configuration->userData,
+                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
+                                                                           true, true);
     else
       data_p->configuration->outboundHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnectorMcast_t> (asynch_connector_out,
-                                                                                      *static_cast<UPnP_Client_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                                      data_p->configuration->userData,
-                                                                                      NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                                      true, true);
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnector_t> (asynch_connector_out,
+                                                                                 *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                                 data_p->configuration->userData,
+                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
+                                                                                 true, true);
     if (unlikely (data_p->configuration->outboundHandle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,

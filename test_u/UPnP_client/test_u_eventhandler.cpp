@@ -410,21 +410,28 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  UPnP_Client_MessageData_t& data_r =
+  UPnP_Client_MessageData_t& data_container_r =
     const_cast<UPnP_Client_MessageData_t&> (message_in.getR ());
-  struct UPnP_Client_MessageData& record_r =
-    const_cast<struct UPnP_Client_MessageData&> (data_r.getR ());
+  struct UPnP_Client_MessageData& data_r =
+    const_cast<struct UPnP_Client_MessageData&> (data_container_r.getR ());
+  ACE_ASSERT (data_r.HTMLDocument);
+  ACE_ASSERT (data_r.xPathObject);
+  if (!data_r.xPathObject->nodesetval ||
+      !data_r.xPathObject->nodesetval->nodeNr)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("no xpath data, continuing\n")));
+    goto continue_;
+  } // end IF
 
-//#if defined (GUI_SUPPORT)
-//  struct HTTP_Record* record_p = NULL;
-//  ACE_NEW_NORETURN (record_p,
-//                    struct HTTP_Record);
-//  ACE_ASSERT (record_p);
-//  *record_p = record_r;
-//  HTTP_Tools::clear (record_r); // remove any references to dynamic data
-//  ACE_ASSERT (CBData_->session);
-//  CBData_->session->notify (record_p);
-//#endif // GUI_SUPPORT
+#if defined (GUI_SUPPORT)
+  ACE_ASSERT (CBData_->session);
+  CBData_->session->getServiceDescription ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children[0].content);
+#endif // GUI_SUPPORT
+
+continue_:
+  xmlXPathFreeObject (data_r.xPathObject); data_r.xPathObject = NULL;
+  xmlFreeDoc (data_r.HTMLDocument); data_r.HTMLDocument = NULL;
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)

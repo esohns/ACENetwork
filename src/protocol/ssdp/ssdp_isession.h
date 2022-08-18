@@ -25,6 +25,8 @@
 
 #include "common_iget.h"
 
+#include "http_common.h"
+
 template <typename StateType,
           typename ConnectionConfigurationType,
           typename UserData>

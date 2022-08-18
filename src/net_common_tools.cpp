@@ -4690,7 +4690,7 @@ Net_Common_Tools::makeUUID ()
     Net_Common_Tools::interfaceToLinkLayerAddress (interface_identifier);
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-  std::string interface_identifier;
+  std::string interface_identifier =
     Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   ether_addr_s =
     Net_Common_Tools::interfaceToLinkLayerAddress (interface_identifier);

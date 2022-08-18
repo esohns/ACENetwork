@@ -465,9 +465,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
     //         shutting down the message queue
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOTSOCK)   && // 10038: happens on Win32
-        (error != ECONNRESET) && // 10054: happens on Win32
-        (error != ENOTCONN))     // 10057: happens on Win32
+    if ((error != ENOTSOCK)     && // 10038
+        (error != ECONNABORTED) && // 10053
+        (error != ECONNRESET)   && // 10054
+        (error != ENOTCONN))       // 10057
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Event_Handler::handle_output(0x%@): \"%m\", continuing\n"),
                   inherited2::handle ()));

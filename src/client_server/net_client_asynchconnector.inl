@@ -382,9 +382,11 @@ Net_Client_AsynchConnector_T<HandlerType,
     if (unlikely (result == -1))
     {
       int error = ACE_OS::last_error ();
-      if (error != ETIME)
+      if (unlikely (error != ETIME))
+      {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Condition::wait(): \"%m\", returning\n")));
+      } // end IF
       else
       {
         ACE_DEBUG ((LM_DEBUG,

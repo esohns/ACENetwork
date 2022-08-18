@@ -132,9 +132,15 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     if (unlikely (interface_identifier.empty ()))
 #endif // ACE_WIN32 || ACE_WIN64
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid interface identifier (was: %s), aborting\n"),
+                  ACE_TEXT ("invalid interface identifier (was: \"%s\"), aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("invalid interface identifier (was: \"%s\"), aborting\n"),
+                 ACE_TEXT (interface_identifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
     ACE_INET_Addr gateway_address;
