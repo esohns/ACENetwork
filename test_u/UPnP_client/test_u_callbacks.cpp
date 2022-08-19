@@ -309,19 +309,6 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (HTTP_DEFAULT_SERVER_PORT));
 
-  entry_p =
-      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_REMOTE_PEER_ADDRESS_NAME)));
-  ACE_ASSERT (entry_p);
-  ACE_INET_Addr remote_peer_address = ACE_sap_any_cast(ACE_INET_Addr&);
-  gtk_entry_set_text (entry_p,
-                      Net_Common_Tools::IPAddressToString (remote_peer_address, true, false).c_str ());
-  spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_REMOTE_PEER_PORT_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_value (spin_button_p, 0);
-
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
@@ -541,104 +528,118 @@ idle_initialize_UI_cb (gpointer userData_in)
 }
 
 gboolean
-idle_start_UI_cb (gpointer userData_in)
+idle_discovery_complete_UI_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_start_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_discovery_complete_UI_cb"));
 
   // sanity check(s)
-//  struct UPnP_Client_UI_CBData* data_p =
-//      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p);
-//  Common_UI_GTK_BuildersIterator_t iterator =
-//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  //GtkAction* action_p =
-  //  GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-  //                                      ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_SEND_NAME)));
-  //ACE_ASSERT (action_p);
-  //gtk_action_set_sensitive (action_p, TRUE);
-
-  //GtkFrame* frame_p =
-  //  GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
-  //                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_FRAME_CONFIGURATION_NAME)));
-  //ACE_ASSERT (frame_p);
-  //gtk_widget_set_sensitive (GTK_WIDGET (frame_p), FALSE);
-
-  return G_SOURCE_REMOVE;
-}
-gboolean
-idle_end_UI_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_end_UI_cb"));
-
-  // sanity check(s)
-//  UPnP_Client_UI_CBData* data_p =
-//      static_cast<UPnP_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p);
-//  Common_UI_GTK_BuildersIterator_t iterator =
-//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  //GtkAction* action_p =
-  //  //GTK_SPIN_BUTTON (glade_xml_get_widget ((*iterator).second.second,
-  //  //                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-  //  GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-  //                                      ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_SEND_NAME)));
-  //ACE_ASSERT (action_p);
-  //gtk_action_set_sensitive (action_p, FALSE);
-
-  //GtkFrame* frame_p =
-  //  GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
-  //                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_FRAME_CONFIGURATION_NAME)));
-  //ACE_ASSERT (frame_p);
-  //gtk_widget_set_sensitive (GTK_WIDGET (frame_p), TRUE);
-
-  return G_SOURCE_REMOVE;
-}
-
-gboolean
-idle_reset_UI_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_reset_UI_cb"));
-
-  // sanity check(s)
-  ACE_ASSERT (userData_in);
   struct UPnP_Client_UI_CBData* data_p =
       static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
+  ACE_ASSERT (data_p);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkAction* action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_DISCOVERY_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, FALSE);
 
-  GtkSpinButton* spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_value (spin_button_p, 0.0);
-  spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_value (spin_button_p, 0.0);
-  spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_value (spin_button_p, 0.0);
+  return G_SOURCE_REMOVE;
+}
 
+gboolean
+idle_service_description_complete_UI_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_service_description_complete_UI_cb"));
+
+  // sanity check(s)
+  struct UPnP_Client_UI_CBData* data_p =
+      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkAction* action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_MAP_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_end_session_UI_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_UI_cb"));
+
+  // sanity check(s)
+  UPnP_Client_UI_CBData* data_p =
+      static_cast<UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
-  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-    data_p->progressData.transferred = 0;
-  } // end lock scope
+  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
+
+  ACE_ASSERT (data_p->progressData.eventSourceId > 0);
+  if (!g_source_remove (data_p->progressData.eventSourceId))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_source_remove(%u), continuing\n")));
+  data_p->progressData.eventSourceId = 0;
 
   return G_SOURCE_REMOVE;
 }
+
+//gboolean
+//idle_reset_UI_cb (gpointer userData_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::idle_reset_UI_cb"));
+//
+//  // sanity check(s)
+//  ACE_ASSERT (userData_in);
+//  struct UPnP_Client_UI_CBData* data_p =
+//      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p->UIState);
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+//
+//  GtkSpinButton* spin_button_p =
+//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
+//  ACE_ASSERT (spin_button_p);
+//  gtk_spin_button_set_value (spin_button_p, 0.0);
+//  spin_button_p =
+//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
+//  ACE_ASSERT (spin_button_p);
+//  gtk_spin_button_set_value (spin_button_p, 0.0);
+//  spin_button_p =
+//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
+//  ACE_ASSERT (spin_button_p);
+//  gtk_spin_button_set_value (spin_button_p, 0.0);
+//
+//  GtkProgressBar* progress_bar_p =
+//    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+//                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
+//  ACE_ASSERT (progress_bar_p);
+//  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+//
+//  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+//    data_p->progressData.transferred = 0;
+//  } // end lock scope
+//
+//  return G_SOURCE_REMOVE;
+//}
 
 gboolean
 idle_update_progress_cb (gpointer userData_in)
@@ -653,14 +654,13 @@ idle_update_progress_cb (gpointer userData_in)
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->state->builders.end ());
-
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  ACE_TCHAR buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   int result = -1;
   float speed = 0.0F;
 
@@ -680,14 +680,14 @@ idle_update_progress_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer, ACE_TEXT ("%.2f %s"),
+    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
                               speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
   } // end IF
   gtk_progress_bar_set_text (progress_bar_p,
-                             ACE_TEXT_ALWAYS_CHAR (buffer));
+                             ACE_TEXT_ALWAYS_CHAR (buffer_a));
   gtk_progress_bar_pulse (progress_bar_p);
 
   // --> reschedule
@@ -706,11 +706,6 @@ idle_finalize_UI_cb (gpointer userData_in)
   struct UPnP_Client_UI_CBData* data_p =
     static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
-
-  //if (data_p->session)
-  //{
-  //  delete data_p->session; data_p->session = NULL;
-  //} // end IF
 
   UPnP_Client_SSDP_ConnectionManager_t* connection_manager_p =
     UPNP_CLIENT_SSDP_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -798,21 +793,21 @@ idle_update_info_display_cb (gpointer userData_in)
         }
         case COMMON_UI_EVENT_STARTED:
         {
-          spin_button_p =
-              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
-          ACE_ASSERT (spin_button_p);
-          gtk_spin_button_set_value (spin_button_p, 0.0);
-          spin_button_p =
-              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
-          ACE_ASSERT (spin_button_p);
-          gtk_spin_button_set_value (spin_button_p, 0.0);
-          spin_button_p =
-              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
-          ACE_ASSERT (spin_button_p);
-          gtk_spin_button_set_value (spin_button_p, 0.0);
+          //spin_button_p =
+          //    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+          //                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
+          //ACE_ASSERT (spin_button_p);
+          //gtk_spin_button_set_value (spin_button_p, 0.0);
+          //spin_button_p =
+          //    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+          //                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
+          //ACE_ASSERT (spin_button_p);
+          //gtk_spin_button_set_value (spin_button_p, 0.0);
+          //spin_button_p =
+          //    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+          //                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
+          //ACE_ASSERT (spin_button_p);
+          //gtk_spin_button_set_value (spin_button_p, 0.0);
 
           spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -903,11 +898,7 @@ idle_update_log_display_cb (gpointer userData_in)
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
       data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-
   GtkTextView* view_p =
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TEXTVIEW_NAME)));
@@ -920,34 +911,37 @@ idle_update_log_display_cb (gpointer userData_in)
                                 &text_iterator);
 
   gchar* string_p = NULL;
-  // sanity check
-  if (data_p->UIState->logStack.empty ())
-    return G_SOURCE_CONTINUE;
 
-  // step1: convert text
-  for (Common_MessageStackConstIterator_t iterator_2 = data_p->UIState->logStack.begin ();
-       iterator_2 != data_p->UIState->logStack.end ();
-       iterator_2++)
-  {
-    string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
-    if (!string_p)
+  // sanity check(s)
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+    if (data_p->UIState->logStack.empty ())
+      return G_SOURCE_CONTINUE;
+
+    // step1: convert text
+    for (Common_MessageStackConstIterator_t iterator_2 = data_p->UIState->logStack.begin ();
+         iterator_2 != data_p->UIState->logStack.end ();
+         iterator_2++)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
-                  ACE_TEXT ((*iterator_2).c_str ())));
-      return G_SOURCE_REMOVE;
-    } // end IF
+      string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
+      if (!string_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
+                    ACE_TEXT ((*iterator_2).c_str ())));
+        return G_SOURCE_REMOVE;
+      } // end IF
 
-    // step2: display text
-    gtk_text_buffer_insert (buffer_p,
-                            &text_iterator,
-                            string_p,
-                            -1);
+      // step2: display text
+      gtk_text_buffer_insert (buffer_p,
+                              &text_iterator,
+                              string_p,
+                              -1);
 
-    g_free (string_p); string_p = NULL;
-  } // end FOR
+      g_free (string_p); string_p = NULL;
+    } // end FOR
 
-  data_p->UIState->logStack.clear ();
+    data_p->UIState->logStack.clear ();
+  } // end lock scope
 
   // step3: scroll the view accordingly
 //  // move the iterator to the beginning of line, so it doesn't scroll
@@ -982,39 +976,6 @@ idle_update_log_display_cb (gpointer userData_in)
 extern "C"
 {
 #endif /* __cplusplus */
-//void
-//action_announce_activate_cb (GtkAction* action_in,
-//                             gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::action_announce_activate_cb"));
-//
-//  ACE_UNUSED_ARG (action_in);
-//
-//  // sanity check(s)
-//  ACE_ASSERT (userData_in);
-//  struct UPnP_Client_UI_CBData* data_p =
-//    static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p->configuration);
-//  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
-//  Common_UI_GTK_BuildersIterator_t iterator =
-//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-//
-//  // retrieve port number
-//  GtkSpinButton* spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  Net_ConnectionConfigurationsIterator_t iterator_3 =
-//    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-//  ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
-//  NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
-//                                                                                                      1); // encode
-//
-//  //ACE_ASSERT (data_p->session);
-//  //data_p->session->announce ();
-//} // action_announce_activate_cb
-
 void
 action_discovery_activate_cb (GtkAction* action_in,
                               gpointer userData_in)
@@ -1122,225 +1083,101 @@ allocate:
   iconnection_p->decrease (); iconnection_p = NULL;
 } // action_discovery_activate_cb
 
-//void
-//action_map_activate_cb (GtkAction* action_in,
-//                        gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::action_map_activate_cb"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (userData_in);
-//  struct UPnP_Client_UI_CBData* data_p =
-//      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p->configuration);
-//  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
-//  ACE_ASSERT (data_p->UIState);
-//  Common_UI_GTK_BuildersIterator_t iterator =
-//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-//
-//  // retrieve data
-//  GtkSpinButton* spin_button_p =
-//      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_EXTERNAL_PORT_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  GtkEntry* entry_p =
-//      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-//                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_EXTERNAL_ADDRESS_NAME)));
-//  ACE_ASSERT (entry_p);
-//  std::string address = gtk_entry_get_text (entry_p);
-//  address += ':';
-//  std::ostringstream converter;
-//  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-//  address += converter.str ();
-//  ACE_INET_Addr external_address;
-//  int result = external_address.set (address.c_str ());
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-//                ACE_TEXT (address.c_str ())));
-//    return;
-//  } // end IF
-//
-//  spin_button_p =
-//      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_INTERNAL_PORT_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  entry_p =
-//      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-//                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_INTERNAL_ADDRESS_NAME)));
-//    ACE_ASSERT (entry_p);
-//  address = gtk_entry_get_text (entry_p);
-//  address += ':';
-//  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-//  converter.clear ();
-//  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-//  address += converter.str ();
-//  ACE_INET_Addr internal_address;
-//  result = internal_address.set (address.c_str ());
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-//                ACE_TEXT (address.c_str ())));
-//    return;
-//  } // end IF
-//
-//  //ACE_ASSERT (data_p->session);
-//  //data_p->session->map (external_address,
-//  //                      internal_address);
-//} // action_map_activate_cb
+void
+action_map_activate_cb (GtkAction* action_in,
+                        gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::action_map_activate_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct UPnP_Client_UI_CBData* data_p =
+      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  // retrieve data
+  GtkSpinButton* spin_button_p =
+      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_EXTERNAL_PORT_NAME)));
+  ACE_ASSERT (spin_button_p);
+  GtkEntry* entry_p =
+      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_EXTERNAL_ADDRESS_NAME)));
+  ACE_ASSERT (entry_p);
+  std::string address = gtk_entry_get_text (entry_p);
+  address += ':';
+  std::ostringstream converter;
+  converter << gtk_spin_button_get_value_as_int (spin_button_p);
+  address += converter.str ();
+  ACE_INET_Addr external_address;
+  int result = external_address.set (address.c_str ());
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT (address.c_str ())));
+    return;
+  } // end IF
+
+  spin_button_p =
+      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_INTERNAL_PORT_NAME)));
+  ACE_ASSERT (spin_button_p);
+  entry_p =
+      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_INTERNAL_ADDRESS_NAME)));
+    ACE_ASSERT (entry_p);
+  address = gtk_entry_get_text (entry_p);
+  address += ':';
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << gtk_spin_button_get_value_as_int (spin_button_p);
+  address += converter.str ();
+  ACE_INET_Addr internal_address;
+  result = internal_address.set (address.c_str ());
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT (address.c_str ())));
+    return;
+  } // end IF
+
+  ACE_ASSERT (data_p->control);
+  data_p->control->getP ()->map (external_address,
+                                 internal_address);
+} // action_map_activate_cb
 
 //void
-//action_peer_activate_cb (GtkAction* action_in,
-//                         gpointer userData_in)
+//action_report_activate_cb (GtkAction* action_in,
+//                           gpointer userData_in)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("::action_peer_activate_cb"));
+//  NETWORK_TRACE (ACE_TEXT ("::action_report_activate_cb"));
 //
 //  ACE_UNUSED_ARG (action_in);
+//  ACE_UNUSED_ARG (userData_in);
 //
-//  // sanity check(s)
-//  ACE_ASSERT (userData_in);
-//  struct UPnP_Client_UI_CBData* data_p =
-//    static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p->configuration);
-//  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
-//  Common_UI_GTK_BuildersIterator_t iterator =
-//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+//  int result = -1;
 //
-//  // update server port/address
-//  GtkSpinButton* spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  GtkEntry* entry_p =
-//    GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-//                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_SERVER_ADDRESS_NAME)));
-//  ACE_ASSERT (entry_p);
-//  std::string address = gtk_entry_get_text (entry_p);
-//  address += ':';
-//  std::ostringstream converter;
-//  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-//  address += converter.str ();
-//  Net_ConnectionConfigurationsIterator_t iterator_3 =
-//    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-//  ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
-//  int result =
-//      NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress.set (address.c_str ());
+//// *PORTABILITY*: on Windows SIGUSRx are not defined
+//// --> use SIGBREAK (21) instead...
+//  int signal = 0;
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  signal = SIGBREAK;
+//#else
+//  signal = SIGUSR1;
+//#endif // ACE_WIN32 || ACE_WIN64
+//  result = ACE_OS::raise (signal);
 //  if (result == -1)
-//  {
 //    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-//                ACE_TEXT (address.c_str ())));
-//    return;
-//  } // end IF
-//
-//  // retrieve data
-//  spin_button_p =
-//      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_EXTERNAL_PORT_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  entry_p =
-//      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-//                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_EXTERNAL_ADDRESS_NAME)));
-//    ACE_ASSERT (entry_p);
-//  address = gtk_entry_get_text (entry_p);
-//  address += ':';
-//  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-//  converter.clear ();
-//  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-//  address += converter.str ();
-//  ACE_INET_Addr external_address;
-//  result = external_address.set (address.c_str ());
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-//                ACE_TEXT (address.c_str ())));
-//    return;
-//  } // end IF
-//
-//  spin_button_p =
-//      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_INTERNAL_PORT_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  entry_p =
-//      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-//                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_INTERNAL_ADDRESS_NAME)));
-//    ACE_ASSERT (entry_p);
-//  address = gtk_entry_get_text (entry_p);
-//  address += ':';
-//  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-//  converter.clear ();
-//  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-//  address += converter.str ();
-//  ACE_INET_Addr internal_address;
-//  result = internal_address.set (address.c_str ());
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-//                ACE_TEXT (address.c_str ())));
-//    return;
-//  } // end IF
-//
-//  spin_button_p =
-//      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_REMOTE_PEER_PORT_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  entry_p =
-//      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-//                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_REMOTE_PEER_ADDRESS_NAME)));
-//    ACE_ASSERT (entry_p);
-//  address = gtk_entry_get_text (entry_p);
-//  address += ':';
-//  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-//  converter.clear ();
-//  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-//  address += converter.str ();
-//  ACE_INET_Addr remote_peer_address;
-//  result = remote_peer_address.set (address.c_str ());
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-//                ACE_TEXT (address.c_str ())));
-//    return;
-//  } // end IF
-//
-//  //ACE_ASSERT (data_p->session);
-//  //data_p->session->peer (external_address,
-//  //                       internal_address,
-//  //                       remote_peer_address);
-//} // action_peer_activate_cb
-
-void
-action_report_activate_cb (GtkAction* action_in,
-                           gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::action_report_activate_cb"));
-
-  ACE_UNUSED_ARG (action_in);
-  ACE_UNUSED_ARG (userData_in);
-
-  int result = -1;
-
-// *PORTABILITY*: on Windows SIGUSRx are not defined
-// --> use SIGBREAK (21) instead...
-  int signal = 0;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  signal = SIGBREAK;
-#else
-  signal = SIGUSR1;
-#endif // ACE_WIN32 || ACE_WIN64
-  result = ACE_OS::raise (signal);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::raise(\"%S\" (%d)): \"%m\", continuing\n"),
-                signal, signal));
-} // action_report_activate_cb
+//                ACE_TEXT ("failed to ACE_OS::raise(\"%S\" (%d)): \"%m\", continuing\n"),
+//                signal, signal));
+//} // action_report_activate_cb
 
 void
 combobox_interface_changed_cb (GtkComboBox* comboBox_in,

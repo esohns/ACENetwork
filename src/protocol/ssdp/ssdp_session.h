@@ -46,11 +46,16 @@ class SSDP_Session_T
 
   // implement SSDP_ISession_T
   inline virtual const StateType& getR () const { return state_; }
-  virtual void initialize (const ConnectionConfigurationType&,
+  virtual void initialize (ACE_UINT16,                         // 'preferred' UPnP server port
+                           const ConnectionConfigurationType&,
                            const UserData&);
 
-  virtual void getDeviceDescription (const std::string&); // device description URL
-  virtual void getServiceDescription (const std::string&); // service description URL
+  virtual void close (); // close all HTTP- connections
+  virtual void wait (); // wait for all HTTP- connections
+  virtual void getURL (const std::string&) const; // device/service description URLs
+
+  virtual void map (const ACE_INET_Addr&,        // external IP/port
+                    const ACE_INET_Addr&) const; // internal IP/port
 
  private:
   ACE_UNIMPLEMENTED_FUNC (SSDP_Session_T (const SSDP_Session_T&))
@@ -58,10 +63,12 @@ class SSDP_Session_T
 
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void notifySSDPResponse (const struct HTTP_Record&); // SSDP response record
-  virtual void notifyServiceControlURI (const std::string&); // service control URI
+  virtual void notifyServiceDescriptionControlURIs (const std::string&,  // service description URI
+                                                    const std::string&); // service control URI
+  virtual void notifyServiceActionArguments(const SSDP_ServiceActionArguments_t&); // service action argument(s)
 
   ConnectionConfigurationType* configuration_;
-  HTTP_IConnection_t*          connection_;
+  ACE_UINT16                   preferredServerPort_;
   StateType                    state_;
   UserData*                    userData_;
 };

@@ -581,10 +581,14 @@ do_work (//bool requestBroadcastReplies_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   CBData_in.progressData.state = &state_r;
+  SSDP_ISession_t* ssdp_isession_p = NULL;
   if (useReactor_in)
-    CBData_in.session = &ssdp_session;
+    ssdp_isession_p = &ssdp_session;
   else
-    CBData_in.session = &asynch_ssdp_session;
+    ssdp_isession_p = &asynch_ssdp_session;
+  SSDP_Control_t ssdp_control (ssdp_isession_p);
+  ssdp_control.start (NULL);
+  CBData_in.control = &ssdp_control;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -675,7 +679,7 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
-  interface_address.set_port_number (UPNP_DEFAULT_CLIENT_PORT,
+  interface_address.set_port_number (UPNP_CLIENT_DEFAULT_PORT,
                                      1);
   ACE_INET_Addr external_address;
   if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
@@ -724,7 +728,7 @@ do_work (//bool requestBroadcastReplies_in,
   connection_configuration_outbound_multicast.socketConfiguration.reuseAddress =
     true;
   connection_configuration_outbound_multicast.socketConfiguration.sourcePort =
-    UPNP_DEFAULT_CLIENT_PORT;
+    UPNP_CLIENT_DEFAULT_PORT;
   connection_configuration_outbound_multicast.socketConfiguration.writeOnly =
     true;
   connection_configuration_outbound_multicast.statisticReportingInterval =
@@ -796,7 +800,6 @@ do_work (//bool requestBroadcastReplies_in,
   //  &configuration_in.streamConfiguration;
 #if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
-  modulehandler_configuration.subscribers = &CBData_in.subscribers;
 #if defined (GTK_USE)
   modulehandler_configuration.lock = &state_r.subscribersLock;
 #endif // GTK_USE
@@ -808,12 +811,11 @@ do_work (//bool requestBroadcastReplies_in,
     &configuration_in.parserConfiguration_2;
 #if defined (GUI_SUPPORT)
   modulehandler_configuration_2.subscriber = &ui_event_handler_2;
-  modulehandler_configuration_2.subscribers = &CBData_in.subscribers_2;
   ACE_SYNCH_RECURSIVE_MUTEX subscribers_lock_2;
   modulehandler_configuration_2.lock = &subscribers_lock_2; // prevent deadlocks
 #endif // GUI_SUPPORT
   modulehandler_configuration_2.xPathQueryString =
-    ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_MANAGEABLEDEVICE_STRING);
+    ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_GATEDESC_STRING);
   modulehandler_configuration_2.xPathNameSpaces.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING),
                                                                            ACE_TEXT_ALWAYS_CHAR (UPNP_XML_DEVICE_ROOT_NAMESPACE_STRING)));
 
@@ -867,9 +869,11 @@ do_work (//bool requestBroadcastReplies_in,
     &configuration_in.streamConfiguration_2;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("HTTP"),
                                                                     &connection_configuration_http));
-  ssdp_session.initialize (connection_configuration_http,
+  ssdp_session.initialize (UPNP_CLIENT_SERVER_PORT, // device-dependent !
+                           connection_configuration_http,
                            configuration_in.userData);
-  asynch_ssdp_session.initialize (connection_configuration_http,
+  asynch_ssdp_session.initialize (UPNP_CLIENT_SERVER_PORT, // device-dependent !
+                                  connection_configuration_http,
                                   configuration_in.userData);
 
   // step0b: initialize event dispatch
@@ -1233,6 +1237,11 @@ do_work (//bool requestBroadcastReplies_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  ssdp_control.stop (true, false);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   timer_manager_p->stop ();
   connection_manager_p->wait ();
   if (!UIDefinitionFileName_in.empty ())

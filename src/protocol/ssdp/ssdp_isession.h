@@ -23,9 +23,13 @@
 
 #include <string>
 
+#include "ace/INET_Addr.h"
+
 #include "common_iget.h"
 
 #include "http_common.h"
+
+#include "ssdp_common.h"
 
 template <typename StateType,
           typename ConnectionConfigurationType,
@@ -36,12 +40,17 @@ class SSDP_ISession_T
  public:
   inline virtual ~SSDP_ISession_T () {}
 
-  virtual void initialize (const ConnectionConfigurationType&, // HTTP-
+  virtual void initialize (ACE_UINT16,                         // 'preferred' UPnP server port
+                           const ConnectionConfigurationType&, // HTTP-
                            const UserData&) = 0;
 
   // API
-  virtual void getDeviceDescription (const std::string&) = 0; // device description URL
-  virtual void getServiceDescription (const std::string&) = 0; // service description URL
+  virtual void close () = 0; // close all HTTP- connections
+  virtual void wait () = 0; // wait for all HTTP- connections
+  virtual void getURL (const std::string&) const = 0; // device/service description URLs
+
+  virtual void map (const ACE_INET_Addr&,            // external IP/port
+                    const ACE_INET_Addr&) const = 0; // internal IP/port
 
   ////////////////////////////////////////
   // callbacks
@@ -49,7 +58,9 @@ class SSDP_ISession_T
 
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void notifySSDPResponse (const struct HTTP_Record&) = 0; // SSDP response record
-  virtual void notifyServiceControlURI (const std::string&) = 0; // service control URI
+  virtual void notifyServiceDescriptionControlURIs (const std::string&,      // service description URI
+                                                    const std::string&) = 0; // service control URI
+  virtual void notifyServiceActionArguments (const SSDP_ServiceActionArguments_t&) = 0; // service action argument(s)
 };
 
 #endif

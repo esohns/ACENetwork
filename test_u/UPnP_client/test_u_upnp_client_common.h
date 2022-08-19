@@ -187,7 +187,6 @@ struct UPnP_Client_ModuleHandlerConfiguration
    , connectionConfigurations (NULL)
    , mode (STREAM_MODULE_XML_PARSER_MODE_DOM)
    , subscriber (NULL)
-   , subscribers (NULL)
    , xPathQueryString ()
    , xPathNameSpaces ()
   {
@@ -199,7 +198,6 @@ struct UPnP_Client_ModuleHandlerConfiguration
   Net_ConnectionConfigurations_t*    connectionConfigurations;
   enum Stream_Module_XML_Parser_Mode mode;
   UPnP_Client_ISessionNotify_t*      subscriber;
-  UPnP_Client_Subscribers_t*         subscribers;
   std::string                        xPathQueryString;
   Stream_HTML_XPathNameSpaces_t      xPathNameSpaces;
 };
@@ -328,23 +326,19 @@ struct UPnP_Client_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE
+   , control (NULL)
    , externalAddress ()
    , gatewayAddress ()
    , interfaceAddress ()
    , progressData ()
-   , session (NULL)
-   , subscribers ()
-   , subscribers_2 ()
   {}
 
   struct UPnP_Client_Configuration*  configuration;
+  SSDP_Control_t*                    control;
   ACE_INET_Addr                      externalAddress;
   ACE_INET_Addr                      gatewayAddress;
   ACE_INET_Addr                      interfaceAddress;
   struct UPnP_Client_UI_ProgressData progressData;
-  SSDP_ISession_t*                   session;
-  UPnP_Client_Subscribers_t          subscribers;
-  UPnP_Client_Subscribers_t          subscribers_2;
 };
 
 struct UPnP_Client_ThreadData

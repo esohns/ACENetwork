@@ -38,7 +38,7 @@
 
 #include "net_macros.h"
 
-#include "http_tools.h"
+#include "http_common.h"
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -46,6 +46,8 @@
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 #include "test_u_defines.h"
+
+#include "test_u_upnp_client_defines.h"
 
 #if defined (GUI_SUPPORT)
 Test_U_EventHandler::Test_U_EventHandler (struct UPnP_Client_UI_CBData* CBData_in)
@@ -88,16 +90,6 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
 //  CBData_->progressData.transferred = 0;
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
-
-  guint event_source_id = g_idle_add (idle_start_UI_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_send_UI_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 }
@@ -138,16 +130,6 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
 
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STOPPED);
-
-  guint event_source_id = g_idle_add (idle_end_UI_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_end_UI_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -177,18 +159,21 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
     const_cast<struct UPnP_Client_MessageData&> (data_r.getR ());
 
 #if defined (GUI_SUPPORT)
-  ACE_ASSERT (CBData_->session);
-  CBData_->session->notifySSDPResponse (record_r);
+  SSDP_StringList_t arguments_a;
+
+  ACE_ASSERT (CBData_->control);
+  CBData_->control->notify (SSDP_EVENT_DISCOVERY_RESPONSE,
+                            record_r,
+                            ACE_TEXT_ALWAYS_CHAR (""),
+                            ACE_TEXT_ALWAYS_CHAR (""),
+                            arguments_a);
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
-
-#if defined (GTK_USE)
   CBData_->progressData.transferred += message_in.total_length ();
-#endif // GTK_USE
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
 #endif // GTK_USE
@@ -297,6 +282,7 @@ Test_U_EventHandler_2::Test_U_EventHandler_2 ()
 #else
  : sessionData_ (NULL)
 #endif // GUI_SUPPORT
+ , state_ (EVENT_HANDLER_STATE_DEVICE)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler_2::Test_U_EventHandler_2"));
 
@@ -327,16 +313,6 @@ Test_U_EventHandler_2::start (Stream_SessionId_t sessionId_in,
 //  CBData_->progressData.transferred = 0;
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
-
-  guint event_source_id = g_idle_add (idle_start_UI_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_send_UI_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 }
@@ -377,16 +353,6 @@ Test_U_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STOPPED);
-
-  guint event_source_id = g_idle_add (idle_end_UI_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_end_UI_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -425,8 +391,151 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   } // end IF
 
 #if defined (GUI_SUPPORT)
-  ACE_ASSERT (CBData_->session);
-  CBData_->session->notifyServiceControlURI ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children[0].content);
+  switch (state_)
+  {
+    case EVENT_HANDLER_STATE_DEVICE:
+    {
+      state_ = EVENT_HANDLER_STATE_SERVICE;
+
+      // update configuration
+      UPnP_Client_StreamConfiguration_t::ITERATOR_T iterator =
+        CBData_->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+      ACE_ASSERT (iterator != CBData_->configuration->streamConfiguration_2.end ());
+      (*iterator).second.second->xPathQueryString =
+        ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_GATECONNSCPD_STRING);
+      (*iterator).second.second->xPathNameSpaces.clear ();
+      (*iterator).second.second->xPathNameSpaces.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING),
+                                                                            ACE_TEXT_ALWAYS_CHAR (UPNP_XML_SERVICE_SCPD_NAMESPACE_STRING)));
+
+      std::string service_description_URI_string, service_control_URI_string;
+      ACE_ASSERT (data_r.xPathObject->nodesetval->nodeNr >= 1);
+      service_description_URI_string =
+        (char*)data_r.xPathObject->nodesetval->nodeTab[0]->children->next->next->children->content;
+      service_control_URI_string =
+        (char*)data_r.xPathObject->nodesetval->nodeTab[0]->children->next->next->next->children->content;
+
+      ACE_ASSERT (CBData_->control);
+      struct HTTP_Record record_s;
+      SSDP_StringList_t arguments_a;
+      CBData_->control->notify (SSDP_EVENT_DEVICE_DESCRIPTION,
+                                record_s,
+                                service_description_URI_string,
+                                service_control_URI_string,
+                                arguments_a);
+
+#if defined (GTK_USE)
+      guint event_source_id = g_idle_add (idle_discovery_complete_UI_cb,
+                                          CBData_);
+      if (event_source_id == 0)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_discovery_complete_UI_cb): \"%m\", returning\n")));
+        return;
+      } // end IF
+      state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+
+      break;
+    }
+    case EVENT_HANDLER_STATE_SERVICE:
+    {
+      state_ = EVENT_HANDLER_STATE_CONTROL;
+
+      // update configuration
+      UPnP_Client_StreamConfiguration_t::ITERATOR_T iterator =
+        CBData_->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+      ACE_ASSERT (iterator != CBData_->configuration->streamConfiguration_2.end ());
+      (*iterator).second.second->xPathQueryString =
+        ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_SOAP_STRING);
+      (*iterator).second.second->xPathNameSpaces.clear ();
+      (*iterator).second.second->xPathNameSpaces.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING),
+                                                                            ACE_TEXT_ALWAYS_CHAR (UPNP_XML_SOAP_NAMESPACE_STRING)));
+
+      SSDP_StringList_t arguments_a;
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("action \"%s\" has these input arguments:\n"),
+                  ACE_TEXT ("AddPortMapping")));
+
+      std::string argument_string, direction_string;
+      for (int i = 0;
+           i < data_r.xPathObject->nodesetval->nodeNr;
+           ++i)
+      {
+        direction_string =
+          (char*)data_r.xPathObject->nodesetval->nodeTab[i]->children->next->children->content;
+        if (ACE_OS::strcmp (direction_string.c_str (),
+                            ACE_TEXT_ALWAYS_CHAR ("in")))
+          continue;
+
+        argument_string =
+          (char*)data_r.xPathObject->nodesetval->nodeTab[i]->children->children->content;
+        arguments_a.push_back (argument_string);
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("argument %u: \"%s\"\n"),
+                    i + 1,
+                    ACE_TEXT (argument_string.c_str ())));
+      } // end FOR
+
+      ACE_ASSERT (CBData_->control);
+      struct HTTP_Record record_s;
+      CBData_->control->notify (SSDP_EVENT_SERVICE_DESCRIPTION,
+                                record_s,
+                                ACE_TEXT_ALWAYS_CHAR (""),
+                                ACE_TEXT_ALWAYS_CHAR (""),
+                                arguments_a);
+
+#if defined (GTK_USE)
+      guint event_source_id = g_idle_add (idle_service_description_complete_UI_cb,
+                                          CBData_);
+      if (event_source_id == 0)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_service_description_complete_UI_cb): \"%m\", returning\n")));
+        return;
+      } // end IF
+      state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+
+      break;
+    }
+    case EVENT_HANDLER_STATE_CONTROL:
+    {
+      // sanity check(s)
+      ACE_ASSERT (data_r.xPathObject->nodesetval->nodeNr == 1);
+
+      if (data_r.status != HTTP_Codes::HTTP_STATUS_OK)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("action failed: fault code: \"%s\" string: \"%s\"; code: \"%s\" description: \"%s\", continuing\n"),
+                    ACE_TEXT ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children->children->children->content),
+                    ACE_TEXT ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children->children->next->children->content),
+                    ACE_TEXT ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children->children->next->next->children->children->children->content),
+                    ACE_TEXT ((char*)data_r.xPathObject->nodesetval->nodeTab[0]->children->children->next->next->children->children->next->children->content)));
+      else
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("action succeeded\n")));
+
+#if defined (GTK_USE)
+      guint event_source_id = g_idle_add (idle_end_session_UI_cb,
+                                          CBData_);
+      if (event_source_id == 0)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_end_session_UI_cb): \"%m\", returning\n")));
+        return;
+      } // end IF
+      state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown state (was: %d), continuing\n"),
+                  state_));
+      break;
+    }
+  } // end SWITCH
 #endif // GUI_SUPPORT
 
 continue_:

@@ -21,12 +21,24 @@
 #ifndef TEST_U_UPNP_CLIENT_DEFINES_H
 #define TEST_U_UPNP_CLIENT_DEFINES_H
 
-#define UPNP_DEFAULT_CLIENT_PORT                          10101
-
+// UPnP
 #define UPNP_XML_DEVICE_ROOT_NAMESPACE_STRING             "urn:schemas-upnp-org:device-1-0"
+#define UPNP_XML_SERVICE_SCPD_NAMESPACE_STRING            "urn:schemas-upnp-org:service-1-0"
+#define UPNP_XML_SOAP_NAMESPACE_STRING                    "http://schemas.xmlsoap.org/soap/envelope/"
 
-#define UPNP_CLIENT_XPATH_QUERY_MANAGEABLEDEVICE_STRING   "/ns:root/ns:device/ns:serviceList/ns:service[ns:serviceId='urn:dslforum-org:serviceId:Layer3Forwarding1']/ns:controlURL"
+#define UPNP_HTTP_SOAP_SOAPACTION_HEADER_STRING           "SOAPACTION"
+
+// UPnP client
+#define UPNP_CLIENT_DEFAULT_PORT                          10101
+#define UPNP_CLIENT_SERVER_PORT                           49600 // *NOTE*: device-dependent :-(
 #define UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING     "ns"
+
+//#define UPNP_CLIENT_XPATH_QUERY_MANAGEABLEDEVICE_STRING   "/ns:root/ns:device/ns:serviceList/ns:service[ns:serviceId='urn:dslforum-org:serviceId:Layer3Forwarding1']/ns:controlURL"
+#define UPNP_CLIENT_XPATH_QUERY_GATEDESC_STRING           "/ns:root/ns:device/ns:deviceList/ns:device/ns:deviceList/ns:device/ns:serviceList/ns:service[ns:serviceId='urn:upnp-org:serviceId:WANIPConn1']"
+#define UPNP_CLIENT_XPATH_QUERY_GATECONNSCPD_STRING       "/ns:scpd/ns:actionList/ns:action[ns:name='AddPortMapping']/ns:argumentList/ns:argument"
+#define UPNP_CLIENT_XPATH_QUERY_SOAP_STRING               "/ns:Envelope/ns:Body"
+
+//----------------------------------------
 
 #define TEST_U_DEFAULT_GTK_RC_FILE                        "resources.rc"
 #if defined (GTK2_USE)
@@ -36,13 +48,11 @@
 #endif // GTK2_USE || GTK3_USE
 #define TEST_U_THREAD_NAME                                "stream processor"
 
-//---------------------------------------
+//----------------------------------------
 
 #define TEST_U_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
-#define TEST_U_UI_GTK_ACTION_ANNOUNCE_NAME                "action_announce"
+#define TEST_U_UI_GTK_ACTION_DISCOVERY_NAME               "action_discovery"
 #define TEST_U_UI_GTK_ACTION_MAP_NAME                     "action_map"
-#define TEST_U_UI_GTK_ACTION_PEER_NAME                    "action_peer"
-#define TEST_U_UI_GTK_ACTION_AUTHENTICATE_NAME            "action_authenticate"
 //#define TEST_U_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"
 #define TEST_U_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
 #define TEST_U_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
@@ -56,7 +66,6 @@
 #define TEST_U_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
 #define TEST_U_UI_GTK_ENTRY_EXTERNAL_ADDRESS_NAME         "entry_external_address"
 #define TEST_U_UI_GTK_ENTRY_INTERNAL_ADDRESS_NAME         "entry_internal_address"
-#define TEST_U_UI_GTK_ENTRY_REMOTE_PEER_ADDRESS_NAME      "entry_remote_peer_address"
 #define TEST_U_UI_GTK_ENTRY_SERVER_ADDRESS_NAME           "entry_server_address"
 #define TEST_U_UI_GTK_HBOX_OPTIONS_NAME                   "hbox_options"
 #define TEST_U_UI_GTK_LISTSTORE_INTERFACE_NAME            "liststore_interface"
@@ -72,7 +81,6 @@
 #define TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME         "spinbutton_server_port"
 #define TEST_U_UI_GTK_SPINBUTTON_EXTERNAL_PORT_NAME       "spinbutton_external_port"
 #define TEST_U_UI_GTK_SPINBUTTON_INTERNAL_PORT_NAME       "spinbutton_internal_port"
-#define TEST_U_UI_GTK_SPINBUTTON_REMOTE_PEER_PORT_NAME    "spinbutton_remote_peer_port"
 #define TEST_U_UI_GTK_STATUSBAR_NAME                      "statusbar"
 //#define TEST_U_UI_GTK_TABLE_OPTIONS_NAME                  "table_options"
 #define TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME            "toggleaction_listen"

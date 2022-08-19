@@ -23,18 +23,15 @@
 
 #include "gtk/gtk.h"
 
-//// thread functions
-//ACE_THR_FUNC_RETURN stream_processing_function (void*);
-
 bool load_network_interfaces (GtkListStore*);
 
 //------------------------------------------------------------------------------
 
 // idle routines
 gboolean idle_initialize_UI_cb (gpointer);
-gboolean idle_start_UI_cb (gpointer);
-gboolean idle_end_UI_cb (gpointer);
-gboolean idle_reset_UI_cb (gpointer);
+gboolean idle_discovery_complete_UI_cb (gpointer);
+gboolean idle_service_description_complete_UI_cb (gpointer);
+gboolean idle_end_session_UI_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 
 /////////////////////////////////////////
@@ -51,19 +48,14 @@ extern "C"
 {
 #endif /* __cplusplus */
 // callbacks
-//G_MODULE_EXPORT void action_announce_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_discovery_activate_cb (GtkAction*, gpointer);
-//G_MODULE_EXPORT void action_map_activate_cb (GtkAction*, gpointer);
-//G_MODULE_EXPORT void action_peer_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_map_activate_cb (GtkAction*, gpointer);
 //G_MODULE_EXPORT void action_report_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void entry_external_address_changed_cb (GtkEntry*, gpointer);
 G_MODULE_EXPORT void entry_internal_address_changed_cb (GtkEntry*, gpointer);
 G_MODULE_EXPORT void entry_remote_peer_address_changed_cb (GtkEntry*, gpointer);
 G_MODULE_EXPORT void entry_server_address_changed_cb (GtkEntry*, gpointer);
-//G_MODULE_EXPORT void spinbutton_external_port_value_changed_cb (GtkSpinButton*, gpointer);
-//G_MODULE_EXPORT void spinbutton_internal_port_value_changed_cb (GtkSpinButton*, gpointer);
-//G_MODULE_EXPORT void spinbutton_remote_peer_port_value_changed_cb (GtkSpinButton*, gpointer);
 G_MODULE_EXPORT void spinbutton_server_port_value_changed_cb (GtkSpinButton*, gpointer);
 G_MODULE_EXPORT void toggleaction_listen_toggled_cb (GtkToggleAction*, gpointer);
 

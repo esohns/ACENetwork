@@ -254,7 +254,6 @@ continue_:
   //    inherited::peer_.send_n (writeBuffer_,        // buffer
   //                             NULL,                // timeout
   //                             &bytes_transferred); // bytes transferred
-  ACE_ASSERT (!inherited::writeBuffer_->cont ());
   bytes_sent =
     inherited::peer_.send_n (inherited::writeBuffer_->rd_ptr (),                    // data
                              static_cast<int> (inherited::writeBuffer_->length ()), // #bytes to send
@@ -321,7 +320,17 @@ continue_:
       inherited::writeBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
       if (unlikely (inherited::writeBuffer_->length () > 0))
         break; // there's more data
+
+      ACE_Message_Block* message_block_p = inherited::writeBuffer_->cont ();
+      if (inherited::writeBuffer_->cont ())
+        inherited::writeBuffer_->cont (NULL);
       inherited::writeBuffer_->release (); inherited::writeBuffer_ = NULL;
+      if (message_block_p)
+      {
+        inherited::writeBuffer_ = message_block_p;
+        goto continue_;
+      } // end IF
+
       result = 0;
       break;
     }

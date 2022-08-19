@@ -87,6 +87,9 @@ target_include_directories (${PROJECT_NAME}_Protocol_SSDP PUBLIC
 set (source_files
      ssdp_codes.h
      ssdp_common.h
+     ssdp_control.cpp
+     ssdp_control.h
+     ssdp_control.inl
      ssdp_defines.h
      ssdp_isession.h
      ssdp_module_streamer.cpp
@@ -171,6 +174,8 @@ export (TARGETS ${PROJECT_NAME}_Protocol_SSDP
 install (FILES
          ssdp_codes.h
          ssdp_common.h
+         ssdp_control.h
+         ssdp_control.inl
          ssdp_defines.h
          ssdp_isession.h
          ssdp_module_streamer.h

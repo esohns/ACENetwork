@@ -57,6 +57,7 @@
 #include "http_network.h"
 
 #include "ssdp_common.h"
+#include "ssdp_control.h"
 #include "ssdp_isession.h"
 #include "ssdp_session.h"
 
@@ -295,5 +296,7 @@ typedef SSDP_Session_T<struct SSDP_SessionState,
                        Test_U_Message,
                        UPnP_Client_AsynchConnector_t,
                        struct Net_UserData> SSDP_AsynchSession_t;
+
+typedef SSDP_Control_T<SSDP_ISession_t> SSDP_Control_t;
 
 #endif

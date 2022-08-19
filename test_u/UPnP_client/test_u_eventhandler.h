@@ -70,6 +70,16 @@ class Test_U_EventHandler
 
 //////////////////////////////////////////
 
+enum Test_U_EventHandlerState
+{
+  EVENT_HANDLER_STATE_DEVICE = 0, // got device description --> retrieve service description
+  EVENT_HANDLER_STATE_SERVICE, // got service description --> send SOAP commands
+  EVENT_HANDLER_STATE_CONTROL, // send SOAP commands
+  ////////////////////////////////////////
+  EVENT_HANDLER_STATE_MAX,
+  EVENT_HANDLER_STATE_INVALID
+};
+
 class Test_U_EventHandler_2
  : public UPnP_Client_ISessionNotify_t
 {
@@ -101,6 +111,7 @@ class Test_U_EventHandler_2
   struct UPnP_Client_UI_CBData*   CBData_;
 #endif // GUI_SUPPORT
   struct UPnP_Client_SessionData* sessionData_;
+  enum Test_U_EventHandlerState   state_;
 };
 
 #endif
