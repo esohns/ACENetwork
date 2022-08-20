@@ -690,7 +690,7 @@ idle_end_session_success_cb (gpointer userData_in)
                                 GTK_DIALOG_DESTROY_WITH_PARENT,
                                 GTK_MESSAGE_INFO,
                                 GTK_BUTTONS_CLOSE,
-                                ACE_TEXT_ALWAYS_CHAR ("Success: %s"),
+                                ACE_TEXT_ALWAYS_CHAR ("Success: \"%s\""),
                                 Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
       gtk_dialog_run (GTK_DIALOG (widget_p));
       gtk_widget_destroy (widget_p); widget_p = NULL;
@@ -699,7 +699,7 @@ idle_end_session_success_cb (gpointer userData_in)
     }
     case EVENT_HANDLER_STATE_MAP_CONTROL:
     {
-      GtkDialog* dialog_p = 
+      GtkDialog* dialog_p =
         GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
       ACE_ASSERT (dialog_p);
@@ -1321,7 +1321,7 @@ action_presentation_url_activate_cb (GtkAction* action_in,
   gtk_statusbar_push (statusbar_p, 0,
                       data_p->control->getP ()->presentationURL ().c_str ());
 
-  GtkDialog* dialog_p = 
+  GtkDialog* dialog_p =
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (dialog_p);
@@ -1330,7 +1330,7 @@ action_presentation_url_activate_cb (GtkAction* action_in,
                             GTK_DIALOG_DESTROY_WITH_PARENT,
                             GTK_MESSAGE_INFO,
                             GTK_BUTTONS_CLOSE,
-                            ACE_TEXT_ALWAYS_CHAR ("Success: %s"),
+                            ACE_TEXT_ALWAYS_CHAR ("Success: \"%s\""),
                             data_p->control->getP ()->presentationURL ().c_str ());
   gtk_dialog_run (GTK_DIALOG (widget_p));
   gtk_widget_destroy (widget_p); widget_p = NULL;
