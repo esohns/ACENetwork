@@ -74,7 +74,8 @@ enum Test_U_EventHandlerState
 {
   EVENT_HANDLER_STATE_DEVICE = 0, // got device description --> retrieve service description
   EVENT_HANDLER_STATE_SERVICE, // got service description --> send SOAP commands
-  EVENT_HANDLER_STATE_CONTROL, // send SOAP commands
+  EVENT_HANDLER_STATE_EXTERNAL_ADDRESS_CONTROL, // receive SOAP reply
+  EVENT_HANDLER_STATE_MAP_CONTROL, // receive SOAP reply
   ////////////////////////////////////////
   EVENT_HANDLER_STATE_MAX,
   EVENT_HANDLER_STATE_INVALID
@@ -102,16 +103,20 @@ class Test_U_EventHandler_2
   virtual void notify (Stream_SessionId_t,              // session id
                        const Test_U_SessionMessage&);   // session message
 
+  enum Test_U_EventHandlerState   state_;
+
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_2 ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_2 (const Test_U_EventHandler_2&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_2& operator= (const Test_U_EventHandler_2&))
 
+  // helper methods
+  std::string retrievePresentationURL (xmlDocPtr);
+
 #if defined (GUI_SUPPORT)
   struct UPnP_Client_UI_CBData*   CBData_;
 #endif // GUI_SUPPORT
   struct UPnP_Client_SessionData* sessionData_;
-  enum Test_U_EventHandlerState   state_;
 };
 
 #endif

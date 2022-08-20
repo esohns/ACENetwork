@@ -8,6 +8,14 @@
     <property name="stock_id">gtk-find</property>
     <signal name="activate" handler="action_discovery_activate_cb" swapped="no"/>
   </object>
+  <object class="GtkAction" id="action_external_address">
+    <property name="label" translatable="yes">External Address</property>
+    <property name="short_label" translatable="yes">External Address</property>
+    <property name="tooltip" translatable="yes">External Address</property>
+    <property name="stock_id">gtk-about</property>
+    <property name="sensitive">False</property>
+    <signal name="activate" handler="action_external_address_activate_cb" swapped="no"/>
+  </object>
   <object class="GtkAction" id="action_map">
     <property name="label">Map</property>
     <property name="short_label">Map</property>
@@ -15,6 +23,14 @@
     <property name="stock_id">gtk-add</property>
     <property name="sensitive">False</property>
     <signal name="activate" handler="action_map_activate_cb" swapped="no"/>
+  </object>
+  <object class="GtkAction" id="action_presentation_url">
+    <property name="label" translatable="yes">Presentation URL</property>
+    <property name="short_label" translatable="yes">Presentation URL</property>
+    <property name="tooltip" translatable="yes">Presentation URL</property>
+    <property name="stock_id">gtk-about</property>
+    <property name="sensitive">False</property>
+    <signal name="activate" handler="action_presentation_url_activate_cb" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="adjustment_data">
     <property name="upper">10000000</property>
@@ -233,6 +249,36 @@
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button_external_address">
+                        <property name="related_action">action_external_address</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="relief">half</property>
+                        <property name="focus_on_click">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button_presentation_URL">
+                        <property name="related_action">action_presentation_url</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="relief">half</property>
+                        <property name="focus_on_click">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>

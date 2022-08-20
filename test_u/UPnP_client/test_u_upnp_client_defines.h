@@ -34,7 +34,8 @@
 #define UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING     "ns"
 
 //#define UPNP_CLIENT_XPATH_QUERY_MANAGEABLEDEVICE_STRING   "/ns:root/ns:device/ns:serviceList/ns:service[ns:serviceId='urn:dslforum-org:serviceId:Layer3Forwarding1']/ns:controlURL"
-#define UPNP_CLIENT_XPATH_QUERY_GATEDESC_STRING           "/ns:root/ns:device/ns:deviceList/ns:device/ns:deviceList/ns:device/ns:serviceList/ns:service[ns:serviceId='urn:upnp-org:serviceId:WANIPConn1']"
+#define UPNP_CLIENT_XPATH_QUERY_GATEDESC_SERVICE_STRING   "/ns:root/ns:device/ns:deviceList/ns:device/ns:deviceList/ns:device/ns:serviceList/ns:service[ns:serviceId='urn:upnp-org:serviceId:WANIPConn1']"
+#define UPNP_CLIENT_XPATH_QUERY_GATEDESC_URL_STRING       "/ns:root/ns:device/ns:presentationURL"
 #define UPNP_CLIENT_XPATH_QUERY_GATECONNSCPD_STRING       "/ns:scpd/ns:actionList/ns:action[ns:name='AddPortMapping']/ns:argumentList/ns:argument"
 #define UPNP_CLIENT_XPATH_QUERY_SOAP_STRING               "/ns:Envelope/ns:Body"
 
@@ -52,7 +53,9 @@
 
 #define TEST_U_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
 #define TEST_U_UI_GTK_ACTION_DISCOVERY_NAME               "action_discovery"
+#define TEST_U_UI_GTK_ACTION_EXTERNAL_ADDRESS_NAME        "action_external_address"
 #define TEST_U_UI_GTK_ACTION_MAP_NAME                     "action_map"
+#define TEST_U_UI_GTK_ACTION_PRESENTATION_URL_NAME        "action_presentation_url"
 //#define TEST_U_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"
 #define TEST_U_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
 #define TEST_U_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"

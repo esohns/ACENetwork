@@ -314,6 +314,7 @@ struct UPnP_Client_UI_ProgressData
   {}
 };
 
+class Test_U_EventHandler_2;
 struct UPnP_Client_UI_CBData
 #if defined (GTK_USE)
  : Test_U_GTK_CBData
@@ -335,6 +336,7 @@ struct UPnP_Client_UI_CBData
 
   struct UPnP_Client_Configuration*  configuration;
   SSDP_Control_t*                    control;
+  Test_U_EventHandler_2*             eventHandler;
   ACE_INET_Addr                      externalAddress;
   ACE_INET_Addr                      gatewayAddress;
   ACE_INET_Addr                      interfaceAddress;

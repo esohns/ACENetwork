@@ -54,8 +54,10 @@ class SSDP_Session_T
   virtual void wait (); // wait for all HTTP- connections
   virtual void getURL (const std::string&) const; // device/service description URLs
 
+  virtual void externalAddress () const;
   virtual void map (const ACE_INET_Addr&,        // external IP/port
                     const ACE_INET_Addr&) const; // internal IP/port
+  inline virtual std::string presentationURL () const { return state_.presentationURL; }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (SSDP_Session_T (const SSDP_Session_T&))
@@ -63,6 +65,7 @@ class SSDP_Session_T
 
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void notifySSDPResponse (const struct HTTP_Record&); // SSDP response record
+  virtual void notifyPresentationURL (const std::string&); // presentation URL
   virtual void notifyServiceDescriptionControlURIs (const std::string&,  // service description URI
                                                     const std::string&); // service control URI
   virtual void notifyServiceActionArguments(const SSDP_ServiceActionArguments_t&); // service action argument(s)

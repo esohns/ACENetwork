@@ -287,6 +287,200 @@ SSDP_Session_T<StateType,
                ConnectionManagerType,
                MessageType,
                ConnectorType,
+               UserData>::externalAddress () const
+{
+  NETWORK_TRACE (ACE_TEXT ("SSDP_Session_T::externalAddress"));
+
+  // sanity check(s)
+  ACE_ASSERT (!state_.serviceDescriptionURL.empty ());
+
+  // step1: parse URL, update configuration
+  std::string hostname_string, URI_string;
+  bool use_SSL_b = false;
+  if (unlikely (!HTTP_Tools::parseURL (state_.serviceDescriptionURL,
+                                       configuration_->socketConfiguration.address,
+                                       hostname_string,
+                                       URI_string,
+                                       use_SSL_b)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT (state_.serviceDescriptionURL.c_str ())));
+    return;
+  } // end IF
+
+  ConnectorType connector (true);
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+  ConnectionManagerType* connection_manager_p = NULL;
+  HTTP_IConnection_t* connection_p = NULL;
+
+  // step2: connect
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (userData_);
+
+  handle_h =
+    Net_Client_Common_Tools::connect<ConnectorType> (connector,
+                                                     *configuration_,
+                                                     *userData_,
+                                                     configuration_->socketConfiguration.address,
+                                                     true, true);
+  if (unlikely (handle_h == ACE_INVALID_HANDLE))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to %s, returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address, false, false).c_str ())));
+    return;
+  } // end IF
+
+  connection_manager_p = ConnectionManagerType::SINGLETON_T::instance ();
+  ACE_ASSERT (connection_manager_p);
+  connection_p =
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+  ACE_ASSERT (connection_p);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%u: connected to %s\n"),
+              connection_p->id (),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address, false, false).c_str ())));
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->allocatorConfiguration);
+  ACE_ASSERT (configuration_->messageAllocator);
+  ACE_ASSERT (connection_p);
+
+  // step3: allocate buffer
+  size_t pdu_size_i =
+    configuration_->allocatorConfiguration->defaultBufferSize +
+    configuration_->allocatorConfiguration->paddingBytes;
+  MessageType* message_p = NULL, *message_2 = NULL;
+allocate:
+  message_p =
+    static_cast<MessageType*> (configuration_->messageAllocator->malloc (pdu_size_i));
+  // keep retrying ?
+  if (!message_p &&
+      !configuration_->messageAllocator->block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate MessageType: \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  // step4: configure message
+  typename MessageType::DATA_T::DATA_T* record_p = NULL;
+  ACE_NEW_NORETURN (record_p,
+                    typename MessageType::DATA_T::DATA_T ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate MessageType::DATA_T::DATA_T: \"%m\", returning\n")));
+    message_p->release (); message_p = NULL;
+    return;
+  } // end IF
+  record_p->method = HTTP_Codes::HTTP_METHOD_POST;
+  record_p->URI = state_.serviceControlURI;
+  record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
+                                            hostname_string));
+  std::string header_string = ACE_TEXT_ALWAYS_CHAR ("text/xml; charset=\"utf-8\"");
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING),
+                                            header_string));
+  header_string = ACE_TEXT_ALWAYS_CHAR ("\"urn:schemas-upnp-org:service:");
+  header_string += ACE_TEXT_ALWAYS_CHAR ("WANIPConnection:1");
+  header_string += ACE_TEXT_ALWAYS_CHAR ("#");
+  header_string += ACE_TEXT_ALWAYS_CHAR ("GetExternalIPAddress");
+  header_string += ACE_TEXT_ALWAYS_CHAR ("\"");
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("SOAPACTION"),
+                                            header_string));
+
+  std::string xml_body = ACE_TEXT_ALWAYS_CHAR ("<?xml version=\"1.0\"?>");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("<s:Envelope");
+  xml_body += ACE_TEXT_ALWAYS_CHAR (" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"");
+  xml_body += ACE_TEXT_ALWAYS_CHAR (" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("<s:Body>");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("<u:");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("GetExternalIPAddress");
+  xml_body += ACE_TEXT_ALWAYS_CHAR (" xmlns:u=\"urn:schemas-upnp-org:service:");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("WANIPConnection:1");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("\">");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("</u:");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("GetExternalIPAddress");
+  xml_body += ACE_TEXT_ALWAYS_CHAR (">");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("</s:Body>");
+  xml_body += ACE_TEXT_ALWAYS_CHAR ("</s:Envelope>");
+
+  std::ostringstream converter;
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << xml_body.size ();
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
+                                            converter.str ()));
+
+  typename MessageType::DATA_T* message_data_container_p = NULL;
+  ACE_NEW_NORETURN (message_data_container_p,
+                    typename MessageType::DATA_T (record_p,
+                                                  true)); // delete ?
+  if (!message_data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate MessageType::DATA_T: \"%m\", returning\n")));
+    delete record_p; record_p = NULL;
+    message_p->release (); message_p = NULL;
+    return;
+  } // end IF
+  message_p->initialize (message_data_container_p,
+                         1, //message_p->sessionId (),
+                         NULL);
+
+allocate_2:
+  message_2 =
+    static_cast<MessageType*> (configuration_->messageAllocator->malloc (pdu_size_i));
+  // keep retrying ?
+  if (!message_2 &&
+      !configuration_->messageAllocator->block ())
+    goto allocate_2;
+  if (!message_2)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate MessageType: \"%m\", returning\n")));
+    message_p->release (); message_p = NULL;
+    return;
+  } // end IF
+
+  int result = message_2->copy (xml_body.c_str (),
+                                xml_body.size ());
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", returning\n")));
+    message_p->release (); message_p = NULL;
+    message_2->release (); message_2 = NULL;
+    return;
+  } // end IF
+  message_p->cont (message_2);
+
+  // step5: send message
+  ACE_Message_Block* message_block_p = message_p;
+  connection_p->send (message_block_p);
+
+  // step6: release resources
+  connection_p->decrease (); connection_p = NULL;
+}
+
+template <typename StateType,
+          typename ConnectionConfigurationType,
+          typename ConnectionManagerType,
+          typename MessageType,
+          typename ConnectorType,
+          typename UserData>
+void
+SSDP_Session_T<StateType,
+               ConnectionConfigurationType,
+               ConnectionManagerType,
+               MessageType,
+               ConnectorType,
                UserData>::map (const ACE_INET_Addr& externalAddress_in,
                                const ACE_INET_Addr& internalAddress_in) const
 {
@@ -588,6 +782,25 @@ SSDP_Session_T<StateType,
 
     getURL ((*iterator).second);
   } // end IF
+}
+
+template <typename StateType,
+          typename ConnectionConfigurationType,
+          typename ConnectionManagerType,
+          typename MessageType,
+          typename ConnectorType,
+          typename UserData>
+void
+SSDP_Session_T<StateType,
+               ConnectionConfigurationType,
+               ConnectionManagerType,
+               MessageType,
+               ConnectorType,
+               UserData>::notifyPresentationURL (const std::string& presentationURL_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("SSDP_Session_T::notifyPresentationURL"));
+
+  state_.presentationURL = presentationURL_in;
 }
 
 template <typename StateType,

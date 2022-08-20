@@ -83,13 +83,18 @@ SSDP_Control_T<SessionInterfaceType>::handle (struct SSDP_Control_Event*& event_
       session_->notifySSDPResponse (event_inout->header);
       break;
     }
-    case SSDP_EVENT_DEVICE_DESCRIPTION:
+    case SSDP_EVENT_PRESENTATION_URL:
+    {
+      session_->notifyPresentationURL (event_inout->data1);
+      break;
+    }
+    case SSDP_EVENT_SERVICE_DESCRIPTION:
     {
       session_->notifyServiceDescriptionControlURIs (event_inout->data1,
                                                      event_inout->data2);
       break;
     }
-    case SSDP_EVENT_SERVICE_DESCRIPTION:
+    case SSDP_EVENT_SERVICE_ARGUMENTS:
     {
       session_->notifyServiceActionArguments (event_inout->data3);
       break;

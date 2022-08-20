@@ -57,6 +57,7 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_connection_stream.h"
 #include "test_u_defines.h"
+#include "test_u_eventhandler.h"
 #include "test_u_message.h"
 #include "test_u_session_message.h"
 
@@ -175,6 +176,78 @@ load_network_interfaces (GtkListStore* listStore_in)
 #endif
 
   return result;
+}
+
+void
+stop_progress_reporting (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::stop_progress_reporting"));
+
+  // sanity check(s)
+  struct UPnP_Client_UI_CBData* data_p =
+      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkProgressBar* progress_bar_p =
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
+  ACE_ASSERT (progress_bar_p);
+
+  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
+
+  ACE_ASSERT (data_p->progressData.eventSourceId > 0);
+  if (!g_source_remove (data_p->progressData.eventSourceId))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_source_remove(%u), continuing\n")));
+  data_p->progressData.eventSourceId = 0;
+
+}
+
+void
+start_progress_reporting (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::start_progress_reporting"));
+
+  // sanity check(s)
+  struct UPnP_Client_UI_CBData* data_p =
+      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  GtkProgressBar* progress_bar_p =
+      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
+  ACE_ASSERT (progress_bar_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
+
+  ACE_ASSERT (!data_p->progressData.eventSourceId);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+    data_p->progressData.eventSourceId =
+      //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+      //                 idle_update_progress_cb,
+      //                 &data_p->progressData,
+      //                 NULL);
+        g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                          // _LOW doesn't work (on Win32)
+                            TEST_U_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
+                            idle_update_progress_cb,
+                            &data_p->progressData,
+                            NULL);
+    if (data_p->progressData.eventSourceId > 0)
+      data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_full(idle_update_target_progress_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
+  } // end lock scope
 }
 
 /////////////////////////////////////////
@@ -528,9 +601,9 @@ idle_initialize_UI_cb (gpointer userData_in)
 }
 
 gboolean
-idle_discovery_complete_UI_cb (gpointer userData_in)
+idle_discovery_complete_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_discovery_complete_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_discovery_complete_cb"));
 
   // sanity check(s)
   struct UPnP_Client_UI_CBData* data_p =
@@ -549,9 +622,9 @@ idle_discovery_complete_UI_cb (gpointer userData_in)
 }
 
 gboolean
-idle_service_description_complete_UI_cb (gpointer userData_in)
+idle_service_description_complete_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_service_description_complete_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_service_description_complete_cb"));
 
   // sanity check(s)
   struct UPnP_Client_UI_CBData* data_p =
@@ -562,17 +635,29 @@ idle_service_description_complete_UI_cb (gpointer userData_in)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   GtkAction* action_p =
     GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_EXTERNAL_ADDRESS_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_MAP_NAME)));
   ACE_ASSERT (action_p);
   gtk_action_set_sensitive (action_p, TRUE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PRESENTATION_URL_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+
+  stop_progress_reporting (userData_in);
 
   return G_SOURCE_REMOVE;
 }
 
 gboolean
-idle_end_session_UI_cb (gpointer userData_in)
+idle_end_session_success_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_UI_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_success_cb"));
 
   // sanity check(s)
   UPnP_Client_UI_CBData* data_p =
@@ -581,65 +666,97 @@ idle_end_session_UI_cb (gpointer userData_in)
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  GtkProgressBar* progress_bar_p =
-    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
-  ACE_ASSERT (progress_bar_p);
+  ACE_ASSERT (data_p->eventHandler);
 
-  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
-  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
+  stop_progress_reporting (userData_in);
 
-  ACE_ASSERT (data_p->progressData.eventSourceId > 0);
-  if (!g_source_remove (data_p->progressData.eventSourceId))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_source_remove(%u), continuing\n")));
-  data_p->progressData.eventSourceId = 0;
+  switch (data_p->eventHandler->state_)
+  {
+    case EVENT_HANDLER_STATE_EXTERNAL_ADDRESS_CONTROL:
+    {
+      GtkStatusbar* statusbar_p =
+        GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_STATUSBAR_NAME)));
+      ACE_ASSERT (statusbar_p);
+      gtk_statusbar_push (statusbar_p, 0,
+                          Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
+
+      GtkDialog* dialog_p = 
+        GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
+      ACE_ASSERT (dialog_p);
+      GtkWidget* widget_p =
+        gtk_message_dialog_new (GTK_WINDOW (dialog_p),
+                                GTK_DIALOG_DESTROY_WITH_PARENT,
+                                GTK_MESSAGE_INFO,
+                                GTK_BUTTONS_CLOSE,
+                                ACE_TEXT_ALWAYS_CHAR ("Success: %s"),
+                                Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
+      gtk_dialog_run (GTK_DIALOG (widget_p));
+      gtk_widget_destroy (widget_p); widget_p = NULL;
+
+      break;
+    }
+    case EVENT_HANDLER_STATE_MAP_CONTROL:
+    {
+      GtkDialog* dialog_p = 
+        GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
+      ACE_ASSERT (dialog_p);
+      GtkWidget* widget_p =
+        gtk_message_dialog_new (GTK_WINDOW (dialog_p),
+                                GTK_DIALOG_DESTROY_WITH_PARENT,
+                                GTK_MESSAGE_INFO,
+                                GTK_BUTTONS_CLOSE,
+                                ACE_TEXT_ALWAYS_CHAR ("Success"));
+      gtk_dialog_run (GTK_DIALOG (widget_p));
+      gtk_widget_destroy (widget_p); widget_p = NULL;
+
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown state (was: %d), continuing\n"),
+                  data_p->eventHandler->state_));
+      break;
+    }
+  } // end SWITCH
 
   return G_SOURCE_REMOVE;
 }
 
-//gboolean
-//idle_reset_UI_cb (gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::idle_reset_UI_cb"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (userData_in);
-//  struct UPnP_Client_UI_CBData* data_p =
-//      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p->UIState);
-//  Common_UI_GTK_BuildersIterator_t iterator =
-//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-//
-//  GtkSpinButton* spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  gtk_spin_button_set_value (spin_button_p, 0.0);
-//  spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  gtk_spin_button_set_value (spin_button_p, 0.0);
-//  spin_button_p =
-//    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-//                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
-//  ACE_ASSERT (spin_button_p);
-//  gtk_spin_button_set_value (spin_button_p, 0.0);
-//
-//  GtkProgressBar* progress_bar_p =
-//    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-//                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
-//  ACE_ASSERT (progress_bar_p);
-//  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
-//
-//  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-//    data_p->progressData.transferred = 0;
-//  } // end lock scope
-//
-//  return G_SOURCE_REMOVE;
-//}
+gboolean
+idle_end_session_error_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_error_cb"));
+
+  // sanity check(s)
+  UPnP_Client_UI_CBData* data_p =
+      static_cast<UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (data_p->eventHandler);
+
+  stop_progress_reporting (userData_in);
+
+  GtkDialog* dialog_p = 
+    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
+  ACE_ASSERT (dialog_p);
+  GtkWidget* widget_p =
+    gtk_message_dialog_new (GTK_WINDOW (dialog_p),
+                            GTK_DIALOG_DESTROY_WITH_PARENT,
+                            GTK_MESSAGE_ERROR,
+                            GTK_BUTTONS_CLOSE,
+                            ACE_TEXT_ALWAYS_CHAR ("action failed"));
+  gtk_dialog_run (GTK_DIALOG (widget_p));
+  gtk_widget_destroy (widget_p); widget_p = NULL;
+
+  return G_SOURCE_REMOVE;
+}
 
 gboolean
 idle_update_progress_cb (gpointer userData_in)
@@ -1084,6 +1201,31 @@ allocate:
 } // action_discovery_activate_cb
 
 void
+action_external_address_activate_cb (GtkAction* action_in,
+                                     gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::action_external_address_activate_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct UPnP_Client_UI_CBData* data_p =
+      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+  //ACE_ASSERT (data_p->UIState);
+  //Common_UI_GTK_BuildersIterator_t iterator =
+  //  data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  //ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->eventHandler);
+
+  start_progress_reporting (userData_in);
+
+  data_p->eventHandler->state_ = EVENT_HANDLER_STATE_EXTERNAL_ADDRESS_CONTROL;
+
+  ACE_ASSERT (data_p->control);
+  data_p->control->getP ()->externalAddress ();
+} // action_presentation_url_activate_cb
+
+void
 action_map_activate_cb (GtkAction* action_in,
                         gpointer userData_in)
 {
@@ -1093,12 +1235,13 @@ action_map_activate_cb (GtkAction* action_in,
   ACE_ASSERT (userData_in);
   struct UPnP_Client_UI_CBData* data_p =
       static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (data_p->eventHandler);
+
+  start_progress_reporting (userData_in);
 
   // retrieve data
   GtkSpinButton* spin_button_p =
@@ -1148,36 +1291,50 @@ action_map_activate_cb (GtkAction* action_in,
     return;
   } // end IF
 
+  data_p->eventHandler->state_ = EVENT_HANDLER_STATE_MAP_CONTROL;
+
   ACE_ASSERT (data_p->control);
   data_p->control->getP ()->map (external_address,
                                  internal_address);
 } // action_map_activate_cb
 
-//void
-//action_report_activate_cb (GtkAction* action_in,
-//                           gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::action_report_activate_cb"));
-//
-//  ACE_UNUSED_ARG (action_in);
-//  ACE_UNUSED_ARG (userData_in);
-//
-//  int result = -1;
-//
-//// *PORTABILITY*: on Windows SIGUSRx are not defined
-//// --> use SIGBREAK (21) instead...
-//  int signal = 0;
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  signal = SIGBREAK;
-//#else
-//  signal = SIGUSR1;
-//#endif // ACE_WIN32 || ACE_WIN64
-//  result = ACE_OS::raise (signal);
-//  if (result == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_OS::raise(\"%S\" (%d)): \"%m\", continuing\n"),
-//                signal, signal));
-//} // action_report_activate_cb
+void
+action_presentation_url_activate_cb (GtkAction* action_in,
+                                     gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::action_presentation_url_activate_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct UPnP_Client_UI_CBData* data_p =
+      static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT (data_p->control);
+
+  GtkStatusbar* statusbar_p =
+    GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_STATUSBAR_NAME)));
+  ACE_ASSERT (statusbar_p);
+  gtk_statusbar_push (statusbar_p, 0,
+                      data_p->control->getP ()->presentationURL ().c_str ());
+
+  GtkDialog* dialog_p = 
+    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
+  ACE_ASSERT (dialog_p);
+  GtkWidget* widget_p =
+    gtk_message_dialog_new (GTK_WINDOW (dialog_p),
+                            GTK_DIALOG_DESTROY_WITH_PARENT,
+                            GTK_MESSAGE_INFO,
+                            GTK_BUTTONS_CLOSE,
+                            ACE_TEXT_ALWAYS_CHAR ("Success: %s"),
+                            data_p->control->getP ()->presentationURL ().c_str ());
+  gtk_dialog_run (GTK_DIALOG (widget_p));
+  gtk_widget_destroy (widget_p); widget_p = NULL;
+} // action_presentation_url_activate_cb
 
 void
 combobox_interface_changed_cb (GtkComboBox* comboBox_in,
@@ -1276,9 +1433,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
   } // end IF
 
   // sanity check(s)
-  ACE_ASSERT (userData_in);
   struct UPnP_Client_UI_CBData* data_p =
       static_cast<struct UPnP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1521,33 +1678,7 @@ continue_2:
       goto error;
 
     // step3: start progress reporting
-    GtkProgressBar* progressbar_p =
-        GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                  ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
-    ACE_ASSERT (progressbar_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
-
-    ACE_ASSERT (!data_p->progressData.eventSourceId);
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
-      data_p->progressData.eventSourceId =
-        //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-        //                 idle_update_progress_cb,
-        //                 &data_p->progressData,
-        //                 NULL);
-          g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                          // _LOW doesn't work (on Win32)
-                              TEST_U_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
-                              idle_update_progress_cb,
-                              &data_p->progressData,
-                              NULL);
-      if (data_p->progressData.eventSourceId > 0)
-        data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
-      else
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_timeout_add_full(idle_update_target_progress_cb): \"%m\", returning\n")));
-        return;
-      } // end IF
-    } // end lock scope
+    start_progress_reporting (userData_in);
   } // end IF
   else
   {

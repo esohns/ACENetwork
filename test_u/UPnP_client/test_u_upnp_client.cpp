@@ -699,6 +699,7 @@ do_work (//bool requestBroadcastReplies_in,
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   CBData_in.externalAddress = external_address;
+  CBData_in.eventHandler = &ui_event_handler_2;
   CBData_in.gatewayAddress = gateway_address;
   CBData_in.interfaceAddress = interface_address;
 #endif // GTK_USE
@@ -815,7 +816,7 @@ do_work (//bool requestBroadcastReplies_in,
   modulehandler_configuration_2.lock = &subscribers_lock_2; // prevent deadlocks
 #endif // GUI_SUPPORT
   modulehandler_configuration_2.xPathQueryString =
-    ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_GATEDESC_STRING);
+    ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_GATEDESC_SERVICE_STRING);
   modulehandler_configuration_2.xPathNameSpaces.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (UPNP_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING),
                                                                            ACE_TEXT_ALWAYS_CHAR (UPNP_XML_DEVICE_ROOT_NAMESPACE_STRING)));
 

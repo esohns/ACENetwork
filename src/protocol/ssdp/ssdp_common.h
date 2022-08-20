@@ -24,15 +24,16 @@
 #include <string>
 #include <vector>
 
-typedef  std::vector<std::string> SSDP_StringList_t;
+typedef std::vector<std::string> SSDP_StringList_t;
 
-typedef  SSDP_StringList_t SSDP_ServiceActionArguments_t;
+typedef SSDP_StringList_t SSDP_ServiceActionArguments_t;
 typedef SSDP_ServiceActionArguments_t::const_iterator SSDP_ServiceActionArgumentsConstIterator_t;
 
 struct SSDP_SessionState
 {
   SSDP_ServiceActionArguments_t actionArguments;
   std::string                   deviceDescriptionURL;
+  std::string                   presentationURL;
   std::string                   serviceControlURI;
   std::string                   serviceDescriptionURL;
 };
