@@ -554,9 +554,7 @@ struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration
 #if defined (GUI_SUPPORT)
    , window (NULL)
 #endif // GUI_SUPPORT
-  {
-    finishOnDisconnect = true;
-  }
+  {}
 
   struct Stream_MediaFramework_ALSA_Configuration*        ALSAConfiguration;
   __u32                                                   buffers; // v4l device buffers

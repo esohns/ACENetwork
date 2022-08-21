@@ -825,6 +825,18 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   switch (message_inout->type ())
   {
+    case STREAM_SESSION_MESSAGE_UNLINK:
+    {
+      if (inherited::endSeen_ && // <-- there was (!) an upstream
+          inherited::configuration_->stopOnUnlink)
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                   ACE_TEXT ("%s: received unlink from upstream, updating state\n"),
+                   inherited::mod_->name ()));
+        inherited::change (STREAM_STATE_SESSION_STOPPING);
+      } // end IF
+      break;
+    }
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // sanity check(s)

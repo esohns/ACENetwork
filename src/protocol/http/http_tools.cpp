@@ -408,13 +408,14 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   URI_out.clear ();
   useSSL_out = false;
 
-  unsigned short port = HTTP_DEFAULT_SERVER_PORT;
+  unsigned short port = 0;
   std::istringstream converter;
   int result = -1;
+  std::string hostname_no_port_string;
 
-  // step1: split protocol/hostname/port
+  // step1: split protocol/hostname/port/URI
   std::string regex_string =
-    ACE_TEXT_ALWAYS_CHAR ("^(?:http(s)?://)?([[:alnum:]\\-.]+)(?:\\:([[:digit:]]{1,5}))?(.+)?$");
+    ACE_TEXT_ALWAYS_CHAR ("^(?:http|ftp)(s){0,1}(?:\\://)([^/]*)(.*)$");
   std::regex regex (regex_string,
                     std::regex::ECMAScript);
   std::smatch match_results;
@@ -428,25 +429,51 @@ HTTP_Tools::parseURL (const std::string& URL_in,
                 ACE_TEXT (URL_in.c_str ())));
     return false;
   } // end IF
-//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
-  ACE_ASSERT (!match_results.empty ());
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
-  if (match_results[1].matched)
+  ACE_ASSERT (match_results[1].matched);
+  std::string match_string = match_results[1];
+  if (!match_string.empty ())
     useSSL_out = true;
   ACE_ASSERT (match_results[2].matched);
-  hostName_out = match_results[2];
-  if (match_results[3].matched)
+  match_string = match_results[2];
+  if (!match_string.empty ())
   {
-    converter.clear ();
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.str (match_results[3].str ());
-    converter >> port;
+    regex_string =
+        ACE_TEXT_ALWAYS_CHAR ("^([[:alnum:].]+)(?:\\:([[:digit:]]{1,5})){0,1}$");
+    regex.assign (regex_string,
+                  std::regex::ECMAScript);
+    std::smatch match_results_2;
+    if (!std::regex_match (match_string,
+                           match_results_2,
+                           regex,
+                           std::regex_constants::match_default))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("invalid hostname string (was: \"%s\"), aborting\n"),
+                 ACE_TEXT (match_string.c_str ())));
+      return false;
+    } // end IF
+    ACE_ASSERT (match_results_2.ready () && !match_results_2.empty ());
+    ACE_ASSERT (match_results_2[1].matched);
+    hostName_out = match_results_2[1];
+    hostname_no_port_string = hostName_out;
+    if (match_results_2[2].matched)
+    {
+      match_string = match_results_2[2];
+      converter.clear ();
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.str (match_string);
+      converter >> port;
 
-    hostName_out += ':';
-    hostName_out += match_results[3];
+      hostName_out += ':';
+      hostName_out += match_string;
+    } // end IF
   } // end IF
-  if (match_results[4].matched)
-    URI_out = match_results[4];
+  ACE_ASSERT (match_results[3].matched);
+  match_string = match_results[3];
+  if (!match_string.empty ())
+    URI_out = match_string;
   else
     URI_out = ACE_TEXT_ALWAYS_CHAR ("/");
 
@@ -497,11 +524,18 @@ HTTP_Tools::parseURL (const std::string& URL_in,
 //  ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
   ACE_ASSERT (!match_results_3.empty ());
 
-  result =
-      address_out.set (port ? port : (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT),
-                       match_results[2].str ().c_str (),
+  if (!hostname_no_port_string.empty ())
+    result =
+      address_out.set ((port ? port : (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT)),
+                       hostname_no_port_string.c_str (),
                        1, // encode port number
                        AF_INET);
+  else
+    result =
+      address_out.set ((port ? port : (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT)),
+                       INADDR_ANY,
+                       1,  // encode port number
+                       0); // do not map
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
