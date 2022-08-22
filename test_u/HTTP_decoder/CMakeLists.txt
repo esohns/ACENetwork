@@ -146,17 +146,11 @@ elseif (WIN32)
 # *TODO*: repair WIN32 pkgconfig support
  target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_XML_LIBRARY})
  target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_XML_PARSER_LIBRARY})
-
-# target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
-
-if (WIN32)
-# target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-endif (WIN32)
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonEvent)

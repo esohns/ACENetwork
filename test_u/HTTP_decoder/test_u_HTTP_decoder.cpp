@@ -266,34 +266,7 @@ do_processArguments (int argc_in,
                       ACE_TEXT (URL_out.c_str ())));
           return false;
         } // end IF
-
-//        std::string hostname_string = hostName_out;
-//        size_t position =
-//          hostName_out.find_last_of (':', std::string::npos);
-//        if (position == std::string::npos)
-//        {
-//          port_out = (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT
-//                                 : HTTP_DEFAULT_SERVER_PORT);
-//          hostname_string += ':';
-//          std::ostringstream converter;
-//          converter << port_out;
-//          hostname_string += converter.str ();
-//        } // end IF
-//        else
-//        {
-//          std::istringstream converter (hostName_out.substr (position + 1,
-//                                                             std::string::npos));
-//          converter >> port_out;
-//        } // end ELSE
-//        result = peer_address.set (hostname_string.c_str (),
-//                                   AF_INET);
-//        if (result == -1)
-//        {
-//          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
-//                      ACE_TEXT (hostname_string.c_str ())));
-//          return false;
-//        } // end IF
+        port_out = peer_address.get_port_number ();
 
         // step2: validate address/verify host name exists
         //        --> resolve
@@ -512,6 +485,7 @@ do_work (unsigned int bufferSize_in,
 #endif // _DEBUG
   // *********************** socket configuration data *************************
   Test_U_ConnectionConfiguration connection_configuration;
+  connection_configuration.socketConfiguration.hostname = hostName_in;
   int result =
     connection_configuration.socketConfiguration.address.set (port_in,
                                                               hostName_in.c_str (),
@@ -902,7 +876,7 @@ allocate:
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
   message_p->initialize (message_data_container_p,
-                         message_p->sessionId (),
+                         1,//message_p->sessionId (),
                          NULL);
   // *IMPORTANT NOTE*: fire-and-forget API (message_p)
   message_block_p = message_p;

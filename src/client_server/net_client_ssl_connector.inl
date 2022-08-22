@@ -199,7 +199,8 @@ Net_Client_SSL_Connector_T<HandlerType,
     if (unlikely (configuration_->socketConfiguration.hostname.empty ()))
     {
       ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("failed to resolve address; cannot set TLS SNI hostname, continuing\n")));
+                  ACE_TEXT ("failed to resolve address (was: \"%s\"); cannot set TLS SNI hostname, continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address, true, false).c_str ())));
       return 0;
     } // end IF
   } // end IF
