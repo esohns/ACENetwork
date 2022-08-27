@@ -532,8 +532,10 @@ HTTP_Tools::parseURL (const std::string& URL_in,
                        AF_INET);
   else
     result =
-      address_out.set ((port ? port : (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT)),
-                       INADDR_ANY,
+      address_out.set ((port ? static_cast<u_short> (port) 
+                             : (useSSL_out ? static_cast<u_short> (HTTPS_DEFAULT_SERVER_PORT) 
+                                           : static_cast<u_short> (HTTP_DEFAULT_SERVER_PORT))),
+                       static_cast<ACE_UINT32> (INADDR_ANY),
                        1,  // encode port number
                        0); // do not map
   if (unlikely (result == -1))
