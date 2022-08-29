@@ -26,7 +26,6 @@
 #include <string>
 #include <vector>
 
-//#include "ace/streams.h"
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -97,12 +96,9 @@ do_printUsage (const std::string& programName_in)
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -167,7 +163,7 @@ do_printUsage (const std::string& programName_in)
 #endif // ACE_WIN32 || ACE_WIN64
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r          : use reactor [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r           : use reactor [")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
@@ -207,11 +203,9 @@ do_processArguments (const int& argc_in,
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path = Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // DEBUG_DEBUGGER
 
   // initialize results
   autoAssociate_out = true;
@@ -821,12 +815,10 @@ ACE_TMAIN (int argc_in,
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
   bool auto_associate = true;
