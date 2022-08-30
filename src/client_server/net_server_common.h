@@ -34,7 +34,7 @@
 // public:
 //  Net_ListenerConfiguration_T ()
 ////   : Net_ConnectionConfigurationBase_T ()
-//   : addressFamily (ACE_ADDRESS_FAMILY_INET)
+//   : addressFamily (AF_INET)
 //   , connectionConfiguration (NULL)
 //  {}
 

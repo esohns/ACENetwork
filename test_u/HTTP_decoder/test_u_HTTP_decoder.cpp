@@ -490,7 +490,7 @@ do_work (unsigned int bufferSize_in,
     connection_configuration.socketConfiguration.address.set (port_in,
                                                               hostName_in.c_str (),
                                                               1,
-                                                              ACE_ADDRESS_FAMILY_INET);
+                                                              AF_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,

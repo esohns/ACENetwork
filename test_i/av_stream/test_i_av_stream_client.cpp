@@ -1562,7 +1562,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
         NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.address.set (port_in,
                                                                                                      hostName_in.c_str (),
                                                                                                      1,
-                                                                                                     ACE_ADDRESS_FAMILY_INET);
+                                                                                                     AF_INET);
       if (result_2 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1595,7 +1595,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
         NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.address.set (port_in,
                                                                                                      hostName_in.c_str (),
                                                                                                      1,
-                                                                                                     ACE_ADDRESS_FAMILY_INET);
+                                                                                                     AF_INET);
       if (result_2 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1630,7 +1630,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
     NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.address.set (port_in,
                                                                                                  hostName_in.c_str (),
                                                                                                  1,
-                                                                                                 ACE_ADDRESS_FAMILY_INET);
+                                                                                                 AF_INET);
   if (result_2 == -1)
   {
     ACE_DEBUG ((LM_ERROR,

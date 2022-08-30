@@ -789,7 +789,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // step0e: initialize action timer
   ACE_INET_Addr peer_address (serverPortNumber_in,
                               serverHostname_in.c_str (),
-                              ACE_ADDRESS_FAMILY_INET);
+                              AF_INET);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("set peer address: %s\n"),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));

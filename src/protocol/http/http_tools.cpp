@@ -497,7 +497,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
 //  result = address_out.set (port,
 //                            hostname.c_str (),
 //                            1,
-//                            ACE_ADDRESS_FAMILY_INET);
+//                            AF_INET);
 //  if (result == -1)
 //  {
 //    ACE_DEBUG ((LM_ERROR,

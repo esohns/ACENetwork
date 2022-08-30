@@ -3864,14 +3864,14 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
   ACE_ASSERT (destinationAddress_in.get_addr_size () ==
               sizeof (struct sockaddr));
 
-  ACE_HANDLE socket_handle = ACE_OS::socket (ACE_ADDRESS_FAMILY_INET,
+  ACE_HANDLE socket_handle = ACE_OS::socket (AF_INET,
                                              SOCK_DGRAM,
                                              0);
   if (unlikely (socket_handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
-                ACE_ADDRESS_FAMILY_INET, SOCK_DGRAM));
+                AF_INET, SOCK_DGRAM));
     return false;
   } // end IF
 

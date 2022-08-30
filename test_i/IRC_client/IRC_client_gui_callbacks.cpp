@@ -277,7 +277,7 @@ connection_setup_function (void* arg_in)
         configuration_p->socketConfiguration.address.set (current_port,
                                                           data_p->phonebookEntry.hostName.c_str (),
                                                           1,
-                                                          ACE_ADDRESS_FAMILY_INET);
+                                                          AF_INET);
       if (result_3 == -1)
       {
         ACE_DEBUG ((LM_ERROR,

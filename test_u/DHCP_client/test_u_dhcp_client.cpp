@@ -749,7 +749,7 @@ do_work (bool requestBroadcastReplies_in,
       connection_configuration_2.socketConfiguration.listenAddress.set (DHCP_DEFAULT_CLIENT_PORT,
                                                                         ACE_LOCALHOST,
                                                                         1,
-                                                                        ACE_ADDRESS_FAMILY_INET);
+                                                                        AF_INET);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   else if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))

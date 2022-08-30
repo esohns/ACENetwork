@@ -243,7 +243,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             0,                                   // priority
                             COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL, // (real-time) signal
                             //this->addr_family_,                // address family
-                            ACE_ADDRESS_FAMILY_INET);                 
+                            AF_INET);                 
                             //configuration_->addressFamily);
   if (unlikely (result == -1))
   {
@@ -391,7 +391,7 @@ Net_Server_AsynchListener_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
   // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
-  if ((address_type == ACE_ADDRESS_FAMILY_INET) &&
+  if ((address_type == AF_INET)                 &&
       listenAddress_in.is_loopback ()           &&
       NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
     if (unlikely (!Net_Common_Tools::setLoopBackFastPath (listen_handle)))

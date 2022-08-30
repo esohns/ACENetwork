@@ -219,7 +219,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
   // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
-  if (localAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET)
+  if (localAddress_in.get_type () == AF_INET)
   {
     const ACE_INET_Addr* inet_addr_p = NULL;
     inet_addr_p = dynamic_cast<const ACE_INET_Addr*> (&localAddress_in);
