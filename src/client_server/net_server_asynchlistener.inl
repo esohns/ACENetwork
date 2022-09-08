@@ -147,7 +147,7 @@ Net_Server_AsynchListener_T<HandlerType,
   // need to extra 16 bytes, but it doesn't hurt.
   size_t space_needed = sizeof (sockaddr_in) + 16;
 #if defined (ACE_HAS_IPV6)
-  if (PF_INET6 == this->addr_family_)
+  if (PF_INET6 == inherited::addr_family_)
     space_needed = sizeof (sockaddr_in6) + 16;
 #endif /* ACE_HAS_IPV6 */
   space_needed = (2 * space_needed) + bytesToRead_in;
@@ -185,50 +185,6 @@ Net_Server_AsynchListener_T<HandlerType,
     return -1;
   } // end IF
 
-//  // Create a new socket for the connection
-//  ACE_HANDLE accept_handle = ACE_INVALID_HANDLE;
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  accept_handle = ACE_OS::socket (configuration_.addressFamily, // domain
-//                                  SOCK_STREAM,                  // type
-//                                  0,                            // protocol
-//                                  NULL,                         // protocol info
-//                                  0,                            // group
-//                                  WSA_FLAG_OVERLAPPED);         // flags
-//  //if (accept_handle != ACE_INVALID_HANDLE)
-//  //{
-//  //  ACE_Proactor* proactor_p = ACE_Proactor::instance ();
-//  //  ACE_ASSERT (proactor_p);
-//  //  result = proactor_p->register_handle (accept_handle, NULL);
-//  //  if (result == -1)
-//  //  {
-//  //    ACE_DEBUG ((LM_ERROR,
-//  //                ACE_TEXT ("failed to ACE_Proactor::register_handle(0x%@): \"%m\", aborting\n"),
-//  //                accept_handle));
-//  //
-//  //    // clean up
-//  //    message_block_p->release ();
-//
-//  //    return -1;
-//  //  } // end IF
-//  //} // end IF
-//#else
-//  accept_handle = ACE_OS::socket (configuration_.addressFamily, // domain
-//                                  SOCK_STREAM,                  // type
-//                                  0);                           // protocol
-//#endif
-//  if (accept_handle == ACE_INVALID_HANDLE)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
-//                configuration_.addressFamily,
-//                SOCK_STREAM));
-//
-//    // clean up
-//    message_block_p->release ();
-//
-//    return -1;
-//  } // end IF
-
   // Initiate asynchronous accept(s)
   ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
   ILISTENER_T* listener_p = this;
@@ -242,25 +198,13 @@ Net_Server_AsynchListener_T<HandlerType,
                             act_p,                               // ACT
                             0,                                   // priority
                             COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL, // (real-time) signal
-                            //this->addr_family_,                // address family
-                            AF_INET);                 
+                            inherited::addr_family_);            // address family
                             //configuration_->addressFamily);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Accept::accept(): \"%m\", aborting\n")));
     message_block_p->release (); message_block_p = NULL;
-//    result = ACE_OS::closesocket (accept_handle);
-//    if (result == -1)
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-//                  accept_handle));
-//#else
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-//                  accept_handle));
-//#endif
     return -1;
   } // end IF
 

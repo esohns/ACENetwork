@@ -32,10 +32,18 @@ else ()
 endif ()
 add_definitions (-DACESTREAM_HAS_DLL)
 
-if (WIN32 AND (CMAKE_BUILD_TYPE STREQUAL Debug))
- # *NOTE*: DirectShow uses 'DEBUG'
- add_definitions (-DDEBUG) # activate DirectShow debug logging
-endif (WIN32 AND (CMAKE_BUILD_TYPE STREQUAL Debug))
+if (WIN32)
+ if (MSVC)
+  add_compile_options (/bigobj)
+# else ()
+#  add_compile_options(-Wa,-mbig-obj)
+ endif (MSVC)
+
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+# *NOTE*: DirectShow uses 'DEBUG'
+  add_definitions (-DDEBUG) # activate DirectShow debug logging
+ endif (CMAKE_BUILD_TYPE STREQUAL Debug)
+endif (WIN32)
 
 if (FFMPEG_SUPPORT)
  include_directories (${ffmpeg_INCLUDE_DIRS})

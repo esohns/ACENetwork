@@ -847,7 +847,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
     result =
       MFSetAttributeSize (configuration_in.configuration_->format.video,
                           MF_MT_FRAME_RATE,
-                          STREAM_DEV_CAM_DEFAULT_CAPTURE_RATE, 1);
+                          STREAM_DEV_CAM_DEFAULT_CAPTURE_FRAME_RATE, 1);
     ACE_ASSERT (SUCCEEDED (result));
     result =
         MFSetAttributeSize (configuration_in.configuration_->format.video,
