@@ -70,3 +70,7 @@ CMakeLists.txt.user*
 #modules/ACE
 #modules/Common
 #modules/ACEStream
+
+# data
+*.torrent
+*.mmdb
