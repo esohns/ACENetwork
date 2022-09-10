@@ -1095,7 +1095,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   stream_configuration.format.video.format.width =
       STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH ;
   stream_configuration.format.video.frameRate.numerator =
-      STREAM_DEV_CAM_DEFAULT_CAPTURE_RATE;
+      STREAM_DEV_CAM_DEFAULT_CAPTURE_FRAME_RATE;
 
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
