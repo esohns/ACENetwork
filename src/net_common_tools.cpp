@@ -1310,7 +1310,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
     return false;
   } // end IF
   unsigned char* data_p = NULL;
-  unsigned int file_size_i = 0;
+  ACE_UINT64 file_size_i = 0;
   if (unlikely (!Common_File_Tools::load (filename_string,
                                           data_p,
                                           file_size_i,

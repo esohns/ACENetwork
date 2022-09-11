@@ -380,7 +380,7 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_FlexBisonParserConfigur
 #endif // ACE_WIN32 || ACE_WIN64
 
   unsigned char* data_p = NULL;
-  unsigned int file_size_i = 0;
+  ACE_UINT64 file_size_i = 0;
   if (unlikely (!Common_File_Tools::load (metaInfoFileName_in,
                                           data_p,
                                           file_size_i,
@@ -810,7 +810,7 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
 
   // step3: process piece(s)
   uint8_t* data_p = NULL, *data_2 = NULL;
-  unsigned int file_size = 0;
+  ACE_UINT64 file_size_i = 0;
   Bencoding_DictionaryIterator_t iterator = metaInfo_in.begin ();
   std::string directory_name_string;
   for (;
@@ -851,8 +851,8 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
       break;
   ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
   ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-  unsigned int current_file_length =
-    static_cast<unsigned int> ((*iterator_4).second->integer);
+  ACE_UINT64 current_file_length =
+    static_cast<ACE_UINT64> ((*iterator_4).second->integer);
   iterator_4 = (*iterator_3)->dictionary->begin ();
   for (;
        iterator_4 != (*iterator_3)->dictionary->end ();
@@ -880,7 +880,7 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
     // step1: load the current piece file into memory
     if (!Common_File_Tools::load (current_piece_file,
                                   data_p,
-                                  file_size,
+                                  file_size_i,
                                   0))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -892,8 +892,8 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
 
     // step2: write to the current file
 write_file:
-    bytes_to_write = ((file_size >= current_file_length) ? current_file_length
-                                                         : file_size);
+    bytes_to_write = ((file_size_i >= current_file_length) ? current_file_length
+                                                           : file_size_i);
     if (!Common_File_Tools::store (current_file_path_on_disk,
                                    data_2,
                                    bytes_to_write,
@@ -906,11 +906,11 @@ write_file:
       return false;
     } // end IF
     current_file_length -= bytes_to_write;
-    file_size -= bytes_to_write;
+    file_size_i -= bytes_to_write;
     data_2 += bytes_to_write;
     if (current_file_length)
     { // *NOTE*: wrote at least file_size bytes here
-      ACE_ASSERT (!file_size);
+      ACE_ASSERT (!file_size_i);
       // --> load the next piece and continue
       delete[] data_p; data_p = NULL; data_2 = NULL;
       continue;
@@ -945,11 +945,11 @@ write_file:
       current_file_path_on_disk += directory_name_string;
       current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
       current_file_path_on_disk += current_file_path;
-      if (file_size)
+      if (file_size_i)
         goto write_file; // there is data left
       // --> load the next piece and continue
     } // end IF
-    ACE_ASSERT (!file_size);
+    ACE_ASSERT (!file_size_i);
     delete [] data_p; data_p = NULL;
   } // end FOR
 
@@ -1134,7 +1134,7 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
 
   std::string filename_string;
   uint8_t* data_p = NULL;
-  unsigned int file_size = 0;
+  ACE_UINT64 file_size_i = 0;
   ACE_Message_Block* message_block_p = NULL;
   struct BitTorrent_Piece_Chunk chunk_s;
   BitTorrent_PiecesIterator_t iterator_2;
@@ -1152,7 +1152,7 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
     filename_string += (*iterator).identifier;
     if (!Common_File_Tools::load (filename_string,
                                   data_p,
-                                  file_size,
+                                  file_size_i,
                                   0))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1162,7 +1162,7 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
     } // end IF
     ACE_NEW_NORETURN (message_block_p,
                       ACE_Message_Block (reinterpret_cast<char*> (data_p),
-                                         static_cast<size_t> (file_size),
+                                         file_size_i,
                                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY));
     if (!message_block_p)
     {
@@ -1171,7 +1171,7 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
       delete [] data_p; data_p = NULL;
       goto error;
     } // end IF
-    message_block_p->wr_ptr (file_size);
+    message_block_p->wr_ptr (file_size_i);
     message_block_p->clr_flags (ACE_Message_Block::DONT_DELETE);
 
     chunk_s.data = message_block_p;
@@ -1180,10 +1180,10 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
     ACE_ASSERT (iterator_2 != pieces_inout.end ());
     (*iterator_2).chunks.push_back (chunk_s);
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s: loaded piece#%u (%u byte(s)...\n"),
+                ACE_TEXT ("%s: loaded piece#%u (%Q byte(s)...\n"),
                 ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
                 piece_index_i,
-                file_size));
+                file_size_i));
   } // end FOR
 
   return true;
