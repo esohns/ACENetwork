@@ -933,10 +933,11 @@ Net_OS_Tools::isIfUpDownManagingInterface (const std::string& interfaceIdentifie
   Net_InterfaceIdentifiers_t managed_interface_identifiers_a,
       unmanaged_interface_identifiers_a;
   unsigned char* data_p = NULL;
-  unsigned int file_size_i = 0;
+  ACE_UINT64 file_size_i = 0;
   if (unlikely (!Common_File_Tools::load (configuration_file_path,
                                           data_p,
-                                          file_size_i)))
+                                          file_size_i,
+                                          0)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
