@@ -83,12 +83,12 @@ class Net_AsynchUDPSocketHandler_T
   // implement (part of) Net_IAsynchSocketHandler
   virtual bool initiate_read (ACE_Message_Block*&); // buffer
 
-  ACE_INET_Addr          address_;
   // the number of open write (i.e. send) requests
   mutable COUNTER_T      counter_;
 #if defined (ACE_LINUX)
   bool                   errorQueue_;
 #endif // ACE_LINUX
+  bool                   handleCloseCalled_;
   ACE_Asynch_Read_Dgram  inputStream_;
   ACE_Asynch_Write_Dgram outputStream_;
   unsigned int           PDUSize_; // --> MTU
@@ -155,12 +155,12 @@ class Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
   // implement (part of) Net_IAsynchSocketHandler
   virtual bool initiate_read (ACE_Message_Block*&); // buffer
 
-  ACE_INET_Addr          address_;
   // the number of open write (i.e. send) requests
   mutable COUNTER_T      counter_;
 #if defined (ACE_LINUX)
   bool                   errorQueue_;
 #endif // ACE_LINUX
+  bool                   handleCloseCalled_;
   ACE_Asynch_Read_Dgram  inputStream_;
   ACE_Asynch_Write_Dgram outputStream_;
   unsigned int           PDUSize_; // --> MTU

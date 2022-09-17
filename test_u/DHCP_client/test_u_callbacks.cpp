@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "net_common.h"
 #include "stdafx.h"
 
 #include "test_u_callbacks.h"
@@ -43,6 +44,8 @@
 #include "common_ui_gtk_tools.h"
 
 #include "net_macros.h"
+
+#include "net_client_common_tools.h"
 
 #include "test_u_common.h"
 #include "test_u_session_message.h"
@@ -1908,121 +1911,52 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       data_p->configuration->handle = ACE_INVALID_HANDLE;
     } // end IF
 
-    // connect (broadcast)
+    // connect (unicast)
     DHCPClient_StreamConfiguration_t::ITERATOR_T iterator_2 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
     DHCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
+    DHCPClient_InboundConnector_t connector (true);
+    DHCPClient_InboundAsynchConnector_t asynch_connector (true);
     DHCPClient_InboundConnectorBcast_t connector_bcast (true);
     DHCPClient_InboundAsynchConnectorBcast_t asynch_connector_bcast (true);
-    DHCPClient_IConnector_t* iconnector_p = NULL;
     Net_ConnectionConfigurationsIterator_t iterator_3 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
-
-//    bool socket_connect = (*iterator_3).second.connect;
-//    (*iterator_3).second.connect = false;
-//    bool write_only = (*iterator_3).second.writeOnly;
-//    (*iterator_3).second.writeOnly = false;
-    //data_p->configuration->listenerConfiguration.address = (ACE_INET_Addr&)ACE_Addr::sap_any;
-    int result = -1;
-    result =
-      NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                                                                                // *IMPORTANT NOTE*: this needs to be INADDR_ANY (0.0.0.0) (instead of
-                                                                                                //                   255.255.255.255: why ?)
-                                                                                                static_cast<ACE_UINT32> (INADDR_ANY),
-#else
-                                                                                                static_cast<ACE_UINT32> (INADDR_BROADCAST),
-#endif // ACE_WIN32 || ACE_WIN64
-                                                                                                1,
-                                                                                                0);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-      goto continue_;
-    } // end IF
+    Net_ConnectionConfigurationsIterator_t iterator_4 =
+        data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
+    ACE_ASSERT (iterator_4 != data_p->configuration->connectionConfigurations.end ());
+    struct Net_UserData user_data_s;
 
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
-      iconnector_p = &connector_bcast;
+      data_p->configuration->handle =
+          Net_Client_Common_Tools::connect (connector,
+                                            *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                            user_data_s,
+                                            static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                            true,
+                                            false);
     else
-      iconnector_p = &asynch_connector_bcast;
-    if (!iconnector_p->initialize (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-      goto continue_;
-    } // end IF
-
-    // step1: initialize connection manager
-//    peer_address =
-//        data_p->configuration->socketConfiguration.address;
-//    data_p->configuration->socketConfiguration.address =
-//        data_p->configuration->listenerConfiguration.address;
-    connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                               &data_p->configuration->userData);
-//    handle_connection_manager = true;
-
-    // step2: connect (broadcast)
-    data_p->configuration->handle =
-        iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress);
-    // *TODO*: support one-thread operation by scheduling a signal and manually
-    //         running the dispatch loop for a limited time...
-    if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
-    {
-      data_p->configuration->handle = ACE_INVALID_HANDLE;
-
-      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                              0);
-      ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-      DHCPClient_InboundAsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
-      // *TODO*: avoid tight loop here
-      do
-      {
-        iconnection_p =
-          connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                     false);
-        if (iconnection_p)
-        {
-          data_p->configuration->handle =
+      data_p->configuration->handle =
+          Net_Client_Common_Tools::connect (asynch_connector,
+                                            *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                            user_data_s,
+                                            static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                            true,
+                                            false);
+    if (data_p->configuration->handle != ACE_INVALID_HANDLE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-              reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
-#else
-              static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
-          break;
-        } // end IF
-      } while (COMMON_TIME_NOW < deadline);
-      if (iconnection_p)
-      {
-        iconnection_p->decrease (); iconnection_p = NULL;
-      } // end IF
-      else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to connect to %s (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ()),
-                    &timeout));
-    } // end IF
-    if (data_p->configuration->handle == ACE_INVALID_HANDLE)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, returning\n"),
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
+                  data_p->configuration->handle,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
-      goto continue_;
-    } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
-                data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
 #else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened UDP socket: %s\n"),
-                data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: opened UDP socket: %s\n"),
+                  data_p->configuration->handle,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
     // connect (broadcast) ?
@@ -2031,123 +1965,34 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       failed = false;
       goto continue_;
     } // end IF
-    iterator_3 =
-          data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
-    ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
 
-//    if ((*iterator_3).second.useLoopBackDevice)
-//      result =
-//        (*iterator_3).second.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-//                                                static_cast<ACE_UINT32> (INADDR_LOOPBACK),
-//                                                1,
-//                                                0);
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    else if (!InlineIsEqualGUID ((*iterator_3).second.interfaceIdentifier, GUID_NULL))
-//#else
-//    else if (!(*iterator_3).second.interfaceIdentifier.empty ())
-//#endif
-//    {
-//      ACE_INET_Addr gateway_address;
-//      if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_3).second.interfaceIdentifier,
-//                                                   (*iterator_3).second.listenAddress,
-//                                                   gateway_address))
-//      {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
-//                    ACE_TEXT ((*iterator_3).second.interfaceIdentifier).c_str ())));
-//#else
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), continuing\n"),
-//                    ACE_TEXT ((*iterator_3).second.interfaceIdentifier.c_str ()),
-//                    NULL));
-//#endif
-//        result = -1;
-//      } // end IF
-//      (*iterator_3).second.listenAddress.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
-//                                                          1);
-//      result = 0;
-//    } // end ELSE IF
-//    else
-//      result =
-//        (*iterator_3).second.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-//                                                static_cast<ACE_UINT32> (INADDR_ANY),
-//                                                1,
-//                                                0);
-//    if (result == -1)
-//    {
-//        ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
-//      goto continue_;
-//    } // end IF
-
-    // step1: initialize connection manager
-//    peer_address =
-//        data_p->configuration->socketConfiguration.address;
-//    data_p->configuration->socketConfiguration.address =
-//        data_p->configuration->listenerConfiguration.address;
-    connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                               &data_p->configuration->userData);
-//    handle_connection_manager = true;
-
-    // step2: connect
-    data_p->configuration->broadcastHandle =
-        iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress);
-    // *TODO*: support one-thread operation by scheduling a signal and manually
-    //         running the dispatch loop for a limited time...
-    if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
-    {
-      data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
-
-      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                              0);
-      ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-      DHCPClient_InboundAsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
-      // *TODO*: avoid tight loop here
-      do
-      {
-        iconnection_p =
-            connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                       false);
-        if (iconnection_p)
-        {
-          data_p->configuration->broadcastHandle =
+    if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+      data_p->configuration->broadcastHandle =
+          Net_Client_Common_Tools::connect (connector_bcast,
+                                            *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second),
+                                            user_data_s,
+                                            static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second)->socketConfiguration.listenAddress,
+                                            true,
+                                            false);
+    else
+      data_p->configuration->broadcastHandle =
+          Net_Client_Common_Tools::connect (asynch_connector_bcast,
+                                            *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second),
+                                            user_data_s,
+                                            static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second)->socketConfiguration.listenAddress,
+                                            true,
+                                            false);
+    if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-              reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
+                  data_p->configuration->broadcastHandle,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_4).second)->socketConfiguration.listenAddress).c_str ())));
 #else
-              static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif // ACE_WIN32 || ACE_WIN64
-          iconnection_p->decrease (); iconnection_p = NULL;
-          break;
-        } // end IF
-      } while (COMMON_TIME_NOW < deadline);
-      if (iconnection_p)
-      {
-        iconnection_p->decrease (); iconnection_p = NULL;
-      } // end IF
-      else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to connect to \"%s\" (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ()),
-                    &timeout));
-    } // end IF
-    if (data_p->configuration->broadcastHandle == ACE_INVALID_HANDLE)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
-      goto continue_;
-    } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
-                data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened UDP socket: %s\n"),
-                data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: opened UDP socket: %s\n"),
+                  data_p->configuration->broadcastHandle,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_4).second)->socketConfiguration.listenAddress).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
     failed = false;
@@ -2325,9 +2170,9 @@ button_about_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
 
   // sanity check(s)
-  ACE_ASSERT (userData_in);
   struct DHCPClient_UI_CBData* data_p =
       static_cast<struct DHCPClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -2368,31 +2213,31 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   int result = -1;
 
   ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (userData_in);
-  //Stream_GTK_CBData* data_p = static_cast<Stream_GTK_CBData*> (userData_in);
-  //// sanity check(s)
-  //ACE_ASSERT (data_p);
 
-  //// step1: remove event sources
-  //{
-  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);
+  // sanity check(s)
+  struct DHCPClient_UI_CBData* data_p =
+      static_cast<struct DHCPClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
 
-  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
-  //       iterator != data_p->eventSourceIds.end ();
-  //       iterator++)
-  //    if (!g_source_remove (*iterator))
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-  //                  *iterator));
-  //  data_p->eventSourceIds.clear ();
-  //} // end lock scope
+  // step1: remove event sources
+  { ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);
+    for (Common_UI_GTK_EventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
+         iterator != data_p->UIState->eventSourceIds.end ();
+         iterator++)
+      if (!g_source_remove (*iterator))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    *iterator));
+    data_p->UIState->eventSourceIds.clear ();
+  } // end lock scope
 
   // step2: initiate shutdown sequence
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   int signal = SIGINT;
 #else
   int signal = SIGQUIT;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   result = ACE_OS::raise (signal);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,

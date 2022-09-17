@@ -1290,7 +1290,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   if (unlikely (!inherited::isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to HandlerType::open (handle was: %u), aborting\n"),
+                ACE_TEXT ("%u: failed to HandlerType::open (handle was: %d), aborting\n"),
                 id (),
                 handle_in));
     goto error;

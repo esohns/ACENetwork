@@ -256,11 +256,18 @@ struct DHCPClient_Configuration
    , connectionConfigurations ()
    , parserConfiguration ()
    , streamConfiguration ()
-//   , listenerConfiguration ()
+   , protocolConfiguration ()
    , broadcastHandle (ACE_INVALID_HANDLE)
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , handle (ACE_INVALID_HANDLE)
-  {}
+  {
+    // *NOTE*: on linux systems, port 68 is taken (by systemd ?; see: `netstat -u --numeric-ports -p`)
+    //         --> request broadcast replies
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    protocolConfiguration.requestBroadcastReplies = true;
+#endif // ACE_WIN32 || ACE_WIN64
+  }
 
   struct DHCP_AllocatorConfiguration           allocatorConfiguration;
   // **************************** signal data **********************************

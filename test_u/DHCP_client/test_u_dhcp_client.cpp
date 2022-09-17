@@ -38,7 +38,6 @@
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
-//#include "ace/Synch.h"
 #include "ace/Version.h"
 
 #if defined (HAVE_CONFIG_H)
@@ -84,6 +83,7 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "net_client_common_tools.h"
 #include "net_client_defines.h"
 
 #include "dhcp_defines.h"
@@ -178,12 +178,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-#endif
-  // *TODO*: this doesn't really make sense (see '-n' option)
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-o          : use loopback [")
-            << NET_INTERFACE_DEFAULT_USE_LOOPBACK
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
+#endif // ACE_WIN32 || ACE_WIN64
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-q          : send request on offer [")
             << TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -234,7 +229,6 @@ do_processArguments (int argc_in,
 #else
                      std::string& interfaceIdentifier_out,
 #endif // ACE_WIN32 || ACE_WIN64
-                     bool& useLoopback_out,
                      bool& sendRequestOnOffer_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
@@ -279,9 +273,8 @@ do_processArguments (int argc_in,
 #endif // _WIN32_WINNT_VISTA
 #else
   interfaceIdentifier_out =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
-  useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   sendRequestOnOffer_out = TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
   useReactor_out =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -297,22 +290,22 @@ do_processArguments (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("bde:f::g::loqrs:tvx:"),
+                              ACE_TEXT ("bde:f::g::lqrs:tvx:"),
 #else
-                              ACE_TEXT ("bdf::g::loqrs:tvx:"),
+                              ACE_TEXT ("bdf::g::lqrs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("bdf::loqrs:tvx:"),
+                              ACE_TEXT ("bdf::lqrs:tvx:"),
 #endif // GUI_SUPPORT
 #else
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                              ACE_TEXT ("bde:f::g::ln::oqrs:tvx:"),
+                              ACE_TEXT ("bde:f::g::ln::qrs:tvx:"),
 #else
-                              ACE_TEXT ("bdf::g::ln::oqrs:tvx:"),
+                              ACE_TEXT ("bdf::g::ln::qrs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("bdf::ln::oqrs:tvx:"),
+                              ACE_TEXT ("bdf::ln::qrs:tvx:"),
 #endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                               1,                         // skip command name
@@ -381,12 +374,7 @@ do_processArguments (int argc_in,
           interfaceIdentifier_out.clear ();
         break;
       }
-#endif
-      case 'o':
-      {
-        useLoopback_out = true;
-        break;
-      }
+#endif // ACE_WIN32 || ACE_WIN64
       case 'q':
       {
         sendRequestOnOffer_out = true;
@@ -535,7 +523,6 @@ do_work (bool requestBroadcastReplies_in,
 #else
          const std::string& interfaceIdentifier_in,
 #endif // ACE_WIN32 || ACE_WIN64
-         bool useLoopback_in,
          bool sendRequestOnOffer_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
@@ -666,13 +653,12 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
 
-  //if (useReactor_in)
-  //  ;
-  //else
-  //  connection_configuration.socketConfiguration.connect = true;
+  if (useReactor_in)
+    ;
+  else
+    connection_configuration.socketConfiguration.connect = true;
   connection_configuration.delayRead = true;
   connection_configuration.socketConfiguration.interfaceIdentifier = interfaceIdentifier_in;
-  connection_configuration.socketConfiguration.useLoopBackDevice = useLoopback_in;
   connection_configuration.socketConfiguration.writeOnly = true;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
@@ -744,20 +730,14 @@ do_work (bool requestBroadcastReplies_in,
   connection_configuration_2.delayRead = false;
   connection_configuration_2.socketConfiguration.connect = false;
   connection_configuration_2.socketConfiguration.writeOnly = false;
-  if (useLoopback_in)
-    result =
-      connection_configuration_2.socketConfiguration.listenAddress.set (DHCP_DEFAULT_CLIENT_PORT,
-                                                                        ACE_LOCALHOST,
-                                                                        1,
-                                                                        AF_INET);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  else if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
+  if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #else
-  else if (!interfaceIdentifier_in.empty ())
+  if (!interfaceIdentifier_in.empty ())
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-  else if (!interfaceIdentifier_in.empty ())
+  if (!interfaceIdentifier_in.empty ())
 #endif // ACE_WIN32 || ACE_WIN64
   {
     ACE_INET_Addr gateway_address;
@@ -792,7 +772,7 @@ do_work (bool requestBroadcastReplies_in,
       result = -1;
     } // end IF
     connection_configuration_2.socketConfiguration.listenAddress.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
-                                                                                1);
+                                                                                  1);
     result = 0;
   } // end ELSE IF
   else
@@ -813,7 +793,7 @@ do_work (bool requestBroadcastReplies_in,
   connection_configuration_3 = connection_configuration_2;
   result =
     connection_configuration_3.socketConfiguration.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                      static_cast<ACE_UINT32> (INADDR_NONE),
+                                                                      static_cast<ACE_UINT32> (INADDR_BROADCAST),
                                                                       1,
                                                                       0);
   if (result == -1)
@@ -850,9 +830,9 @@ do_work (bool requestBroadcastReplies_in,
   ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
 
   DHCPClient_IConnection_t* iconnection_p = NULL;
-  DHCPClient_IOutboundStreamConnection_t* istream_connection_p = NULL;
+//  DHCPClient_IOutboundStreamConnection_t* istream_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+//  enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //  Test_U_MessageData* message_data_p = NULL;
 //  Test_U_MessageData_t* message_data_container_p = NULL;
   Test_U_Message* message_p = NULL;
@@ -860,8 +840,8 @@ do_work (bool requestBroadcastReplies_in,
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
-                             &configuration_in.userData);
+//  connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
+//                             &configuration_in.userData);
 
   // step0d: initialize regular (global) statistic reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -943,8 +923,8 @@ do_work (bool requestBroadcastReplies_in,
   //         connection to the unicast address is handled by the discovery
   //         module
 //  configuration_in.streamConfiguration.configuration_.module = NULL;
-  connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
-                             &configuration_in.userData);
+//  connection_manager_p->set (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
+//                             &configuration_in.userData);
 
   //Test_U_OutboundConnector_t connector (connection_manager_p,
   //                                      configuration_in.statisticReportingInterval);
@@ -952,86 +932,34 @@ do_work (bool requestBroadcastReplies_in,
   //                                                   configuration_in.statisticReportingInterval);
   DHCPClient_OutboundConnectorBcast_t connector (true);
   DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector (true);
+  struct Net_UserData user_data_s;
   if (useReactor_in)
-    iconnector_p = &connector;
+    handle =
+        Net_Client_Common_Tools::connect (connector,
+                                          *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                          user_data_s,
+                                          static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second)->socketConfiguration.peerAddress,
+                                          true,
+                                          true);
   else
-    iconnector_p = &asynch_connector;
-  if (unlikely (!iconnector_p->initialize (*static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second))))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector, returning\n")));
-    return;
-  } // end IF
-  handle =
-    iconnector_p->connect (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress);
-  if (unlikely (handle == ACE_INVALID_HANDLE))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
-    return;
-  } // end IF
-  if (unlikely (iconnector_p->useReactor ()))
+    handle =
+        Net_Client_Common_Tools::connect (asynch_connector,
+                                          *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                          user_data_s,
+                                          static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator).second)->socketConfiguration.peerAddress,
+                                          true,
+                                          true);
+  if (unlikely (useReactor_in))
     (*iterator_2).second.second->connection =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else
         connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   else
-  {
-    // step1: wait for the connection to register with the manager
-    deadline = COMMON_TIME_NOW +
-               ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                               0);
-    // *TODO*: avoid tight loop here
-    do
-    {
-      (*iterator_2).second.second->connection =
-          connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress);
-      if ((*iterator_2).second.second->connection)
-        break;
-    } while (COMMON_TIME_NOW < deadline);
-  } // end IF
-  if (unlikely (!(*iterator_2).second.second->connection))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
-    return;
-  } // end IF
-  // step1b: wait for the connection to finish initializing
-  // *TODO*: avoid tight loop here
-  deadline = COMMON_TIME_NOW + timeout;
-  do
-  {
-    status =
-      (*iterator_2).second.second->connection->status ();
-    if (status == NET_CONNECTION_STATUS_OK)
-      break;
-  } while (COMMON_TIME_NOW < deadline);
-  if (unlikely (status != NET_CONNECTION_STATUS_OK))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ()),
-                status));
-    (*iterator_2).second.second->connection->decrease ();
-    return;
-  } // end IF
-  // step1c: wait for the connection stream to finish initializing
-  istream_connection_p =
-    dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> ((*iterator_2).second.second->connection);
-  if (unlikely (!istream_connection_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(%@), returning\n"),
-                (*iterator_2).second.second->connection));
-    (*iterator_2).second.second->connection->decrease ();
-    return;
-  } // end IF
-  istream_connection_p->wait (STREAM_STATE_RUNNING,
-                              NULL); // <-- block
+    (*iterator_2).second.second->connection =
+        connection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
+                                   true);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
               (*iterator_2).second.second->connection->id (),
@@ -1447,7 +1375,6 @@ ACE_TMAIN (int argc_in,
 #else
   std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
-  bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   bool send_request_on_offer =
       TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
   bool use_reactor =
@@ -1483,7 +1410,6 @@ ACE_TMAIN (int argc_in,
 #else
                             interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
-                            use_loopback,
                             send_request_on_offer,
                             use_reactor,
                             statistic_reporting_interval,
@@ -1768,7 +1694,6 @@ ACE_TMAIN (int argc_in,
 #else
            interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
-           use_loopback,
            send_request_on_offer,
            use_reactor,
            statistic_reporting_interval,

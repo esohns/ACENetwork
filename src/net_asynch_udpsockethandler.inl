@@ -49,11 +49,11 @@ Net_AsynchUDPSocketHandler_T<SocketType,
  , inherited3 ()
  , inherited4 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
- , address_ ()
  , counter_ (0) // initial count
 #if defined (ACE_LINUX)
  , errorQueue_ (NET_SOCKET_DEFAULT_ERRORQUEUE)
 #endif // ACE_LINUX
+ , handleCloseCalled_ (false)
  , inputStream_ ()
  , outputStream_ ()
  , PDUSize_ (NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE)
@@ -490,8 +490,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     } // end IF
   } // end IF
 
-  // *TODO*: remove type inferences
-  address_ = inherited::configuration_->peerAddress;
   // *NOTE*: IP_MTU works only on connect()ed sockets (see man 7 ip)
   // *TODO*: to be disambiguated
   PDUSize_ = Net_Common_Tools::getMTU (handle);
@@ -654,11 +652,9 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     ((writeHandle_ != ACE_INVALID_HANDLE) && // handle multiple invocations
      (writeHandle_ == inherited2::get_handle ()));
   if (is_writeonly_b &&    // 'writeOnly'
-      !address_.is_any ()) // avoid recursion
+      !handleCloseCalled_) // avoid recursion
   {
-    static ACE_INET_Addr inet_addr_sap_any (ACE_sap_any_cast (const ACE_INET_Addr&));
-    ACE_INET_Addr source_SAP = inet_addr_sap_any;
-    address_ = inet_addr_sap_any;
+    handleCloseCalled_ = true;
     return this->handle_close (handle_in,
                                mask_in);
   } // end IF
@@ -874,7 +870,8 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   int result = -1;
   bool close = false;
 
-  // sanity check
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
   if (unlikely (!result_in.success ()))
   {
     unsigned long error = result_in.error ();
@@ -893,7 +890,8 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 //        (error != EDESTADDRREQ) // 89:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: %d, address: %s): \"%s\", aborting\n"),
-                  result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
+                  result_in.handle (),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
@@ -976,11 +974,11 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
  , inherited3 ()
  , inherited4 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
- , address_ ()
  , counter_ (0) // initial count
 #if defined (ACE_LINUX)
  , errorQueue_ (NET_SOCKET_DEFAULT_ERRORQUEUE)
 #endif // ACE_LINUX
+ , handleCloseCalled_ (false)
  , inputStream_ ()
  , outputStream_ ()
  , PDUSize_ (NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE)
@@ -1406,8 +1404,6 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
     } // end IF
   } // end IF
 
-  // *TODO*: remove type inferences
-  address_ = inherited::configuration_->peerAddress;
   // *NOTE*: IP_MTU works only on connect()ed sockets (see man 7 ip)
   // *TODO*: to be disambiguated
   PDUSize_ = Net_Common_Tools::getMTU (handle);
@@ -1569,11 +1565,9 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
     ((writeHandle_ != ACE_INVALID_HANDLE) && // handle multiple invocations
      (writeHandle_ == inherited2::get_handle ()));
   if (is_writeonly_b &&    // 'writeOnly'
-      !address_.is_any ()) // avoid recursion
+      !handleCloseCalled_) // avoid recursion
   {
-    static ACE_INET_Addr inet_addr_sap_any (ACE_sap_any_cast (const ACE_INET_Addr&));
-    ACE_INET_Addr source_SAP = inet_addr_sap_any;
-    address_ = inet_addr_sap_any;
+    handleCloseCalled_ = true;
     return this->handle_close (handle_in,
                                mask_in);
   } // end IF

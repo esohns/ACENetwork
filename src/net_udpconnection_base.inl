@@ -764,12 +764,12 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
       inherited::stream_.upstream (true);
   ACE_Message_Block* message_block_p = NULL;// , * message_block_2, * message_block_3 = NULL;
-//  unsigned int length = 0;
   size_t bytes_sent = 0;
   ssize_t result_2 = 0;
 
   // *TODO*: this is obviously flaky; remove ASAP
   // sanity check(s)
+  ACE_ASSERT (inherited::HANDLER_T::configuration_);
   if (likely (!stream_p))
     stream_p = &(inherited::stream_);
   ACE_ASSERT (stream_p);
@@ -845,13 +845,13 @@ send:
 #endif // ACE_WIN32 || ACE_WIN64
     // *NOTE*: this is a fire-and-forget API for message_block_p
     result_2 =
-      inherited::outputStream_.send (message_block_p,                      // data
-                                     bytes_sent,                           // #bytes sent
-                                     0,                                    // flags
-                                     inherited::address_,                  // peer address
-                                     NULL,                                 // asynchronous completion token
-                                     0,                                    // priority
-                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+      inherited::outputStream_.send (message_block_p,                        // data
+                                     bytes_sent,                             // #bytes sent
+                                     0,                                      // flags
+                                     inherited::HANDLER_T::configuration_->peerAddress, // peer address
+                                     NULL,                                   // asynchronous completion token
+                                     0,                                      // priority
+                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);   // signal
     if (unlikely (result_2 == -1))
     {
       int error = ACE_OS::last_error ();
@@ -945,7 +945,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                     ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  peerSAP_out = inherited::address_;
+  peerSAP_out = inherited::HANDLER_T::configuration_->peerAddress;
 }
 
 template <typename SocketHandlerType,
