@@ -232,13 +232,28 @@ idle_initialize_UI_cb (gpointer userData_in)
                              0.0,
                              static_cast<gdouble> (std::numeric_limits<ACE_UINT64>::max ()));
 
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end());
+  GtkEntry* entry_p =
+      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_DESTINATION_NAME)));
+  ACE_ASSERT (entry_p);
+  GtkEntryBuffer* entry_buffer_p = gtk_entry_get_buffer (entry_p);
+  ACE_ASSERT (entry_buffer_p);
+  gtk_entry_buffer_set_text (entry_buffer_p,
+                             Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress,
+                                                                  true,
+                                                                  false).c_str (),
+                             -1);
+
   spin_button_p =
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_PORT_NAME)));
   ACE_ASSERT (spin_button_p);
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+  //iterator_2 =
+  //  data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+  //ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.get_port_number ()));
 
@@ -296,12 +311,6 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
                                 (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR));
-  check_button_p =
-    GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
-  ACE_ASSERT (check_button_p);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice);
 
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -310,11 +319,9 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
-
   size_t pdu_size_i =
     NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->allocatorConfiguration->defaultBufferSize +
     NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->allocatorConfiguration->paddingBytes;
-
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (pdu_size_i));
 

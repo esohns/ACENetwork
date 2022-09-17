@@ -311,17 +311,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="n_rows">2</property>
-                                <property name="n_columns">2</property>
-                                <property name="homogeneous">True</property>
-                                <child>
-                                  <object class="GtkLabel" id="label_messages">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">messages</property>
-                                    <property name="track_visited_links">False</property>
-                                  </object>
-                                </child>
                                 <child>
                                   <object class="GtkVBox" id="vbox_messages">
                                     <property name="visible">True</property>
@@ -335,6 +324,7 @@
                                         <property name="tooltip_markup" translatable="yes">session messages</property>
                                         <property name="tooltip_text" translatable="yes">session messages</property>
                                         <property name="editable">False</property>
+                                        <property name="has_frame">False</property>
                                         <property name="invisible_char">●</property>
                                         <property name="xalign">1</property>
                                         <property name="caps_lock_warning">False</property>
@@ -356,6 +346,7 @@
                                         <property name="tooltip_markup" translatable="yes">data messages</property>
                                         <property name="tooltip_text" translatable="yes">data messages</property>
                                         <property name="editable">False</property>
+                                        <property name="has_frame">False</property>
                                         <property name="invisible_char">●</property>
                                         <property name="xalign">1</property>
                                         <property name="caps_lock_warning">False</property>
@@ -370,21 +361,8 @@
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="right_attach">2</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="label_data">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">data</property>
-                                    <property name="track_visited_links">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="top_attach">1</property>
-                                    <property name="bottom_attach">2</property>
+                                    <property name="x_options">GTK_FILL</property>
+                                    <property name="y_options">GTK_FILL</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -396,6 +374,7 @@
                                     <property name="tooltip_markup" translatable="yes">bytes</property>
                                     <property name="tooltip_text" translatable="yes">bytes</property>
                                     <property name="editable">False</property>
+                                    <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
                                     <property name="xalign">1</property>
                                     <property name="caps_lock_warning">False</property>
@@ -403,10 +382,9 @@
                                     <property name="numeric">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="right_attach">2</property>
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
+                                    <property name="y_options">GTK_FILL</property>
                                   </packing>
                                 </child>
                               </object>
@@ -526,6 +504,7 @@
                                             <property name="receives_default">True</property>
                                             <property name="tooltip_markup" translatable="yes">host</property>
                                             <property name="tooltip_text" translatable="yes">host</property>
+                                            <property name="has_frame">False</property>
                                             <property name="invisible_char">●</property>
                                             <property name="text" translatable="yes">localhost</property>
                                             <property name="caps_lock_warning">False</property>
@@ -553,6 +532,7 @@
                                             <property name="tooltip_markup" translatable="yes">port</property>
                                             <property name="tooltip_text" translatable="yes">port</property>
                                             <property name="max_length">5</property>
+                                            <property name="has_frame">False</property>
                                             <property name="invisible_char">●</property>
                                             <property name="width_chars">10</property>
                                             <property name="xalign">1</property>
@@ -749,26 +729,7 @@
                                                             </packing>
                                                             </child>
                                                             <child>
-                                                            <object class="GtkCheckButton" id="checkbutton_loopback">
-                                                            <property name="label" translatable="yes">loopback</property>
-                                                            <property name="visible">True</property>
-                                                            <property name="sensitive">False</property>
-                                                            <property name="can_focus">True</property>
-                                                            <property name="can_default">True</property>
-                                                            <property name="receives_default">True</property>
-                                                            <property name="tooltip_markup" translatable="yes">use loopback device</property>
-                                                            <property name="tooltip_text" translatable="yes">use loopback device</property>
-                                                            <property name="relief">half</property>
-                                                            <property name="focus_on_click">False</property>
-                                                            <property name="xalign">0</property>
-                                                            <property name="draw_indicator">True</property>
-                                                            <signal name="toggled" handler="checkbutton_loopback_toggled_cb" swapped="no"/>
-                                                            </object>
-                                                            <packing>
-                                                            <property name="expand">True</property>
-                                                            <property name="fill">True</property>
-                                                            <property name="position">1</property>
-                                                            </packing>
+                                                            <placeholder/>
                                                             </child>
                                                             </object>
                                                             </child>
@@ -832,23 +793,15 @@
                                                   <object class="GtkTable" id="table_options">
                                                     <property name="visible">True</property>
                                                     <property name="can_focus">False</property>
-                                                    <property name="n_columns">2</property>
                                                     <property name="homogeneous">True</property>
-                                                    <child>
-                                                      <object class="GtkLabel" id="label_buffersize">
-                                                        <property name="visible">True</property>
-                                                        <property name="can_focus">False</property>
-                                                        <property name="label" translatable="yes">buffer</property>
-                                                        <property name="track_visited_links">False</property>
-                                                      </object>
-                                                    </child>
                                                     <child>
                                                       <object class="GtkSpinButton" id="spinbutton_buffersize">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">True</property>
                                                         <property name="has_tooltip">True</property>
-                                                        <property name="tooltip_markup" translatable="yes">bytes</property>
-                                                        <property name="tooltip_text" translatable="yes">bytes</property>
+                                                        <property name="tooltip_markup" translatable="yes">buffer (bytes)</property>
+                                                        <property name="tooltip_text" translatable="yes">buffer (bytes)</property>
+                                                        <property name="has_frame">False</property>
                                                         <property name="invisible_char">●</property>
                                                         <property name="xalign">1</property>
                                                         <property name="caps_lock_warning">False</property>
@@ -861,10 +814,6 @@
                                                         <property name="adjustment">adjustment_buffersize</property>
                                                         <property name="numeric">True</property>
                                                       </object>
-                                                      <packing>
-                                                        <property name="left_attach">1</property>
-                                                        <property name="right_attach">2</property>
-                                                      </packing>
                                                     </child>
                                                   </object>
                                                 </child>
