@@ -64,9 +64,9 @@ idle_update_info_display_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
   // sanity check(s)
-  ACE_ASSERT (userData_in);
   struct Test_U_GTK_CBData* data_p =
     static_cast<struct Test_U_GTK_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
 
   GtkSpinButton* spin_button_p = NULL;
@@ -429,10 +429,9 @@ idle_end_session_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_end_session_cb"));
 
+  // sanity check(s)
   struct ClientServer_UI_CBData* data_p =
     static_cast<struct ClientServer_UI_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
@@ -462,13 +461,9 @@ idle_end_session_cb (gpointer userData_in)
   } // end SWITCH
   bool idle_b = !number_of_connections;
 
-  // synch access
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-
-//  int result = -1;
+  // sanity check(s)
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // step1: idle ?
@@ -1016,16 +1011,21 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
     switch (configuration_p->timeoutHandler->mode ())
     {
       case Client_TimeoutHandler::ActionModeType::ACTION_ALTERNATING:
+      {
+        interval.set ((NET_CLIENT_DEFAULT_TEST_ALTERNATING_INTERVAL / 1000),
+                      ((NET_CLIENT_DEFAULT_TEST_ALTERNATING_INTERVAL % 1000) * 1000));
+        break;
+      }
       case Client_TimeoutHandler::ActionModeType::ACTION_NORMAL:
       {
-        interval.set ((NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL / 1000),
-                      ((NET_CLIENT_DEFAULT_SERVER_TEST_INTERVAL % 1000) * 1000));
+        interval.set ((NET_CLIENT_DEFAULT_TEST_NORMAL_INTERVAL / 1000),
+                      ((NET_CLIENT_DEFAULT_TEST_NORMAL_INTERVAL % 1000) * 1000));
         break;
       }
       case Client_TimeoutHandler::ActionModeType::ACTION_STRESS:
       {
-        interval.set ((NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL / 1000),
-                      ((NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL % 1000) * 1000));
+        interval.set ((NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL / 1000),
+                      ((NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL % 1000) * 1000));
         break;
       }
       default:
@@ -1039,7 +1039,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
     configuration_p->signalHandlerConfiguration.actionTimerId =
       COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (configuration_p->timeoutHandler, // event handler handle
                                                                   NULL,                                  // asynchronous completion token
-                                                                  COMMON_TIME_NOW + interval,            // first wakeup time
+                                                                  ACE_Time_Value::zero,                  // first wakeup time
                                                                   interval);                             // interval
     if (configuration_p->signalHandlerConfiguration.actionTimerId == -1)
     {
@@ -1435,20 +1435,20 @@ continue_:
   ACE_ASSERT (widget_p);
   gtk_widget_set_sensitive (widget_p, (value > 0));
 
-  // step3: update information display
-  if (value == 0)
-  {
-    GtkSpinButton* spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
-    ACE_ASSERT (spin_button_p);
-    gtk_spin_button_set_value (spin_button_p, 0.0);
-    spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
-    ACE_ASSERT (spin_button_p);
-    gtk_spin_button_set_value (spin_button_p, 0.0);
-  } // end IF
+//  // step3: update information display
+//  if (value == 0)
+//  {
+//    GtkSpinButton* spin_button_p =
+//      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+//                                               ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
+//    ACE_ASSERT (spin_button_p);
+//    gtk_spin_button_set_value (spin_button_p, 0.0);
+//    spin_button_p =
+//      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+//                                               ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
+//    ACE_ASSERT (spin_button_p);
+//    gtk_spin_button_set_value (spin_button_p, 0.0);
+//  } // end IF
 } // spinbutton_connections_value_changed_client_cb
 void
 spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
@@ -1569,15 +1569,13 @@ button_about_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
+
+  // sanity check(s)
   struct Test_U_GTK_CBData* data_p =
     static_cast<struct Test_U_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
-
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // retrieve about dialog handle
@@ -1612,27 +1610,26 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
+  ACE_UNUSED_ARG (widget_in);
+
+  // sanity check(s)
+  struct Test_U_GTK_CBData* data_p =
+      static_cast<struct Test_U_GTK_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
   int result = -1;
 
-  ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (userData_in);
-  //Test_U_GTK_CBData* data_p = static_cast<Test_U_GTK_CBData*> (userData_in);
-  //// sanity check(s)
-  //ACE_ASSERT (data_p);
-
-  //// step1: remove event sources
-  //{
-  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);
-
-  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
-  //       iterator != data_p->UIState->eventSourceIds.end ();
-  //       iterator++)
-  //    if (!g_source_remove (*iterator))
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-  //                  *iterator));
-  //  data_p->UIState->eventSourceIds.clear ();
-  //} // end lock scope
+  // step1: remove event sources
+  { ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);
+    for (Common_UI_GTK_EventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
+         iterator != data_p->UIState->eventSourceIds.end ();
+         iterator++)
+      if (!g_source_remove (*iterator))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    *iterator));
+    data_p->UIState->eventSourceIds.clear ();
+  } // end lock scope
 
   // step2: initiate shutdown sequence
   result = ACE_OS::raise (SIGINT);
@@ -1644,7 +1641,8 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+                                                      true);
 
   return FALSE;
 } // button_quit_clicked_cb

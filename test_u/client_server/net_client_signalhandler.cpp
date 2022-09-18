@@ -303,8 +303,9 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     if (inherited::configuration_->actionTimerId >= 0)
     {
       const void* act_p = NULL;
-      result = timer_manager_p->cancel_timer (inherited::configuration_->actionTimerId,
-                                              &act_p);
+      result =
+          timer_manager_p->cancel_timer (inherited::configuration_->actionTimerId,
+                                         &act_p);
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (unlikely (result <= 0))
@@ -317,8 +318,6 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
                     inherited::configuration_->actionTimerId));
       inherited::configuration_->actionTimerId = -1;
     } // end IF
-    timer_manager_p->stop (false, // wait for completion ?
-                           true); // N/A
 
     // step2: cancel connection attempts (if any)
     if (inherited::configuration_->dispatchState->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
@@ -378,14 +377,14 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       {
         iconnection_manager_p->stop (false, // wait for completion ?
                                      true); // high priority ?
-        iconnection_manager_p->abort ();
+        iconnection_manager_p->abort (false); // wait ?
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
       {
         iconnection_manager_2->stop (false, // wait for completion ?
                                      true); // high priority ?
-        iconnection_manager_2->abort ();
+        iconnection_manager_2->abort (false); // wait ?
         break;
       }
       default:

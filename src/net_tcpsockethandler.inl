@@ -247,12 +247,12 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 // *PORTABILITY*: this isn't entirely portable
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: %@, mask: %d) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_TCPSocketHandler_T::handle_close(handle: %@, mask: %d) called for unknown reasons --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %d) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_TCPSocketHandler_T::handle_close(handle: %d, mask: %d) called for unknown reasons --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #endif // ACE_WIN32 || ACE_WIN64

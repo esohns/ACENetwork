@@ -515,10 +515,10 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     resetTimeoutHandlerId_ = -1;
   } // end IF
   resetTimeoutHandlerId_ =
-    timer_interface_p->schedule_timer (&resetTimeoutHandler_,                   // event handler handle
-                                       NULL,                                    // asynchronous completion token
-                                       COMMON_TIME_NOW + resetTimeoutInterval_, // first wakeup time
-                                       resetTimeoutInterval_);                  // interval
+    timer_interface_p->schedule_timer (&resetTimeoutHandler_,  // event handler handle
+                                       NULL,                   // asynchronous completion token
+                                       ACE_Time_Value::zero,   // first wakeup time
+                                       resetTimeoutInterval_); // interval
   if (unlikely (resetTimeoutHandlerId_ == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -558,6 +558,20 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
     isActive_ = false;
   } // end lock scope
+
+  if (unlikely (resetTimeoutHandlerId_ != -1))
+  {
+    Common_ITimer_Manager_t* timer_interface_p =
+        COMMON_TIMERMANAGER_SINGLETON::instance ();
+    const void* act_p = NULL;
+    int result = timer_interface_p->cancel_timer (resetTimeoutHandlerId_,
+                                                  &act_p);
+    if (unlikely (result <= 0))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
+                  resetTimeoutHandlerId_));
+    resetTimeoutHandlerId_ = -1;
+  } // end IF
 
   if (waitForCompletion_in)
     wait (true); // N/A

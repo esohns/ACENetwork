@@ -157,7 +157,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [VALUE]   : connection interval (s) [")
-            << NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL
+            << NET_CLIENT_DEFAULT_CONNECT_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] {0 --> OFF}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l           : log to a file [")
@@ -177,7 +177,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s           : ping interval (ms) [")
-            << NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL
+            << NET_CLIENT_DEFAULT_PING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] {0: OFF}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t           : trace information [")
@@ -259,15 +259,15 @@ do_processArguments (int argc_in,
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
 #endif // GUI_SUPPORT
-  connectionInterval_out = NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL;
+  connectionInterval_out = NET_CLIENT_DEFAULT_CONNECT_INTERVAL;
   logToFile_out = false;
   serverHostname_out =
       ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_DEFAULT_SERVER_HOSTNAME);
   serverPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out =
           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
-  pingInterval_out.set (NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL / 1000,
-                        (NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL % 1000) * 1000);
+  pingInterval_out.set (NET_CLIENT_DEFAULT_PING_INTERVAL / 1000,
+                        (NET_CLIENT_DEFAULT_PING_INTERVAL % 1000) * 1000);
   traceInformation_out = false;
   protocol_out = NET_TRANSPORTLAYER_TCP;
   printVersionAndExit_out = false;
@@ -653,15 +653,15 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //	config.currentStatistics = {};
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
-  Common_Timer_Manager_t* timer_manager_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (timer_manager_p);
-  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+//  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+  Common_Timer_Tools::configuration_.dispatch =
+      (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR
+                     : COMMON_TIMER_DISPATCH_PROACTOR);
   Common_Timer_Tools::configuration_.publishSeconds = true;
-  timer_manager_p->initialize (Common_Timer_Tools::configuration_);
-  timer_manager_p->start (NULL);
-  //    (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR);
   Common_Timer_Tools::initialize ();
+  Common_Timer_Manager_t* timer_manager_p =
+      COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
 
   // step0c: initialize connector
   Test_U_TCPConnectionManager_t* connection_manager_p =
@@ -827,9 +827,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       (connectionInterval_in > 0))
   {
     // schedule action interval timer
-    ACE_Time_Value interval (((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? (NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL / 1000)
+    ACE_Time_Value interval (((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? (NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL / 1000)
                                                                                       : connectionInterval_in),
-                             ((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEFAULT_SERVER_STRESS_INTERVAL % 1000) * 1000)
+                             ((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL % 1000) * 1000)
                                                                                       : 0));
     configuration_in.signalHandlerConfiguration.actionTimerId =
         timer_manager_p->schedule_timer (&timeout_handler,           // event handler handle
@@ -847,7 +847,6 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step0e: initialize signal handling
-  // *WORKAROUND*: ACE_INET_Addr::operator= is broken
   configuration_in.signalHandlerConfiguration.address = peer_address;
   configuration_in.signalHandlerConfiguration.TCPConnectionConfiguration =
     &tcp_connection_configuration;
@@ -1076,7 +1075,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   {
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-    gtk_manager_p->wait ();
+    gtk_manager_p->wait (false);
 #else
     ;
 #endif // GTK_USE
@@ -1084,38 +1083,21 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end ELSE
 
   // step3: clean up
-  //		{ // synch access
-  //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //					 iterator != CBData_in.event_source_ids.end();
-  //					 iterator++)
-  //				g_source_remove(*iterator);
-  //		} // end lock scope
-  timer_manager_p->stop ();
-  timer_manager_p->wait ();
-  Common_Timer_Tools::finalize ();
-
-//  connection_manager_p->abort ();
-  //TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
   // *IMPORTANT NOTE*: as long as connections are inactive (i.e. events are
   // dispatched by reactor thread(s), there is no real reason to wait here)
-//  connection_manager_p->wait ();
-  TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
-  TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->abort (false);
+  TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->abort (false);
 
-  // step5: stop reactor (&& proactor, if applicable)
+  TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->stop (true,   // wait ?
+                                                            false);
+  TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->stop (true,   // wait ?
+                                                            false);
+
+  // stop reactor (&& proactor, if applicable)
   Common_Event_Tools::finalizeEventDispatch (*configuration_in.signalHandlerConfiguration.dispatchState,
                                              false); // don't block
 
-//  { // synch access
-//    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-//		for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-//				 iterator != CBData_in.event_source_ids.end();
-//				 iterator++)
-//			g_source_remove(*iterator);
-//	} // end lock scope
+  Common_Timer_Tools::finalize ();
 
   result = event_handler.close (ACE_Module_Base::M_DELETE_NONE);
   if (result == -1)
@@ -1242,8 +1224,7 @@ ACE_TMAIN (int argc_in,
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_FILE);
 #endif // GUI_SUPPORT
-  unsigned int connection_interval =
-   NET_CLIENT_DEFAULT_SERVER_CONNECT_INTERVAL;
+  unsigned int connection_interval = NET_CLIENT_DEFAULT_CONNECT_INTERVAL;
   bool log_to_file = false;
   std::string server_hostname =
     ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_DEFAULT_SERVER_HOSTNAME);
@@ -1251,8 +1232,8 @@ ACE_TMAIN (int argc_in,
    NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor =
           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
-  ACE_Time_Value ping_interval (NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL / 1000,
-                                (NET_CLIENT_DEFAULT_SERVER_PING_INTERVAL % 1000) * 1000);
+  ACE_Time_Value ping_interval (NET_CLIENT_DEFAULT_PING_INTERVAL / 1000,
+                                (NET_CLIENT_DEFAULT_PING_INTERVAL % 1000) * 1000);
   ACE_Time_Value statistic_reporting_interval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S,
                                                0);
   bool trace_information = false;
@@ -1444,6 +1425,8 @@ ACE_TMAIN (int argc_in,
     &configuration.dispatchConfiguration;
   if (use_reactor)
   {
+    configuration.dispatchConfiguration.dispatch =
+        COMMON_EVENT_DISPATCH_REACTOR;
     configuration.dispatchConfiguration.numberOfReactorThreads =
       number_of_dispatch_threads;
     configuration.dispatchConfiguration.reactorType =
@@ -1491,7 +1474,8 @@ ACE_TMAIN (int argc_in,
   if (!Common_Signal_Tools::preInitialize (signal_set,
                                            (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                           true, // use networking
+                                           true,  // using networking ?
+                                           false, // using asynch timers ?
                                            previous_signal_actions,
                                            previous_signal_mask))
   {

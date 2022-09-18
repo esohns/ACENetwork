@@ -2795,7 +2795,6 @@ continue_:
     } // end IF
   } while (!converter.fail ());
 #endif // ACE_WIN32 || ACE_WIN64
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   ACE_DEBUG ((LM_DEBUG,
@@ -2814,7 +2813,6 @@ continue_:
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 
   return result;
 }

@@ -1023,7 +1023,8 @@ ACE_TMAIN (int argc_in,
   if (!Common_Signal_Tools::preInitialize (signal_set,
                                            (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                           true, // use networking
+                                           true,  // using networking ?
+                                           false, // using asynch timers ?
                                            previous_signal_actions,
                                            previous_signal_mask))
   {

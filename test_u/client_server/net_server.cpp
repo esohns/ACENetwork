@@ -162,13 +162,10 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#else
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface identifier [\"")
-            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
+            << ACE_TEXT_ALWAYS_CHAR (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3).c_str ())
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-#endif
   // *TODO*: this doesn't really make sense (see '-n' option)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-o           : use loopback [")
             << NET_INTERFACE_DEFAULT_USE_LOOPBACK
@@ -265,7 +262,7 @@ do_processArguments (const int& argc_in,
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
   logToFile_out = false;
   networkInterface_out =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   useLoopBack_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out =
@@ -492,16 +489,16 @@ do_initializeSignals (bool useReactor_in,
 //       i++)
 //    signals_out.sig_del (i);
 
-  if (!useReactor_in)
-  {
-    ACE_Proactor* proactor_p = ACE_Proactor::instance ();
-    ACE_ASSERT (proactor_p);
-    ACE_POSIX_Proactor* proactor_impl_p =
-        dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
-    ACE_ASSERT (proactor_impl_p);
-    if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
-      signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
-  } // end IF
+//  if (!useReactor_in)
+//  {
+//    ACE_Proactor* proactor_p = ACE_Proactor::instance ();
+//    ACE_ASSERT (proactor_p);
+//    ACE_POSIX_Proactor* proactor_impl_p =
+//        dynamic_cast<ACE_POSIX_Proactor*> (proactor_p->implementation ());
+//    ACE_ASSERT (proactor_impl_p);
+//    if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
+//      signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
+//  } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 }
 
@@ -682,6 +679,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     &configuration_in.dispatchConfiguration;
   if (useReactor_in)
   {
+    configuration_in.dispatchConfiguration.dispatch =
+        COMMON_EVENT_DISPATCH_REACTOR;
     configuration_in.dispatchConfiguration.numberOfReactorThreads =
       numberOfDispatchThreads_in;
     configuration_in.dispatchConfiguration.reactorType =
@@ -916,23 +915,19 @@ do_work (unsigned int maximumNumberOfConnections_in,
     connection_configuration_p_2->socketConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
                                                                                      1);
 
-    std::string interface_identifier =
-      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
-    ACE_ASSERT (!interface_identifier.empty ());
-    ACE_INET_Addr peer_address, gateway_address;
-    Net_Common_Tools::interfaceToIPAddress (interface_identifier,
-                                            peer_address,
+    ACE_INET_Addr nic_address, gateway_address;
+    Net_Common_Tools::interfaceToIPAddress (networkInterface_in,
+                                            nic_address,
                                             gateway_address);
     result =
       connection_configuration_p_2->socketConfiguration.peerAddress.set (static_cast<u_short> (listeningPortNumber_in + 1),
-                                                                         //peer_address.get_ip_address (),
-                                                                         static_cast<ACE_UINT32> (INADDR_LOOPBACK),
+                                                                         nic_address.get_ip_address (),
                                                                          1,
                                                                          0);
     ACE_ASSERT (result != -1);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("set peer address to %s\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p_2->socketConfiguration.peerAddress, false, false).c_str ())));
 
     connection_configuration_p->socketConfiguration.address.set_port_number (listeningPortNumber_in,
                                                                              1);
@@ -1284,7 +1279,7 @@ ACE_TMAIN (int argc_in,
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
   std::string network_interface =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor =
@@ -1491,7 +1486,8 @@ ACE_TMAIN (int argc_in,
   if (!Common_Signal_Tools::preInitialize (signal_set,
                                            (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                           true, // use networking
+                                           true,  // using networking ?
+                                           false, // using asynch timers ?
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
