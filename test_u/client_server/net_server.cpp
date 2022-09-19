@@ -742,7 +742,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step2: signal handling
-  struct Server_SignalHandlerConfiguration signal_handler_configuration;
   if (useReactor_in)
     configuration_in.TCPListener =
       SERVER_TCP_LISTENER_SINGLETON::instance ();
@@ -753,6 +752,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration_in.SSLListener =
     SERVER_SSL_LISTENER_SINGLETON::instance ();
 #endif // SSL_SUPPORT
+  struct Server_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.TCPListener = configuration_in.TCPListener;
 #if defined (SSL_SUPPORT)
   signal_handler_configuration.SSLListener = configuration_in.SSLListener;
@@ -787,12 +787,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
   connection_manager_p->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_p->set (*connection_configuration_p,
-                             NULL);
+                             &user_data);
   connection_manager_p->start (NULL);
   connection_manager_2->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->set (*connection_configuration_p_2,
-                             NULL);
+                             &user_data);
   connection_manager_2->start (NULL);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
@@ -1145,7 +1145,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   Common_Timer_Tools::finalize ();
-  timer_manager_p->stop ();
 
   //// wait for connection processing to complete
   //NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();

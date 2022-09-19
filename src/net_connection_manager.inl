@@ -444,14 +444,11 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                   ACE_TEXT ("caught exception in Net_IConnection_T::decrease(): \"%m\", continuing\n")));
     }
 
-    // iff there are no more connections, signal any waiters
-    if (connections_.is_empty ())
-    {
-      result = condition_.broadcast ();
-      if (unlikely (result == -1))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
-    } // end IF
+    // signal any waiters
+    result = condition_.broadcast ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
   } // end lock scope
 }
 

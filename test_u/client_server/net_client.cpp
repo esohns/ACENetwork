@@ -1277,7 +1277,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1309,7 +1309,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 #if defined (GUI_SUPPORT)
@@ -1326,7 +1326,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 #endif // GUI_SUPPORT
@@ -1397,7 +1397,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1414,7 +1414,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_SUCCESS;
   } // end IF
 
@@ -1436,7 +1436,7 @@ ACE_TMAIN (int argc_in,
 #else
         ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_DEV_POLL
                                           : COMMON_REACTOR_ACE_DEFAULT);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   else
   {
@@ -1458,7 +1458,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
