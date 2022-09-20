@@ -31,7 +31,6 @@
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN32
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1190,6 +1189,7 @@ ACE_TMAIN (int argc_in,
 #else
   Common_Tools::initialize (true); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
@@ -1434,7 +1434,7 @@ ACE_TMAIN (int argc_in,
         ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_THREAD_POOL
                                           : COMMON_REACTOR_ACE_DEFAULT);
 #else
-        ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_DEV_POLL
+        ((number_of_dispatch_threads > 1) ? COMMON_REACTOR_THREAD_POOL//COMMON_REACTOR_DEV_POLL
                                           : COMMON_REACTOR_ACE_DEFAULT);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF

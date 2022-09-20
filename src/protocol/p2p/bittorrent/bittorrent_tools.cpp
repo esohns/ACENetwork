@@ -392,11 +392,11 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_FlexBisonParserConfigur
     return false;
   } // end IF
   ACE_ASSERT (data_p);
-  unsigned int size = Common_File_Tools::size (metaInfoFileName_in);
+  ACE_UINT64 size_i = Common_File_Tools::size (metaInfoFileName_in);
   ACE_Message_Block message_block (reinterpret_cast<char*> (data_p),
-                                   size + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                                   size_i + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                    ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY);
-  message_block.wr_ptr (size);
+  message_block.wr_ptr (size_i);
 
   if (!parser.parse (&message_block))
   {
@@ -892,8 +892,9 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
 
     // step2: write to the current file
 write_file:
-    bytes_to_write = ((file_size_i >= current_file_length) ? current_file_length
-                                                           : file_size_i);
+    bytes_to_write =
+      static_cast<unsigned int> ((file_size_i >= current_file_length) ? current_file_length
+                                                                      : file_size_i);
     if (!Common_File_Tools::store (current_file_path_on_disk,
                                    data_2,
                                    bytes_to_write,

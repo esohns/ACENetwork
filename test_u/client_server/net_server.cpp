@@ -688,7 +688,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_THREAD_POOL
                                           : COMMON_REACTOR_ACE_DEFAULT);
 #else
-        ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_DEV_POLL
+        ((numberOfDispatchThreads_in > 1) ? COMMON_REACTOR_THREAD_POOL//COMMON_REACTOR_DEV_POLL
                                           : COMMON_REACTOR_ACE_DEFAULT);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
@@ -1242,6 +1242,7 @@ ACE_TMAIN (int argc_in,
 #else
   Common_Tools::initialize (true); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();

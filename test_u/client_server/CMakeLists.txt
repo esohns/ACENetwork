@@ -334,7 +334,7 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/client_server
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_TARGET}
                          ARGS "-l -t"
@@ -346,34 +346,40 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/client_server
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
+ if (GUI_SUPPORT)
+  if (GTK_SUPPORT)
+   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
+  endif (GTK_SUPPORT)
+  if (WXWIDGETS_SUPPORT)
+   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
+  endif (WXWIDGETS_SUPPORT)
+ endif (GUI_SUPPORT)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${ACE_LIB_PATH}
                            ${SSL_LIB_PATH}
                            ${GTK_LIB_PATH}
-                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
-                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/image/Debug
-                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/math/Debug
-                           ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                           ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
-                           ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
-                           ${PROJECT_SOURCE_DIR}/cmake/src/Debug)
+                           ${WXWIDGETS_LIB_PATH})
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_SOURCE}.exe" COMMAND)
+ string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  create_target_launcher (${EXECUTABLE_SOURCE}
+                         COMMAND ${COMMAND}
                          ARGS "-l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/client_server
                          ENVIRONMENT foo=bar)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_TARGET}.exe" COMMAND)
+ string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  create_target_launcher (${EXECUTABLE_TARGET}
+                         COMMAND ${COMMAND}
                          ARGS "-l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/client_server
                          ENVIRONMENT foo=bar)
 endif ()
