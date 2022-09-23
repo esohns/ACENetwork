@@ -1,4 +1,5 @@
 include (ffmpeg)
+include (ImageMagick)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
 include (faad)
 
@@ -299,12 +300,14 @@ elseif (WIN32)
  endif (FAAD_SUPPORT)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_2_LIB_DIR}" FFMPEG_2_PATH)
+ file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_PATH}
                            ${FAAD_PATH}
                            ${FFMPEG_PATH}
                            ${FFMPEG_2_PATH}
+                           ${IMAGEMAGICK_PATH}
                            ${GTK_PATH}
                            ${WXWIDGETS_PATH}
                            ${ACE_LIBRARY_PATH})
@@ -313,15 +316,6 @@ elseif (WIN32)
                          ARGS "-l -r -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                                              G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/html/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/http/Debug
                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/web_tv
                          ENVIRONMENT foo=bar)
 endif ()

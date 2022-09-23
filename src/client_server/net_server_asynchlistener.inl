@@ -269,21 +269,20 @@ Net_Server_AsynchListener_T<HandlerType,
   inherited::bytes_to_read (numberOfBytesToRead_in);
   inherited::validate_new_connection (validateConnections_in);
   inherited::reissue_accept (reissueAccept_in);
-  // *WARNING*: cannot currently set this in the base class
-  //this->addr_family_ = address.get_type ();
+  inherited::addr_family_ = listenAddress_in.get_type ();
 
   // Create the listener socket
   // *NOTE*: some socket options need to be set before accept()ing
   //         --> set these here
-  int address_type = listenAddress_in.get_type ();
-  ACE_HANDLE listen_handle = ACE_OS::socket (address_type, // domain
-                                             SOCK_STREAM,  // type
-                                             0);           // protocol
+  ACE_HANDLE listen_handle =
+    ACE_OS::socket (inherited::addr_family_, // domain
+                    SOCK_STREAM,             // type
+                    0);                      // protocol
   if (unlikely (listen_handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
-                address_type, SOCK_STREAM));
+                inherited::addr_family_, SOCK_STREAM));
     return -1;
   } // end IF
   // *NOTE*: implicitly calls ACE_Asynch_Accept::open(),
@@ -333,7 +332,7 @@ Net_Server_AsynchListener_T<HandlerType,
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0602) // _WIN32_WINNT_WIN8
   // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if ((address_type == AF_INET)                 &&
       listenAddress_in.is_loopback ()           &&
@@ -352,9 +351,9 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (listenAddress_in == SAP_any))
   //if (listenAddress_in.is_any ())
   {
-    result = ACE::bind_port (listen_handle, // handle
-                             INADDR_ANY,    // address
-                             address_type); // family
+    result = ACE::bind_port (listen_handle,            // handle
+                             INADDR_ANY,               // address
+                             inherited::addr_family_); // family
     if (result == -1)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -362,13 +361,13 @@ Net_Server_AsynchListener_T<HandlerType,
                   ACE_TEXT ("failed to ACE::bind_port(0x%@,%u,%d): \"%m\", aborting\n"),
                   listen_handle,
                   INADDR_ANY,
-                  address_type));
+                  inherited::addr_family_));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::bind_port(%d,%u,%d): \"%m\", aborting\n"),
                   listen_handle,
                   INADDR_ANY,
-                  address_type));
+                  inherited::addr_family_));
 #endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF

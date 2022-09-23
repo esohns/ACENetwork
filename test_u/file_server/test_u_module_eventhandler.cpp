@@ -93,7 +93,12 @@ Test_U_Module_EventHandler::handleControlMessage (Stream_ControlMessage_t& contr
       //} // end IF
 
       // step3: send a 'disconnect' command upstream to sever the connection
-      if (!inherited::putControlMessage (STREAM_CONTROL_DISCONNECT,
+      ACE_ASSERT (inherited::sessionData_);
+
+      const FileServer_SessionData& session_data_r =
+        inherited::sessionData_->getR ();
+      if (!inherited::putControlMessage (session_data_r.sessionId,
+                                         STREAM_CONTROL_DISCONNECT,
                                          true))
       {
         ACE_DEBUG ((LM_ERROR,

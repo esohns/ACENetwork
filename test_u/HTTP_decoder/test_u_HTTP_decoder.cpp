@@ -160,12 +160,12 @@ do_processArguments (int argc_in,
                      std::string& outputFileName_out,
                      std::string& hostName_out,
                      bool& logToFile_out,
-                     unsigned short& port_out,
+                     ACE_UINT16& port_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
                      bool& useSSL_out,
-                     std::string& URL_out,
+                     std::string& URI_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
 {
@@ -189,7 +189,7 @@ do_processArguments (int argc_in,
   statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   traceInformation_out = false;
   useSSL_out = false;
-  URL_out.clear ();
+  URI_out.clear ();
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out = TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
@@ -250,20 +250,20 @@ do_processArguments (int argc_in,
       }
       case 'u':
       {
-        URL_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
+        std::string URL_string =
+          ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
 
         // step1: parse URL
         ACE_INET_Addr peer_address;
-        std::string URI_string;
-        if (!HTTP_Tools::parseURL (URL_out,
+        if (!HTTP_Tools::parseURL (URL_string,
                                    peer_address,
                                    hostName_out,
-                                   URI_string,
+                                   URI_out,
                                    useSSL_out))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
-                      ACE_TEXT (URL_out.c_str ())));
+                      ACE_TEXT (URL_string.c_str ())));
           return false;
         } // end IF
         port_out = peer_address.get_port_number ();
@@ -298,21 +298,21 @@ do_processArguments (int argc_in,
                           (std::regex_constants::ECMAScript |
                            std::regex_constants::icase));
         std::smatch match_results_3;
-        if (!std::regex_match (URI_string,
+        if (!std::regex_match (URI_out,
                                match_results_3,
                                regex,
                                std::regex_constants::match_default))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid URI (was: \"%s\"), aborting\n"),
-                      ACE_TEXT (URI_string.c_str ())));
+                      ACE_TEXT (URI_out.c_str ())));
           return false;
         } // end IF
 //        ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
         ACE_ASSERT (!match_results_3.empty ());
 
         if (!match_results_3[2].matched)
-          URL_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL);
+          URI_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URI);
 //        else if (!match_results_3[3].matched)
 //          URL_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_SUFFIX);
 
@@ -442,11 +442,11 @@ do_work (unsigned int bufferSize_in,
          bool debugParser_in,
          const std::string& fileName_in,
          const std::string& hostName_in,
-         unsigned short port_in,
+         ACE_UINT16 port_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          bool useSSL_in,
-         const std::string& URL_in,
+         const std::string& URI_in,
          unsigned int numberOfDispatchThreads_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -527,7 +527,7 @@ do_work (unsigned int bufferSize_in,
   //         processed --> use (a) dedicated thread(s) so the event dispatch
   //         does not deadlock in single-threaded reactor/proactor scenarios
   modulehandler_configuration.concurrency =
-    STREAM_HEADMODULECONCURRENCY_ACTIVE;
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.configuration = &configuration;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
@@ -544,7 +544,7 @@ do_work (unsigned int bufferSize_in,
   modulehandler_configuration.streamConfiguration =
     &configuration.streamConfiguration;
   modulehandler_configuration.targetFileName = fileName_in;
-  modulehandler_configuration.URL = URL_in;
+  modulehandler_configuration.URL = URI_in;
 
   // ******************** (sub-)stream configuration data **********************
   //if (bufferSize_in)
@@ -732,7 +732,7 @@ do_work (unsigned int bufferSize_in,
       connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else
       connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   else
   {
     // step1: wait for the connection to register with the manager
@@ -799,20 +799,6 @@ do_work (unsigned int bufferSize_in,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_TCP_CAST ((*iterator).second)->socketConfiguration.address).c_str ())));
 
   // step2: send HTTP request
-//  ACE_NEW_NORETURN (message_data_p,
-//                    Test_U_MessageData ());
-//  if (!message_data_p)
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate memory, returning\n")));
-
-//    // clean up
-//    connection_p->close ();
-//    connection_p->decrease ();
-
-//    goto clean_up;
-//  } // end IF
-//  ACE_NEW_NORETURN (message_data_p->HTTPRecord,
   ACE_NEW_NORETURN (record_p,
                     struct HTTP_Record ());
 //  if (!message_data_p->HTTPRecord)
@@ -830,8 +816,15 @@ do_work (unsigned int bufferSize_in,
     goto clean_up;
   } // end IF
   record_p->method = HTTP_Codes::HTTP_METHOD_GET;
-  record_p->URI = URL_in;
+  record_p->URI = URI_in;
   record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR(HTTP_PRT_HEADER_HOST_STRING),
+    hostName_in));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR(HTTP_PRT_HEADER_ACCEPT_STRING),
+    ACE_TEXT_ALWAYS_CHAR("*/*")));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR(HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
+    ACE_TEXT_ALWAYS_CHAR("gzip;q=1.0, deflate, identity")));
+
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
   ACE_NEW_NORETURN (message_data_container_p,
 //                    Test_U_MessageData_t (message_data_p,
@@ -881,6 +874,10 @@ allocate:
   // *IMPORTANT NOTE*: fire-and-forget API (message_p)
   message_block_p = message_p;
   istream_connection_p->send (message_block_p);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("sent HTTP GET request (URI was: \"%s\")...\n"),
+              ACE_TEXT (URI_in.c_str ())));
 
   connection_manager_p->wait ();
 
@@ -1020,7 +1017,7 @@ ACE_TMAIN (int argc_in,
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
   bool use_SSL = false;
-  std::string URL;
+  std::string URI_string;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
     TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -1038,7 +1035,7 @@ ACE_TMAIN (int argc_in,
                             statistic_reporting_interval,
                             trace_information,
                             use_SSL,
-                            URL,
+                            URI_string,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   {
@@ -1065,7 +1062,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("limiting the number of message buffers could (!) lead to deadlocks --> make sure you know what you are doing...\n")));
   if (host_name.empty ()                                                    ||
       //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool) ||
-      URL.empty ())
+      URI_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
@@ -1079,7 +1076,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1109,7 +1106,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1141,7 +1138,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1165,7 +1162,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_SUCCESS;
   } // end IF
@@ -1191,7 +1188,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1207,7 +1204,7 @@ ACE_TMAIN (int argc_in,
            use_reactor,
            statistic_reporting_interval,
            use_SSL,
-           URL,
+           URI_string,
            number_of_dispatch_threads,
            signal_set,
            ignored_signal_set,
@@ -1250,7 +1247,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1295,7 +1292,7 @@ ACE_TMAIN (int argc_in,
               elapsed_time.system_time,
               ACE_TEXT (user_time_string.c_str ()),
               ACE_TEXT (system_time_string.c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
@@ -1310,7 +1307,7 @@ ACE_TMAIN (int argc_in,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

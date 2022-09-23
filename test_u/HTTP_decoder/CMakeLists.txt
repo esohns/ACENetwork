@@ -195,6 +195,8 @@ if (UNIX)
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/HTTP_decoder
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
+ string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_LIB_PATH)
@@ -207,20 +209,10 @@ elseif (WIN32)
                            ${SSL_LIB_PATH}
                            ${IMAGEMAGICK_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
+                         COMMAND ${COMMAND}
                          ARGS "-l -r -t -u https://www.tagesschau.de/index.html"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                                              G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/err/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/image/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/math/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/dec/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/${BUILD_PATH_SUFFIX}/src/modules/vis/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/protocol/dhcp/${CMAKE_BUILD_TYPE}
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/HTTP_decoder
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/HTTP_decoder
                          ENVIRONMENT foo=bar)
 endif ()

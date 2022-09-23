@@ -431,7 +431,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   } // end IF
   ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
-  ACE_ASSERT (match_results[1].matched);
+  //ACE_ASSERT (match_results[1].matched);
   std::string match_string = match_results[1];
   if (!match_string.empty ())
     useSSL_out = true;
@@ -440,7 +440,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   if (!match_string.empty ())
   {
     regex_string =
-        ACE_TEXT_ALWAYS_CHAR ("^([[:alnum:].]+)(?:\\:([[:digit:]]{1,5})){0,1}$");
+        ACE_TEXT_ALWAYS_CHAR ("^([[:alnum:].-]+)(?:\\:([[:digit:]]{1,5})){0,1}$");
     regex.assign (regex_string,
                   std::regex::ECMAScript);
     std::smatch match_results_2;

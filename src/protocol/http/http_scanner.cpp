@@ -77965,10 +77965,10 @@ YY_RULE_SETUP
 { iparser_p->offset (yyleng);
                              if (content_length_or_chunk_size)
                              {
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found entity chunk @%d: %u byte(s)\n"),
-                                           iparser_p->offset (),
-                                           content_length_or_chunk_size));
+                               //ACE_DEBUG ((LM_DEBUG,
+                               //            ACE_TEXT ("found entity chunk @%d: %u byte(s)\n"),
+                               //            iparser_p->offset (),
+                               //            content_length_or_chunk_size));
 /*                               char c = 0;
                                for (unsigned int i = 0;
                                     i < content_length_or_chunk_size;
@@ -77992,9 +77992,9 @@ YY_RULE_SETUP
                              } // end IF
                              else
                              {
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found last entity chunk @%d: 0 byte(s)\n"),
-                                           iparser_p->offset ()));
+                               //ACE_DEBUG ((LM_DEBUG,
+                               //            ACE_TEXT ("found last entity chunk @%d: 0 byte(s)\n"),
+                               //            iparser_p->offset ()));
                                // *NOTE*: do not consume the terminating CRLF
                                //         here; this happens in <chunked_body>
                                yylval->ival = content_length_or_chunk_size;
