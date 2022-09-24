@@ -1,3 +1,6 @@
+include (ffmpeg)
+include (ImageMagick)
+
 # disable GUI support
 is_UI_graphical (${UI_FRAMEWORK})
 if (NOT UI_FRAMEWORK STREQUAL "")
@@ -262,7 +265,9 @@ endif (GUI_SUPPORT)
 
 add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
-                ${${EXECUTABLE_GUI}_EXE_SRCS})
+                ${${EXECUTABLE_GUI}_EXE_SRCS}
+                etc/bittorrent_client_main.glade
+                etc/bittorrent_client_session.glade)
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
 if (WIN32)
  if (NOT BUILD_TEST_I)
@@ -329,7 +334,7 @@ install (FILES
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t"
+                         ARGS "-l -r -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
@@ -338,36 +343,44 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/bittorrent_client
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
+ string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_GUI}.exe" COMMAND_2)
+ string (REPLACE "\\" "\\\\" COMMAND_2 ${COMMAND_2})
+ if (GUI_SUPPORT)
+  if (GTK_SUPPORT)
+   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+  endif (GTK_SUPPORT)
+  if (WXWIDGETS_SUPPORT)
+   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
+  endif (WXWIDGETS_SUPPORT)
+ endif (GUI_SUPPORT)
+ file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl OPENSSL_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ImageMagick IMAGEMAGICK_LIB_PATH)
+ file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
+ file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                           ${ACE_LIB_PATH}
+                           ${ACE_LIBRARY_PATH}
                            ${OPENSSL_LIB_PATH}
-                           ${FFMPEG_LIB_PATH}
-                           ${GTK_LIB_PATH}
-                           ${IMAGEMAGICK_LIB_PATH})
+                           ${FFMPEG_PATH}
+                           ${GTK_PATH}
+                           ${WXWIDGETS_PATH}
+                           ${IMAGEMAGICK_PATH})
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t"
+                         COMMAND ${COMMAND}
+                         ARGS "-l -r -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
-                                              G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/image/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/math/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/p2p/bittorrent/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/http/Debug
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/bittorrent_client
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}
+                         ENVIRONMENT foo=bar)
+ create_target_launcher (${EXECUTABLE_GUI}
+                         COMMAND ${COMMAND_2}
+                         ARGS "-l -r -t"
+#                        FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client
                          ENVIRONMENT foo=bar)
 endif ()

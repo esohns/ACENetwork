@@ -31,9 +31,9 @@
 
 // GTK widget names
 #define BITTORRENT_CLIENT_GUI_GTK_BUTTON_ABOUT                          "button_about"
-#define BITTORRENT_CLIENT_GUI_GTK_BUTTON_CONNECT                        "button_connect"
+#define BITTORRENT_CLIENT_GUI_GTK_BUTTON_CONNECT                        "button_start"
 #define BITTORRENT_CLIENT_GUI_GTK_BUTTON_CONNECTION_CLOSE               "button_page_session_connection_close"
-#define BITTORRENT_CLIENT_GUI_GTK_BUTTON_DISCONNECT                     "button_close"
+#define BITTORRENT_CLIENT_GUI_GTK_BUTTON_DISCONNECT                     "button_stop"
 #define BITTORRENT_CLIENT_GUI_GTK_BUTTON_TAB_SESSION_CLOSE              "button_tab_session_close"
 #define BITTORRENT_CLIENT_GUI_GTK_BUTTON_QUIT                           "button_quit"
 #define BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CONNECTIONS                  "combobox_page_session_connections"

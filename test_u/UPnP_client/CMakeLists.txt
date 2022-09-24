@@ -1,3 +1,5 @@
+include (ffmpeg)
+include (ImageMagick)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 include (libxml2)
 
@@ -237,10 +239,6 @@ if (UNIX)
                          ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
-                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
 #                                              /usr/local/lib
                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                          ENVIRONMENT foo=bar)
@@ -250,6 +248,9 @@ elseif (WIN32)
  if (FFMPEG_SUPPORT)
   file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  endif (FFMPEG_SUPPORT)
+ if (IMAGEMAGICK_SUPPORT)
+  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
+ endif (IMAGEMAGICK_SUPPORT)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
  if (GUI_SUPPORT)
   if (GTK_SUPPORT)
@@ -263,6 +264,7 @@ elseif (WIN32)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}
                            ${FFMPEG_PATH}
+                           ${IMAGEMAGICK_PATH}
                            ${GTK_LIB_PATH}
                            ${WXWIDGETS_LIB_PATH}
                            ${ACE_LIB_PATH})

@@ -358,7 +358,7 @@ connection_failed:
       connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else
       connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   if (!connection_2)
     goto connection_failed;
   istream_connection_p =
@@ -374,15 +374,8 @@ connection_failed:
     goto remove_page;
   } // end IF
   stream_p = &istream_connection_p->stream ();
-  for (Stream_Iterator_t iterator_2 (*stream_p);
-       iterator_2.next (current_p) != 0;
-       iterator_2.advance ())
-  {
-    tail_p =
-      const_cast<Stream_IStream_t::STREAM_T*> (stream_p)->tail ();
-    if (current_p != tail_p)
-      module_p = current_p;
-  } // end FOR
+  module_p =
+    const_cast<Stream_IStream_t::STREAM_T*> (stream_p)->find (ACE_TEXT (IRC_CLIENT_HANDLER_MODULE_NAME));
   ACE_ASSERT (module_p);
   icontrol_p =
     dynamic_cast<IRC_IControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
@@ -405,7 +398,7 @@ connection_failed:
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     // *TODO*: who deletes the module ? (the stream won't do it !)
     data_p->CBData->connections.insert (std::make_pair (connection_p->getR ().timeStamp,
                                                         connection_p));
@@ -432,7 +425,7 @@ connection_failed:
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     data_p->CBData->connections.erase (connection_p->getR ().timeStamp);
 
     goto remove_page;
@@ -446,7 +439,7 @@ connection_failed:
   result = 0;
 #else
   result = NULL;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   goto done;
 
@@ -460,7 +453,7 @@ done:
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
   } // end lock scope
 

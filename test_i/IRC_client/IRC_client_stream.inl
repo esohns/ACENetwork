@@ -76,13 +76,13 @@ IRC_Client_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_in,
   ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                IRC_Client_Module_IRCHandler_Module (this,
-  //                                                     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME)),
-  //                false);
-  //ACE_ASSERT (module_p);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  IRC_Client_Module_IRCHandler_Module (this,
+                                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME)),
+                  false);
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
   delete_out = true;
 

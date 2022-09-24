@@ -26,7 +26,6 @@
 
 #include "common_error_tools.h"
 
-//#include "ace/Synch.h"
 #include "common_timer_manager.h"
 
 #include "common_ui_gtk_common.h"
@@ -615,21 +614,21 @@ idle_initialize_ui_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             std::numeric_limits<ACE_UINT32>::max ());
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             std::numeric_limits<ACE_UINT32>::max ());
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_HOTPLUGGINGS_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             std::numeric_limits<ACE_UINT32>::max ());
 
   // configuration -----------------------
   GtkListStore* list_store_p =

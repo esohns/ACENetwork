@@ -136,8 +136,8 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 #endif // GUI_SUPPORT
 
     // step2: stop all sessions
-    ACE_ASSERT (inherited::configuration_->control);
-    inherited::configuration_->control->stop (false);
+    if (inherited::configuration_->control)
+      inherited::configuration_->control->stop (false);
 
 //    // step3: stop event dispatch
 //    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,

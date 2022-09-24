@@ -295,6 +295,7 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
  set (ARGS "${ARGS} -t")
 endif (CMAKE_BUILD_TYPE STREQUAL Debug)
 if (UNIX)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}" COMMAND)
  if (GUI_SUPPORT)
   if (GTK_SUPPORT)
    set (ARGS "-g./etc/${ui_definition_file} ${ARGS}")
@@ -326,27 +327,25 @@ elseif (WIN32)
  else ()
   set (ARGS "-g ${ARGS}")
  endif (GUI_SUPPORT)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_PATH)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
+ string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
+ file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${PROJECT_SOURCE_DIR}/../libiconv-1.9.2-1/bin
                            ${PROJECT_SOURCE_DIR}/../libxml2/win32/bin.msvc
                            ${PROJECT_SOURCE_DIR}/../libpng-1.6.25/cmake/${CMAKE_BUILD_TYPE}
-#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libavcodec
-#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libavutil
-#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libswresample
-#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libswscale
-#                           ${PROJECT_SOURCE_DIR}/../assimp/cmake/code/${CMAKE_BUILD_TYPE}
                            ${GTK_PATH}
                            ${ACE_PATH}
                            ${SSL_LIB_PATH})
 endif ()
 create_target_launcher (${EXECUTABLE}
+                        COMMAND ${COMMAND}
                         ARGS ${ARGS}
 #                        FORWARD_ARGS
                         RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/wlan_monitor
+                        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/${EXECUTABLE}
                         ENVIRONMENT ${ENVIRONMENT})
 
 ##########################################

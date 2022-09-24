@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.24"/>
-  <!-- interface-naming-policy toplevel-contextual -->
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkAction" id="action_cancel">
     <property name="label">Cancel</property>
     <property name="short_label">Cancel</property>
@@ -12,48 +11,6 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-close</property>
     <property name="icon-size">1</property>
-  </object>
-  <object class="GtkWindow" id="window_tab_session">
-    <property name="can_focus">False</property>
-    <property name="resizable">False</property>
-    <property name="focus_on_map">False</property>
-    <property name="decorated">False</property>
-    <property name="deletable">False</property>
-    <child>
-      <object class="GtkHBox" id="hbox_tab_session">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkLabel" id="label_tab_session">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="button_tab_session_close">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">False</property>
-            <property name="receives_default">False</property>
-            <property name="image">button_disconnect_image</property>
-            <property name="relief">half</property>
-            <property name="focus_on_click">False</property>
-            <property name="image_position">right</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
   </object>
   <object class="GtkListStore" id="liststore_page_session_connections"/>
   <object class="GtkTextTagTable" id="texttagtable_notebook_page_session_channels"/>
@@ -165,39 +122,11 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkTable" id="table_pieces">
+                      <object class="GtkGrid" id="grid_pieces">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="n_rows">3</property>
-                        <property name="n_columns">3</property>
-                        <property name="homogeneous">True</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
+                        <property name="row_homogeneous">True</property>
+                        <property name="column_homogeneous">True</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -294,6 +223,48 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="window_tab_session">
+    <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="focus_on_map">False</property>
+    <property name="decorated">False</property>
+    <property name="deletable">False</property>
+    <child>
+      <object class="GtkHBox" id="hbox_tab_session">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkLabel" id="label_tab_session">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_tab_session_close">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">False</property>
+            <property name="image">button_disconnect_image</property>
+            <property name="relief">half</property>
+            <property name="focus_on_click">False</property>
+            <property name="image_position">right</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
             <property name="position">1</property>
           </packing>
         </child>

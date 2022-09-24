@@ -1149,7 +1149,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -1229,7 +1229,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1252,7 +1252,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1279,7 +1279,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1311,7 +1311,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1331,6 +1331,7 @@ ACE_TMAIN (int argc_in,
   struct BitTorrent_Client_Configuration configuration;
   struct BitTorrent_Client_UI_CBData ui_cb_data;
   ui_cb_data.configuration = &configuration;
+  ui_cb_data.UIState = &state_r;
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
 #if defined (GTK_USE)
 //  lock_2 = &state_r.subscribersLock;
@@ -1353,7 +1354,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_SUCCESS;
   } // end IF
@@ -1433,7 +1434,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1477,7 +1478,7 @@ ACE_TMAIN (int argc_in,
               elapsed_rusage.ru_nsignals,
               elapsed_rusage.ru_nvcsw,
               elapsed_rusage.ru_nivcsw));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step10: clean up
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -1496,7 +1497,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

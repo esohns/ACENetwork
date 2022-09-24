@@ -1,3 +1,4 @@
+#include (iconv)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 include (PreXMLImplementation)
 #include (SetXMLImplementation)
@@ -7,8 +8,7 @@ include (SetMonitorImplementation)
 
 add_library (${PROJECT_NAME}_WLAN STATIC "")
 
-if (UNIX)
-elseif (WIN32)
+if (WIN32)
 # include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/scripts/Macros.cmake)
  get_WIN32_Version (WINDOWS_VERSION_MAJOR WINDOWS_VERSION_MINOR WINDOWS_VERSION_MICRO)
 # message (STATUS "WINDOWS_VERSION: ${WINDOWS_VERSION_MAJOR}.${WINDOWS_VERSION_MINOR}.${WINDOWS_VERSION_MICRO}")
@@ -19,7 +19,7 @@ elseif (WIN32)
    add_definitions (-DWINXP_SUPPORT)
   endif (WINXP_SUPPORT)
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
-endif ()
+endif (WIN32)
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
@@ -92,8 +92,10 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib>)
 elseif (WIN32)
  if (LIBXML2_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:$ENV{LIB_ROOT}/libiconv-1.9.2-1/include>)
+  if (LIBICONV_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                               $<BUILD_INTERFACE:${LIBICONV_INCLUDE_DIRS}>)
+  endif (LIBICONV_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               $<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIR}>)
  endif (LIBXML2_SUPPORT)

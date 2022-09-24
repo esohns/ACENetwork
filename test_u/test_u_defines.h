@@ -23,8 +23,10 @@
 
 #include "ace/config-lite.h"
 
+#define TEST_U_STREAM_THREAD_NAME                    "stream processor"
+
 // event dispatch
-#define TEST_U_DEFAULT_NUMBER_OF_TP_THREADS         3
+#define TEST_U_DEFAULT_NUMBER_OF_TP_THREADS          3
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS 1
 #else
@@ -37,29 +39,29 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 // stream
-#define TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME   "ProtocolHandler"
-#define TEST_U_STREAM_MODULE_HEADERPARSER_NAME      "HeaderParser"
+#define TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME    "ProtocolHandler"
+#define TEST_U_STREAM_MODULE_HEADERPARSER_NAME       "HeaderParser"
 
-#define TEST_U_DEFAULT_BUFFER_SIZE                  16384 // bytes
-#define TEST_U_MAX_MESSAGES                         0 // 0 --> no limits
+#define TEST_U_DEFAULT_BUFFER_SIZE                   16384 // bytes
+#define TEST_U_MAX_MESSAGES                          0 // 0 --> no limits
 
 // (asynchronous) connections
-#define TEST_U_CONNECTION_ASYNCH_TIMEOUT            60 // second(s)
+#define TEST_U_CONNECTION_ASYNCH_TIMEOUT             60 // second(s)
 // *IMPORTANT NOTE*: this means that asynchronous connections take at least this
 //                   amount of time to establish
-#define TEST_U_CONNECTION_ASYNCH_TIMEOUT_INTERVAL   1  // second(s)
+#define TEST_U_CONNECTION_ASYNCH_TIMEOUT_INTERVAL    1  // second(s)
 
 // sessions
-#define TEST_U_SESSION_LOG_FILENAME_PREFIX          "test_u_session"
-#define TEST_U_SESSION_USE_CURSES                   true // use (PD|N)curses library ?
+#define TEST_U_SESSION_LOG_FILENAME_PREFIX           "test_u_session"
+#define TEST_U_SESSION_USE_CURSES                    true // use (PD|N)curses library ?
 
-#define TEST_U_DEFAULT_SESSION_LOG                  false // log to file ? : stdout
+#define TEST_U_DEFAULT_SESSION_LOG                   false // log to file ? : stdout
 
 // statistic
-#define TEST_U_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
+#define TEST_U_DEFAULT_STATISTIC_REPORTING_INTERVAL  0 // seconds: 0 --> OFF
 
 // SSL
-#define TEST_U_PEM_CERTIFICATE_FILE                 "dummy.pem"
-#define TEST_U_PEM_PRIVATE_KEY_FILE                 "key.pem"
+#define TEST_U_PEM_CERTIFICATE_FILE                  "dummy.pem"
+#define TEST_U_PEM_PRIVATE_KEY_FILE                  "key.pem"
 
 #endif

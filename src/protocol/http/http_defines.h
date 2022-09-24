@@ -42,6 +42,7 @@
 // protocol
 #define HTTP_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST
 #define HTTP_DEFAULT_SERVER_PORT                  ACE_DEFAULT_HTTP_PORT
+#define HTTP_DEFAULT_URI                          "index.html"
 
 #define HTTP_DEFAULT_PRINT_PROGRESSDOT            false
 #define HTTP_COMMAND_STRING_RESPONSE              "HTTP_RESPONSE"

@@ -21,31 +21,29 @@
 
 #include "net_wlan_tools.h"
 
-#include <guiddef.h>
-#include <iphlpapi.h>
-#include <Ks.h>
-#include <l2cmn.h>
-#include <mstcpip.h>
+#include "guiddef.h"
+#include "iphlpapi.h"
+#include "Ks.h"
+#include "l2cmn.h"
+#include "mstcpip.h"
 #define __CGUID_H__
-#include <OleAuto.h>
-#include <shlwapi.h>
-#include <wlanapi.h>
-#include <WinInet.h>
+#include "OleAuto.h"
+#include "shlwapi.h"
+#include "wlanapi.h"
+#include "WinInet.h"
 
 #if defined (MSXML_SUPPORT)
-#include <msxml2.h>
-#elif defined (LIBXML2_SUPPORT)
+#include "msxml2.h"
+#endif // MSXML_SUPPORT
+#if defined (LIBXML2_SUPPORT)
 #include "libxml/xpath.h"
 #include "libxml/xpathInternals.h"
-#else
-#error "no supported XML parser, aborting"
-#endif
+#endif // LIBXML2_SUPPORT
 
 #include "ace/Handle_Set.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
-#include "ace/Synch.h"
 
 #include "common_file_tools.h"
 #include "common_string_tools.h"
@@ -2218,12 +2216,12 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
        ++iterator)
   {
     interface_identifier_s =
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
       *iterator;
 #else
       Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator));
     ACE_ASSERT (!InlineIsEqualGUID (interface_identifier_s, GUID_NULL));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
     result_2 =
       WlanGetAvailableNetworkList (client_handle,
                                    &interface_identifier_s,
@@ -2231,7 +2229,7 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
                                    NULL,
                                    &wlan_network_list_p);
     if (unlikely (result_2 != ERROR_SUCCESS)) // ERROR_CAN_NOT_COMPLETE: 1003
-    {
+    {                                         // ERROR_NDIS_DOT11_POWER_STATE_INVALID: 2150899714
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(0x%@): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier_s).c_str ()),

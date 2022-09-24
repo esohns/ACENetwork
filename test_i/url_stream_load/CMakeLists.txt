@@ -1,5 +1,5 @@
 include (ffmpeg)
-
+include (ImageMagick)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 include (PreXMLImplementation)
 
@@ -270,31 +270,20 @@ elseif (WIN32)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_PATH)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML2_PATH)
+ file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_PATH}
                            ${FFMPEG_PATH}
+                           ${IMAGEMAGICK_PATH}
                            ${GTK_PATH}
                            ${WXWIDGETS_PATH}
-#                           ${ICONV_PATH}
-#                           ${LIBXML2_PATH}
                            ${ACE_LIBRARY_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
                          ARGS "-l -r -t -u https://mcdn.daserste.de/daserste/de/master.m3u8"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                                              G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/err/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/dec/Debug
-                                              ${PROJECT_SOURCE_DIR}/../ACEStream/cmake/src/modules/html/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/http/Debug
-                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/url_stream_load
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/${EXECUTABLE}
                          ENVIRONMENT foo=bar)
 endif ()

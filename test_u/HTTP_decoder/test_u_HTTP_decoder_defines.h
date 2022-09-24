@@ -21,13 +21,8 @@
 #ifndef TEST_U_HTTP_DECODER_DEFINES_H
 #define TEST_U_HTTP_DECODER_DEFINES_H
 
-#define TEST_U_DEFAULT_OUTPUT_FILE                   "output.html"
-#define TEST_U_THREAD_NAME                           "stream processor"
+#define TEST_U_DEFAULT_OUTPUT_FILE "output.html"
 
-#define TEST_U_DEFAULT_SUFFIX                        ".html"
-#define TEST_U_DEFAULT_URI                           "index.html"
-
-//#define TEST_U_DEFAULT_BUFFER_SIZE                   16384 // bytes
-//#define TEST_U_MAX_MESSAGES                          0 // 0 --> no limits
+#define TEST_U_DEFAULT_SUFFIX      ".html"
 
 #endif
