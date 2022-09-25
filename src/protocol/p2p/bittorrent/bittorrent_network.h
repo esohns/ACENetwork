@@ -121,9 +121,9 @@ struct BitTorrent_SessionInitiationThreadData
    , session (NULL)
   {};
 
-  BitTorrent_PeerAddresses_t* addresses;
-  ACE_SYNCH_MUTEX*            lock;
-  Net_IInetSession_t*         session;
+  BitTorrent_PeerAddresses_t addresses;
+  ACE_SYNCH_MUTEX*           lock;
+  Net_IInetSession_t*        session;
 };
 
 template <typename SessionInterfaceType>

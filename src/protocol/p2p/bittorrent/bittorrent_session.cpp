@@ -38,27 +38,33 @@ net_bittorrent_session_setup_function (void* arg_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->addresses);
   ACE_ASSERT (data_p->lock);
   ACE_ASSERT (data_p->session);
 
   ACE_INET_Addr peer_address;
+  Net_IInetSession_t* isession_p = NULL;
+  bool delete_thread_data_b = false;
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *data_p->lock, result);
-    peer_address = data_p->addresses->back ();
-    data_p->addresses->pop_back ();
+    peer_address = data_p->addresses.back ();
+    data_p->addresses.pop_back ();
+    delete_thread_data_b = data_p->addresses.empty ();
+    isession_p = data_p->session;
   } // end lock scope
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connecting to peer \"%s\"...\n"),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 
-  data_p->session->connect (peer_address);
+  isession_p->connect (peer_address);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = 0;
 #else
   result = NULL;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
+
+  if (unlikely (delete_thread_data_b))
+    delete data_p;
 
   return result;
 }

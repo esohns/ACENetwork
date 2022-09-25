@@ -58,7 +58,9 @@ class HTTP_Module_Parser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   struct Stream_UserData>
- , public HTTP_ParserDriver_T<SessionMessageType>
+ , public HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                              TimePolicyType,
+                              SessionMessageType>
 {
   typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -69,7 +71,9 @@ class HTTP_Module_Parser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   struct Stream_UserData> inherited;
-  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
+  typedef HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                              TimePolicyType,
+                              SessionMessageType> inherited2;
 
  public:
   HTTP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
@@ -152,7 +156,9 @@ class HTTP_Module_ParserH_T
                                       StatisticContainerType,
                                       TimerManagerType,
                                       UserDataType>
- , public HTTP_ParserDriver_T<SessionMessageType>
+ , public HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                              TimePolicyType,
+                              SessionMessageType>
 {
   typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -168,7 +174,9 @@ class HTTP_Module_ParserH_T
                                       StatisticContainerType,
                                       TimerManagerType,
                                       UserDataType> inherited;
-  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
+  typedef HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                              TimePolicyType,
+                              SessionMessageType> inherited2;
 
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile

@@ -709,7 +709,8 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
   filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   std::ostringstream converter;
   converter << std::setfill ('0');
-  converter << std::setw (Common_Math_Tools::digitsBase10 (static_cast<int> (numberOfPieces_in)));
+  converter <<
+    std::setw (Common_Math_Tools::digitsBase10 (static_cast<int> (numberOfPieces_in)));
   converter << index_in;
   filename += converter.str ();
   filename += ACE_TEXT_ALWAYS_CHAR ("_");
@@ -756,7 +757,7 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
   } // end IF
   ACE_UNUSED_ARG (result);
   result_2 = stream.close ();
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_FILE_IO::close(\"%s\"): \"%m\", aborting\n"),
@@ -765,8 +766,9 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
   } // end IF
   else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s: saved piece to \"%s\" (%u byte(s))...\n"),
+                ACE_TEXT ("%s: saved piece %u to \"%s\" (%u byte(s))...\n"),
                 ACE_TEXT (metaInfoFileName_in.c_str ()),
+                index_in,
                 ACE_TEXT (filename.c_str ()),
                 piece_in.length));
   return result_3;
@@ -837,37 +839,68 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
        ++iterator_2)
     if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_KEY))
       break;
-  ACE_ASSERT (iterator_2 != (*iterator).second->dictionary->end ());
-  ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
-  Bencoding_ListIterator_t iterator_3 = (*iterator_2).second->list->begin ();
-  ACE_ASSERT (iterator_3 != (*iterator_2).second->list->end ());
-  ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
-  Bencoding_DictionaryIterator_t iterator_4 =
-      (*iterator_3)->dictionary->begin ();
-  for (;
-       iterator_4 != (*iterator_3)->dictionary->end ();
-       ++iterator_4)
-    if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY))
-      break;
-  ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
-  ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-  ACE_UINT64 current_file_length =
-    static_cast<ACE_UINT64> ((*iterator_4).second->integer);
-  iterator_4 = (*iterator_3)->dictionary->begin ();
-  for (;
-       iterator_4 != (*iterator_3)->dictionary->end ();
-       ++iterator_4)
-    if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_PATH_KEY))
-      break;
-  ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
-  ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
-  std::string current_file_path =
-      BitTorrent_Tools::listToPath (*(*iterator_4).second->list);
+  bool is_single_file_b = false;
+  ACE_UINT64 current_file_length = 0;
+  std::string current_file_path;
+  Bencoding_ListIterator_t iterator_3;
+  Bencoding_DictionaryIterator_t iterator_4;
+  if (iterator_2 == (*iterator).second->dictionary->end()) // torrent contains just a single file
+  {
+    is_single_file_b = true;
+    iterator_2 =
+      (*iterator).second->dictionary->begin ();
+    for (;
+         iterator_2 != (*iterator).second->dictionary->end ();
+         ++iterator_2)
+      if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_LENGTH_KEY))
+        break;
+    ACE_ASSERT (iterator_2 != (*iterator).second->dictionary->end());
+    ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+    current_file_length =
+      static_cast<ACE_UINT64> ((*iterator_2).second->integer);
+    current_file_path = directory_name_string;
+    directory_name_string.clear ();
+  } // end IF
+  else
+  {
+    ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
+    iterator_3 = (*iterator_2).second->list->begin ();
+    ACE_ASSERT (iterator_3 != (*iterator_2).second->list->end ());
+    ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+    iterator_4 = (*iterator_3)->dictionary->begin ();
+    for (;
+         iterator_4 != (*iterator_3)->dictionary->end ();
+         ++iterator_4)
+      if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY))
+        break;
+    ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
+    ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+    current_file_length =
+      static_cast<ACE_UINT64> ((*iterator_4).second->integer);
+    iterator_4 = (*iterator_3)->dictionary->begin();
+    for (;
+         iterator_4 != (*iterator_3)->dictionary->end();
+         ++iterator_4)
+      if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR(BITTORRENT_METAINFO_INFO_FILES_PATH_KEY))
+        break;
+    ACE_ASSERT(iterator_4 != (*iterator_3)->dictionary->end());
+    ACE_ASSERT((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
+    current_file_path =
+        BitTorrent_Tools::listToPath (*(*iterator_4).second->list);
+  } // end ELSE
   std::string current_file_path_on_disk = pieces_path;
-  current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  current_file_path_on_disk += directory_name_string;
-  current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  current_file_path_on_disk += current_file_path;
+  if (is_single_file_b)
+  {
+    current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    current_file_path_on_disk += current_file_path;
+  } // end IF
+  else
+  {
+    current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    current_file_path_on_disk += directory_name_string;
+    current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    current_file_path_on_disk += current_file_path;
+  } // end ELSE
   unsigned int bytes_to_write = 0;
   std::string current_piece_file;
   for (Common_File_IdentifierListIterator_t iterator_5 = piece_files.begin ();
@@ -918,37 +951,40 @@ write_file:
     } // end IF
     // done with the current file
     // --> get the next filename/size ?
-    ++iterator_3;
-    if (iterator_3 != (*iterator_2).second->list->end ())
-    { ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
-      iterator_4 = (*iterator_3)->dictionary->begin ();
-      for (;
-           iterator_4 != (*iterator_3)->dictionary->end ();
-           ++iterator_4)
-        if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY))
-          break;
-      ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
-      ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-      current_file_length =
-        static_cast<unsigned int> ((*iterator_4).second->integer);
-      iterator_4 = (*iterator_3)->dictionary->begin ();
-      for (;
-           iterator_4 != (*iterator_3)->dictionary->end ();
-           ++iterator_4)
-        if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_PATH_KEY))
-          break;
-      ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
-      ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
-      current_file_path =
-          BitTorrent_Tools::listToPath (*(*iterator_4).second->list);
-      current_file_path_on_disk = pieces_path;
-      current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-      current_file_path_on_disk += directory_name_string;
-      current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-      current_file_path_on_disk += current_file_path;
-      if (file_size_i)
-        goto write_file; // there is data left
-      // --> load the next piece and continue
+    if (!is_single_file_b)
+    {
+      ++iterator_3;
+      if (iterator_3 != (*iterator_2).second->list->end ())
+      { ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+        iterator_4 = (*iterator_3)->dictionary->begin ();
+        for (;
+             iterator_4 != (*iterator_3)->dictionary->end ();
+             ++iterator_4)
+          if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_LENGTH_KEY))
+            break;
+        ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
+        ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+        current_file_length =
+          static_cast<unsigned int> ((*iterator_4).second->integer);
+        iterator_4 = (*iterator_3)->dictionary->begin ();
+        for (;
+             iterator_4 != (*iterator_3)->dictionary->end ();
+             ++iterator_4)
+          if (*(*iterator_4).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_PATH_KEY))
+            break;
+        ACE_ASSERT (iterator_4 != (*iterator_3)->dictionary->end ());
+        ACE_ASSERT ((*iterator_4).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
+        current_file_path =
+            BitTorrent_Tools::listToPath (*(*iterator_4).second->list);
+        current_file_path_on_disk = pieces_path;
+        current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+        current_file_path_on_disk += directory_name_string;
+        current_file_path_on_disk += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+        current_file_path_on_disk += current_file_path;
+        if (file_size_i)
+          goto write_file; // there is data left
+        // --> load the next piece and continue
+      } // end IF
     } // end IF
     ACE_ASSERT (!file_size_i);
     delete [] data_p; data_p = NULL;

@@ -495,6 +495,71 @@ idle_initialize_UI_cb (gpointer userData_in)
   return G_SOURCE_REMOVE;
 }
 
+
+gboolean
+idle_piece_complete_progress_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_remove_session_cb"));
+
+  // sanity check(s)
+  struct BitTorrent_Client_UI_SessionCBData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
+  ACE_ASSERT (data_p);
+//  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
+  ACE_ASSERT (data_p->session);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+
+  GtkNotebook* notebook_p = NULL;
+  GtkVBox* vbox_p = NULL;
+  gint page_number = -1;
+//  gint number_of_pages = 0;
+  Common_UI_GTK_BuildersIterator_t iterator;
+  ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock);
+
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+
+  iterator = state_r.builders.find (data_p->label);
+  // sanity check(s)
+  if (iterator == state_r.builders.end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("session (label was: \"%s\") builder not found, aborting\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    goto clean_up;
+  } // end IF
+
+  // remove session page from sessions notebook ?
+  notebook_p =
+    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_SESSIONS)));
+  ACE_ASSERT (notebook_p);
+
+  vbox_p =
+      GTK_VBOX (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_VBOX_SESSION)));
+  ACE_ASSERT (vbox_p);
+  page_number = gtk_notebook_page_num (notebook_p,
+                                       GTK_WIDGET (vbox_p));
+
+  { // flip away from "this" page ?
+    // *IMPORTANT NOTE*: release lock while switching pages
+    ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
+    gtk_notebook_set_current_page (notebook_p,
+                                   page_number);
+  } // end lock scope
+
+clean_up:
+  state_r.eventSourceIds.erase (data_p->eventSourceId);
+  delete data_p->session; data_p->session = NULL;
+
+  return G_SOURCE_REMOVE;
+}
+
 gboolean
 idle_remove_session_cb (gpointer userData_in)
 {
@@ -527,12 +592,12 @@ idle_remove_session_cb (gpointer userData_in)
   if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, aborting\n"),
+                ACE_TEXT ("session (label was: \"%s\") builder not found, aborting\n"),
                 ACE_TEXT (data_p->label.c_str ())));
     goto clean_up;
   } // end IF
 
-  // remove channel page from connection notebook ?
+  // remove session page from sessions notebook ?
   notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_SESSIONS)));
@@ -551,7 +616,7 @@ idle_remove_session_cb (gpointer userData_in)
     ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
 
     gtk_notebook_prev_page (notebook_p);
-  } // end IF
+  } // end IF && lock scope
   gtk_notebook_remove_page (notebook_p,
                             page_number);
 
@@ -582,7 +647,6 @@ idle_update_display_cb (gpointer userData_in)
 
   if (data_p->sessions.empty ())
     return G_SOURCE_CONTINUE;
-
   // step0: retrieve active session
   BitTorrent_Client_GUI_Session_t* session_p =
       BitTorrent_Client_UI_Tools::current (state_r,
@@ -654,7 +718,7 @@ idle_update_progress_cb (gpointer userData_in)
                     ACE_TEXT ("thread %u has joined (status was: %@)...\n"),
                     *iterator_2,
                     exit_status));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       } // end IF
 
       Common_UI_GTK_PendingActionsIterator_t iterator_3 =

@@ -23,29 +23,21 @@
 
 #include <string>
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_SUPPORT)
+#include "gtk/gtk.h"
+#endif // GTK_SUPPORT
+#endif // GUI_SUPPORT
+
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-#include "gtk/gtk.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-
 #include "common_iget.h"
 
-//#include "stream_common.h"
-
-//#include "net_common.h"
 #include "net_defines.h"
 
 #include "bittorrent_client_configuration.h"
-
-//#include "bittorrent_client_gui_common.h"
-
-// forward declarations
-//struct BitTorrent_Client_SessionState;
 
 template <typename SessionInterfaceType,
           typename ConnectionType,
@@ -72,29 +64,10 @@ class BitTorrent_Client_GUI_Session_T
   //            BitTorrent_Client_UI_CBData::Common_UI_GTKState::lock held !
   virtual ~BitTorrent_Client_GUI_Session_T ();
 
-//  void initialize (struct BitTorrent_Client_SessionState*, // session state handle
-//                   BitTorrent_IControl*);                  // controller handle
-//  // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-//  void finalize (bool = true); // locked access ?
   void close ();
 
   // implement Common_IGet_T
   inline virtual const ConnectionCBDataType& getR () const { return CBData_; }
-
-  // *WARNING*: callers may need protection from:
-  //            - the thread(s) servicing the UI (GTK) event loop
-  //            - the event dispatch thread(s) (reactor/proactor)
-  //void current (std::string&,        // return value: nickname
-  //              std::string&) const; // return value: channel / nickname
-//  inline const struct BitTorrent_Client_SessionState& state () const { ACE_ASSERT (sessionState_); return *sessionState_; };
-
-//  void createConnection (const ACE_INET_Addr&, // address
-//                         bool = true,          // locked access ?
-//                         bool = true);         // locked access (GDK) ?
-//  // *IMPORTANT NOTE*: callers must invoke ConnectionType::decrease () when done
-//  ConnectionType* getConnection (const ACE_INET_Addr&) const; // address
-//  void terminateConnection (const ACE_INET_Addr&, // address
-//                            bool = true);         // locked access ?
 
   bool                 closing_;
 

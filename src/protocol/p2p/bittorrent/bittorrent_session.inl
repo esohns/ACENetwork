@@ -319,7 +319,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
       inherited::state_.pieces.push_back (piece_s);
     } // end WHILE
     BitTorrent_Tools::assembleFiles (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (configuration_in.metaInfoFileName.c_str ()),
-                                                                                    ACE_DIRECTORY_SEPARATOR_CHAR)),
+                                                                          ACE_DIRECTORY_SEPARATOR_CHAR)),
                                      *configuration_in.metaInfo);
     // try to load existing pieces
     if (!BitTorrent_Tools::loadPieces (configuration_in.metaInfoFileName,
@@ -2428,57 +2428,56 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               peer_addresses.size ()));
 
-  struct BitTorrent_SessionInitiationThreadData thread_data;
-  thread_data.addresses = &peer_addresses;
-  thread_data.lock = &(inherited::lock_);
-  thread_data.session = this;
+  struct BitTorrent_SessionInitiationThreadData* thread_data_p = NULL;
+  ACE_NEW_NORETURN (thread_data_p,
+                    struct BitTorrent_SessionInitiationThreadData ());
+  ACE_ASSERT (thread_data_p);
+  thread_data_p->addresses = peer_addresses;
+  thread_data_p->lock = &(inherited::lock_);
+  thread_data_p->session = this;
   ACE_Thread_Manager* thread_manager_p = NULL;
   const char** thread_names_p = NULL;
   char* thread_name_p = NULL;
   std::string buffer;
   std::ostringstream converter;
-  ACE_THR_FUNC function_p =
-      static_cast<ACE_THR_FUNC> (::net_bittorrent_session_setup_function);
-  void* arg_p = &thread_data;
   int group_id_i = -1;
+  int number_of_threads_i = thread_data_p->addresses.size();
   ACE_thread_t* thread_ids_p = NULL;
   ACE_hthread_t* thread_handles_p = NULL;
   // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
   //         available)
   ACE_NEW_NORETURN (thread_ids_p,
-                    ACE_thread_t[thread_data.addresses->size ()]);
+                    ACE_thread_t[number_of_threads_i]);
   if (!thread_ids_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory(%u), aborting\n"),
-                (sizeof (ACE_thread_t) * thread_data.addresses->size ())));
+                (sizeof (ACE_thread_t) * number_of_threads_i)));
     goto error;
   } // end IF
   ACE_NEW_NORETURN (thread_handles_p,
-                    ACE_hthread_t[thread_data.addresses->size ()]);
+                    ACE_hthread_t[number_of_threads_i]);
   if (!thread_handles_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory(%u), aborting\n"),
-                (sizeof (ACE_hthread_t) * thread_data.addresses->size ())));
+                (sizeof (ACE_hthread_t) * number_of_threads_i)));
     goto error;
   } // end IF
 //  ACE_OS::memset (thread_handles_p, 0, sizeof (thread_handles_p));
   // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
   //         available)
   ACE_NEW_NORETURN (thread_names_p,
-                    const char*[thread_data.addresses->size ()]);
+                    const char*[number_of_threads_i]);
   if (!thread_names_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory(%u), aborting\n"),
-                (sizeof (char*) * thread_data.addresses->size ())));
+                (sizeof (char*) * number_of_threads_i)));
     goto error;
   } // end IF
   ACE_OS::memset (thread_names_p, 0, sizeof (thread_names_p));
-  for (unsigned int i = 0;
-       i < thread_data.addresses->size ();
-       i++)
+  for (unsigned int i = 0; i < number_of_threads_i; i++)
   {
     thread_name_p = NULL;
     // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
@@ -2504,25 +2503,26 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   group_id_i =
-    thread_manager_p->spawn_n (thread_ids_p,                   // id(s)
-                               thread_data.addresses->size (), // # threads
-                               function_p,                     // function
-                               arg_p,                          // argument
+    thread_manager_p->spawn_n (thread_ids_p,                               // id(s)
+                               number_of_threads_i,                        // # threads
+                               static_cast<ACE_THR_FUNC> (::net_bittorrent_session_setup_function), // function
+                               thread_data_p,                              // argument
                                (THR_NEW_LWP      |
-                                THR_JOINABLE     |
-                                THR_INHERIT_SCHED),            // flags
-                               ACE_DEFAULT_THREAD_PRIORITY,    // priority
+                                //THR_JOINABLE     |
+                                THR_DETACHED     |
+                                THR_INHERIT_SCHED),                        // flags
+                               ACE_DEFAULT_THREAD_PRIORITY,                // priority
                                BITTORRENT_SESSION_HANDLER_THREAD_GROUP_ID, // group id
-                               NULL,                           // stack(s)
-                               NULL,                           // stack size(s)
-                               thread_handles_p,               // handle(s)
-                               NULL,                           // task
-                               thread_names_p);                // name(s)
-  if (group_id_i == -1)
+                               NULL,                                       // stack(s)
+                               NULL,                                       // stack size(s)
+                               thread_handles_p,                           // handle(s)
+                               NULL,                                       // task
+                               thread_names_p);                            // name(s)
+  if (unlikely (group_id_i == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn_n(%u): \"%m\", aborting\n"),
-                thread_data.addresses->size ()));
+                number_of_threads_i));
     goto error;
   } // end IF
 
@@ -2530,18 +2530,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   if (thread_ids_p)
     delete [] thread_ids_p;
   delete [] thread_handles_p;
-  for (unsigned int i = 0; i < thread_data.addresses->size (); i++)
+  for (unsigned int i = 0; i < number_of_threads_i; i++)
     delete [] thread_names_p[i];
   delete [] thread_names_p;
 
-  result = thread_manager_p->wait_grp (group_id_i);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", aborting\n"),
-                group_id_i));
-    goto error;
-  } // end IF
+  //result = thread_manager_p->wait_grp (group_id_i);
+  //if (result == -1)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", aborting\n"),
+  //              group_id_i));
+  //  goto error;
+  //} // end IF
 
   return;
 
@@ -2550,10 +2550,13 @@ error:
     delete [] thread_ids_p;
   if (thread_handles_p)
     delete [] thread_handles_p;
-  for (unsigned int j = 0; j < thread_data.addresses->size (); j++)
-    delete [] thread_names_p[j];
+  if (thread_names_p)
+    for (unsigned int j = 0; j < number_of_threads_i; j++)
+      delete [] thread_names_p[j];
   if (thread_names_p)
     delete [] thread_names_p;
+  if (thread_data_p)
+    delete thread_data_p;
 }
 
 template <typename PeerHandlerConfigurationType,
@@ -2718,12 +2721,10 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
-#if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%u: %s\n"),
-              id_in,
-              ACE_TEXT (BitTorrent_Tools::RecordToString (record_in).c_str ())));
-#endif // _DEBUG
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("%u: %s\n"),
+  //            id_in,
+  //            ACE_TEXT (BitTorrent_Tools::RecordToString (record_in).c_str ())));
 
   if (!record_in.length)
     return;
@@ -2909,6 +2910,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
             (*iterator).chunks.clear ();
             goto continue_;
           } // end IF
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("%s: piece %u complete...\n"),
+                      ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                                     ACE_DIRECTORY_SEPARATOR_CHAR),
+                      record_in.piece.index));
+
           send_have_b = true;
           if (!BitTorrent_Tools::savePiece (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                                                                                  ACE_DIRECTORY_SEPARATOR_CHAR)),
@@ -3180,6 +3187,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   // sanity check(s)
   ACE_ASSERT (id_in);
 
+  const typename ISTREAM_CONNECTION_T::STREAM_T* stream_p =
+    NULL;
+  const typename ISTREAM_CONNECTION_T::STREAM_T::SESSION_DATA_CONTAINER_T* session_data_container_p =
+    NULL;
+  const typename ISTREAM_CONNECTION_T::STREAM_T::SESSION_DATA_T* session_data_p =
+    NULL;
   struct BitTorrent_PeerMessageData* data_p = NULL;
   typename PeerStreamType::MESSAGE_T::DATA_T* data_container_p = NULL;
   ICONNECTION_T* iconnection_p = NULL;
@@ -3225,11 +3238,6 @@ allocate:
                 ACE_TEXT ("failed to allocate peer stream message: \"%m\", aborting\n")));
     goto error;
   } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
-  message_out->initialize (data_container_p,
-                           message_out->sessionId (),
-                           NULL);
-  data_container_p = NULL;
 
 continue_:
   if (connection_out) // only want message
@@ -3254,6 +3262,16 @@ continue_:
     goto error;
   } // end IF
 
+  stream_p = &connection_out->stream ();
+  session_data_container_p = &stream_p->getR_2 ();
+  session_data_p = &session_data_container_p->getR ();
+
+  // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
+  message_out->initialize (data_container_p,
+                           session_data_p->sessionId,
+                           NULL);
+  ACE_ASSERT (!data_container_p);
+
   return true;
 
 error:
@@ -3261,9 +3279,9 @@ error:
   {
     message_out->release (); message_out = NULL;
   } // end IF
-  else if (data_container_p)
+  if (data_container_p)
     data_container_p->decrease ();
-  else if (data_p)
+  if (data_p)
     delete data_p;
   if (connection_out)
   {

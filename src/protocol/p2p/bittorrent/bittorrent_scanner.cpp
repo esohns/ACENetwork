@@ -6203,6 +6203,7 @@ case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
+                            ACE_ASSERT (yylval->record);
                             // skip over piece data
                             unsigned int bytes_to_skip =
                               yylval->record->length - 9 - 1;

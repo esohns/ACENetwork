@@ -166,7 +166,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
 #else
                         UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                                    ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::initialize"));
@@ -208,26 +208,27 @@ BitTorrent_PeerStream_T<StreamStateType,
   session_data_p =
     &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
   ACE_ASSERT (session_data_p);
+  session_data_p->stream = this;
 
   // ---------------------------------------------------------------------------
 
   // ******************* Marshal ************************
-  module_p =
-      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
-  ACE_ASSERT (module_p);
-  writer_impl_p = dynamic_cast<typename inherited::WRITER_T*> (module_p->writer ());
-  if (!writer_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T*> failed, aborting\n")));
-    goto error;
-  } // end IF
-  writer_impl_p->setP (&(inherited::state_));
+  //module_p =
+  //    const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
+  //ACE_ASSERT (module_p);
+  //writer_impl_p = dynamic_cast<typename inherited::WRITER_T*> (module_p->writer ());
+  //if (!writer_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T*> failed, aborting\n")));
+  //  goto error;
+  //} // end IF
+  //writer_impl_p->setP (&(inherited::state_));
 
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
+  //// *NOTE*: push()ing the module will open() it
+  ////         --> set the argument that is passed along (head module expects a
+  ////             handle to the session data)
+  //module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (NULL))

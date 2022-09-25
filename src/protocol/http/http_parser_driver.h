@@ -30,27 +30,32 @@
 
 #include "http_iparser.h"
 #include "http_parser.h"
-//#include "http_scanner.h"
 
 #include "location.hh"
 
 // forward declaration(s)
 class ACE_Message_Block;
 class ACE_Message_Queue_Base;
+class Stream_ITask;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
-//struct YYLTYPE;
 int HTTP_Scanner_get_debug  (yyscan_t);
 void HTTP_Scanner_set_debug (int  _bdebug , yyscan_t);
 void HTTP_Scanner_set_column (int, yyscan_t);
 void HTTP_Scanner_set_lineno ( int _line_number , yyscan_t yyscanner );
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 class HTTP_ParserDriver_T
  : public HTTP_IParser
 {
  public:
-  HTTP_ParserDriver_T (const std::string&); // scanner tables file (if any)
+  // convenient types
+  typedef ACE_Task<ACE_SYNCH_USE, TimePolicyType> TASK_T;
+
+  HTTP_ParserDriver_T (Stream_ITask*,
+                       const std::string&); // scanner tables file (if any)
   virtual ~HTTP_ParserDriver_T ();
 
   // implement (part of) HTTP_IParser
@@ -83,7 +88,8 @@ class HTTP_ParserDriver_T
   struct HTTP_ParserConfiguration* configuration_;
   bool                             finished_; // processed the whole entity ?
   ACE_Message_Block*               fragment_;
-  unsigned int                     offset_; // parsed entity bytes
+  Stream_ITask*                    itask_;
+  size_t                           offset_; // parsed entity bytes
   struct HTTP_Record*              record_;
 
  private:

@@ -142,7 +142,7 @@ class Net_StreamConnectionBase_T
   inline virtual void signal () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only
-  inline virtual void waitForIdleState () const { stream_.idle (false); }
+  inline virtual void waitForIdleState (bool waitForever_in = true) const { stream_.idle (waitForever_in, false); }
   // -------------------------------------
   inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,
@@ -276,7 +276,7 @@ class Net_AsynchStreamConnectionBase_T
   inline virtual void signal () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   // *NOTE*: this waits for outbound (!) data only
-  virtual void waitForIdleState () const;
+  virtual void waitForIdleState (bool = true) const; // wait forever ?
   // -------------------------------------
   inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,

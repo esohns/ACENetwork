@@ -24,6 +24,7 @@
 #include <string>
 
 #include "ace/INET_Addr.h"
+#include "ace/Stream.h"
 
 #include "common_timer_manager_common.h"
 
@@ -209,11 +210,11 @@ struct BitTorrent_PeerSessionData
     return *this;
   }
 
-  std::string                            filename; // .torrent file
-  bool                                   forwardedHandshake;
-  struct BitTorrent_PeerHandShake*       handshake;
-  Stream_IStream_T<ACE_MT_SYNCH,
-                   Common_TimePolicy_t>* stream; // aggregator
+  std::string                      filename; // .torrent file
+  bool                             forwardedHandshake;
+  struct BitTorrent_PeerHandShake* handshake;
+  ACE_Stream<ACE_MT_SYNCH,
+             Common_TimePolicy_t>* stream; // aggregator
 };
 
 struct BitTorrent_TrackerSessionData
@@ -240,8 +241,8 @@ struct BitTorrent_TrackerSessionData
 
   struct BitTorrent_ConnectionState*        connectionState;
   enum Stream_Decoder_CompressionFormatType format;
-  Stream_IStream_T<ACE_MT_SYNCH,
-                   Common_TimePolicy_t>*    stream; // aggregator
+  ACE_Stream<ACE_MT_SYNCH,
+             Common_TimePolicy_t>*          stream; // aggregator
 };
 
 struct BitTorrent_PeerStreamState

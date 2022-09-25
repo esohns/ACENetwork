@@ -343,6 +343,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_piece_payload>
 <state_piece>{
 {OCTET}{1}                { ACE_ASSERT (yyleng == 1);
+                            ACE_ASSERT (yylval->record);
                             // skip over piece data
                             unsigned int bytes_to_skip =
                               yylval->record->length - 9 - 1;

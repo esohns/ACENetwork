@@ -31,9 +31,9 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
-#endif
+#endif // HAVE_CONFIG_H
 
 #include "http_codes.h"
 #include "http_common.h"
@@ -797,10 +797,16 @@ BitTorrent_Control_T<SessionAsynchType,
   ACE_ASSERT (!connection_out);
   ACE_ASSERT (!message_out);
 
+  const typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T* stream_p =
+    NULL;
+  const typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::SESSION_DATA_CONTAINER_T* session_data_container_p =
+    NULL;
+  const typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::SESSION_DATA_T* session_data_p =
+    NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
-      NULL;
+    NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
-      NULL;
+    NULL;
   Net_ConnectionId_t tracker_connection_id = 0;
   typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
   unsigned int buffer_size_i = 0;
@@ -847,11 +853,6 @@ allocate:
     data_container_p->decrease (); data_container_p = NULL;
     goto error;
   } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
-  message_out->initialize (data_container_p,
-                           message_out->sessionId (),
-                           NULL);
-  ACE_ASSERT (!data_container_p);
 
   // reuse tracker connection(s)
   tracker_connection_id = session_in->trackerConnectionId ();
@@ -883,6 +884,16 @@ allocate:
     goto error;
   } // end IF
 
+  stream_p = &connection_out->stream ();
+  session_data_container_p = &stream_p->getR_2 ();
+  session_data_p = &session_data_container_p->getR ();
+
+  // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
+  message_out->initialize (data_container_p,
+                           session_data_p->sessionId,
+                           NULL);
+  ACE_ASSERT (!data_container_p);
+
   return true;
 
 error:
@@ -890,9 +901,9 @@ error:
   {
     message_out->release (); message_out = NULL;
   } // end IF
-  else if (data_container_p)
+  if (data_container_p)
     data_container_p->decrease ();
-  else if (data_p)
+  if (data_p)
     delete data_p;
   if (connection_out)
   {

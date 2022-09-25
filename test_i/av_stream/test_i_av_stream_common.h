@@ -166,13 +166,14 @@ struct Test_I_AVStream_DirectShow_StreamSessionData
     return *this;
   }
 
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  IDirect3DDevice9Ex* direct3DDevice;
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+  IDirect3DDevice9Ex*              direct3DDevice;
 #else
-  IDirect3DDevice9*   direct3DDevice;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-  UINT                resetToken; // direct 3D manager 'id'
-  Stream_IStream_t*   stream;
+  IDirect3DDevice9*                direct3DDevice;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
+  UINT                             resetToken; // direct 3D manager 'id'
+  ACE_Stream<ACE_MT_SYNCH,
+             Common_TimePolicy_t>* stream;
 };
 //typedef Stream_SessionData_T<Test_I_AVStream_DirectShow_SessionData> Test_I_AVStream_DirectShow_SessionData_t;
 
@@ -196,15 +197,16 @@ struct Test_I_AVStream_MediaFoundation_StreamSessionData
     return *this;
   }
 
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  IDirect3DDevice9Ex* direct3DDevice;
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+  IDirect3DDevice9Ex*              direct3DDevice;
 #else
-  IDirect3DDevice9*   direct3DDevice;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-  UINT                direct3DManagerResetToken;
-  TOPOID              rendererNodeId;
-  IMFMediaSession*    session;
-  Stream_IStream_t*   stream;
+  IDirect3DDevice9*                direct3DDevice;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
+  UINT                             direct3DManagerResetToken;
+  TOPOID                           rendererNodeId;
+  IMFMediaSession*                 session;
+  ACE_Stream<ACE_MT_SYNCH,
+             Common_TimePolicy_t>* stream;
 };
 //typedef Stream_SessionData_T<Test_I_AVStream_MediaFoundation_StreamSessionData> Test_I_AVStream_MediaFoundation_StreamSessionData_t;
 #else
@@ -224,7 +226,8 @@ struct Test_I_AVStream_ALSA_V4L_StreamSessionData
     return *this;
   }
 
-  Stream_IStream_t* stream;
+  ACE_Stream<ACE_MT_SYNCH,
+             Common_TimePolicy_t>* stream;
 };
 //typedef Stream_SessionData_T<Test_I_AVStream_V4L_StreamSessionData> Test_I_AVStream_V4L_StreamSessionData_t;
 #endif // ACE_WIN32 || ACE_WIN64

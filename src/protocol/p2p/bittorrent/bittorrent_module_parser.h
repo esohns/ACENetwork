@@ -110,7 +110,8 @@ class BitTorrent_Module_PeerParser_T
   virtual void record (struct BitTorrent_PeerRecord*&); // data record
   virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
 
-  DataMessageType* headFragment_;
+  DataMessageType*                           headFragment_;
+  struct Common_FlexBisonParserConfiguration parserConfiguration;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +291,8 @@ class BitTorrent_Module_TrackerParser_T
                                      bool&);               // return value: pass message downstream ?
 
  protected:
-  DataMessageType* headFragment_;
+  DataMessageType*                           headFragment_;
+  struct Common_FlexBisonParserConfiguration parserConfiguration;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_TrackerParser_T ())

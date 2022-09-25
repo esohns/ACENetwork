@@ -48,7 +48,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      SessionMessageType>::HTTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
- , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
+ , inherited2 (this,
+               ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
  , headFragment_ (NULL)
  , chunks_ ()
 {
@@ -548,7 +549,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in) // stream handle
- , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
+ , inherited2 (this,
+               ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
  , headFragment_ (NULL)
  //, crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , chunks_ ()
@@ -634,11 +636,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     {
       headFragment_->release (); headFragment_ = NULL;
     } // end IF
-    //crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
     chunks_.clear ();
   } // end IF
 
-  //crunch_ = configuration_in.crunchMessages;
   ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
       inherited::msg_queue_;

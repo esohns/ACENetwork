@@ -19,18 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-// *WORKAROUND*
-#include <iostream>
-using namespace std;
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
-//                   a problem in conjunction with the standard include headers
-//                   when ACE_USES_OLD_IOSTREAMS is defined
-//                   --> include the necessary header(s) manually (see above),
-//                       and prevent ace/iosfwd.h from causing any harm
-#define ACE_IOSFWD_H
-
-#include "ace/Synch.h"
-
 #include "bittorrent_client_curses.h"
 
 #include <string>

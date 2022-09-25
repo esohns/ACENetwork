@@ -152,7 +152,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
 #else
                            UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                                       ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::initialize"));
@@ -163,7 +163,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
   ACE_ASSERT (configuration_in.configuration_);
 
 //  int result = -1;
-//  SessionDataType* session_data_p = NULL;
+  SessionDataType* session_data_p = NULL;
 //  typename inherited::MODULE_T* module_p = NULL;
 //  PARSER_T* parser_impl_p = NULL;
 
@@ -187,108 +187,11 @@ BitTorrent_TrackerStream_T<StreamStateType,
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
-//  session_data_p =
-//    &const_cast<SessionDataType&> (inherited::sessionData_->get ());
-
-//  session_data_p->sessionID = configuration_in.sessionID;
-
-//  // ---------------------------------------------------------------------------
-//  // sanity check(s)
-//  ACE_ASSERT (configuration_in.moduleConfiguration);
-
-  //  configuration_in.moduleConfiguration.streamState = &state_;
+  session_data_p =
+    &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
+  session_data_p->stream = this;
 
   // ---------------------------------------------------------------------------
-
-//  // ******************* Handler ************************
-//  IRC_Module_Handler* handler_impl = NULL;
-//  handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
-//  if (!handler_impl)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
-//    return false;
-//  } // end IF
-//  if (!handler_impl->initialize (configuration_in.messageAllocator,
-//                                 (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
-//                                  : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
-//                                 (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                handler_.name ()));
-//    return false;
-//  } // end IF
-
-  // ******************* Statistic Report ************************
-  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
-  //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  //if (!runtimeStatistic_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
-  //                                          configuration_in.messageAllocator))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  return false;
-  //} // end IF
-
-  //// ******************* Parser ************************
-  //PARSER_T* parser_impl_p = NULL;
-  //parser_impl_p =
-  //  dynamic_cast<PARSER_T*> (parser_.writer ());
-  //if (!parser_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
-  //                                configuration_in.moduleHandlerConfiguration_2.crunchMessages, // "crunch" messages ?
-  //                                configuration_in.moduleHandlerConfiguration_2.traceScanning,  // debug scanner ?
-  //                                configuration_in.moduleHandlerConfiguration_2.traceParsing))  // debug parser ?
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              parser_.name ()));
-  //  return false;
-  //} // end IF
-
-//  // ******************* Marshal ************************
-//  module_p =
-//      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
-//  ACE_ASSERT (module_p);
-//  parser_impl_p = dynamic_cast<PARSER_T*> (module_p->writer ());
-//  if (!parser_impl_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("dynamic_cast<BitTorrent_Module_Parser_T*> failed, aborting\n")));
-//    goto error;
-//  } // end IF
-////  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-////  {
-////    ACE_DEBUG ((LM_ERROR,
-////                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-////                marshal_.name ()));
-////    return false;
-////  } // end IF
-//  if (!parser_impl_p->initialize (inherited::state_))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("%s: failed to initialize writer task, aborting\n"),
-//                module_p->name ()));
-//    goto error;
-//  } // end IF
-
-//  // *NOTE*: push()ing the module will open() it
-//  //         --> set the argument that is passed along (head module expects a
-//  //             handle to the session data)
-//  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (configuration_in.configuration_->notificationStrategy))

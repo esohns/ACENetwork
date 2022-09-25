@@ -13,10 +13,10 @@
     <property name="icon-size">1</property>
   </object>
   <object class="GtkListStore" id="liststore_page_session_connections"/>
-  <object class="GtkTextTagTable" id="texttagtable_notebook_page_session_channels"/>
   <object class="GtkTextBuffer" id="textbuffer_notebook_page_session_log">
     <property name="tag_table">texttagtable_notebook_page_session_channels</property>
   </object>
+  <object class="GtkTextTagTable" id="texttagtable_notebook_page_session_channels"/>
   <object class="GtkWindow" id="window_page_session">
     <property name="can_focus">False</property>
     <child>

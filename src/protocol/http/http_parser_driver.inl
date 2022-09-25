@@ -25,9 +25,11 @@
 
 #include "common_file_tools.h"
 
-#ifdef HAVE_CONFIG_H
+#include "stream_itask.h"
+
+#if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
-#endif
+#endif // HAVE_CONFIG_H
 
 #include "net_macros.h"
 
@@ -36,17 +38,21 @@
 #include "http_message.h"
 #include "http_scanner.h"
 
-template <typename SessionMessageType>
-HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string& scannerTables_in)
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::HTTP_ParserDriver_T (Stream_ITask* itask_in,
+                                                              const std::string& scannerTables_in)
  : configuration_ (NULL)
  , finished_ (false)
  , fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
+ , itask_ (itask_in)
  , blockInParse_ (false)
  , isFirst_ (true)
- //, parser_ (this,          // driver
- //           scannerState_) // scanner
  , scannerState_ (NULL)
  , scannerTables_ (scannerTables_in)
  , bufferState_ (NULL)
@@ -55,6 +61,9 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string&
  , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::HTTP_ParserDriver_T"));
+
+  // sanity check(s)
+  ACE_ASSERT (itask_);
 
   int result = -1;
 
@@ -141,8 +150,12 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string&
   yydebug = (COMMON_PARSER_DEFAULT_YACC_TRACE ? 1 : 0);
 }
 
-template <typename SessionMessageType>
-HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::~HTTP_ParserDriver_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::~HTTP_ParserDriver_T"));
 
@@ -165,9 +178,13 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
     delete record_;
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 bool
-HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct HTTP_ParserConfiguration& configuration_in)
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::initialize (const struct HTTP_ParserConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::initialize"));
 
@@ -235,9 +252,13 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct HTTP_ParserCon
   return true;
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::error (const struct YYLTYPE& location_in,
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::error (const struct YYLTYPE& location_in,
                                                 const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
@@ -275,9 +296,13 @@ HTTP_ParserDriver_T<SessionMessageType>::error (const struct YYLTYPE& location_i
   //std::clog << location_in << ": " << message_in << std::endl;
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::error (const yy::location& location_in,
                                                 const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
@@ -315,9 +340,13 @@ HTTP_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
   //std::clog << location_in << ": " << message_in << std::endl;
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::error (const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
 
@@ -333,9 +362,13 @@ HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
 //   std::clog << message_in << std::endl;
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 bool
-HTTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::parse (ACE_Message_Block* data_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::parse"));
 
@@ -419,9 +452,13 @@ continue_:
   return (result == 0);
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 bool
-HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::switchBuffer (bool unlink_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::switchBuffer"));
 
@@ -471,16 +508,21 @@ HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
   return true;
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::waitBuffer ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::waitBuffer"));
 
-  int result = -1;
+  int result_i = -1;
   ACE_Message_Block* message_block_p = NULL;
-  bool is_session_end = false;
-  bool is_data = false;
+  bool done_b = false;
+  bool is_data_b = false;
+  bool handle_message_inline_b = false;
 
   // *IMPORTANT NOTE*: 'this' is the parser thread currently in yylex() context
 
@@ -491,8 +533,8 @@ HTTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
   // 1. wait for data
   do
   {
-    result = messageQueue_->dequeue_head (message_block_p, NULL);
-    if (unlikely (result == -1))
+    result_i = messageQueue_->dequeue_head (message_block_p, NULL);
+    if (unlikely (result_i == -1))
     { int error = ACE_OS::last_error ();
       if (unlikely (error != ESHUTDOWN))
         ACE_DEBUG ((LM_ERROR,
@@ -505,33 +547,44 @@ HTTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
     {
       case ACE_Message_Block::MB_DATA:
       case ACE_Message_Block::MB_PROTO:
-        is_data = true;
+        is_data_b = true;
         break;
       case STREAM_MESSAGE_SESSION_TYPE:
       {
         SessionMessageType* session_message_p =
           static_cast<SessionMessageType*> (message_block_p);
         if (unlikely (session_message_p->type () == STREAM_SESSION_MESSAGE_END))
-          is_session_end = true; // session has finished --> abort
+          done_b = true; // session has finished --> leave
+        else
+          handle_message_inline_b = true;
         break;
       }
       default:
         break;
     } // end SWITCH
-    if (likely (is_data))
+    if (likely (is_data_b))
       break;
 
-    // requeue message
-    result = messageQueue_->enqueue_tail (message_block_p, NULL);
-    if (unlikely (result == -1))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", returning\n")));
-      return;
+    // requeue message ?
+    if (handle_message_inline_b)
+    { ACE_ASSERT (itask_);
+      itask_->handleMessage (message_block_p,
+                             done_b);
+      handle_message_inline_b = false;
     } // end IF
+    else
+    {
+      result_i = messageQueue_->enqueue_tail (message_block_p, NULL);
+      if (unlikely (result_i == -1))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", returning\n")));
+        return;
+      } // end IF
+    } // end ELSE
     message_block_p = NULL;
 
-    if (unlikely (is_session_end))
+    if (unlikely (done_b))
       break;
   } while (true);
 
@@ -548,9 +601,13 @@ HTTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
   } // end IF
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::dump_state () const
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::dump_state"));
 
@@ -560,9 +617,13 @@ HTTP_ParserDriver_T<SessionMessageType>::dump_state () const
   ACE_NOTREACHED (return;)
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 bool
-HTTP_ParserDriver_T<SessionMessageType>::begin (const char* buffer_in,
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::begin (const char* buffer_in,
                                                 unsigned int bufferSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::begin"));
@@ -607,9 +668,13 @@ HTTP_ParserDriver_T<SessionMessageType>::begin (const char* buffer_in,
   return true;
 }
 
-template <typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::end ()
+HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                    TimePolicyType,
+                    SessionMessageType>::end ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::end"));
 

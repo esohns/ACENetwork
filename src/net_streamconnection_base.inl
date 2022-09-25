@@ -473,7 +473,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
         (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)                && // local close ?
         (inherited2::state_.status != NET_CONNECTION_STATUS_PEER_CLOSED))             // --> peer closed
       inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
-    decrease_b = !inherited2::state_.closed;
+    decrease_b = !inherited2::state_.closed; // i.e. only decrease reference count the first time around
     inherited2::state_.closed = true;
   } // end lock scope
 
@@ -491,7 +491,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     stream_.flush (false,  // flush inbound data ?
                    false,  // flush session messages ?
                    false); // recurse upstream (if any) ?
-    stream_.idle (false); // recurse upstream (if any) ?
+    stream_.idle (inherited2::state_.status == NET_CONNECTION_STATUS_PEER_CLOSED, // wait forever ?
+                  false); // recurse upstream (if any) ?
     stream_.stop (true,   // wait for worker(s) (if any)
                   true,   // recurse upstream (if any) ?
                   false); // high priority ?
@@ -1415,9 +1416,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_close"));
 
-//  int result = -1;
   bool cancel_b = false;
-//  bool decrease_b = true;
 
   // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
   //                   gone away, i.e. no new data will be accepted by the
@@ -1435,12 +1434,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
         (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)                && // local close ?
         (inherited2::state_.status != NET_CONNECTION_STATUS_PEER_CLOSED))             // --> peer closed
-    {
       inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
-      cancel_b = true;
-//      decrease_b = !inherited2::state_.closed;
-      inherited2::state_.closed = true;
-    } // end IF
+    cancel_b = !inherited2::state_.closed; // i.e. only cancel the first time around
+    inherited2::state_.closed = true;
   } // end lock scope
 
   // step0b: notify stream ?
@@ -1457,7 +1453,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     stream_.flush (false,  // do not flush inbound data
                    false,  // do not flush session messages
                    false); // recurse upstream (if any) ?
-    stream_.idle (false); // recurse upstream (if any) ?
+    stream_.idle (inherited2::state_.status == NET_CONNECTION_STATUS_PEER_CLOSED, // wait forever ?
+                  false); // recurse upstream (if any) ?
     stream_.stop (true,   // wait for worker(s) (if any)
                   true,   // recurse upstream (if any) ?
                   false); // high priority ?
@@ -1822,12 +1819,13 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 UserDataType>::waitForIdleState () const
+                                 UserDataType>::waitForIdleState (bool waitForever_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::waitForIdleState"));
 
   // step1: wait for the streams' 'outbound' queue to turn idle
-  stream_.idle (false); // recurse ?
+  stream_.idle (waitForever_in,
+                false);         // recurse ?
 
   // --> outbound stream data has been processed
 
