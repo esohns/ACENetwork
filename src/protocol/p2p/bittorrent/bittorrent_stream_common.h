@@ -46,21 +46,8 @@
 
 #include "bittorrent_common.h"
 #include "bittorrent_message.h"
-//#include "bittorrent_module_parser.h"
 #include "bittorrent_sessionmessage.h"
-//#include "bittorrent_stream.h"
-
-//struct BitTorrent_AllocatorConfiguration
-// : Stream_AllocatorConfiguration
-//{
-//  BitTorrent_AllocatorConfiguration ()
-//   : Stream_AllocatorConfiguration ()
-//  {
-//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-//    //         'flex's yy_scan_buffer() method
-//    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-//  }
-//};
+#include "bittorrent_streamhandler.h"
 
 typedef Stream_DataBase_T<struct BitTorrent_PeerMessageData> BitTorrent_PeerMessageData_t;
 
@@ -311,5 +298,43 @@ DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_TrackerSessionData,           
                                 Stream_INotify_t,                                // stream notification interface type
                                 BitTorrent_TrackerHandler_t,                         // writer type
                                 BitTorrent_TrackerHandler);                          // class name
+
+//----------------------------------------
+
+//typedef BitTorrent_PeerStream_T<struct BitTorrent_PeerStreamState,
+//                                struct BitTorrent_PeerStreamConfiguration,
+//                                struct Stream_Statistic,
+//                                Common_Timer_Manager_t,
+//                                struct BitTorrent_PeerModuleHandlerConfiguration,
+//                                struct BitTorrent_PeerSessionData,
+//                                BitTorrent_PeerSessionData_t,
+//                                Stream_ControlMessage_t,
+//                                BitTorrent_Message_t,
+//                                BitTorrent_PeerSessionMessage_t,
+//                                BitTorrent_PeerConnectionConfiguration,
+//                                struct BitTorrent_PeerConnectionState,
+//                                Net_TCPSocketConfiguration_t,
+//                                struct BitTorrent_SessionState,
+//                                BitTorrent_PeerConnection_Manager_t,
+//                                struct Stream_UserData> BitTorrent_PeerStream_t;
+
+////----------------------------------------
+
+//typedef BitTorrent_PeerStreamHandler_T<struct BitTorrent_PeerSessionData,
+//                                       struct Stream_UserData,
+//                                       BitTorrent_ISession_t
+//#if defined (GUI_SUPPORT)
+//                                       ,void> BitTorrent_PeerStreamHandler_t;
+//#else
+//                                       > BitTorrent_PeerStreamHandler_t;
+//#endif // GUI_SUPPORT
+//typedef BitTorrent_TrackerStreamHandler_T<struct BitTorrent_TrackerSessionData,
+//                                          struct Stream_UserData,
+//                                          BitTorrent_ISession_t
+//#if defined (GUI_SUPPORT)
+//                                          ,void> BitTorrent_TrackerStreamHandler_t;
+//#else
+//                                          > BitTorrent_TrackerStreamHandler_t;
+//#endif // GUI_SUPPORT
 
 #endif

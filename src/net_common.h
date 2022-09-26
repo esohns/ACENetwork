@@ -200,10 +200,10 @@ enum Net_Connection_Status
 struct Net_Statistic
 {
   Net_Statistic ()
-   : sentBytes (0.0F)
-   , receivedBytes (0.0F)
+   : sentBytes (0)
+   , receivedBytes (0)
    , timeStamp (ACE_Time_Value::zero)
-   , previousBytes (0.0F)
+   , previousBytes (0)
    , previousTimeStamp (ACE_Time_Value::zero)
   {}
   struct Net_Statistic operator+= (const struct Net_Statistic& rhs_in)
@@ -218,12 +218,12 @@ struct Net_Statistic
     return *this;
   }
 
-  float          sentBytes;
-  float          receivedBytes;
+  ACE_UINT64     sentBytes;
+  ACE_UINT64     receivedBytes;
 
   // statistic and speed calculations
   ACE_Time_Value timeStamp;
-  float          previousBytes; // total-
+  ACE_UINT64     previousBytes; // total-
   ACE_Time_Value previousTimeStamp;
 };
 typedef struct Net_Statistic Net_Statistic_t;

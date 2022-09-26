@@ -146,7 +146,6 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
     return false;
   } // end IF
 
-#if defined (_DEBUG)
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   AddressType local_address, remote_address;
   try {
@@ -158,10 +157,10 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
   }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registered connection [0x%@/0x%@]: %s %s %s (total: %d)\n"),
-              this, handle_h,
+              ACE_TEXT ("registered connection [0x%@/%d]: %s %s %s (total: %d)\n"),
+              this, reinterpret_cast<int> (handle_h),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address, false, false).c_str ()),
-              (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
+              (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") : ACE_TEXT ("<-->"))),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address, false, false).c_str ()),
               manager_p->count ()));
 #else
@@ -169,11 +168,10 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
               ACE_TEXT ("registered connection [%@/%d]: %s %s %s (total: %d)\n"),
               this, handle_h,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address, false, false).c_str ()),
-              (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
+              (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") : ACE_TEXT ("<-->"))),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address, false, false).c_str ()),
               manager_p->count ()));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 
   return true;
 }
@@ -201,19 +199,6 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
   typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
     CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (manager_p);
-#if defined (_DEBUG)
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  AddressType local_address, remote_address;
-  try {
-    this->info (handle,
-                local_address,
-                remote_address);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
-  }
-  unsigned int number_of_connections = manager_p->count () - 1;
-#endif // _DEBUG
 
   // (try to) de-register with the connection manager
   isRegistered_ = false;
@@ -225,19 +210,17 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
                 ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
   }
 
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
-              this, handle,
-              number_of_connections));
+              ACE_TEXT ("deregistered connection [0x%@/%d] (total: %u)\n"),
+              this, reinterpret_cast<int> (state_.handle),
+              manager_p->count ()));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
-              this, handle,
-              number_of_connections));
+              this, state_.handle,
+              manager_p->count ()));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 }
 
 template <ACE_SYNCH_DECL,

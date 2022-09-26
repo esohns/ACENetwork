@@ -37,9 +37,6 @@ template <typename AddressType,
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType, // socket-
-          ////////////////////////////////
           typename ConnectionType, // implements Net_IConnection_T
           typename ConnectionManagerType, // implements Net_IConnectionManager_T
           typename ConnectorType,

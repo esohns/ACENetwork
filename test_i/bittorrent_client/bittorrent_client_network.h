@@ -194,7 +194,7 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
                                 BitTorrent_Client_PeerConnectionConfiguration,
                                 struct BitTorrent_Client_PeerConnectionState,
                                 Net_TCPSocketConfiguration_t,
-                                struct BitTorrent_SessionState,
+                                struct BitTorrent_Client_SessionState,
                                 BitTorrent_Client_PeerConnection_Manager_t,
                                 struct Stream_UserData> BitTorrent_Client_PeerStream_t;
 typedef BitTorrent_ISession_T<ACE_INET_Addr,
@@ -202,13 +202,10 @@ typedef BitTorrent_ISession_T<ACE_INET_Addr,
                               BitTorrent_Client_TrackerConnectionConfiguration,
                               struct BitTorrent_Client_PeerConnectionState,
                               struct Net_StreamStatistic,
-                              Net_TCPSocketConfiguration_t,
-                              Net_TCPSocketConfiguration_t,
-                              Net_TCPSocketConfiguration_t,
                               BitTorrent_Client_PeerStream_t,
                               enum Stream_StateMachine_ControlState,
                               struct BitTorrent_Client_SessionConfiguration,
-                              struct BitTorrent_SessionState> BitTorrent_Client_ISession_t;
+                              struct BitTorrent_Client_SessionState> BitTorrent_Client_ISession_t;
 struct BitTorrent_Client_PeerConnectionState
  : BitTorrent_PeerConnectionState
 {
@@ -249,14 +246,12 @@ struct BitTorrent_Client_SessionConfiguration
 {
   BitTorrent_Client_SessionConfiguration ()
    : BitTorrent_SessionConfiguration ()
-   , connectionConfiguration (NULL)
+   , CBData (NULL)
    , controller (NULL)
-   , trackerConnectionConfiguration (NULL)
   {}
 
-  BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
-  BitTorrent_Client_IControl_t*                     controller;
-  BitTorrent_Client_TrackerConnectionConfiguration* trackerConnectionConfiguration;
+  struct BitTorrent_Client_UI_CBData* CBData;
+  BitTorrent_Client_IControl_t*       controller;
 };
 
 //////////////////////////////////////////
@@ -305,7 +300,7 @@ typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_TrackerStreamState,
                                    BitTorrent_Client_TrackerConnectionConfiguration,
                                    struct BitTorrent_Client_TrackerConnectionState,
                                    Net_TCPSocketConfiguration_t,
-                                   struct BitTorrent_SessionState,
+                                   struct BitTorrent_Client_SessionState,
                                    BitTorrent_Client_TrackerConnection_Manager_t,
                                    struct Stream_UserData> BitTorrent_Client_TrackerStream_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,

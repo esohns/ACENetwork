@@ -24,12 +24,12 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "net_client_common_tools.h"
+
 template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -40,8 +40,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -62,8 +60,6 @@ template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -74,8 +70,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -116,8 +110,6 @@ template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -129,8 +121,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -151,8 +141,6 @@ template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -164,8 +152,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -181,151 +167,58 @@ Net_SessionBase_T<AddressType,
 
   ConnectorType connector (true);
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+  //  typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
+  struct Net_UserData user_data_s; // *TODO*: make this generic
 
-  // step1: initialize connector
-  typename ConnectorType::ICONNECTOR_T* iconnector_p = &connector;
-  if (!iconnector_p->initialize (*configuration_->connectionConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-    return;
-  } // end IF
-
-  ACE_Time_Value deadline;
-  typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
-  int result = -1;
-
-  // step2: try to connect
-  handle_h = iconnector_p->connect (address_in);
+  handle_h =
+    Net_Client_Common_Tools::connect (connector,
+                                      *static_cast<ConnectionConfigurationType*> (configuration_->connectionConfiguration),
+                                      user_data_s,
+                                      address_in,
+                                      true,
+                                      true);
   if (handle_h == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+               ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
+               ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return;
   } // end IF
-  if (isAsynch_)
-  {
-    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                            0);
-    deadline = COMMON_TIME_NOW + timeout;
-    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S,
-                          0);
-    bool is_peer_address =
-      (iconnector_p->transportLayer () == NET_TRANSPORTLAYER_TCP);
+  //  iconnection_p =
+  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+  //#else
+  //      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle_h));
+  //#endif // ACE_WIN32 || ACE_WIN64
+  //  if (!iconnection_p)
+  //  {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
+  //                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+  //    return;
+  //  } // end IF
 
-    // step0a: wait for the connection attempt to complete
-    typename ConnectorType::IASYNCH_CONNECTOR_T* iasynch_connector_p =
-      dynamic_cast<typename ConnectorType::IASYNCH_CONNECTOR_T*> (&connector);
-    ACE_ASSERT (iasynch_connector_p);
-    result = iasynch_connector_p->wait (handle_h,
-                                        timeout);
-    if (unlikely (result))
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-                  ACE::sock_error (result)));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-                  ACE_TEXT (ACE_OS::strerror (result))));
-#endif // ACE_WIN32 || ACE_WIN64
-      return;
-    } // end IF
+ //ACE_DEBUG ((LM_DEBUG,
+ //            ACE_TEXT ("connected to %s: %u...\n"),
+ //            ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
+ //            iconnection_p->id ()));
 
-    // step0b: wait for the connection to register with the manager
-    // *TODO*: this may not be accurate/applicable for/to all protocols
-    do
-    {
-      // *TODO*: avoid this tight loop
-      iconnection_p =
-          CONNECTION_MANAGER_SINGLETON_T::instance ()->get (address_in,
-                                                            is_peer_address);
-      if (iconnection_p)
-        break; // done
-      result = ACE_OS::sleep (delay);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                    &delay));
-    } while (COMMON_TIME_NOW < deadline);
-  } // end ELSE
-  else
-    iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
-#else
-      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle_h));
-#endif // ACE_WIN32 || ACE_WIN64
-  if (!iconnection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
-    return;
-  } // end IF
-
-  // step3a: wait for the connection to finish initializing
-  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S,
-                                         0);
-  deadline = COMMON_TIME_NOW + initialization_timeout;
-  enum Net_Connection_Status status_e = NET_CONNECTION_STATUS_INVALID;
-  typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
-  // *TODO*: avoid tight loop here
-  do
-  {
-    status_e = iconnection_p->status ();
-    // *TODO*: break early upon failure too
-    if (status_e == NET_CONNECTION_STATUS_OK)
-      break;
-  } while (COMMON_TIME_NOW < deadline);
-  if (status_e != NET_CONNECTION_STATUS_OK)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (to: %s) failed to initialize (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-                status_e));
-    goto error;
-  } // end IF
-  // step3b: wait for the connection stream to finish initializing
-  istream_connection_p =
-    dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
-  if (!istream_connection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
-                iconnection_p));
-    goto error;
-  } // end IF
-  istream_connection_p->wait (STREAM_STATE_RUNNING,
-                              NULL); // <-- block
-
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("connected to %s: %u...\n"),
-  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-  //            iconnection_p->id ()));
-
-  iconnection_p->decrease ();
+  //  iconnection_p->decrease ();
 
   return;
 
-error:
-  if (iconnection_p)
-  {
-    iconnection_p->abort ();
-    iconnection_p->decrease (); iconnection_p = NULL;
-  } // end IF
+//error:
+//  if (iconnection_p)
+//  {
+//    iconnection_p->abort ();
+//    iconnection_p->decrease (); iconnection_p = NULL;
+//  } // end IF
 }
 
 template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -337,8 +230,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -365,8 +256,6 @@ template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -378,8 +267,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -426,8 +313,6 @@ template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -439,8 +324,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -468,8 +351,6 @@ template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -481,8 +362,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,
@@ -507,8 +386,6 @@ template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
           typename ConnectorType,
@@ -520,8 +397,6 @@ Net_SessionBase_T<AddressType,
                   ConnectionConfigurationType,
                   ConnectionStateType,
                   StatisticContainerType,
-                  SocketConfigurationType,
-                  HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
                   ConnectorType,

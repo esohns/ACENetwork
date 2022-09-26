@@ -100,8 +100,8 @@ class BitTorrent_Control_T
                           const std::string&);   // redirected URL
 
   mutable ACE_Condition_Thread_Mutex condition_;
-  SessionConfigurationType*          configuration_;
   mutable ACE_Thread_Mutex           lock_;
+  SessionConfigurationType*          sessionConfiguration_;
   SESSIONS_T                         sessions_;
 };
 

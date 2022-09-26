@@ -725,14 +725,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
-    ACE_Time_Value interval (statisticReportingInterval_in,
-                             0);
+    ACE_Time_Value interval (statisticReportingInterval_in, 0);
     timer_id =
-      timer_manager_p->schedule_timer (&statistic_handler,         // event handler handle
-                                       NULL,                       // asynchronous completion token
-                                       COMMON_TIME_NOW + interval, // first wakeup time
-                                       interval);                  // interval
-    if (timer_id == -1)
+      timer_manager_p->schedule_timer (&statistic_handler,   // event handler handle
+                                       NULL,                 // asynchronous completion token
+                                       ACE_Time_Value::zero, // initial delay
+                                       interval);            // interval
+    if (unlikely (timer_id == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));

@@ -249,7 +249,7 @@ POP_Module_ParserH_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("POP_Module_ParserH_T::collect"));
 
   // step1: initialize info container POD
-  data_out.bytes = 0.0;
+  data_out.bytes = 0;
   data_out.dataMessages = 0;
   data_out.sessionMessages = 0;
   data_out.timeStamp = COMMON_TIME_NOW;

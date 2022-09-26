@@ -64,6 +64,15 @@ class BitTorrent_Client_PeerStreamHandler_T
                                          >
 #endif // GUI_SUPPORT
 {
+  typedef BitTorrent_PeerStreamHandler_T<SessionDataType,
+                                         UserDataType,
+                                         SessionInterfaceType
+#if defined (GUI_SUPPORT)
+                                         ,CBDataType> inherited;
+#else
+                                         > inherited;
+#endif // GUI_SUPPORT
+
  public:
   BitTorrent_Client_PeerStreamHandler_T (SessionInterfaceType* // session handle
 #if defined (GUI_SUPPORT)
@@ -90,15 +99,6 @@ class BitTorrent_Client_PeerStreamHandler_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStreamHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStreamHandler_T (const BitTorrent_Client_PeerStreamHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStreamHandler_T& operator= (const BitTorrent_Client_PeerStreamHandler_T&))
-
-  typedef std::map<Stream_SessionId_t, SessionDataType*> SESSION_DATA_T;
-  typedef typename SESSION_DATA_T::iterator SESSION_DATA_ITERATOR_T;
-
-#if defined (GUI_SUPPORT)
-  CBDataType*           CBData_;
-#endif // GUI_SUPPORT
-  SessionInterfaceType* session_;
-  SESSION_DATA_T        sessionData_;
 };
 
 //////////////////////////////////////////
@@ -154,29 +154,10 @@ class BitTorrent_Client_TrackerStreamHandler_T
                        const BitTorrent_SessionMessage_T<SessionDataType,
                                                          UserDataType>&); // session message
 
-  // implement Common_IInitialize_T
-  //inline virtual bool initialize (const struct Common_ParserConfiguration& configuration_in) { configuration_ = &const_cast<struct Common_ParserConfiguration&> (configuration_in); return true; }
-
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStreamHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStreamHandler_T (const BitTorrent_Client_TrackerStreamHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStreamHandler_T& operator= (const BitTorrent_Client_TrackerStreamHandler_T&))
-
-  // convenient types
-  typedef std::map<Stream_SessionId_t, SessionDataType*> SESSION_DATA_T;
-  typedef typename SESSION_DATA_T::iterator SESSION_DATA_ITERATOR_T;
-  typedef BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
-                                      UserDataType> MESSAGE_T;
-  typedef BitTorrent_SessionMessage_T<SessionDataType,
-                                      UserDataType> SESSION_MESSAGE_T;
-  typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;
-
-//  struct Common_ParserConfiguration* configuration_;
-#if defined (GUI_SUPPORT)
-  CBDataType*                        CBData_;
-#endif // GUI_SUPPORT
-  SessionInterfaceType*              session_;
-  SESSION_DATA_T                     sessionData_;
 };
 
 // include template definition

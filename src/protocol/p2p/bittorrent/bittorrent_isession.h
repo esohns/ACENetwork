@@ -38,10 +38,6 @@ template <typename AddressType,
           typename PeerConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
-          typename PeerHandlerConfigurationType, // peer socket-
-          typename TrackerHandlerConfigurationType, // tracker socket-
-          ////////////////////////////////
           typename PeerStreamType,
           typename StreamStatusType,
           ////////////////////////////////
@@ -52,8 +48,6 @@ class BitTorrent_ISession_T
                          PeerConnectionConfigurationType,
                          PeerConnectionStateType,
                          StatisticContainerType,
-                         SocketConfigurationType,
-                         PeerHandlerConfigurationType,
                          PeerStreamType,
                          StreamStatusType,
                          ConfigurationType,

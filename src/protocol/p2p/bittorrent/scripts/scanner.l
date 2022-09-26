@@ -4,7 +4,7 @@
 //#include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 //#undef PARSER_HEADER_H
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 
 typedef void* yyscan_t;
@@ -185,6 +185,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
   //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
 
   unsigned int bitfield_counter = 0;
+  unsigned int bytes_to_skip = 0;
 %}
 
 <INITIAL>{
@@ -339,23 +340,29 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             yylval->record->piece.begin =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext + 4))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext + 4));
+                            bytes_to_skip = yylval->record->length - 9 - 1;
                             BEGIN (state_piece); }
 } // end <state_piece_payload>
 <state_piece>{
 {OCTET}{1}                { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (yylval->record);
                             // skip over piece data
-                            unsigned int bytes_to_skip =
-                              yylval->record->length - 9 - 1;
-                            char c = 0;
-                            for (unsigned int i = 0; i < bytes_to_skip; ++i)
+//                            unsigned int bytes_to_skip =
+//                              yylval->record->length - 9 - 1;
+//                            char c = 0;
+//                            for (unsigned int i = 0; i < bytes_to_skip; ++i)
+//                            {
+//                              c = static_cast<char> (yyinput (yyscanner));
+//                              // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
+//                              *(yyg->yy_c_buf_p - 1) = c;
+//                            } // end IF
+                            --bytes_to_skip;
+                            if (!bytes_to_skip)
                             {
-                              c = static_cast<char> (yyinput (yyscanner));
-                              // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-                              *(yyg->yy_c_buf_p - 1) = c;
+                              BEGIN (state_length);
+                              return yy::BitTorrent_Parser::token::PIECE;
                             } // end IF
-                            BEGIN (state_length);
-                            return yy::BitTorrent_Parser::token::PIECE; }
+                          }
 } // end <state_piece>
 <<EOF>>                   { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                { /* *TODO*: use (?s:.) ? */

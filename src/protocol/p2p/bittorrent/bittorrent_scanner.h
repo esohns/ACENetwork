@@ -7,7 +7,7 @@
 //#include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 //#undef PARSER_HEADER_H
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 
 typedef void* yyscan_t;

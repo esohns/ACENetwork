@@ -537,7 +537,7 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::initialized_);
 
   // step1: initialize info container POD
-  data_out.bytes = 0.0;
+  data_out.bytes = 0;
   data_out.dataMessages = 0;
   data_out.droppedMessages = 0;
   data_out.timestamp = COMMON_TIME_NOW;

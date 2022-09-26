@@ -196,8 +196,8 @@ connection_setup_function (void* arg_in)
   IRC_IControl* icontrol_p = NULL;
   const Stream_IStream_t::STREAM_T* stream_p = NULL;
   const Stream_Module_t* module_p = NULL;
-  const Stream_Module_t* current_p = NULL;
-  Stream_Module_t* tail_p = NULL;
+//  const Stream_Module_t* current_p = NULL;
+//  Stream_Module_t* tail_p = NULL;
   IRC_Client_Connection_Manager_t::ICONNECTION_T* connection_2 = NULL;
   unsigned short current_port = 0;
   int result_3 = -1;

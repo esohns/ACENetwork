@@ -48,7 +48,9 @@
 #include "net_client_connector.h"
 
 #include "bittorrent_common.h"
+#include "bittorrent_isession.h"
 #include "bittorrent_stream_common.h"
+#include "bittorrent_streamhandler.h"
 
 struct BitTorrent_SessionConfiguration;
 struct BitTorrent_SessionState;
@@ -111,24 +113,23 @@ class BitTorrent_TrackerConnectionConfiguration
   }
 };
 
+//////////////////////////////////////////
+
 typedef std::vector<ACE_INET_Addr> BitTorrent_PeerAddresses_t;
 typedef BitTorrent_PeerAddresses_t::const_iterator BitTorrent_PeerAddressesIterator_t;
 struct BitTorrent_SessionInitiationThreadData
 {
   BitTorrent_SessionInitiationThreadData ()
-   : addresses (NULL)
+   : addresses ()
    , lock (NULL)
    , session (NULL)
-  {};
+  {}
 
   BitTorrent_PeerAddresses_t addresses;
   ACE_SYNCH_MUTEX*           lock;
   Net_IInetSession_t*        session;
 };
 
-template <typename SessionInterfaceType>
-class BitTorrent_IControl_T;
-//typedef BitTorrent_IControl_T<BitTorrent_ISession_t> BitTorrent_IControl_t;
 struct BitTorrent_SessionConfiguration
  : Net_SessionConfiguration
 {
@@ -136,10 +137,21 @@ struct BitTorrent_SessionConfiguration
    : Net_SessionConfiguration ()
    , metaInfo (NULL)
    , metaInfoFileName ()
-  {};
+   , peerModuleHandlerConfiguration (NULL)
+   , peerStreamConfiguration (NULL)
+   , trackerConnectionConfiguration (NULL)
+   , trackerModuleHandlerConfiguration (NULL)
+   , trackerStreamConfiguration (NULL)
+  {}
 
-  Bencoding_Dictionary_t* metaInfo;
-  std::string             metaInfoFileName;
+  Bencoding_Dictionary_t*                   metaInfo;
+  std::string                               metaInfoFileName;
+
+  struct Stream_ModuleHandlerConfiguration* peerModuleHandlerConfiguration;
+  struct Stream_Configuration*              peerStreamConfiguration;
+  struct Net_ConnectionConfigurationBase*   trackerConnectionConfiguration;
+  struct Stream_ModuleHandlerConfiguration* trackerModuleHandlerConfiguration;
+  struct Stream_Configuration*              trackerStreamConfiguration;
 };
 
 // *NOTE*: see also: https://wiki.theory.org/BitTorrentSpecification#Overview
@@ -163,40 +175,112 @@ typedef BitTorrent_PeerStatus_t::iterator BitTorrent_PeerStatusIterator_t;
 typedef std::map<Net_ConnectionId_t, BitTorrent_MessagePayload_Bitfield> BitTorrent_PeerPieces_t;
 typedef BitTorrent_PeerPieces_t::iterator BitTorrent_PeerPiecesIterator_t;
 
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 BitTorrent_PeerConnectionConfiguration,
+                                 struct BitTorrent_PeerConnectionState,
+                                 struct Net_StreamStatistic,
+                                 struct Net_UserData> BitTorrent_PeerConnection_Manager_t;
+
+typedef BitTorrent_PeerStream_T<struct BitTorrent_PeerStreamState,
+                                struct BitTorrent_PeerStreamConfiguration,
+                                struct Stream_Statistic,
+                                Common_Timer_Manager_t,
+                                struct BitTorrent_PeerModuleHandlerConfiguration,
+                                struct BitTorrent_PeerSessionData,
+                                BitTorrent_PeerSessionData_t,
+                                Stream_ControlMessage_t,
+                                BitTorrent_Message_t,
+                                BitTorrent_PeerSessionMessage_t,
+                                BitTorrent_PeerConnectionConfiguration,
+                                struct BitTorrent_PeerConnectionState,
+                                Net_TCPSocketConfiguration_t,
+                                struct BitTorrent_SessionState,
+                                BitTorrent_PeerConnection_Manager_t,
+                                struct Stream_UserData> BitTorrent_PeerStream_t;
+
+typedef BitTorrent_ISession_T<ACE_INET_Addr,
+                              BitTorrent_PeerConnectionConfiguration,
+                              BitTorrent_TrackerConnectionConfiguration,
+                              struct BitTorrent_PeerConnectionState,
+                              struct Net_StreamStatistic,
+                              BitTorrent_PeerStream_t,
+                              enum Stream_StateMachine_ControlState,
+                              struct BitTorrent_SessionConfiguration,
+                              struct BitTorrent_SessionState> BitTorrent_ISession_t;
+
+//----------------------------------------
+
+typedef BitTorrent_PeerStreamHandler_T<struct BitTorrent_PeerSessionData,
+                                       struct Stream_UserData,
+                                       BitTorrent_ISession_t
+#if defined (GUI_SUPPORT)
+                                       ,void> BitTorrent_PeerStreamHandler_t;
+#else
+                                       > BitTorrent_PeerStreamHandler_t;
+#endif // GUI_SUPPORT
+typedef BitTorrent_TrackerStreamHandler_T<struct BitTorrent_TrackerSessionData,
+                                          struct Stream_UserData,
+                                          BitTorrent_ISession_t
+#if defined (GUI_SUPPORT)
+                                          ,void> BitTorrent_TrackerStreamHandler_t;
+#else
+                                          > BitTorrent_TrackerStreamHandler_t;
+#endif // GUI_SUPPORT
+
 struct BitTorrent_SessionState
 {
   BitTorrent_SessionState ()
    : connections ()
    , fileName ()
-   , key ()
    , metaInfo (NULL)
+   , pieces ()
+   ///////////////////////////////////////
+   , peerConnectionConfiguration (NULL)
    , peerId ()
+   , peerModuleHandlerConfiguration (NULL)
    , peerPieces ()
    , peerStatus ()
+   , peerStreamConfiguration (NULL)
+   , peerStreamHandler (NULL)
+   ///////////////////////////////////////
+   , key ()
    , trackerAddress ()
+   , trackerBaseURI ()
+   , trackerConnectionConfiguration (NULL)
    , trackerConnectionId (0)
    , trackerId ()
+   , trackerModuleHandlerConfiguration (NULL)
    , trackerRequestResponse (NULL)
    , trackerScrapeResponse (NULL)
-   , trackerBaseURI ()
-   , pieces ()
-  {};
+   , trackerStreamConfiguration (NULL)
+   , trackerStreamHandler (NULL)
+  {}
 
-  Net_ConnectionIds_t     connections;
-  std::string             fileName; // .torrent file
-  std::string             key; // tracker-
-  Bencoding_Dictionary_t* metaInfo;
-  std::string             peerId;
-  BitTorrent_PeerPieces_t peerPieces; // map of the pieces the peers have
-  BitTorrent_PeerStatus_t peerStatus; // choked/unchoked, interested/not interested
-  ACE_INET_Addr           trackerAddress; // *NOTE*: might be redirected
-  Net_ConnectionId_t      trackerConnectionId;
-  std::string             trackerId;
-  Bencoding_Dictionary_t* trackerRequestResponse;
-  Bencoding_Dictionary_t* trackerScrapeResponse;
-  std::string             trackerBaseURI;
+  Net_ConnectionIds_t                       connections;
+  std::string                               fileName; // .torrent file
+  Bencoding_Dictionary_t*                   metaInfo;
+  BitTorrent_Pieces_t                       pieces;
 
-  BitTorrent_Pieces_t     pieces;
+  struct Net_ConnectionConfigurationBase*   peerConnectionConfiguration;
+  std::string                               peerId;
+  struct Stream_ModuleHandlerConfiguration* peerModuleHandlerConfiguration;
+  BitTorrent_PeerPieces_t                   peerPieces; // map of the pieces the peers have
+  BitTorrent_PeerStatus_t                   peerStatus; // choked/unchoked, interested/not interested
+  struct Stream_Configuration*              peerStreamConfiguration;
+  BitTorrent_PeerStreamHandler_t*           peerStreamHandler;
+
+  std::string                               key; // tracker-
+  ACE_INET_Addr                             trackerAddress; // *NOTE*: might be redirected
+  std::string                               trackerBaseURI;
+  struct Net_ConnectionConfigurationBase*   trackerConnectionConfiguration;
+  Net_ConnectionId_t                        trackerConnectionId;
+  std::string                               trackerId;
+  struct Stream_ModuleHandlerConfiguration* trackerModuleHandlerConfiguration;
+  Bencoding_Dictionary_t*                   trackerRequestResponse;
+  Bencoding_Dictionary_t*                   trackerScrapeResponse;
+  struct Stream_Configuration*              trackerStreamConfiguration;
+  BitTorrent_TrackerStreamHandler_t*        trackerStreamHandler;
 };
 
 #endif

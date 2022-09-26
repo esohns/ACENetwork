@@ -921,7 +921,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   // step1: initialize info container POD
   data_out.capturedFrames = 0;
   data_out.droppedFrames = 0;
-  data_out.bytes = 0.0;
+  data_out.bytes = 0;
   data_out.dataMessages = 0;
   data_out.timeStamp = COMMON_TIME_NOW;
 

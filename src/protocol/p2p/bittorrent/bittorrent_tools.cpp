@@ -1217,7 +1217,7 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
     ACE_ASSERT (iterator_2 != pieces_inout.end ());
     (*iterator_2).chunks.push_back (chunk_s);
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s: loaded piece#%u (%Q byte(s)...\n"),
+                ACE_TEXT ("%s: loaded piece %u (%Q byte(s))...\n"),
                 ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
                 piece_index_i,
                 file_size_i));

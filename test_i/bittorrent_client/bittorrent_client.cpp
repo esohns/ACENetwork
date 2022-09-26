@@ -38,14 +38,14 @@
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
 
-// *WORKAROUND*
-using namespace std;
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
-//                   a problem in conjunction with the standard include headers
-//                   when ACE_USES_OLD_IOSTREAMS is defined
-//                   --> include the necessary headers manually (see above), and
-//                       prevent ace/iosfwd.h from causing any harm
-#define ACE_IOSFWD_H
+//// *WORKAROUND*
+//using namespace std;
+//// *IMPORTANT NOTE*: several ACE headers include ace/iosfwd.h, which introduces
+////                   a problem in conjunction with the standard include headers
+////                   when ACE_USES_OLD_IOSTREAMS is defined
+////                   --> include the necessary headers manually (see above), and
+////                       prevent ace/iosfwd.h from causing any harm
+//#define ACE_IOSFWD_H
 
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
@@ -53,7 +53,6 @@ using namespace std;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN32
-//#include "ace/Synch.h"
 #include "ace/POSIX_Proactor.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
@@ -497,6 +496,17 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
+  // step1: initialize timers
+  Common_Timer_Tools::configuration_.dispatch =
+      (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR
+                     : COMMON_TIMER_DISPATCH_PROACTOR);
+  //Common_Timer_Tools::configuration_.publishSeconds = false;
+  Common_Timer_Tools::initialize ();
+  Common_Timer_Manager_t* timer_manager_p =
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
+  long timer_id = -1;
+
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   int result = -1;
@@ -520,8 +530,12 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
       BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
   ACE_ASSERT (tracker_connection_manager_p);
+  Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
+                                                  peer_connection_manager_p,
+                                                  false);
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
-  allocator_configuration.defaultBufferSize = BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
+  allocator_configuration.defaultBufferSize =
+    BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
   Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                                      BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (allocator_configuration))
@@ -543,11 +557,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
 
-#if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
-#endif // _DEBUG
 
   struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
@@ -555,8 +567,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   peer_modulehandler_configuration.parserConfiguration =
       &configuration_in.peerParserConfiguration;
-  peer_modulehandler_configuration.statisticReportingInterval =
-    statisticReportingInterval_in;
+  //peer_modulehandler_configuration.statisticReportingInterval =
+  //  statisticReportingInterval_in;
   peer_modulehandler_configuration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
 
@@ -571,8 +583,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   tracker_modulehandler_configuration.parserConfiguration =
       &configuration_in.trackerParserConfiguration;
-  tracker_modulehandler_configuration.statisticReportingInterval =
-    statisticReportingInterval_in;
+  //tracker_modulehandler_configuration.statisticReportingInterval =
+  //  statisticReportingInterval_in;
   tracker_modulehandler_configuration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
 
@@ -584,9 +596,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
   BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
-  Net_ConnectionConfigurationsIterator_t iterator;
-  Net_ConnectionConfigurationsIterator_t iterator_2;
-//  ACE_thread_t thread_id = 0;
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -618,9 +627,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   configuration_in.peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                         &peer_connection_configuration));
-  iterator =
-    configuration_in.peerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.peerConnectionConfigurations.end ());
 
   tracker_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
@@ -634,18 +640,15 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   configuration_in.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                            &tracker_connection_configuration));
-  iterator_2 =
-    configuration_in.trackerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != configuration_in.trackerConnectionConfigurations.end ());
 
   configuration_in.sessionConfiguration.controller =
-      &bittorrent_control;
+    &bittorrent_control;
   configuration_in.sessionConfiguration.metaInfoFileName =
-      metaInfoFileName_in;
+    metaInfoFileName_in;
   configuration_in.sessionConfiguration.connectionConfiguration =
-    static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second);
+    &peer_connection_configuration;
   configuration_in.sessionConfiguration.trackerConnectionConfiguration =
-    static_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second);
+    &tracker_connection_configuration;
   configuration_in.sessionConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
   configuration_in.sessionConfiguration.dispatch =
@@ -681,12 +684,29 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step5: initialize connection manager
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                          ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  peer_connection_manager_p->set (*static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
+  peer_connection_manager_p->set (peer_connection_configuration,
                                   NULL);
+  peer_connection_manager_p->start (NULL);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  tracker_connection_manager_p->set (*static_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
+  tracker_connection_manager_p->set (tracker_connection_configuration,
                                      NULL);
+  tracker_connection_manager_p->start (NULL);
+
+  if (statisticReportingInterval_in != ACE_Time_Value::zero)
+  {
+    timer_id =
+      timer_manager_p->schedule_timer (&statistic_handler,             // event handler handle
+                                       NULL,                           // asynchronous completion token
+                                       ACE_Time_Value::zero,           // initial delay
+                                       statisticReportingInterval_in); // interval
+    if (unlikely (timer_id == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
+      goto clean;
+    } // end IF
+  } // end IF
 
   // event loop(s):
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly
@@ -792,8 +812,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   // step7: clean up
 clean:
-  peer_connection_manager_p->wait ();
-  tracker_connection_manager_p->wait ();
+  peer_connection_manager_p->abort (true);
+  tracker_connection_manager_p->abort (true);
+
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   result = thread_manager_p->wait_grp (group_id_2);
@@ -803,6 +824,8 @@ clean:
                 group_id_2));
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
+
+  Common_Timer_Tools::finalize ();
 }
 
 void

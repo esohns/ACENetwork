@@ -28,6 +28,7 @@
 
 #include "common_file_tools.h"
 
+#include "common_parser_common.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -35,6 +36,7 @@
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
+#include "net_client_common_tools.h"
 #include "net_client_defines.h"
 
 #include "http_tools.h"
@@ -43,16 +45,14 @@
 #include "bittorrent_network.h"
 #include "bittorrent_tools.h"
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -71,16 +71,14 @@ template <typename PeerHandlerConfigurationType,
 #else
           >
 #endif // GUI_SUPPORT
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -102,46 +100,23 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
  : inherited ()
  , logToFile_ (BITTORRENT_DEFAULT_SESSION_LOG)
  , peerHandlerModule_ (NULL)
- , peerStreamHandler_ (this)
  , trackerHandlerModule_ (NULL)
- , trackerStreamHandler_ (this)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::BitTorrent_Session_T"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     inherited::state_.peerId = BitTorrent_Tools::generatePeerId ();
   } // end lock scope
-
-  ACE_NEW_NORETURN (peerHandlerModule_,
-                    PEER_MESSAGEHANDLER_MODULE_T (NULL,
-                                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
-  if (!peerHandlerModule_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
-  } // end IF
-  ACE_NEW_NORETURN (trackerHandlerModule_,
-                    TRACKER_MESSAGEHANDLER_MODULE_T (NULL,
-                                                     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
-  if (!trackerHandlerModule_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
-  } // end IF
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -160,16 +135,14 @@ template <typename PeerHandlerConfigurationType,
 #else
           >
 #endif // GUI_SUPPORT
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -199,16 +172,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
 //////////////////////////////////////////
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -228,16 +199,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 bool
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -261,14 +230,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.controller);
-  ACE_ASSERT (configuration_in.metaInfo);
   ACE_ASSERT (configuration_in.parserConfiguration);
+  ACE_ASSERT (configuration_in.metaInfo);
+//  ACE_ASSERT (configuration_in.peerModuleHandlerConfiguration);
+//  ACE_ASSERT (configuration_in.peerStreamConfiguration);
+//  ACE_ASSERT (configuration_in.trackerConnectionConfiguration);
+//  ACE_ASSERT (configuration_in.trackerModuleHandlerConfiguration);
+//  ACE_ASSERT (configuration_in.trackerStreamConfiguration);
 
   // *TODO*: remove type inferences
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, false);
     inherited::state_.metaInfo = configuration_in.metaInfo;
     // initialize piece data
-    // *TODO*: load completed piece data from somewhere
     Bencoding_DictionaryIterator_t iterator =
         configuration_in.metaInfo->begin ();
     for (;
@@ -318,9 +291,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                         : static_cast<unsigned int> ((*iterator_3).second->integer));
       inherited::state_.pieces.push_back (piece_s);
     } // end WHILE
-    BitTorrent_Tools::assembleFiles (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (configuration_in.metaInfoFileName.c_str ()),
-                                                                          ACE_DIRECTORY_SEPARATOR_CHAR)),
-                                     *configuration_in.metaInfo);
+
     // try to load existing pieces
     if (!BitTorrent_Tools::loadPieces (configuration_in.metaInfoFileName,
                                        inherited::state_.pieces))
@@ -330,8 +301,47 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                   ACE_TEXT (configuration_in.metaInfoFileName.c_str ())));
       return false;
     } // end IF
+
+    ACE_ASSERT (!inherited::state_.peerStreamHandler);
+    ACE_NEW_NORETURN (inherited::state_.peerStreamHandler,
+#if defined (GUI_SUPPORT)
+                      PeerStreamHandlerType (this, static_cast<CBDataType*> (configuration_in.CBData)));
+#else
+                      PeerStreamHandlerType (this));
+#endif // GUI_SUPPORT
+    ACE_ASSERT (inherited::state_.peerStreamHandler);
+
+    ACE_NEW_NORETURN (peerHandlerModule_,
+                      PEER_MESSAGEHANDLER_MODULE_T (NULL,
+                                                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
+    if (!peerHandlerModule_)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+      return false;
+    } // end IF
+
+    ACE_ASSERT (!inherited::state_.trackerStreamHandler);
+    ACE_NEW_NORETURN (inherited::state_.trackerStreamHandler,
+#if defined (GUI_SUPPORT)
+                      TrackerStreamHandlerType (this, static_cast<CBDataType*> (configuration_in.CBData)));
+#else
+                      TrackerStreamHandlerType (this));
+#endif // GUI_SUPPORT
+    ACE_ASSERT (inherited::state_.trackerStreamHandler);
+
+    ACE_NEW_NORETURN (trackerHandlerModule_,
+                      TRACKER_MESSAGEHANDLER_MODULE_T (NULL,
+                                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
+    if (!trackerHandlerModule_)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+      return false;
+    } // end IF
   } // end lock scope
-  if (!trackerStreamHandler_.initialize (*configuration_in.parserConfiguration))
+
+  if (!inherited::state_.trackerStreamHandler->initialize (*static_cast<struct Common_FlexBisonParserConfiguration*> (configuration_in.parserConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to BitTorrent_TrackerStreamHandler_T::initialize(), aborting\n")));
@@ -341,16 +351,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   return inherited::initialize (configuration_in);
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -370,16 +378,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -401,16 +407,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::connect"));
 
-  // step0: subscribe to notifications
-  PEERMODULEHANDLERCONFIGURATIONITERATOR_T iterator;
   PeerConnectionConfigurationType* configuration_p = NULL;
   PeerUserDataType* user_data_p = NULL;
-  typename PeerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
-  bool clone_module = false;
-//  bool delete_module = false;
-  Stream_Module_t* module_p = NULL;
+  typename PeerStreamType::CONFIGURATION_T::ITERATOR_T iterator;
+
   inherited::CONNECTION_MANAGER_SINGLETON_T::instance ()->get (configuration_p,
                                                                user_data_p);
+
+  // sanity check(s)
   ACE_ASSERT (configuration_p);
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_p->streamConfiguration);
@@ -422,40 +426,25 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   iterator =
       configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
-  subscriber_p = (*iterator).second.second->subscriber;
-  (*iterator).second.second->subscriber = &peerStreamHandler_;
-
-  clone_module =
-    configuration_p->streamConfiguration->configuration_->cloneModule;
-  module_p =
-    configuration_p->streamConfiguration->configuration_->module;
+  (*iterator).second.second->subscriber = inherited::state_.peerStreamHandler;
 
   configuration_p->streamConfiguration->configuration_->cloneModule =
     false;
   configuration_p->streamConfiguration->configuration_->module =
     peerHandlerModule_;
 
-  // step1: (try to) connect
+  // step2: (try to) connect
   inherited::connect (address_in);
-
-  // step2: reset configuration
-  (*iterator).second.second->subscriber = subscriber_p;
-
-  configuration_p->streamConfiguration->configuration_->cloneModule =
-    clone_module;
-  configuration_p->streamConfiguration->configuration_->module = module_p;
 };
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -475,16 +464,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -508,8 +495,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration->messageAllocator);
 
   inherited::connect (id_in);
 
@@ -655,16 +640,14 @@ error:
     istream_connection_p->decrease ();
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -684,16 +667,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -752,16 +733,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end IF
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -781,16 +760,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -815,8 +792,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration->allocatorConfiguration);
 
   struct BitTorrent_PeerRecord* record_p = NULL;
   struct BitTorrent_PeerMessageData* data_p = NULL;
@@ -883,16 +858,14 @@ error:
     istream_connection_p->decrease ();
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -912,16 +885,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -946,8 +917,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration->allocatorConfiguration);
 
   struct BitTorrent_PeerRecord* record_p = NULL;
   struct BitTorrent_PeerMessageData* data_p = NULL;
@@ -1014,16 +983,14 @@ error:
     istream_connection_p->decrease ();
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -1043,16 +1010,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -1151,16 +1116,14 @@ error:
     istream_connection_p->decrease ();
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -1180,16 +1143,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -1354,16 +1315,14 @@ error:
     istream_connection_p->decrease ();
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -1383,16 +1342,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -1483,16 +1440,14 @@ error:
     istream_connection_p->decrease ();
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -1512,16 +1467,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -1698,16 +1651,14 @@ error:
     delete data_p;
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -1727,16 +1678,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -1758,19 +1707,17 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
-  TrackerConnectorType connector (true);
-  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-
-  // step0: subscribe to notifications
-  TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T iterator;
   TrackerConnectionConfigurationType* configuration_p = NULL;
   TrackerUserDataType* user_data_p = NULL;
-  typename TrackerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
-  bool clone_module = false;
-  //bool delete_module = false;
-  Stream_Module_t* module_p = NULL;
+  typename TrackerStreamType::CONFIGURATION_T::ITERATOR_T iterator;
+  TrackerConnectorType connector (true);
+  TrackerUserDataType user_data_s;
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+
   TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (configuration_p,
                                                             user_data_p);
+
+  // sanity check(s)
   ACE_ASSERT (configuration_p);
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_p->streamConfiguration);
@@ -1782,40 +1729,22 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   iterator =
       configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
-  subscriber_p = (*iterator).second.second->subscriber;
-  ACE_ASSERT (!subscriber_p);
-  (*iterator).second.second->subscriber = &trackerStreamHandler_;
+  (*iterator).second.second->subscriber =
+      inherited::state_.trackerStreamHandler;
 
-  clone_module =
-    configuration_p->streamConfiguration->configuration_->cloneModule;
-  module_p =
-    configuration_p->streamConfiguration->configuration_->module;
-  ACE_ASSERT (!module_p);
   configuration_p->streamConfiguration->configuration_->cloneModule =
     false;
   configuration_p->streamConfiguration->configuration_->module =
     trackerHandlerModule_;
 
-  ACE_Time_Value deadline;
-  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S,
-                                         0);
-  Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
-  typename TrackerConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
-      NULL;
-
-  // step1: initialize connector
-  typename TrackerConnectorType::ICONNECTOR_T* iconnector_p = &connector;
-  typename TrackerConnectorType::ICONNECTION_T* iconnection_p = NULL;
-  int result = -1;
-  if (!iconnector_p->initialize (*inherited::configuration_->trackerConnectionConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-    goto error;
-  } // end IF
-
   // step2: try to connect
-  handle_h = iconnector_p->connect (address_in);
+  handle_h =
+    Net_Client_Common_Tools::connect (connector,
+                                      *static_cast<TrackerConnectionConfigurationType*> (inherited::configuration_->trackerConnectionConfiguration),
+                                      user_data_s,
+                                      address_in,
+                                      true,
+                                      true);
   if (handle_h == ACE_INVALID_HANDLE)
   { ACE_ASSERT (inherited::configuration_);
     ACE_DEBUG ((LM_ERROR,
@@ -1825,130 +1754,43 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     goto error;
   } // end IF
-  if (inherited::isAsynch_)
-  {
-    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                            0);
-    deadline = COMMON_TIME_NOW + timeout;
-    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S,
-                          0);
-    bool is_peer_address =
-      (iconnector_p->transportLayer () == NET_TRANSPORTLAYER_TCP);
-
-    // step0a: wait for the connection attempt to complete
-    typename TrackerConnectorType::IASYNCH_CONNECTOR_T* iasynch_connector_p =
-      dynamic_cast<typename TrackerConnectorType::IASYNCH_CONNECTOR_T*> (&connector);
-    ACE_ASSERT (iasynch_connector_p);
-    result = iasynch_connector_p->wait (handle_h,
-                                        timeout);
-    if (unlikely (result))
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-                  ACE::sock_error (result)));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-                  ACE_TEXT (ACE_OS::strerror (result))));
-#endif // ACE_WIN32 || ACE_WIN64
-      goto error;
-    } // end IF
-
-    // step0b: wait for the connection to register with the manager
-    // *TODO*: this may not be accurate/applicable for/to all protocols
-    do
-    {
-      // *TODO*: avoid this tight loop
-      iconnection_p =
-          TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (address_in,
-                                                                    is_peer_address);
-      if (iconnection_p)
-        break; // done
-      result = ACE_OS::sleep (delay);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                    &delay));
-    } while (COMMON_TIME_NOW < deadline);
-  } // end ELSE
-  else
-    iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
-#else
-      TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle_h));
-#endif // ACE_WIN32 || ACE_WIN64
-  if (!iconnection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to connect to tracker %s: \"%m\", returning\n"),
-                ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                               ACE_DIRECTORY_SEPARATOR_CHAR),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
-    goto error;
-  } // end IF
-
-  // step3a: wait for the connection to finish initializing
-  deadline = COMMON_TIME_NOW + initialization_timeout;
-  // *TODO*: avoid tight loop here
-  do
-  {
-    status = iconnection_p->status ();
-    // *TODO*: break early upon failure too
-    if (status == NET_CONNECTION_STATUS_OK)
-      break;
-  } while (COMMON_TIME_NOW < deadline);
-  if (status != NET_CONNECTION_STATUS_OK)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (to tracker: %s) failed to initialize (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-                status));
-    goto error;
-  } // end IF
-  // step3b: wait for the connection stream to finish initializing
-  istream_connection_p =
-    dynamic_cast<typename TrackerConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
-  if (!istream_connection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
-                iconnection_p));
-    goto error;
-  } // end IF
-  istream_connection_p->wait (STREAM_STATE_RUNNING,
-                              NULL); // <-- block
+//  iconnection_p =
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//      TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+//#else
+//      TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle_h));
+//#endif // ACE_WIN32 || ACE_WIN64
+//  if (!iconnection_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%s: failed to connect to tracker %s: \"%m\", returning\n"),
+//                ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+//                               ACE_DIRECTORY_SEPARATOR_CHAR),
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+//    goto error;
+//  } // end IF
 
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("connected to tracker %s: %u\n"),
   //            ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
   //            iconnection_p->id ()));
 
-  iconnection_p->decrease (); iconnection_p = NULL;
+//  iconnection_p->decrease (); iconnection_p = NULL;
 
 error:
-  (*iterator).second.second->subscriber = subscriber_p;
-  configuration_p->streamConfiguration->configuration_->cloneModule =
-    clone_module;
-  configuration_p->streamConfiguration->configuration_->module =
-    module_p;
-  if (iconnection_p)
-    iconnection_p->decrease ();
+  //  if (iconnection_p)
+  //    iconnection_p->decrease ();
+  ;
 };
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -1968,16 +1810,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -1999,6 +1839,9 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     if (inherited::state_.trackerConnectionId)
     {
@@ -2019,23 +1862,21 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   inherited::connect (id_in);
 
-  ACE_ASSERT (inherited::configuration_);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: new tracker connection (id: %d)\n"),
               ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                                        ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 }
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -2055,16 +1896,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -2115,16 +1954,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end IF
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -2144,16 +1981,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -2187,16 +2022,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   }
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -2216,16 +2049,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -2267,16 +2098,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   }
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -2296,16 +2125,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -2441,7 +2268,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   std::string buffer;
   std::ostringstream converter;
   int group_id_i = -1;
-  int number_of_threads_i = thread_data_p->addresses.size();
+  size_t number_of_threads_i = thread_data_p->addresses.size ();
   ACE_thread_t* thread_ids_p = NULL;
   ACE_hthread_t* thread_handles_p = NULL;
   // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
@@ -2497,7 +2324,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     buffer = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_SESSION_HANDLER_THREAD_NAME);
     buffer += ACE_TEXT_ALWAYS_CHAR (" #");
     buffer += converter.str ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_OS::strcpy (thread_name_p, buffer.c_str ());
+#else
+    ACE_ASSERT (COMMON_THREAD_PTHREAD_NAME_MAX_LENGTH <= BUFSIZ);
+    ACE_OS::strncpy (thread_name_p,
+                     buffer.c_str (),
+                     std::min (static_cast<size_t> (COMMON_THREAD_PTHREAD_NAME_MAX_LENGTH - 1), static_cast<size_t> (ACE_OS::strlen (buffer.c_str ()))));
+#endif // ACE_WIN32 || ACE_WIN64
     thread_names_p[i] = thread_name_p;
   } // end FOR
   thread_manager_p = ACE_Thread_Manager::instance ();
@@ -2559,16 +2393,14 @@ error:
     delete thread_data_p;
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -2588,16 +2420,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -2659,16 +2489,15 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                   ACE_TEXT (record_in.peer_id.c_str ())));
   } // end lock scope
 }
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -2688,16 +2517,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -2898,7 +2725,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
           if (!BitTorrent_Tools::validatePieceHash (*iterator))
           {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to BitTorrent_Tools::validatePieceHash(%s,%u), continuing\n"),
+                        ACE_TEXT ("failed to BitTorrent_Tools::validatePieceHash(%s,%u), retrying\n"),
                         ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                                        ACE_DIRECTORY_SEPARATOR_CHAR),
                         record_in.piece.index));
@@ -2990,16 +2817,14 @@ continue_:
 
 //////////////////////////////////////////
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -3019,16 +2844,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -3056,16 +2879,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
               ACE_TEXT (message_text.c_str ())));
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -3085,16 +2906,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -3122,16 +2941,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
        message_text);
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -3151,16 +2968,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 bool
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,
@@ -3221,6 +3036,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end IF
   data_p = NULL;
 
+  // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->connectionConfiguration);
   ACE_ASSERT (inherited::configuration_->connectionConfiguration->allocatorConfiguration);
@@ -3291,16 +3107,14 @@ error:
   return false;
 }
 
-template <typename PeerHandlerConfigurationType,
-          typename TrackerHandlerConfigurationType,
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
-          typename PeerHandlerModuleType,
-          typename TrackerHandlerModuleType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
           typename PeerConnectionManagerType,
@@ -3320,16 +3134,14 @@ template <typename PeerHandlerConfigurationType,
           >
 #endif // GUI_SUPPORT
 void
-BitTorrent_Session_T<PeerHandlerConfigurationType,
-                     TrackerHandlerConfigurationType,
-                     PeerConnectionConfigurationType,
+BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
-                     PeerHandlerModuleType,
-                     TrackerHandlerModuleType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
                      PeerConnectionType,
                      TrackerConnectionType,
                      PeerConnectionManagerType,

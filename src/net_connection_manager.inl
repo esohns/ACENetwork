@@ -908,24 +908,30 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   StatisticContainerType statistic_s;
   ACE_OS::memset (&statistic_s, 0, sizeof (StatisticContainerType));
 
+  OWN_TYPE_T* this_p = const_cast<OWN_TYPE_T*> (this);
+  size_t number_of_connections_i = 0;
+
+  // step1: aggregate data from active connections
+  if (unlikely (!this_p->collect (statistic_s)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_IStatistic::collect(), returning\n")));
+    return;
+  } // end IF
+
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-    // aggregate data from active connections
-    if (unlikely (!const_cast<OWN_TYPE_T*> (this)->collect (statistic_s)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_IStatistic::collect(), returning\n")));
-      return;
-    } // end IF
-    ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("*** CONNECTION STATISTIC ***\n--> [%u] connection(s) <--\n# sent data: %.0f (avg.: %.2f)\n received data: %.0f (avg.: %.2f) byte(s)\n*** CONNECTION STATISTIC ***\\END\n"),
-                connections_.size (),
-                statistic_s.sentBytes,
-                (connections_.size () ? (statistic_s.sentBytes / connections_.size ())
-                                      : 0.0F),
-                statistic_s.receivedBytes,
-                (connections_.size () ? (statistic_s.receivedBytes / connections_.size ())
-                                      : 0.0F)));
+    number_of_connections_i = connections_.size ();
   } // end lock scope
+
+  // step2: dump statistic information
+  ACE_DEBUG ((LM_INFO,
+              ACE_TEXT ("*** CONNECTION STATISTIC ***\n--> [%B] connection(s) <--\n sent data: \t%Q \t(avg.: %.2f)\n received data: %Q \t(avg.: %.2f)\n msg./s: \t%.2f \tB/s: %.2f\n*** CONNECTION STATISTIC ***\\END\n"),
+              number_of_connections_i,
+              statistic_s.sentBytes,
+              (number_of_connections_i ? (statistic_s.sentBytes / static_cast<float> (number_of_connections_i)) : 0.0F),
+              statistic_s.receivedBytes,
+              (number_of_connections_i ? (statistic_s.receivedBytes / static_cast<float> (number_of_connections_i)) : 0.0F),
+              statistic_s.streamStatistic.messagesPerSecond, statistic_s.streamStatistic.bytesPerSecond));
 }
 
 template <ACE_SYNCH_DECL,
@@ -945,12 +951,13 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
 
   ICONNECTION_T* connection_p = NULL;
+
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
          iterator.next (connection_p);
          iterator.advance ())
     { ACE_ASSERT (connection_p);
-      try { // dump connection information
+      try {
         connection_p->dump_state ();
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,

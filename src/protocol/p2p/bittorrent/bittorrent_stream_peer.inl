@@ -114,11 +114,11 @@ BitTorrent_PeerStream_T<StreamStateType,
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  MODULE_STATISTIC_T (this,
-//                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-//                  false);
-//  layout_inout->append (module_p, NULL, 0);
+  ACE_NEW_RETURN (module_p,
+                  MODULE_STATISTIC_T (this,
+                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
   //ACE_NEW_RETURN (module_p,
   //                MODULE_HANDLER_T (this,
   //                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)),
@@ -174,15 +174,10 @@ BitTorrent_PeerStream_T<StreamStateType,
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!inherited::isRunning ());
-//  ACE_ASSERT (configuration_in.moduleConfiguration);
   ACE_ASSERT (configuration_in.configuration_);
 
-//  int result = -1;
   SessionDataType* session_data_p = NULL;
-  typename inherited::MODULE_T* module_p = NULL;
-  typename inherited::WRITER_T* writer_impl_p = NULL;
 
-//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
 
@@ -212,24 +207,6 @@ BitTorrent_PeerStream_T<StreamStateType,
 
   // ---------------------------------------------------------------------------
 
-  // ******************* Marshal ************************
-  //module_p =
-  //    const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
-  //ACE_ASSERT (module_p);
-  //writer_impl_p = dynamic_cast<typename inherited::WRITER_T*> (module_p->writer ());
-  //if (!writer_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T*> failed, aborting\n")));
-  //  goto error;
-  //} // end IF
-  //writer_impl_p->setP (&(inherited::state_));
-
-  //// *NOTE*: push()ing the module will open() it
-  ////         --> set the argument that is passed along (head module expects a
-  ////             handle to the session data)
-  //module_p->arg (inherited::sessionData_);
-
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (NULL))
     {
@@ -239,14 +216,14 @@ BitTorrent_PeerStream_T<StreamStateType,
       goto error;
     } // end IF
 
-  inherited::isInitialized_ = true;
-
   return true;
 
 error:
   if (reset_setup_pipeline)
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
+
+  inherited::isInitialized_ = false;
 
   return false;
 }

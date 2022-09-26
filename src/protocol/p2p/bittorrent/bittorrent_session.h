@@ -43,9 +43,7 @@ class ACE_Message_Block;
 
 ACE_THR_FUNC_RETURN net_bittorrent_session_setup_function (void*);
 
-template <typename PeerHandlerConfigurationType, // socket-
-          typename TrackerHandlerConfigurationType, // socket-
-          typename PeerConnectionConfigurationType,
+template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
           typename PeerConnectionStateType,
           ////////////////////////////////
@@ -53,8 +51,8 @@ template <typename PeerHandlerConfigurationType, // socket-
           typename TrackerStreamType,
           typename StreamStatusType,
           ////////////////////////////////
-          typename PeerModuleHandlerConfigurationType,
-          typename TrackerModuleHandlerConfigurationType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
           ////////////////////////////////
           typename PeerConnectionType,
           typename TrackerConnectionType,
@@ -84,8 +82,6 @@ class BitTorrent_Session_T
                             PeerConnectionConfigurationType,
                             PeerConnectionStateType,
                             struct Net_StreamStatistic,
-                            Net_TCPSocketConfiguration_t,
-                            PeerHandlerConfigurationType,
                             typename PeerConnectionType::ICONNECTION_T,
                             PeerConnectionManagerType,
                             PeerConnectorType,
@@ -96,9 +92,6 @@ class BitTorrent_Session_T
                                                   TrackerConnectionConfigurationType,
                                                   PeerConnectionStateType,
                                                   struct Net_StreamStatistic,
-                                                  Net_TCPSocketConfiguration_t,
-                                                  PeerHandlerConfigurationType,
-                                                  TrackerHandlerConfigurationType,
                                                   PeerStreamType,
                                                   StreamStatusType,
                                                   ConfigurationType,
@@ -108,8 +101,6 @@ class BitTorrent_Session_T
                             PeerConnectionConfigurationType,
                             PeerConnectionStateType,
                             struct Net_StreamStatistic,
-                            Net_TCPSocketConfiguration_t,
-                            PeerHandlerConfigurationType,
                             typename PeerConnectionType::ICONNECTION_T,
                             PeerConnectionManagerType,
                             PeerConnectorType,
@@ -120,9 +111,6 @@ class BitTorrent_Session_T
                                                   TrackerConnectionConfigurationType,
                                                   PeerConnectionStateType,
                                                   struct Net_StreamStatistic,
-                                                  Net_TCPSocketConfiguration_t,
-                                                  PeerHandlerConfigurationType,
-                                                  TrackerHandlerConfigurationType,
                                                   PeerStreamType,
                                                   StreamStatusType,
                                                   ConfigurationType,
@@ -159,13 +147,13 @@ class BitTorrent_Session_T
 
   typedef Stream_Module_Aggregator_ReaderTask_T<ACE_MT_SYNCH,
                                                 Common_TimePolicy_t,
-                                                PeerModuleHandlerConfigurationType,
+                                                typename PeerStreamType::CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T,
                                                 typename PeerStreamType::CONTROL_MESSAGE_T,
                                                 typename PeerStreamType::MESSAGE_T,
                                                 typename PeerStreamType::SESSION_MESSAGE_T> PEER_MESSAGEHANDLER_READER_T;
   typedef Stream_Module_MessageHandlerA_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          PeerModuleHandlerConfigurationType,
+                                          typename PeerStreamType::CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T,
                                           typename PeerStreamType::CONTROL_MESSAGE_T,
                                           typename PeerStreamType::MESSAGE_T,
                                           typename PeerStreamType::SESSION_MESSAGE_T,
@@ -173,13 +161,13 @@ class BitTorrent_Session_T
                                           PeerStreamUserDataType> PEER_MESSAGEHANDLER_WRITER_T;
   typedef Stream_Module_Aggregator_ReaderTask_T<ACE_MT_SYNCH,
                                                 Common_TimePolicy_t,
-                                                TrackerModuleHandlerConfigurationType,
+                                                typename TrackerStreamType::CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T,
                                                 typename TrackerStreamType::CONTROL_MESSAGE_T,
                                                 typename TrackerStreamType::MESSAGE_T,
                                                 typename TrackerStreamType::SESSION_MESSAGE_T> TRACKER_MESSAGEHANDLER_READER_T;
   typedef Stream_Module_MessageHandlerA_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
-                                          TrackerModuleHandlerConfigurationType,
+                                          typename TrackerStreamType::CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T,
                                           typename TrackerStreamType::CONTROL_MESSAGE_T,
                                           typename TrackerStreamType::MESSAGE_T,
                                           typename TrackerStreamType::SESSION_MESSAGE_T,
@@ -189,8 +177,8 @@ class BitTorrent_Session_T
                                  Common_TimePolicy_t,
                                  typename PeerStreamType::SESSION_DATA_T,
                                  enum Stream_SessionMessageType,
-                                 struct Stream_ModuleConfiguration,
-                                 PeerModuleHandlerConfigurationType,
+                                 typename PeerStreamType::CONFIGURATION_T::MODULE_CONFIGURATION_T,
+                                 typename PeerStreamType::CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T,
                                  libacenetwork_default_bittorrent_handler_module_name_string,
                                  Stream_INotify_t,
                                  PEER_MESSAGEHANDLER_READER_T,
@@ -199,36 +187,12 @@ class BitTorrent_Session_T
                                  Common_TimePolicy_t,
                                  typename TrackerStreamType::SESSION_DATA_T,
                                  enum Stream_SessionMessageType,
-                                 struct Stream_ModuleConfiguration,
-                                 TrackerModuleHandlerConfigurationType,
+                                 typename TrackerStreamType::CONFIGURATION_T::MODULE_CONFIGURATION_T,
+                                 typename TrackerStreamType::CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T,
                                  libacenetwork_default_bittorrent_handler_module_name_string,
                                  Stream_INotify_t,
                                  TRACKER_MESSAGEHANDLER_READER_T,
                                  TRACKER_MESSAGEHANDLER_WRITER_T> TRACKER_MESSAGEHANDLER_MODULE_T;
-
-  typedef BitTorrent_PeerStreamHandler_T<typename PeerStreamType::SESSION_DATA_T,
-                                         PeerStreamUserDataType,
-                                         typename inherited::ISESSION_T
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType> PEER_HANDLER_T;
-#else
-                                         > PEER_HANDLER_T;
-#endif // GUI_SUPPORT
-  typedef BitTorrent_TrackerStreamHandler_T<typename TrackerStreamType::SESSION_DATA_T,
-                                            TrackerStreamUserDataType,
-                                            typename inherited::ISESSION_T
-#if defined (GUI_SUPPORT)
-                                            ,CBDataType> TRACKER_HANDLER_T;
-#else
-                                            > TRACKER_HANDLER_T;
-#endif // GUI_SUPPORT
-
-  typedef typename std::map<std::string,
-                            std::pair <struct Stream_ModuleConfiguration*,
-                                       PeerModuleHandlerConfigurationType*> >::iterator PEERMODULEHANDLERCONFIGURATIONITERATOR_T;
-  typedef typename std::map<std::string,
-                            std::pair <struct Stream_ModuleConfiguration*,
-                                       TrackerModuleHandlerConfigurationType*> >::iterator TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T;
 
   // implement/override (part of) BitTorrent_ISession_T
   virtual void connect (Net_ConnectionId_t); // connection id
@@ -270,9 +234,7 @@ class BitTorrent_Session_T
 
   bool                             logToFile_;
   PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;
-  PEER_HANDLER_T                   peerStreamHandler_;
   TRACKER_MESSAGEHANDLER_MODULE_T* trackerHandlerModule_;
-  TRACKER_HANDLER_T                trackerStreamHandler_;
 };
 
 // include template definition

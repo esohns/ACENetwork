@@ -597,27 +597,8 @@ HTTP_Tools::URLEncode (const std::string& string_in,
 
   std::string result;
 
-  // *NOTE*: the default locale is the 'C' locale (as in:
-  //         'std::setlocale(LC_ALL, "C")')
-  //         --> replace with (C++-)US-ASCII
-  std::locale locale;
-  try {
-    std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_ASCII_STRING));
-    locale = us_ascii_locale;
-  } catch (std::runtime_error& exception_in) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
-                ACE_TEXT (COMMON_LOCALE_EN_US_ASCII_STRING),
-                ACE_TEXT (exception_in.what ())));
-    Common_Tools::printLocales ();
-    return result;
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
-                ACE_TEXT (COMMON_LOCALE_EN_US_ASCII_STRING)));
-    Common_Tools::printLocales ();
-    return result;
-  }
+  // *NOTE*: use the US-ASCII locale for isdigit,isalpha
+  std::locale c_locale = std::locale::classic ();
   std::ostringstream converter;
   converter << std::hex << std::setfill ('0');
   std::string converted_string;
@@ -627,8 +608,8 @@ HTTP_Tools::URLEncode (const std::string& string_in,
   {
     if (escapeAll_in                                ||
         // 'unreserved' characters (see also: RFC 3986)
-        (!std::isdigit (*iterator, locale) &&
-         !std::isalpha (*iterator, locale) &&
+        (!std::isdigit (*iterator, c_locale) &&
+         !std::isalpha (*iterator, c_locale) &&
          !((*iterator == '.') || (*iterator == '-') || (*iterator == '_') ||
           (*iterator == '~')))                      ||
         // 'unsafe' characters (see also: RFC 1738)
@@ -646,7 +627,7 @@ HTTP_Tools::URLEncode (const std::string& string_in,
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       // *TODO*: there is probably a better way to do this...
-      converter << std::setw (2) << static_cast<unsigned short> (*iterator);
+      converter << std::setw (2) << static_cast<ACE_UINT16> (*iterator);
       converted_string = converter.str ();
       // "...For consistency, URI producers and normalizers should use
       //  uppercase hexadecimal digits for all percent-encodings. ..."

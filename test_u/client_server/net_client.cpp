@@ -639,20 +639,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
   ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
 
-  //  config.useThreadPerConnection = false;
-  //  config.serializeOutput = false;
-
-  //  config.notificationStrategy = NULL;
-//  config.delete_module = false;
-  // *WARNING*: set at runtime, by the appropriate connection handler
-//  config.sessionID = 0; // (== socket handle !)
-//  config.statisticsReportingInterval = 0; // == off
-//	config.printFinalReport = false;
-  // ************ runtime data ************
-//	config.currentStatistics = {};
-//	config.lastCollectionTimestamp = ACE_Time_Value::zero;
-
-//  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+  // step0b: initialize timers
   Common_Timer_Tools::configuration_.dispatch =
       (useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR
                      : COMMON_TIMER_DISPATCH_PROACTOR);
@@ -831,10 +818,10 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                              ((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL % 1000) * 1000)
                                                                                       : 0));
     configuration_in.signalHandlerConfiguration.actionTimerId =
-        timer_manager_p->schedule_timer (&timeout_handler,           // event handler handle
-                                         NULL,                       // asynchronous completion token
-                                         COMMON_TIME_NOW + interval, // first wakeup time
-                                         interval);                  // interval
+        timer_manager_p->schedule_timer (&timeout_handler,     // event handler handle
+                                         NULL,                 // asynchronous completion token
+                                         ACE_Time_Value::zero, // initial delay
+                                         interval);            // interval
     if (configuration_in.signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,

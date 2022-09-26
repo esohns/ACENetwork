@@ -29,9 +29,9 @@
 #include "net_macros.h"
 
 #if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
 #include "bittorrent_client_curses.h"
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
 #include "bittorrent_client_network.h"
 
@@ -62,7 +62,7 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 #else
     case SIGHUP:
     case SIGQUIT:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     {
 //       // *PORTABILITY*: tracing in a signal handler context is not portable
 //       // *TODO*
@@ -113,35 +113,40 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
   } // end SWITCH
 
+  BitTorrent_Client_IPeerConnection_Manager_t* connection_manager_p =
+      BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  BitTorrent_Client_ITrackerConnection_Manager_t* connection_manager_2 =
+      BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_2);
+
   // ...abort one ?
   if (abort)
   {
-    BitTorrent_Client_IPeerConnection_Manager_t* connection_manager_p =
-        BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (connection_manager_p);
     connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
   } // end IF
 
   // ...shutdown ?
   if (shutdown)
   {
+    connection_manager_p->stop (false, false);
+    connection_manager_2->stop (false, false);
+
+    // step1: stop all sessions
+    ACE_ASSERT (inherited::configuration_->control);
+    inherited::configuration_->control->stop (false);
+
+    connection_manager_p->abort (false);
+    connection_manager_2->abort (false);
+
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
-    // step1: notify curses dispatch ?
+    // step2: notify curses dispatch ?
     ACE_ASSERT (inherited::configuration_->cursesState);
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
       inherited::configuration_->cursesState->finished = true;
     } // end IF
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
-
-    // step2: stop all sessions
-    if (inherited::configuration_->control)
-      inherited::configuration_->control->stop (false);
-
-//    // step3: stop event dispatch
-//    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-//                                         inherited::configuration_->dispatchState->reactorGroupId,
-//                                         false);                                                    // don't block
   } // end IF
 }

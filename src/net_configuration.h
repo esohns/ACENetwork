@@ -26,23 +26,6 @@
 
 #include "common_parser_common.h"
 
-// forward declarations
-//class Stream_IAllocator;
-//struct Net_UserData;
-
-//struct Net_AllocatorConfiguration
-// : Common_AllocatorConfiguration
-//{
-//  Net_AllocatorConfiguration ()
-//   : Common_AllocatorConfiguration ()
-//  {
-//    defaultBufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-//    //         'flex's yy_scan_buffer() method
-//    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-//  }
-//};
-
 //typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
 //typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
 
@@ -50,12 +33,21 @@ struct Common_FlexBisonParserConfiguration;
 struct Net_SessionConfiguration
 {
   Net_SessionConfiguration ()
-   : dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
+   : connectionConfiguration (NULL)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , parserConfiguration (NULL)
+#if defined (GUI_SUPPORT)
+   , CBData (NULL)
+#endif // GUI_SUPPORT
   {}
 
-  enum Common_EventDispatchType               dispatch;
-  struct Common_FlexBisonParserConfiguration* parserConfiguration;
+  struct Net_ConnectionConfigurationBase* connectionConfiguration;
+  enum Common_EventDispatchType           dispatch;
+  struct Common_ParserConfiguration*      parserConfiguration;
+
+#if defined (GUI_SUPPORT)
+  struct Common_UI_CBData*                CBData;
+#endif // GUI_SUPPORT
 };
 
 //template <typename ConnectionConfigurationType,

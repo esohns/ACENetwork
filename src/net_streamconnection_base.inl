@@ -26,6 +26,7 @@
 #include "common.h"
 
 #include "stream_common.h"
+#include "stream_itask.h"
 
 #include "net_common.h"
 #include "net_connection_configuration.h"
@@ -898,8 +899,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::send"));
 
   int result = -1;
-  Stream_Module_t* module_p = NULL;
+  Stream_Module_t* module_p = NULL, *module_2 = NULL;
   Stream_Task_t* task_p = NULL;
+  Stream_ITask* itask_p = NULL;
 
   // *NOTE*: feed the data into the stream (queue of the tail module 'reader'
   //         task; Note: 'tail' module to support potential 'streamer' modules)
@@ -907,14 +909,20 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (module_p);
   do
   {
-    if (unlikely (!module_p->next () || // aggregator
-                  !module_p->next ()->next () || // next is aggregator
-                  (!ACE_OS::strcmp (module_p->next ()->name (),
-                                    ACE_TEXT ("ACE_Stream_Tail")) ||
-                   !ACE_OS::strcmp (module_p->next ()->name (),
-                                    ACE_TEXT (STREAM_MODULE_TAIL_NAME)))))
+    task_p = module_p->writer ();
+    ACE_ASSERT (task_p);
+    itask_p = dynamic_cast<Stream_ITask*> (task_p);
+    if (unlikely (itask_p &&
+                  itask_p->isAggregator ()))
+      break; // aggregator
+    module_2 = module_p->next ();
+    ACE_ASSERT (module_2);
+    if (unlikely (!ACE_OS::strcmp (module_2->name (),
+                                   ACE_TEXT ("ACE_Stream_Tail")) ||
+                  !ACE_OS::strcmp (module_2->name (),
+                                   ACE_TEXT (STREAM_MODULE_TAIL_NAME))))
       break;
-    module_p = module_p->next ();
+    module_p = module_2;
   } while (true);
   ACE_ASSERT (module_p);
   task_p = module_p->reader ();
@@ -1763,8 +1771,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::send"));
 
   int result = -1;
-  Stream_Module_t* module_p = NULL;
+  Stream_Module_t* module_p = NULL, *module_2 = NULL;
   Stream_Task_t* task_p = NULL;
+  Stream_ITask* itask_p = NULL;
 
   // *NOTE*: feed the data into the stream (queue of the tail module 'reader'
   //         task; Note: 'tail' module to support potential 'streamer' modules)
@@ -1772,14 +1781,20 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (module_p);
   do
   {
-    if (unlikely (!module_p->next () || // aggregator
-                  !module_p->next ()->next () || // next is aggregator
-                  (!ACE_OS::strcmp (module_p->next ()->name (),
-                                    ACE_TEXT ("ACE_Stream_Tail")) ||
-                   !ACE_OS::strcmp (module_p->next ()->name (),
-                                    ACE_TEXT (STREAM_MODULE_TAIL_NAME)))))
+    task_p = module_p->writer ();
+    ACE_ASSERT (task_p);
+    itask_p = dynamic_cast<Stream_ITask*> (task_p);
+    if (unlikely (itask_p &&
+                  itask_p->isAggregator ()))
+      break; // aggregator
+    module_2 = module_p->next ();
+    ACE_ASSERT (module_2);
+    if (unlikely (!ACE_OS::strcmp (module_2->name (),
+                                   ACE_TEXT ("ACE_Stream_Tail")) ||
+                  !ACE_OS::strcmp (module_2->name (),
+                                   ACE_TEXT (STREAM_MODULE_TAIL_NAME))))
       break;
-    module_p = module_p->next ();
+    module_p = module_2;
   } while (true);
   ACE_ASSERT (module_p);
   task_p = module_p->reader ();

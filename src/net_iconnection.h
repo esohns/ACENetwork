@@ -207,9 +207,6 @@ template <typename AddressType,
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,  // inherits Net_SocketConfiguration
-          typename HandlerConfigurationType, // socket-
-          ////////////////////////////////
           typename PeerStreamType,
           typename StreamStatusType,
           ////////////////////////////////

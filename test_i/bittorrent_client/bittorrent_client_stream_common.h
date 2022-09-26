@@ -48,7 +48,6 @@
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-#include "bittorrent_client_common.h"
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_streamhandler.h"
 
@@ -136,7 +135,7 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
                                 BitTorrent_Client_PeerConnectionConfiguration,
                                 struct BitTorrent_Client_PeerConnectionState,
                                 Net_TCPSocketConfiguration_t,
-                                struct BitTorrent_SessionState,
+                                struct BitTorrent_Client_SessionState,
                                 BitTorrent_Client_PeerConnection_Manager_t,
                                 struct Stream_UserData> BitTorrent_Client_PeerStream_t;
 
@@ -159,7 +158,7 @@ typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_TrackerStreamState,
                                    BitTorrent_Client_TrackerConnectionConfiguration,
                                    struct BitTorrent_Client_TrackerConnectionState,
                                    Net_TCPSocketConfiguration_t,
-                                   struct BitTorrent_SessionState,
+                                   struct BitTorrent_Client_SessionState,
                                    BitTorrent_Client_TrackerConnection_Manager_t,
                                    struct Stream_UserData> BitTorrent_Client_TrackerStream_t;
 
@@ -277,7 +276,13 @@ typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
                                         BitTorrent_Client_TrackerMessage_t,
                                         BitTorrent_Client_TrackerSessionMessage_t> BitTorrent_Client_TrackerMessageAllocator_t;
 
-//typedef BitTorrent_StreamHandler_T<struct BitTorrent_Client_SessionData,
-//                                   struct BitTorrent_Client_UI_CBData> BitTorrent_Client_StreamHandler_t;
+typedef BitTorrent_PeerStreamHandler_T<struct BitTorrent_Client_PeerSessionData,
+                                       struct Stream_UserData,
+                                       BitTorrent_Client_ISession_t,
+                                       struct BitTorrent_Client_UI_CBData> BitTorrent_Client_PeerStreamHandler_t;
+typedef BitTorrent_TrackerStreamHandler_T<struct BitTorrent_Client_TrackerSessionData,
+                                          struct Stream_UserData,
+                                          BitTorrent_Client_ISession_t,
+                                          struct BitTorrent_Client_UI_CBData> BitTorrent_Client_TrackerStreamHandler_t;
 
 #endif

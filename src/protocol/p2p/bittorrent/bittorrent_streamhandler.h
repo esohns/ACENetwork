@@ -61,6 +61,14 @@ class BitTorrent_PeerStreamHandler_T
                                                                   UserDataType> >
 {
  public:
+  // convenient types
+  typedef Stream_ISessionDataNotify_T<SessionDataType,
+                                      enum Stream_SessionMessageType,
+                                      BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
+                                                           UserDataType>,
+                                      BitTorrent_SessionMessage_T<SessionDataType,
+                                                                  UserDataType> > SESSIONDATA_NOTIFY_T;
+
   BitTorrent_PeerStreamHandler_T (SessionInterfaceType* // session handle
 #if defined (GUI_SUPPORT)
                                   ,CBDataType* = NULL); // ui feedback data handle
@@ -91,14 +99,14 @@ class BitTorrent_PeerStreamHandler_T
   CBDataType*           CBData_;
 #endif // GUI_SUPPORT
   SessionInterfaceType* session_;
+
+  ACE_Thread_Mutex      lock_;
   SESSION_DATA_T        sessionData_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T (const BitTorrent_PeerStreamHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T& operator= (const BitTorrent_PeerStreamHandler_T&))
-
-  ACE_Thread_Mutex      lock_;
 };
 
 //////////////////////////////////////////
@@ -122,6 +130,14 @@ class BitTorrent_TrackerStreamHandler_T
  , public Common_IInitialize_T<struct Common_FlexBisonParserConfiguration>
 {
  public:
+  // convenient types
+  typedef Stream_ISessionDataNotify_T<SessionDataType,
+                                      enum Stream_SessionMessageType,
+                                      BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
+                                                                  UserDataType>,
+                                      BitTorrent_SessionMessage_T<SessionDataType,
+                                                                  UserDataType> > SESSIONDATA_NOTIFY_T;
+
   BitTorrent_TrackerStreamHandler_T (SessionInterfaceType* // session handle
 #if defined (GUI_SUPPORT)
                                      ,CBDataType* = NULL); // ui feedback data handle

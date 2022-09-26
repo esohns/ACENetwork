@@ -67,8 +67,8 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 #else
  : session_ (interfaceHandle_in)
 #endif // GUI_SUPPORT
- , sessionData_ ()
  , lock_ ()
+ , sessionData_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::BitTorrent_PeerStreamHandler_T"));
 
@@ -117,33 +117,6 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::connect(), continuing\n")));
   }
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  {
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    //  CBData_->progressData.transferred = 0;
-      state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
-
-//    guint event_source_id = g_idle_add (idle_start_UI_cb,
-//                                        CBData_);
-//    if (event_source_id == 0)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to g_idle_add(idle_send_UI_cb): \"%m\", returning\n")));
-//      return;
-//    } // end IF
-//    CBData_->eventSourceIds.insert (event_source_id);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
@@ -215,32 +188,6 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::disconnect(), continuing\n")));
   }
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  {
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-      state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
-
-//    guint event_source_id = g_idle_add (idle_end_UI_cb,
-//                                        CBData_);
-//    if (event_source_id == 0)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to g_idle_add(idle_end_UI_cb): \"%m\", returning\n")));
-//      return;
-//    } // end IF
-//    CBData_->eventSourceIds.insert (event_source_id);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
@@ -313,26 +260,8 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::notify(), continuing\n")));
   }
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  { 
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_USE
-      CBData_->progressData.transferred += message_in.total_length ();
-#if defined (GTK_USE)
-      state_r.eventStack.push (COMMON_UI_EVENT_DATA);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
+
 template <typename SessionDataType,
           typename UserDataType,
           typename SessionInterfaceType
@@ -358,7 +287,6 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
   SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
-  int result = -1;
 
   // sanity check(s)
   // *NOTE*: the current implementation isn't fully synchronized in the sense
@@ -366,60 +294,6 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   //         STREAM_SESSION_MESSAGE_DISCONNECT after STREAM_SESSION_MESSAGE_END)
   if (iterator == sessionData_.end ())
     return;
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  {
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_USE
-      enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
-      switch (sessionMessage_in.type ())
-      {
-        case STREAM_SESSION_MESSAGE_STATISTIC:
-        {
-          if ((*iterator).second->lock)
-          {
-            result = (*iterator).second->lock->acquire ();
-            if (result == -1)
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
-          } // end IF
-
-#if defined (GTK_USE) || defined (WXWIDGETS_USE)
-          CBData_->progressData.statistic = (*iterator).second->statistic;
-#endif // GTK_USE || WXWIDGETS_USE
-
-          if ((*iterator).second->lock)
-          {
-            result = (*iterator).second->lock->release ();
-            if (result == -1)
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-          } // end IF
-
-          event_e = COMMON_UI_EVENT_STATISTIC;
-          break;
-        }
-        default:
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("invalid/unknown session message type (was: %d), returning\n"),
-                      sessionMessage_in.type ()));
-          return;
-        }
-      } // end SWITCH
-#if defined (GTK_USE)
-      state_r.eventStack.push (event_e);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
 
 //////////////////////////////////////////
@@ -495,33 +369,6 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerConnect(), continuing\n")));
   }
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  {
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-      //  CBData_->progressData.transferred = 0;
-      state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
-
-//    guint event_source_id = g_idle_add (idle_start_UI_cb,
-//                                        CBData_);
-//    if (event_source_id == 0)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to g_idle_add(idle_send_UI_cb): \"%m\", returning\n")));
-//      return;
-//    } // end IF
-//    CBData_->eventSourceIds.insert (event_source_id);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
@@ -589,32 +436,6 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerDisconnect(), continuing\n")));
   }
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  {
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-      state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
-
-//    guint event_source_id = g_idle_add (idle_end_UI_cb,
-//                                        CBData_);
-//    if (event_source_id == 0)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to g_idle_add(idle_end_UI_cb): \"%m\", returning\n")));
-//      return;
-//    } // end IF
-//    CBData_->eventSourceIds.insert (event_source_id);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
@@ -757,24 +578,8 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
                 ACE_TEXT ("caught exception in Net_ISession_T::notify(), continuing\n")));
   }
   delete parser.bencoding_; parser.bencoding_ = NULL;
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  {
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-      CBData_->progressData.transferred += message_in.total_length ();
-      state_r.eventStack.push (COMMON_UI_EVENT_DATA);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
+
 template <typename SessionDataType,
           typename UserDataType,
           typename SessionInterfaceType
@@ -798,62 +603,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 
   SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
-  int result = -1;
 
   // sanity check(s)
   ACE_ASSERT (iterator != sessionData_.end ());
-
-#if defined (GUI_SUPPORT)
-  if (CBData_)
-  {
-#if defined (GTK_USE)
-    Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-    ACE_ASSERT (gtk_manager_p);
-    Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_USE
-      enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
-      switch (sessionMessage_in.type ())
-      {
-        case STREAM_SESSION_MESSAGE_STATISTIC:
-        {
-          if ((*iterator).second->lock)
-          {
-            result = (*iterator).second->lock->acquire ();
-            if (result == -1)
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
-          } // end IF
-
-#if defined (GTK_USE) || defined (WXWIDGETS_USE)
-          CBData_->progressData.statistic = (*iterator).second->statistic;
-#endif // GTK_USE || WXWIDGETS_USE
-
-          if ((*iterator).second->lock)
-          {
-            result = (*iterator).second->lock->release ();
-            if (result == -1)
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-          } // end IF
-
-          event_e = COMMON_UI_EVENT_STATISTIC;
-          break;
-        }
-        default:
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("invalid/unknown session message type (was: %d), returning\n"),
-                      sessionMessage_in.type ()));
-          return;
-        }
-      } // end SWITCH
-#if defined (GTK_USE)
-      state_r.eventStack.push (event_e);
-    } // end lock scope
-#endif // GTK_USE
-  } // end IF
-#endif // GUI_SUPPORT
 }
