@@ -146,26 +146,17 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   gdk_threads_leave ();
 #endif // GTK_CHECK_VERSION (3,6,0)
 
-//  // retrieve connection tabs
-//  GtkNotebook* notebook_p =
-//    GTK_NOTEBOOK (gtk_builder_get_object (builder_p,
-//                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_SESSIONS)));
-//  ACE_ASSERT (notebook_p);
-//  result_2 = g_signal_connect (notebook_p,
-//                               ACE_TEXT_ALWAYS_CHAR ("switch-page"),
-//                               G_CALLBACK (switch_channel_cb),
-//                               &CBData_);
-//  ACE_ASSERT (result_2);
-
-//  // retrieve session log tab child
-//  GtkScrolledWindow* scrolled_window_p =
-//    GTK_SCROLLED_WINDOW (gtk_builder_get_object (builder_p,
-//                                                 ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_SCROLLEDWINDOW_SESSION)));
-//  ACE_ASSERT (scrolled_window_p);
-//  // disallow reordering the application log tab
-//  gtk_notebook_set_tab_reorderable (notebook_p,
-//                                    GTK_WIDGET (scrolled_window_p),
-//                                    FALSE);
+  //// add default text tag to table
+  //GtkTextTagTable* text_tag_table_p =
+  //  GTK_TEXT_TAG_TABLE (gtk_builder_get_object (builder_p,
+  //                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTTAGTABLE_SESSION)));
+  //ACE_ASSERT (text_tag_table_p);
+  //GtkTextTag* text_tag_p =
+  //  GTK_TEXT_TAG (gtk_builder_get_object (builder_p,
+  //                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTTAG_DEFAULT_SESSION)));
+  //ACE_ASSERT (text_tag_p);
+  //gtk_text_tag_table_add (text_tag_table_p,
+  //                        text_tag_p);
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     state_r.builders[CBData_.label] =

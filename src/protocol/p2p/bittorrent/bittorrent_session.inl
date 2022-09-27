@@ -303,10 +303,11 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     } // end IF
 
     ACE_ASSERT (!inherited::state_.peerStreamHandler);
-    ACE_NEW_NORETURN (inherited::state_.peerStreamHandler,
 #if defined (GUI_SUPPORT)
+    ACE_NEW_NORETURN (inherited::state_.peerStreamHandler,
                       PeerStreamHandlerType (this, static_cast<CBDataType*> (configuration_in.CBData)));
 #else
+    ACE_NEW_NORETURN (inherited::state_.peerStreamHandler,
                       PeerStreamHandlerType (this));
 #endif // GUI_SUPPORT
     ACE_ASSERT (inherited::state_.peerStreamHandler);
@@ -322,10 +323,11 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     } // end IF
 
     ACE_ASSERT (!inherited::state_.trackerStreamHandler);
-    ACE_NEW_NORETURN (inherited::state_.trackerStreamHandler,
 #if defined (GUI_SUPPORT)
+    ACE_NEW_NORETURN (inherited::state_.trackerStreamHandler,
                       TrackerStreamHandlerType (this, static_cast<CBDataType*> (configuration_in.CBData)));
 #else
+    ACE_NEW_NORETURN (inherited::state_.trackerStreamHandler,
                       TrackerStreamHandlerType (this));
 #endif // GUI_SUPPORT
     ACE_ASSERT (inherited::state_.trackerStreamHandler);

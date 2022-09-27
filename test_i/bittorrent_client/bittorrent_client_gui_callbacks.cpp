@@ -1091,26 +1091,26 @@ button_session_connection_close_clicked_cb (GtkWidget* widget_in,
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->session);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
   Common_UI_GTK_BuildersIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
+    state_r.builders.find (data_p->label);
   ACE_ASSERT (iterator != state_r.builders.end ());
+  Common_UI_GTK_BuildersIterator_t iterator_2 =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator_2 != state_r.builders.end ());
 
   // step1: retrieve active connection entry
   GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CONNECTIONS)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CONNECTION)));
   ACE_ASSERT (combo_box_p);
   GtkTreeIter active_iter;
   //   GValue active_value;
-  gchar* connection_value = NULL;
+  gchar* connection_value_p = NULL;
   if (!gtk_combo_box_get_active_iter (combo_box_p,
                                       &active_iter))
   {
@@ -1118,35 +1118,33 @@ button_session_connection_close_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
     return;
   } // end IF
-//   gtk_tree_model_get_value(gtk_combo_box_get_model(serverlist),
-//                            &active_iter,
-//                            0, &active_value);
+//   gtk_tree_model_get_value (gtk_combo_box_get_model(serverlist),
+//                             &active_iter,
+//                             0, &active_value);
   gtk_tree_model_get (gtk_combo_box_get_model (combo_box_p),
                       &active_iter,
-                      0, &connection_value, // just retrieve the first column...
+                      0, &connection_value_p, // just retrieve the first column...
                       -1);
   //   ACE_ASSERT(G_VALUE_HOLDS_STRING(&active_value));
-  ACE_ASSERT (connection_value);
+  ACE_ASSERT (connection_value_p);
 
   // convert UTF8 to locale
-//   channel_string = g_value_get_string(&active_value);
+//   connection_string = g_value_get_string(&active_value);
   std::string connection_string =
-    Common_UI_GTK_Tools::UTF8ToLocale (connection_value,
-                                       g_utf8_strlen (connection_value, -1));
+    Common_UI_GTK_Tools::UTF8ToLocale (connection_value_p,
+                                       g_utf8_strlen (connection_value_p, -1));
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_UI_GTK_Tools::UTF8ToLocale(\"%s\"), returning\n"),
-                connection_value));
-    g_free (connection_value);
+                connection_value_p));
+    g_free (connection_value_p);
     return;
   } // end IF
-  g_free (connection_value);
+  g_free (connection_value_p); connection_value_p = NULL;
 
   ACE_INET_Addr address;
   data_p->session->disconnect (address);
-
-  gtk_widget_set_sensitive (widget_in, FALSE);
 }
 
 void
