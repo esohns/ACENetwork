@@ -21,8 +21,6 @@
 #ifndef BITTORRENT_CLIENT_DEFINES_H
 #define BITTORRENT_CLIENT_DEFINES_H
 
-#define BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE "bittorrent_client.ini"
-
 #define BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE "test.torrent"
 
 #define BITTORRENT_CLIENT_DEFAULT_USE_CURSES   false // use (PD|N)curses library ?

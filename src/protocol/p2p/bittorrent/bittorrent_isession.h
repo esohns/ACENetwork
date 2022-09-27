@@ -56,6 +56,8 @@ class BitTorrent_ISession_T
  public:
   inline virtual ~BitTorrent_ISession_T () {}
 
+  virtual unsigned int numberOfPieces () const = 0;
+
   virtual void choke (Net_ConnectionId_t, // connection id
                       bool) = 0;          // choke ? : unchoke
   virtual void interested (Net_ConnectionId_t, // connection id

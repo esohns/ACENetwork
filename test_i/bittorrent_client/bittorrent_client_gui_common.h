@@ -118,8 +118,8 @@ struct BitTorrent_Client_UI_CBData
    , controller (NULL)
    , progressData ()
    , sessions ()
-   , subscribers ()
-   , trackerSubscribers ()
+//   , subscribers ()
+//   , trackerSubscribers ()
    , UIFileDirectory ()
   {}
 
@@ -130,76 +130,63 @@ struct BitTorrent_Client_UI_CBData
   BitTorrent_Client_IControl_t*            controller;
   struct BitTorrent_Client_UI_ProgressData progressData;
   BitTorrent_Client_GUI_Sessions_t         sessions;
-  BitTorrent_Client_IPeerSubscribers_t     subscribers;
-  BitTorrent_Client_ITrackerSubscribers_t  trackerSubscribers;
+//  BitTorrent_Client_IPeerSubscribers_t     subscribers;
+//  BitTorrent_Client_ITrackerSubscribers_t  trackerSubscribers;
   std::string                              UIFileDirectory;
 };
 
-struct BitTorrent_Client_Configuration;
-struct BitTorrent_Client_ThreadData
+struct BitTorrent_Client_UI_SessionThreadData
+ : BitTorrent_Client_SessionThreadData
 {
-  BitTorrent_Client_ThreadData ()
-   : configuration (NULL)
-   , controller (NULL)
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
-   , cursesState (NULL)
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
-   , dispatchState (NULL)
-   , filename ()
-//   , groupId (-1)
-  {}
-
-  struct BitTorrent_Client_Configuration* configuration;
-  BitTorrent_Client_IControl_t*           controller;
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
-  struct BitTorrent_Client_CursesState*   cursesState;
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
-  struct Common_EventDispatchState*       dispatchState;
-  std::string                             filename; // metainfo (aka '.torrent') file URI
-//  int                                     groupId;
-};
-
-struct BitTorrent_Client_SessionThreadData
- : BitTorrent_Client_ThreadData
-{
-  BitTorrent_Client_SessionThreadData ()
-   : BitTorrent_Client_ThreadData ()
-   , configuration (NULL)
+  BitTorrent_Client_UI_SessionThreadData ()
+   : BitTorrent_Client_SessionThreadData ()
    , CBData (NULL)
+#if defined (GTK_USE)
+   , eventSourceId (0)
+#endif // GTK_USE
   {}
 
-  struct BitTorrent_Client_Configuration* configuration;
-  struct BitTorrent_Client_UI_CBData*     CBData;
+  struct BitTorrent_Client_UI_CBData* CBData;
+#if defined (GTK_USE)
+  guint                               eventSourceId;
+#endif // GTK_USE
 };
 
 struct BitTorrent_Client_UI_SessionCBData
 {
   BitTorrent_Client_UI_SessionCBData ()
-   : configuration (NULL)
-   , controller (NULL)
+   : controller (NULL)
+   , CBData (NULL)
 #if defined (GTK_USE)
    , eventSourceId (0)
-   , state (NULL)
 #endif // GTK_USE
    , handler (NULL)
    , label ()
    , session (NULL)
   {}
 
-  struct BitTorrent_Client_Configuration* configuration;
   BitTorrent_Client_IControl_t*           controller;
+  struct BitTorrent_Client_UI_CBData*     CBData;
 #if defined (GTK_USE)
   guint                                   eventSourceId;
-  Common_UI_GTK_State_t*                  state;
 #endif // GTK_USE
   BitTorrent_Client_GUI_Session_t*        handler;
   // *TODO*: remove this
   std::string                             label;
   BitTorrent_Client_ISession_t*           session;
+};
+
+struct BitTorrent_Client_UI_SessionProgressData
+{
+  BitTorrent_Client_UI_SessionProgressData ()
+   : CBData (NULL)
+   , label ()
+   , pieceIndex (-1)
+  {}
+
+  struct BitTorrent_Client_UI_CBData* CBData;
+  std::string                         label;
+  int                                 pieceIndex;
 };
 
 #endif

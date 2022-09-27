@@ -308,6 +308,13 @@ target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonSignal)
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonTimer)
 
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Decoder)
+#target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Device)
+#if (WIN32)
+# target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
+#endif (WIN32)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Network)
+target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${PROJECT_NAME}_Protocol_BitTorrent)

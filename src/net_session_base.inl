@@ -276,15 +276,20 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::close"));
 
+  // sanity check(s)
+  ConnectionManagerType* connection_manager_p =
+      CONNECTION_MANAGER_SINGLETON_T::instance ();
+  ACE_ASSERT (connection_manager_p);
+
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     for (Net_ConnectionIdsIterator_t iterator = state_.connections.begin ();
          iterator != state_.connections.end ();
          ++iterator)
     {
-      iconnection_p =
-          CONNECTION_MANAGER_SINGLETON_T::instance ()->get (*iterator);
-      if (!iconnection_p)
+      iconnection_p =connection_manager_p->get (*iterator);
+      if (unlikely (!iconnection_p)) // mostly likely: different connection manager
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to retrieve connection handle (id was: %d), continuing\n"),
@@ -293,6 +298,10 @@ Net_SessionBase_T<AddressType,
       } // end IF
       iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
+
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("aborted connection (id was: %d)...\n"),
+                  *iterator));
     } // end FOR
 
     if (waitForCompletion_in)
@@ -335,13 +344,13 @@ Net_SessionBase_T<AddressType,
 
   int result = -1;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    if (state_.connections.empty ())
-      return;
-    result = condition_.wait ();
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Condition_Thread_Mutex::wait(): \"%m\", continuing\n")));
-    ACE_ASSERT (state_.connections.empty ());
+    while (!state_.connections.empty ())
+    {
+      result = condition_.wait ();
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Condition_Thread_Mutex::wait(): \"%m\", continuing\n")));
+    } // end WHILE
   } // end lock scope
 }
 
@@ -373,7 +382,7 @@ Net_SessionBase_T<AddressType,
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     std::pair<Net_ConnectionIdsIterator_t, bool> result =
-        state_.connections.insert (id_in);
+      state_.connections.insert (id_in);
     ACE_ASSERT (result.second);
   } // end lock scope
 
@@ -408,9 +417,11 @@ Net_SessionBase_T<AddressType,
 
   Net_ConnectionIdsIterator_t iterator;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
     iterator = state_.connections.find (id_in);
-    if (iterator != state_.connections.end ())
-      state_.connections.erase (iterator);
+    ACE_ASSERT (iterator != state_.connections.end ());
+    state_.connections.erase (iterator);
+
     if (state_.connections.empty ())
     {
       int result = condition_.broadcast ();

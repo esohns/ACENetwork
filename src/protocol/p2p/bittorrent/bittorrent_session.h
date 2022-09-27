@@ -131,6 +131,7 @@ class BitTorrent_Session_T
   virtual ~BitTorrent_Session_T ();
 
   // override/implement (part of) BitTorrent_ISession_T
+  inline virtual unsigned int numberOfPieces () const { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, 0); return static_cast<unsigned int> (inherited::state_.pieces.size ()); }
   virtual bool initialize (const ConfigurationType&);
   virtual void connect (const ACE_INET_Addr&);
   virtual void trackerConnect (const ACE_INET_Addr&);

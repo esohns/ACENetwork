@@ -24,7 +24,6 @@
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
-//#include "ace/Synch.h"
 
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_defines.h"
@@ -61,84 +60,66 @@ session_handler_cb (void* arg_in)
   result = -1;
 #else
   result = arg_in;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // sanity check(s)
-  struct BitTorrent_Client_SessionThreadData* data_p =
-    static_cast<struct BitTorrent_Client_SessionThreadData*> (arg_in);
+  struct BitTorrent_Client_UI_SessionThreadData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionThreadData*> (arg_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->CBData);
   ACE_ASSERT (data_p->configuration);
 
   guint context_id = 0;
-  GtkProgressBar* progress_bar_p = NULL;
   GtkStatusbar* statusbar_p = NULL;
-//  gchar* string_p = NULL;
   std::string label_string =
     ACE_TEXT_ALWAYS_CHAR (ACE::basename (data_p->filename.c_str ()));
-//  int result_2 = -1;
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+wait_retry:
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, NULL);
-    // step1: create new connection handler
     Common_UI_GTK_BuildersIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
     // sanity check(s)
     ACE_ASSERT (iterator != state_r.builders.end ());
 
-    // retrieve progress bar handle
+    if (!data_p->eventSourceId)
+      goto wait_retry;
+
+  // retrieve progress bar handle
 #if GTK_CHECK_VERSION (3,6,0)
 #else
     gdk_threads_enter ();
 #endif // GTK_CHECK_VERSION (3,6,0)
-    progress_bar_p =
-      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
-    ACE_ASSERT (progress_bar_p);
 
     // generate context id
     statusbar_p =
       GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR)));
     ACE_ASSERT (statusbar_p);
-    //string_p =
-    //  Common_UI_GTK_Tools::Locale2UTF8 ((*data_p->phonebookIterator).second.hostName);
-    //if (!string_p)
-    //{
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to Common_UI_GTK_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
-    //              ACE_TEXT ((*data_p->phonebookIterator).second.hostName.c_str ())));
-
-    //  // clean up
-    //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->GTKState.lock);
-    //  data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
-    //  delete data_p;
-
-    //  return result;
-    //} // end IF
     context_id =
       gtk_statusbar_get_context_id (statusbar_p,
                                     label_string.c_str ());
                                     //string_p);
+
 #if GTK_CHECK_VERSION (3,6,0)
 #else
     gdk_threads_leave ();
 #endif // GTK_CHECK_VERSION (3,6,0)
-    //g_free (string_p);
   } // end lock scope
+
+  // sanity check(s)
+  ACE_ASSERT (data_p->eventSourceId);
 
   // *NOTE*: this schedules addition of a new session page
   //         --> make sure to remove it again if things go wrong
   BitTorrent_Client_GUI_Session_t* session_p = NULL;
 
-//  gdk_threads_enter ();
   ACE_NEW_NORETURN (session_p,
-                    BitTorrent_Client_GUI_Session_t (*data_p->configuration,
-                                                     state_r,
+                    BitTorrent_Client_GUI_Session_t (*data_p->CBData,
                                                      context_id,
                                                      label_string,
                                                      data_p->CBData->UIFileDirectory,
@@ -150,12 +131,12 @@ session_handler_cb (void* arg_in)
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     goto clean;
   } // end IF
-//  gdk_threads_leave ();
   // *WARNING*: beyond this point, need to remove the session page !
   //            --> goto remove_page
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, NULL);
     data_p->CBData->sessions.insert (std::make_pair (label_string, session_p));
+    data_p->CBData->progressData.completedActions.insert (data_p->eventSourceId);
   } // end lock scope
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -165,15 +146,6 @@ session_handler_cb (void* arg_in)
 #endif
 
 clean:
-  { // synch access
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
-#else
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
-#endif
-    data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
-  } // end lock scope
-
   // clean up
   delete data_p; data_p = NULL;
 
@@ -214,35 +186,25 @@ idle_add_session_cb (gpointer userData_in)
   struct BitTorrent_Client_UI_SessionCBData* data_p =
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->eventSourceId);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
-  GtkWindow* window_p = NULL;
-  GtkHBox* hbox_p = NULL;
-  GtkLabel* label_p = NULL;
-  std::string page_tab_label_string;
-  GtkVBox* vbox_p = NULL;
-  GtkNotebook* notebook_p = NULL;
-  gint page_number = -1;
-  ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock);
-
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (data_p->label);
-  // sanity check(s)
-  if (iterator == state_r.builders.end ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("session builder (was: \"%s\") not found, aborting\n"),
-                ACE_TEXT (data_p->label.c_str ())));
-    goto clean_up;
-  } // end IF
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  Common_UI_GTK_BuildersIterator_t iterator_2 =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator_2 != state_r.builders.end ());
+
+  GtkWindow* window_p = NULL;
+  GtkHBox* hbox_p = NULL, *hbox_2 = NULL;
+  GtkLabel* label_p = NULL;
+  GtkVBox* vbox_p = NULL;
+  GtkNotebook* notebook_p = NULL;
+  GtkTable* table_p = NULL;
+  gint page_number = -1;
 
   // add new page to the sessions notebook
   // retrieve (dummy) parent window
@@ -267,22 +229,22 @@ idle_add_session_cb (gpointer userData_in)
                       data_p->label.c_str ());
 
   // retrieve (dummy) parent window
-  window_p =
-    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_SESSION)));
-  ACE_ASSERT (window_p);
-  // retrieve channel tab
+  hbox_2 =
+    GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_PAGE_SESSION)));
+  ACE_ASSERT (hbox_2);
+  // retrieve session tab
   vbox_p =
     GTK_VBOX (gtk_builder_get_object ((*iterator).second.second,
                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_VBOX_SESSION)));
   ACE_ASSERT (vbox_p);
   g_object_ref (vbox_p);
-  gtk_container_remove (GTK_CONTAINER (window_p),
+  gtk_container_remove (GTK_CONTAINER (hbox_2),
                         GTK_WIDGET (vbox_p));
 
   notebook_p =
-      GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_SESSIONS)));
+    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_SESSIONS)));
   ACE_ASSERT (notebook_p);
   page_number = gtk_notebook_append_page (notebook_p,
                                           GTK_WIDGET (vbox_p),
@@ -297,26 +259,49 @@ idle_add_session_cb (gpointer userData_in)
     g_object_unref (hbox_p);
     g_object_unref (vbox_p);
 
-    goto clean_up;
+    return G_SOURCE_REMOVE;
   } // end IF
   g_object_unref (hbox_p);
+  g_object_unref (vbox_p);
 
   // allow reordering
   gtk_notebook_set_tab_reorderable (notebook_p,
                                     GTK_WIDGET (vbox_p),
                                     TRUE);
-  g_object_unref (vbox_p);
 
-  // *IMPORTANT NOTE*: release lock while switching pages
-  { ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
-    gtk_notebook_set_current_page (notebook_p,
-                                   page_number);
-  } // end lock scope
+  gtk_notebook_set_current_page (notebook_p,
+                                 page_number);
 
-clean_up:
-  state_r.eventSourceIds.erase (data_p->eventSourceId);
-  data_p->eventSourceId = 0;
-
+  // initialize pieces map
+  table_p =
+    GTK_TABLE (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TABLE_PIECES)));
+  ACE_ASSERT (table_p);
+  unsigned int number_of_pieces_i = data_p->session->numberOfPieces ();
+  unsigned int number_of_colummns_and_rows_i =
+    static_cast<unsigned int> (std::ceil (std::sqrt (static_cast<float> (number_of_pieces_i))));
+  gtk_table_resize (table_p,
+                    number_of_colummns_and_rows_i,
+                    number_of_colummns_and_rows_i);
+  int x, y;
+  GtkButton* button_p = NULL;
+//  GdkColor black = {0, 0x0000, 0x0000, 0x0000};
+  for (unsigned int i = 0;
+       i < number_of_pieces_i;
+       ++i)
+  {
+    button_p = GTK_BUTTON (gtk_button_new ());
+    ACE_ASSERT (button_p);
+//    gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_NORMAL, &black);
+//    gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_PRELIGHT, &black);
+//    gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_ACTIVE, &black);
+    x = i % number_of_colummns_and_rows_i;
+    y = i / number_of_colummns_and_rows_i;
+    gtk_table_attach_defaults (table_p,
+                               GTK_WIDGET (button_p),
+                               x, x + 1,
+                               y, y + 1);
+  } // end FOR
   return G_SOURCE_REMOVE;
 }
 
@@ -366,58 +351,18 @@ idle_initialize_UI_cb (gpointer userData_in)
   struct BitTorrent_Client_UI_CBData* data_p =
     static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // step1: connect signals/slots
-  //   gtk_builder_connect_signals((*iterator).second.second,
-  //                               &const_cast<main_cb_data&> (userData_in));
-  GtkButton* button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_CONNECT)));
-  ACE_ASSERT (button_p);
-  gulong result = g_signal_connect (button_p,
-                                    ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                                    G_CALLBACK (button_connect_clicked_cb),
-                                    userData_in);
-  ACE_ASSERT (result);
-  button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_DISCONNECT)));
-  ACE_ASSERT (button_p);
-  result = g_signal_connect (button_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (button_disconnect_clicked_cb),
-                             userData_in);
-  ACE_ASSERT (result);
-
-  button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_ABOUT)));
-  ACE_ASSERT (button_p);
-  result = g_signal_connect (button_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (button_about_clicked_cb),
-                             userData_in);
-  ACE_ASSERT (result);
-  button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_QUIT)));
-  ACE_ASSERT (button_p);
-  result = g_signal_connect (button_p,
-                             ACE_TEXT_ALWAYS_CHAR ("clicked"),
-                             G_CALLBACK (button_quit_clicked_cb),
-                             NULL);
-  ACE_ASSERT (result);
+  gtk_builder_connect_signals ((*iterator).second.second,
+                               userData_in);
 
   // step2: retrieve toplevel handle
   GtkWindow* window_p =
@@ -431,10 +376,10 @@ idle_initialize_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   // connect default signals
-  result = g_signal_connect (window_p,
-                             ACE_TEXT_ALWAYS_CHAR ("delete-event"),
-                             G_CALLBACK (button_quit_clicked_cb),
-                             window_p);
+  gulong result = g_signal_connect (window_p,
+                                    ACE_TEXT_ALWAYS_CHAR ("delete-event"),
+                                    G_CALLBACK (button_quit_clicked_cb),
+                                    window_p);
   ACE_ASSERT (result);
   //   g_signal_connect(window_p,
   //                    ACE_TEXT_ALWAYS_CHAR("destroy-event"),
@@ -446,6 +391,47 @@ idle_initialize_UI_cb (gpointer userData_in)
                              window_p);
   ACE_ASSERT (result);
 
+  GtkFileChooserButton *file_chooser_button_p = NULL;
+  if (!data_p->configuration->sessionConfiguration.metaInfoFileName.empty ())
+  {
+    file_chooser_button_p =
+        GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_FILECHOOSERBUTTON_TORRENT)));
+    ACE_ASSERT (file_chooser_button_p);
+    GFile* file_p =
+      g_file_new_for_path (data_p->configuration->sessionConfiguration.metaInfoFileName.c_str ());
+    ACE_ASSERT (file_p);
+    GError* error_p = NULL;
+    if (!gtk_file_chooser_select_file (GTK_FILE_CHOOSER (file_chooser_button_p),
+                                       file_p,
+                                       &error_p))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("failed to gtk_file_chooser_select_file(\"%s\"): \"%s\", continuing\n"),
+                 ACE_TEXT (g_file_get_path (file_p)),
+                 ACE_TEXT (error_p->message)));
+      g_error_free (error_p); error_p = NULL;
+    } // end IF
+    g_object_unref (G_OBJECT (file_p)); file_p = NULL;
+  } // end IF
+  file_chooser_button_p =
+      GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_FILECHOOSERBUTTON_DESTINATION)));
+  ACE_ASSERT (file_chooser_button_p);
+  std::string download_path =
+      Common_File_Tools::getUserDownloadDirectory (ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p),
+                                       ACE_TEXT (download_path.c_str ()));
+
+  GtkProgressBar* progress_bar_p =
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
+  ACE_ASSERT (progress_bar_p);
+  gint width, height;
+  gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
+  gtk_progress_bar_set_pulse_step (progress_bar_p,
+                                   1.0 / static_cast<double> (width));
+
   GtkStatusbar* statusbar_p =
     GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR)));
@@ -453,6 +439,13 @@ idle_initialize_UI_cb (gpointer userData_in)
   data_p->contextId =
     gtk_statusbar_get_context_id (statusbar_p,
                                   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR_CONTEXT_DESCRIPTION));
+
+  GtkFileFilter* file_filter_p =
+      GTK_FILE_FILTER (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_FILEFILTER_TORRENT)));
+  ACE_ASSERT (file_filter_p);
+  gtk_file_filter_add_pattern (file_filter_p,
+                               ACE_TEXT ("*.torrent"));
 
   //// use correct screen
   //if (parentWidget_in)
@@ -499,14 +492,12 @@ idle_initialize_UI_cb (gpointer userData_in)
 gboolean
 idle_piece_complete_progress_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_remove_session_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_piece_complete_progress_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_UI_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
+  struct BitTorrent_Client_UI_SessionProgressData* data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionProgressData*> (userData_in);
   ACE_ASSERT (data_p);
-//  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
-  ACE_ASSERT (data_p->session);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -517,7 +508,6 @@ idle_piece_complete_progress_cb (gpointer userData_in)
   GtkNotebook* notebook_p = NULL;
   GtkVBox* vbox_p = NULL;
   gint page_number = -1;
-//  gint number_of_pages = 0;
   Common_UI_GTK_BuildersIterator_t iterator;
   ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock);
 
@@ -554,8 +544,7 @@ idle_piece_complete_progress_cb (gpointer userData_in)
   } // end lock scope
 
 clean_up:
-  state_r.eventSourceIds.erase (data_p->eventSourceId);
-  delete data_p->session; data_p->session = NULL;
+  delete data_p; data_p = NULL;
 
   return G_SOURCE_REMOVE;
 }
@@ -569,37 +558,27 @@ idle_remove_session_cb (gpointer userData_in)
   struct BitTorrent_Client_UI_SessionCBData* data_p =
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
-//  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
+  ACE_ASSERT (data_p->eventSourceId);
   ACE_ASSERT (data_p->session);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersIterator_t iterator =
+    state_r.builders.find (data_p->label);
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  Common_UI_GTK_BuildersIterator_t iterator_2 =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator_2 != state_r.builders.end ());
 
   GtkNotebook* notebook_p = NULL;
   GtkVBox* vbox_p = NULL;
   gint page_number = -1;
-//  gint number_of_pages = 0;
-  Common_UI_GTK_BuildersIterator_t iterator;
-  ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock);
-
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-
-  iterator = state_r.builders.find (data_p->label);
-  // sanity check(s)
-  if (iterator == state_r.builders.end ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("session (label was: \"%s\") builder not found, aborting\n"),
-                ACE_TEXT (data_p->label.c_str ())));
-    goto clean_up;
-  } // end IF
 
   // remove session page from sessions notebook ?
   notebook_p =
-    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
+    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_SESSIONS)));
   ACE_ASSERT (notebook_p);
 
@@ -612,16 +591,16 @@ idle_remove_session_cb (gpointer userData_in)
 
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
   { // flip away from "this" page ?
-    // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
-
     gtk_notebook_prev_page (notebook_p);
   } // end IF && lock scope
   gtk_notebook_remove_page (notebook_p,
                             page_number);
 
-clean_up:
-  state_r.eventSourceIds.erase (data_p->eventSourceId);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+    data_p->CBData->progressData.completedActions.insert (data_p->eventSourceId);
+  } // end lock scope
+
+  data_p->session->wait ();
   delete data_p->session; data_p->session = NULL;
 
   return G_SOURCE_REMOVE;
@@ -674,24 +653,20 @@ idle_update_progress_cb (gpointer userData_in)
   struct BitTorrent_Client_UI_ProgressData* data_p =
     static_cast<struct BitTorrent_Client_UI_ProgressData*> (userData_in);
   ACE_ASSERT (data_p);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
-  int result = -1;
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
-
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
   ACE_ASSERT (progress_bar_p);
 
+  int result = -1;
   ACE_THR_FUNC_RETURN exit_status;
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
@@ -701,29 +676,36 @@ idle_update_progress_cb (gpointer userData_in)
          iterator_2 != data_p->completedActions.end ();
          ++iterator_2)
     {
-      result = thread_manager_p->join (*iterator_2, &exit_status);
+      Common_UI_GTK_PendingActionsIterator_t iterator_3 =
+          data_p->pendingActions.find (*iterator_2);
+      ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
+
+      ACE_thread_t thread_id = (*iterator_3).second.id ();
+      if (!thread_id)
+        goto continue_;
+
+      result = thread_manager_p->join (thread_id,
+                                       &exit_status);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
-                    *iterator_2));
+                    thread_id));
       else if (exit_status)
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("thread %d has joined (status was: %d)...\n"),
-                    *iterator_2,
+                    thread_id,
                     exit_status));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("thread %u has joined (status was: %@)...\n"),
-                    *iterator_2,
+                    thread_id,
                     exit_status));
 #endif // ACE_WIN32 || ACE_WIN64
       } // end IF
 
-      Common_UI_GTK_PendingActionsIterator_t iterator_3 =
-          data_p->pendingActions.find (*iterator_2);
-      ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
+continue_:
       state_r.eventSourceIds.erase ((*iterator_3).first);
       data_p->pendingActions.erase (iterator_3);
     } // end FOR
@@ -769,28 +751,25 @@ button_about_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
+  ACE_UNUSED_ARG (userData_in);
 
   // sanity check(s)
-  struct BitTorrent_Client_UI_CBData* data_p =
-    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-
+//  struct BitTorrent_Client_UI_CBData* data_p =
+//    static_cast<struct BitTorrent_Client_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // retrieve about dialog handle
   GtkDialog* dialog_p =
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_MAIN_ABOUT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_ABOUT)));
   ACE_ASSERT (dialog_p);
 
   // run dialog
@@ -800,10 +779,10 @@ button_about_clicked_cb (GtkWidget* widget_in,
 }
 
 void
-button_connect_clicked_cb (GtkWidget* widget_in,
-                           gpointer userData_in)
+button_start_clicked_cb (GtkWidget* widget_in,
+                         gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::button_connect_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_start_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
 
@@ -838,16 +817,17 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("no .torrent file selected, returning\n")));
     return;
   } // end IF
-  data_p->configuration->trackerStreamConfiguration.configuration_->filename =
-    filename_p;
-  g_free (filename_p);
-  if (!Common_File_Tools::isReadable (data_p->configuration->trackerStreamConfiguration.configuration_->filename))
+  if (!Common_File_Tools::isReadable (ACE_TEXT_ALWAYS_CHAR (filename_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT (".torrent file (was: \"%s\") not readable, returning\n"),
-                ACE_TEXT (data_p->configuration->trackerStreamConfiguration.configuration_->filename.c_str ())));
+                ACE_TEXT (filename_p)));
+    g_free (filename_p);
     return;
   } // end IF
+  data_p->configuration->sessionConfiguration.metaInfoFileName =
+    filename_p;
+  g_free (filename_p);
 
   // step2: retrieve target directory
   file_chooser_button_p =
@@ -862,130 +842,87 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("no destination folder selected, returning\n")));
     return;
   } // end IF
-  BitTorrent_Client_TrackerStreamConfiguration_t::ITERATOR_T iterator_2 =
-    data_p->configuration->trackerStreamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->trackerStreamConfiguration.end ());
-  (*iterator_2).second.second->destination = path_p;
-  g_free (path_p);
-  if (!Common_File_Tools::isDirectory ((*iterator_2).second.second->destination))
+  if (!Common_File_Tools::isDirectory (ACE_TEXT_ALWAYS_CHAR (path_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("destination folder (was: \"%s\") does not exist, returning\n"),
-                ACE_TEXT ((*iterator_2).second.second->destination.c_str ())));
+                ACE_TEXT (path_p)));
+    g_free (path_p);
     return;
   } // end IF
+  BitTorrent_Client_PeerStreamConfiguration_t::ITERATOR_T iterator_2 =
+      data_p->configuration->peerStreamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->peerStreamConfiguration.end ());
+  (*iterator_2).second.second->destination = path_p;
+  g_free (path_p);
 
   // start session thread
-  struct BitTorrent_Client_SessionThreadData* session_thread_data_p = NULL;
-  ACE_NEW_NORETURN (session_thread_data_p,
-                    struct BitTorrent_Client_SessionThreadData ());
-  if (!session_thread_data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
-  } // end IF
-  session_thread_data_p->CBData = data_p;
-  session_thread_data_p->configuration = data_p->configuration;
-  ACE_thread_t thread_id = -1;
-  ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
-  //char thread_name[BUFSIZ];
-  //ACE_OS::memset (thread_name, 0, sizeof (thread_name));
-  char* thread_name_p = NULL;
-  ACE_NEW_NORETURN (thread_name_p,
-                    char[BUFSIZ]);
-  if (!thread_name_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-
-    // clean up
-    delete session_thread_data_p;
-
-    return;
-  } // end IF
-  ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
-  const char* thread_name_2 = thread_name_p;
-  ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
-  ACE_ASSERT (thread_manager_p);
-  result =
-    thread_manager_p->spawn (::session_handler_cb,             // function
-                             session_thread_data_p,            // argument
-                             (THR_NEW_LWP      |
-                              THR_JOINABLE     |
-                              THR_INHERIT_SCHED),              // flags
-                             &thread_id,                       // thread id
-                             &thread_handle,                   // thread handle
-                             ACE_DEFAULT_THREAD_PRIORITY,      // priority
-                             COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1, // *TODO*: group id
-                             NULL,                             // stack
-                             0,                                // stack size
-                             &thread_name_2);                  // name
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
-
-    // clean up
-    delete thread_name_p;
-    delete session_thread_data_p;
-
-    return;
-  } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started session thread (id was: %d)...\n"),
-              thread_id));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started session thread (id was: %u)...\n"),
-              thread_id));
-#endif
-
-  // setup progress updates
-  //if (data_p->progressData.cursorType == GDK_LAST_CURSOR)
-  //{
-  //  GtkWindow* window_p =
-  //    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-  //                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_MAIN)));
-  //  ACE_ASSERT (window_p);
-  //  GdkWindow* window_2 = gtk_widget_get_window (GTK_WIDGET (window_p));
-  //  ACE_ASSERT (window_2);
-  //  GdkCursor* cursor_p = gdk_window_get_cursor (window_2);
-  //  data_p->progressData.cursorType = gdk_cursor_get_cursor_type (cursor_p);
-  //  cursor_p = gdk_cursor_new (BITTORRENT_CLIENT_GUI_GTK_CURSOR_BUSY);
-  //  if (!cursor_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to gdk_cursor_new(): \"%m\", returning\n")));
-
-  //    // clean up
-  //    delete thread_name_p;
-  //    delete connection_thread_data_p;
-  //    ACE_THR_FUNC_RETURN exit_status;
-  //    result = thread_manager_p->join (thread_id, &exit_status);
-  //    if (result == -1)
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to ACE_Thread_Manager::join(%d): \"%m\", continuing\n"),
-  //                  thread_id));
-  //    data_p->progressData.cursorType = GDK_LAST_CURSOR;
-
-  //    return;
-  //  } // end IF
-  //  gdk_window_set_cursor (window_2, cursor_p);
-  //} // end IF
-  GtkProgressBar* progress_bar_p =
-    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
-  ACE_ASSERT (progress_bar_p);
-  gint width, height;
-  gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
-  gtk_progress_bar_set_pulse_step (progress_bar_p,
-                                   1.0 / static_cast<double> (width));
+  // *IMPORTANT NOTE*: every session should have its' own dedicated event source
+  //                   id --> *TODO*: use g_idle_add instead of native threads
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    struct BitTorrent_Client_UI_SessionThreadData* session_thread_data_p = NULL;
+    ACE_NEW_NORETURN (session_thread_data_p,
+                      struct BitTorrent_Client_UI_SessionThreadData ());
+    if (!session_thread_data_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+      return;
+    } // end IF
+    session_thread_data_p->CBData = data_p;
+    session_thread_data_p->configuration = data_p->configuration;
+    session_thread_data_p->controller = data_p->controller;
+    session_thread_data_p->filename =
+        data_p->configuration->sessionConfiguration.metaInfoFileName;
+    ACE_thread_t thread_id = -1;
+    ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
+    char thread_name_a[BUFSIZ];
+    ACE_OS::memset (thread_name_a, 0, sizeof (char[BUFSIZ]));
+    const char* thread_name_p = thread_name_a;
+    ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
+    ACE_ASSERT (thread_manager_p);
+    result =
+      thread_manager_p->spawn (::session_handler_cb,             // function
+                               session_thread_data_p,            // argument
+                               (THR_NEW_LWP      |
+                                THR_JOINABLE     |
+                                THR_INHERIT_SCHED),              // flags
+                               &thread_id,                       // thread id
+                               &thread_handle,                   // thread handle
+                               ACE_DEFAULT_THREAD_PRIORITY,      // priority
+                               COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1, // *TODO*: group id
+                               NULL,                             // stack
+                               0,                                // stack size
+                               &thread_name_p);                  // name
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
+      delete session_thread_data_p; session_thread_data_p = NULL;
+      return;
+    } // end IF
+  #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("started session thread (id was: %d)...\n"),
+                thread_id));
+  #else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("started session thread (id was: %u)...\n"),
+                thread_id));
+  #endif // ACE_WIN32 || ACE_WIN64
+
+    // setup progress updates ?
+    GtkProgressBar* progress_bar_p = NULL;
+    if (!data_p->progressData.pendingActions.empty ())
+      goto continue_;
+
+    progress_bar_p =
+        GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
+    ACE_ASSERT (progress_bar_p);
     gtk_widget_show (GTK_WIDGET (progress_bar_p));
 
-    guint event_source_id =
+    session_thread_data_p->eventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
       //                 &data_p->progressData,
@@ -995,7 +932,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                           idle_update_progress_cb,
                           &data_p->progressData,
                           NULL);
-    if (!event_source_id)
+    if (!session_thread_data_p->eventSourceId)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", returning\n")));
@@ -1011,21 +948,24 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
       return;
     } // end IF
-    data_p->progressData.pendingActions[event_source_id] =
+    data_p->progressData.pendingActions[session_thread_data_p->eventSourceId] =
       ACE_Thread_ID (thread_id,
                      thread_handle);
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("idle_update_progress_cb: %d\n"),
 //                event_source_id));
-    state_r.eventSourceIds.insert (event_source_id);
+    state_r.eventSourceIds.insert (session_thread_data_p->eventSourceId);
   } // end lock scope
+
+continue_:
+  ;
 }
 
 void
-button_disconnect_clicked_cb (GtkWidget* widget_in,
-                              gpointer userData_in)
+button_stop_all_clicked_cb (GtkWidget* widget_in,
+                            gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::button_disconnect_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_stop_all_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
 
@@ -1091,37 +1031,37 @@ button_quit_clicked_cb (GtkWidget* widget_in,
                                                       true); // high priority ?
 }
 
-void
-switch_session_cb (GtkNotebook* notebook_in,
-                   //GtkNotebookPage* page_in,
-                   GtkWidget* page_in,
-                   guint pageNum_in,
-                   gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::switch_session_cb"));
+//void
+//switch_session_cb (GtkNotebook* notebook_in,
+//                   //GtkNotebookPage* page_in,
+//                   GtkWidget* page_in,
+//                   guint pageNum_in,
+//                   gpointer userData_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::switch_session_cb"));
 
-  ACE_UNUSED_ARG (notebook_in);
-  ACE_UNUSED_ARG (page_in);
-  ACE_UNUSED_ARG (pageNum_in);
+//  ACE_UNUSED_ARG (notebook_in);
+//  ACE_UNUSED_ARG (page_in);
+//  ACE_UNUSED_ARG (pageNum_in);
 
-  // sanity check(s)
-  struct BitTorrent_Client_UI_SessionCBData* data_p =
-    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
-  ACE_ASSERT (data_p);
+//  // sanity check(s)
+//  struct BitTorrent_Client_UI_SessionCBData* data_p =
+//    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
+//  ACE_ASSERT (data_p);
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+//  Common_UI_GTK_Manager_t* gtk_manager_p =
+//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+//  ACE_ASSERT (gtk_manager_p);
+//  Common_UI_GTK_State_t& state_r =
+//    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
-  Common_UI_GTK_BuildersIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-}
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+//  // sanity check(s)
+//  ACE_ASSERT (iterator != state_r.builders.end ());
+//}
 
 void
 button_session_close_clicked_cb (GtkWidget* widget_in,
@@ -1135,16 +1075,16 @@ button_session_close_clicked_cb (GtkWidget* widget_in,
   struct BitTorrent_Client_UI_SessionCBData* data_p =
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->session);
+  ACE_ASSERT (data_p->handler);
 
-  data_p->session->close ();
+  data_p->handler->close ();
 }
 
 void
-button_connection_close_clicked_cb (GtkWidget* widget_in,
-                                    gpointer userData_in)
+button_session_connection_close_clicked_cb (GtkWidget* widget_in,
+                                            gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::button_connection_close_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::button_session_connection_close_clicked_cb"));
 
   // sanity check(s)
   struct BitTorrent_Client_UI_SessionCBData* data_p =
@@ -1193,14 +1133,15 @@ button_connection_close_clicked_cb (GtkWidget* widget_in,
   std::string connection_string =
     Common_UI_GTK_Tools::UTF8ToLocale (connection_value,
                                        g_utf8_strlen (connection_value, -1));
-  g_free (connection_value);
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_UI_GTK_Tools::UTF8ToLocale(\"%s\"), returning\n"),
                 connection_value));
+    g_free (connection_value);
     return;
   } // end IF
+  g_free (connection_value);
 
   ACE_INET_Addr address;
   data_p->session->disconnect (address);

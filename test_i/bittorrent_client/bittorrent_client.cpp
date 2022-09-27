@@ -783,29 +783,24 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 #endif // GUI_SUPPORT
 
   // step6c: dispatch connection attempt, wait for the session to finish
-  if (!numberOfDispatchThreads_in)
-    Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
-  else
-  {
-    bittorrent_control.request (metaInfoFileName_in);
-    // wait for the download to complete
-    try {
-      bittorrent_control.wait (true);
-    }
-    catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::wait(), returning\n")));
-      goto clean;
-    }
-    bittorrent_control.stop (true,  // wait ?
-                             true); // high priority ?
+  bittorrent_control.request (metaInfoFileName_in);
+  // wait for the download to complete
+  try {
+    bittorrent_control.wait (true);
+  }
+  catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in BitTorrent_IControl_T::wait(), returning\n")));
+    goto clean;
+  }
+  bittorrent_control.stop (true,   // wait ?
+                           false); // high priority ?
 
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("session complete...\n")));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("session complete...\n")));
 
-    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
-  } // end ELSE
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true); // wait ?
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));

@@ -356,7 +356,7 @@ BitTorrent_Control_T<SessionAsynchType,
     if (iterator == sessions_.end ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to retrieve session handle (metainfo filename was: \"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to retrieve session handle (metainfo file was: \"%s\"), aborting\n"),
                   ACE_TEXT (metaInfoFileName_in.c_str ())));
       return NULL;
     } // end IF

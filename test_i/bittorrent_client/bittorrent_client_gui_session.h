@@ -46,20 +46,19 @@ class BitTorrent_Client_GUI_Session_T
  : public Common_IGetR_T<ConnectionCBDataType>
 {
  public:
-  BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_Configuration&, // configuration
+  BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_UI_CBData&, // UI callback data
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                   const Common_UI_GTK_State_t&,                  // GTK state
-                                   guint,                                         // (statusbar) context id
+                                   guint,                                     // (statusbar) context id
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-                                   const std::string&,                            // (session log tab) label
+                                   const std::string&,                        // (session log tab) label
 #if defined (GUI_SUPPORT)
-                                   const std::string&,                            // UI (glade) file directory
+                                   const std::string&,                        // UI (glade) file directory
 #endif // GUI_SUPPORT
                                    ///////
-                                   BitTorrent_Client_IControl_t*,                 // controller handle
-                                   const std::string&);                           // metainfo (aka '.torrent') file name
+                                   BitTorrent_Client_IControl_t*,             // controller handle
+                                   const std::string&);                       // metainfo (aka '.torrent') file name
   // *WARNING*: must be called with
   //            BitTorrent_Client_UI_CBData::Common_UI_GTKState::lock held !
   virtual ~BitTorrent_Client_GUI_Session_T ();

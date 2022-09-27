@@ -79,7 +79,7 @@ class Net_SessionBase_T
   ConfigurationType*         configuration_;
   bool                       isAsynch_;
 
-  ACE_Thread_Mutex           lock_;
+  mutable ACE_Thread_Mutex   lock_;
   ACE_Condition_Thread_Mutex condition_;
   StateType                  state_;
 

@@ -86,6 +86,7 @@
 #include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_gui_defines.h"
 #include "bittorrent_client_network.h"
+#include "bittorrent_client_session_common.h"
 #include "bittorrent_client_signalhandler.h"
 #include "bittorrent_client_stream_common.h"
 #include "bittorrent_client_tools.h"
@@ -117,19 +118,19 @@ do_printUsage (const std::string& programName_in)
             << std::endl << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
-  std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILENAME]   : configuration file [\"")
-            << path
-            << ACE_TEXT_ALWAYS_CHAR ("\"]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d              : debug [")
             << (COMMON_PARSER_DEFAULT_LEX_TRACE ||
                 COMMON_PARSER_DEFAULT_YACC_TRACE)
             << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+  std::string path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path += ACE_TEXT (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [FILENAME]   : .torrent file [\"")
+            << path
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -176,8 +177,8 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR* argv_in[], // cannot be const
-                     std::string& configurationFile_out,
                      bool& debug_out,
+                     std::string& torrentFile_out,
                      std::string& UIRCFile_out,
                      bool& logToFile_out,
                      bool& useReactor_out,
@@ -191,32 +192,20 @@ do_processArguments (int argc_in,
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
+  configuration_path +=
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   // initialize results
-  configurationFile_out          = configuration_path;
-  configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
+  debug_out =(COMMON_PARSER_DEFAULT_LEX_TRACE ||
+              COMMON_PARSER_DEFAULT_YACC_TRACE);
 
-  debug_out                      =
-    (COMMON_PARSER_DEFAULT_LEX_TRACE ||
-     COMMON_PARSER_DEFAULT_YACC_TRACE);
+  torrentFile_out = configuration_path;
+  torrentFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  torrentFile_out +=
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   UIRCFile_out                   = configuration_path;
-  UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIRCFile_out                  +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
@@ -232,16 +221,14 @@ do_processArguments (int argc_in,
   traceInformation_out           = false;
 
   UIDefinitionFileDirectory_out  = configuration_path;
-  UIDefinitionFileDirectory_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIDefinitionFileDirectory_out +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
+  numThreadPoolThreads_out       =
+      TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dg:lrs:tu:vx:"),
+                              ACE_TEXT ("df:g:lrs:tu:vx:"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -253,14 +240,14 @@ do_processArguments (int argc_in,
   {
     switch (option)
     {
-      case 'c':
-      {
-        configurationFile_out = argumentParser.opt_arg ();
-        break;
-      }
       case 'd':
       {
         debug_out = true;
+        break;
+      }
+      case 'f':
+      {
+        torrentFile_out = argumentParser.opt_arg ();
         break;
       }
       case 'g':
@@ -430,7 +417,9 @@ do_initializeSignals (bool useReactor_in,
 }
 
 void
-do_work (unsigned int numberOfDispatchThreads_in,
+do_work (bool debug_in,
+         const std::string& torrentFile_in,
+         unsigned int numberOfDispatchThreads_in,
          bool useReactor_in,
          struct BitTorrent_Client_UI_CBData& CBData_in,
          const std::string& UIDefinitionFile_in,
@@ -448,6 +437,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   // initialize protocol configuration
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
+  allocator_configuration.defaultBufferSize =
+      BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
 
   Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                                      BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
@@ -461,14 +452,18 @@ do_work (unsigned int numberOfDispatchThreads_in,
                                                                    &heap_allocator);
   BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
                                                                          &heap_allocator);
+  BitTorrent_Client_Control_t bittorrent_control (&CBData_in.configuration->sessionConfiguration);
+
+  CBData_in.controller = &bittorrent_control;
+
+  ////////////////////////// parser configuration //////////////////////////////
+  CBData_in.configuration->parserConfiguration.debugScanner = debug_in;
+  CBData_in.configuration->parserConfiguration.debugParser = debug_in;
 
   ////////////////////////// stream configuration //////////////////////////////
   struct BitTorrent_PeerStreamConfiguration peer_stream_configuration;
   struct BitTorrent_TrackerStreamConfiguration tracker_stream_configuration;
 
-#if defined (_DEBUG)
-  //CBData_in.configuration->parserConfiguration.debugScanner = true;
-#endif // _DEBUG
   peer_stream_configuration.messageAllocator = &peer_message_allocator;
   tracker_stream_configuration.messageAllocator =
     &tracker_message_allocator;
@@ -478,10 +473,11 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   ////////////////////// socket handler configuration //////////////////////////
   BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
+  peer_connection_configuration.allocatorConfiguration =
+      &allocator_configuration;
+  peer_connection_configuration.messageAllocator = &peer_message_allocator;
 //  peer_connection_configuration.statisticReportingInterval =
 //    ACE_Time_Value (reporting_interval, 0);
-  peer_connection_configuration.messageAllocator = &peer_message_allocator;
-
   peer_connection_configuration.streamConfiguration =
     &CBData_in.configuration->peerStreamConfiguration;
 
@@ -489,11 +485,12 @@ do_work (unsigned int numberOfDispatchThreads_in,
                                                                                 &peer_connection_configuration));
 
   BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
-//  tracker_connection_configuration.statisticReportingInterval =
-//    ACE_Time_Value (reporting_interval, 0);
+  tracker_connection_configuration.allocatorConfiguration =
+      &allocator_configuration;
   tracker_connection_configuration.messageAllocator =
     &tracker_message_allocator;
-
+//  tracker_connection_configuration.statisticReportingInterval =
+//    ACE_Time_Value (reporting_interval, 0);
   tracker_connection_configuration.streamConfiguration =
     &CBData_in.configuration->trackerStreamConfiguration;
 
@@ -510,6 +507,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
+  peer_modulehandler_configuration.concurrency =
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   peer_modulehandler_configuration.statisticReportingInterval =
     (*iterator).second->statisticReportingInterval;
   peer_modulehandler_configuration.streamConfiguration =
@@ -523,6 +522,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
                                                                peer_stream_configuration);
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
+  tracker_modulehandler_configuration.concurrency =
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   tracker_modulehandler_configuration.statisticReportingInterval =
     (*iterator_2).second->statisticReportingInterval;
   tracker_modulehandler_configuration.streamConfiguration =
@@ -532,6 +533,20 @@ do_work (unsigned int numberOfDispatchThreads_in,
   CBData_in.configuration->trackerStreamConfiguration.initialize (module_configuration,
                                                                   tracker_modulehandler_configuration,
                                                                   tracker_stream_configuration);
+
+  CBData_in.configuration->sessionConfiguration.controller =
+      &bittorrent_control;
+  CBData_in.configuration->sessionConfiguration.metaInfoFileName =
+      torrentFile_in;
+  CBData_in.configuration->sessionConfiguration.connectionConfiguration =
+      &peer_connection_configuration;
+  CBData_in.configuration->sessionConfiguration.trackerConnectionConfiguration =
+      &tracker_connection_configuration;
+  CBData_in.configuration->sessionConfiguration.parserConfiguration =
+      &CBData_in.configuration->parserConfiguration;
+  CBData_in.configuration->sessionConfiguration.dispatch =
+      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
+                     : COMMON_EVENT_DISPATCH_PROACTOR);
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -576,6 +591,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   // step4: initialize signal handling
   BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
+  signal_handler_configuration.control = &bittorrent_control;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -596,9 +612,8 @@ do_work (unsigned int numberOfDispatchThreads_in,
     return;
   } // end IF
 
-  // event loop(s):
-  // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
-  // [- signal timer expiration to perform server queries] (see above)
+  // step6b: start session controller
+  bittorrent_control.start (NULL);
 
   // step5: start GTK event loop
 #if defined (GTK_USE)
@@ -631,7 +646,6 @@ do_work (unsigned int numberOfDispatchThreads_in,
 #endif // GTK_USE
 
   // step6: initialize worker(s)
-//  int group_id = -1;
   if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -648,20 +662,24 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  // step7: dispatch events
-  Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
+#if defined (GTK_USE)
+  gtk_manager_p->wait (false);
+#endif // GTK_USE
 
   // step8: clean up
-#if defined (GTK_USE)
-  gtk_manager_p->wait ();
-#endif // GTK_USE
-  timer_manager_p->stop ();
+  bittorrent_control.stop (true,  // wait ?
+                           true); // high priority ?
+
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true); // wait ?
 
   // wait for connection processing to complete
   peer_connection_manager_p->abort ();
   tracker_connection_manager_p->abort ();
   peer_connection_manager_p->wait ();
   tracker_connection_manager_p->wait ();
+
+  timer_manager_p->stop ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -758,26 +776,18 @@ ACE_TMAIN (int argc_in,
   // step2a: process commandline arguments
   std::string configuration_path             =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path                        += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path                        += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path                        += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path                        += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path                        += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path                        += ACE_TEXT_ALWAYS_CHAR ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
-
-  std::string configuration_file_name        = configuration_path;
-  configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
+  configuration_path                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_path                   +=
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   bool debug                                 =
-    (COMMON_PARSER_DEFAULT_LEX_TRACE ||
-     COMMON_PARSER_DEFAULT_YACC_TRACE);
+      (COMMON_PARSER_DEFAULT_LEX_TRACE ||
+       COMMON_PARSER_DEFAULT_YACC_TRACE);
+
+  std::string torrent_file_name        = configuration_path;
+  torrent_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  torrent_file_name                   +=
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   std::string rc_file_name                 = configuration_path;
   rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -807,8 +817,8 @@ ACE_TMAIN (int argc_in,
     TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
-                            configuration_file_name,
                             debug,
+                            torrent_file_name,
                             rc_file_name,
                             log_to_file,
                             use_reactor,
@@ -838,7 +848,8 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_MAIN_FILE);
 
   // step2b: validate argument(s)
-  if (!Common_File_Tools::isReadable (configuration_file_name) ||
+  if ((!torrent_file_name.empty () &&
+       !Common_File_Tools::isReadable (torrent_file_name)) ||
       !Common_File_Tools::isReadable (ui_definition_file_name))
   {
     do_printUsage (ACE::basename (argv_in[0]));
@@ -989,7 +1000,9 @@ ACE_TMAIN (int argc_in,
   // step9: do work
   ACE_High_Res_Timer timer;
   timer.start ();
-  do_work (number_of_thread_pool_threads,
+  do_work (debug,
+           torrent_file_name,
+           number_of_thread_pool_threads,
            use_reactor,
            ui_cb_data,
            ui_definition_file_name,

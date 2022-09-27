@@ -46,15 +46,15 @@ gboolean idle_update_progress_cb (gpointer);
 // callbacks
 // main
 G_MODULE_EXPORT void button_about_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void button_connect_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void button_disconnect_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_start_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_stop_all_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void button_quit_clicked_cb (GtkWidget*, GdkEvent*, gpointer);
-G_MODULE_EXPORT void switch_session_cb (GtkNotebook*, GtkWidget*, guint, gpointer);
+//G_MODULE_EXPORT void switch_session_cb (GtkNotebook*, GtkWidget*, guint, gpointer);
 
 // BitTorrent_Client_GUI_Session
 G_MODULE_EXPORT void button_session_close_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void button_connection_close_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void combobox_connections_changed_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void button_session_connection_close_clicked_cb (GtkWidget*, gpointer);
+//G_MODULE_EXPORT void combobox_connections_changed_cb (GtkWidget*, gpointer);
 
 // BitTorrent_Client_GUI_Connection
 #ifdef __cplusplus

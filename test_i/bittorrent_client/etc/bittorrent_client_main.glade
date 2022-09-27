@@ -75,7 +75,7 @@
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">bittorrent client</property>
     <property name="destroy_with_parent">True</property>
-    <signal name="delete-event" handler="quit_activated_cb" swapped="no"/>
+    <signal name="delete-event" handler="button_quit_clicked_cb" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox_main">
         <property name="visible">True</property>
@@ -168,7 +168,7 @@
                         <property name="layout_style">start</property>
                         <child>
                           <object class="GtkButton" id="button_start">
-                            <property name="label">gtk-connect</property>
+                            <property name="label">gtk-media-play</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="can_default">True</property>
@@ -178,6 +178,7 @@
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
                             <property name="focus_on_click">False</property>
+                            <signal name="clicked" handler="button_start_clicked_cb" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -187,13 +188,14 @@
                         </child>
                         <child>
                           <object class="GtkButton" id="button_stop">
-                            <property name="label">gtk-disconnect</property>
+                            <property name="label">gtk-stop</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="relief">half</property>
                             <property name="use_stock">True</property>
                             <property name="focus_on_click">False</property>
+                            <signal name="clicked" handler="button_stop_all_clicked_cb" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -212,13 +214,8 @@
                 </child>
               </object>
             </child>
-            <child type="label">
-              <object class="GtkLabel" id="label_torrent">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">False</property>
-                <property name="track_visited_links">False</property>
-              </object>
+            <child type="label_item">
+              <placeholder/>
             </child>
           </object>
           <packing>

@@ -2548,10 +2548,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("%u: %s\n"),
-  //            id_in,
-  //            ACE_TEXT (BitTorrent_Tools::RecordToString (record_in).c_str ())));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%u: %s\n"),
+              id_in,
+              ACE_TEXT (BitTorrent_Tools::RecordToString (record_in).c_str ())));
 
   if (!record_in.length)
     return;
