@@ -566,7 +566,7 @@ idle_log_progress_cb (gpointer userData_in)
   gtk_text_view_scroll_mark_onscreen (text_view_p,
                                       text_mark_p);
 
-clean_up:
+//clean_up:
   delete data_p; data_p = NULL;
 
   return G_SOURCE_REMOVE;
@@ -605,13 +605,19 @@ idle_piece_complete_progress_cb (gpointer userData_in)
   {
     ACE_ASSERT (l && l->data);
     button_p = static_cast<GtkButton*> (l->data);
-    if (reinterpret_cast<unsigned int> (g_object_get_data (G_OBJECT (button_p), ACE_TEXT ("index"))) == data_p->pieceIndex)
+    if (static_cast<unsigned int> (reinterpret_cast<size_t> (g_object_get_data (G_OBJECT (button_p), ACE_TEXT ("index")))) == static_cast<unsigned int> (data_p->pieceIndex))
       break;
   } // end FOR
   ACE_ASSERT (button_p);
 
 #if defined (GTK2_USE)
   GdkColor green = {0, 0x0000, 0xffff, 0x0000};
+
+//  GtkRcStyle* rc_style_p = gtk_rc_style_new ();
+//  rc_style_p->bg[GTK_STATE_NORMAL] = green;
+//  rc_style_p->color_flags[GTK_STATE_NORMAL] = GTK_RC_BG;
+//  gtk_widget_modify_style (GTK_WIDGET (button_p), rc_style_p);
+//  gtk_rc_style_unref (rc_style_p);
 
   gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_NORMAL, &green);
   gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_PRELIGHT, &green);
@@ -640,7 +646,7 @@ idle_piece_complete_progress_cb (gpointer userData_in)
   g_object_unref (css_provider_p); css_provider_p = NULL;
 #endif // GTK2_USE || GTK3_USE
 
-clean_up:
+//clean_up:
   g_list_free (list_p); list_p = NULL;
   delete data_p; data_p = NULL;
 
@@ -679,7 +685,7 @@ idle_complete_progress_cb (gpointer userData_in)
   gtk_dialog_run (GTK_DIALOG (widget_p));
   gtk_widget_destroy (widget_p); widget_p = NULL;
 
-clean_up:
+//clean_up:
   delete data_p; data_p = NULL;
 
   return G_SOURCE_REMOVE;

@@ -54,6 +54,8 @@ class BitTorrent_ISession_T
                          StateType>
 {
  public:
+  inline virtual ~BitTorrent_ISession_T () {} // *TODO*: remove ASAP
+
   virtual unsigned int numberOfPieces () const = 0;
 
   virtual void choke (Net_ConnectionId_t, // connection id

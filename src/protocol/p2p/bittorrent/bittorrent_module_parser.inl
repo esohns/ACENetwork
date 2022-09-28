@@ -395,20 +395,12 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     { ACE_ASSERT (message_block_p);
       if (message_block_p->length () >= header_bytes)
       {
-        if (message_block_p->length () == header_bytes)
-        {
-          message_block_p->rd_ptr (header_bytes);
-          message_block_p = message_block_p->cont ();
-        } // end IF
-        else
-          message_block_p->rd_ptr (header_bytes);
+        message_block_p->rd_ptr (header_bytes);
         break;
       } // end IF
-      else
-      {
-        header_bytes -= static_cast<unsigned int> (message_block_p->length ());
-        message_block_p->rd_ptr (message_block_p->length ());
-      } // end ELSE
+
+      header_bytes -= static_cast<unsigned int> (message_block_p->length ());
+      message_block_p->rd_ptr (message_block_p->length ());
       message_block_p = message_block_p->cont ();
     } while (true);
     ACE_ASSERT (message_block_p);
@@ -416,42 +408,46 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     do
     { ACE_ASSERT (message_block_p);
       skipped_bytes += static_cast<unsigned int> (message_block_p->length ());
-      if (skipped_bytes >= message_bytes)
+      if (skipped_bytes < message_bytes)
       {
-        if (skipped_bytes == message_bytes)
+        message_block_p = message_block_p->cont ();
+        continue;
+      } // end IF
+
+      // skipped_bytes >= message_bytes
+      if (skipped_bytes == message_bytes)
+      {
+        if (message_block_p->cont ())
         {
-          if (message_block_p->cont ())
-          {
-            ACE_Message_Block* message_block_2 = headFragment_;
-            headFragment_ = dynamic_cast<DataMessageType*> (message_block_p->cont ());
-            ACE_ASSERT (headFragment_);
-            message_block_p->cont (NULL);
-            message_block_p = message_block_2;
-          } // end IF
-          else
-          {
-            message_block_p = headFragment_;
-            headFragment_ = NULL;
-          } // end ELSE
+          ACE_Message_Block* message_block_2 = headFragment_;
+          headFragment_ =
+              dynamic_cast<DataMessageType*> (message_block_p->cont ());
+          ACE_ASSERT (headFragment_);
+          message_block_p->cont (NULL);
+          message_block_p = message_block_2;
         } // end IF
         else
         {
-          unsigned int remainder = skipped_bytes - message_bytes;
-          ACE_Message_Block* message_block_2 = message_block_p->duplicate ();
-          ACE_ASSERT (message_block_2);
-          ACE_Message_Block* message_block_3 = message_block_p->cont ();
-          if (message_block_3)
-            message_block_2->cont (message_block_3);
-          message_block_p->cont (NULL);
-          message_block_p->wr_ptr (message_block_p->rd_ptr () + (message_block_p->length () - remainder));
-          message_block_2->rd_ptr (message_block_2->length () - remainder);
           message_block_p = headFragment_;
-          headFragment_ = dynamic_cast<DataMessageType*> (message_block_2);
-          ACE_ASSERT (headFragment_);
+          headFragment_ = NULL;
         } // end ELSE
         break;
       } // end IF
-      message_block_p = message_block_p->cont ();
+
+      // skipped_bytes > message_bytes
+      unsigned int remainder = skipped_bytes - message_bytes;
+      ACE_Message_Block* message_block_2 = message_block_p->duplicate ();
+      ACE_ASSERT (message_block_2);
+      ACE_Message_Block* message_block_3 = message_block_p->cont ();
+      if (message_block_3)
+        message_block_2->cont (message_block_3);
+      message_block_p->cont (NULL);
+      message_block_p->wr_ptr (message_block_p->rd_ptr () + (message_block_p->length () - remainder));
+      message_block_2->rd_ptr (message_block_2->length () - remainder);
+      message_block_p = headFragment_;
+      headFragment_ = dynamic_cast<DataMessageType*> (message_block_2);
+      ACE_ASSERT (headFragment_);
+      break;
     } while (true);
     ACE_ASSERT (message_block_p->total_length () == (data_r.peerRecord->length - 9));
   } // end IF

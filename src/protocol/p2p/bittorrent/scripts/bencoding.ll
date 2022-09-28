@@ -203,8 +203,14 @@ METAINFO_FILE                     {DICTIONARY}
                          parser->offset (string_length);
                          std::string string_i;
                          string_i.push_back (yytext[0]);
+                         char c = 0;
                          for (unsigned int i = 0; i < (string_length - 1); ++i)
-                           string_i.push_back (yyinput ());
+                         {
+                           c = yyinput ();
+                           // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
+                           *(yy_cp - 1) = c;
+                           string_i.push_back (c);
+                         } // end FOR
                          yy_pop_state ();
                          return yy::BitTorrent_MetaInfo_Parser::make_STRING (string_i, location_); }
 } // end <state_string>

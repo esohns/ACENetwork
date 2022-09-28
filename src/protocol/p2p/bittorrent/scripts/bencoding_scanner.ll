@@ -182,11 +182,11 @@ METAINFO_FILE                     {DICTIONARY}
                          converter << yytext;
                          converter >> string_length; }
 ":"                    { parser_->offset (1);
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string ());
+                         ACE_ASSERT (yylval->sval);
                          if (!string_length)
                          { // --> found an empty string
-                           ACE_NEW_NORETURN (yylval->sval,
-                                             std::string ());
-                           ACE_ASSERT (yylval->sval);
                            yy_pop_state ();
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } // end IF
@@ -194,15 +194,15 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_string>
 <state_string_2>{
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
-                         parser_->offset (string_length);
-                         ACE_NEW_NORETURN (yylval->sval,
-                                           std::string ());
-                         ACE_ASSERT (yylval->sval);
+                         parser_->offset (yyleng);
                          yylval->sval->push_back (yytext[0]);
-                         for (unsigned int i = 0; i < (string_length - 1); ++i)
-                           yylval->sval->push_back (yyinput ());
-                         yy_pop_state ();
-                         return yy::BitTorrent_Bencoding_Parser::token::STRING; }
+                         --string_length;
+                         if (!string_length)
+                         {
+                           yy_pop_state ();
+                           return yy::BitTorrent_Bencoding_Parser::token::STRING;
+                         } // end IF
+                       }
 } // end <state_string_2>
 <state_list>{
 "e"                    { parser_->offset (1);
@@ -236,11 +236,11 @@ METAINFO_FILE                     {DICTIONARY}
                          converter << yytext;
                          converter >> string_length; }
 ":"                    { parser_->offset (1);
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string ());
+                         ACE_ASSERT (yylval->sval);
                          if (!string_length)
                          { // --> found an empty string
-                           ACE_NEW_NORETURN (yylval->sval,
-                                             std::string ());
-                           ACE_ASSERT (yylval->sval);
                            yy_push_state (state_dictionary_value);
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } // end IF
@@ -248,15 +248,15 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_string>
 <state_dictionary_key_2>{
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
-                         parser_->offset (string_length);
-                         ACE_NEW_NORETURN (yylval->sval,
-                                           std::string ());
-                         ACE_ASSERT (yylval->sval);
+                         parser_->offset (yyleng);
                          yylval->sval->push_back (yytext[0]);
-                         for (unsigned int i = 0; i < (string_length - 1); ++i)
-                           yylval->sval->push_back (yyinput ());
-                         yy_push_state (state_dictionary_value);
-                         return yy::BitTorrent_Bencoding_Parser::token::STRING; }
+                         --string_length;
+                         if (!string_length)
+                         {
+                           yy_push_state (state_dictionary_value);
+                           return yy::BitTorrent_Bencoding_Parser::token::STRING;
+                         } // end IF
+                       }
 } // end <state_dictionary_key_2>
 <state_dictionary_value>{
 "i"                    { parser_->offset (1);

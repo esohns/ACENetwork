@@ -2493,11 +2493,11 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 { parser_->offset (1);
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string ());
+                         ACE_ASSERT (yylval->sval);
                          if (!string_length)
                          { // --> found an empty string
-                           ACE_NEW_NORETURN (yylval->sval,
-                                             std::string ());
-                           ACE_ASSERT (yylval->sval);
                            yy_pop_state ();
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } // end IF
@@ -2509,15 +2509,15 @@ case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (string_length != 0);
-                         parser_->offset (string_length);
-                         ACE_NEW_NORETURN (yylval->sval,
-                                           std::string ());
-                         ACE_ASSERT (yylval->sval);
+                         parser_->offset (yyleng);
                          yylval->sval->push_back (yytext[0]);
-                         for (unsigned int i = 0; i < (string_length - 1); ++i)
-                           yylval->sval->push_back (yyinput ());
-                         yy_pop_state ();
-                         return yy::BitTorrent_Bencoding_Parser::token::STRING; }
+                         --string_length;
+                         if (!string_length)
+                         {
+                           yy_pop_state ();
+                           return yy::BitTorrent_Bencoding_Parser::token::STRING;
+                         } // end IF
+                       }
 	YY_BREAK
 // end <state_string_2>
 
@@ -2575,11 +2575,11 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 { parser_->offset (1);
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string ());
+                         ACE_ASSERT (yylval->sval);
                          if (!string_length)
                          { // --> found an empty string
-                           ACE_NEW_NORETURN (yylval->sval,
-                                             std::string ());
-                           ACE_ASSERT (yylval->sval);
                            yy_push_state (state_dictionary_value);
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } // end IF
@@ -2591,15 +2591,15 @@ case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (string_length != 0);
-                         parser_->offset (string_length);
-                         ACE_NEW_NORETURN (yylval->sval,
-                                           std::string ());
-                         ACE_ASSERT (yylval->sval);
+                         parser_->offset (yyleng);
                          yylval->sval->push_back (yytext[0]);
-                         for (unsigned int i = 0; i < (string_length - 1); ++i)
-                           yylval->sval->push_back (yyinput ());
-                         yy_push_state (state_dictionary_value);
-                         return yy::BitTorrent_Bencoding_Parser::token::STRING; }
+                         --string_length;
+                         if (!string_length)
+                         {
+                           yy_push_state (state_dictionary_value);
+                           return yy::BitTorrent_Bencoding_Parser::token::STRING;
+                         } // end IF
+                       }
 	YY_BREAK
 // end <state_dictionary_key_2>
 

@@ -92,6 +92,11 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   GError* error_p = NULL;
+  GtkComboBox* combo_box_p = NULL;
+  GtkCellRenderer* cell_renderer_p = NULL;
+  GtkTextBuffer* text_buffer_p = NULL;
+  GtkTextIter text_iter;
+  GtkTextView* text_view_p = NULL;
 
   // create new GtkBuilder
   GtkBuilder* builder_p = gtk_builder_new ();
@@ -151,11 +156,11 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   gdk_threads_leave ();
 #endif // GTK_CHECK_VERSION (3,6,0)
 
-  GtkComboBox* combo_box_p =
+  combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object (builder_p,
                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CONNECTION)));
   ACE_ASSERT (combo_box_p);
-  GtkCellRenderer* cell_renderer_p = gtk_cell_renderer_text_new ();
+  cell_renderer_p = gtk_cell_renderer_text_new ();
   if (!cell_renderer_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -172,18 +177,17 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                                   ACE_TEXT ("text"), 0,
                                   NULL);
 
-  GtkTextBuffer* text_buffer_p =
+  text_buffer_p =
     GTK_TEXT_BUFFER (gtk_builder_get_object (builder_p,
                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTBUFFER_SESSION)));
   ACE_ASSERT (text_buffer_p);
-  GtkTextIter text_iter;
   gtk_text_buffer_get_end_iter (text_buffer_p,
                                 &text_iter);
   gtk_text_buffer_create_mark (text_buffer_p,
                                ACE_TEXT_ALWAYS_CHAR ("scroll"),
                                &text_iter,
                                TRUE);
-  GtkTextView* text_view_p =
+  text_view_p =
     GTK_TEXT_VIEW (gtk_builder_get_object (builder_p,
                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTVIEW_SESSION)));
   ACE_ASSERT (text_view_p);

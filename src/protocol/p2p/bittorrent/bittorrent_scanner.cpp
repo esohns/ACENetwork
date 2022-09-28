@@ -3,6 +3,7 @@
 //#include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 //#undef PARSER_HEADER_H
+//#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 
 typedef void* yyscan_t;
@@ -5401,7 +5402,7 @@ static const yy_state_type yy_NUL_trans[144] =
 static const flex_int32_t yy_rule_linenum[15] =
     {   0,
       193,  201,  206,  213,  220,  228,  242,  287,  296,  306,
-      321,  336,  348,  369
+      321,  336,  348,  370
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -6195,7 +6196,7 @@ YY_RULE_SETUP
                             yylval->record->piece.begin =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext + 4))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext + 4));
-                            bytes_to_skip = yylval->record->length - 9 - 1;
+                            bytes_to_skip = yylval->record->length - 9;
                             BEGIN (state_piece); }
 	YY_BREAK
 // end <state_piece_payload>
@@ -6218,6 +6219,7 @@ YY_RULE_SETUP
                             --bytes_to_skip;
                             if (!bytes_to_skip)
                             {
+                              iparser_p->offset (yylval->record->length - 9);
                               BEGIN (state_length);
                               return yy::BitTorrent_Parser::token::PIECE;
                             } // end IF

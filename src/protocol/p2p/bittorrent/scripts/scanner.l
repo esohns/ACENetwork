@@ -340,7 +340,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             yylval->record->piece.begin =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext + 4))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext + 4));
-                            bytes_to_skip = yylval->record->length - 9 - 1;
+                            bytes_to_skip = yylval->record->length - 9;
                             BEGIN (state_piece); }
 } // end <state_piece_payload>
 <state_piece>{
@@ -359,6 +359,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             --bytes_to_skip;
                             if (!bytes_to_skip)
                             {
+                              iparser_p->offset (yylval->record->length - 9);
                               BEGIN (state_length);
                               return yy::BitTorrent_Parser::token::PIECE;
                             } // end IF
