@@ -36,7 +36,9 @@ extern "C"
 gboolean idle_add_session_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
+gboolean idle_log_progress_cb (gpointer);
 gboolean idle_piece_complete_progress_cb (gpointer);
+gboolean idle_complete_progress_cb (gpointer);
 gboolean idle_remove_session_cb (gpointer);
 gboolean idle_update_display_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);

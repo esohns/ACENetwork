@@ -43,27 +43,38 @@ template <typename SessionInterfaceType,
           typename ConnectionType,
           typename ConnectionCBDataType>
 class BitTorrent_Client_GUI_Session_T
- : public Common_IGetR_T<ConnectionCBDataType>
+ : public BitTorrent_ISessionProgress
+ , public Common_IGetR_T<ConnectionCBDataType>
 {
  public:
-  BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_UI_CBData&, // UI callback data
+  BitTorrent_Client_GUI_Session_T (struct BitTorrent_Client_UI_CBData&, // in/out: UI callback data
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                   guint,                                     // (statusbar) context id
+                                   guint,                               // (statusbar) context id
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-                                   const std::string&,                        // (session log tab) label
+                                   const std::string&,                  // (session log tab) label
 #if defined (GUI_SUPPORT)
-                                   const std::string&,                        // UI (glade) file directory
+                                   const std::string&,                  // UI (glade) file directory
 #endif // GUI_SUPPORT
                                    ///////
-                                   BitTorrent_Client_IControl_t*,             // controller handle
-                                   const std::string&);                       // metainfo (aka '.torrent') file name
+                                   BitTorrent_Client_IControl_t*,       // controller handle
+                                   const std::string&);                 // metainfo (aka '.torrent') file name
   // *WARNING*: must be called with
   //            BitTorrent_Client_UI_CBData::Common_UI_GTKState::lock held !
   virtual ~BitTorrent_Client_GUI_Session_T ();
 
   void close ();
+
+  // implement BitTorrent_ISessionProgress
+  virtual void log (const std::string&); // log message
+  inline virtual void numberOfPieces (unsigned int) {}
+  virtual void pieceComplete (unsigned int); // piece index
+  virtual void complete (bool = false); // cancelled ?
+  inline virtual void trackerConnect (Net_ConnectionId_t) {}
+  inline virtual void trackerDisconnect (Net_ConnectionId_t) {}
+  inline virtual void peerConnect (Net_ConnectionId_t) {}
+  inline virtual void peerDisconnect (Net_ConnectionId_t) {}
 
   // implement Common_IGet_T
   inline virtual const ConnectionCBDataType& getR () const { return CBData_; }
@@ -74,12 +85,6 @@ class BitTorrent_Client_GUI_Session_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T (const BitTorrent_Client_GUI_Session_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T& operator= (const BitTorrent_Client_GUI_Session_T&))
-
-  // helper methods
-  void log (const std::string&);
-//  void log (const struct BitTorrent_Record&);
-//  void error (const struct BitTorrent_Record&,
-//              bool = true); // locked access ?
 
   ConnectionCBDataType CBData_;
 #if defined (GUI_SUPPORT)

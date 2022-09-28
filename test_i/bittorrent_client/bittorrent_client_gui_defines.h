@@ -59,6 +59,7 @@
 #define BITTORRENT_CLIENT_GUI_GTK_TABLE_PIECES                          "table_pieces"
 #define BITTORRENT_CLIENT_GUI_GTK_TEXTTAG_DEFAULT_SESSION               "texttag_default"
 #define BITTORRENT_CLIENT_GUI_GTK_TEXTTAGTABLE_SESSION                  "texttagtable_notebook_page_session"
+#define BITTORRENT_CLIENT_GUI_GTK_TEXTBUFFER_SESSION                    "textbuffer_notebook_page_session"
 #define BITTORRENT_CLIENT_GUI_GTK_TEXTVIEW_SESSION                      "textview_page_session_log"
 #define BITTORRENT_CLIENT_GUI_GTK_VBOX_SESSION                          "vbox_page_session"
 #define BITTORRENT_CLIENT_GUI_GTK_WINDOW_MAIN                           "window_main"

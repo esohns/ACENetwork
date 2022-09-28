@@ -54,8 +54,6 @@ class BitTorrent_ISession_T
                          StateType>
 {
  public:
-  inline virtual ~BitTorrent_ISession_T () {}
-
   virtual unsigned int numberOfPieces () const = 0;
 
   virtual void choke (Net_ConnectionId_t, // connection id
@@ -96,6 +94,24 @@ class BitTorrent_ISession_T
   virtual void notify (Net_ConnectionId_t,                  // connection id
                        const struct BitTorrent_PeerRecord&, // message record
                        ACE_Message_Block* = NULL) = 0;      // data piece (if applicable)
+};
+
+//////////////////////////////////////////
+
+class BitTorrent_ISessionProgress
+{
+ public:
+  virtual void log (const std::string&) = 0; // log message
+
+  virtual void numberOfPieces (unsigned int) = 0; // #pieces in torrent
+  virtual void pieceComplete (unsigned int) = 0; // piece index
+
+  virtual void complete (bool = false) = 0; // cancelled ?
+
+  virtual void trackerConnect (Net_ConnectionId_t) = 0; // connection id
+  virtual void trackerDisconnect (Net_ConnectionId_t) = 0; // connection id
+  virtual void peerConnect (Net_ConnectionId_t) = 0; // connection id
+  virtual void peerDisconnect (Net_ConnectionId_t) = 0; // connection id
 };
 
 #endif

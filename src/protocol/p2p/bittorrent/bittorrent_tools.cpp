@@ -638,18 +638,20 @@ BitTorrent_Tools::validatePieceHash (const struct BitTorrent_Piece& piece_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::validatePieceHash"));
 
-  unsigned char* data_p = NULL, *data_2 = NULL;
+  ACE_UINT8* data_p = NULL, *data_2 = NULL;
   ACE_Message_Block* message_block_p = NULL;
+
   // concatenate the data
   ACE_NEW_NORETURN (data_p,
-                    unsigned char[piece_in.length]);
+                    ACE_UINT8[piece_in.length]);
   if (!data_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory (was: %u byte(s)), aborting\n"),
-                sizeof (unsigned char) * piece_in.length));
+                sizeof (ACE_UINT8) * piece_in.length));
     return false;
   } // end IF
+
   data_2 = data_p;
   for (BitTorrent_PieceChunksConstIterator_t iterator = piece_in.chunks.begin ();
        iterator != piece_in.chunks.end ();
@@ -667,14 +669,14 @@ BitTorrent_Tools::validatePieceHash (const struct BitTorrent_Piece& piece_in)
   } // end FOR
   ACE_ASSERT (data_2 == data_p + piece_in.length);
 
-  unsigned char piece_hash[SHA_DIGEST_LENGTH];
   // hash and compare
+  ACE_UINT8 piece_hash[SHA_DIGEST_LENGTH];
   SHA1 (data_p,
         piece_in.length,
         piece_hash);
   delete [] data_p; data_p = NULL;
   return (ACE_OS::memcmp (piece_hash,
-                          piece_in.hash.data (),
+                          piece_in.hash,
                           SHA_DIGEST_LENGTH) == 0);
 }
 

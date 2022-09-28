@@ -168,10 +168,6 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]      : #thread pool threads [")
-            << TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS
-            << ACE_TEXT_ALWAYS_CHAR ("]")
-            << std::endl;
 } // end print_usage
 
 bool
@@ -185,8 +181,7 @@ do_processArguments (int argc_in,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
                      std::string& UIDefinitionFileDirectory_out,
-                     bool& printVersionAndExit_out,
-                     unsigned int& numThreadPoolThreads_out)
+                     bool& printVersionAndExit_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
@@ -223,12 +218,10 @@ do_processArguments (int argc_in,
   UIDefinitionFileDirectory_out  = configuration_path;
 
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       =
-      TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("df:g:lrs:tu:vx:"),
+                              ACE_TEXT ("df:g:lrs:tu:v"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -286,14 +279,6 @@ do_processArguments (int argc_in,
       case 'v':
       {
         printVersionAndExit_out = true;
-        break;
-      }
-      case 'x':
-      {
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter.clear ();
-        converter << argumentParser.opt_arg ();
-        converter >> numThreadPoolThreads_out;
         break;
       }
       // error handling
@@ -813,8 +798,7 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   bool print_version_and_exit                = false;
-  unsigned int number_of_thread_pool_threads =
-    TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
+  unsigned int number_of_thread_pool_threads = 3;
   if (!do_processArguments (argc_in,
                             argv_in,
                             debug,
@@ -825,8 +809,7 @@ ACE_TMAIN (int argc_in,
                             reporting_interval,
                             trace_information,
                             UIDefinitionFile_directory,
-                            print_version_and_exit,
-                            number_of_thread_pool_threads))
+                            print_version_and_exit))
   {
     do_printUsage (ACE::basename (argv_in[0]));
 

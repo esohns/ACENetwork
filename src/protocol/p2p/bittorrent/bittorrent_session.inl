@@ -280,8 +280,9 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
           Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""), // no prefix
                                               false);                    // filename only
       ACE_ASSERT (!piece_s.filename.empty ());
-      piece_s.hash =
-          piece_hashes.substr (0, BITTORRENT_PRT_INFO_PIECE_HASH_SIZE);
+      ACE_OS::memcpy (piece_s.hash,
+                      piece_hashes.data (),
+                      BITTORRENT_PRT_INFO_PIECE_HASH_SIZE);
       piece_hashes.erase (0, BITTORRENT_PRT_INFO_PIECE_HASH_SIZE);
       piece_s.length =
           (piece_hashes.empty () ? total_length % static_cast<unsigned int> ((*iterator_3).second->integer)
@@ -292,7 +293,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       inherited::state_.pieces.push_back (piece_s);
     } // end WHILE
 
-    // try to load existing pieces
+    // load existing pieces
     if (!BitTorrent_Tools::loadPieces (configuration_in.metaInfoFileName,
                                        inherited::state_.pieces))
     {
@@ -300,6 +301,16 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                   ACE_TEXT ("failed to BitTorrent_Tools::loadPieces(\"%s\"), aborting\n"),
                   ACE_TEXT (configuration_in.metaInfoFileName.c_str ())));
       return false;
+    } // end IF
+    // notify existing pieces to event subscriber
+    if (configuration_in.subscriber)
+    {
+      unsigned int index_i = 0;
+      for (BitTorrent_PiecesIterator_t iterator = inherited::state_.pieces.begin ();
+           iterator != inherited::state_.pieces.end ();
+           ++iterator, ++index_i)
+        if (!(*iterator).chunks.empty ())
+          configuration_in.subscriber->pieceComplete (index_i);
     } // end IF
 
     ACE_ASSERT (!inherited::state_.peerStreamHandler);
@@ -2089,6 +2100,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
               id_in,
               ACE_TEXT (HTTP_Tools::dump (response_in).c_str ())));
 
+  // notify torrent cancelled to event subscriber
+  if (inherited::configuration_->subscriber)
+    inherited::configuration_->subscriber->complete (true);
+
   ACE_ASSERT (inherited::configuration_->controller);
   try {
     inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
@@ -2550,10 +2565,17 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
+  std::string record_string =
+    BitTorrent_Tools::RecordToString (record_in);
+  if (inherited::configuration_->subscriber)
+    inherited::configuration_->subscriber->log (record_string);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: %s\n"),
               id_in,
-              ACE_TEXT (BitTorrent_Tools::RecordToString (record_in).c_str ())));
+              ACE_TEXT (record_string.c_str ())));
 
   if (!record_in.length)
     return;
@@ -2760,6 +2782,11 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
             ACE_ASSERT (false); // *TODO*
             break;
           } // end IF
+
+          // notify piece complete to event subscriber
+          if (inherited::configuration_->subscriber)
+            inherited::configuration_->subscriber->pieceComplete (record_in.piece.index);
+
           for (iterator = inherited::state_.pieces.begin ();
                iterator != inherited::state_.pieces.end ();
                ++iterator)
@@ -2795,6 +2822,10 @@ continue_:
         requestNextPiece (id_in);
       if (unlikely (notify_completion_b))
       {
+        // notify torrent complete to event subscriber
+        if (inherited::configuration_->subscriber)
+          inherited::configuration_->subscriber->complete (false);
+
         ACE_ASSERT (inherited::configuration_->controller);
         try {
           inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,

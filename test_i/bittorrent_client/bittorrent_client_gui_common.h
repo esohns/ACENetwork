@@ -179,14 +179,16 @@ struct BitTorrent_Client_UI_SessionCBData
 struct BitTorrent_Client_UI_SessionProgressData
 {
   BitTorrent_Client_UI_SessionProgressData ()
-   : CBData (NULL)
-   , label ()
+   : label ()
+   , message ()
    , pieceIndex (-1)
   {}
 
-  struct BitTorrent_Client_UI_CBData* CBData;
-  std::string                         label;
-  int                                 pieceIndex;
+  std::string label;
+
+  std::string message; // log-
+  int         pieceIndex;
+  bool        cancelled;
 };
 
 #endif

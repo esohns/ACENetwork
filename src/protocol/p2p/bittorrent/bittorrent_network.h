@@ -137,6 +137,7 @@ struct BitTorrent_SessionConfiguration
    : Net_SessionConfiguration ()
    , metaInfo (NULL)
    , metaInfoFileName ()
+   , subscriber (NULL)
    , peerModuleHandlerConfiguration (NULL)
    , peerStreamConfiguration (NULL)
    , trackerConnectionConfiguration (NULL)
@@ -146,6 +147,8 @@ struct BitTorrent_SessionConfiguration
 
   Bencoding_Dictionary_t*                   metaInfo;
   std::string                               metaInfoFileName;
+
+  BitTorrent_ISessionProgress*              subscriber; // session --> UI events
 
   struct Stream_ModuleHandlerConfiguration* peerModuleHandlerConfiguration;
   struct Stream_Configuration*              peerStreamConfiguration;

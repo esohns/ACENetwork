@@ -105,7 +105,7 @@ struct BitTorrent_Piece
 
   BitTorrent_PieceChunks_t chunks;
   std::string              filename;
-  std::string              hash; // SHA1 20 bytes
+  ACE_UINT8                hash[BITTORRENT_PRT_INFO_PIECE_HASH_SIZE]; // SHA1
   unsigned int             length;
 };
 typedef std::vector<struct BitTorrent_Piece> BitTorrent_Pieces_t;
@@ -186,6 +186,7 @@ struct net_bittorrent_piece_index_remove_predicate
 
 //////////////////////////////////////////
 
+// *NOTE*: session --> controller notification
 enum BitTorrent_Event
 {
   BITTORRENT_EVENT_CANCELLED = ACE_Message_Block::MB_USER,
