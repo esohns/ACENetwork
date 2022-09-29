@@ -21,6 +21,10 @@
 
 #include "test_i_connection_stream.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "amvideo.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "ace/Log_Msg.h"
 
 #include "stream_misc_defines.h"
@@ -283,6 +287,25 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   Test_I_HTTPParser* parser_impl_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct _AMMediaType media_type_s;
+  ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
+  media_type_s.majortype = MEDIATYPE_Video;
+  media_type_s.subtype = MEDIASUBTYPE_RGB24;
+  media_type_s.bFixedSizeSamples = TRUE;
+  media_type_s.bTemporalCompression = FALSE;
+  media_type_s.formattype = FORMAT_VideoInfo;
+  media_type_s.cbFormat = sizeof (struct tagVIDEOINFOHEADER);
+  media_type_s.pbFormat =
+    reinterpret_cast<BYTE*> (CoTaskMemAlloc (sizeof (struct tagVIDEOINFOHEADER)));
+  ACE_ASSERT (media_type_s.pbFormat);
+  ACE_OS::memset (media_type_s.pbFormat, 0, sizeof (struct tagVIDEOINFOHEADER));
+  struct tagVIDEOINFOHEADER* video_info_header_p =
+    reinterpret_cast<struct tagVIDEOINFOHEADER*> (media_type_s.pbFormat);
+  SetRectEmpty (&video_info_header_p->rcSource);
+  SetRectEmpty (&video_info_header_p->rcTarget);
+  video_info_header_p->bmiHeader.biSize = sizeof (struct tagBITMAPINFOHEADER);
+  video_info_header_p->bmiHeader.biPlanes = 1;
+  video_info_header_p->bmiHeader.biBitCount = 24;
+  video_info_header_p->bmiHeader.biCompression = BI_RGB;
 #else
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_VideoMediaType media_type_s;

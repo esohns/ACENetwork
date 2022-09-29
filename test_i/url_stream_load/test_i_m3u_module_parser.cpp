@@ -110,17 +110,23 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   } // end ELSE
   if (!missing_bytes)
   {
+    int result = -1;
     ACE_Message_Block* message_block_p = message_inout;
     while (message_block_p->cont ())
       message_block_p = message_block_p->cont ();
     if (*(message_block_p->rd_ptr () + (message_block_p->length () - 1)) != '\n')
     {
-      int result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
+      result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
       ACE_ASSERT (result != -1);
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: appended line break to data\n"),
+                  ACE_TEXT ("%s: appended missing line break to data\n"),
                   inherited::mod_->name ()));
     } // end IF
+    result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
+    ACE_ASSERT (result != -1);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: appended line break to data\n"),
+                inherited::mod_->name ()));
   } // end IF
 
   // initialize return value(s)

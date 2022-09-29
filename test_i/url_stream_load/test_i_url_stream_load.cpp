@@ -638,13 +638,14 @@ do_work (bool debugParser_in,
     &allocator_configuration;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
-      STREAM_HEADMODULECONCURRENCY_ACTIVE;
+      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
-  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CLONE;
+  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
   //modulehandler_configuration.connectionManager = connection_manager_p;
 //  configuration_in.parserConfiguration.debugParser = true;
 //  configuration_in.parserConfiguration.debugScanner = true;
+  modulehandler_configuration.messageAllocator = &message_allocator;
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration.statisticReportingInterval =
@@ -677,7 +678,7 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.codecId = AV_CODEC_ID_H263;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_2.concurrency =
-      STREAM_HEADMODULECONCURRENCY_ACTIVE;
+      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration_2.connectionConfigurations =
     &configuration_in.connectionConfigurations;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

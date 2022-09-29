@@ -45,6 +45,8 @@
 
 #include "net_macros.h"
 
+#include "net_client_common_tools.h"
+
 #include "test_i_common.h"
 #include "test_i_defines.h"
 
@@ -209,6 +211,8 @@ idle_load_segment_cb (gpointer userData_in)
                           : HTTP_DEFAULT_SERVER_PORT);
     hostname_string_2 += converter.str ();
   } // end IF
+  static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.hostname =
+    hostname_string;
   result =
     static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
                                                                                                                             AF_INET);
@@ -1182,6 +1186,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     GtkSpinner* spinner_p = NULL;
     GtkProgressBar* progressbar_p = NULL;
     size_t pdu_size_i = 0;
+    struct Net_UserData user_data_s;
 
     // retrieve buffer size
     spin_button_p =
@@ -1211,6 +1216,10 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
       goto error;
     } // end IF
+
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
+        hostname_string;
+
     hostname_string_2 = hostname_string;
     position =
       hostname_string_2.find_last_of (':', std::string::npos);
@@ -1290,10 +1299,22 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     {
 #if defined (SSL_SUPPORT)
       if (use_SSL)
-        iconnector_p = &ssl_connector;
+        data_p->handle =
+          Net_Client_Common_Tools::connect (ssl_connector,
+                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                            user_data_s,
+                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                            true,
+                                            true);
       else
 #endif // SSL_SUPPORT
-        iconnector_p = &connector;
+        data_p->handle =
+            Net_Client_Common_Tools::connect (connector,
+                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                              user_data_s,
+                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                              true,
+                                              true);
     } // end IF
     else
     {
@@ -1301,73 +1322,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
-      iconnector_p = &asynch_connector;
-    } // end ELSE
-    if (!iconnector_p->initialize (*static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
-      goto error;
-    } // end IF
-
-//    // step3a: initialize connection manager
-//    peer_address =
-//        data_p->configuration->socketConfiguration.address;
-//    data_p->configuration->socketConfiguration.address =
-//        data_p->configuration->listenerConfiguration.address;
-//    connection_manager_p->set (*data_p->configuration,
-//                               &data_p->configuration->userData);
-//    handle_connection_manager = true;
-
-    // step3b: connect
-    data_p->handle =
-        iconnector_p->connect (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address);
-    // *TODO*: support one-thread operation by scheduling a signal and manually
-    //         running the dispatch loop for a limited time...
-    if (data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0)
-    {
-      data_p->handle = ACE_INVALID_HANDLE;
-
-      ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                              0);
-      ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-      // *TODO*: avoid tight loop here
-      do
-      {
-        iconnection_p =
-            iconnection_manager_p->get (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                        true);
-        if (iconnection_p)
-        {
-          data_p->handle =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-              reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
-#else
-              static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
-          break;
-        } // end IF
-      } while (COMMON_TIME_NOW < deadline);
-      if (!iconnection_p)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to connect to %s (timed out after: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ()),
-                    &timeout));
-    } // end IF
-    else
-    {
-      iconnection_p =
-        iconnection_manager_p->get (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                    true);
-      if (iconnection_p)
-      {
-        data_p->handle =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-            reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
-#else
-            static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
-      } // end IF
+      data_p->handle =
+          Net_Client_Common_Tools::connect (asynch_connector,
+                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                            user_data_s,
+                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                            true,
+                                            true);
     } // end ELSE
     if (data_p->handle == ACE_INVALID_HANDLE)
     {
@@ -1376,17 +1337,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
       goto error;
     } // end IF
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
-//                data_p->handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
-//#else
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: opened TCP socket to %s\n"),
-//                data_p->handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->address).c_str ())));
-//#endif
+    iconnection_p = iconnection_manager_p->get (data_p->handle);
 
     // step4: send HTTP request
     ACE_ASSERT (iconnection_p);
@@ -1409,7 +1360,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     HTTP_record_p->method =
       (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
                           : HTTP_Codes::HTTP_METHOD_POST);
-    HTTP_record_p->URI = (*iterator_3).second.second->URL;
+    HTTP_record_p->URI = URI_string;
     HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
     ACE_NEW_NORETURN (message_data_p,
@@ -1653,23 +1604,22 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (userData_in);
-  //struct Test_I_URLStreamLoad_UI_CBData* data_p =
-  //  static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
-  //// sanity check(s)
-  //ACE_ASSERT (data_p);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  // sanity check(s)
+  ACE_ASSERT (data_p);
 
-  //// step1: remove event sources
-  //{ ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->lock);
-  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
-  //       iterator != data_p->eventSourceIds.end ();
-  //       iterator++)
-  //    if (!g_source_remove (*iterator))
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-  //                  *iterator));
-  //  data_p->eventSourceIds.clear ();
-  //} // end lock scope
+  // step1: remove event sources
+  { ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);
+    for (Common_UI_GTK_EventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
+         iterator != data_p->UIState->eventSourceIds.end ();
+         iterator++)
+      if (!g_source_remove (*iterator))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    *iterator));
+    data_p->UIState->eventSourceIds.clear ();
+  } // end lock scope
 
   // step2: initiate shutdown sequence
   int result = -1;

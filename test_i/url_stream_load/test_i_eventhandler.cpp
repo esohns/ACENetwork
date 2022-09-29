@@ -212,10 +212,10 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   if (data_r.M3UPlaylist)
   {
     // sanity check(s)
-    ACE_ASSERT (!data_r.M3UPlaylist->stream_inf_elements.empty ());
+    ACE_ASSERT (!data_r.M3UPlaylist->ext_inf_elements.empty ());
 
-    const struct M3U_StreamInf_Element& element_r =
-        data_r.M3UPlaylist->stream_inf_elements.front ();
+    const struct M3U_ExtInf_Element& element_r =
+        data_r.M3UPlaylist->ext_inf_elements.front ();
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("loading \"%s\"...\n"),
                 ACE_TEXT (element_r.URL.c_str ())));
@@ -435,6 +435,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       event_e = COMMON_UI_EVENT_CONNECT; break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
       event_e = COMMON_UI_EVENT_DISCONNECT; break;
+    case STREAM_SESSION_MESSAGE_STEP:
+      event_e = COMMON_UI_EVENT_STEP; break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)
