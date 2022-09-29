@@ -1088,6 +1088,7 @@ ACE_TMAIN (int argc_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   logstack_p = &state_r.logStack;
   lock_p = &state_r.logStackLock;
+  ui_cb_data.UIState = &state_r;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   Common_Logger_t logger (logstack_p,

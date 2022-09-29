@@ -111,18 +111,43 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   if (!missing_bytes)
   {
     int result = -1;
+    size_t size_i = 0, capacity_i = 0;
     ACE_Message_Block* message_block_p = message_inout;
     while (message_block_p->cont ())
       message_block_p = message_block_p->cont ();
+
     if (*(message_block_p->rd_ptr () + (message_block_p->length () - 1)) != '\n')
     {
-      result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
+      if (!message_block_p->space ())
+      {
+        capacity_i = message_block_p->capacity () + 1 + 1; // allocate space for final \n as well (see below)
+        size_i = message_block_p->size () + 1 + 1;
+        result = message_block_p->size (capacity_i);
+        ACE_ASSERT (result != -1);
+        result = message_block_p->size (size_i);
+        ACE_ASSERT (result != -1);
+        ACE_ASSERT (message_block_p->space () == 2);
+      } // end IF
+
+      result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"), 1);
       ACE_ASSERT (result != -1);
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: appended missing line break to data\n"),
                   inherited::mod_->name ()));
     } // end IF
-    result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"));
+
+    if (!message_block_p->space ())
+    {
+      capacity_i = message_block_p->capacity () + 1;
+      size_i = message_block_p->size () + 1;
+      result = message_block_p->size (capacity_i);
+      ACE_ASSERT (result != -1);
+      result = message_block_p->size (size_i);
+      ACE_ASSERT (result != -1);
+      ACE_ASSERT (message_block_p->space () == 1);
+    } // end IF
+
+    result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"), 1);
     ACE_ASSERT (result != -1);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: appended line break to data\n"),

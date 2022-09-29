@@ -667,19 +667,6 @@ do_work (const std::string& configurationFile_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-  Test_I_Stream input_stream;
-  ACE_Thread_Mutex timeout_handler_lock;
-  Test_I_TimeoutHandler timeout_handler;
-  timeout_handler.lock_ = &timeout_handler_lock;
-#if defined (GUI_SUPPORT)
-  Test_I_EventHandler message_handler (&CBData_in);
-  CBData_in.channels = &channels;
-  CBData_in.currentChannel = channel_in;
-  CBData_in.stream = &input_stream;
-  CBData_in.timeoutHandler = &timeout_handler;
-#else
-  Test_I_EventHandler message_handler;
-#endif // GUI_SUPPORT
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_Module_EventHandler_2_Module event_handler_module_2 (NULL,
@@ -701,6 +688,19 @@ do_work (const std::string& configurationFile_in,
   Test_I_MessageAllocator_2_t message_allocator_2 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                    &heap_allocator,         // heap allocator handle
                                                    true);                   // block ?
+  Test_I_Stream input_stream;
+  ACE_Thread_Mutex timeout_handler_lock;
+  Test_I_TimeoutHandler timeout_handler;
+  timeout_handler.lock_ = &timeout_handler_lock;
+#if defined (GUI_SUPPORT)
+  Test_I_EventHandler message_handler (&CBData_in);
+  CBData_in.channels = &channels;
+  CBData_in.currentChannel = channel_in;
+  CBData_in.stream = &input_stream;
+  CBData_in.timeoutHandler = &timeout_handler;
+#else
+  Test_I_EventHandler message_handler;
+#endif // GUI_SUPPORT
 
   // *********************** socket configuration data ************************
   Test_I_WebTV_ConnectionConfiguration_t connection_configuration;
