@@ -35,12 +35,13 @@
 class Test_I_Message;
 class Test_I_SessionMessage_3;
 
-extern const char stream_name_string_3b[];
+extern const char stream_name_string_4a[];
+extern const char stream_name_string_4b[];
 
 class Test_I_AVStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_3b,
+                        stream_name_string_4b,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -56,7 +57,7 @@ class Test_I_AVStream
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_3b,
+                        stream_name_string_4b,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -88,53 +89,53 @@ class Test_I_AVStream
 
 //////////////////////////////////////////
 
-//class Test_I_AudioStream
-// : public Stream_Base_T<ACE_MT_SYNCH,
-//                        Common_TimePolicy_t,
-//                        stream_name_string_3b,
-//                        enum Stream_ControlType,
-//                        enum Stream_SessionMessageType,
-//                        enum Stream_StateMachine_ControlState,
-//                        struct Test_I_WebTV_StreamState_2,
-//                        struct Test_I_WebTV_StreamConfiguration_2,
-//                        struct Stream_Statistic,
-//                        struct Test_I_WebTV_ModuleHandlerConfiguration_2,
-//                        Test_I_WebTV_SessionData_2, // session data
-//                        Test_I_WebTV_SessionData_2_t,      // session data container (reference counted)
-//                        Stream_ControlMessage_t,
-//                        Test_I_Message,
-//                        Test_I_SessionMessage_2>
-//{
-//  typedef Stream_Base_T<ACE_MT_SYNCH,
-//                        Common_TimePolicy_t,
-//                        stream_name_string_3b,
-//                        enum Stream_ControlType,
-//                        enum Stream_SessionMessageType,
-//                        enum Stream_StateMachine_ControlState,
-//                        struct Test_I_WebTV_StreamState_2,
-//                        struct Test_I_WebTV_StreamConfiguration_2,
-//                        struct Stream_Statistic,
-//                        struct Test_I_WebTV_ModuleHandlerConfiguration_2,
-//                        Test_I_WebTV_SessionData_2, // session data
-//                        Test_I_WebTV_SessionData_2_t,      // session data container (reference counted)
-//                        Stream_ControlMessage_t,
-//                        Test_I_Message,
-//                        Test_I_SessionMessage_2> inherited;
-//
-// public:
-//  Test_I_AudioStream ();
-//  inline virtual ~Test_I_AudioStream () { inherited::shutdown (); }
-//
-//  // implement (part of) Stream_IStreamControlBase
-//  virtual bool load (Stream_ILayout*, // i/o value: layout
-//                     bool&);          // return value: delete modules ?
-//
-//  // implement Common_IInitialize_T
-//  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-//
-// private:
-//  ACE_UNIMPLEMENTED_FUNC (Test_I_AudioStream (const Test_I_AudioStream&))
-//  ACE_UNIMPLEMENTED_FUNC (Test_I_AudioStream& operator= (const Test_I_AudioStream&))
-//};
+class Test_I_AudioStream
+ : public Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_4a,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_WebTV_StreamState_3,
+                        struct Test_I_WebTV_StreamConfiguration_3,
+                        struct Stream_Statistic,
+                        struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                        Test_I_WebTV_SessionData_3, // session data
+                        Test_I_WebTV_SessionData_3_t, // session data container (reference counted)
+                        Stream_ControlMessage_t,
+                        Test_I_Message,
+                        Test_I_SessionMessage_3>
+{
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_4a,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_WebTV_StreamState_3,
+                        struct Test_I_WebTV_StreamConfiguration_3,
+                        struct Stream_Statistic,
+                        struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                        Test_I_WebTV_SessionData_3, // session data
+                        Test_I_WebTV_SessionData_3_t, // session data container (reference counted)
+                        Stream_ControlMessage_t,
+                        Test_I_Message,
+                        Test_I_SessionMessage_3> inherited;
+
+ public:
+  Test_I_AudioStream ();
+  inline virtual ~Test_I_AudioStream () { inherited::shutdown (); }
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ILayout*, // i/o value: layout
+                     bool&);          // return value: delete modules ?
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AudioStream (const Test_I_AudioStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AudioStream& operator= (const Test_I_AudioStream&))
+};
 
 #endif

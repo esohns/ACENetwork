@@ -52,6 +52,7 @@ class Test_I_Message;
 class Test_I_SessionMessage;
 class Test_I_SessionMessage_3;
 class Test_I_AVStream;
+class Test_I_AudioStream;
 
 typedef std::list<std::string> Test_I_WebTV_ChannelSegmentURLs_t;
 typedef Test_I_WebTV_ChannelSegmentURLs_t::iterator Test_I_WebTV_ChannelSegmentURLsIterator_t;
@@ -151,6 +152,8 @@ struct Test_I_WebTV_Configuration
    , streamConfiguration_2b ()
    , streamConfiguration_3a ()
    , streamConfiguration_3b ()
+   , streamConfiguration_4a ()
+   , streamConfiguration_4b ()
   {}
 
   // **************************** socket data **********************************
@@ -163,7 +166,8 @@ struct Test_I_WebTV_Configuration
   Test_I_WebTV_StreamConfiguration_t   streamConfiguration_2b; // video
   Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3a; // audio
   Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3b; // video
-  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_4; // input
+  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_4a; // audio input
+  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_4b; // AV input
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -225,7 +229,8 @@ struct Test_I_WebTV_UI_CBData
    , audioHandle (ACE_INVALID_HANDLE)
    , videoHandle (ACE_INVALID_HANDLE)
    , progressData ()
-   , stream (NULL)
+   , AVStream (NULL)
+   , AudioStream (NULL)
    , streamSessionId (0)
    , subscribers ()
    , audioTimeoutHandler (NULL)
@@ -242,7 +247,8 @@ struct Test_I_WebTV_UI_CBData
   ACE_HANDLE                            audioHandle; // connection-
   ACE_HANDLE                            videoHandle; // connection-
   struct Test_I_WebTV_UI_ProgressData   progressData;
-  Test_I_AVStream*                      stream; // input-
+  Test_I_AVStream*                      AVStream; // input-
+  Test_I_AudioStream*                   AudioStream; // input-
   Stream_SessionId_t                    streamSessionId;
   Test_I_Subscribers_t                  subscribers;
   Test_I_TimeoutHandler*                audioTimeoutHandler;

@@ -45,7 +45,7 @@ class Test_I_SessionMessage;
 class Test_I_SessionMessage_3;
 
 extern const char stream_name_string_[];
-extern const char stream_name_string_3a[];
+extern const char stream_name_string_3[];
 
 class Test_I_ConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -110,7 +110,7 @@ class Test_I_ConnectionStream
 class Test_I_ConnectionStream_3
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_3a,
+                                        stream_name_string_3,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -130,7 +130,7 @@ class Test_I_ConnectionStream_3
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_3a,
+                                        stream_name_string_3,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,

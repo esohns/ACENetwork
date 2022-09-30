@@ -116,8 +116,9 @@
 #endif // GUI_SUPPORT
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream");
-const char stream_name_string_3a[] = ACE_TEXT_ALWAYS_CHAR("WebTVStream_2");
-const char stream_name_string_3b[] = ACE_TEXT_ALWAYS_CHAR("WebTVInputStream");
+const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream_3");
+const char stream_name_string_4a[] = ACE_TEXT_ALWAYS_CHAR ("WebTVAudioInputStream");
+const char stream_name_string_4b[] = ACE_TEXT_ALWAYS_CHAR ("WebTVAVInputStream");
 
 void
 do_print_usage (const std::string& programName_in)
@@ -690,7 +691,8 @@ do_work (const std::string& configurationFile_in,
   Test_I_MessageAllocator_3_t message_allocator_3 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                    &heap_allocator,         // heap allocator handle
                                                    true);                   // block ?
-  Test_I_AVStream input_stream;
+  Test_I_AVStream av_input_stream;
+  Test_I_AudioStream audio_input_stream;
   ACE_Thread_Mutex timeout_handler_lock;
   Test_I_TimeoutHandler timeout_handler, timeout_handler_2;
   timeout_handler.lock_ = &timeout_handler_lock;
@@ -701,7 +703,8 @@ do_work (const std::string& configurationFile_in,
   Test_I_EventHandler_3 message_handler_3 (&CBData_in); // audio/video content
   CBData_in.channels = &channels;
   CBData_in.currentChannel = channel_in;
-  CBData_in.stream = &input_stream;
+  CBData_in.AVStream = &av_input_stream;
+  CBData_in.AudioStream = &audio_input_stream;
   CBData_in.audioTimeoutHandler = &timeout_handler;
   CBData_in.videoTimeoutHandler = &timeout_handler_2;
 #else
@@ -772,8 +775,12 @@ do_work (const std::string& configurationFile_in,
     configuration_in.parserConfiguration.debugScanner = true;
 #endif // _DEBUG
   // ********************** module configuration data **************************
-  Test_I_WebTV_MessageQueue_t message_queue (STREAM_QUEUE_MAX_SLOTS,
-                                             NULL);
+  Test_I_WebTV_MessageQueue_t av_input_queue (STREAM_QUEUE_MAX_SLOTS,
+                                              NULL);
+  Test_I_WebTV_MessageQueue_t audio_input_queue (STREAM_QUEUE_MAX_SLOTS,
+                                                 NULL);
+  Test_I_WebTV_MessageQueue_t audio_output_queue (STREAM_QUEUE_MAX_SLOTS,
+                                                  NULL);
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_marshal; // marshal
@@ -862,7 +869,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_3a.messageAllocator = &message_allocator;
   modulehandler_configuration_3a.parserConfiguration =
     &configuration_in.parserConfiguration;
-  modulehandler_configuration_3a.queue = &message_queue;
+  modulehandler_configuration_3a.queue = &audio_input_queue;
   //  modulehandler_configuration_3a.statisticReportingInterval =
   //    statisticReportingInterval_in;
   modulehandler_configuration_3a.subscriber = &message_handler_3;
@@ -898,7 +905,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_3b.messageAllocator = &message_allocator;
   modulehandler_configuration_3b.parserConfiguration =
     &configuration_in.parserConfiguration;
-  modulehandler_configuration_3b.queue = &message_queue;
+  modulehandler_configuration_3b.queue = &av_input_queue;
   //  modulehandler_configuration_3b.statisticReportingInterval =
   //    statisticReportingInterval_in;
   modulehandler_configuration_3b.subscriber = &message_handler_3;
@@ -927,33 +934,36 @@ do_work (const std::string& configurationFile_in,
   ALSA_configuration.asynch = false;
 #endif // ACE_WIN32 || ACE_WIN64
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
-  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4;
-  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_decoder_4; // audio decoder
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4a;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_queue_sink_4a;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4b;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_injector_4b; // audio injector
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_decoder_4b; // audio decoder
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   modulehandler_configuration_4.ALSAConfiguration = &ALSA_configuration;
 #endif // ACE_WIN32 || ACE_WIN64
-  modulehandler_configuration_4.allocatorConfiguration =
+  modulehandler_configuration_4b.allocatorConfiguration =
     &allocator_configuration;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_4.codecId = AV_CODEC_ID_H264;
+  modulehandler_configuration_4b.codecId = AV_CODEC_ID_H264;
 #endif // FFMPEG_SUPPORT
-  modulehandler_configuration_4.concurrency =
+  modulehandler_configuration_4b.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
-  modulehandler_configuration_4.defragmentMode = STREAM_DEFRAGMENT_CLONE;
+  modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
 //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
-  modulehandler_configuration_4.delayConfiguration = &delay_configuration;
+  modulehandler_configuration_4b.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_4.deviceIdentifier.identifierDiscriminator =
+  modulehandler_configuration_4b.deviceIdentifier.identifierDiscriminator =
     Stream_Device_Identifier::GUID;
-  modulehandler_configuration_4.deviceIdentifier.identifier._guid =
+  modulehandler_configuration_4b.deviceIdentifier.identifier._guid =
     Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false); // playback
-  modulehandler_configuration_4.deviceType = AV_HWDEVICE_TYPE_DXVA2;
+  modulehandler_configuration_4b.deviceType = AV_HWDEVICE_TYPE_DXVA2;
   //modulehandler_configuration_4.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   struct tWAVEFORMATEX* waveformatex_p =
-    Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_4.deviceIdentifier.identifier._guid);
+    Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_4b.deviceIdentifier.identifier._guid);
 #else
   modulehandler_configuration_4.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
@@ -961,46 +971,64 @@ do_work (const std::string& configurationFile_in,
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_4.outputFormat.audio.format =
+  modulehandler_configuration_4b.outputFormat.audio.format =
       Stream_Module_Decoder_Tools::to (*waveformatex_p);
-  modulehandler_configuration_4.outputFormat.audio.channels =
+  modulehandler_configuration_4b.outputFormat.audio.channels =
       waveformatex_p->nChannels;
-  modulehandler_configuration_4.outputFormat.audio.sampleRate =
+  modulehandler_configuration_4b.outputFormat.audio.sampleRate =
       waveformatex_p->nSamplesPerSec;
   CoTaskMemFree (waveformatex_p); waveformatex_p = NULL;
 #else
-  modulehandler_configuration_4.outputFormat.audio.format = AV_SAMPLE_FMT_S16;
-  modulehandler_configuration_4.outputFormat.audio.channels = 2;
-  modulehandler_configuration_4.outputFormat.audio.sampleRate = 48000;
+  modulehandler_configuration_4b.outputFormat.audio.format = AV_SAMPLE_FMT_S16;
+  modulehandler_configuration_4b.outputFormat.audio.channels = 2;
+  modulehandler_configuration_4b.outputFormat.audio.sampleRate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
-  modulehandler_configuration_4.outputFormat.video.format = AV_PIX_FMT_RGB24;
+  modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT
-  modulehandler_configuration_4.queue = &message_queue;
-  modulehandler_configuration_4.display = Common_UI_Tools::getDefaultDisplay ();
+  modulehandler_configuration_4b.queue = &av_input_queue;
+  modulehandler_configuration_4b.display = Common_UI_Tools::getDefaultDisplay ();
   struct HTTP_ParserConfiguration parserConfiguration_4;
-  modulehandler_configuration_4.statisticReportingInterval =
+  modulehandler_configuration_4b.statisticReportingInterval =
     statisticReportingInterval_in;
-  modulehandler_configuration_4.subscriber = &message_handler_3;
+  modulehandler_configuration_4b.subscriber = &message_handler_3;
 //  modulehandler_configuration_3.targetFileName =
 //    ACE_TEXT_ALWAYS_CHAR ("webtv.264");
   //modulehandler_configuration_3.targetFileName = outputDirectory_in;
 
-  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4; // input-
-  stream_configuration_4.mediaType.audio.channels = 2;
-  stream_configuration_4.mediaType.audio.format = AV_SAMPLE_FMT_S16;
-  stream_configuration_4.mediaType.audio.sampleRate = 48000;
-  stream_configuration_4.messageAllocator = &message_allocator_3;
-  stream_configuration_4.cloneModule = false;
-  stream_configuration_4.module = &event_handler_module_3;
-  stream_configuration_4.printFinalReport = true;
-  configuration_in.streamConfiguration_4.initialize (module_configuration,
-                                                     modulehandler_configuration_4,
-                                                     stream_configuration_4);
-  modulehandler_configuration_audio_decoder_4 = modulehandler_configuration_4;
-  modulehandler_configuration_audio_decoder_4.codecId = AV_CODEC_ID_AAC;
-  configuration_in.streamConfiguration_4.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
-                                                                 std::make_pair (&module_configuration,
-                                                                                 &modulehandler_configuration_audio_decoder_4)));
+  modulehandler_configuration_4a = modulehandler_configuration_4b;
+  modulehandler_configuration_4a.queue = &audio_input_queue;
+  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4a; // audio input-
+  stream_configuration_4a.messageAllocator = &message_allocator_3;
+  configuration_in.streamConfiguration_4a.initialize (module_configuration,
+                                                      modulehandler_configuration_4a,
+                                                      stream_configuration_4a);
+  modulehandler_configuration_queue_sink_4a = modulehandler_configuration_4a;
+  modulehandler_configuration_queue_sink_4a.queue = &audio_output_queue;
+  configuration_in.streamConfiguration_4a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_queue_sink_4a)));
+
+  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4b; // AV input-
+  stream_configuration_4b.mediaType.audio.channels = 2;
+  stream_configuration_4b.mediaType.audio.format = AV_SAMPLE_FMT_S16;
+  stream_configuration_4b.mediaType.audio.sampleRate = 48000;
+  stream_configuration_4b.messageAllocator = &message_allocator_3;
+  stream_configuration_4b.cloneModule = false;
+  stream_configuration_4b.module = &event_handler_module_3;
+  stream_configuration_4b.printFinalReport = true;
+  configuration_in.streamConfiguration_4b.initialize (module_configuration,
+                                                      modulehandler_configuration_4b,
+                                                      stream_configuration_4b);
+  modulehandler_configuration_audio_injector_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_audio_injector_4b.queue = &audio_output_queue;
+  configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_INJECTOR_DEFAULT_NAME_STRING),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_audio_injector_4b)));
+  modulehandler_configuration_audio_decoder_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_audio_decoder_4b.codecId = AV_CODEC_ID_AAC;
+  configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_audio_decoder_4b)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -1155,12 +1183,15 @@ do_work (const std::string& configurationFile_in,
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                              true); // wait ?
 
-  input_stream.stop (true,   // wait for completion ?
-                     false,  // recurse ?
-                     false); // high priority
-  input_stream.remove (&event_handler_module_3,
-                       true,   // lock ?
-                       false); // reset ?
+  audio_input_stream.stop (true,   // wait for completion ?
+                           false,  // recurse ?
+                           false); // high priority
+  av_input_stream.stop (true,   // wait for completion ?
+                        false,  // recurse ?
+                        false); // high priority
+  av_input_stream.remove (&event_handler_module_3,
+                          true,   // lock ?
+                          false); // reset ?
 
   timer_manager_p->stop ();
 
@@ -1182,9 +1213,12 @@ clean:
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  input_stream.stop (true,   // wait for completion ?
-                     false,  // recurse ?
-                     false); // high priority
+  audio_input_stream.stop (true,   // wait for completion ?
+                           false,  // recurse ?
+                           false); // high priority
+  av_input_stream.stop (true,   // wait for completion ?
+                        false,  // recurse ?
+                        false); // high priority
 
   timer_manager_p->stop ();
 }

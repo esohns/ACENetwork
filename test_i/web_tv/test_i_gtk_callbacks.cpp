@@ -572,21 +572,21 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
 
-  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_3 =
-    data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_3b.end ());
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
+    data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
   ACE_ASSERT (file_chooser_button_p);
-  if (!(*iterator_3).second.second->targetFileName.empty ())
+  if (!(*iterator_4b).second.second->targetFileName.empty ())
   {
     if (!gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                              (*iterator_3).second.second->targetFileName.c_str ()))
+                                              (*iterator_4b).second.second->targetFileName.c_str ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_current_folder(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT ((*iterator_3).second.second->targetFileName.c_str ())));
+                  ACE_TEXT ((*iterator_4b).second.second->targetFileName.c_str ())));
       return G_SOURCE_REMOVE;
     } // end IF
   } // end IF
@@ -607,13 +607,13 @@ idle_initialize_UI_cb (gpointer userData_in)
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_SAVE_NAME)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                !(*iterator_3).second.second->targetFileName.empty ());
+                                !(*iterator_4b).second.second->targetFileName.empty ());
   toggle_button_p =
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_DISPLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
-                                !(*iterator_3).second.second->display.device.empty ());
+                                !(*iterator_4b).second.second->display.device.empty ());
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -731,9 +731,9 @@ idle_initialize_UI_cb (gpointer userData_in)
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
-  (*iterator_3).second.second->window =
+  (*iterator_4b).second.second->window =
     gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
-  ACE_ASSERT ((*iterator_3).second.second->window);
+  ACE_ASSERT ((*iterator_4b).second.second->window);
 
   // select some widgets
   combo_box_p =
@@ -1262,7 +1262,7 @@ idle_start_session_cb (gpointer userData_in)
 #endif // ACE_WIN32 || ACE_WIN64
 
   const Stream_Module_t* module_p =
-      data_p->stream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+      data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   ACE_ASSERT (module_p);
   data_p->dispatch =
       dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
@@ -1274,7 +1274,7 @@ idle_start_session_cb (gpointer userData_in)
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
-  isetp_p->setP (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)));
+  //isetp_p->setP (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)));
 
   //ACE_ASSERT (!data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
@@ -1325,18 +1325,18 @@ idle_start_session_cb (gpointer userData_in)
                                            static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->messageAllocator);
   data_p->audioTimeoutHandler->interval_.sec ((*channel_iterator).second.audioSegment.length);
   // start first download now
-  //data_p->audioTimeoutHandler->handle (NULL);
-  //// schedule regular downloads in-between buffers
-  //data_p->audioTimeoutHandler->timerId_ =
-  //    COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (data_p->audioTimeoutHandler,
-  //                                                                NULL,
-  //                                                                ACE_Time_Value ((*channel_iterator).second.audioSegment.length / 2, 0),
-  //                                                                data_p->audioTimeoutHandler->interval_);
-  //ACE_ASSERT (data_p->audioTimeoutHandler->timerId_);
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("scheduled audio segment download interval timer (id: %d, interval: %#T)\n"),
-  //            data_p->audioTimeoutHandler->timerId_,
-  //            &data_p->audioTimeoutHandler->interval_));
+  data_p->audioTimeoutHandler->handle (NULL);
+  // schedule regular downloads in-between buffers
+  data_p->audioTimeoutHandler->timerId_ =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (data_p->audioTimeoutHandler,
+                                                                  NULL,
+                                                                  ACE_Time_Value ((*channel_iterator).second.audioSegment.length / 2, 0),
+                                                                  data_p->audioTimeoutHandler->interval_);
+  ACE_ASSERT (data_p->audioTimeoutHandler->timerId_);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("scheduled audio segment download interval timer (id: %d, interval: %#T)\n"),
+              data_p->audioTimeoutHandler->timerId_,
+              &data_p->audioTimeoutHandler->interval_));
   data_p->videoTimeoutHandler->initialize (data_p->videoHandle,
                                            &(*channel_iterator).second.videoSegment,
                                            (*stream_iterator_3b).second.second->URL,
@@ -1461,23 +1461,23 @@ drawing_area_resize_end (gpointer userData_in)
              ACE_TEXT ("window resized to %dx%d\n"),
              allocation_s.width, allocation_s.height));
 
-  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4 =
-      data_p->configuration->streamConfiguration_4.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_4.end ());
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
+      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  (*iterator_4).second.second->outputFormat.video.resolution.cy =
+  (*iterator_4b).second.second->outputFormat.video.resolution.cy =
     allocation_s.height;
-  (*iterator_4).second.second->outputFormat.video.resolution.cx =
+  (*iterator_4b).second.second->outputFormat.video.resolution.cx =
     allocation_s.width;
 #else
-  (*iterator_4).second.second->outputFormat.video.resolution.height =
+  (*iterator_4b).second.second->outputFormat.video.resolution.height =
       allocation_s.height;
-  (*iterator_4).second.second->outputFormat.video.resolution.width =
+  (*iterator_4b).second.second->outputFormat.video.resolution.width =
       allocation_s.width;
 #endif // ACE_WIN32 || ACE_WIN64
 
-  ACE_ASSERT (data_p->stream);
-  if (!data_p->stream->isRunning ())
+  ACE_ASSERT (data_p->AVStream);
+  if (!data_p->AVStream->isRunning ())
     return FALSE;
 
   // *NOTE*: two things need doing:
@@ -1486,7 +1486,7 @@ drawing_area_resize_end (gpointer userData_in)
 
   // step1:
   const Stream_Module_t* module_p =
-    data_p->stream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+    data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   ACE_ASSERT (module_p);
   Stream_Visualization_IResize* iresize_p =
       dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
@@ -1500,7 +1500,7 @@ drawing_area_resize_end (gpointer userData_in)
   }
 
   // step2
-  data_p->stream->notify (STREAM_SESSION_MESSAGE_RESIZE,
+  data_p->AVStream->notify (STREAM_SESSION_MESSAGE_RESIZE,
                           false, // recurse upstream ?
                           true); // expedite ?
 
@@ -1822,10 +1822,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3b =
         data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_3b != data_p->configuration->streamConfiguration_3b.end ());
-    Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_4 =
-        data_p->configuration->streamConfiguration_4.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (stream_iterator_4 != data_p->configuration->streamConfiguration_4.end ());
-    ACE_ASSERT ((*stream_iterator_4).second.second->delayConfiguration);
+    Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_4b =
+        data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (stream_iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
+    ACE_ASSERT ((*stream_iterator_4b).second.second->delayConfiguration);
     Test_I_TCPConnector_t connector (true);
 #if defined (SSL_SUPPORT)
     Test_I_SSLConnector_t ssl_connector (true);
@@ -1874,10 +1874,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.cx =
+    data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cx =
         g_value_get_uint (&value);
 #else
-    data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.width =
+    data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.width =
         g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
@@ -1886,10 +1886,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
                               2, &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.cy =
+    data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cy =
         g_value_get_uint (&value);
 #else
-    data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.height =
+    data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.height =
         g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
@@ -1903,15 +1903,15 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
          iterator_8 != (*channel_iterator).second.resolutions.end ();
          ++iterator_8)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (((*iterator_8).resolution.cx == data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.cx) &&
-          ((*iterator_8).resolution.cy == data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.cy))
+      if (((*iterator_8).resolution.cx == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cx) &&
+          ((*iterator_8).resolution.cy == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cy))
 #else
-      if (((*iterator_8).resolution.width == data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.width) &&
-          ((*iterator_8).resolution.height == data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution.height))
+      if (((*iterator_8).resolution.width == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.width) &&
+          ((*iterator_8).resolution.height == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.height))
 #endif // ACE_WIN32 || ACE_WIN64
       {
-        (*stream_iterator_4).second.second->delayConfiguration->interval.msec (static_cast<long> (1000 / (*iterator_8).frameRate));
-        (*stream_iterator_4).second.second->delayConfiguration->averageTokensPerInterval =
+        (*stream_iterator_4b).second.second->delayConfiguration->interval.msec (static_cast<long> (1000 / (*iterator_8).frameRate));
+        (*stream_iterator_4b).second.second->delayConfiguration->averageTokensPerInterval =
             1;
         URI_string = (*iterator_8).URI;
         break;
@@ -1987,27 +1987,34 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (toggle_button_p);
     if (!gtk_toggle_button_get_active (toggle_button_p))
     {
-      (*stream_iterator_4).second.second->targetFileName.clear ();
+      (*stream_iterator_4b).second.second->targetFileName.clear ();
       goto continue_;
     } // end IF
     file_chooser_button_p =
         GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
     ACE_ASSERT (file_chooser_button_p);
-    (*stream_iterator_4).second.second->targetFileName =
+    (*stream_iterator_4b).second.second->targetFileName =
       gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
 //    ACE_ASSERT (Common_File_Tools::isDirectory ((*iterator_3).second.second->targetFileName));
 
 continue_:
     // step2: start processing stream
-    if (unlikely (!data_p->stream->initialize (data_p->configuration->streamConfiguration_4)))
+    if (unlikely (!data_p->AudioStream->initialize (data_p->configuration->streamConfiguration_4a)))
     {
       ACE_DEBUG ((LM_ERROR,
                  ACE_TEXT ("failed to Test_I_Stream::initialize(), returning\n")));
       return;
     } // end IF
-    data_p->stream->start ();
-    data_p->streamSessionId = data_p->stream->getR_2 ().getR ().sessionId;
+    data_p->AudioStream->start ();
+    if (unlikely (!data_p->AVStream->initialize (data_p->configuration->streamConfiguration_4b)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("failed to Test_I_Stream::initialize(), returning\n")));
+      return;
+    } // end IF
+    data_p->AVStream->start ();
+    data_p->streamSessionId = data_p->AVStream->getR_2 ().getR ().sessionId;
 
     // step3: connect to peers
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
@@ -2195,9 +2202,12 @@ continue_:
   data_p->videoHandle = ACE_INVALID_HANDLE;
 
   data_p->dispatch = NULL;
-  data_p->stream->stop (false, // wait for completion ?
-                        false, // recurse ?
-                        true); // high priority
+  data_p->AudioStream->stop (false, // wait for completion ?
+                             false, // recurse ?
+                             true); // high priority
+  data_p->AVStream->stop (false, // wait for completion ?
+                          false, // recurse ?
+                          true); // high priority
 
   return;
 
@@ -2441,10 +2451,10 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
   Common_UI_GTK_BuildersConstIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
-  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4 =
-      data_p->configuration->streamConfiguration_4.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_4.end ());
-  ACE_ASSERT ((*iterator_4).second.second->delayConfiguration);
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
+      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
+  ACE_ASSERT ((*iterator_4b).second.second->delayConfiguration);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
   ACE_ASSERT (data_p->channels);
   ACE_ASSERT (data_p->currentChannel);
@@ -2503,7 +2513,7 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
     if ((*iterator_2).resolution.width == resolution_s.width)
 #endif // ACE_WIN32 || ACE_WIN64
     {
-      (*iterator_4).second.second->delayConfiguration->averageTokensPerInterval =
+      (*iterator_4b).second.second->delayConfiguration->averageTokensPerInterval =
           (*iterator_2).frameRate;
       break;
     } // end IF
@@ -2527,11 +2537,11 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   Common_UI_GTK_BuildersConstIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
-  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_2 =
-      data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_3b.end ());
-  ACE_ASSERT (data_p->stream);
-  if (!data_p->stream->isRunning ())
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
+      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
+  ACE_ASSERT (data_p->AVStream);
+  if (!data_p->AVStream->isRunning ())
     return;
 
   GtkDrawingArea* drawing_area_p =
@@ -2554,12 +2564,12 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
   const Stream_Module_t* module_p = NULL;
   module_p =
-    data_p->stream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+    data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("%s: failed to Stream_IStream::find(\"Display\"), returning\n"),
-               ACE_TEXT (data_p->stream->name ().c_str ())));
+               ACE_TEXT (data_p->AVStream->name ().c_str ())));
     return;
   } // end IF
 
@@ -2571,7 +2581,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
     gtk_window_iconify (window_p);
 
-    (*iterator_2).second.second->window =
+    (*iterator_4b).second.second->window =
         gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
   } // end IF
   else
@@ -2582,7 +2592,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
     gtk_window_deiconify (window_p);
 
-    (*iterator_2).second.second->window =
+    (*iterator_4b).second.second->window =
         gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
 
     g_signal_emit_by_name (G_OBJECT (drawing_area_p),
@@ -2601,7 +2611,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
       return;
     }
   } // end ELSE
-  ACE_ASSERT ((*iterator_2).second.second->window);
+  ACE_ASSERT ((*iterator_4b).second.second->window);
 
   Common_UI_IFullscreen* ifullscreen_p =
       dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
@@ -2609,7 +2619,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("%s:%s: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
-               ACE_TEXT (data_p->stream->name ().c_str ()),
+               ACE_TEXT (data_p->AVStream->name ().c_str ()),
                module_p->name (),
                const_cast<Stream_Module_t*> (module_p)->writer ()));
     return;

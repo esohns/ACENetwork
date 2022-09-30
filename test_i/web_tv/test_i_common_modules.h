@@ -47,8 +47,11 @@
 
 #include "stream_file_sink.h"
 
+#include "stream_lib_tagger.h"
+
 #include "stream_misc_defragment.h"
 #include "stream_misc_delay.h"
+#include "stream_misc_injector.h"
 #include "stream_misc_messagehandler.h"
 #include "stream_misc_media_splitter.h"
 #include "stream_misc_queue_source.h"
@@ -213,7 +216,7 @@ typedef Stream_Module_QueueWriter_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                          // session data type
                               enum Stream_SessionMessageType,                      // session event type
                               struct Test_I_WebTV_ModuleHandlerConfiguration_3,    // module handler configuration type
-                              libacestream_default_misc_queue_module_name_string,
+                              libacestream_default_misc_queue_sink_module_name_string,
                               Stream_INotify_t,                                    // stream notification interface type
                               Test_I_QueueTarget);                                 // writer type
 
@@ -264,7 +267,7 @@ typedef Stream_Module_QueueReader_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                          // session data type
                               enum Stream_SessionMessageType,                      // session event type
                               struct Test_I_WebTV_ModuleHandlerConfiguration_3,    // module handler configuration type
-                              libacestream_default_misc_queue_module_name_string,
+                              libacestream_default_misc_queue_source_module_name_string,
                               Stream_INotify_t,                                    // stream notification interface type
                               Test_I_QueueSource);                                 // writer type
 
@@ -478,22 +481,6 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData,                  
                               Stream_INotify_t,                                            // stream notification interface type
                               Test_I_MessageHandler);                                      // writer type
 
-//typedef Stream_Module_MessageHandler_2<ACE_MT_SYNCH,
-//                                       Common_TimePolicy_t,
-//                                       struct Test_I_WebTV_ModuleHandlerConfiguration_2,
-//                                       Stream_ControlMessage_t,
-//                                       Test_I_Message,
-//                                       Test_I_SessionMessage_2,
-//                                       struct Test_I_WebTV_SessionData_3,
-//                                       struct Stream_UserData> Test_I_MessageHandler_2;
-//
-//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData_2,                           // session data type
-//                              enum Stream_SessionMessageType,                              // session event type
-//                              struct Test_I_WebTV_ModuleHandlerConfiguration_2,            // module handler configuration type
-//                              libacestream_default_misc_messagehandler_module_name_string,
-//                              Stream_INotify_t,                                            // stream notification interface type
-//                              Test_I_MessageHandler_2);                                    // writer type
-
 typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
                                        struct Test_I_WebTV_ModuleHandlerConfiguration_3,
@@ -509,5 +496,36 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData_3,                
                               libacestream_default_misc_messagehandler_module_name_string,
                               Stream_INotify_t,                                            // stream notification interface type
                               Test_I_MessageHandler_3);                                    // writer type
+
+typedef Stream_Module_Tagger_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                               Stream_ControlMessage_t,
+                               Test_I_Message,
+                               Test_I_SessionMessage_3,
+                               STREAM_MEDIATYPE_AUDIO,
+                               struct Stream_UserData> Test_I_Audio_Tagger;
+
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData_3,                  // session data type
+                              enum Stream_SessionMessageType,                     // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,   // module handler configuration type
+                              libacestream_default_lib_tagger_module_name_string,
+                              Stream_INotify_t,                                   // stream notification interface type
+                              Test_I_Audio_Tagger);                               // writer type
+
+typedef Stream_Module_Injector_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                                 Stream_ControlMessage_t,
+                                 Test_I_Message,
+                                 Test_I_SessionMessage_3,
+                                 struct Stream_UserData> Test_I_Audio_Injector;
+
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData_3,                     // session data type
+                              enum Stream_SessionMessageType,                        // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,      // module handler configuration type
+                              libacestream_default_misc_injector_module_name_string,
+                              Stream_INotify_t,                                      // stream notification interface type
+                              Test_I_Audio_Injector);                                // writer type
 
 #endif

@@ -85,7 +85,7 @@ Test_I_Message::Test_I_Message (Stream_SessionId_t sessionId_in,
 
 Test_I_Message::Test_I_Message (const Test_I_Message& message_in)
  : inherited (message_in)
- , mediaType_ (STREAM_MEDIATYPE_INVALID)
+ , mediaType_ (message_in.mediaType_)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Message::Test_I_Message"));
 
@@ -222,6 +222,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
 
   // set message type
   result_p->set (inherited::type_);
+  result_p->setMediaType (mediaType_);
 
   // initialize
   if (inherited::isInitialized_)

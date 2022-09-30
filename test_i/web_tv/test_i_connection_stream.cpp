@@ -235,7 +235,7 @@ Test_I_ConnectionStream_3::load (Stream_ILayout* layout_in,
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_QueueTarget_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_DEFAULT_NAME_STRING)),
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
 
