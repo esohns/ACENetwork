@@ -147,7 +147,8 @@ struct Test_I_WebTV_Configuration
    , connectionConfigurations ()
    , parserConfiguration ()
    , streamConfiguration ()
-   , streamConfiguration_2 ()
+   , streamConfiguration_2a ()
+   , streamConfiguration_2b ()
    , streamConfiguration_3a ()
    , streamConfiguration_3b ()
   {}
@@ -158,9 +159,11 @@ struct Test_I_WebTV_Configuration
   struct HTTP_ParserConfiguration      parserConfiguration;
   // **************************** stream data **********************************
   Test_I_WebTV_StreamConfiguration_t   streamConfiguration;
-  Test_I_WebTV_StreamConfiguration_t   streamConfiguration_2;
-  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3a;
-  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3b; // input
+  Test_I_WebTV_StreamConfiguration_t   streamConfiguration_2a; // audio
+  Test_I_WebTV_StreamConfiguration_t   streamConfiguration_2b; // video
+  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3a; // audio
+  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3b; // video
+  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_4; // input
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -225,7 +228,8 @@ struct Test_I_WebTV_UI_CBData
    , stream (NULL)
    , streamSessionId (0)
    , subscribers ()
-   , timeoutHandler (NULL)
+   , audioTimeoutHandler (NULL)
+   , videoTimeoutHandler (NULL)
    , videoUpdateEventSourceId (0)
   {}
 
@@ -241,7 +245,8 @@ struct Test_I_WebTV_UI_CBData
   Test_I_AVStream*                      stream; // input-
   Stream_SessionId_t                    streamSessionId;
   Test_I_Subscribers_t                  subscribers;
-  Test_I_TimeoutHandler*                timeoutHandler;
+  Test_I_TimeoutHandler*                audioTimeoutHandler;
+  Test_I_TimeoutHandler*                videoTimeoutHandler;
   guint                                 videoUpdateEventSourceId;
 };
 #endif // GUI_SUPPORT

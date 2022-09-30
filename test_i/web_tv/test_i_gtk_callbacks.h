@@ -23,9 +23,6 @@
 
 #include "gtk/gtk.h"
 
-//// thread functions
-//ACE_THR_FUNC_RETURN stream_processing_function (void*);
-
 //------------------------------------------------------------------------------
 
 // idle routines
@@ -34,6 +31,8 @@ gboolean idle_end_session_2 (gpointer);
 gboolean idle_load_channel_configuration_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
+gboolean idle_notify_segment_data_cb (gpointer);
+gboolean idle_notify_segment_data_2_cb (gpointer);
 gboolean idle_segment_download_complete_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);

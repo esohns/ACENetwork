@@ -32,6 +32,8 @@
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_string_tools.h"
+
 #include "common_parser_m3u_defines.h"
 
 #include "common_timer_tools.h"
@@ -322,7 +324,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
         channel_s.description = (*iterator_2).second;
       else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_URI_KEY_STRING)))
-        channel_s.URI = (*iterator_2).second;
+        channel_s.URI = Common_String_Tools::uncomment ((*iterator_2).second);
     } // end FOR
     if (is_channel_b)
       (*channel_iterator).second.channels.push_back (channel_s);
@@ -589,13 +591,14 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+  { ACE_GUARD(ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push(COMMON_UI_EVENT_DATA);
+  } // end lock scope
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -603,6 +606,10 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     const_cast<Test_I_MessageDataContainer&> (message_in.getR ());
   struct Test_I_WebTV_MessageData& data_r =
     const_cast<struct Test_I_WebTV_MessageData&> (data_container_r.getR ());
+  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
+  ACE_ASSERT (iterator != sessionDataMap_.end ());
+  ACE_ASSERT ((*iterator).second->connection);
+  Net_ConnectionId_t connection_id = (*iterator).second->connection->id ();
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -620,6 +627,10 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   // process audio/video playlist data
   int UTC_offset_i = 0;
   unsigned int seconds_i = 0;
+  bool is_audio_b = (connection_id == CBData_->audioHandle);
+  struct Test_I_WebTV_ChannelSegment* segment_p =
+    (is_audio_b ? &(*channel_iterator).second.audioSegment
+                : &(*channel_iterator).second.videoSegment);
   if (!data_r.M3UPlaylist->ext_inf_elements.empty ())
   {
     M3U_ExtInf_ElementsIterator_t iterator =
@@ -630,19 +641,19 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                            ACE_TEXT_ALWAYS_CHAR (COMMON_PARSER_M3U_EXT_X_PROGRAM_DATE_TIME)))
       {
-        (*channel_iterator).second.videoSegment.start =
+        segment_p->start =
             Common_Timer_Tools::ISO8601ToTimestamp ((*iterator_2).second,
                                                     UTC_offset_i);
         break;
       } // end IF
     // *WARNING*: lengths might not be uniform
-    (*channel_iterator).second.videoSegment.length = (*iterator).Length;
+    segment_p->length = (*iterator).Length;
     for (;
          iterator != data_r.M3UPlaylist->ext_inf_elements.end ();
          ++iterator)
     {
       seconds_i += (*iterator).Length;
-      (*channel_iterator).second.videoSegment.URLs.push_back ((*iterator).URL);
+      segment_p->URLs.push_back ((*iterator).URL);
     } // end FOR
   } // end IF
   else
@@ -655,65 +666,67 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                            ACE_TEXT_ALWAYS_CHAR (COMMON_PARSER_M3U_EXT_X_PROGRAM_DATE_TIME)))
       {
-        (*channel_iterator).second.videoSegment.start =
+        segment_p->start =
             Common_Timer_Tools::ISO8601ToTimestamp ((*iterator_2).second,
                                                     UTC_offset_i);
         break;
       } // end IF
     // *WARNING*: lengths might not be uniform
-    (*channel_iterator).second.videoSegment.length = (*iterator).Length;
+    segment_p->length = (*iterator).Length;
     for (;
          iterator != data_r.M3UPlaylist->stream_inf_elements.end ();
          ++iterator)
     {
       seconds_i += (*iterator).Length;
-      (*channel_iterator).second.videoSegment.URLs.push_back ((*iterator).URL);
+      segment_p->URLs.push_back ((*iterator).URL);
     } // end FOR
   } // end ELSE
-  (*channel_iterator).second.videoSegment.end =
-      (*channel_iterator).second.videoSegment.start;
-  (*channel_iterator).second.videoSegment.end += static_cast<time_t> (seconds_i);
+  segment_p->end = segment_p->start;
+  segment_p->end += static_cast<time_t> (seconds_i);
   // convert times
   if (UTC_offset_i)
   {
-    (*channel_iterator).second.videoSegment.start =
-        Common_Timer_Tools::localToUTC ((*channel_iterator).second.videoSegment.start,
+    segment_p->start =
+        Common_Timer_Tools::localToUTC (segment_p->start,
                                         UTC_offset_i,
                                         true);
-    (*channel_iterator).second.videoSegment.end =
-        Common_Timer_Tools::localToUTC ((*channel_iterator).second.videoSegment.end,
+    segment_p->end =
+        Common_Timer_Tools::localToUTC (segment_p->end,
                                         UTC_offset_i,
                                         true);
   } // end IF
-  (*channel_iterator).second.videoSegment.start =
-      Common_Timer_Tools::UTCToLocal ((*channel_iterator).second.videoSegment.start);
-  (*channel_iterator).second.videoSegment.end =
-      Common_Timer_Tools::UTCToLocal ((*channel_iterator).second.videoSegment.end);
+  segment_p->start =
+      Common_Timer_Tools::UTCToLocal (segment_p->start);
+  segment_p->end =
+      Common_Timer_Tools::UTCToLocal (segment_p->end);
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("received segment data (%u second(s): start %#T, end: %#T\n"),
+              ACE_TEXT ("received %s segment data (%u second(s): start %#T, end: %#T\n"),
+              (is_audio_b ? ACE_TEXT ("audio") : ACE_TEXT ("video")),
               seconds_i,
-              &(*channel_iterator).second.videoSegment.start,
-              &(*channel_iterator).second.videoSegment.end));
+              &segment_p->start,
+              &segment_p->end));
 
   // keep the most recent 5% entries
-  ACE_ASSERT (!(*channel_iterator).second.videoSegment.URLs.empty ());
+  ACE_ASSERT (!segment_p->URLs.empty ());
   Test_I_WebTV_ChannelSegmentURLsIterator_t iterator_3 =
-      (*channel_iterator).second.videoSegment.URLs.begin ();
+    segment_p->URLs.begin ();
   unsigned int number_to_erase =
-      (static_cast<float> ((*channel_iterator).second.videoSegment.URLs.size ()) * 0.95);
+      (static_cast<float> (segment_p->URLs.size ()) * 0.95);
   std::advance (iterator_3, number_to_erase);
-  (*channel_iterator).second.videoSegment.URLs.erase ((*channel_iterator).second.videoSegment.URLs.begin (),
-                                                      iterator_3);
+  segment_p->URLs.erase (segment_p->URLs.begin (),
+                         iterator_3);
 
-  guint event_source_id = g_idle_add (idle_start_session_cb,
+  guint event_source_id = g_idle_add (idle_notify_segment_data_cb,
                                       CBData_);
   if (unlikely (event_source_id == 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): ""\"%m\", returning\n")));
+                ACE_TEXT ("failed to g_idle_add(idle_notify_segment_data_cb): ""\"%m\", returning\n")));
     return;
   } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
+  { ACE_GUARD(ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventSourceIds.insert(event_source_id);
+  } // end lock scope
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 }

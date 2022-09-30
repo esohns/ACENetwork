@@ -271,7 +271,7 @@ next_list:
       }
       case DHCP_Codes::DHCP_OPTION_FIELDTYPE_LENGTH:
       {
-        unsigned int num_bytes = (*iterator).second.size ();
+        size_t num_bytes_i = (*iterator).second.size ();
         break;
       }
       default:

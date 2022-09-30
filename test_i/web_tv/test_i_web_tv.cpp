@@ -692,8 +692,9 @@ do_work (const std::string& configurationFile_in,
                                                    true);                   // block ?
   Test_I_AVStream input_stream;
   ACE_Thread_Mutex timeout_handler_lock;
-  Test_I_TimeoutHandler timeout_handler;
+  Test_I_TimeoutHandler timeout_handler, timeout_handler_2;
   timeout_handler.lock_ = &timeout_handler_lock;
+  timeout_handler_2.lock_ = &timeout_handler_lock;
 #if defined (GUI_SUPPORT)
   Test_I_EventHandler message_handler (&CBData_in); // master.m3u(8)
   Test_I_EventHandler_2 message_handler_2 (&CBData_in); // audio/video playlists
@@ -701,7 +702,8 @@ do_work (const std::string& configurationFile_in,
   CBData_in.channels = &channels;
   CBData_in.currentChannel = channel_in;
   CBData_in.stream = &input_stream;
-  CBData_in.timeoutHandler = &timeout_handler;
+  CBData_in.audioTimeoutHandler = &timeout_handler;
+  CBData_in.videoTimeoutHandler = &timeout_handler_2;
 #else
   Test_I_EventHandler message_handler;
   Test_I_EventHandler_2 message_handler_2;
@@ -720,27 +722,47 @@ do_work (const std::string& configurationFile_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
 
-    Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2;
+    Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2a;
 //  connection_configuration.socketConfiguration.address = remoteHost_in;
-  connection_configuration_2.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_2.statisticReportingInterval =
+  connection_configuration_2a.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_2a.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration_2.messageAllocator = &message_allocator;
-  connection_configuration_2.streamConfiguration =
-    &configuration_in.streamConfiguration_2;
-  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2"),
-                                                                    &connection_configuration_2));
+  connection_configuration_2a.messageAllocator = &message_allocator;
+  connection_configuration_2a.streamConfiguration =
+    &configuration_in.streamConfiguration_2a;
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2a"),
+                                                                    &connection_configuration_2a));
+    Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2b;
+//  connection_configuration.socketConfiguration.address = remoteHost_in;
+  connection_configuration_2b.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_2b.statisticReportingInterval =
+    statisticReportingInterval_in;
+  connection_configuration_2b.messageAllocator = &message_allocator;
+  connection_configuration_2b.streamConfiguration =
+    &configuration_in.streamConfiguration_2b;
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2b"),
+                                                                    &connection_configuration_2b));
 
-  Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3;
-  connection_configuration_3.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_3.socketConfiguration.useLoopBackDevice = false;
-//  connection_configuration_3.statisticReportingInterval =
+  Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3a;
+  connection_configuration_3a.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_3a.socketConfiguration.useLoopBackDevice = false;
+//  connection_configuration_3a.statisticReportingInterval =
 //    statisticReportingInterval_in;
-  connection_configuration_3.messageAllocator = &message_allocator_3;
-  connection_configuration_3.streamConfiguration =
+  connection_configuration_3a.messageAllocator = &message_allocator_3;
+  connection_configuration_3a.streamConfiguration =
     &configuration_in.streamConfiguration_3a;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("3a"),
-                                                                    &connection_configuration_3));
+                                                                    &connection_configuration_3a));
+  Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3b;
+  connection_configuration_3b.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_3b.socketConfiguration.useLoopBackDevice = false;
+//  connection_configuration_3b.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  connection_configuration_3b.messageAllocator = &message_allocator_3;
+  connection_configuration_3b.streamConfiguration =
+    &configuration_in.streamConfiguration_3b;
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("3b"),
+                                                                    &connection_configuration_3b));
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
@@ -755,11 +777,14 @@ do_work (const std::string& configurationFile_in,
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_marshal; // marshal
-  struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_2;
-  struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_marshal_2; // marshal
+  struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_2a;
+  struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_marshal_2a; // marshal
+  struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_2b;
+  struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_marshal_2b; // marshal
 
   struct Test_I_WebTV_StreamConfiguration stream_configuration;
-  struct Test_I_WebTV_StreamConfiguration stream_configuration_2;
+  struct Test_I_WebTV_StreamConfiguration stream_configuration_2a;
+  struct Test_I_WebTV_StreamConfiguration stream_configuration_2b;
 
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
@@ -775,8 +800,6 @@ do_work (const std::string& configurationFile_in,
 //  modulehandler_configuration.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration.subscriber = &message_handler;
-  //modulehandler_configuration.targetFileName = outputDirectory_in;
-//  modulehandler_configuration.URL = URL_in;
   modulehandler_configuration.waitForConnect = false;
   // ******************** (sub-)stream configuration data *********************
   stream_configuration.messageAllocator = &message_allocator;
@@ -793,22 +816,110 @@ do_work (const std::string& configurationFile_in,
                                                                std::make_pair (&module_configuration,
                                                                                &modulehandler_configuration_marshal)));
 
-  modulehandler_configuration_2 = modulehandler_configuration;
-  modulehandler_configuration_2.subscriber = &message_handler_2;
+  modulehandler_configuration_2a = modulehandler_configuration;
+  modulehandler_configuration_2a.subscriber = &message_handler_2;
   // ******************** (sub-)stream configuration data *********************
-  stream_configuration_2 = stream_configuration;
-  stream_configuration_2.module = &event_handler_module_2;
-  configuration_in.streamConfiguration_2.initialize (module_configuration,
-                                                     modulehandler_configuration_2,
-                                                     stream_configuration_2);
+  stream_configuration_2a = stream_configuration;
+  stream_configuration_2a.cloneModule = true;
+  stream_configuration_2a.module = &event_handler_module_2;
+  configuration_in.streamConfiguration_2a.initialize (module_configuration,
+                                                      modulehandler_configuration_2a,
+                                                      stream_configuration_2a);
+  modulehandler_configuration_marshal_2a = modulehandler_configuration_2a;
+  struct HTTP_ParserConfiguration parserConfiguration_2a;
+  modulehandler_configuration_marshal_2a.parserConfiguration =
+    &parserConfiguration_2a;
+  configuration_in.streamConfiguration_2a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_marshal_2a)));
+  modulehandler_configuration_2b = modulehandler_configuration;
+  modulehandler_configuration_2b.subscriber = &message_handler_2;
+  // ******************** (sub-)stream configuration data *********************
+  stream_configuration_2b = stream_configuration;
+  stream_configuration_2b.cloneModule = true;
+  stream_configuration_2b.module = &event_handler_module_2;
+  configuration_in.streamConfiguration_2b.initialize (module_configuration,
+                                                      modulehandler_configuration_2b,
+                                                      stream_configuration_2b);
+  modulehandler_configuration_marshal_2b = modulehandler_configuration_2b;
+  struct HTTP_ParserConfiguration parserConfiguration_2b;
+  modulehandler_configuration_marshal_2b.parserConfiguration =
+    &parserConfiguration_2b;
+  configuration_in.streamConfiguration_2b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_marshal_2b)));
 
-  modulehandler_configuration_marshal_2 = modulehandler_configuration_2;
-  struct HTTP_ParserConfiguration parserConfiguration_3;
-  modulehandler_configuration_marshal_2.parserConfiguration =
-    &parserConfiguration_3;
-  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
-                                                                 std::make_pair (&module_configuration,
-                                                                                 &modulehandler_configuration_marshal_2)));
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_3a;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_marshal_3a;
+  modulehandler_configuration_3a.allocatorConfiguration =
+    &allocator_configuration;
+  modulehandler_configuration_3a.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration_3a.closeAfterReception = true;
+  modulehandler_configuration_3a.concurrency =
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+  modulehandler_configuration_3a.connectionConfigurations =
+    &configuration_in.connectionConfigurations;
+  modulehandler_configuration_3a.messageAllocator = &message_allocator;
+  modulehandler_configuration_3a.parserConfiguration =
+    &configuration_in.parserConfiguration;
+  modulehandler_configuration_3a.queue = &message_queue;
+  //  modulehandler_configuration_3a.statisticReportingInterval =
+  //    statisticReportingInterval_in;
+  modulehandler_configuration_3a.subscriber = &message_handler_3;
+  modulehandler_configuration_3a.waitForConnect = false;
+  struct HTTP_ParserConfiguration parserConfiguration_3a;
+  modulehandler_configuration_3a.parserConfiguration =
+      &parserConfiguration_3a;
+  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_3a;
+  stream_configuration_3a.messageAllocator = &message_allocator_3;
+  stream_configuration_3a.cloneModule = true;
+  stream_configuration_3a.module = &event_handler_module_3;
+  configuration_in.streamConfiguration_3a.initialize (module_configuration,
+                                                      modulehandler_configuration_3a,
+                                                      stream_configuration_3a);
+  modulehandler_configuration_marshal_3a = modulehandler_configuration_3a;
+  struct HTTP_ParserConfiguration parserConfiguration_marshal_3a;
+  modulehandler_configuration_marshal_3a.parserConfiguration =
+    &parserConfiguration_marshal_3a;
+  configuration_in.streamConfiguration_3a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_marshal_3a)));
+
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_3b;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_marshal_3b;
+  modulehandler_configuration_3b.allocatorConfiguration =
+    &allocator_configuration;
+  modulehandler_configuration_3b.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration_3b.closeAfterReception = true;
+  modulehandler_configuration_3b.concurrency =
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+  modulehandler_configuration_3b.connectionConfigurations =
+    &configuration_in.connectionConfigurations;
+  modulehandler_configuration_3b.messageAllocator = &message_allocator;
+  modulehandler_configuration_3b.parserConfiguration =
+    &configuration_in.parserConfiguration;
+  modulehandler_configuration_3b.queue = &message_queue;
+  //  modulehandler_configuration_3b.statisticReportingInterval =
+  //    statisticReportingInterval_in;
+  modulehandler_configuration_3b.subscriber = &message_handler_3;
+  modulehandler_configuration_3b.waitForConnect = false;
+  struct HTTP_ParserConfiguration parserConfiguration_3b;
+  modulehandler_configuration_3b.parserConfiguration =
+      &parserConfiguration_3b;
+  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_3b;
+  stream_configuration_3b.messageAllocator = &message_allocator_3;
+  stream_configuration_3b.cloneModule = true;
+  stream_configuration_3b.module = &event_handler_module_3;
+  configuration_in.streamConfiguration_3b.initialize (module_configuration,
+                                                      modulehandler_configuration_3b,
+                                                      stream_configuration_3b);
+  modulehandler_configuration_marshal_3b = modulehandler_configuration_3b;
+  struct HTTP_ParserConfiguration parserConfiguration_marshal_3b;
+  modulehandler_configuration_marshal_3b.parserConfiguration =
+    &parserConfiguration_marshal_3b;
+  configuration_in.streamConfiguration_3b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_marshal_3b)));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -816,105 +927,80 @@ do_work (const std::string& configurationFile_in,
   ALSA_configuration.asynch = false;
 #endif // ACE_WIN32 || ACE_WIN64
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
-  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_3;
-  //struct Test_I_WebTV_ModuleHandlerConfiguration_2 modulehandler_configuration_4; // parser
-  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_5; // audio decoder
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_decoder_4; // audio decoder
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  modulehandler_configuration_3.ALSAConfiguration = &ALSA_configuration;
+  modulehandler_configuration_4.ALSAConfiguration = &ALSA_configuration;
 #endif // ACE_WIN32 || ACE_WIN64
-  modulehandler_configuration_3.allocatorConfiguration =
+  modulehandler_configuration_4.allocatorConfiguration =
     &allocator_configuration;
-  modulehandler_configuration_3.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_3.codecId = AV_CODEC_ID_H264;
+  modulehandler_configuration_4.codecId = AV_CODEC_ID_H264;
 #endif // FFMPEG_SUPPORT
-  modulehandler_configuration_3.concurrency =
+  modulehandler_configuration_4.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
-  modulehandler_configuration_3.connectionConfigurations =
-    &configuration_in.connectionConfigurations;
-//#if defined (_DEBUG)
-  //modulehandler_configuration_3.debug = true;
-//#endif // _DEBUG
-  modulehandler_configuration_3.defragmentMode = STREAM_DEFRAGMENT_CLONE;
+  modulehandler_configuration_4.defragmentMode = STREAM_DEFRAGMENT_CLONE;
 //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
-  modulehandler_configuration_3.delayConfiguration = &delay_configuration;
+  modulehandler_configuration_4.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_3.deviceIdentifier.identifierDiscriminator =
+  modulehandler_configuration_4.deviceIdentifier.identifierDiscriminator =
     Stream_Device_Identifier::GUID;
-  modulehandler_configuration_3.deviceIdentifier.identifier._guid =
+  modulehandler_configuration_4.deviceIdentifier.identifier._guid =
     Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false); // playback
-  modulehandler_configuration_3.deviceType = AV_HWDEVICE_TYPE_DXVA2;
-  //modulehandler_configuration_3.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+  modulehandler_configuration_4.deviceType = AV_HWDEVICE_TYPE_DXVA2;
+  //modulehandler_configuration_4.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   struct tWAVEFORMATEX* waveformatex_p =
-    Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_3.deviceIdentifier.identifier._guid);
+    Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_4.deviceIdentifier.identifier._guid);
 #else
-  modulehandler_configuration_3.deviceIdentifier.identifier =
+  modulehandler_configuration_4.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
-  modulehandler_configuration_3.deviceType = AV_HWDEVICE_TYPE_VAAPI;
+  modulehandler_configuration_4.deviceType = AV_HWDEVICE_TYPE_VAAPI;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_3.outputFormat.audio.format =
+  modulehandler_configuration_4.outputFormat.audio.format =
       Stream_Module_Decoder_Tools::to (*waveformatex_p);
-  modulehandler_configuration_3.outputFormat.audio.channels =
+  modulehandler_configuration_4.outputFormat.audio.channels =
       waveformatex_p->nChannels;
-  modulehandler_configuration_3.outputFormat.audio.sampleRate =
+  modulehandler_configuration_4.outputFormat.audio.sampleRate =
       waveformatex_p->nSamplesPerSec;
   CoTaskMemFree (waveformatex_p); waveformatex_p = NULL;
 #else
-  modulehandler_configuration_3.outputFormat.audio.format = AV_SAMPLE_FMT_S16;
-  modulehandler_configuration_3.outputFormat.audio.channels = 2;
-  modulehandler_configuration_3.outputFormat.audio.sampleRate = 48000;
+  modulehandler_configuration_4.outputFormat.audio.format = AV_SAMPLE_FMT_S16;
+  modulehandler_configuration_4.outputFormat.audio.channels = 2;
+  modulehandler_configuration_4.outputFormat.audio.sampleRate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
-  modulehandler_configuration_3.outputFormat.video.format = AV_PIX_FMT_RGB24;
+  modulehandler_configuration_4.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT
-  modulehandler_configuration_3.display = Common_UI_Tools::getDefaultDisplay ();
+  modulehandler_configuration_4.queue = &message_queue;
+  modulehandler_configuration_4.display = Common_UI_Tools::getDefaultDisplay ();
   struct HTTP_ParserConfiguration parserConfiguration_4;
-  modulehandler_configuration_3.parserConfiguration =
-    &parserConfiguration_4;
-  modulehandler_configuration_3.queue = &message_queue;
-  modulehandler_configuration_3.statisticReportingInterval =
+  modulehandler_configuration_4.statisticReportingInterval =
     statisticReportingInterval_in;
-  modulehandler_configuration_3.subscriber = &message_handler_3;
+  modulehandler_configuration_4.subscriber = &message_handler_3;
 //  modulehandler_configuration_3.targetFileName =
 //    ACE_TEXT_ALWAYS_CHAR ("webtv.264");
   //modulehandler_configuration_3.targetFileName = outputDirectory_in;
-  modulehandler_configuration_3.waitForConnect = false;
-  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_3b; // input-
-  stream_configuration_3b.mediaType.audio.channels = 2;
-  stream_configuration_3b.mediaType.audio.format = AV_SAMPLE_FMT_S16;
-  stream_configuration_3b.mediaType.audio.sampleRate = 48000;
-  stream_configuration_3b.messageAllocator = &message_allocator_3;
-  stream_configuration_3b.cloneModule = false;
-  stream_configuration_3b.module = &event_handler_module_3;
-  stream_configuration_3b.printFinalReport = true;
-  configuration_in.streamConfiguration_3b.initialize (module_configuration,
-                                                      modulehandler_configuration_3,
-                                                      stream_configuration_3b);
 
-  modulehandler_configuration_5 = modulehandler_configuration_3;
-  modulehandler_configuration_5.codecId = AV_CODEC_ID_AAC;
-  configuration_in.streamConfiguration_3b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
-                                                                  std::make_pair (&module_configuration,
-                                                                                  &modulehandler_configuration_5)));
-
-  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_3a;
-  stream_configuration_3a.messageAllocator = &message_allocator_3;
-  stream_configuration_3a.cloneModule = true;
-  stream_configuration_3a.module = &event_handler_module_3;
-  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_6;
-  modulehandler_configuration_6 = modulehandler_configuration_3;
-  modulehandler_configuration_6.concurrency =
-      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-  struct HTTP_ParserConfiguration parserConfiguration_5;
-  modulehandler_configuration_6.parserConfiguration =
-      &parserConfiguration_5;
-  configuration_in.streamConfiguration_3a.initialize (module_configuration,
-                                                      modulehandler_configuration_6,
-                                                      stream_configuration_3a);
+  struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4; // input-
+  stream_configuration_4.mediaType.audio.channels = 2;
+  stream_configuration_4.mediaType.audio.format = AV_SAMPLE_FMT_S16;
+  stream_configuration_4.mediaType.audio.sampleRate = 48000;
+  stream_configuration_4.messageAllocator = &message_allocator_3;
+  stream_configuration_4.cloneModule = false;
+  stream_configuration_4.module = &event_handler_module_3;
+  stream_configuration_4.printFinalReport = true;
+  configuration_in.streamConfiguration_4.initialize (module_configuration,
+                                                     modulehandler_configuration_4,
+                                                     stream_configuration_4);
+  modulehandler_configuration_audio_decoder_4 = modulehandler_configuration_4;
+  modulehandler_configuration_audio_decoder_4.codecId = AV_CODEC_ID_AAC;
+  configuration_in.streamConfiguration_4.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_audio_decoder_4)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -929,7 +1015,7 @@ do_work (const std::string& configurationFile_in,
   ACE_ASSERT (connection_manager_3);
   connection_manager_3->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_3->set (connection_configuration_3,
+  connection_manager_3->set (connection_configuration_3a,
                              NULL);
 
   Common_Timer_Manager_t* timer_manager_p =
@@ -1072,7 +1158,7 @@ do_work (const std::string& configurationFile_in,
   input_stream.stop (true,   // wait for completion ?
                      false,  // recurse ?
                      false); // high priority
-  input_stream.remove (&event_handler_module_2,
+  input_stream.remove (&event_handler_module_3,
                        true,   // lock ?
                        false); // reset ?
 
