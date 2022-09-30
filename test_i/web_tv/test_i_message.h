@@ -36,7 +36,7 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
+class Test_I_SessionMessage_3;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -86,7 +86,7 @@ class Test_I_Message
                                                  struct Common_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
                                                  Test_I_Message,
-                                                 Test_I_SessionMessage_2>;
+                                                 Test_I_SessionMessage_3>;
 
  public:
   Test_I_Message (Stream_SessionId_t, // session id

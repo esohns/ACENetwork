@@ -32,9 +32,8 @@
 #include "test_i_message.h"
 #include "test_i_session_message.h"
 
-class Test_I_EventHandler
+class Test_I_EventHandler // master m3u
  : public Test_I_ISessionNotify_t
- , public Test_I_ISessionNotify_2_t
 {
  public:
   Test_I_EventHandler (
@@ -56,12 +55,6 @@ class Test_I_EventHandler
   virtual void notify (Stream_SessionId_t,              // session id
                        const Test_I_SessionMessage&);   // session message
 
-  // implement Stream_ISessionDataNotify_2_T
-  virtual void start (Stream_SessionId_t,                        // session id
-                      const Test_I_WebTV_SessionData_2&); // session data
-  virtual void notify (Stream_SessionId_t,                // session id
-                       const Test_I_SessionMessage_2&);   // session message
-
  private:
 #if defined (GUI_SUPPORT)
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler ())
@@ -72,14 +65,92 @@ class Test_I_EventHandler
   typedef std::map<unsigned int, struct Test_I_WebTV_SessionData*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
-  typedef std::map<unsigned int, Test_I_WebTV_SessionData_2*> SESSION_DATA_MAP_2_T;
-  typedef SESSION_DATA_MAP_2_T::iterator SESSION_DATA_MAP_ITERATOR_2_T;
+#if defined (GUI_SUPPORT)
+  struct Test_I_WebTV_UI_CBData* CBData_;
+#endif // GUI_SUPPORT
+  SESSION_DATA_MAP_T             sessionDataMap_;
+};
+
+//////////////////////////////////////////
+
+class Test_I_EventHandler_2 // playlist m3u
+ : public Test_I_ISessionNotify_t
+{
+ public:
+  Test_I_EventHandler_2 (
+#if defined (GUI_SUPPORT)
+                         struct Test_I_WebTV_UI_CBData*); // UI state
+#else
+                        );
+#endif // GUI_SUPPORT
+  inline virtual ~Test_I_EventHandler_2 () {}
+
+  // implement Stream_ISessionDataNotify_T
+  virtual void start (Stream_SessionId_t,               // session id
+                      const Test_I_WebTV_SessionData&); // session data
+  virtual void notify (Stream_SessionId_t,
+                       const enum Stream_SessionMessageType&);
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,     // session id
+                       const Test_I_Message&); // (protocol) message
+  virtual void notify (Stream_SessionId_t,            // session id
+                       const Test_I_SessionMessage&); // session message
+
+ private:
+#if defined (GUI_SUPPORT)
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2 ())
+#endif // GUI_SUPPORT
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2 (const Test_I_EventHandler_2&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2& operator= (const Test_I_EventHandler_2&))
+
+  typedef std::map<unsigned int, Test_I_WebTV_SessionData*> SESSION_DATA_MAP_T;
+  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
 #if defined (GUI_SUPPORT)
   struct Test_I_WebTV_UI_CBData* CBData_;
 #endif // GUI_SUPPORT
-  SESSION_DATA_MAP_T                     sessionDataMap_;
-  SESSION_DATA_MAP_2_T                   sessionDataMap2_;
+  SESSION_DATA_MAP_T             sessionDataMap_;
+};
+
+//////////////////////////////////////////
+
+class Test_I_EventHandler_3 // content
+ : public Test_I_ISessionNotify_3_t
+{
+ public:
+  Test_I_EventHandler_3 (
+#if defined (GUI_SUPPORT)
+                         struct Test_I_WebTV_UI_CBData*); // UI state
+#else
+                        );
+#endif // GUI_SUPPORT
+  inline virtual ~Test_I_EventHandler_3 () {}
+
+  // implement Stream_ISessionDataNotify_T
+  virtual void start (Stream_SessionId_t,                 // session id
+                      const Test_I_WebTV_SessionData_3&); // session data
+  virtual void notify (Stream_SessionId_t,
+                       const enum Stream_SessionMessageType&);
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,     // session id
+                       const Test_I_Message&); // (protocol) message
+  virtual void notify (Stream_SessionId_t,              // session id
+                       const Test_I_SessionMessage_3&); // session message
+
+ private:
+#if defined (GUI_SUPPORT)
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3 ())
+#endif // GUI_SUPPORT
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3 (const Test_I_EventHandler_3&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3& operator= (const Test_I_EventHandler_3&))
+
+  typedef std::map<unsigned int, Test_I_WebTV_SessionData_3*> SESSION_DATA_MAP_T;
+  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
+
+#if defined (GUI_SUPPORT)
+  struct Test_I_WebTV_UI_CBData* CBData_;
+#endif // GUI_SUPPORT
+  SESSION_DATA_MAP_T             sessionDataMap_;
 };
 
 #endif

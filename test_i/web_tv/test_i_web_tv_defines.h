@@ -40,12 +40,22 @@
 #define TEST_I_M3U_EXTINFO_FRAMERATE_KEY_STRING           "FRAME-RATE"
 #define TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING          "RESOLUTION"
 
+// keys
+#define TEST_I_M3U_MEDIAINFO_DEFAULT_KEY_STRING           "DEFAULT"
+#define TEST_I_M3U_MEDIAINFO_NAME_KEY_STRING              "NAME"
+#define TEST_I_M3U_MEDIAINFO_TYPE_KEY_STRING              "TYPE"
+#define TEST_I_M3U_MEDIAINFO_URI_KEY_STRING               "URI"
+// values
+#define TEST_I_M3U_MEDIAINFO_DEFAULT_YES_STRING           "YES"
+#define TEST_I_M3U_MEDIAINFO_TYPE_AUDIO_STRING            "AUDIO"
+
 //----------------------------------------
 
 #if defined (GTK_SUPPORT)
 #define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
 #define TEST_I_UI_GTK_BUTTON_LOAD_NAME                    "button_load"
 #define TEST_I_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
+#define TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME          "combobox_audio_channel"
 #define TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME               "combobox_channel"
 #define TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME               "combobox_display"
 #define TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME            "combobox_resolution"
@@ -56,6 +66,7 @@
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
 #define TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
 #define TEST_I_UI_GTK_FRAME_CHANNEL_NAME                  "frame_channel"
+#define TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME         "liststore_audio_channel"
 #define TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME              "liststore_channel"
 #define TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME           "liststore_resolution"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                    "progressbar"

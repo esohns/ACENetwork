@@ -98,8 +98,6 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_eventhandler.h
      test_i_message.cpp
      test_i_message.h
-     test_i_module_eventhandler.cpp
-     test_i_module_eventhandler.h
      test_i_module_httpget.cpp
      test_i_module_httpget.h
      test_i_m3u_module_parser.cpp

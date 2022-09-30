@@ -42,10 +42,10 @@
 // forward declarations
 class Stream_IAllocator;
 class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
+class Test_I_SessionMessage_3;
 
 extern const char stream_name_string_[];
-extern const char stream_name_string_2[];
+extern const char stream_name_string_3a[];
 
 class Test_I_ConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -107,50 +107,50 @@ class Test_I_ConnectionStream
 
 //////////////////////////////////////////
 
-class Test_I_ConnectionStream_2
+class Test_I_ConnectionStream_3
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_2,
+                                        stream_name_string_3a,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
-                                        struct Test_I_WebTV_StreamState_2,
-                                        struct Test_I_WebTV_StreamConfiguration_2,
+                                        struct Test_I_WebTV_StreamState_3,
+                                        struct Test_I_WebTV_StreamConfiguration_3,
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
-                                        struct Test_I_WebTV_ModuleHandlerConfiguration_2,
-                                        Test_I_WebTV_SessionData_2,
-                                        Test_I_WebTV_SessionData_2_t,
+                                        struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                                        Test_I_WebTV_SessionData_3,
+                                        Test_I_WebTV_SessionData_3_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
-                                        Test_I_SessionMessage_2,
+                                        Test_I_SessionMessage_3,
                                         ACE_INET_Addr,
-                                        Test_I_ConnectionManager_2_t,
+                                        Test_I_ConnectionManager_3_t,
                                         struct Stream_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_2,
+                                        stream_name_string_3a,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
-                                        struct Test_I_WebTV_StreamState_2,
-                                        struct Test_I_WebTV_StreamConfiguration_2,
+                                        struct Test_I_WebTV_StreamState_3,
+                                        struct Test_I_WebTV_StreamConfiguration_3,
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
-                                        struct Test_I_WebTV_ModuleHandlerConfiguration_2,
-                                        Test_I_WebTV_SessionData_2,
-                                        Test_I_WebTV_SessionData_2_t,
+                                        struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                                        Test_I_WebTV_SessionData_3,
+                                        Test_I_WebTV_SessionData_3_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
-                                        Test_I_SessionMessage_2,
+                                        Test_I_SessionMessage_3,
                                         ACE_INET_Addr,
-                                        Test_I_ConnectionManager_2_t,
+                                        Test_I_ConnectionManager_3_t,
                                         struct Stream_UserData> inherited;
 
  public:
-  Test_I_ConnectionStream_2 ();
-  inline virtual ~Test_I_ConnectionStream_2 () { inherited::shutdown (); }
+  Test_I_ConnectionStream_3 ();
+  inline virtual ~Test_I_ConnectionStream_3 () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // i/o value: layout
@@ -161,8 +161,8 @@ class Test_I_ConnectionStream_2
                            ACE_HANDLE);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_2 (const Test_I_ConnectionStream_2&))
-  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_2& operator= (const Test_I_ConnectionStream_2&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_3 (const Test_I_ConnectionStream_3&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_3& operator= (const Test_I_ConnectionStream_3&))
 };
 
 #endif

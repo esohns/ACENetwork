@@ -50,8 +50,8 @@
 // forward declarations
 class Test_I_Message;
 class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
-class Test_I_Stream;
+class Test_I_SessionMessage_3;
+class Test_I_AVStream;
 
 typedef std::list<std::string> Test_I_WebTV_ChannelSegmentURLs_t;
 typedef Test_I_WebTV_ChannelSegmentURLs_t::iterator Test_I_WebTV_ChannelSegmentURLsIterator_t;
@@ -72,27 +72,39 @@ struct Test_I_WebTV_ChannelSegment
   }
 };
 
-struct Test_I_WebTV_ChannelResolution
+struct Test_I_WebTV_Channel_AudioChannel
+{
+  bool        default;
+  std::string description;
+  std::string URI; // relative to channel baseURI
+};
+typedef std::vector<struct Test_I_WebTV_Channel_AudioChannel> Test_I_WebTV_Channel_AudioChannels_t;
+typedef Test_I_WebTV_Channel_AudioChannels_t::iterator Test_I_WebTV_Channel_AudioChannelsIterator_t;
+typedef Test_I_WebTV_Channel_AudioChannels_t::const_iterator Test_I_WebTV_Channel_AudioChannelsConstIterator_t;
+
+struct Test_I_WebTV_Channel_Resolution
 {
   unsigned int              frameRate;
   Common_Image_Resolution_t resolution;
   std::string               URI; // relative to channel baseURI
 };
-typedef std::vector<struct Test_I_WebTV_ChannelResolution> Test_I_WebTV_ChannelResolutions_t;
-typedef Test_I_WebTV_ChannelResolutions_t::iterator Test_I_WebTV_ChannelResolutionsIterator_t;
-typedef Test_I_WebTV_ChannelResolutions_t::const_iterator Test_I_WebTV_ChannelResolutionsConstIterator_t;
+typedef std::vector<struct Test_I_WebTV_Channel_Resolution> Test_I_WebTV_Channel_Resolutions_t;
+typedef Test_I_WebTV_Channel_Resolutions_t::iterator Test_I_WebTV_Channel_ResolutionsIterator_t;
+typedef Test_I_WebTV_Channel_Resolutions_t::const_iterator Test_I_WebTV_Channel_ResolutionsConstIterator_t;
 
 // *NOTE*: the main program URL 'mainURL' contains information about the
 //         available streams
 struct Test_I_WebTV_ChannelConfiguration
 {
-  std::string                        baseURI; // sub-URI (if any) of the individual streams
-  unsigned int                       indexPositions; // i.e. for computing leading "0"s
-  std::string                        mainURL; // program-
-  unsigned int                       maxIndex; // wrap around (to 1 (!)) after this
-  std::string                        name;
-  Test_I_WebTV_ChannelResolutions_t  resolutions;
-  struct Test_I_WebTV_ChannelSegment segment;
+  std::string                          baseURI; // sub-URI (if any) of the individual streams
+  unsigned int                         indexPositions; // i.e. for computing leading "0"s
+  std::string                          mainURL; // program-
+  unsigned int                         maxIndex; // wrap around (to 1 (!)) after this
+  std::string                          name;
+  Test_I_WebTV_Channel_AudioChannels_t channels;
+  Test_I_WebTV_Channel_Resolutions_t   resolutions;
+  struct Test_I_WebTV_ChannelSegment   audioSegment;
+  struct Test_I_WebTV_ChannelSegment   videoSegment;
 
   void clear ()
   {
@@ -101,8 +113,10 @@ struct Test_I_WebTV_ChannelConfiguration
     mainURL.clear ();
     maxIndex = 0;
     name.clear ();
+    channels.clear ();
     resolutions.clear ();
-    segment.clear ();
+    audioSegment.clear ();
+    videoSegment.clear ();
   }
 };
 typedef std::map<unsigned int, struct Test_I_WebTV_ChannelConfiguration> Test_I_WebTV_ChannelConfigurations_t;
@@ -134,7 +148,8 @@ struct Test_I_WebTV_Configuration
    , parserConfiguration ()
    , streamConfiguration ()
    , streamConfiguration_2 ()
-   , streamConfiguration_3 ()
+   , streamConfiguration_3a ()
+   , streamConfiguration_3b ()
   {}
 
   // **************************** socket data **********************************
@@ -143,8 +158,9 @@ struct Test_I_WebTV_Configuration
   struct HTTP_ParserConfiguration      parserConfiguration;
   // **************************** stream data **********************************
   Test_I_WebTV_StreamConfiguration_t   streamConfiguration;
-  Test_I_WebTV_StreamConfiguration_2_t streamConfiguration_2;
-  Test_I_WebTV_StreamConfiguration_2_t streamConfiguration_3; // input
+  Test_I_WebTV_StreamConfiguration_t   streamConfiguration_2;
+  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3a;
+  Test_I_WebTV_StreamConfiguration_3_t streamConfiguration_3b; // input
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -156,7 +172,7 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           struct Common_AllocatorConfiguration,
                                           Stream_ControlMessage_t,
                                           Test_I_Message,
-                                          Test_I_SessionMessage_2> Test_I_MessageAllocator_2_t;
+                                          Test_I_SessionMessage_3> Test_I_MessageAllocator_3_t;
 
 typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 
@@ -200,9 +216,11 @@ struct Test_I_WebTV_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , channels (NULL)
    , currentChannel (0)
-   , currentStream (0)
+   , currentAudioStream (0)
+   , currentVideoStream (0)
    , dispatch (NULL)
-   , handle (ACE_INVALID_HANDLE)
+   , audioHandle (ACE_INVALID_HANDLE)
+   , videoHandle (ACE_INVALID_HANDLE)
    , progressData ()
    , stream (NULL)
    , streamSessionId (0)
@@ -214,11 +232,13 @@ struct Test_I_WebTV_UI_CBData
   struct Test_I_WebTV_Configuration*    configuration;
   Test_I_WebTV_ChannelConfigurations_t* channels;
   unsigned int                          currentChannel;
-  unsigned int                          currentStream;
+  unsigned int                          currentAudioStream;
+  unsigned int                          currentVideoStream;
   Common_IDispatch*                     dispatch;
-  ACE_HANDLE                            handle; // connection-
+  ACE_HANDLE                            audioHandle; // connection-
+  ACE_HANDLE                            videoHandle; // connection-
   struct Test_I_WebTV_UI_ProgressData   progressData;
-  Test_I_Stream*                        stream; // input-
+  Test_I_AVStream*                      stream; // input-
   Stream_SessionId_t                    streamSessionId;
   Test_I_Subscribers_t                  subscribers;
   Test_I_TimeoutHandler*                timeoutHandler;

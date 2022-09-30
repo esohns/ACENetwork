@@ -94,10 +94,9 @@ extern "C"
 class Stream_IAllocator;
 class Test_I_Message;
 class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
-//struct Test_I_WebTV_ConnectionConfiguration;
+//class Test_I_SessionMessage_2;
+class Test_I_SessionMessage_3;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          //Test_I_WebTV_ConnectionConfiguration_t,
                           struct HTTP_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 
@@ -125,28 +124,29 @@ struct Test_I_WebTV_SessionData
 {
   Test_I_WebTV_SessionData ()
    : Test_I_StreamSessionData ()
-   , address (static_cast<u_short> (0),
-              static_cast<ACE_UINT32> (INADDR_ANY))
+   //, address (static_cast<u_short> (0),
+   //           static_cast<ACE_UINT32> (INADDR_NONE))
    , connection (NULL)
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
-   , targetFileName ()
+   //, targetFileName ()
   {}
 
   struct Test_I_WebTV_SessionData& operator= (const struct Test_I_WebTV_SessionData& rhs_in)
   {
     Test_I_StreamSessionData::operator= (rhs_in);
 
+    //address = rhs_in.address;
     connection = (connection ? connection : rhs_in.connection);
-    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
-                                              : targetFileName);
+    //targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
+    //                                          : targetFileName);
 
     return *this;
   }
 
-  ACE_INET_Addr                                address;
+  //ACE_INET_Addr                                address;
   Test_I_IConnection_t*                        connection;
   enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
-  std::string                                  targetFileName; // file writer module
+  //std::string                                  targetFileName; // file writer module
 };
 typedef Stream_SessionData_T<struct Test_I_WebTV_SessionData> Test_I_WebTV_SessionData_t;
 
@@ -164,27 +164,13 @@ struct Test_I_WebTV_ModuleHandlerConfiguration
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
    , subscriber (NULL)
-   , subscribers (NULL)
-   , targetFileName ()
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-   , window (NULL)
-#endif // GTK_USE
-#endif // GUI_SUPPORT
   {
-    concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
+    concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
     inbound = true;
   }
 
   Net_ConnectionConfigurations_t* connectionConfigurations;
   Test_I_ISessionNotify_t*        subscriber;
-  Test_I_Subscribers_t*           subscribers;
-  std::string                     targetFileName; // dump module
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-  GdkWindow*                      window;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
 };
 
 struct Test_I_WebTV_StreamConfiguration
@@ -212,23 +198,53 @@ struct Test_I_WebTV_StreamState
 
 //////////////////////////////////////////
 
-struct Test_I_WebTV_StreamState_2;
-class Test_I_WebTV_SessionData_2
+//typedef Stream_ISessionDataNotify_T<struct Test_I_WebTV_SessionData,
+//                                    enum Stream_SessionMessageType,
+//                                    Test_I_Message,
+//                                    Test_I_SessionMessage_2> Test_I_ISessionNotify_2;
+////typedef std::list<Test_I_ISessionNotify_2*> Test_I_Subscribers_2;
+////typedef Test_I_Subscribers_2::const_iterator Test_I_SubscribersIterator_2;
+//
+//struct Test_I_WebTV_ModuleHandlerConfiguration_2
+// : HTTP_ModuleHandlerConfiguration
+//{
+//  Test_I_WebTV_ModuleHandlerConfiguration_2 ()
+//   : HTTP_ModuleHandlerConfiguration ()
+//   , connectionConfigurations (NULL)
+//   , subscriber (NULL)
+//  {
+//    concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+//    inbound = true;
+//  }
+//
+//  Net_ConnectionConfigurations_t* connectionConfigurations;
+//  Test_I_ISessionNotify_2*        subscriber;
+//};
+//
+////extern const char stream_name_string_[];
+//typedef Stream_Configuration_T<//stream_name_string_,
+//                               struct Test_I_WebTV_StreamConfiguration,
+//                               struct Test_I_WebTV_ModuleHandlerConfiguration_2> Test_I_WebTV_StreamConfiguration_2;
+
+//////////////////////////////////////////
+
+struct Test_I_WebTV_StreamState_3;
+class Test_I_WebTV_SessionData_3
  : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
 #if defined (FFMPEG_SUPPORT)
                                         struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-                                        struct Test_I_WebTV_StreamState_2,
+                                        struct Test_I_WebTV_StreamState_3,
                                         struct Stream_Statistic,
                                         struct Stream_UserData>
 {
  public:
-  Test_I_WebTV_SessionData_2 ()
+  Test_I_WebTV_SessionData_3 ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
 #if defined (FFMPEG_SUPPORT)
                                    struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-                                   struct Test_I_WebTV_StreamState_2,
+                                   struct Test_I_WebTV_StreamState_3,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
    , address (static_cast<u_short> (0),
@@ -238,13 +254,13 @@ class Test_I_WebTV_SessionData_2
    , targetFileName ()
   {}
 
-  Test_I_WebTV_SessionData_2& operator= (const Test_I_WebTV_SessionData_2& rhs_in)
+  Test_I_WebTV_SessionData_3& operator= (const Test_I_WebTV_SessionData_3& rhs_in)
   {
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
 #if defined (FFMPEG_SUPPORT)
                                   struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-                                  struct Test_I_WebTV_StreamState_2,
+                                  struct Test_I_WebTV_StreamState_3,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator= (rhs_in);
 
@@ -260,19 +276,19 @@ class Test_I_WebTV_SessionData_2
   enum Stream_Decoder_CompressionFormatType format; // HTTP parser module
   std::string                               targetFileName; // file writer module
 };
-typedef Stream_SessionData_T<Test_I_WebTV_SessionData_2> Test_I_WebTV_SessionData_2_t;
+typedef Stream_SessionData_T<Test_I_WebTV_SessionData_3> Test_I_WebTV_SessionData_3_t;
 
-typedef Stream_ISessionDataNotify_T<Test_I_WebTV_SessionData_2,
+typedef Stream_ISessionDataNotify_T<Test_I_WebTV_SessionData_3,
                                     enum Stream_SessionMessageType,
                                     Test_I_Message,
-                                    Test_I_SessionMessage_2> Test_I_ISessionNotify_2_t;
-typedef std::list<Test_I_ISessionNotify_2_t*> Test_I_Subscribers_2_t;
-typedef Test_I_Subscribers_2_t::const_iterator Test_I_SubscribersIterator_2_t;
+                                    Test_I_SessionMessage_3> Test_I_ISessionNotify_3_t;
+//typedef std::list<Test_I_ISessionNotify_3_t*> Test_I_Subscribers_3_t;
+//typedef Test_I_Subscribers_3_t::const_iterator Test_I_SubscribersIterator_3_t;
 
-struct Test_I_WebTV_ModuleHandlerConfiguration_2
+struct Test_I_WebTV_ModuleHandlerConfiguration_3
  : HTTP_ModuleHandlerConfiguration
 {
-  Test_I_WebTV_ModuleHandlerConfiguration_2 ()
+  Test_I_WebTV_ModuleHandlerConfiguration_3 ()
    : HTTP_ModuleHandlerConfiguration ()
    , ALSAConfiguration (NULL)
 #if defined (FFMPEG_SUPPORT)
@@ -290,7 +306,6 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
    , videoStreamType (27) // H264
    , queue (NULL)
    , subscriber (NULL)
-   , subscribers (NULL)
    , targetFileName ()
 #if defined (FFMPEG_SUPPORT)
    , outputFormat ()
@@ -319,8 +334,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
   unsigned int                                     audioStreamType;          // MPEG TS decoder module
   unsigned int                                     videoStreamType;          // MPEG TS decoder module
   ACE_Message_Queue_Base*                          queue;
-  Test_I_ISessionNotify_2_t*                       subscriber;
-  Test_I_Subscribers_2_t*                          subscribers;
+  Test_I_ISessionNotify_3_t*                       subscriber;
   std::string                                      targetFileName; // dump module
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
@@ -332,10 +346,10 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_2
 #endif // GUI_SUPPORT
 };
 
-struct Test_I_WebTV_StreamConfiguration_2
+struct Test_I_WebTV_StreamConfiguration_3
  : HTTP_StreamConfiguration
 {
-  Test_I_WebTV_StreamConfiguration_2 ()
+  Test_I_WebTV_StreamConfiguration_3 ()
    : HTTP_StreamConfiguration ()
    , mediaType ()
   {}
@@ -344,22 +358,22 @@ struct Test_I_WebTV_StreamConfiguration_2
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Test_I_WebTV_StreamConfiguration_2,
-                               struct Test_I_WebTV_ModuleHandlerConfiguration_2> Test_I_WebTV_StreamConfiguration_2_t;
+                               struct Test_I_WebTV_StreamConfiguration_3,
+                               struct Test_I_WebTV_ModuleHandlerConfiguration_3> Test_I_WebTV_StreamConfiguration_3_t;
 
-struct Test_I_WebTV_StreamState_2
+struct Test_I_WebTV_StreamState_3
  : Test_I_StreamState
 {
-  Test_I_WebTV_StreamState_2 ()
+  Test_I_WebTV_StreamState_3 ()
    : Test_I_StreamState ()
    , sessionData (NULL)
   {}
 
-  Test_I_WebTV_SessionData_2* sessionData;
+  Test_I_WebTV_SessionData_3* sessionData;
 };
 
 typedef Stream_MessageQueue_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,
-                              Test_I_SessionMessage_2> Test_I_WebTV_MessageQueue_t;
+                              Test_I_SessionMessage_3> Test_I_WebTV_MessageQueue_t;
 
 #endif

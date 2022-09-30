@@ -137,7 +137,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
-  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+  //session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
 
@@ -201,18 +201,18 @@ failed:
 
 //////////////////////////////////////////
 
-Test_I_ConnectionStream_2::Test_I_ConnectionStream_2 ()
+Test_I_ConnectionStream_3::Test_I_ConnectionStream_3 ()
  : inherited ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::Test_I_ConnectionStream_2"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_3::Test_I_ConnectionStream_3"));
 
 }
 
 bool
-Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
+Test_I_ConnectionStream_3::load (Stream_ILayout* layout_in,
                                  bool& deleteModules_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_3::load"));
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -220,7 +220,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPMarshal_2_Module (this,
+                  Test_I_HTTPMarshal_3_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   layout_in->append (module_p, NULL, 0);
@@ -245,10 +245,10 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 }
 
 bool
-Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configuration_in,
+Test_I_ConnectionStream_3::initialize (const inherited::CONFIGURATION_T& configuration_in,
                                        ACE_HANDLE handle_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_3::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!inherited::isRunning ());

@@ -100,11 +100,11 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URI_string_2, URL_string;
   bool use_SSL = false;
-  typename Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
-    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  typename Test_I_ConnectionManager_3_t::INTERFACE_T* iconnection_manager_p =
+    TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_p = NULL;
-  Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
+  Test_I_ConnectionManager_3_t::ICONNECTION_T* iconnection_p = NULL;
+  Test_I_IStreamConnection_3* istream_connection_p = NULL;
   HTTP_Form_t HTTP_form;
   HTTP_Headers_t HTTP_headers;
   struct HTTP_Record* HTTP_record_p = NULL;
@@ -148,9 +148,9 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   if (unlikely (!iconnection_p))
     return;
   istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_p);
+      dynamic_cast<Test_I_IStreamConnection_3*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
-  const Test_I_IStreamConnection_2_t::STREAM_T& stream_r =
+  const Test_I_IStreamConnection_3::STREAM_T& stream_r =
       istream_connection_p->stream ();
 
   ACE_NEW_NORETURN (HTTP_record_p,

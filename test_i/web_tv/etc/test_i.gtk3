@@ -54,6 +54,22 @@
       <column type="guint"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="liststore_display">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name device -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_audio_channel">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="guint"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="liststore_resolution">
     <columns>
       <!-- column-name text -->
@@ -293,6 +309,7 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="model">liststore_channel</property>
+                                        <property name="has_frame">False</property>
                                         <property name="focus_on_click">False</property>
                                         <property name="id_column">0</property>
                                         <signal name="changed" handler="combobox_channel_changed_cb" swapped="no"/>
@@ -332,11 +349,28 @@
                                     <property name="can_focus">False</property>
                                     <property name="orientation">vertical</property>
                                     <child>
+                                      <object class="GtkComboBox" id="combobox_audio_channel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="model">liststore_audio_channel</property>
+                                        <property name="has_frame">False</property>
+                                        <property name="focus_on_click">False</property>
+                                        <property name="id_column">0</property>
+                                        <signal name="changed" handler="combobox_audio_channel_changed_cb" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
                                       <object class="GtkComboBox" id="combobox_resolution">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="model">liststore_resolution</property>
+                                        <property name="has_frame">False</property>
                                         <property name="focus_on_click">False</property>
                                         <property name="id_column">0</property>
                                         <signal name="changed" handler="combobox_resolution_changed_cb" swapped="no"/>
@@ -344,7 +378,7 @@
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">True</property>
-                                        <property name="position">0</property>
+                                        <property name="position">1</property>
                                       </packing>
                                     </child>
                                   </object>
@@ -474,6 +508,7 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="model">liststore_display</property>
+                                        <property name="has_frame">False</property>
                                         <property name="focus_on_click">False</property>
                                       </object>
                                       <packing>
@@ -617,14 +652,6 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkListStore" id="liststore_display">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name device -->
-      <column type="gchararray"/>
-    </columns>
   </object>
   <object class="GtkWindow" id="window_fullscreen">
     <property name="can_focus">False</property>

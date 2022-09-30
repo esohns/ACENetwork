@@ -57,18 +57,18 @@ typedef ACE_Singleton<Test_I_ConnectionManager_t,
 //////////////////////////////////////////
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Test_I_WebTV_ConnectionConfiguration_2_t,
+                                 Test_I_WebTV_ConnectionConfiguration_3_t,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
-                                 struct Net_UserData> Test_I_IConnectionManager_2_t;
+                                 struct Net_UserData> Test_I_IConnectionManager_3_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                ACE_INET_Addr,
-                                Test_I_WebTV_ConnectionConfiguration_2_t,
-                                struct HTTP_ConnectionState,
-                                HTTP_Statistic_t,
-                                struct Net_UserData> Test_I_ConnectionManager_2_t;
+                                 ACE_INET_Addr,
+                                 Test_I_WebTV_ConnectionConfiguration_3_t,
+                                 struct HTTP_ConnectionState,
+                                 HTTP_Statistic_t,
+                                 struct Net_UserData> Test_I_ConnectionManager_3_t;
 
-typedef ACE_Singleton<Test_I_ConnectionManager_2_t,
-                      ACE_SYNCH_MUTEX> TEST_I_CONNECTIONMANAGER_SINGLETON_2;
+typedef ACE_Singleton<Test_I_ConnectionManager_3_t,
+                      ACE_SYNCH_MUTEX> TEST_I_CONNECTIONMANAGER_SINGLETON_3;
 
 #endif
