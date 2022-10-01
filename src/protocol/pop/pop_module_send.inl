@@ -118,10 +118,6 @@ POP_Module_Send_T<ACE_SYNCH_USE,
     message_inout->getR ();
   const typename DataMessageType::DATA_T::DATA_T& data_r =
     data_container_r.getR ();
-
-//  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-//    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
-
   int result = -1;
   DataMessageType* message_p = NULL;
   typename DataMessageType::DATA_T* data_container_2 = NULL;
@@ -311,6 +307,14 @@ POP_Module_Send_T<ACE_SYNCH_USE,
         goto protocol_error;
 
       // --> QUIT has been sent
+      // close connection
+      ACE_ASSERT (connection_);
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: got QUIT reply, closing connection (id: %u)...\n"),
+                  inherited::mod_->name (),
+                  reinterpret_cast<unsigned int> (connection_->id ())));
+      connection_->abort ();
+
       delete data_p; data_p = NULL;
       return;
     }
