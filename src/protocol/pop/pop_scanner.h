@@ -682,12 +682,11 @@ void yyfree ( void * , yyscan_t yyscanner );
 #define text 3
 #define multiline_text 4
 #define multiline_text_begin 5
-#define multiline_text_dot 6
+#define multiline_text_end 6
 
 #endif
 
 
-    
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
  * down here because we want the user's section 1 to have been scanned first.
@@ -699,7 +698,6 @@ void yyfree ( void * , yyscan_t yyscanner );
 /* %if-c++-only */
 /* %endif */
 #endif
-    
 
 
 

@@ -94,7 +94,7 @@ SPACE          \x20
 %s             text
 %s             multiline_text
 %s             multiline_text_begin
-%s             multiline_text_dot
+%s             multiline_text_end
 
 %{
 /* handle locations */
@@ -162,14 +162,17 @@ SPACE          \x20
 } // end <text_begin>
 <multiline_text_begin>{
 {DOT}/{CRLF}               { driver->offset (yyleng);
-                             BEGIN(reply_code);
-                             return yytokentype::REPLY_TEXT_END;
-                             /* return yy::POP_Parser::token::REPLY_TEXT_END; */ }
+                             BEGIN(multiline_text_end); }
 {DOT}                      { driver->offset (yyleng); /* byte-stuffing */
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              BEGIN(multiline_text); }
+{CRLF}                     { driver->offset (yyleng);
+                             ACE_NEW_NORETURN (yylval->sval,
+                                               std::string ());
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->append (yytext); }
 {OCTET}{1}                 { driver->offset (yyleng);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
@@ -177,6 +180,12 @@ SPACE          \x20
                              yylval->sval->append (yytext);
                              BEGIN(multiline_text); }
 } // end <multiline_text_begin>
+<multiline_text_end>{
+{CRLF}                     { driver->offset (yyleng);
+                             BEGIN(reply_code);
+                             return yytokentype::REPLY_TEXT_END;
+                             /* return yy::POP_Parser::token::REPLY_TEXT_END; */ }
+} // end <multiline_text_end>
 <text>{
 {CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
@@ -202,7 +211,7 @@ SPACE          \x20
 <<EOF>>                    { yyterminate(); }
 <*>{OCTET}{1}              { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
-                             ACE_ASSERT (false);
+                             /* ACE_ASSERT (false); */
 
                              // debug info
                              std::string error_message =

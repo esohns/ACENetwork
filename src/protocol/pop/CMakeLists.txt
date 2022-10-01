@@ -124,7 +124,8 @@ target_sources (${PROJECT_NAME}_Protocol_POP
 #                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 PRIVATE ${absolute_source_files}
-                INTERFACE ${absolute_script_files})
+                scripts/scanner.l
+                scripts/parser.y)
 target_precompile_headers (${PROJECT_NAME}_Protocol_POP
                            PUBLIC stdafx.h)
 

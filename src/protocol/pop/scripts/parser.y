@@ -159,9 +159,9 @@ message:                 "reply_code"                               { driver->cu
                                                                       struct POP_Record* record_p = &driver->current ();
                                                                       driver->record (record_p);
                                                                       YYACCEPT; }
-text_lines:              text_line text_lines                       { $$ = $1 + $2; }
+text_lines:              text_lines text_line                       { $$ = $1 + $2; }
                          | /* empty */                              { $$ = 0; }
-text_line:               "text"                                     { $$ = $1->length () + 2;
+text_line:               "text"                                     { $$ = static_cast<ACE_UINT32> ($1->size ()) + 2;
                                                                       driver->current ().text.push_back (*$1); }
 %%
 
