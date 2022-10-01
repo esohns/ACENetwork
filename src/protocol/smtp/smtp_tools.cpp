@@ -40,8 +40,13 @@ SMTP_Tools::dump (const struct SMTP_Record& record_in)
 
   string_buffer = ACE_TEXT_ALWAYS_CHAR ("code: \t");
   string_buffer += SMTP_Tools::CodeToString (record_in.code);
-  string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
+  string_buffer += ACE_TEXT_ALWAYS_CHAR (" (");
+  converter << record_in.code;
+  string_buffer += converter.str ();
+  string_buffer += ACE_TEXT_ALWAYS_CHAR (")\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("text: (");
+  converter.clear ();
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter << record_in.text.size ();
   string_buffer += converter.str ();
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("):\n");

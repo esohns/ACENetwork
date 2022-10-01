@@ -335,7 +335,7 @@ no_authentication_:
     }
   } // end SWITCH
 
-//send:
+send:
   message_p = inherited::allocateMessage (inherited::configuration_->allocatorConfiguration->defaultBufferSize);
   if (unlikely (!message_p))
   {
@@ -378,11 +378,15 @@ no_authentication_:
 
 protocol_error:
   ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("%s[%s]: received error reply code (was: \"%s\"):\n%s\n, returning\n"),
+              ACE_TEXT ("%s[%s]: received error reply code (was: %u - \"%s\"):\n%s\n, sending QUIT\n"),
               inherited::mod_->name (),
               ACE_TEXT (SMTP_Tools::StateToString (state_r.protocolState).c_str ()),
-              ACE_TEXT (SMTP_Tools::CodeToString (data_r.code).c_str ()),
+              data_r.code, ACE_TEXT (SMTP_Tools::CodeToString (data_r.code).c_str ()),
               ACE_TEXT (SMTP_Tools::dump (data_r).c_str ())));
+
+  data_p->request.command = SMTP_Codes::SMTP_COMMAND_QUIT;
+  goto send;
+
 error:
   if (data_p)
     delete data_p;
