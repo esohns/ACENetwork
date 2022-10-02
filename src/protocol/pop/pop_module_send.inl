@@ -306,14 +306,14 @@ POP_Module_Send_T<ACE_SYNCH_USE,
       if (!POP_Tools::isSuccess (data_r.status[0]))
         goto protocol_error;
 
-      // --> QUIT has been sent
-      // close connection
-      ACE_ASSERT (connection_);
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: got QUIT reply, closing connection (id: %u)...\n"),
-                  inherited::mod_->name (),
-                  reinterpret_cast<unsigned int> (connection_->id ())));
-      connection_->abort ();
+      //// --> QUIT has been sent
+      //// close connection
+      //ACE_ASSERT (connection_);
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("%s: got QUIT reply, closing connection (id: %u)...\n"),
+      //            inherited::mod_->name (),
+      //            reinterpret_cast<unsigned int> (connection_->id ())));
+      //connection_->abort ();
 
       delete data_p; data_p = NULL;
       return;
