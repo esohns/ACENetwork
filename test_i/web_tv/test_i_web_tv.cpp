@@ -1186,6 +1186,9 @@ do_work (const std::string& configurationFile_in,
   audio_input_stream.stop (true,   // wait for completion ?
                            false,  // recurse ?
                            false); // high priority
+  audio_input_stream.remove (&event_handler_module_3,
+                             true,   // lock ?
+                             false); // reset ?
   av_input_stream.stop (true,   // wait for completion ?
                         false,  // recurse ?
                         false); // high priority
