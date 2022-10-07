@@ -316,7 +316,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
       if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                            ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_DEFAULT_KEY_STRING)))
-        channel_s.default =
+        channel_s.default_ =
           !ACE_OS::strcmp ((*iterator_2).first.c_str (),
                            ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_DEFAULT_YES_STRING));
       else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),

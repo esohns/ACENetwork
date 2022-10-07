@@ -75,7 +75,7 @@ struct Test_I_WebTV_ChannelSegment
 
 struct Test_I_WebTV_Channel_AudioChannel
 {
-  bool        default;
+  bool        default_;
   std::string description;
   std::string URI; // relative to channel baseURI
 };

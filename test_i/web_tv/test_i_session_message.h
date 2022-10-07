@@ -27,6 +27,8 @@
 #include "stream_common.h"
 #include "stream_session_message_base.h"
 
+#include "stream_lib_imediatype.h"
+
 #include "test_i_web_tv_common.h"
 
 // forward declaration(s)
@@ -135,6 +137,7 @@ class Test_I_SessionMessage_3
  : public Stream_SessionMessageBase_T<enum Stream_SessionMessageType,
                                       Test_I_WebTV_SessionData_3_t,
                                       struct Stream_UserData>
+ , public Stream_IMediaType
 {
   typedef Stream_SessionMessageBase_T<enum Stream_SessionMessageType,
                                       Test_I_WebTV_SessionData_3_t,
@@ -161,6 +164,10 @@ class Test_I_SessionMessage_3
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
 
+  // implement Stream_IMediaType
+  inline void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+  inline enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
+
  private:
   // *NOTE*: these may be used by message allocators
   // *WARNING*: these ctors are NOT threadsafe
@@ -172,6 +179,8 @@ class Test_I_SessionMessage_3
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage_3 ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage_3& operator= (const Test_I_SessionMessage_3&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 
 #endif

@@ -941,7 +941,7 @@ do_work (const std::string& configurationFile_in,
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_decoder_4b; // audio decoder
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  modulehandler_configuration_4.ALSAConfiguration = &ALSA_configuration;
+  modulehandler_configuration_4b.ALSAConfiguration = &ALSA_configuration;
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_4b.allocatorConfiguration =
     &allocator_configuration;
@@ -965,9 +965,9 @@ do_work (const std::string& configurationFile_in,
   struct tWAVEFORMATEX* waveformatex_p =
     Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_4b.deviceIdentifier.identifier._guid);
 #else
-  modulehandler_configuration_4.deviceIdentifier.identifier =
+  modulehandler_configuration_4b.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
-  modulehandler_configuration_4.deviceType = AV_HWDEVICE_TYPE_VAAPI;
+  modulehandler_configuration_4b.deviceType = AV_HWDEVICE_TYPE_VAAPI;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
