@@ -2504,17 +2504,19 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
   // set corresponding video framerate
-  for (Test_I_WebTV_Channel_ResolutionsConstIterator_t iterator_2 = (*channel_iterator).second.resolutions.begin ();
-       iterator_2 != (*channel_iterator).second.resolutions.end ();
-       ++iterator_2)
+  for (Test_I_WebTV_Channel_ResolutionsConstIterator_t iterator_3 = (*channel_iterator).second.resolutions.begin ();
+       iterator_3 != (*channel_iterator).second.resolutions.end ();
+       ++iterator_3)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((*iterator_2).resolution.cx == resolution_s.cx)
+    if ((*iterator_3).resolution.cx == resolution_s.cx)
 #else
-    if ((*iterator_2).resolution.width == resolution_s.width)
+    if ((*iterator_3).resolution.width == resolution_s.width)
 #endif // ACE_WIN32 || ACE_WIN64
     {
       (*iterator_4b).second.second->delayConfiguration->averageTokensPerInterval =
-          (*iterator_2).frameRate;
+          (*iterator_3).frameRate;
+      data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.frameRate.num =
+          (*iterator_3).frameRate;
       break;
     } // end IF
 } // combobox_resolution_changed_cb

@@ -108,11 +108,8 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  struct Test_I_WebTV_SessionData* session_data_p = NULL;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
-  Stream_Module_t* module_p = NULL;
-//  Test_I_Net_Writer_t* netIO_impl_p = NULL;
-  Test_I_HTTPParser* parser_impl_p = NULL;
+//  struct Test_I_WebTV_SessionData* session_data_p = NULL;
+//  inherited::CONFIGURATION_T::ITERATOR_T iterator;
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -130,44 +127,15 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
-  session_data_p =
-    &const_cast<struct Test_I_WebTV_SessionData&> (inherited::sessionData_->getR ());
-  iterator =
-      const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+//  session_data_p =
+//    &const_cast<struct Test_I_WebTV_SessionData&> (inherited::sessionData_->getR ());
+//  iterator =
+//      const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+//  ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
-  //session_data_p->sessionID = configuration_in.sessionID;
-  //session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+//  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
-
-  // ---------------------------------------------------------------------------
-  // ******************* Net IO ************************
-  module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("Marshal")));
-    goto failed;
-  } // end IF
-  parser_impl_p = dynamic_cast<Test_I_HTTPParser*> (module_p->writer ());
-  if (!parser_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s/%s: dynamic_cast<Test_I_HTTPParser> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT (module_p->name ())));
-    goto failed;
-  } // end IF
-//  parser_impl_p->setP (&(inherited::state_));
-
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (configuration_in.configuration_->notificationStrategy))

@@ -691,6 +691,12 @@ do_work (const std::string& configurationFile_in,
   Test_I_MessageAllocator_3_t message_allocator_3 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                    &heap_allocator,         // heap allocator handle
                                                    true);                   // block ?
+  Test_I_WebTV_MessageQueue_t av_input_queue (STREAM_QUEUE_MAX_SLOTS,
+                                              NULL);
+  Test_I_WebTV_MessageQueue_t audio_input_queue (STREAM_QUEUE_MAX_SLOTS,
+                                                 NULL);
+  Test_I_WebTV_MessageQueue_t audio_output_queue (STREAM_QUEUE_MAX_SLOTS,
+                                                  NULL);
   Test_I_AVStream av_input_stream;
   Test_I_AudioStream audio_input_stream;
   ACE_Thread_Mutex timeout_handler_lock;
@@ -775,12 +781,6 @@ do_work (const std::string& configurationFile_in,
     configuration_in.parserConfiguration.debugScanner = true;
 #endif // _DEBUG
   // ********************** module configuration data **************************
-  Test_I_WebTV_MessageQueue_t av_input_queue (STREAM_QUEUE_MAX_SLOTS,
-                                              NULL);
-  Test_I_WebTV_MessageQueue_t audio_input_queue (STREAM_QUEUE_MAX_SLOTS,
-                                                 NULL);
-  Test_I_WebTV_MessageQueue_t audio_output_queue (STREAM_QUEUE_MAX_SLOTS,
-                                                  NULL);
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration modulehandler_configuration_marshal; // marshal
@@ -1012,6 +1012,7 @@ do_work (const std::string& configurationFile_in,
   stream_configuration_4b.mediaType.audio.channels = 2;
   stream_configuration_4b.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
   stream_configuration_4b.mediaType.audio.sampleRate = 48000;
+  stream_configuration_4b.mediaType.video.frameRate.num = 30;
   stream_configuration_4b.messageAllocator = &message_allocator_3;
   stream_configuration_4b.cloneModule = false;
   stream_configuration_4b.module = &event_handler_module_3;
