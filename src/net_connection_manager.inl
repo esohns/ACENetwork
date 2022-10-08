@@ -282,9 +282,6 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
-  // sanity check(s)
-  ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
-
   ICONNECTION_T* connection_p = NULL;
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, NULL);
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));

@@ -102,7 +102,7 @@ struct Test_I_WebTV_ChannelConfiguration
   std::string                          mainURL; // program-
   unsigned int                         maxIndex; // wrap around (to 1 (!)) after this
   std::string                          name;
-  Test_I_WebTV_Channel_AudioChannels_t channels;
+  Test_I_WebTV_Channel_AudioChannels_t audioChannels;
   Test_I_WebTV_Channel_Resolutions_t   resolutions;
   struct Test_I_WebTV_ChannelSegment   audioSegment;
   struct Test_I_WebTV_ChannelSegment   videoSegment;
@@ -114,7 +114,7 @@ struct Test_I_WebTV_ChannelConfiguration
     mainURL.clear ();
     maxIndex = 0;
     name.clear ();
-    channels.clear ();
+    audioChannels.clear ();
     resolutions.clear ();
     audioSegment.clear ();
     videoSegment.clear ();

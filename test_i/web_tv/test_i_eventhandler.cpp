@@ -327,7 +327,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
         channel_s.URI = Common_String_Tools::uncomment ((*iterator_2).second);
     } // end FOR
     if (is_channel_b)
-      (*channel_iterator).second.channels.push_back (channel_s);
+      (*channel_iterator).second.audioChannels.push_back (channel_s);
   } // end FOR
 
   guint event_source_id =

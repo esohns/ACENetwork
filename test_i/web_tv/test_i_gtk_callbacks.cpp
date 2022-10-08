@@ -333,7 +333,7 @@ idle_load_channel_configuration_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
   ACE_ASSERT (liststore_p);
   load_audio_channels (liststore_p,
-                       (*channel_iterator).second.channels);
+                       (*channel_iterator).second.audioChannels);
   GtkComboBox* combo_box_p =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
@@ -1852,7 +1852,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     (*stream_iterator_2b).second.second->parserConfiguration->messageQueue = NULL;
     (*stream_iterator_marshal_2b).second.second->parserConfiguration->messageQueue = NULL;
 
-    // retrieve stream URL
+    // retrieve stream URLs
     GtkComboBox* combo_box_p =
         GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
@@ -1897,6 +1897,29 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (data_p->currentChannel);
     channel_iterator = data_p->channels->find (data_p->currentChannel);
     ACE_ASSERT (channel_iterator != data_p->channels->end ());
+
+    combo_box_p =
+        GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
+    ACE_ASSERT (combo_box_p);
+    if (!gtk_combo_box_get_active_iter (combo_box_p,
+                                        &iterator_7))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
+      return;
+    } // end IF
+    list_store_p =
+        GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
+    ACE_ASSERT (list_store_p);
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                              &iterator_7,
+                              1,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    data_p->currentAudioStream = g_value_get_uint (&value);
+    g_value_unset (&value);
 
     // compute URI/URL for video stream
     for (Test_I_WebTV_Channel_ResolutionsConstIterator_t iterator_8 = (*channel_iterator).second.resolutions.begin ();
@@ -1955,7 +1978,8 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     (*stream_iterator_3b).second.second->URL = (*stream_iterator_2b).second.second->URL;
 
     // compute URI/URL for audio stream
-    URI_string = (*channel_iterator).second.channels[data_p->currentAudioStream].URI;
+    URI_string =
+      (*channel_iterator).second.audioChannels[data_p->currentAudioStream].URI;
     ACE_ASSERT (!URI_string.empty ());
     is_URI_b = HTTP_Tools::URLIsURI (URI_string);
     if (is_URI_b)
