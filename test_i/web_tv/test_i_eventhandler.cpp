@@ -608,8 +608,10 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     const_cast<struct Test_I_WebTV_MessageData&> (data_container_r.getR ());
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   ACE_ASSERT (iterator != sessionDataMap_.end ());
-  ACE_ASSERT ((*iterator).second->connection);
-  Net_ConnectionId_t connection_id = (*iterator).second->connection->id ();
+  Net_ConnectionId_t connection_id = ACE_INVALID_HANDLE;
+  //ACE_ASSERT ((*iterator).second->connection);
+  if (likely ((*iterator).second->connection))
+    connection_id = (*iterator).second->connection->id ();
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -627,7 +629,8 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   // process audio/video playlist data
   int UTC_offset_i = 0;
   unsigned int seconds_i = 0;
-  bool is_audio_b = (connection_id == CBData_->audioHandle);
+  bool is_audio_b = ((connection_id != ACE_INVALID_HANDLE) &&
+                     (connection_id == CBData_->audioHandle));
   struct Test_I_WebTV_ChannelSegment* segment_p =
     (is_audio_b ? &(*channel_iterator).second.audioSegment
                 : &(*channel_iterator).second.videoSegment);

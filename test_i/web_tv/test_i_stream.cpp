@@ -44,6 +44,11 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream::load"));
 
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+  bool save_to_file_b = !(*iterator).second.second->targetFileName.empty ();
+
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_QueueSource_Module (this,
@@ -92,7 +97,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 
   ACE_NEW_RETURN (module_p,
                   Test_I_Splitter_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MEDIASPLITTER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   branch_p = module_p;
@@ -102,8 +107,8 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
       dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
   ACE_ASSERT (idistributor_p);
   idistributor_p->initialize (configuration_->configuration_->branches);
-
   module_p = NULL;
+
 //#if defined (FAAD_SUPPORT)
   //ACE_NEW_RETURN (module_p,
   //                Test_I_FAADDecoder_Module (this,
@@ -121,6 +126,24 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   module_p = NULL;
 #endif // FFMPEG_SUPPORT
 //#endif // FAAD_SUPPORT
+
+  if (save_to_file_b)
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Audio_Tagger_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_QueueTarget_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+  } // end IF
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_NEW_RETURN (module_p,
                   Test_I_WASAPIOut_Module (this,
@@ -138,13 +161,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 
   ++index_i;
 
-//ACE_NEW_RETURN (module_p,
-//                Test_I_FileSink_Module (this,
-//                                        ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
-//                false);
-//layout_in->append (module_p, branch_p, index_i);
-//module_p = NULL;
-
+continue_:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_NEW_RETURN (module_p,
                   Test_I_VideoHWDecoder_Module (this,
@@ -160,27 +177,104 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
-                  Test_I_VideoResize_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                  Test_I_Video_Tagger_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 
-  ACE_NEW_RETURN (module_p,
-                  Test_I_VideoDelay_Module (this,
-                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
+  typename inherited::MODULE_T* branch_2 = NULL; // NULL: 'display|save' branches
+  unsigned int index_2 = 0;
 
-  ACE_NEW_RETURN (module_p,
-                  Test_I_GTKCairo_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
-  module_p = NULL;
+  if (save_to_file_b)
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Distributor_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    branch_2 = module_p;
+    configuration_->configuration_->branches.clear ();
+    configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
+    Stream_IDistributorModule* idistributor_2 =
+        dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+    ACE_ASSERT (idistributor_2);
+    idistributor_2->initialize (configuration_->configuration_->branches);
+    module_p = NULL;
 
-//++index_i;
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoResize_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoDelay_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_GTKCairo_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
+    ++index_2;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_QueueSource_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR ("QueueSource_2")),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_AVIEncoder_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_ENCODER_AVI_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_FileSink_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+#endif // ACE_WIN32 || ACE_WIN64
+
+    ++index_2;
+  } // end IF
+  else
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoResize_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoDelay_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_GTKCairo_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+  } // end ELSE
+  ++index_i;
 
   deleteModules_out = true;
 
@@ -218,10 +312,19 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
       const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
-  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
   session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
+  if (!(*iterator).second.second->targetFileName.empty ())
+  {
+    Stream_Module_t* module_p =
+      const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("QueueSource_2"),
+                                                     false,
+                                                     false));
+    ACE_ASSERT (module_p);
+    module_p->arg (inherited::sessionData_);
+  } // end IF
 
   // ---------------------------------------------------------------------------
 

@@ -163,10 +163,10 @@ do_print_usage (const std::string& programName_in)
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
   std::string output_file = Common_File_Tools::getTempDirectory ();
-//  output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//  output_file +=
-//    ACE_TEXT_ALWAYS_CHAR (Test_I_WebTV_DEFAULT_OUTPUT_FILE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-f[[PATH]]: (output) file directory [")
+  output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  output_file +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_DEFAULT_TARGET_FILE);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-f[[PATH]]: (output) file [")
             << output_file
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
@@ -215,7 +215,7 @@ do_process_arguments (int argc_in,
                       std::string& GtkRcFileName_out,
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
-                      std::string& outputDirectory_out,
+                      std::string& outputFileName_out,
 #if defined (GUI_SUPPORT)
                       std::string& UIDefinitonFileName_out,
 #endif // GUI_SUPPORT
@@ -248,10 +248,10 @@ do_process_arguments (int argc_in,
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
-  outputDirectory_out = temp_directory;
-//  fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//  fileName_out +=
-//    ACE_TEXT_ALWAYS_CHAR (Test_I_WebTV_DEFAULT_OUTPUT_FILE);
+  outputFileName_out = temp_directory;
+  outputFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  outputFileName_out +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_DEFAULT_TARGET_FILE);
 #if defined (GUI_SUPPORT)
   UIDefinitonFileName_out = configuration_directory;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -310,7 +310,7 @@ do_process_arguments (int argc_in,
 #endif // GUI_SUPPORT
       case 'f':
       {
-        outputDirectory_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
+        outputFileName_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
 #if defined (GUI_SUPPORT)
@@ -594,7 +594,7 @@ do_parse_configuration_file (const std::string& fileName_in,
 void
 do_work (const std::string& configurationFile_in,
          bool debugParser_in,
-         const std::string& outputDirectory_in,
+         const std::string& outputFileName_in,
          const std::string& UIDefinitionFileName_in,
          bool useReactor_in,
          const ACE_Time_Value& statisticReportingInterval_in,
@@ -697,6 +697,8 @@ do_work (const std::string& configurationFile_in,
                                                  NULL);
   Test_I_WebTV_MessageQueue_t audio_output_queue (STREAM_QUEUE_MAX_SLOTS,
                                                   NULL);
+  Test_I_WebTV_MessageQueue_t save_queue (STREAM_QUEUE_MAX_SLOTS,
+                                          NULL);
   Test_I_AVStream av_input_stream;
   Test_I_AudioStream audio_input_stream;
   ACE_Thread_Mutex timeout_handler_lock;
@@ -939,6 +941,8 @@ do_work (const std::string& configurationFile_in,
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4b;
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_injector_4b; // audio injector
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_decoder_4b; // audio decoder
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_queue_sink_4b; // audio queue
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_queue_source_4b; // save queue
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   modulehandler_configuration_4b.ALSAConfiguration = &ALSA_configuration;
@@ -991,9 +995,8 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.statisticReportingInterval =
     statisticReportingInterval_in;
   modulehandler_configuration_4b.subscriber = &message_handler_3;
-//  modulehandler_configuration_3.targetFileName =
-//    ACE_TEXT_ALWAYS_CHAR ("webtv.264");
-  //modulehandler_configuration_3.targetFileName = outputDirectory_in;
+  modulehandler_configuration_4b.targetFileName =
+    outputFileName_in;
 
   modulehandler_configuration_4a = modulehandler_configuration_4b;
   modulehandler_configuration_4a.queue = &audio_input_queue;
@@ -1030,6 +1033,19 @@ do_work (const std::string& configurationFile_in,
   configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_audio_decoder_4b)));
+  modulehandler_configuration_audio_queue_sink_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_audio_queue_sink_4b.queue = &save_queue;
+  configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_audio_queue_sink_4b)));
+  modulehandler_configuration_save_queue_source_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_save_queue_source_4b.autoStart = true;
+  modulehandler_configuration_save_queue_source_4b.concurrency =
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
+  modulehandler_configuration_save_queue_source_4b.queue = &save_queue;
+  configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("QueueSource_2"),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_save_queue_source_4b)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -1286,7 +1302,7 @@ ACE_TMAIN (int argc_in,
   std::string configuration_file;
   bool debug_parser;
   std::string configuration_path;
-  std::string output_directory;
+  std::string output_filename_string;
 #if defined (GUI_SUPPORT)
   std::string ui_definition_file;
 #endif // GUI_SUPPORT
@@ -1386,10 +1402,10 @@ ACE_TMAIN (int argc_in,
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
-  output_directory = Common_File_Tools::getTempDirectory ();
-//  output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-//  output_file +=
-//    ACE_TEXT_ALWAYS_CHAR (Test_I_WebTV_DEFAULT_OUTPUT_FILE);
+  output_filename_string = Common_File_Tools::getTempDirectory ();
+  output_filename_string += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  output_filename_string +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_DEFAULT_TARGET_FILE);
 #if defined (GUI_SUPPORT)
   ui_definition_file = configuration_path;
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1417,7 +1433,7 @@ ACE_TMAIN (int argc_in,
                              gtk_rc_file,
 #endif // GTK_SUPPORT
 #endif // GUI_SUPPORT
-                             output_directory,
+                             output_filename_string,
 #if defined (GUI_SUPPORT)
                              ui_definition_file,
 #endif // GUI_SUPPORT
@@ -1582,7 +1598,7 @@ ACE_TMAIN (int argc_in,
   // step2: do actual work
   do_work (configuration_file,
            debug_parser,
-           output_directory,
+           output_filename_string,
            ui_definition_file,
            use_reactor,
            statistic_reporting_interval,
