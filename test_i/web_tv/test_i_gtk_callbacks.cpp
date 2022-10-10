@@ -579,23 +579,28 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_SAVE_NAME)));
   ACE_ASSERT (toggle_button_p);
+  std::string target_filename_string = (*iterator_4b).second.second->targetFileName;
   gtk_toggle_button_set_active (toggle_button_p,
-                                !(*iterator_4b).second.second->targetFileName.empty ());
+                                !target_filename_string.empty ());
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_SAVE_NAME)));
   ACE_ASSERT (entry_p);
   gtk_entry_set_text (entry_p,
-                      ACE_TEXT (Common_File_Tools::basename ((*iterator_4b).second.second->targetFileName, false).c_str ()));
+                      ACE_TEXT (Common_File_Tools::basename (target_filename_string, false).c_str ()));
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
   ACE_ASSERT (file_chooser_button_p);
-  std::string target_filename_string =
-    ((*iterator_4b).second.second->targetFileName.empty () ? Common_File_Tools::getTempDirectory ()
-                                                           : (*iterator_4b).second.second->targetFileName);
+  if (target_filename_string.empty ())
+  {
+    target_filename_string = Common_File_Tools::getTempDirectory ();
+    target_filename_string += ACE_DIRECTORY_SEPARATOR_STR;
+    target_filename_string +=
+      ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_DEFAULT_TARGET_FILE);
+  } // end IF
   if (!gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                            ACE_TEXT (target_filename_string.c_str ())))
+                                            ACE_TEXT (Common_File_Tools::directory (target_filename_string).c_str ())))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_file_chooser_set_current_folder(\"%s\"): \"%s\", aborting\n"),
