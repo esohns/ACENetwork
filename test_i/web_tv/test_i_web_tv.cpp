@@ -943,6 +943,7 @@ do_work (const std::string& configurationFile_in,
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_decoder_4b; // audio decoder
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_queue_sink_4b; // audio queue
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_queue_source_4b; // save queue
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_converter_4b; // save converter
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   modulehandler_configuration_4b.ALSAConfiguration = &ALSA_configuration;
@@ -1046,6 +1047,12 @@ do_work (const std::string& configurationFile_in,
   configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("QueueSource_2"),
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_save_queue_source_4b)));
+  modulehandler_configuration_save_converter_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_save_converter_4b.outputFormat.video.format =
+    AV_PIX_FMT_BGR24;
+  configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_save_converter_4b)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =

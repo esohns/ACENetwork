@@ -85,6 +85,7 @@
 
 #include "test_i_common.h"
 #include "test_i_message.h"
+#include "test_i_module_converter.h"
 #include "test_i_session_message.h"
 
 #include "test_i_web_tv_stream_common.h"
