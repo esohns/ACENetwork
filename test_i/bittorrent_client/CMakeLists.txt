@@ -215,10 +215,7 @@ target_precompile_headers (${EXECUTABLE}
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
-#install (FILES etc/net_client.glade
-#         DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
 
 ########### next target ###############
 set (EXECUTABLE_GUI bittorrent_client_gui)
@@ -328,14 +325,13 @@ target_precompile_headers (${EXECUTABLE_GUI}
 
 install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
 install (FILES
          etc/bittorrent_client.ini
          etc/bittorrent_client.rc
          etc/bittorrent_client_main.glade
          etc/bittorrent_client_session.glade
-         DESTINATION share/${PROJECT_NAME}/${EXECUTABLE_GUI} COMPONENT config)
+         DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 
 ##########################################
 

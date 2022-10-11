@@ -1048,6 +1048,7 @@ do_work (const std::string& configurationFile_in,
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_save_queue_source_4b)));
   modulehandler_configuration_save_converter_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_save_converter_4b.handleResize = false;
   modulehandler_configuration_save_converter_4b.outputFormat.video.format =
     AV_PIX_FMT_BGR24;
   configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
@@ -1148,18 +1149,18 @@ do_work (const std::string& configurationFile_in,
     } // end IF
 #endif // GTK_USE
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    HWND window_p = GetConsoleWindow ();
-    if (!window_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-      goto clean;
-    } // end IF
-    BOOL was_visible_b = false;
-    was_visible_b = ShowWindow (window_p, SW_HIDE);
-    ACE_UNUSED_ARG (was_visible_b);
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    HWND window_p = GetConsoleWindow ();
+//    if (!window_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
+//      goto clean;
+//    } // end IF
+//    BOOL was_visible_b = false;
+//    was_visible_b = ShowWindow (window_p, SW_HIDE);
+//    ACE_UNUSED_ARG (was_visible_b);
+//#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 #else
   if (!input_stream.initialize (configuration_in.streamConfiguration_3))

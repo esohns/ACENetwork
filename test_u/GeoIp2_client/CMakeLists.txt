@@ -88,10 +88,7 @@ target_precompile_headers (${EXECUTABLE}
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
-#install (FILES etc/net_client.glade
-#         DESTINATION etc/lib${PROJECT_NAME}/test_u COMPONENT config)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 
 ##########################################
 

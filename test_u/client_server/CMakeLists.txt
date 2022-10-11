@@ -157,10 +157,9 @@ target_precompile_headers (${EXECUTABLE_SOURCE}
 
 install (TARGETS ${EXECUTABLE_SOURCE}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 install (FILES etc/net_client.glade
-         DESTINATION etc/lib${PROJECT_NAME}/test_u COMPONENT config)
+         DESTINATION "etc/client_server" COMPONENT config)
 
 ########### next target ###############
 set (EXECUTABLE_TARGET server)
@@ -276,10 +275,9 @@ target_precompile_headers (${EXECUTABLE_TARGET}
 
 install (TARGETS ${EXECUTABLE_TARGET}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 install (FILES etc/net_server.glade
-         DESTINATION etc/lib${PROJECT_NAME}/test_u COMPONENT config)
+         DESTINATION "etc/client_server" COMPONENT config)
 
 ##########################################
 

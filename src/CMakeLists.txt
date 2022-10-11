@@ -377,7 +377,7 @@ if (UNIX)
           DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}" COMPONENT config)
 elseif (WIN32)
  install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
-          DESTINATION "etc" COMPONENT config)
+          DESTINATION "share" COMPONENT config)
 #          DESTINATION "$ENV{APPDATA}/${PROJECT_NAME}" COMPONENT config)
 endif ()
 

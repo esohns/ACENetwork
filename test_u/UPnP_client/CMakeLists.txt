@@ -184,51 +184,35 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_U)
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
 
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  if (GTK2_USE)
+   set (UI_FILE "test_u.gtk2")
+  elseif (GTK3_USE)
+   set (UI_FILE "test_u.gtk3")
+  endif ()
+ elseif (WXWIDGETS_USE)
+   set (UI_FILE "test_u.xrc")
+ endif ()
+endif (GUI_SUPPORT)
+
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 if (WIN32)
  get_filename_component (ACE_LIB_PATH ${ACE_LIBRARY}
                          DIRECTORY)
  set (ACE_DLL_FILE ACE${LIB_FILE_SUFFIX}.dll)
  set (ACE_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_DLL_FILE})
  install (FILES ${ACE_DLL_FQPATH}
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libatk-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/freetype6.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/intl.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libcairo-2.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libfontconfig-1.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgio-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libglib-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgmodule-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgobject-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgthread-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgdk_pixbuf-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgdk-win32-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgtk-win32-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpango-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangocairo-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangoft2-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangowin32-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpng14-14.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/zlib1.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../libglade/bin/libglade-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.1/.libs/libxml2-2.dll
-                H:/software/Development/dll/libgcc_s_dw2-1.dll
-                H:/software/Development/dll/libexpat-1.dll
-                H:/software/Development/dll/libiconv-2.dll
-                ${Common_DIR}/src/${CMAKE_BUILD_TYPE}/Common.dll
-                ${Common_DIR}/src/ui/${CMAKE_BUILD_TYPE}/CommonUI.dll
-                ${ACEStream_DIR}/src/${CMAKE_BUILD_TYPE}/ACEStream.dll
-                ${ACENetwork_DIR}/src/${CMAKE_BUILD_TYPE}/ACENetwork.dll
-                ${ACENetwork_DIR}/src/protocol/dhcp/${CMAKE_BUILD_TYPE}/ACENetwork_Protocol_DHCP.dll
           DESTINATION bin COMPONENT bin)
- install (FILES etc/test_u.glade
+ install (FILES etc/${UI_FILE}
+                etc/resources.rc
           DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 #          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 elseif (UNIX)
- install (FILES etc/test_u.glade
+ install (FILES etc/${UI_FILE}
+                etc/resources.rc
           DESTINATION etc/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 endif ()
 

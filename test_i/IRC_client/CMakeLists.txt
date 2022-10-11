@@ -202,12 +202,11 @@ target_precompile_headers (${EXECUTABLE}
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
 install (FILES
          etc/IRC_client.ini
          etc/IRC_client_phonebook.ini
-         DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
+         DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 
 ########### next target ###############
 set (EXECUTABLE_GUI IRC_client_gui)
@@ -320,8 +319,7 @@ target_precompile_headers (${EXECUTABLE_GUI}
 
 install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
 if (WIN32)
  get_filename_component (ACE_LIB_PATH ${ACE_LIBRARY} DIRECTORY)
  set (ACE_DLL_FILE ACE${LIB_FILE_SUFFIX}.dll)
@@ -360,10 +358,22 @@ if (WIN32)
                 ${LIB_ROOT}/gtk3/bin/libwinpthread-1.dll
                 ${LIB_ROOT}/assimp/cmake/bin/Debug/assimp-vc142-mtd.dll
                 ${LIB_ROOT}/libpng/build/Debug/libpng16d.dll
-                ${LIB_ROOT}/ffmpeg/libswresample/swresample-4.dll
-                ${LIB_ROOT}/ffmpeg/libswscale/swscale-6.dll
-                ${LIB_ROOT}/ffmpeg/libavcodec/avcodec-59.dll
-                ${LIB_ROOT}/ffmpeg/libavutil/avutil-57.dll
+                ${LIB_ROOT}/ffmpeg/bin/swresample-4.dll
+                ${LIB_ROOT}/ffmpeg/bin/swscale-6.dll
+                ${LIB_ROOT}/ffmpeg/bin/avformat-59.dll
+                ${LIB_ROOT}/ffmpeg/bin/avcodec-59.dll
+                ${LIB_ROOT}/ffmpeg/bin/avutil-57.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_MagickCore_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_MagickWand_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_bzlib_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_freetype_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_fribidi_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_glib_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_harfbuzz_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_lcms_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_libxml_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_lqr_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_zlib_.dll
                 ${LIB_ROOT}/libepoxy/bin/epoxy-0.dll
                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_core_vc_x64_custom.dll
                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_html_vc_x64_custom.dll
@@ -374,6 +384,11 @@ if (WIN32)
                 ${LIB_ROOT}/openssl/libssl-3-x64.dll
                 ${LIB_ROOT}/zlib/build/Debug/zlibd.dll
           DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
+ install (FILES
+          ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/gschemas.compiled
+          ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/org.gtk.Settings.ColorChooser.gschema.xml
+          ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/org.gtk.Settings.FileChooser.gschema.xml
+          DESTINATION "share/glib-2.0/schemas" COMPONENT config)
 endif (WIN32)
 install (FILES
          etc/IRC_client.ini
