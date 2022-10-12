@@ -69,7 +69,7 @@ class Test_I_LibAVConverter
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData,                             // session data type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData_3,                           // session data type
                               enum Stream_SessionMessageType,                              // session event type
                               struct Test_I_WebTV_ModuleHandlerConfiguration_3,            // module handler configuration type
                               libacestream_default_dec_libav_converter_module_name_string,

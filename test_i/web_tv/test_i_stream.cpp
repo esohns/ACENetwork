@@ -48,6 +48,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
   bool save_to_file_b = !(*iterator).second.second->targetFileName.empty ();
+  Stream_Branches_t branches_a;
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
@@ -101,12 +102,12 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, NULL, 0);
   branch_p = module_p;
-  configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
-  configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
+  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
   Stream_IDistributorModule* idistributor_p =
       dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
   ACE_ASSERT (idistributor_p);
-  idistributor_p->initialize (configuration_->configuration_->branches);
+  idistributor_p->initialize (branches_a);
   module_p = NULL;
 
 //#if defined (FAAD_SUPPORT)
@@ -194,13 +195,13 @@ continue_:
                     false);
     layout_in->append (module_p, branch_p, index_i);
     branch_2 = module_p;
-    configuration_->configuration_->branches.clear ();
-    configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
-    configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
+    branches_a.clear ();
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
     Stream_IDistributorModule* idistributor_2 =
         dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
     ACE_ASSERT (idistributor_2);
-    idistributor_2->initialize (configuration_->configuration_->branches);
+    idistributor_2->initialize (branches_a);
     module_p = NULL;
 
     ACE_NEW_RETURN (module_p,

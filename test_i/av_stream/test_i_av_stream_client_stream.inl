@@ -68,6 +68,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   Stream_Module_t* module_p = NULL;
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
   unsigned int index_i = 0;
+  Stream_Branches_t branches_a;
 
   ACE_NEW_RETURN (module_p,
                   Test_I_Stream_DirectShow_CamSource_Module (this,
@@ -102,11 +103,11 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
                     false);
     layout_out->append (module_p, NULL, 0);
     branch_p = module_p;
-    inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
     Stream_IDistributorModule* idistributor_p =
       dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
     ACE_ASSERT (idistributor_p);
-    idistributor_p->initialize (inherited::configuration_->configuration_->branches);
+    idistributor_p->initialize (branches_a);
   } // end IF
 
   ACE_ASSERT (inherited::configuration_->configuration_->module_2);
