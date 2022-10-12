@@ -33,8 +33,10 @@
 
 #define TEST_I_WEBTV_DEFAULT_TARGET_FILE                  "output.avi"
 
+// *NOTE*: compute and add new segments when this value is reached
+#define TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM             10
 // *NOTE*: preload, NOT download
-#define TEST_I_WEBTV_NUMBER_OF_SEGMENTS_TO_PRELOAD        100
+#define TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS    100
 
 #define TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS           2
 

@@ -840,7 +840,7 @@ add_segment_URIs (const std::string& lastURI_in,
 
   std::string URI_string;
   for (unsigned int i = 0;
-       i < TEST_I_WEBTV_NUMBER_OF_SEGMENTS_TO_PRELOAD;
+       i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
        ++i)
   {
     URI_string = URI_string_head;
@@ -891,12 +891,22 @@ idle_segment_download_complete_cb (gpointer userData_in)
   ACE_ASSERT (data_p->videoTimeoutHandler->lock_);
   std::string current_URL;
   { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, *data_p->videoTimeoutHandler->lock_, G_SOURCE_REMOVE);
-    current_URL = (*channel_iterator).second.videoSegment.URLs.back ();
-    if ((*channel_iterator).second.videoSegment.URLs.size () <= 10)
+    if ((*channel_iterator).second.audioSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
+    {
+      current_URL = (*channel_iterator).second.audioSegment.URLs.back ();
+      add_segment_URIs (current_URL,
+                        (*channel_iterator).second.audioSegment.URLs,
+                        (*channel_iterator).second.maxIndex,
+                        (*channel_iterator).second.indexPositions);
+    } // end IF
+    else if ((*channel_iterator).second.videoSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
+    {
+      current_URL = (*channel_iterator).second.videoSegment.URLs.back ();
       add_segment_URIs (current_URL,
                         (*channel_iterator).second.videoSegment.URLs,
                         (*channel_iterator).second.maxIndex,
                         (*channel_iterator).second.indexPositions);
+    } // end ELSE IF
   } // end lock scope
 
   return G_SOURCE_REMOVE;

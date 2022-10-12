@@ -206,10 +206,10 @@ elseif (WIN32)
  set (CPACK_NSIS_DISPLAY_NAME "@PROJECT_NAME@")
 
  set (CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-#set (CPACK_NSIS_EXECUTABLES_DIRECTORY )
  # working directory
- SetOutPath $INSTDIR
- set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk' '$INSTDIR\\\\bin\\\\web_tv.exe' '-l -r -t' $INSTDIR\\\\include\\\\libacestream_icon.ico 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F1 'web TV'")
+# set (CPACK_NSIS_EXECUTABLES_DIRECTORY $INSTDIR)
+ set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "SetOutPath $INSTDIR
+                                         CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk' '$INSTDIR\\\\bin\\\\web_tv.exe' '-l -r' $INSTDIR\\\\include\\\\ACENetwork_icon.ico 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F1 'web TV'")
 #set (CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\VSXu Player Fullscreen.lnk\\\" \\\"$INSTDIR\\\\.\\\\vsxu_player.exe \\\" -f")
 #set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk\\\")
 
@@ -221,7 +221,7 @@ elseif (WIN32)
 #set (CPACK_NSIS_INSTALLER_MUI_ICON_CODE )
 
 #set (CPACK_NSIS_MENU_LINKS "doc/cmake-${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}/cmake.html" "CMake Help")
- set (CPACK_NSIS_MENU_LINKS "${CPACK_NSIS_HELP_LINK}" "@PROJECT_NAME@ Project Web Site")
+ set (CPACK_NSIS_MENU_LINKS "https:\\\\\\\\www.github.com\\\\esohns\\\\@PROJECT_NAME@" "@PROJECT_NAME@ Project Web Site")
  set (CPACK_NSIS_MODIFY_PATH ON)
  set (CPACK_NSIS_MUI_ICON ${CPACK_PACKAGE_ICON})
 #set (CPACK_NSIS_MUI_FINISHPAGE_RUN )
@@ -232,5 +232,5 @@ elseif (WIN32)
  # Title displayed at the top of the installer
  set (CPACK_NSIS_PACKAGE_NAME "@PROJECT_NAME@ @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_MICRO@")
 
- set (CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.github.com\\\\esohns\\\\@PROJECT_NAME@")
+ set (CPACK_NSIS_URL_INFO_ABOUT "https:\\\\\\\\www.github.com\\\\esohns\\\\@PROJECT_NAME@")
 endif ()
