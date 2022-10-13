@@ -29,6 +29,7 @@
 
 Test_I_M3U_Module_Parser::Test_I_M3U_Module_Parser (ISTREAM_T* stream_in)
  : inherited (stream_in)
+ , contentLength_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::Test_I_M3U_Module_Parser"));
 
@@ -87,7 +88,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
 
   // append \n to final fragment, if not present
   std::istringstream converter;
-  unsigned int content_length = 0, missing_bytes = 0;
+  ACE_UINT32 missing_bytes = 0;
   const Test_I_MessageDataContainer& data_container_r = message_inout->getR ();
   const Test_I_WebTV_MessageData& data_r = data_container_r.getR ();
   HTTP_HeadersConstIterator_t iterator =
@@ -99,14 +100,17 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
                 inherited::mod_->name (),
                 ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
     // assume the message contains all of the content
+    contentLength_ =
+      (inherited::headFragment_ ? inherited::headFragment_->total_length () + message_inout->total_length ()
+                                : message_inout->total_length ());
   } // end IF
   else
   {
     converter.str ((*iterator).second);
-    converter >> content_length;
+    converter >> contentLength_;
     missing_bytes =
-        content_length - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
-                       - message_inout->total_length ();
+      contentLength_ - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
+                     - message_inout->total_length ();
   } // end ELSE
   if (!missing_bytes)
   {
@@ -134,6 +138,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: appended missing line break to data\n"),
                   inherited::mod_->name ()));
+      ++contentLength_;
     } // end IF
 
     if (!message_block_p->space ())
@@ -152,6 +157,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: appended line break to data\n"),
                 inherited::mod_->name ()));
+    ++contentLength_;
   } // end IF
 
   // initialize return value(s)
@@ -181,8 +187,17 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   } // end IF
   message_inout = NULL;
 
-  if (!missing_bytes)
-    inherited::finished_ = true;
+  //if (!missing_bytes)
+  //  inherited::finished_ = true;
+}
+
+bool
+Test_I_M3U_Module_Parser::hasFinished () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::hasFinished"));
+
+  return (contentLength_ &&
+          (contentLength_ == inherited::scannerState_.offset));
 }
 
 void
@@ -225,5 +240,5 @@ Test_I_M3U_Module_Parser::record (struct M3U_Playlist*& record_inout)
 
   inherited::headFragment_ = NULL;
   inherited::fragment_ = NULL;
-  inherited::finished_ = true;
+  //inherited::finished_ = true;
 }

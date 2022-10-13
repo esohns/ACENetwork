@@ -1382,8 +1382,6 @@ drawingarea_draw_cb (GtkWidget* widget_in,
 {
   STREAM_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
 
-  ACE_UNUSED_ARG (widget_in);
-
   ACE_ASSERT (context_in);
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);

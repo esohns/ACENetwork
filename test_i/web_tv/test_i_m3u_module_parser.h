@@ -78,15 +78,19 @@ class Test_I_M3U_Module_Parser
   ACE_UNIMPLEMENTED_FUNC (Test_I_M3U_Module_Parser (const Test_I_M3U_Module_Parser&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_M3U_Module_Parser& operator= (const Test_I_M3U_Module_Parser&))
 
+  // implement (part of) Common_Parser_M3U_IParser
+  virtual bool hasFinished () const;
   virtual void record (struct M3U_Playlist*&); // data record
+
+  ACE_UINT32 contentLength_;
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData,  // session data type
-                              enum Stream_SessionMessageType,           // session event type
-                              struct Test_I_WebTV_ModuleHandlerConfiguration, // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData,                     // session data type
+                              enum Stream_SessionMessageType,                      // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration,      // module handler configuration type
                               libacestream_default_misc_parser_module_name_string,
-                              Stream_INotify_t,                         // stream notification interface type
-                              Test_I_M3U_Module_Parser);                // writer type
+                              Stream_INotify_t,                                    // stream notification interface type
+                              Test_I_M3U_Module_Parser);                           // writer type
 
 #endif
