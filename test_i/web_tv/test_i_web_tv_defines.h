@@ -56,9 +56,12 @@
 //----------------------------------------
 
 #if defined (GTK_SUPPORT)
+#define TEST_I_UI_GTK_BOX_DISPLAY_NAME                    "box_display"
+#define TEST_I_UI_GTK_BOX_SAVE_NAME                       "box_save"
 #define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
 #define TEST_I_UI_GTK_BUTTON_LOAD_NAME                    "button_load"
 #define TEST_I_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
+#define TEST_I_UI_GTK_COMBOBOX_ADAPTER_NAME               "combobox_adapter"
 #define TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME          "combobox_audio_channel"
 #define TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME               "combobox_channel"
 #define TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME               "combobox_display"
@@ -71,8 +74,10 @@
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
 #define TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
 #define TEST_I_UI_GTK_FRAME_CHANNEL_NAME                  "frame_channel"
+#define TEST_I_UI_GTK_LISTSTORE_ADAPTER_NAME              "liststore_adapter"
 #define TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME         "liststore_audio_channel"
 #define TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME              "liststore_channel"
+#define TEST_I_UI_GTK_LISTSTORE_DISPLAY_NAME              "liststore_display"
 #define TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME           "liststore_resolution"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                    "progressbar"
 #define TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME         "spinbutton_connections"

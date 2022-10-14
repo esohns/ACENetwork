@@ -43,6 +43,8 @@
 #include "common_timer_manager.h"
 #include "common_timer_manager_common.h"
 
+#include "common_ui_tools.h"
+
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
@@ -228,6 +230,55 @@ load_audio_channels (GtkListStore* listStore_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("loaded audio channel \"%s\"\n"),
                 ACE_TEXT ((*iterator_2).description.c_str ())));
+  } // end FOR
+}
+
+void
+load_adapters (GtkListStore* listStore_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::load_adapters"));
+
+  // initialize result
+  gtk_list_store_clear (listStore_in);
+
+  GtkTreeIter iterator;
+  Common_UI_DisplayAdapters_t adapters_a =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    Common_UI_Tools::getAdapters (true); // exclude 'mirroring' devices
+#else
+    Common_UI_Tools::getAdapters ();
+#endif // ACE_WIN32 || ACE_WIN64
+  for (Common_UI_DisplayAdaptersIterator_t iterator_2 = adapters_a.begin ();
+       iterator_2 != adapters_a.end ();
+       ++iterator_2)
+  {
+    gtk_list_store_append (listStore_in, &iterator);
+    gtk_list_store_set (listStore_in, &iterator,
+                        0, (*iterator_2).description.c_str (),
+                        1, (*iterator_2).device.c_str (),
+                        -1);
+  } // end FOR
+}
+
+void
+load_displays (GtkListStore* listStore_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::load_displays"));
+
+  // initialize result
+  gtk_list_store_clear (listStore_in);
+
+  GtkTreeIter iterator;
+  Common_UI_DisplayDevices_t displays_a = Common_UI_Tools::getDisplays ();
+  for (Common_UI_DisplayDevicesIterator_t iterator_2 = displays_a.begin ();
+       iterator_2 != displays_a.end ();
+       ++iterator_2)
+  {
+    gtk_list_store_append (listStore_in, &iterator);
+    gtk_list_store_set (listStore_in, &iterator,
+                        0, (*iterator_2).description.c_str (),
+                        1, (*iterator_2).device.c_str (),
+                        -1);
   } // end FOR
 }
 
@@ -429,6 +480,9 @@ idle_initialize_UI_cb (gpointer userData_in)
   Common_UI_GTK_BuildersConstIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
+    data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
 
   // step1: initialize dialog window(s)
   GtkSpinButton* spin_button_p =
@@ -549,6 +603,48 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
                                         1, GTK_SORT_ASCENDING);
 
+  GtkToggleButton* toggle_button_p =
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_DISPLAY_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
+                                !(*iterator_4b).second.second->display.device.empty ());
+
+  list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_ADAPTER_NAME)));
+  ACE_ASSERT (list_store_p);
+  load_adapters (list_store_p);
+
+  combo_box_p =
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_ADAPTER_NAME)));
+  ACE_ASSERT (combo_box_p);
+  cell_renderer_p = gtk_cell_renderer_text_new ();
+  if (!cell_renderer_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+               ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box_p),
+                              cell_renderer_p,
+                              TRUE);
+  // *NOTE*: cell_renderer_p does not need to be g_object_unref()ed because it
+  //         is GInitiallyUnowned and the floating reference has been
+  //         passed to combo_box_p by the gtk_cell_layout_pack_start() call
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box_p),
+                                  cell_renderer_p,
+                                  //"cell-background", 0,
+                                  ACE_TEXT_ALWAYS_CHAR ("text"), 0,
+                                  NULL);
+
+  list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_DISPLAY_NAME)));
+  ACE_ASSERT (list_store_p);
+  load_displays (list_store_p);
+
   combo_box_p =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME)));
@@ -572,10 +668,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
 
-  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
-    data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
-  GtkToggleButton* toggle_button_p =
+  toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_SAVE_NAME)));
   ACE_ASSERT (toggle_button_p);
@@ -607,13 +700,6 @@ idle_initialize_UI_cb (gpointer userData_in)
                 ACE_TEXT (target_filename_string.c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-
-  toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_DISPLAY_NAME)));
-  ACE_ASSERT (toggle_button_p);
-  gtk_toggle_button_set_active (toggle_button_p,
-                                !(*iterator_4b).second.second->display.device.empty ());
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -758,7 +844,8 @@ idle_initialize_UI_cb (gpointer userData_in)
 }
 
 void
-add_segment_URIs (const std::string& lastURI_in,
+add_segment_URIs (unsigned int program_in,
+                  const std::string& lastURI_in,
                   Test_I_WebTV_ChannelSegmentURLs_t& URIs_out,
                   unsigned int maxIndex_in,
                   unsigned int indexPositions_in)
@@ -766,111 +853,207 @@ add_segment_URIs (const std::string& lastURI_in,
   NETWORK_TRACE (ACE_TEXT ("::add_segment_URIs"));
 
   std::string URI_string_head, URI_string_head_2, URI_string_tail;
+  std::string regex_string;
   std::regex regex;
   std::smatch match_results;
   std::stringstream converter;
-  unsigned int index_i = 0, index_2 = 0;
   bool URI_has_path = false;
+  std::string::size_type position_i;
 
-  size_t position = lastURI_in.find_last_of ('/', std::string::npos);
-  if (position != std::string::npos)
+  switch (program_in)
   {
-    URI_has_path = true;
-    URI_string_tail =
-        lastURI_in.substr (position + 1, std::string::npos);
-    URI_string_head = lastURI_in;
-    position = lastURI_in.find ('/', 0);
-    URI_string_head.erase (position, std::string::npos);
-
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-    converter.str (lastURI_in.substr (position + 1, indexPositions_in));
-    converter >> index_2;
-
-    std::string regex_string =
-        ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([[:alnum:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(.ts)$");
-    regex.assign (regex_string);
-    if (unlikely(!std::regex_match (URI_string_tail,
-                                    match_results,
-                                    regex,
-                                    std::regex_constants::match_default)))
+    case 5: // ARTE
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                  ACE_TEXT (lastURI_in.c_str ())));
-      return;
-    } // end IF
-    ACE_ASSERT (match_results.ready () && !match_results.empty ());
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-    converter.str (match_results[9].str ());
-    converter >> index_i;
-    URI_string_head_2 = (match_results[1].str () +
-                         match_results[2].str () +
-                         match_results[3].str () +
-                         match_results[4].str () +
-                         match_results[5].str () +
-                         match_results[6].str () +
-                         match_results[7].str () +
-                         match_results[8].str ());
-    URI_string_tail = match_results[10].str ();
-  } // end IF
-  else
-  {
-    std::string regex_string =
-        ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(.ts)$");
-    regex.assign (regex_string);
-    if (unlikely(!std::regex_match (lastURI_in,
-                                    match_results,
-                                    regex,
-                                    std::regex_constants::match_default)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                 ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                 ACE_TEXT (lastURI_in.c_str ())));
-      return;
-    } // end IF
-    ACE_ASSERT (match_results.ready () && !match_results.empty ());
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-    converter.str (match_results[1].str ());
-    converter >> index_i;
-    URI_string_tail = match_results[2].str ();
-  } // end ELSE
+      ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
 
-  std::string URI_string;
-  for (unsigned int i = 0;
-       i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
-       ++i)
-  {
-    URI_string = URI_string_head;
-    if (URI_has_path)
-    {
-      URI_string += '/';
+      position_i = lastURI_in.rfind ('/', std::string::npos);
+      ACE_ASSERT (position_i != std::string::npos);
+      URI_string_tail =
+          lastURI_in.substr (position_i + 1, std::string::npos);
+
+      position_i = lastURI_in.find ('/', 0);
+      ACE_ASSERT (position_i != std::string::npos);
+      position_i = lastURI_in.find ('/', position_i + 1);
+      ACE_ASSERT (position_i != std::string::npos);
+
+      URI_string_head = lastURI_in;
+      URI_string_head.erase (position_i + 1, std::string::npos);
+
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
-      URI_string += converter.str ();
-      URI_string += '/';
-      URI_string += URI_string_head_2;
-    } // end IF
+      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter >> index_2;
 
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-    if (indexPositions_in)
-      converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
-    else
-      converter << ++index_i;
-    if (maxIndex_in &&
-        (index_i == maxIndex_in))
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^(master)(_)([[:alnum:]]+)(_)([[:digit:]]+)(.ts)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (URI_string_tail,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (lastURI_in.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[5].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str () +
+                           match_results[3].str () +
+                           match_results[4].str ());
+      URI_string_tail = match_results[6].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
+        URI_string += converter.str ();
+        URI_string += '/';
+        URI_string += URI_string_head_2;
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        if (indexPositions_in)
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
+        else
+          converter << ++index_i;
+        if (maxIndex_in &&
+            (index_i == maxIndex_in))
+        {
+          index_i = 1; // *TODO*: or 0 ?
+          ++index_2;
+        } // end IF
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    default:
     {
-      index_i = 1;
-      ++index_2;
-    } // end IF
-    URI_string += converter.str ();
-    URI_string += URI_string_tail;
-    URIs_out.push_back (URI_string);
-  } // end FOR
+      ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
+
+      position_i = lastURI_in.rfind ('/', std::string::npos);
+      if (position_i != std::string::npos)
+      {
+        URI_has_path = true;
+        URI_string_tail =
+            lastURI_in.substr (position_i + 1, std::string::npos);
+        URI_string_head = lastURI_in;
+        position_i = lastURI_in.find ('/', 0);
+        URI_string_head.erase (position_i, std::string::npos);
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+        converter >> index_2;
+
+        regex_string =
+            ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([[:alnum:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(.ts|.aac)$");
+        regex.assign (regex_string);
+        if (unlikely(!std::regex_match (URI_string_tail,
+                                        match_results,
+                                        regex,
+                                        std::regex_constants::match_default)))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                      ACE_TEXT (lastURI_in.c_str ())));
+          return;
+        } // end IF
+        ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter.str (match_results[7].str ());
+        converter >> date_i;
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter.str (match_results[9].str ());
+        converter >> index_i;
+        URI_string_head_2 = (match_results[1].str () +
+                             match_results[2].str () +
+                             match_results[3].str () +
+                             match_results[4].str () +
+                             match_results[5].str () +
+                             match_results[6].str () +
+                             match_results[7].str () + // date
+                             match_results[8].str ());
+        URI_string_tail = match_results[10].str ();
+      } // end IF
+      else
+      {
+        std::string regex_string =
+            ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(.ts|.aac)$");
+        regex.assign (regex_string);
+        if (unlikely(!std::regex_match (lastURI_in,
+                                        match_results,
+                                        regex,
+                                        std::regex_constants::match_default)))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                     ACE_TEXT (lastURI_in.c_str ())));
+          return;
+        } // end IF
+        ACE_ASSERT (match_results.ready () && !match_results.empty ());
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter.str (match_results[1].str ());
+        converter >> index_i;
+        URI_string_tail = match_results[2].str ();
+      } // end ELSE
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        if (URI_has_path)
+        {
+          URI_string += '/';
+          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+          converter.clear ();
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
+          URI_string += converter.str ();
+          URI_string += '/';
+          URI_string += URI_string_head_2;
+        } // end IF
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        if (indexPositions_in)
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
+        else
+          converter << ++index_i;
+        if (maxIndex_in &&
+            (index_i == maxIndex_in))
+        {
+          index_i = 1; // *TODO*: or 0 ?
+          ++index_2;
+        } // end IF
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+  } // end SWITCH
 }
 
 gboolean
@@ -891,18 +1074,24 @@ idle_segment_download_complete_cb (gpointer userData_in)
   ACE_ASSERT (data_p->videoTimeoutHandler->lock_);
   std::string current_URL;
   { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, *data_p->videoTimeoutHandler->lock_, G_SOURCE_REMOVE);
+    if (data_p->currentAudioStream == -1)
+      goto continue_;
     if ((*channel_iterator).second.audioSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
     {
       current_URL = (*channel_iterator).second.audioSegment.URLs.back ();
-      add_segment_URIs (current_URL,
+      add_segment_URIs (data_p->currentChannel,
+                        current_URL,
                         (*channel_iterator).second.audioSegment.URLs,
                         (*channel_iterator).second.maxIndex,
                         (*channel_iterator).second.indexPositions);
     } // end IF
-    else if ((*channel_iterator).second.videoSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
+
+continue_:
+    if ((*channel_iterator).second.videoSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
     {
       current_URL = (*channel_iterator).second.videoSegment.URLs.back ();
-      add_segment_URIs (current_URL,
+      add_segment_URIs (data_p->currentChannel,
+                        current_URL,
                         (*channel_iterator).second.videoSegment.URLs,
                         (*channel_iterator).second.maxIndex,
                         (*channel_iterator).second.indexPositions);
@@ -974,7 +1163,7 @@ idle_notify_segment_data_cb (gpointer userData_in)
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
 
   if ((*channel_iterator).second.videoSegment.URLs.empty () ||
-      (*channel_iterator).second.audioSegment.URLs.empty ())
+      ((data_p->currentAudioStream != -1) && (*channel_iterator).second.audioSegment.URLs.empty ()))
     return G_SOURCE_REMOVE; // wait for audio/video segment data
 
   // close connection(s)
@@ -1079,11 +1268,6 @@ idle_start_session_cb (gpointer userData_in)
   (*stream_iterator_3b).second.second->parserConfiguration->messageQueue = NULL;
   (*stream_iterator_marshal_3b).second.second->parserConfiguration->messageQueue = NULL;
 
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//#else
-//  ACE_OS::sleep (2); // *TODO*: why ?
-//#endif // ACE_WIN32 || ACE_WIN64
-
   Test_I_TCPConnector_3_t connector (true);
 #if defined (SSL_SUPPORT)
   Test_I_SSLConnector_3_t ssl_connector (true);
@@ -1093,26 +1277,22 @@ idle_start_session_cb (gpointer userData_in)
   std::string hostname_string, URI_string, URI_string_2, URL_string, URL_string_2;
   bool use_SSL = false;
   struct Net_UserData user_data_s;
-  ACE_ASSERT (!(*channel_iterator).second.audioSegment.URLs.empty () &&
+  ACE_ASSERT (((data_p->currentAudioStream == -1) || !(*channel_iterator).second.audioSegment.URLs.empty ()) &&
               !(*channel_iterator).second.videoSegment.URLs.empty ());
 
-  std::string current_URL_1 =
+  std::string current_URL_1, current_URL_2;
+  bool is_URI_b, is_URI_2;
+
+  if (data_p->currentAudioStream == -1)
+    goto continue_;
+  current_URL_1 =
       (*channel_iterator).second.audioSegment.URLs.front ();
   (*channel_iterator).second.audioSegment.URLs.pop_front ();
-  std::string current_URL_2 =
-      (*channel_iterator).second.videoSegment.URLs.front ();
-  (*channel_iterator).second.videoSegment.URLs.pop_front ();
-  bool is_URI_b = HTTP_Tools::URLIsURI (current_URL_1);
-  bool is_URI_2 = HTTP_Tools::URLIsURI (current_URL_2);
+  is_URI_b = HTTP_Tools::URLIsURI (current_URL_1);
   if (is_URI_b)
     URL_string = (*stream_iterator_3a).second.second->URL;
   else
     URL_string = current_URL_1;
-  if (is_URI_2)
-    URL_string_2 = (*stream_iterator_3b).second.second->URL;
-  else
-    URL_string_2 = current_URL_2;
-
   if (!HTTP_Tools::parseURL (URL_string,
                              host_address,
                              hostname_string,
@@ -1137,6 +1317,16 @@ idle_start_session_cb (gpointer userData_in)
     URI_string_2 += current_URL_1;
     URI_string = URI_string_2;
   } // end IF
+
+continue_:
+  current_URL_2 =
+      (*channel_iterator).second.videoSegment.URLs.front ();
+  (*channel_iterator).second.videoSegment.URLs.pop_front ();
+  is_URI_2 = HTTP_Tools::URLIsURI (current_URL_2);
+  if (is_URI_2)
+    URL_string_2 = (*stream_iterator_3b).second.second->URL;
+  else
+    URL_string_2 = current_URL_2;
   if (!HTTP_Tools::parseURL (URL_string_2,
                              host_address,
                              hostname_string,
@@ -1163,6 +1353,8 @@ idle_start_session_cb (gpointer userData_in)
   } // end IF
 
   // connect to peers
+  if (data_p->currentAudioStream == -1)
+    goto continue_2;
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
   {
 #if defined (SSL_SUPPORT)
@@ -1217,6 +1409,7 @@ idle_start_session_cb (gpointer userData_in)
               ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
+continue_2:
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
   {
 #if defined (SSL_SUPPORT)
@@ -1331,6 +1524,8 @@ idle_start_session_cb (gpointer userData_in)
   } // end IF
 
   // schedule timers
+  if (data_p->currentAudioStream == -1)
+    goto continue_3;
   data_p->audioTimeoutHandler->initialize (data_p->audioHandle,
                                            &(*channel_iterator).second.audioSegment,
                                            (*stream_iterator_3a).second.second->URL,
@@ -1351,6 +1546,7 @@ idle_start_session_cb (gpointer userData_in)
               data_p->audioTimeoutHandler->timerId_,
               &data_p->audioTimeoutHandler->interval_));
 
+continue_3:
   data_p->videoTimeoutHandler->initialize (data_p->videoHandle,
                                            &(*channel_iterator).second.videoSegment,
                                            (*stream_iterator_3b).second.second->URL,
@@ -1917,10 +2113,11 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (combo_box_p);
     if (!gtk_combo_box_get_active_iter (combo_box_p,
                                         &iterator_7))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                 ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
-      return;
+    { // most likely cause, joint a/v stream (e.g. ARTE de/fr)
+      //ACE_DEBUG ((LM_ERROR,
+      //            ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
+      data_p->currentAudioStream = -1;
+      goto continue_;
     } // end IF
     list_store_p =
         GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
@@ -1934,6 +2131,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     data_p->currentAudioStream = g_value_get_uint (&value);
     g_value_unset (&value);
 
+continue_:
     // compute URI/URL for video stream
     for (Test_I_WebTV_Channel_ResolutionsConstIterator_t iterator_8 = (*channel_iterator).second.resolutions.begin ();
          iterator_8 != (*channel_iterator).second.resolutions.end ();
@@ -1991,6 +2189,8 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     (*stream_iterator_3b).second.second->URL = (*stream_iterator_2b).second.second->URL;
 
     // compute URI/URL for audio stream
+    if (data_p->currentAudioStream == -1)
+      goto continue_2;
     URI_string =
       (*channel_iterator).second.audioChannels[data_p->currentAudioStream].URI;
     ACE_ASSERT (!URI_string.empty ());
@@ -2017,6 +2217,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     //  hostname_string;
     (*stream_iterator_3a).second.second->URL = (*stream_iterator_2a).second.second->URL;
 
+continue_2:
     // save to file ?
     toggle_button_p =
         GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -2025,7 +2226,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     if (!gtk_toggle_button_get_active (toggle_button_p))
     {
       (*stream_iterator_4b).second.second->targetFileName.clear ();
-      goto continue_;
+      goto continue_3;
     } // end IF
     entry_p =
         GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
@@ -2042,7 +2243,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     (*stream_iterator_4b).second.second->targetFileName +=
       gtk_entry_get_text (entry_p);
 
-continue_:
+continue_3:
     // step2: start processing stream
     if (unlikely (!data_p->AudioStream->initialize (data_p->configuration->streamConfiguration_4a)))
     {
@@ -2061,6 +2262,8 @@ continue_:
     data_p->streamSessionId = data_p->AVStream->getR_2 ().getR ().sessionId;
 
     // step3: connect to peers
+    if (data_p->currentAudioStream == -1)
+      goto continue_4;
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     {
 #if defined (SSL_SUPPORT)
@@ -2115,6 +2318,7 @@ continue_:
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
+continue_4:
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     {
 #if defined (SSL_SUPPORT)
@@ -2566,6 +2770,33 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
 } // combobox_resolution_changed_cb
 
 void
+togglebutton_display_toggled_cb (GtkToggleButton* toggleButton_in,
+                                 gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::togglebutton_display_toggled_cb"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  GtkBox* box_p =
+    GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BOX_DISPLAY_NAME)));
+  ACE_ASSERT (box_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (box_p),
+                            gtk_toggle_button_get_active (toggleButton_in));
+} // togglebutton_display_toggled_cb
+
+void
 togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
                                     gpointer userData_in)
 {
@@ -2678,6 +2909,33 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
     return;
   }
 } // togglebutton_fullscreen_toggled_cb
+
+void
+togglebutton_save_toggled_cb (GtkToggleButton* toggleButton_in,
+                              gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::togglebutton_save_toggled_cb"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  GtkBox* box_p =
+      GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BOX_SAVE_NAME)));
+  ACE_ASSERT (box_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (box_p),
+                            gtk_toggle_button_get_active (toggleButton_in));
+} // togglebutton_save_toggled_cb
 
 gboolean
 key_cb (GtkWidget* widget_in,

@@ -223,7 +223,7 @@ struct Test_I_WebTV_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , channels (NULL)
    , currentChannel (0)
-   , currentAudioStream (0)
+   , currentAudioStream (-1)
    , currentVideoStream (0)
    , dispatch (NULL)
    , audioHandle (ACE_INVALID_HANDLE)
@@ -241,7 +241,7 @@ struct Test_I_WebTV_UI_CBData
   struct Test_I_WebTV_Configuration*    configuration;
   Test_I_WebTV_ChannelConfigurations_t* channels;
   unsigned int                          currentChannel;
-  unsigned int                          currentAudioStream;
+  int                                   currentAudioStream;
   unsigned int                          currentVideoStream;
   Common_IDispatch*                     dispatch;
   ACE_HANDLE                            audioHandle; // connection-

@@ -48,24 +48,6 @@
       <column type="guint"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="liststore_display">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name device -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_resolution">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name width -->
-      <column type="guint"/>
-      <!-- column-name height -->
-      <column type="guint"/>
-    </columns>
-  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
@@ -104,6 +86,8 @@
                             <property name="can_default">True</property>
                             <property name="has_default">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_markup" translatable="yes">load channel configuration</property>
+                            <property name="tooltip_text" translatable="yes">load channel configuration</property>
                             <property name="relief">half</property>
                             <property name="use_stock">True</property>
                             <property name="focus_on_click">False</property>
@@ -121,6 +105,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_markup" translatable="yes">start stream</property>
+                            <property name="tooltip_text" translatable="yes">start stream</property>
                             <property name="relief">half</property>
                             <property name="use_stock">True</property>
                             <property name="focus_on_click">False</property>
@@ -242,6 +228,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="tooltip_markup" translatable="yes">channel</property>
+                                    <property name="tooltip_text" translatable="yes">channel</property>
                                     <property name="model">liststore_channel</property>
                                     <property name="has_frame">False</property>
                                     <property name="focus_on_click">False</property>
@@ -286,6 +274,8 @@
                                   <object class="GtkComboBox" id="combobox_audio_channel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="tooltip_markup" translatable="yes">audio channel</property>
+                                    <property name="tooltip_text" translatable="yes">audio channel</property>
                                     <property name="model">liststore_audio_channel</property>
                                     <property name="has_frame">False</property>
                                     <property name="focus_on_click">False</property>
@@ -303,6 +293,8 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="tooltip_markup" translatable="yes">resolution</property>
+                                    <property name="tooltip_text" translatable="yes">resolution</property>
                                     <property name="model">liststore_resolution</property>
                                     <property name="has_frame">False</property>
                                     <property name="focus_on_click">False</property>
@@ -337,32 +329,33 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="frame_save">
+                  <object class="GtkFrame" id="frame_display">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">start</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="aligment_save">
+                      <object class="GtkAlignment" id="alignment_display">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkBox" id="box_main_10">
+                          <object class="GtkBox" id="box_main_12">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkToggleButton" id="togglebutton_save">
-                                <property name="label">gtk-save</property>
+                              <object class="GtkToggleButton" id="togglebutton_display">
+                                <property name="label">gtk-fullscreen</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="tooltip_markup" translatable="yes">display</property>
+                                <property name="tooltip_text" translatable="yes">display</property>
                                 <property name="halign">start</property>
                                 <property name="valign">start</property>
                                 <property name="relief">half</property>
                                 <property name="use_stock">True</property>
                                 <property name="focus_on_click">False</property>
-                                <signal name="toggled" handler="togglebutton_save_toggled_cb" swapped="no"/>
+                                <signal name="toggled" handler="togglebutton_display_toggled_cb" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -371,18 +364,18 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox" id="box1">
+                              <object class="GtkBox" id="box_display">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
                                 <child>
-                                  <object class="GtkEntry" id="entry_save">
+                                  <object class="GtkComboBox" id="combobox_adapter">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="has_frame">False</property>
-                                    <property name="invisible_char">●</property>
-                                    <property name="primary_icon_stock">gtk-save</property>
-                                    <property name="primary_icon_activatable">False</property>
-                                    <property name="primary_icon_sensitive">False</property>
+                                    <property name="sensitive">False</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="tooltip_markup" translatable="yes">display adapter</property>
+                                    <property name="tooltip_text" translatable="yes">display adapter</property>
+                                    <property name="model">liststore_adapter</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -391,23 +384,51 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkFileChooserButton" id="filechooserbutton_save">
+                                  <object class="GtkComboBox" id="combobox_display">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
-                                    <property name="action">select-folder</property>
-                                    <property name="local_only">False</property>
-                                    <property name="preview_widget_active">False</property>
-                                    <property name="show_hidden">True</property>
-                                    <property name="use_preview_label">False</property>
+                                    <property name="tooltip_markup" translatable="yes">display</property>
+                                    <property name="tooltip_text" translatable="yes">display</property>
+                                    <property name="model">liststore_display</property>
+                                    <property name="has_frame">False</property>
                                     <property name="focus_on_click">False</property>
-                                    <property name="title" translatable="yes">choose save directory...</property>
-                                    <signal name="file-set" handler="filechooserbutton_save_file_set_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButtonBox" id="buttonbox_display">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="layout_style">start</property>
+                                    <child>
+                                      <object class="GtkToggleButton" id="togglebutton_fullscreen">
+                                        <property name="label">gtk-fullscreen</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="tooltip_markup" translatable="yes">fullscreen</property>
+                                        <property name="tooltip_text" translatable="yes">fullscreen</property>
+                                        <property name="relief">half</property>
+                                        <property name="use_stock">True</property>
+                                        <property name="focus_on_click">False</property>
+                                        <signal name="toggled" handler="togglebutton_fullscreen_toggled_cb" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
@@ -432,28 +453,34 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="frame_display">
+                  <object class="GtkFrame" id="frame_save">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">start</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment_display">
+                      <object class="GtkAlignment" id="aligment_save">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkBox" id="box_main_11">
+                          <object class="GtkBox" id="box_main_10">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkToggleButton" id="togglebutton_display">
-                                <property name="label">gtk-fullscreen</property>
+                              <object class="GtkToggleButton" id="togglebutton_save">
+                                <property name="label">gtk-save</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
+                                <property name="tooltip_markup" translatable="yes">save</property>
+                                <property name="tooltip_text" translatable="yes">save</property>
+                                <property name="halign">start</property>
                                 <property name="valign">start</property>
                                 <property name="relief">half</property>
                                 <property name="use_stock">True</property>
                                 <property name="focus_on_click">False</property>
+                                <signal name="toggled" handler="togglebutton_save_toggled_cb" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -462,18 +489,20 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox" id="box_main_12">
+                              <object class="GtkBox" id="box_save">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="orientation">vertical</property>
                                 <child>
-                                  <object class="GtkComboBox" id="combobox_display">
+                                  <object class="GtkEntry" id="entry_save">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                    <property name="model">liststore_display</property>
+                                    <property name="tooltip_markup" translatable="yes">filename</property>
+                                    <property name="tooltip_text" translatable="yes">filename</property>
                                     <property name="has_frame">False</property>
-                                    <property name="focus_on_click">False</property>
+                                    <property name="invisible_char">●</property>
+                                    <property name="primary_icon_stock">gtk-save</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                    <property name="primary_icon_sensitive">False</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -482,27 +511,20 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButtonBox" id="buttonbox_display">
+                                  <object class="GtkFileChooserButton" id="filechooserbutton_save">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="layout_style">start</property>
-                                    <child>
-                                      <object class="GtkToggleButton" id="togglebutton_fullscreen">
-                                        <property name="label">gtk-fullscreen</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="receives_default">True</property>
-                                        <property name="relief">half</property>
-                                        <property name="use_stock">True</property>
-                                        <property name="focus_on_click">False</property>
-                                        <signal name="toggled" handler="togglebutton_fullscreen_toggled_cb" swapped="no"/>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">True</property>
+                                    <property name="tooltip_markup" translatable="yes">directory</property>
+                                    <property name="tooltip_text" translatable="yes">directory</property>
+                                    <property name="action">select-folder</property>
+                                    <property name="local_only">False</property>
+                                    <property name="preview_widget_active">False</property>
+                                    <property name="show_hidden">True</property>
+                                    <property name="use_preview_label">False</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="title" translatable="yes">choose save directory...</property>
+                                    <signal name="file-set" handler="filechooserbutton_save_file_set_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -656,11 +678,37 @@
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkListStore" id="liststore_adapter">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name device -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="liststore_audio_channel">
     <columns>
       <!-- column-name text -->
       <column type="gchararray"/>
       <!-- column-name id -->
+      <column type="guint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_display">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name device -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_resolution">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name width -->
+      <column type="guint"/>
+      <!-- column-name height -->
       <column type="guint"/>
     </columns>
   </object>
@@ -686,8 +734,8 @@
   <object class="GtkSizeGroup" id="sizegroup_options">
     <property name="mode">both</property>
     <widgets>
-      <widget name="togglebutton_save"/>
       <widget name="togglebutton_display"/>
+      <widget name="togglebutton_save"/>
     </widgets>
   </object>
 </interface>

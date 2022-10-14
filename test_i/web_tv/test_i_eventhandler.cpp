@@ -710,14 +710,22 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
               &segment_p->end));
 
   // keep the most recent 5% entries
+  // *TODO*: remove this altogether
   ACE_ASSERT (!segment_p->URLs.empty ());
   Test_I_WebTV_ChannelSegmentURLsIterator_t iterator_3 =
     segment_p->URLs.begin ();
-  unsigned int number_to_erase =
-      (static_cast<float> (segment_p->URLs.size ()) * 0.95);
-  std::advance (iterator_3, number_to_erase);
-  segment_p->URLs.erase (segment_p->URLs.begin (),
-                         iterator_3);
+  ACE_UINT32 number_to_erase_i = segment_p->URLs.size () - 2;
+  //  ((segment_p->URLs.size () <= 10) ? 0
+  //                                   : (static_cast<float> (segment_p->URLs.size ()) * 0.95));
+  if (number_to_erase_i)
+  {
+    number_to_erase_i =
+      std::min (static_cast<size_t> (number_to_erase_i), segment_p->URLs.size () - 3);
+    std::advance (iterator_3, number_to_erase_i);
+    segment_p->URLs.erase (segment_p->URLs.begin (),
+                           iterator_3);
+  } // end IF
+  ACE_ASSERT (segment_p->URLs.size () >= 2);
 
   guint event_source_id = g_idle_add (idle_notify_segment_data_cb,
                                       CBData_);

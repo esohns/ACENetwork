@@ -50,11 +50,12 @@ G_MODULE_EXPORT gint button_load_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void togglebutton_play_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void combobox_channel_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void combobox_resolution_changed_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void togglebutton_save_toggled_cb (GtkToggleButton*, gpointer);
+G_MODULE_EXPORT void combobox_display_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void filechooserbutton_output_directory_set_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void togglebutton_display_toggled_cb (GtkToggleButton*, gpointer);
-G_MODULE_EXPORT void combobox_display_changed_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void togglebutton_save_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void togglebutton_fullscreen_toggled_cb (GtkToggleButton*, gpointer);
+G_MODULE_EXPORT void togglebutton_save_toggled_cb (GtkToggleButton*, gpointer);
 #if GTK_CHECK_VERSION (3,0,0)
 G_MODULE_EXPORT gboolean drawingarea_draw_cb (GtkWidget*, cairo_t*, gpointer);
 #else
