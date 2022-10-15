@@ -40,11 +40,45 @@
       </object>
     </child>
   </object>
+  <object class="GtkListStore" id="liststore_adapter">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name device -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_audio_channel">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="guint"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="liststore_channel">
     <columns>
       <!-- column-name text -->
       <column type="gchararray"/>
       <!-- column-name id -->
+      <column type="guint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_display">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name device -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_resolution">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name width -->
+      <column type="guint"/>
+      <!-- column-name height -->
       <column type="guint"/>
     </columns>
   </object>
@@ -393,6 +427,7 @@
                                     <property name="model">liststore_display</property>
                                     <property name="has_frame">False</property>
                                     <property name="focus_on_click">False</property>
+                                    <signal name="changed" handler="combobox_display_changed_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -677,40 +712,6 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkListStore" id="liststore_adapter">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name device -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_audio_channel">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name id -->
-      <column type="guint"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_display">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name device -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_resolution">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name width -->
-      <column type="guint"/>
-      <!-- column-name height -->
-      <column type="guint"/>
-    </columns>
   </object>
   <object class="GtkWindow" id="window_fullscreen">
     <property name="can_focus">False</property>

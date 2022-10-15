@@ -791,7 +791,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   dialog_p =
       GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_ABOUT_NAME)));
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_ABOUT_NAME)));
   ACE_ASSERT (dialog_p);
   result = g_signal_connect_swapped (G_OBJECT (dialog_p),
                                      ACE_TEXT_ALWAYS_CHAR ("response"),
@@ -809,13 +809,13 @@ idle_initialize_UI_cb (gpointer userData_in)
   // step9: draw main dialog
   dialog_p =
       GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (dialog_p);
   gtk_widget_show_all (GTK_WIDGET (dialog_p));
 
   GtkDrawingArea* drawing_area_p =
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
   (*iterator_4b).second.second->window =
     gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
@@ -824,9 +824,9 @@ idle_initialize_UI_cb (gpointer userData_in)
   // select some widgets
   combo_box_p =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
   ACE_ASSERT (combo_box_p);
-#if GTK_CHECK_VERSION(2,30,0)
+#if GTK_CHECK_VERSION (2,30,0)
   struct _GValue value = G_VALUE_INIT;
 #else
   struct _GValue value;
@@ -835,6 +835,23 @@ idle_initialize_UI_cb (gpointer userData_in)
   g_value_init (&value, G_TYPE_UINT);
   g_value_set_uint (&value,
                     data_p->currentChannel);
+  Common_UI_GTK_Tools::selectValue (combo_box_p,
+                                    value,
+                                    1);
+  g_value_unset (&value);
+
+  combo_box_p =
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME)));
+  ACE_ASSERT (combo_box_p);
+#if GTK_CHECK_VERSION (2,30,0)
+  value = G_VALUE_INIT;
+#else
+  ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+  g_value_init (&value, G_TYPE_STRING);
+  g_value_set_string (&value,
+                      (*iterator_4b).second.second->display.device.c_str ());
   Common_UI_GTK_Tools::selectValue (combo_box_p,
                                     value,
                                     1);
@@ -862,7 +879,8 @@ add_segment_URIs (unsigned int program_in,
 
   switch (program_in)
   {
-    case 5: // ARTE
+    case 5:  // ARTE
+    case 28: // NASA TV
     {
       ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
 
@@ -2768,6 +2786,66 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
       break;
     } // end IF
 } // combobox_resolution_changed_cb
+
+void
+combobox_display_changed_cb (GtkWidget* widget_in,
+                             gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::combobox_display_changed_cb"));
+
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
+    data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
+
+  GtkTreeIter iterator_2;
+  gboolean result = gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget_in),
+                                                   &iterator_2);
+  ACE_ASSERT (result);
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_DISPLAY_NAME)));
+  ACE_ASSERT (list_store_p);
+#if GTK_CHECK_VERSION (2,30,0)
+  GValue value = G_VALUE_INIT;
+#else
+  GValue value;
+  ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                            &iterator_2,
+                            1, &value);
+  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+  (*iterator_4b).second.second->display =
+    Common_UI_Tools::getDisplay (g_value_get_string (&value));
+  g_value_unset (&value);
+
+  // select corresponding adapter
+  GtkComboBox* combo_box_p =
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_ADAPTER_NAME)));
+  ACE_ASSERT (combo_box_p);
+  struct Common_UI_DisplayAdapter display_adapter_s =
+    Common_UI_Tools::getAdapter ((*iterator_4b).second.second->display);
+  g_value_init (&value, G_TYPE_STRING);
+  g_value_set_string (&value,
+                      display_adapter_s.description.c_str ());
+  Common_UI_GTK_Tools::selectValue (combo_box_p,
+                                    value,
+                                    0);
+}
 
 void
 togglebutton_display_toggled_cb (GtkToggleButton* toggleButton_in,
