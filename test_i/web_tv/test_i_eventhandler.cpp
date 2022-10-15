@@ -234,9 +234,38 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   // process video stream data
   struct Test_I_WebTV_Channel_Resolution resolution_s;
   std::istringstream converter;
+  struct Test_I_WebTV_ChannelSegment channel_segment_s;
+  int UTC_offset_i = 0;
+
+  // *NOTE*: some channels (e.g. QVC) publish their segment directly
+  for (M3U_ExtInf_ElementsIterator_t iterator = data_r.M3UPlaylist->ext_inf_elements.begin ();
+       iterator != data_r.M3UPlaylist->ext_inf_elements.end ();
+       ++iterator)
+  {
+    for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
+         iterator_2 != (*iterator).keyValues.end ();
+         ++iterator_2)
+    {
+      if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                           ACE_TEXT_ALWAYS_CHAR (COMMON_PARSER_M3U_EXT_X_PROGRAM_DATE_TIME)))
+      {
+        (*channel_iterator).second.videoSegment.start =
+            Common_Timer_Tools::ISO8601ToTimestamp ((*iterator_2).second,
+                                                    UTC_offset_i);
+        break;
+      } // end IF
+    } // end FOR
+    // *WARNING*: lengths might not be uniform
+    (*channel_iterator).second.videoSegment.length = (*iterator).Length;
+    (*channel_iterator).second.videoSegment.URLs.push_back ((*iterator).URL);
+  } // end FOR
+  // *WARNING*: lengths might not be uniform
+  (*channel_iterator).second.videoSegment.length *=
+    data_r.M3UPlaylist->ext_inf_elements.size ();
+
   for (M3U_StreamInf_ElementsIterator_t iterator = data_r.M3UPlaylist->stream_inf_elements.begin ();
-        iterator != data_r.M3UPlaylist->stream_inf_elements.end ();
-        ++iterator)
+       iterator != data_r.M3UPlaylist->stream_inf_elements.end ();
+       ++iterator)
   {
     for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
           iterator_2 != (*iterator).keyValues.end ();
@@ -332,9 +361,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   guint event_source_id =
       g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
-                        idle_load_channel_configuration_cb,
-                        CBData_,
-                        NULL);
+                       idle_load_channel_configuration_cb,
+                       CBData_,
+                       NULL);
   if (unlikely (event_source_id == 0))
   {
     ACE_DEBUG ((LM_ERROR,

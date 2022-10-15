@@ -410,15 +410,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     message_block_p->rd_ptr (bytes_to_skip);
     iterator =
         data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-    if (likely (iterator != data_p->headers.end ()))
-    {
-      std::istringstream converter;
-      converter.str ((*iterator).second);
-      converter >> bytes_to_skip;
-    } // end IF
-    else
-      bytes_to_skip = 0;
-    ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
+    ACE_ASSERT (iterator != data_p->headers.end ());
+    std::istringstream converter;
+    converter.str ((*iterator).second);
+    converter >> bytes_to_skip;
+    //ACE_ASSERT (bytes_to_skip && (headFragment_->total_length () == bytes_to_skip));
   } // end IF
   else
   { ACE_ASSERT (!chunks_.empty ());

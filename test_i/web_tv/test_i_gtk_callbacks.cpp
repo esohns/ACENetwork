@@ -349,7 +349,6 @@ idle_load_channel_configuration_cb (gpointer userData_in)
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
       data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
-  ACE_ASSERT (!(*channel_iterator).second.resolutions.empty ());
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -377,6 +376,22 @@ idle_load_channel_configuration_cb (gpointer userData_in)
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   data_p->videoHandle = ACE_INVALID_HANDLE;
+
+  switch (data_p->currentChannel)
+  {
+    case 18: // QVC
+    case 25: // Channel NewsAsia
+    {
+      struct Test_I_WebTV_Channel_Resolution resolution_s;
+      resolution_s.frameRate = 25;
+      resolution_s.resolution.cx = 960; // *NOTE*: got this info from VLC; where does it get it from ?
+      resolution_s.resolution.cy = 540;
+      (*channel_iterator).second.resolutions.push_back (resolution_s);
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
 
   // update configuration
   GtkListStore* liststore_p =
@@ -880,6 +895,7 @@ add_segment_URIs (unsigned int program_in,
   switch (program_in)
   {
     case 5:  // ARTE
+    case 8:  // MDR
     case 28: // NASA TV
     {
       ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
@@ -952,6 +968,357 @@ add_segment_URIs (unsigned int program_in,
           index_i = 1; // *TODO*: or 0 ?
           ++index_2;
         } // end IF
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    case 7: // HR
+    {
+      ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
+
+      position_i = lastURI_in.rfind ('/', std::string::npos);
+      URI_string_tail =
+          lastURI_in.substr (position_i + 1, std::string::npos);
+      URI_string_head = lastURI_in;
+      position_i = lastURI_in.find ('/', 0);
+      position_i = lastURI_in.find ('/', position_i + 1);
+      URI_string_head.erase (position_i, std::string::npos);
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter >> index_2;
+
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^([^-]+)(-)([^-]+)(-)([[:digit:]]+)(_)([[:digit:]]+)(.ts|.aac)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (URI_string_tail,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (lastURI_in.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[5].str ());
+      converter >> date_i;
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[7].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str () +
+                           match_results[3].str () +
+                           match_results[4].str () +
+                           match_results[5].str () + // date
+                           match_results[6].str ());
+      URI_string_tail = match_results[8].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        URI_string += '/';
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
+        URI_string += converter.str ();
+        URI_string += '/';
+        URI_string += URI_string_head_2;
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        if (indexPositions_in)
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
+        else
+          converter << ++index_i;
+        if (maxIndex_in &&
+            (index_i == maxIndex_in))
+        {
+          index_i = 1; // *TODO*: or 0 ?
+          ++index_2;
+        } // end IF
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    case 10: // RBB
+    {
+      ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
+
+      position_i = lastURI_in.rfind ('/', std::string::npos);
+      URI_string_tail =
+          lastURI_in.substr (position_i + 1, std::string::npos);
+      URI_string_head = lastURI_in;
+      position_i = lastURI_in.find ('/', 0);
+      position_i = lastURI_in.find ('/', position_i + 1);
+      URI_string_head.erase (position_i, std::string::npos);
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter >> index_2;
+
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^([^-]+)(-)([^-]+)(-)([^-]+)(-)([^-]+)(-)([[:digit:]]+)(_)([[:digit:]]+)(.ts)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (URI_string_tail,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (lastURI_in.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[9].str ());
+      converter >> date_i;
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[11].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str () +
+                           match_results[3].str () +
+                           match_results[4].str () +
+                           match_results[5].str () +
+                           match_results[6].str () +
+                           match_results[7].str () +
+                           match_results[8].str () +
+                           match_results[9].str () + // date
+                           match_results[10].str ());
+      URI_string_tail = match_results[12].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        URI_string += '/';
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
+        URI_string += converter.str ();
+        URI_string += '/';
+        URI_string += URI_string_head_2;
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        if (indexPositions_in)
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
+        else
+          converter << ++index_i;
+        if (maxIndex_in &&
+            (index_i == maxIndex_in))
+        {
+          index_i = 1; // *TODO*: or 0 ?
+          ++index_2;
+        } // end IF
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    case 13: // WDR
+    {
+      ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
+
+      position_i = lastURI_in.rfind ('/', std::string::npos);
+      URI_string_tail =
+          lastURI_in.substr (position_i + 1, std::string::npos);
+      URI_string_head = lastURI_in;
+      position_i = lastURI_in.find ('/', 0);
+      URI_string_head.erase (position_i, std::string::npos);
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter >> index_2;
+
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([[:digit:]]+)(_)([[:digit:]]+)(.ts|.aac)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (URI_string_tail,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (lastURI_in.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[3].str ());
+      converter >> date_i;
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[5].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str () +
+                           match_results[3].str () + // date
+                           match_results[4].str ());
+      URI_string_tail = match_results[6].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        URI_string += '/';
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
+        URI_string += converter.str ();
+        URI_string += '/';
+        URI_string += URI_string_head_2;
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        if (indexPositions_in)
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
+        else
+          converter << ++index_i;
+        if (maxIndex_in &&
+            (index_i == maxIndex_in))
+        {
+          index_i = 1; // *TODO*: or 0 ?
+          ++index_2;
+        } // end IF
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    case 18: // QVC
+    {
+      ACE_UINT32 index_i = 0, date_i = 0;
+
+      position_i = lastURI_in.rfind ('_', std::string::npos);
+      ACE_ASSERT (position_i != std::string::npos);
+
+      URI_string_head = lastURI_in;
+      URI_string_head.erase (position_i + 1, std::string::npos);
+
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(_)([^_]+)(_)([^_]+)(_)([[:digit:]]+)(.ts)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (lastURI_in,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (lastURI_in.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[7].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str () +
+                           match_results[3].str () +
+                           match_results[4].str () +
+                           match_results[5].str () +
+                           match_results[6].str ());
+      URI_string_tail = match_results[8].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << ++index_i;
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    case 25: // Channel NewsAsia
+    {
+      ACE_UINT32 index_i = 0, date_i = 0;
+
+      position_i = lastURI_in.rfind ('_', std::string::npos);
+      ACE_ASSERT (position_i != std::string::npos);
+
+      URI_string_head = lastURI_in;
+      URI_string_head.erase (position_i + 1, std::string::npos);
+
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([^_]+)(_)([[:digit:]]+)(.*)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (lastURI_in,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (lastURI_in.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[5].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str () +
+                           match_results[3].str () +
+                           match_results[4].str ());
+      URI_string_tail = match_results[6].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << ++index_i;
         URI_string += converter.str ();
         URI_string += URI_string_tail;
         URIs_out.push_back (URI_string);
@@ -1091,8 +1458,13 @@ idle_segment_download_complete_cb (gpointer userData_in)
   ACE_ASSERT (!(*channel_iterator).second.videoSegment.URLs.empty ());
   ACE_ASSERT (data_p->videoTimeoutHandler->lock_);
   std::string current_URL;
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
+      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
+
   { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, *data_p->videoTimeoutHandler->lock_, G_SOURCE_REMOVE);
-    if (data_p->currentAudioStream == -1)
+    if ((data_p->currentAudioStream == -1) ||
+        (*stream_iterator_3a).second.second->URL.empty ())
       goto continue_;
     if ((*channel_iterator).second.audioSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
     {
@@ -1179,9 +1551,13 @@ idle_notify_segment_data_cb (gpointer userData_in)
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
       data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
+      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
 
   if ((*channel_iterator).second.videoSegment.URLs.empty () ||
-      ((data_p->currentAudioStream != -1) && (*channel_iterator).second.audioSegment.URLs.empty ()))
+      (((data_p->currentAudioStream != -1) && (*channel_iterator).second.audioSegment.URLs.empty ()) &&
+       ((data_p->currentAudioStream != -1) && !(*stream_iterator_3a).second.second->URL.empty ()))) // e.g. RBB
     return G_SOURCE_REMOVE; // wait for audio/video segment data
 
   // close connection(s)
@@ -1191,6 +1567,7 @@ idle_notify_segment_data_cb (gpointer userData_in)
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   ACE_ASSERT (data_p->audioHandle);
   ACE_ASSERT (data_p->videoHandle);
+
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->audioHandle));
@@ -1203,6 +1580,7 @@ idle_notify_segment_data_cb (gpointer userData_in)
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   data_p->audioHandle = ACE_INVALID_HANDLE;
+
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->videoHandle));
@@ -1295,13 +1673,14 @@ idle_start_session_cb (gpointer userData_in)
   std::string hostname_string, URI_string, URI_string_2, URL_string, URL_string_2;
   bool use_SSL = false;
   struct Net_UserData user_data_s;
-  ACE_ASSERT (((data_p->currentAudioStream == -1) || !(*channel_iterator).second.audioSegment.URLs.empty ()) &&
-              !(*channel_iterator).second.videoSegment.URLs.empty ());
+  //ACE_ASSERT (((data_p->currentAudioStream == -1) || !(*channel_iterator).second.audioSegment.URLs.empty ()) &&
+  //            !(*channel_iterator).second.videoSegment.URLs.empty ());
 
   std::string current_URL_1, current_URL_2;
   bool is_URI_b, is_URI_2;
 
-  if (data_p->currentAudioStream == -1)
+  if ((data_p->currentAudioStream == -1) ||
+      (*stream_iterator_3a).second.second->URL.empty ())
     goto continue_;
   current_URL_1 =
       (*channel_iterator).second.audioSegment.URLs.front ();
@@ -1371,7 +1750,8 @@ continue_:
   } // end IF
 
   // connect to peers
-  if (data_p->currentAudioStream == -1)
+  if ((data_p->currentAudioStream == -1) ||
+      (*stream_iterator_3a).second.second->URL.empty ())
     goto continue_2;
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
   {
@@ -1542,7 +1922,8 @@ continue_2:
   } // end IF
 
   // schedule timers
-  if (data_p->currentAudioStream == -1)
+  if ((data_p->currentAudioStream == -1) ||
+      (*stream_iterator_3a).second.second->URL.empty ())
     goto continue_3;
   data_p->audioTimeoutHandler->initialize (data_p->audioHandle,
                                            &(*channel_iterator).second.audioSegment,
@@ -2168,7 +2549,7 @@ continue_:
         URI_string = (*iterator_8).URI;
         break;
       } // end IF
-    ACE_ASSERT (!URI_string.empty ());
+    //ACE_ASSERT (!URI_string.empty ()); // *NOTE* might be empty (e.g. QVC)
     if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
                                host_address,
                                hostname_string,
@@ -2180,7 +2561,8 @@ continue_:
                  ACE_TEXT ((*channel_iterator).second.mainURL.c_str ())));
       return;
     } // end IF
-    bool is_URI_b = HTTP_Tools::URLIsURI (URI_string);
+    bool is_URI_b =
+      (URI_string.empty () ? false : HTTP_Tools::URLIsURI (URI_string));
     if (is_URI_b)
     {
       (*stream_iterator_2b).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
@@ -2195,7 +2577,8 @@ continue_:
       (*stream_iterator_2b).second.second->URL += URI_string;
     } // end IF
     else
-      (*stream_iterator_2b).second.second->URL = URI_string;
+      (*stream_iterator_2b).second.second->URL =
+        (!URI_string.empty () ? URI_string : (*channel_iterator).second.mainURL);
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address =
         host_address;
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.hostname =
@@ -2211,8 +2594,9 @@ continue_:
       goto continue_2;
     URI_string =
       (*channel_iterator).second.audioChannels[data_p->currentAudioStream].URI;
-    ACE_ASSERT (!URI_string.empty ());
-    is_URI_b = HTTP_Tools::URLIsURI (URI_string);
+    //ACE_ASSERT (!URI_string.empty ()); // e.g. RBB (default audio)
+    is_URI_b =
+      (URI_string.empty () ? false : HTTP_Tools::URLIsURI (URI_string));
     if (is_URI_b)
     {
       (*stream_iterator_2a).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
@@ -2280,7 +2664,8 @@ continue_3:
     data_p->streamSessionId = data_p->AVStream->getR_2 ().getR ().sessionId;
 
     // step3: connect to peers
-    if (data_p->currentAudioStream == -1)
+    if ((data_p->currentAudioStream == -1) ||
+        (*stream_iterator_3a).second.second->URL.empty ())
       goto continue_4;
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     {
