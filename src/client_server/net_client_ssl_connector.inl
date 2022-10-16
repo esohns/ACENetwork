@@ -225,5 +225,16 @@ Net_Client_SSL_Connector_T<HandlerType,
               ACE_TEXT ("set TLS SNI hostname: \"%s\"\n"),
               ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ())));
 
+  if (configuration_->socketConfiguration.version)
+  {
+    SSL_CTX* context_2 = SSL_get_SSL_CTX (context_p);
+    ACE_ASSERT (context_2);
+    SSL_CTX_set_min_proto_version (context_2,
+                                   configuration_->socketConfiguration.version);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set minimum protocol version: 0x%x\n"),
+                configuration_->socketConfiguration.version));
+  } // end IF
+
   return 0;
 }
