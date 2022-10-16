@@ -384,8 +384,13 @@ idle_load_channel_configuration_cb (gpointer userData_in)
     {
       struct Test_I_WebTV_Channel_Resolution resolution_s;
       resolution_s.frameRate = 25;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       resolution_s.resolution.cx = 960; // *NOTE*: got this info from VLC; where does it get it from ?
       resolution_s.resolution.cy = 540;
+#else
+      resolution_s.resolution.width = 960; // *NOTE*: got this info from VLC; where does it get it from ?
+      resolution_s.resolution.height = 540;
+#endif // ACE_WIN32 || ACE_WIN64
       (*channel_iterator).second.resolutions.push_back (resolution_s);
       break;
     }

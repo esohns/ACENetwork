@@ -1091,6 +1091,7 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
       inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
   Stream_Module_t* module_p = NULL;
+  Stream_Branches_t branches_a;
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
   unsigned int index_i = 0;
 
@@ -1129,11 +1130,11 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
                     false);
     layout_inout->append (module_p, NULL, 0);
     branch_p = module_p;
-    inherited::configuration_->configuration_->branches.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
     Stream_IDistributorModule* idistributor_p =
         dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
     ACE_ASSERT (idistributor_p);
-    idistributor_p->initialize (inherited::configuration_->configuration_->branches);
+    idistributor_p->initialize (branches_a);
   } // end IF
 
   ACE_ASSERT (inherited::configuration_->configuration_->module_2);
@@ -1156,8 +1157,8 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
     layout_inout->append (module_p, branch_p, index_i);
     module_p = NULL;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   } // end IF
+#endif // GUI_SUPPORT
 
   delete_out = true;
 
