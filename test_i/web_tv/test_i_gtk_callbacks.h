@@ -28,6 +28,7 @@
 // idle routines
 gboolean idle_end_session_cb (gpointer);
 gboolean idle_end_session_2 (gpointer);
+gboolean idle_end_session_3 (gpointer); // this simply clicks "stop"
 gboolean idle_load_channel_configuration_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
@@ -35,6 +36,7 @@ gboolean idle_notify_segment_data_cb (gpointer);
 gboolean idle_notify_segment_data_2_cb (gpointer);
 gboolean idle_segment_download_complete_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
+gboolean idle_start_session_2 (gpointer); // this simply clicks "play"
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
 gboolean idle_update_video_display_cb (gpointer);
@@ -47,6 +49,7 @@ extern "C"
 #endif /* __cplusplus */
 // callbacks
 G_MODULE_EXPORT gint button_load_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gboolean dialog_main_key_press_event_cb (GtkWidget*, GdkEventKey*, gpointer);
 G_MODULE_EXPORT void togglebutton_play_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void combobox_channel_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void combobox_resolution_changed_cb (GtkWidget*, gpointer);

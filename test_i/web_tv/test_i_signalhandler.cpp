@@ -41,17 +41,16 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SignalHandler::handle"));
 
-//  int result = -1;
-
   bool statistic = false;
   bool shutdown = false;
   switch (signal_in.signal)
   {
     case SIGINT:
 // *PORTABILITY*: on Windows SIGQUIT is not defined
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGQUIT:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     {
 //       // *PORTABILITY*: tracing in a signal handler context is not portable
 //       // *TODO*
@@ -64,21 +63,22 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) and SIGTERM (15) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR1:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  case SIGBREAK:
 #else
-    case SIGBREAK:
-#endif
+  case SIGUSR1:
+#endif // ACE_WIN32 || ACE_WIN64
     {
       // print statistic
       statistic = true;
 
       break;
     }
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGHUP:
     case SIGUSR2:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     case SIGTERM:
     {
       // print statistic
@@ -92,7 +92,7 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal (was: %d --> \"%S\"), returning\n"),
-                  signal_in, signal_in));
+                  signal_in.signal, signal_in.signal));
 
       ACE_OS::last_error (EINVAL);
 

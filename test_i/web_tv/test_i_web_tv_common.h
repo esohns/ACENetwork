@@ -223,6 +223,7 @@ struct Test_I_WebTV_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , channels (NULL)
    , currentChannel (0)
+   , nextChannel (-1)
    , currentAudioStream (-1)
    , currentVideoStream (0)
    , dispatch (NULL)
@@ -241,6 +242,7 @@ struct Test_I_WebTV_UI_CBData
   struct Test_I_WebTV_Configuration*    configuration;
   Test_I_WebTV_ChannelConfigurations_t* channels;
   unsigned int                          currentChannel;
+  int                                   nextChannel;
   int                                   currentAudioStream;
   unsigned int                          currentVideoStream;
   Common_IDispatch*                     dispatch;

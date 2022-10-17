@@ -92,11 +92,6 @@ idle_end_session_cb (gpointer userData_in)
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
 
-  GtkToggleButton* toggle_button_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
-  ACE_ASSERT (toggle_button_p);
-
   // stop progress reporting
 //  GtkSpinner* spinner_p =
 //    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
@@ -203,6 +198,56 @@ idle_end_session_2 (gpointer userData_in)
                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME)));
   ACE_ASSERT (frame_p);
   gtk_widget_set_sensitive (GTK_WIDGET (frame_p), TRUE);
+
+  if (data_p->nextChannel != -1)
+  {
+#if GTK_CHECK_VERSION (2,30,0)
+    struct _GValue value = G_VALUE_INIT;
+#else
+    struct _GValue value;
+    ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+    g_value_init (&value, G_TYPE_UINT);
+    g_value_set_uint (&value,
+                      data_p->nextChannel);
+    GtkComboBox* combo_box_p =
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
+    ACE_ASSERT (combo_box_p);
+    Common_UI_GTK_Tools::selectValue (combo_box_p,
+                                      value,
+                                      1);
+    g_value_unset (&value);
+  } // end IF
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_end_session_3 (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_3"));
+
+  ACE_UNUSED_ARG (userData_in);
+
+  // sanity check(s)
+  //struct Test_I_WebTV_UI_CBData* data_p =
+  //    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  //ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p, FALSE);
 
   return G_SOURCE_REMOVE;
 }
@@ -379,6 +424,17 @@ idle_load_channel_configuration_cb (gpointer userData_in)
 
   switch (data_p->currentChannel)
   {
+    case 14: // Parlamentsfernsehen
+    case 15: // ANIXE
+    {
+      for (Test_I_WebTV_Channel_ResolutionsIterator_t iterator_2 = (*channel_iterator).second.resolutions.begin ();
+           iterator_2 != (*channel_iterator).second.resolutions.end ();
+           ++iterator_2)
+      { ACE_ASSERT (!(*iterator_2).frameRate);
+        (*iterator_2).frameRate = 25;
+      } // end FOR
+      break;
+    }
     case 18: // QVC
     case 25: // Channel NewsAsia
     {
@@ -432,6 +488,24 @@ idle_load_channel_configuration_cb (gpointer userData_in)
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
   gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), TRUE);
+
+  // auto-play ?
+  if (data_p->nextChannel != -1)
+  { ACE_ASSERT (data_p->nextChannel == data_p->currentChannel);
+    guint event_source_id = g_idle_add (idle_start_session_2,
+                                        userData_in);
+    if (unlikely (event_source_id == 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_start_session_2): ""\"%m\", returning\n")));
+      return G_SOURCE_REMOVE;
+    } // end IF
+    { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+      state_r.eventSourceIds.insert (event_source_id);
+    } // end lock scope
+  
+    data_p->nextChannel = -1;
+  } // end IF
 
   return G_SOURCE_REMOVE;
 }
@@ -842,23 +916,27 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT ((*iterator_4b).second.second->window);
 
   // select some widgets
-  combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
-  ACE_ASSERT (combo_box_p);
 #if GTK_CHECK_VERSION (2,30,0)
   struct _GValue value = G_VALUE_INIT;
 #else
   struct _GValue value;
   ACE_OS::memset (&value, 0, sizeof (struct _GValue));
 #endif // GTK_CHECK_VERSION (2,30,0)
-  g_value_init (&value, G_TYPE_UINT);
-  g_value_set_uint (&value,
-                    data_p->currentChannel);
-  Common_UI_GTK_Tools::selectValue (combo_box_p,
-                                    value,
-                                    1);
-  g_value_unset (&value);
+  if (data_p->currentChannel)
+  {
+    data_p->nextChannel = data_p->currentChannel; // auto-play
+    combo_box_p =
+        GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
+    ACE_ASSERT (combo_box_p);
+    g_value_init (&value, G_TYPE_UINT);
+    g_value_set_uint (&value,
+                      data_p->currentChannel);
+    Common_UI_GTK_Tools::selectValue (combo_box_p,
+                                      value,
+                                      1);
+    g_value_unset (&value);
+  } // end IF
 
   combo_box_p =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -1605,14 +1683,12 @@ idle_notify_segment_data_cb (gpointer userData_in)
   if (unlikely (event_source_id == 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_notify_segment_data_cb): ""\"%m\", returning\n")));
+                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): ""\"%m\", returning\n")));
     return G_SOURCE_REMOVE;
   } // end IF
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("scheduled session start...\n")));
 
   return G_SOURCE_REMOVE;
 }
@@ -1970,6 +2046,35 @@ continue_3:
               ACE_TEXT ("scheduled video segment download interval timer (id: %d, interval: %#T)\n"),
               data_p->videoTimeoutHandler->timerId_,
               &data_p->videoTimeoutHandler->interval_));
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_start_session_2 (gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::idle_start_session_2"));
+
+  ACE_UNUSED_ARG (userData_in);
+
+  // sanity check(s)
+  //struct Test_I_WebTV_UI_CBData* data_p =
+  //  static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  //ACE_ASSERT (data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p, TRUE);
 
   return G_SOURCE_REMOVE;
 }
@@ -2547,7 +2652,7 @@ continue_:
       if (((*iterator_8).resolution.width == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.width) &&
           ((*iterator_8).resolution.height == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.height))
 #endif // ACE_WIN32 || ACE_WIN64
-      {
+      { ACE_ASSERT ((*iterator_8).frameRate);
         (*stream_iterator_4b).second.second->delayConfiguration->interval.msec (static_cast<long> (1000 / (*iterator_8).frameRate));
         (*stream_iterator_4b).second.second->delayConfiguration->averageTokensPerInterval =
             1;
@@ -3082,11 +3187,22 @@ combobox_channel_changed_cb (GtkWidget* widget_in,
 
   list_store_p =
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
+  ACE_ASSERT (list_store_p);
+  gtk_list_store_clear (list_store_p);
+  list_store_p =
+      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
   ACE_ASSERT (list_store_p);
   gtk_list_store_clear (list_store_p);
   data_p->currentAudioStream = 0;
   data_p->currentVideoStream = 0;
+
+  // auto-load ?
+  if (data_p->nextChannel != -1)
+  { ACE_ASSERT (data_p->nextChannel == data_p->currentChannel);
+    gtk_button_clicked (button_p);
+  } // end IF
 } // combobox_channel_changed_cb
 
 void
@@ -3422,14 +3538,15 @@ key_cb (GtkWidget* widget_in,
   Common_UI_GTK_Manager_t* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR());
   Common_UI_GTK_BuildersConstIterator_t iterator =
       state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   switch (eventKey_in->keyval)
   {
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION (3,0,0)
     case GDK_KEY_Escape:
     case GDK_KEY_f:
     case GDK_KEY_F:
@@ -3460,11 +3577,105 @@ key_cb (GtkWidget* widget_in,
 
       break;
     }
+#if GTK_CHECK_VERSION (3,0,0)
+    case GDK_KEY_1:
+    case GDK_KEY_2:
+    case GDK_KEY_3:
+    case GDK_KEY_4:
+    case GDK_KEY_5:
+    case GDK_KEY_6:
+    case GDK_KEY_7:
+    case GDK_KEY_8:
+    case GDK_KEY_9:
+    case GDK_KEY_0:
+#else
+    case GDK_1:
+    case GDK_2:
+    case GDK_3:
+    case GDK_4:
+    case GDK_5:
+    case GDK_6:
+    case GDK_7:
+    case GDK_8:
+    case GDK_9:
+    case GDK_0:
+#endif // GTK_CHECK_VERSION (3,0,0)
+    {
+      // sanity check(s)
+      if (data_p->nextChannel != -1)
+        return TRUE; // done (do not propagate further)
+#if GTK_CHECK_VERSION (3,0,0)
+      if (eventKey_in->keyval == GDK_KEY_0)
+        data_p->nextChannel = 10;
+      else
+        data_p->nextChannel = eventKey_in->keyval - GDK_KEY_0;
+#else
+      ACE_ASSERT (false); // *TODO*
+#endif // GTK_CHECK_VERSION (3,0,0)
+      // sanity check(s)
+      if (data_p->nextChannel == data_p->currentChannel)
+      {
+        data_p->nextChannel = -1; // reset
+        return TRUE; // done (do not propagate further)
+      } // end IF
+
+      GtkToggleButton* toggle_button_p =
+        GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+      ACE_ASSERT (toggle_button_p);
+      if (gtk_toggle_button_get_active (toggle_button_p))
+      {
+        guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                                                 idle_end_session_3,
+                                                 userData_in,
+                                                 NULL);
+        if (unlikely (event_source_id == 0))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to g_idle_add_full(idle_end_session_3): ""\"%m\", returning\n")));
+          return G_SOURCE_REMOVE;
+        } // end IF
+        { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, TRUE);
+          state_r.eventSourceIds.insert (event_source_id);
+        } // end lock scope
+        return TRUE; // done (do not propagate further)
+      } // end IF
+
+#if GTK_CHECK_VERSION (2,30,0)
+      struct _GValue value = G_VALUE_INIT;
+#else
+      struct _GValue value;
+      ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+      g_value_init (&value, G_TYPE_UINT);
+      g_value_set_uint (&value,
+                        data_p->nextChannel);
+      GtkComboBox* combo_box_p =
+        GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
+      ACE_ASSERT (combo_box_p);
+      Common_UI_GTK_Tools::selectValue (combo_box_p,
+                                        value,
+                                        1);
+      g_value_unset (&value);
+
+      break;
+    }
     default:
       return FALSE; // propagate
   } // end SWITCH
 
   return TRUE; // done (do not propagate further)
+}
+
+gboolean
+dialog_main_key_press_event_cb (GtkWidget* widget_in,
+                                GdkEventKey* eventKey_in,
+                                gpointer userData_in)
+{
+  return key_cb (widget_in,
+                 eventKey_in,
+                 userData_in);
 }
 
 gboolean

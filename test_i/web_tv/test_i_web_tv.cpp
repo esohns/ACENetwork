@@ -196,7 +196,7 @@ do_print_usage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [id]   : (default) channel# [")
-            << 1
+            << 0
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v        : print version information and exit [")
@@ -264,7 +264,7 @@ do_process_arguments (int argc_in,
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S, 0)
                                                    : ACE_Time_Value::zero);
   traceInformation_out = false;
-  channel_out = 1;
+  channel_out = 0;
   printVersionAndExit_out = false;
 
   std::string options_string = ACE_TEXT_ALWAYS_CHAR ("c:df:lrs:tu:v");
@@ -624,28 +624,31 @@ do_work (const std::string& configurationFile_in,
                ACE_TEXT (configurationFile_in.c_str ())));
     return;
   } // end IF
-  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
-      channels.find (channel_in);
-  if (unlikely (channel_iterator == channels.end ()))
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("invalid channel# (was: %u), returning\n"),
-               channel_in));
-    return;
-  } // end IF
+  Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string;
   bool use_SSL = false;
-  if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
-                             host_address,
-                             hostname_string,
-                             URI_string,
-                             use_SSL))
+  if (channel_in)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-                ACE_TEXT ((*channel_iterator).second.mainURL.c_str ())));
-    return;
+    channel_iterator = channels.find (channel_in);
+    if (unlikely (channel_iterator == channels.end ()))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("invalid channel# (was: %u), returning\n"),
+                 channel_in));
+      return;
+    } // end IF
+    if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
+                               host_address,
+                               hostname_string,
+                               URI_string,
+                               use_SSL))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                  ACE_TEXT ((*channel_iterator).second.mainURL.c_str ())));
+      return;
+    } // end IF
   } // end IF
 
 #if defined (SSL_SUPPORT)
@@ -757,6 +760,7 @@ do_work (const std::string& configurationFile_in,
   Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3a;
   connection_configuration_3a.allocatorConfiguration = &allocator_configuration;
   connection_configuration_3a.socketConfiguration.useLoopBackDevice = false;
+  connection_configuration_3a.socketConfiguration.version = TLS1_VERSION;
 //  connection_configuration_3a.statisticReportingInterval =
 //    statisticReportingInterval_in;
   connection_configuration_3a.messageAllocator = &message_allocator_3;
@@ -767,6 +771,7 @@ do_work (const std::string& configurationFile_in,
   Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3b;
   connection_configuration_3b.allocatorConfiguration = &allocator_configuration;
   connection_configuration_3b.socketConfiguration.useLoopBackDevice = false;
+  connection_configuration_3b.socketConfiguration.version = TLS1_VERSION;
 //  connection_configuration_3b.statisticReportingInterval =
 //    statisticReportingInterval_in;
   connection_configuration_3b.messageAllocator = &message_allocator_3;
@@ -1427,7 +1432,7 @@ ACE_TMAIN (int argc_in,
     (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S ? ACE_Time_Value (STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S, 0)
                                                    : ACE_Time_Value::zero);
   trace_information = false;
-  channel_i = 1;
+  channel_i = 0;
   print_version_and_exit = false;
   ACE_OS::memset (&elapsed_rusage, 0, sizeof (elapsed_rusage));
 
