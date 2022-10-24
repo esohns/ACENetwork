@@ -1175,7 +1175,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_SSLConnector_t ssl_connector (true);
 #endif // SSL_SUPPORT
     Test_I_AsynchTCPConnector_t asynch_connector (true);
-    Test_I_IConnector_t* iconnector_p = NULL;
+//    Test_I_IConnector_t* iconnector_p = NULL;
     Test_I_IStreamConnection_t* istream_connection_p = NULL;
     HTTP_Form_t HTTP_form;
     HTTP_Headers_t HTTP_headers;
