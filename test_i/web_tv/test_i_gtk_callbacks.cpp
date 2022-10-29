@@ -491,7 +491,7 @@ idle_load_channel_configuration_cb (gpointer userData_in)
 
   // auto-play ?
   if (data_p->nextChannel != -1)
-  { ACE_ASSERT (data_p->nextChannel == data_p->currentChannel);
+  { ACE_ASSERT (data_p->nextChannel == static_cast<int> (data_p->currentChannel));
     guint event_source_id = g_idle_add (idle_start_session_2,
                                         userData_in);
     if (unlikely (event_source_id == 0))
@@ -3011,7 +3011,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (iconnection_manager_p);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
   ACE_ASSERT (data_p->channels);
-  ACE_ASSERT (data_p->currentChannel);
+  if (!data_p->currentChannel) // no channel selected
+    return G_SOURCE_REMOVE;
   channel_iterator = data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
   Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
@@ -3200,7 +3201,7 @@ combobox_channel_changed_cb (GtkWidget* widget_in,
 
   // auto-load ?
   if (data_p->nextChannel != -1)
-  { ACE_ASSERT (data_p->nextChannel == data_p->currentChannel);
+  { ACE_ASSERT (data_p->nextChannel == static_cast<int> (data_p->currentChannel));
     gtk_button_clicked (button_p);
   } // end IF
 } // combobox_channel_changed_cb
@@ -3613,7 +3614,7 @@ key_cb (GtkWidget* widget_in,
       ACE_ASSERT (false); // *TODO*
 #endif // GTK_CHECK_VERSION (3,0,0)
       // sanity check(s)
-      if (data_p->nextChannel == data_p->currentChannel)
+      if (data_p->nextChannel == static_cast<int> (data_p->currentChannel))
       {
         data_p->nextChannel = -1; // reset
         return TRUE; // done (do not propagate further)

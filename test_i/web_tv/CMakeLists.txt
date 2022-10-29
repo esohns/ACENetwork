@@ -236,7 +236,10 @@ if (WIN32)
 #          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 elseif (UNIX)
   install (FILES
-           DESTINATION share/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
+           ${configuration_file}
+           ${ui_definition_file}
+           ${ui_rc_file}
+           DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
 endif ()
 
 ##########################################

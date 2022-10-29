@@ -285,7 +285,7 @@ install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 install (FILES etc/wlan_monitor.glade
-         DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
+         DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
 
 ##########################################
 

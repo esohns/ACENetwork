@@ -327,7 +327,7 @@ install (TARGETS ${EXECUTABLE_CLIENT}
          COMPONENT test_i)
 if (UNIX)
  install (FILES ${ui_definition_file}
-          DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}/av_stream" COMPONENT config)
+          DESTINATION "etc/${PROJECT_NAME}/av_stream" COMPONENT config)
 elseif (WIN32)
  install (FILES ${ui_definition_file}
           DESTINATION "etc/av_stream" COMPONENT config)
@@ -688,7 +688,7 @@ install (TARGETS ${EXECUTABLE_SERVER}
          RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
 if (UNIX)
  install (FILES ${ui_definition_file_2}
-          DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}/av_stream" COMPONENT config)
+          DESTINATION "etc/${PROJECT_NAME}/av_stream" COMPONENT config)
 elseif (WIN32)
  install (FILES ${ui_definition_file_2}
           DESTINATION "etc/av_stream" COMPONENT config)

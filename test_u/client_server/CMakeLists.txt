@@ -159,7 +159,7 @@ install (TARGETS ${EXECUTABLE_SOURCE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 install (FILES etc/net_client.glade
-         DESTINATION "etc/client_server" COMPONENT config)
+         DESTINATION "etc/${PROJECT_NAME}/client_server" COMPONENT config)
 
 ########### next target ###############
 set (EXECUTABLE_TARGET server)
@@ -277,7 +277,7 @@ install (TARGETS ${EXECUTABLE_TARGET}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 install (FILES etc/net_server.glade
-         DESTINATION "etc/client_server" COMPONENT config)
+         DESTINATION "etc/${PROJECT_NAME}/client_server" COMPONENT config)
 
 ##########################################
 
