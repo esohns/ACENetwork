@@ -209,13 +209,16 @@ if (GUI_SUPPORT)
  if (WXWIDGETS_SUPPORT)
   set (${EXECUTABLE_TARGET}_SRCS
        ${${EXECUTABLE_TARGET}_SRCS}
-       net_server_wxui.cpp
-       net_server_wxui.h
-       net_server_wxui_callbacks.cpp
+#       net_server_wxui.cpp
+#       net_server_wxui.h
+#       net_server_wxui_callbacks.cpp
        net_server_wxui_base.cpp
        net_server_wxui_base.h)
  endif (WXWIDGETS_SUPPORT)
  if (WXWIDGETS_USE)
+  list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui.cpp)
+  list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui.h)
+  list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui_callbacks.cpp)
   list (REMOVE_ITEM ${EXECUTABLE_TARGET}_SRCS net_server.cpp)
  endif (WXWIDGETS_USE)
 endif (GUI_SUPPORT)

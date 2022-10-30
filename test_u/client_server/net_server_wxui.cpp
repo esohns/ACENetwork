@@ -304,6 +304,5 @@ server::OnInit_2 ()
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-
   return true;
 }
