@@ -3611,7 +3611,10 @@ key_cb (GtkWidget* widget_in,
       else
         data_p->nextChannel = eventKey_in->keyval - GDK_KEY_0;
 #else
-      ACE_ASSERT (false); // *TODO*
+      if (eventKey_in->keyval == GDK_0)
+        data_p->nextChannel = 10;
+      else
+        data_p->nextChannel = eventKey_in->keyval - GDK_0;
 #endif // GTK_CHECK_VERSION (3,0,0)
       // sanity check(s)
       if (data_p->nextChannel == static_cast<int> (data_p->currentChannel))
