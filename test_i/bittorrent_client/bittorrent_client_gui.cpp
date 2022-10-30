@@ -442,8 +442,10 @@ do_work (bool debug_in,
   CBData_in.controller = &bittorrent_control;
 
   ////////////////////////// parser configuration //////////////////////////////
+#if defined (_DEBUG)
   CBData_in.configuration->parserConfiguration.debugScanner = debug_in;
   CBData_in.configuration->parserConfiguration.debugParser = debug_in;
+#endif // _DEBUG
 
   ////////////////////////// stream configuration //////////////////////////////
   struct BitTorrent_PeerStreamConfiguration peer_stream_configuration;

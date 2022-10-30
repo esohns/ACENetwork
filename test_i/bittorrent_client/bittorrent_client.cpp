@@ -557,9 +557,11 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
 
+#if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
+#endif // _DEBUG
 
   struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
