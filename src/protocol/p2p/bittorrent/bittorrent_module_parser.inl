@@ -347,10 +347,12 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   data_r.peerRecord = record_inout;
   record_inout = NULL;
 
+#if defined (_DEBUG)
   if (inherited2::configuration_->debugParser)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s\n"),
                 ACE_TEXT (BitTorrent_Tools::RecordToString (*data_r.peerRecord).c_str ())));
+#endif // _DEBUG
 
   // set new head fragment
   unsigned int message_bytes = 0;
@@ -569,11 +571,12 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   ACE_ASSERT (handshake_inout);
   ACE_ASSERT (inherited::sessionData_);
 
-  // debug info
+#if defined (_DEBUG)
   if (inherited2::configuration_->debugParser)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (BitTorrent_Tools::HandShakeToString (*handshake_inout).c_str ())));
+#endif // _DEBUG
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, const_cast<ACE_MT_SYNCH::MUTEX&> (inherited::sessionData_->getR_2 ()));
     typename SessionMessageType::DATA_T::DATA_T& session_data_r =

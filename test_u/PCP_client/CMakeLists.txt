@@ -198,7 +198,9 @@ if (WIN32)
           DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 #          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 elseif (UNIX)
- install (FILES etc/${UI_FILE}
+ install (FILES etc/test_u.gtk2
+                etc/test_u.gtk3
+                etc/test_u.xrc
                 etc/resources.rc
           DESTINATION etc/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 endif ()

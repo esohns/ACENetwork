@@ -237,7 +237,9 @@ if (WIN32)
 elseif (UNIX)
   install (FILES
            ${configuration_file}
-           ${ui_definition_file}
+           etc/test_u.gtk2
+           etc/test_u.gtk3
+           etc/test_u.xrc
            ${ui_rc_file}
            DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
 endif ()
