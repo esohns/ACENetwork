@@ -1,0 +1,17 @@
+#!/bin/sh
+#//%%%FILE%%%////////////////////////////////////////////////////////////////////
+#// File Name: sofficerc
+#//
+#// History:
+#//   Date   |Name | Description of modification
+#// ---------|-----|-------------------------------------------------------------
+#// 20/02/06 | soh | Creation.
+#//%%%FILE%%%////////////////////////////////////////////////////////////////////
+
+#ProductKey = StarOffice6.0
+#ConfigFile = ${SYSUSERCONFIG}/.sversionrc
+#ConfigDir = ${$ConfigFile:versions:${ProductKey}}
+
+UNO_SERVICES=file:///usr/lib64/libreoffice/program/services.rdb
+UNO_TYPES=file:///usr/lib64/libreoffice/program/types/offapi.rdb file:///usr/lib64/libreoffice/program/types.rdb
+#UNO_WRITERDB=$ConfigDir/user.rdb

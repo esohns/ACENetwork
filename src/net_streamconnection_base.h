@@ -21,16 +21,16 @@
 #ifndef NET_STREAMCONNECTION_BASE_H
 #define NET_STREAMCONNECTION_BASE_H
 
+#include "ace/Asynch_IO.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
+#include "ace/Synch_Traits.h"
 
 #include "net_common.h"
 #include "net_connection_base.h"
 #include "net_iconnection.h"
-#include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
 #include "net_ilistener.h"
-#include "net_itransportlayer.h"
 
 // forward declarations
 class ACE_Time_Value;

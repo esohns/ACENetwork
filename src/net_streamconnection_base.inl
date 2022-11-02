@@ -19,18 +19,18 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
-#include "ace/Global_Macros.h"
-#include "ace/SOCK_Stream.h"
+#include "ace/OS.h"
 #include "ace/Svc_Handler.h"
-
-#include "common.h"
+#include "ace/Task.h"
+#include "ace/Thread.h"
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
+#include "stream_defines.h"
 #include "stream_itask.h"
 
-#include "net_common.h"
 #include "net_connection_configuration.h"
-#include "net_defines.h"
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 template <ACE_SYNCH_DECL,
@@ -295,13 +295,13 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // step3d: start stream
   stream_.start ();
-  if (unlikely (!stream_.isRunning ()))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
-                id ()));
-    goto error;
-  } // end IF
+  //if (unlikely (!stream_.isRunning ()))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
+  //              id ()));
+  //  goto error;
+  //} // end IF
   handle_stream = true;
 
   // step4: start receiving ?
@@ -1354,13 +1354,13 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // step3c: start stream
   stream_.start ();
-  if (unlikely (!stream_.isRunning ()))
-  { // already closed ?
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
-                id ()));
-    goto error;
-  } // end IF
+  //if (unlikely (!stream_.isRunning ()))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
+  //              id ()));
+  //  goto error;
+  //} // end IF
   handle_stream = true;
 
   // step4: start receiving ?
