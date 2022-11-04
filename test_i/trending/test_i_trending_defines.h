@@ -24,7 +24,7 @@
 #include "ace/config-lite.h"
 
 #define TEST_I_ISIN_LENGTH                           12 // 2 + 10
-#define TEST_I_DEFAULT_ISIN                          "DExxxxxxxxxx"
+#define TEST_I_DEFAULT_ISIN                          "DE000ETFL581"
 
 #define TEST_I_DEFAULT_LIBREOFFICE_REFERENCE_ROW     5
 #define TEST_I_DEFAULT_LIBREOFFICE_START_ROW         8
@@ -43,7 +43,8 @@
 #define TEST_I_DEFAULT_PORT                          STREAM_DOCUMENT_DEFAULT_LIBREOFFICE_SERVER_PORT
 
 #define TEST_I_URL_SYMBOL_PLACEHOLDER                "%s"
-#define TEST_I_DEFAULT_URL                           "https://www.tagesschau.de/wirtschaft/boersenkurse/suche/"
+#define TEST_I_DEFAULT_URL                           "https://www.tagesschau.de/wirtschaft/boersenkurse/ajax/get_search.htn"
+#define TEST_I_DEFAULT_FORM_KEY_LIMIT_STRING         "limit"
 #define TEST_I_DEFAULT_FORM_KEY_SEARCH_STRING        "suchbegriff"
 
 #endif

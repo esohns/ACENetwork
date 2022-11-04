@@ -161,6 +161,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
       } // end IF
 
       if (!inherited::send ((*iterator).second,
+                            HTTP_Codes::HTTP_METHOD_GET,
                             inherited::configuration_->HTTPHeaders,
                             inherited::configuration_->HTTPForm))
       {

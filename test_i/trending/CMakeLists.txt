@@ -201,7 +201,7 @@ if (UNIX)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}" COMMAND)
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-c./etc/soffice.ini -f./etc/symbols.ini -h localhost -l -o ./output.ods -p 2083 -r -t -u https://www.tagesschau.de/wirtschaft/boersenkurse/suche/"
+                         ARGS "-c./etc/soffice.ini -f./etc/template.ods -h localhost -iDE000ETFL581 -l -o ./output.ods -p 2083 -r -t -u https://www.tagesschau.de/wirtschaft/boersenkurse/ajax/get_search.htn"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}
@@ -231,11 +231,14 @@ elseif (WIN32)
                            ${SSL_LIBRARY_PATH}
                            ${ZLIB_LIBRARY_PATH}
                            ${OO_LIBRARY_PATH})
+ file (TO_NATIVE_PATH "${UNO_HOME}" UNO_HOME_PATH)
+ string (REPLACE "\\" "\\\\" UNO_HOME_PATH ${UNO_HOME_PATH})
+ set (ENVIRONMENT "UNO_HOME=${UNO_HOME_PATH};URE_MORE_TYPES=$ORIGIN/types/offapi.rdb")
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-c.\\\\etc\\\\soffice.ini -f.\\\\etc\\\\template.ods -h localhost -i.\\\\etc\\\\symbols.ini -l -o .\\\\output.ods -p 2083 -r -t -u https://www.tagesschau.de/wirtschaft/boersenkurse/suche/"
+                         ARGS "-c.\\\\etc\\\\soffice.ini -f.\\\\etc\\\\template.ods -h localhost -iDE000ETFL581 -l -o .\\\\output.ods -p 2083 -r -t -u https://www.tagesschau.de/wirtschaft/boersenkurse/ajax/get_search.htn"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}
-                         ENVIRONMENT foo=bar;_NO_DEBUG_HEAP=1)
+                         ENVIRONMENT ${ENVIRONMENT})
 endif ()

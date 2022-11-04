@@ -45,9 +45,18 @@ Test_I_Stream_HTTPGet::handleDataMessage (Test_I_Stream_Message*& message_inout,
   STREAM_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::handleDataMessage"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::mod_);
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::sessionData_);
+  Test_I_StockItemsIterator_t iterator = iterator_;
+  if (iterator == inherited::configuration_->stockItems.end ())
+  {
+    const Test_I_Stream_MessageData& message_data_container_r =
+        message_inout->getR ();
+    Test_I_Trending_MessageData& message_data_r =
+      const_cast<Test_I_Trending_MessageData&> (message_data_container_r.getR ());
+    message_data_r.stockItem = *iterator_;
+    return;
+  } // end IF
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -69,14 +78,15 @@ Test_I_Stream_HTTPGet::handleDataMessage (Test_I_Stream_Message*& message_inout,
   message_data_r.stockItem = *iterator_;
 
   // send next request ?
+  iterator = iterator_;
   do
   {
-    if (++iterator_ == inherited::configuration_->stockItems.end ())
+    if (++iterator == inherited::configuration_->stockItems.end ())
     { // done --> close connection
       ACE_ASSERT (inherited::sessionData_);
       Test_I_Trending_SessionData& session_data_r =
         const_cast<Test_I_Trending_SessionData&> (inherited::sessionData_->getR ());
-      ACE_ASSERT (session_data_r.connection);
+      //ACE_ASSERT (session_data_r.connection);
       if (session_data_r.connection)
       {
         session_data_r.connection->abort ();
@@ -89,30 +99,33 @@ Test_I_Stream_HTTPGet::handleDataMessage (Test_I_Stream_Message*& message_inout,
       break;
   } while (true);
 
-  std::string url_string = inherited::configuration_->URL;
-  HTTP_Form_t form_data;
-  form_data.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_FORM_KEY_SEARCH_STRING),
-                                    (*iterator_).ISIN));
-  if (form_data.empty ())
-    makeURI (inherited::configuration_->URL,
-             (*iterator_).ISIN,
-             url_string);
+  //std::string url_string = inherited::configuration_->URL;
+  //HTTP_Form_t form_data;
+  //form_data.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_FORM_KEY_SEARCH_STRING),
+  //                                  (*iterator_).ISIN));
+  //if (form_data.empty ())
+  //  makeURI (inherited::configuration_->URL,
+  //           (*iterator_).ISIN,
+  //           url_string);
 
-  // send HTTP GET/POST request
-  if (!inherited::send (url_string,
-                        inherited::configuration_->HTTPHeaders,
-                        form_data))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to send HTTP request \"%s\", returning\n"),
-                inherited::mod_->name (),
-                ACE_TEXT (inherited::configuration_->URL.c_str ())));
-    return;
-  } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: fetching \"%s\"...\n"),
-              inherited::mod_->name (),
-              ACE_TEXT ((*iterator_).symbol.c_str ())));
+  //// send HTTP GET/POST request
+  //if (!inherited::send (url_string,
+  //                      HTTP_Codes::HTTP_METHOD_GET,
+  //                      inherited::configuration_->HTTPHeaders,
+  //                      form_data))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s: failed to send HTTP request \"%s\", returning\n"),
+  //              inherited::mod_->name (),
+  //              ACE_TEXT (inherited::configuration_->URL.c_str ())));
+  //  return;
+  //} // end IF
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("%s: fetching \"%s\"...\n"),
+  //            inherited::mod_->name (),
+  //            ACE_TEXT ((*iterator_).symbol.c_str ())));
+
+  iterator_++;
 }
 
 void
@@ -129,7 +142,7 @@ Test_I_Stream_HTTPGet::handleSessionMessage (Test_I_Stream_SessionMessage*& mess
 
   switch (message_inout->type ())
   {
-    case STREAM_SESSION_MESSAGE_BEGIN:
+    case STREAM_SESSION_MESSAGE_LINK:
     {
       // sanity check(s)
       //ACE_ASSERT (!inherited::sessionData_);
@@ -184,11 +197,14 @@ Test_I_Stream_HTTPGet::handleSessionMessage (Test_I_Stream_SessionMessage*& mess
       //                      ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (TEST_I_URL_SYMBOL_PLACEHOLDER)),
       //                      (*iterator_).ISIN.c_str ());
       HTTP_Form_t form_data;
+      form_data.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_FORM_KEY_LIMIT_STRING),
+                                        ACE_TEXT_ALWAYS_CHAR ("6")));
       form_data.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_FORM_KEY_SEARCH_STRING),
                                         (*iterator_).ISIN));
 
-      // send first HTTP POST request
+      // send first HTTP GET request
       if (!inherited::send (inherited::configuration_->URL,
+                            HTTP_Codes::HTTP_METHOD_GET,
                             inherited::configuration_->HTTPHeaders,
                             form_data))
       {
@@ -201,12 +217,34 @@ Test_I_Stream_HTTPGet::handleSessionMessage (Test_I_Stream_SessionMessage*& mess
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: fetching \"%s\"...\n"),
                   inherited::mod_->name (),
-                  ACE_TEXT ((*iterator_).symbol.c_str ())));
+                  ACE_TEXT ((*iterator_).ISIN.c_str ())));
 
       break;
     }
-    case STREAM_SESSION_MESSAGE_END:
+    case STREAM_SESSION_MESSAGE_STEP:
+    {
+      std::string url_string = inherited::configuration_->URL;
+      HTTP_Form_t form_data;
+
+      // send HTTP GET/POST request
+      if (!inherited::send (url_string,
+                            HTTP_Codes::HTTP_METHOD_GET,
+                            inherited::configuration_->HTTPHeaders,
+                            form_data))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to send HTTP request \"%s\", returning\n"),
+                    inherited::mod_->name (),
+                    ACE_TEXT (inherited::configuration_->URL.c_str ())));
+        return;
+      } // end IF
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: fetching \"%s\"...\n"),
+                  inherited::mod_->name (),
+                  ACE_TEXT (url_string.c_str ())));
+
       break;
+    }
     default:
       break;
   } // end SWITCH

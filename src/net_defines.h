@@ -71,6 +71,8 @@
 // --- SSL ---
 #if defined (SSL_SUPPORT)
 #define NET_PROTOCOL_DEFAULT_SSL_TRUSTED_CAS_FILENAME_STRING           "cacert.pem"
+#define NET_PROTOCOL_DEFAULT_SSL_CERTIFICATE_FILENAME_STRING           "dummy.pem"
+#define NET_PROTOCOL_DEFAULT_SSL_KEY_FILENAME_STRING                   "key.pem"
 #endif // SSL_SUPPORT
 
 // --- UDP ---

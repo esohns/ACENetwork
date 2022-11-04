@@ -143,6 +143,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
                     ACE_TEXT ("retrieving \"%s\"...\n"),
                     ACE_TEXT (URL_string.c_str ())));
         if (!inherited::send (URL_string,
+                              HTTP_Codes::HTTP_METHOD_GET,
                               inherited::configuration_->HTTPHeaders,
                               inherited::configuration_->HTTPForm))
         {
@@ -255,6 +256,7 @@ continue_:
       } // end IF
 
       if (!inherited::send ((*iterator).second,
+                            HTTP_Codes::HTTP_METHOD_GET,
                             inherited::configuration_->HTTPHeaders,
                             inherited::configuration_->HTTPForm))
       {

@@ -156,28 +156,48 @@ enum Test_I_SAXParserState : int
   //SAXPARSER_STATE_IN_HEAD_TITLE,
   ////////////////////////////////////////
   SAXPARSER_STATE_IN_BODY_DIV_CONTENT,
-  SAXPARSER_STATE_IN_TBODY_CONTENT,
-  SAXPARSER_STATE_IN_TR_CONTENT,
+  SAXPARSER_STATE_IN_UL_CONTENT,
+  SAXPARSER_STATE_IN_LI_CONTENT,
   ////////////////////////////////////////
-  SAXPARSER_STATE_READ_SYMBOL,
-  SAXPARSER_STATE_READ_WKN,
-  SAXPARSER_STATE_READ_ISIN,
-  SAXPARSER_STATE_READ_CHANGE,
-  SAXPARSER_STATE_READ_CHANGE_2,
-  SAXPARSER_STATE_READ_DATE,
-  SAXPARSER_STATE_READ_VALUE
+  SAXPARSER_STATE_READ_ONCLICK,
 };
+
+enum Test_I_SAXParserState_2 : int
+{
+  SAXPARSER_STATE_2_INVALID = -1,
+  ////////////////////////////////////////
+  SAXPARSER_STATE_2_IN_HTML = 0,
+  ////////////////////////////////////////
+  SAXPARSER_STATE_2_IN_HEAD,
+  SAXPARSER_STATE_2_IN_BODY,
+  ////////////////////////////////////////
+  //SAXPARSER_STATE_2_IN_HEAD_TITLE,
+  ////////////////////////////////////////
+  SAXPARSER_STATE_2_IN_BODY_DIV_CONTENT,
+  SAXPARSER_STATE_2_IN_SPAN_PRICE_CONTENT,
+  SAXPARSER_STATE_2_IN_SPAN_CHANGE_CONTENT,
+  SAXPARSER_STATE_2_IN_SPAN_DATE_CONTENT,
+  ////////////////////////////////////////
+  SAXPARSER_STATE_2_READ_PRICE,
+  SAXPARSER_STATE_2_READ_CHANGE,
+  SAXPARSER_STATE_2_READ_DATE,
+};
+
 struct Test_I_SAXParserContext
  : Stream_Module_HTMLParser_SAXParserContextBase
 {
   Test_I_SAXParserContext ()
    : Stream_Module_HTMLParser_SAXParserContextBase ()
    , record (NULL)
+   , URL ()
    , state (SAXPARSER_STATE_INVALID)
+   , state_2 (SAXPARSER_STATE_2_INVALID)
   {}
 
-  struct Test_I_StockRecord* record;
-  enum Test_I_SAXParserState state;
+  struct Test_I_StockRecord*   record;
+  std::string                  URL;
+  enum Test_I_SAXParserState   state;
+  enum Test_I_SAXParserState_2 state_2;
 };
 
 struct Test_I_Trending_ModuleHandlerConfiguration
@@ -263,12 +283,14 @@ struct Test_I_Trending_Configuration
    , parserConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
+   , streamConfiguration_2 ()
   {}
 
   // **************************** parser data **********************************
   struct HTTP_ParserConfiguration       parserConfiguration;
   Net_ConnectionConfigurations_t        connectionConfigurations;
   Test_I_Trending_StreamConfiguration_t streamConfiguration;
+  Test_I_Trending_StreamConfiguration_t streamConfiguration_2; // connection
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,

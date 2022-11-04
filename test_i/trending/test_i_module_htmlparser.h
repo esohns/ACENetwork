@@ -39,9 +39,7 @@
 
 #include "test_i_trending_common.h"
 
-//// SAX callbacks
-//void test_i_libxml2_sax_start_document_cb (void*); // user data
-//void test_i_libxml2_sax_end_document_cb (void*); // user data
+// SAX callbacks
 void test_i_libxml2_sax_characters_cb (void*,          // user data
                                        const xmlChar*, // string
                                        int);           // length
@@ -50,9 +48,16 @@ void test_i_libxml2_sax_start_element_cb (void*,            // user data
                                           const xmlChar**); // attributes
 void test_i_libxml2_sax_end_element_cb (void*,           // user data
                                         const xmlChar*); // name
-//xmlEntityPtr getEntity (void*,           // user data
-//                        const xmlChar*); // name
-
+//////////////////////////////////////////
+void test_i_libxml2_sax_characters_2 (void*,          // user data
+                                      const xmlChar*, // string
+                                      int);           // length
+void test_i_libxml2_sax_start_element_2 (void*,            // user data
+                                         const xmlChar*,   // name
+                                         const xmlChar**); // attributes
+void test_i_libxml2_sax_end_element_2 (void*,           // user data
+                                       const xmlChar*); // name
+//////////////////////////////////////////
 void
 test_i_libxml2_sax_error_cb (void*,       // context
                              const char*, // message
@@ -104,8 +109,11 @@ class Test_I_Stream_HTMLParser
   // helper methods
   virtual bool initializeSAXParser ();
 
+  bool                          isInitial_; // retrieve request URL ?
   Test_I_StockRecordsIterator_t iterator_;
   Test_I_StockRecordsIterator_t iterator_2_;
+  Test_I_SAXParserContext       context_; // retrieve request URL
+  Test_I_SAXParserContext       context_2; // retrieve stock data
 };
 
 // declare module

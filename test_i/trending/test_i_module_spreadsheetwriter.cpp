@@ -209,7 +209,15 @@ Test_I_Stream_SpreadsheetWriter::handleSessionMessage (Test_I_Stream_SessionMess
       document_properties[2].Value <<=
         document::MacroExecMode::ALWAYS_EXECUTE_NO_WARN;
 
-      filename = ::rtl::OUString::createFromAscii (inherited::configuration_->libreOfficeRc.c_str ());
+
+      std::string filename_string =
+        Common_Tools::environment (ACE_TEXT_ALWAYS_CHAR (STREAM_DOCUMENT_DEFAULT_LIBREOFFICE_ENV_UNO_HOME));
+      filename_string += ACE_DIRECTORY_SEPARATOR_STR;
+      filename_string +=
+        ACE_TEXT_ALWAYS_CHAR (STREAM_DOCUMENT_DEFAULT_LIBREOFFICE_FILE_UNO_INI);
+      filename = ::rtl::OUString::createFromAscii (filename_string.c_str ());
+
+      //filename = ::rtl::OUString::createFromAscii (inherited::configuration_->libreOfficeRc.c_str ());
       result_3 = ::osl::FileBase::getFileURLFromSystemPath (filename,
                                                             filename_url);
       ACE_ASSERT (result_3 == ::osl::FileBase::RC::E_None);

@@ -112,6 +112,10 @@ do_printUsage (const std::string& programName_in)
             << configuration_file
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
   configuration_file = path;
   configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file +=
@@ -503,6 +507,39 @@ do_work (const std::string& bootstrapFileName_in,
 {
   STREAM_TRACE (ACE_TEXT ("::do_work"));
 
+//#if defined (SSL_SUPPORT)
+//  std::string data_directory_string =
+//    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+//                                                      ACE_TEXT_ALWAYS_CHAR (""),
+//                                                      false); // data
+//  std::string filename_string = data_directory_string;
+//  filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
+//  filename_string +=
+//    ACE_TEXT_ALWAYS_CHAR (NET_PROTOCOL_DEFAULT_SSL_TRUSTED_CAS_FILENAME_STRING);
+//  data_directory_string =
+//    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+//                                                      ACE_TEXT_ALWAYS_CHAR (""),
+//                                                      true); // config
+//  std::string certificate_string = data_directory_string;
+//  certificate_string += ACE_DIRECTORY_SEPARATOR_CHAR;
+//  certificate_string +=
+//    ACE_TEXT_ALWAYS_CHAR (NET_PROTOCOL_DEFAULT_SSL_CERTIFICATE_FILENAME_STRING);
+//  std::string key_string = data_directory_string;
+//  key_string += ACE_DIRECTORY_SEPARATOR_CHAR;
+//  key_string +=
+//    ACE_TEXT_ALWAYS_CHAR (NET_PROTOCOL_DEFAULT_SSL_KEY_FILENAME_STRING);
+//  if (unlikely (!Net_Common_Tools::initializeSSLContext (certificate_string,
+//                                                         key_string,
+//                                                         filename_string, // trusted CAs
+//                                                         true,            // client
+//                                                         NULL)))          // default context
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//               ACE_TEXT ("failed to Net_Common_Tools::initializeSSLContext(), returning\n")));
+//    return;
+//  } // end IF
+//#endif // SSL_SUPPORT
+
   bool finalize_event_dispatch = false;
   bool stop_timers = false;
 //  int group_id = -1;
@@ -545,7 +582,9 @@ do_work (const std::string& bootstrapFileName_in,
   Test_I_Trending_ConnectionConfiguration_t connection_configuration;
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_Trending_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_I_Trending_ModuleHandlerConfiguration modulehandler_configuration_2; // connection-
   struct Test_I_Trending_StreamConfiguration stream_configuration;
+  struct Test_I_Trending_StreamConfiguration stream_configuration_2; // connection-
   Net_ConnectionConfigurationsIterator_t iterator;
   struct Common_EventDispatchState event_dispatch_state_s;
   struct Net_UserData user_data_s;
@@ -586,14 +625,19 @@ do_work (const std::string& bootstrapFileName_in,
 
   // *********************** socket configuration data ************************
   connection_configuration.socketConfiguration.address = remoteHost_in;
+  connection_configuration.socketConfiguration.hostname =
+    ACE_TEXT_ALWAYS_CHAR ("www.tagesschau.de");
   connection_configuration.socketConfiguration.useLoopBackDevice =
     connection_configuration.socketConfiguration.address.is_loopback ();
+  //connection_configuration.socketConfiguration.version = TLS1_VERSION;
+
   //connection_configuration.writeOnly = true;
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.allocatorConfiguration = &allocator_configuration;
-  connection_configuration.allocatorConfiguration->defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE;
+  connection_configuration.allocatorConfiguration->defaultBufferSize =
+    TEST_I_DEFAULT_BUFFER_SIZE;
   connection_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
+    &configuration.streamConfiguration_2;
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  &connection_configuration));
@@ -660,13 +704,21 @@ do_work (const std::string& bootstrapFileName_in,
                                                                   ACE_TEXT_ALWAYS_CHAR ("Keep-Alive")));
 
   modulehandler_configuration.URL = URL_in;
-  // ******************** (sub-)stream configuration data *********************
+  modulehandler_configuration_2 = modulehandler_configuration;
+  modulehandler_configuration_2.concurrency =
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+
+  // ******************** (sub-)stream configuration data **********************
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.printFinalReport = true;
-  //configuration.streamConfiguration.configuration_.module = module_p;
+  stream_configuration_2 = stream_configuration;
+  stream_configuration_2.printFinalReport = false;
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
                                                 stream_configuration);
+  configuration.streamConfiguration_2.initialize (module_configuration,
+                                                  modulehandler_configuration_2,
+                                                  stream_configuration_2);
 
   // step0b: initialize event dispatch
   event_dispatch_configuration_s.numberOfProactorThreads =
@@ -1008,7 +1060,7 @@ ACE_TMAIN (int argc_in,
   // step1d: initialize logging and/or tracing
   if (log_to_file)
     log_file_name =
-      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACEStream_PACKAGE_NAME),
+      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
                                         ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
   if (!Common_Log_Tools::initializeLogging (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
                                             log_file_name,                        // log file name
