@@ -483,7 +483,7 @@ error:
       row = inherited::configuration_->libreOfficeSheetStartRow;
       row =
         Stream_Document_Tools::firstFreeRow (cell_range_p,
-                                             inherited::configuration_->libreOfficeSheetStartColumn,
+                                             inherited::configuration_->libreOfficeSheetStartColumn + 1,
                                              row);
       for (Test_I_StockRecordsIterator_t iterator_2 = session_data_r.data.begin ();
            iterator_2 != session_data_r.data.end ();

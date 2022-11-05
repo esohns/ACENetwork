@@ -152,34 +152,6 @@ Test_I_Trending_Stream_T<ConnectorType>::initialize (const Test_I_Trending_Strea
 
   // ---------------------------------------------------------------------------
 
-  Test_I_HTTPParser* HTTPParser_impl_p = NULL;
-
-  // ******************* HTTP Marshal ************************
-  //Stream_Module_t* module_p =
-  //  const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("HTTPMarshal")));
-  //if (!module_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-  //              ACE_TEXT (stream_name_string_),
-  //              ACE_TEXT ("HTTPMarshal")));
-  //  goto failed;
-  //} // end IF
-  //HTTPParser_impl_p = dynamic_cast<Test_I_HTTPParser*> (module_p->writer ());
-  //if (!HTTPParser_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("%s: dynamic_cast<Test_I_HTTPParser> failed, aborting\n"),
-  //              ACE_TEXT (stream_name_string_)));
-  //  goto failed;
-  //} // end IF
-  //HTTPParser_impl_p->setP (&(inherited::state_));
-
-  //// *NOTE*: push()ing the module will open() it
-  ////         --> set the argument that is passed along (head module expects a
-  ////             handle to the session data)
-  //module_p->arg (inherited::sessionData_);
-
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup ())
     {
@@ -192,7 +164,6 @@ Test_I_Trending_Stream_T<ConnectorType>::initialize (const Test_I_Trending_Strea
   // -------------------------------------------------------------
 
   inherited::isInitialized_ = true;
-  //inherited::dump_state ();
 
   return true;
 

@@ -118,6 +118,7 @@ Test_I_Stream_HTMLParser::handleDataMessage (Test_I_Stream_Message*& message_ino
     // clean up
     passMessageDownstream_out = false;
     message_inout->release (); message_inout = NULL;
+    inherited::headFragment_ = NULL;
 
     ACE_ASSERT (!inherited::parserContext_.URL.empty ());
     ACE_DEBUG ((LM_DEBUG,
@@ -177,10 +178,10 @@ Test_I_Stream_HTMLParser::handleDataMessage (Test_I_Stream_Message*& message_ino
   // sanity check(s)
   ACE_ASSERT (headFragment_);
 
-  const typename Test_I_Stream_Message::DATA_T& data_container_r =
-    headFragment_->getR ();
-  typename Test_I_Stream_Message::DATA_T::DATA_T& data_r =
-    const_cast<typename Test_I_Stream_Message::DATA_T::DATA_T&> (data_container_r.getR ());
+//  const typename Test_I_Stream_Message::DATA_T& data_container_r =
+//    headFragment_->getR ();
+//  typename Test_I_Stream_Message::DATA_T::DATA_T& data_r =
+//    const_cast<typename Test_I_Stream_Message::DATA_T::DATA_T&> (data_container_r.getR ());
   int result = -1;
 
   // *IMPORTANT NOTE*: no more data will arrive for this document

@@ -199,13 +199,15 @@ endif (WIN32)
 
 if (UNIX)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}" COMMAND)
+ file (TO_NATIVE_PATH "${UNO_HOME}" "/usr/lib64/libreoffice/program")
+ set (ENVIRONMENT "UNO_HOME=${UNO_HOME_PATH};URE_MORE_TYPES=$ORIGIN/types/offapi.rdb")
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
                          ARGS "-c./etc/soffice.ini -f./etc/template.ods -h localhost -iDE000ETFL581 -l -o ./output.ods -p 2083 -r -t -u https://www.tagesschau.de/wirtschaft/boersenkurse/ajax/get_search.htn"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}
-                         ENVIRONMENT foo=bar)
+                         ENVIRONMENT ${ENVIRONMENT})
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
