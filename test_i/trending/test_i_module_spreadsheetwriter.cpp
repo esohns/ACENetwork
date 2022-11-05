@@ -142,9 +142,11 @@ Test_I_Stream_SpreadsheetWriter::~Test_I_Stream_SpreadsheetWriter ()
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SpreadsheetWriter::~Test_I_Stream_SpreadsheetWriter"));
 
+  if (document_.is ())
+    document_.clear ();
   if (handler_2)
   {
-    handler_2->release ();
+    handler_2->release (); handler_2 = NULL;
 //    delete handler_2;
   } // end IF
 }
@@ -600,6 +602,8 @@ error:
                     session_data_r.data.size ()));
       } // end IF
 
+      document_.clear ();
+ 
 continue_:
 error_2:
       if (inherited::component_.is ())
@@ -623,8 +627,8 @@ error_2:
 //        }
 //        if (component_p.is ())
 //          component_p->dispose ();
-//        inherited::componentContext_.clear ();
 //      } // end IF
+      inherited::componentContext_.clear ();
 
       break;
     }
