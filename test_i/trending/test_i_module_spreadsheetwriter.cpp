@@ -46,6 +46,7 @@
 #include "stream_macros.h"
 
 #include "stream_document_defines.h"
+#include "stream_document_tools.h"
 
 #include "test_i_trending_defines.h"
 
@@ -428,6 +429,7 @@ error:
       uno::Reference<sheet::XCalculatable> calculatable_p;
       ACE_TCHAR buffer[BUFSIZ];
       ACE_OS::memset (buffer, 0, sizeof (buffer));
+      std::string timestamp_string;
 
       // sanity check(s)
       if (!document_.is ())
@@ -470,8 +472,17 @@ error:
       ACE_ASSERT (cell_range_p.is ());
 
       // set index data
+      timestamp_string =
+        Common_Timer_Tools::timestampToString ((*iterator).timeStamp,
+                                               false);
+      ACE_ASSERT (!timestamp_string.empty ());
+
       column = 0;
       row = inherited::configuration_->libreOfficeSheetStartRow;
+      row =
+        Stream_Document_Tools::firstFreeRow (cell_range_p,
+                                             inherited::configuration_->libreOfficeSheetStartColumn,
+                                             row);
       for (Test_I_StockRecordsIterator_t iterator_2 = session_data_r.data.begin ();
            iterator_2 != session_data_r.data.end ();
            ++iterator_2)
@@ -510,6 +521,12 @@ error:
         ACE_ASSERT (cell_p.is ());
         cell_p->setValue ((*iterator_2).change);
 
+        ++column;
+        cell_p =
+          cell_range_p->getCellByPosition (column, row);
+        ACE_ASSERT (cell_p.is ());
+        cell_p->setFormula (::rtl::OUString::createFromAscii (timestamp_string.c_str ()));
+
         ++row;
       } // end FOR
 
@@ -520,11 +537,6 @@ error:
           cell_range_p->getCellByPosition (TEST_I_LIBREOFFICE_DATE_COLUMN - 1,
                                            TEST_I_LIBREOFFICE_DATE_ROW - 1);
         ACE_ASSERT (cell_p.is ());
-
-        std::string timestamp_string =
-          Common_Timer_Tools::timestampToString ((*iterator).timeStamp,
-                                                 false);
-        ACE_ASSERT (!timestamp_string.empty ());
         cell_p->setFormula (::rtl::OUString::createFromAscii (timestamp_string.c_str ()));
       } // end IF
 

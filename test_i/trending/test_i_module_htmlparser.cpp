@@ -169,8 +169,64 @@ Test_I_Stream_HTMLParser::handleDataMessage (Test_I_Stream_Message*& message_ino
                                 passMessageDownstream_out);
 
   // done
-  ACE_ASSERT (session_data_r.connection);
-  session_data_r.connection->abort ();
+  { ACE_GUARD (ACE_Thread_Mutex, aGuard, *session_data_r.lock);
+    if (session_data_r.connection)
+      session_data_r.connection->abort ();
+  } // end lock scope
+
+  // sanity check(s)
+  ACE_ASSERT (headFragment_);
+
+  const typename Test_I_Stream_Message::DATA_T& data_container_r =
+    headFragment_->getR ();
+  typename Test_I_Stream_Message::DATA_T::DATA_T& data_r =
+    const_cast<typename Test_I_Stream_Message::DATA_T::DATA_T&> (data_container_r.getR ());
+  int result = -1;
+
+  // *IMPORTANT NOTE*: no more data will arrive for this document
+  result = htmlParseChunk (inherited::parserContext_.parserContext,
+                           ACE_TEXT_ALWAYS_CHAR (""),
+                           0,
+                           1); // terminate
+  xmlErrorPtr error_p = xmlGetLastError ();
+  if (result)
+  {
+    xmlParserErrors parse_errors = static_cast<xmlParserErrors> (result);
+    ACE_DEBUG ((Stream_HTML_Tools::errorLevelToLogPriority (error_p ? error_p->level : XML_ERR_ERROR),
+                ACE_TEXT ("%s: failed to htmlParseChunk() (result was: %d): \"%s\", continuing\n"),
+                inherited::mod_->name (),
+                result,
+                error_p ? ACE_TEXT (error_p->message) : ACE_TEXT ("")));
+  } // end IF
+  if (!inherited::parserContext_.parserContext->wellFormed)
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("%s: document not well-formed, continuing\n"),
+                inherited::mod_->name ()));
+  if (error_p &&
+      error_p->code)
+    ACE_DEBUG ((Stream_HTML_Tools::errorLevelToLogPriority (error_p->level),
+                ACE_TEXT ("%s: document had errors (last error was: %d: \"%s\"), continuing\n"),
+                inherited::mod_->name (),
+                error_p->code, ACE_TEXT (error_p->message)));
+  xmlCtxtResetLastError (inherited::parserContext_.parserContext);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("parsing HTML...DONE\n")));
+
+  //// *TODO*: remove type inference
+  //ACE_ASSERT (!data_r.HTMLDocument);
+  //data_r.HTMLDocument = inherited::parserContext_.parserContext->myDoc;
+  //inherited::parserContext_.parserContext->myDoc = NULL;
+
+  //result = inherited::put_next (inherited::headFragment_, NULL);
+  //if (unlikely (result == -1))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s: failed to ACE_Task::put_next(): \"%m\", continuing\n"),
+  //              inherited::mod_->name ()));
+  //  inherited::headFragment_->release ();
+  //} // end IF
+  //inherited::headFragment_ = NULL;
 }
 
 void

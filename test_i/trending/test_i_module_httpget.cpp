@@ -82,50 +82,13 @@ Test_I_Stream_HTTPGet::handleDataMessage (Test_I_Stream_Message*& message_inout,
   do
   {
     if (++iterator == inherited::configuration_->stockItems.end ())
-    { // done --> close connection
-      ACE_ASSERT (inherited::sessionData_);
-      Test_I_Trending_SessionData& session_data_r =
-        const_cast<Test_I_Trending_SessionData&> (inherited::sessionData_->getR ());
-      //ACE_ASSERT (session_data_r.connection);
-      if (session_data_r.connection)
-      {
-        session_data_r.connection->abort ();
-        session_data_r.connection->decrease (); session_data_r.connection = NULL;
-      } // end IF
-      return; // done
-    } // end IF
+      break; // done
 
     if (!(*iterator_).ISIN.empty ())
       break;
   } while (true);
 
-  //std::string url_string = inherited::configuration_->URL;
-  //HTTP_Form_t form_data;
-  //form_data.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_FORM_KEY_SEARCH_STRING),
-  //                                  (*iterator_).ISIN));
-  //if (form_data.empty ())
-  //  makeURI (inherited::configuration_->URL,
-  //           (*iterator_).ISIN,
-  //           url_string);
-
-  //// send HTTP GET/POST request
-  //if (!inherited::send (url_string,
-  //                      HTTP_Codes::HTTP_METHOD_GET,
-  //                      inherited::configuration_->HTTPHeaders,
-  //                      form_data))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("%s: failed to send HTTP request \"%s\", returning\n"),
-  //              inherited::mod_->name (),
-  //              ACE_TEXT (inherited::configuration_->URL.c_str ())));
-  //  return;
-  //} // end IF
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("%s: fetching \"%s\"...\n"),
-  //            inherited::mod_->name (),
-  //            ACE_TEXT ((*iterator_).symbol.c_str ())));
-
-  iterator_++;
+  //iterator_++;
 }
 
 void

@@ -126,7 +126,12 @@ struct Test_I_Trending_SessionData
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionData::operator+= (rhs_in);
 
-    connection = rhs_in.connection;
+    if (rhs_in.connection)
+    {
+      if (connection)
+        connection->decrease ();
+      connection = rhs_in.connection;
+    } // end IF
     data.insert (data.end (), rhs_in.data.begin (), rhs_in.data.end ());
     //parserContext = (parserContext ? parserContext : rhs_in.parserContext);
     targetFileName = (targetFileName.empty () ? rhs_in.targetFileName

@@ -680,6 +680,7 @@ do_work (const std::string& bootstrapFileName_in,
   modulehandler_configuration.passive = false;
   stock_item.ISIN = ISIN_in;
   modulehandler_configuration.stockItems.insert (stock_item);
+  modulehandler_configuration.stopOnUnlink = true;
   modulehandler_configuration.streamConfiguration = &configuration.streamConfiguration;
   modulehandler_configuration.fileIdentifier.identifier = fileName_in;
   //modulehandler_configuration.hostName = hostName_in;
