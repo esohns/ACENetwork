@@ -1056,7 +1056,8 @@ ACE_TMAIN (int argc_in,
     do_printUsage (ACE::basename (argv_in[0]));
     goto error;
   } // end IF
-  if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
+  if (number_of_dispatch_threads == 0)
+    number_of_dispatch_threads = 1;
 
   // step1d: initialize logging and/or tracing
   if (log_to_file)
