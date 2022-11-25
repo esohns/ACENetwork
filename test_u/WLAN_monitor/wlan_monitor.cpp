@@ -503,49 +503,6 @@ do_work (bool autoAssociate_in,
   configuration_in.WLANMonitorConfiguration.timerInterface =
     timer_manager_p;
 #endif // ACE_WIN32 || ACE_WIN64
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (WLANAPI_SUPPORT)
-  iwlanmonitor_p = NET_WLAN_WLANAPIMONITOR_SINGLETON::instance ();
-  istatistic_handler_p = NET_WLAN_WLANAPIMONITOR_SINGLETON::instance ();
-#else
-      ACE_ASSERT (false);
-      ACE_NOTSUP;
-      ACE_NOTREACHED (break;)
-#endif // WLANAPI_SUPPORT
-#else
-  switch (API_in)
-  {
-    case NET_WLAN_MONITOR_API_WEXT:
-#if defined (WEXT_SUPPORT)
-      iwlanmonitor_p = NET_WLAN_WEXTMONITOR_SINGLETON::instance ();
-      istatistic_handler_p = NET_WLAN_WEXTMONITOR_SINGLETON::instance ();
-#endif // WEXT_SUPPORT
-      break;
-    case NET_WLAN_MONITOR_API_NL80211:
-      iwlanmonitor_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
-      istatistic_handler_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
-      break;
-    case NET_WLAN_MONITOR_API_DBUS:
-#if defined (DBUS_SUPPORT)
-      iwlanmonitor_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
-      istatistic_handler_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
-#endif // DBUS_SUPPORT
-      break;
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown WLAN monitor API (was: %d), aborting\n"),
-                  API_in));
-      return;
-    }
-  } // end SWITCH
-#endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iwlanmonitor_p && istatistic_handler_p);
-  iwlanmonitor_p->initialize (configuration_in.WLANMonitorConfiguration);
-
-  Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
-                                            dynamic_cast<Net_IStatisticHandler_t*> (iwlanmonitor_p),
-                                            false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -598,8 +555,8 @@ do_work (bool autoAssociate_in,
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize signal handler, aborting\n")));
-    goto error;
+                ACE_TEXT ("failed to initialize signal handler, returning\n")));
+    return;
   } // end IF
   if (!Common_Signal_Tools::initialize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                         //COMMON_SIGNAL_DISPATCH_REACTOR,
@@ -609,8 +566,8 @@ do_work (bool autoAssociate_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), aborting\n")));
-    goto error;
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
+    return;
   } // end IF
 
   // step5: handle events (signals, incoming connections/data, timers, ...)
@@ -635,6 +592,50 @@ do_work (bool autoAssociate_in,
   // - perform statistics collecting/reporting
   // [GTK events:]
   // - dispatch UI events (if any)
+
+  #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
+  iwlanmonitor_p = NET_WLAN_WLANAPIMONITOR_SINGLETON::instance ();
+  istatistic_handler_p = NET_WLAN_WLANAPIMONITOR_SINGLETON::instance ();
+#else
+      ACE_ASSERT (false);
+      ACE_NOTSUP;
+      ACE_NOTREACHED (break;)
+#endif // WLANAPI_SUPPORT
+#else
+  switch (API_in)
+  {
+    case NET_WLAN_MONITOR_API_WEXT:
+#if defined (WEXT_SUPPORT)
+      iwlanmonitor_p = NET_WLAN_WEXTMONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_WEXTMONITOR_SINGLETON::instance ();
+#endif // WEXT_SUPPORT
+      break;
+    case NET_WLAN_MONITOR_API_NL80211:
+      iwlanmonitor_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
+      break;
+    case NET_WLAN_MONITOR_API_DBUS:
+#if defined (DBUS_SUPPORT)
+      iwlanmonitor_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
+#endif // DBUS_SUPPORT
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown WLAN monitor API (was: %d), aborting\n"),
+                  API_in));
+      return;
+    }
+  } // end SWITCH
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (iwlanmonitor_p && istatistic_handler_p);
+  iwlanmonitor_p->initialize (configuration_in.WLANMonitorConfiguration);
+
+  Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
+                                            dynamic_cast<Net_IStatisticHandler_t*> (iwlanmonitor_p),
+                                            false);
 
   // step5a: start GTK event loop ?
 #if defined (GUI_SUPPORT)
