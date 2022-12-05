@@ -179,6 +179,7 @@ done_connect:
 
     // step2: stop event dispatch
     Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
-                                               false);                                    // don't block
+                                               false,                                    // don't block
+                                               false);                                   // don't delete singletons
   } // end IF
 }

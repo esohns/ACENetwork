@@ -321,7 +321,7 @@ target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE_GUI}
-                           PUBLIC stdafx.h)
+                           REUSE_FROM ${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets

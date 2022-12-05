@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkAction" id="action_accept">
     <property name="label">OK</property>
     <property name="short_label">OK</property>
@@ -17,6 +18,48 @@
     <property name="stock">gtk-close</property>
     <property name="icon-size">1</property>
   </object>
+  <object class="GtkWindow" id="window_tab_connection">
+    <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="focus_on_map">False</property>
+    <property name="decorated">False</property>
+    <property name="deletable">False</property>
+    <child>
+      <object class="GtkHBox" id="hbox_tab_connection">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkLabel" id="label_tab_connection">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="button_close">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">False</property>
+            <property name="image">button_disconnect_image</property>
+            <property name="relief">half</property>
+            <property name="focus_on_click">False</property>
+            <property name="image_position">right</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkDialog" id="dialog_page_connection_entry">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">please insert data...</property>
@@ -25,80 +68,20 @@
     <property name="type_hint">normal</property>
     <property name="deletable">False</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="vbox_dialog_page_connection_entry">
-        <property name="visible">True</property>
+      <object class="GtkVBox" id="dialog-vbox1">
         <property name="can_focus">False</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="hbuttonbox_dialog_page_connection_entry">
-            <property name="visible">True</property>
+          <object class="GtkHButtonBox" id="dialog-action_area1">
             <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button_accept">
-                <property name="related_action">action_accept</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="focus_on_click">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack_type">end</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_cancel">
-                <property name="related_action">action_cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="focus_on_click">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="pack_type">end</property>
             <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkEntry" id="entry_dialog_page_connection_entry">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="has_focus">True</property>
-            <property name="is_focus">True</property>
-            <property name="invisible_char">●</property>
-            <property name="activates_default">True</property>
-            <property name="truncate_multiline">True</property>
-            <property name="shadow_type">etched-out</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
           </packing>
         </child>
       </object>
     </child>
-    <action-widgets>
-      <action-widget response="0">button_accept</action-widget>
-      <action-widget response="1">button_cancel</action-widget>
-    </action-widgets>
   </object>
   <object class="GtkListStore" id="liststore_page_connection_channels">
     <columns>
@@ -170,6 +153,10 @@
                             <property name="width_chars">9</property>
                             <property name="truncate_multiline">True</property>
                             <property name="shadow_type">etched-out</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                             <signal name="focus-in-event" handler="nick_entry_kb_focused_cb" swapped="no"/>
                           </object>
                           <packing>
@@ -286,6 +273,10 @@
                             <property name="activates_default">True</property>
                             <property name="truncate_multiline">True</property>
                             <property name="shadow_type">etched-out</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
                             <signal name="focus-in-event" handler="join_entry_kb_focused_cb" swapped="no"/>
                           </object>
                           <packing>
@@ -402,14 +393,14 @@
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
-                    <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkToggleButton" id="togglebutton_away">
                         <property name="label" translatable="yes">_away</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">a</property>
+                        <property name="tooltip_markup">user is away</property>
+                        <property name="tooltip_text" translatable="yes">user is away (a)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -427,7 +418,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">i</property>
+                        <property name="tooltip_markup">user is invisible (i)</property>
+                        <property name="tooltip_text" translatable="yes">user is invisible (i)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -445,7 +437,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">o</property>
+                        <property name="tooltip_markup">user is a network-wide or 'global' operator (o)</property>
+                        <property name="tooltip_text" translatable="yes">user is a network-wide or 'global' operator (o)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -463,7 +456,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">local operator (O)</property>
+                        <property name="tooltip_markup">user is a server-wise or 'local' operator (O)</property>
+                        <property name="tooltip_text" translatable="yes">user is a server-wise or 'local' operator (O)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -481,6 +475,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="tooltip_markup">restricted user connection (r)</property>
                         <property name="tooltip_text" translatable="yes">restricted user connection (r)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
@@ -499,7 +494,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">receive server notices (s)</property>
+                        <property name="tooltip_markup">user receives server notices (s)</property>
+                        <property name="tooltip_text" translatable="yes">user receives server notices (s)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -517,7 +513,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">receive wallops (w)</property>
+                        <property name="tooltip_markup">user receives WALLOPS messages (w)</property>
+                        <property name="tooltip_text" translatable="yes">user receives WALLOPS messages (w)</property>
                         <property name="relief">none</property>
                         <property name="use_underline">True</property>
                         <property name="focus_on_click">False</property>
@@ -527,6 +524,36 @@
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">6</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkVSeparator" id="vseparator1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">7</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkToggleButton" id="togglebutton_hideoper">
+                        <property name="label" translatable="yes">_hide oper</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="tooltip_markup">hides oper status from users (i.e. whois) (H)</property>
+                        <property name="tooltip_text" translatable="yes">hides oper status from users (i.e. whois) (H)</property>
+                        <property name="relief">none</property>
+                        <property name="use_underline">True</property>
+                        <property name="focus_on_click">False</property>
+                        <signal name="toggled" handler="user_mode_toggled_cb" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">8</property>
                       </packing>
                     </child>
                   </object>
@@ -646,48 +673,6 @@
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="window_tab_connection">
-    <property name="can_focus">False</property>
-    <property name="resizable">False</property>
-    <property name="focus_on_map">False</property>
-    <property name="decorated">False</property>
-    <property name="deletable">False</property>
-    <child>
-      <object class="GtkHBox" id="hbox_tab_connection">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <child>
-          <object class="GtkLabel" id="label_tab_connection">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="button_close">
-            <property name="visible">True</property>
-            <property name="sensitive">False</property>
-            <property name="can_focus">False</property>
-            <property name="receives_default">False</property>
-            <property name="image">button_disconnect_image</property>
-            <property name="relief">half</property>
-            <property name="focus_on_click">False</property>
-            <property name="image_position">right</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
           </packing>
         </child>
       </object>

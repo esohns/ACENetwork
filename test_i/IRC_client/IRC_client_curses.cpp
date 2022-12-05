@@ -99,77 +99,68 @@ curses_input (struct Common_UI_Curses_State* state_in,
     case PADENTER:
 #endif // ACE_WIN32 || ACE_WIN64
     {
+      IRC_CommandType_t command_e =
+        IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID;
+      string_list_t parameters_a;
+      IRC_Tools::parse (state_r.message,
+                        command_e,
+                        parameters_a);
+
       { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, false);
         // sanity check(s)
-        if (state_r.message.empty () ||            // --> no data
-            (*state_r.activePanel).first.empty ()) // --> server log
+        if (state_r.message.empty () ||                                        // --> no data
+            ((*state_r.activePanel).first.empty () &&                          // --> server log
+             (command_e == IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID))) // --> not a command
           break; // nothing to do
         { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.sessionState->lock, false);
           // sanity check (s)
-          if (state_r.sessionState->activeChannel.empty ())
+          if (!state_r.sessionState->activeChannel.empty ())
           {
-            ACE_DEBUG ((LM_DEBUG,
-                        ACE_TEXT ("not in a channel, continuing\n")));
-            break;
+            state_r.receivers.clear ();
+            state_r.receivers.push_front (state_r.sessionState->activeChannel);
           } // end IF
-          state_r.receivers.clear ();
-          state_r.receivers.push_front (state_r.sessionState->activeChannel);
         } // end lock scope
 
         // step1: parse commands
-        IRC_CommandType_t command_e =
-          IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID;
-        string_list_t parameters_a;
-        if (IRC_Tools::parse (state_r.message,
-                              command_e,
-                              parameters_a))
+        switch (command_e)
         {
-          switch (command_e)
-          {
-            case IRC_Record::CommandType::JOIN:
-            { ACE_ASSERT (!parameters_a.empty ());
-              string_list_t channels_a, keys_a;
-              std::string channel_string = parameters_a.front ();
-              // sanity check(s): has '#' prefix ?
-              if (channel_string.find ('#', 0) != 0)
-                channel_string.insert (channel_string.begin (), '#');
-              // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
-              // *TODO*: support the CHANNELLEN=xxx "feature" of the server
-              if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
-                channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
-              channels_a.push_back (channel_string);
-              try {
-                state_r.controller->join (channels_a, keys_a);
-              } catch (...) {
-                ACE_DEBUG ((LM_ERROR,
-                            ACE_TEXT ("caught exception in IRC_IControl::join(), aborting\n")));
-                return false;
-              }
-              break;
-            }
-            case IRC_Record::CommandType::PART:
-            { ACE_ASSERT (!parameters_a.empty ());
-              string_list_t channels_a;
-              channels_a.push_back (parameters_a.front ());
-              try {
-                state_r.controller->part (channels_a);
-              } catch (...) {
-                ACE_DEBUG ((LM_ERROR,
-                            ACE_TEXT ("caught exception in IRC_IControl::part(), aborting\n")));
-                return false;
-              }
-              break;
-            }
-            default:
-            {
+          case IRC_Record::CommandType::JOIN:
+          { ACE_ASSERT (!parameters_a.empty ());
+            string_list_t channels_a, keys_a;
+            std::string channel_string = parameters_a.front ();
+            // sanity check(s): has '#' prefix ?
+            if (channel_string.find ('#', 0) != 0)
+              channel_string.insert (channel_string.begin (), '#');
+            // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
+            // *TODO*: support the CHANNELLEN=xxx "feature" of the server
+            if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
+              channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
+            channels_a.push_back (channel_string);
+            try {
+              state_r.controller->join (channels_a, keys_a);
+            } catch (...) {
               ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("invalid/unknown command (was: %s), continuing\n"),
-                          ACE_TEXT (IRC_Tools::CommandToString (command_e).c_str ())));
-              break;
+                          ACE_TEXT ("caught exception in IRC_IControl::join(), aborting\n")));
+              return false;
             }
-          } // end SWITCH
-          goto continue_;
-        } // end IF
+            goto continue_;
+          }
+          case IRC_Record::CommandType::PART:
+          { ACE_ASSERT (!parameters_a.empty ());
+            string_list_t channels_a;
+            channels_a.push_back (parameters_a.front ());
+            try {
+              state_r.controller->part (channels_a);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::part(), aborting\n")));
+              return false;
+            }
+            goto continue_;
+          }
+          default:
+            break;
+        } // end SWITCH
 
         // step2: send the message
         try {
@@ -201,6 +192,10 @@ continue_:
         state_r.message.clear ();
       } // end lock scope
 
+      break;
+    }
+    case KEY_BACKSPACE:
+    {
       break;
     }
     default:
@@ -891,6 +886,7 @@ curses_part (const std::string& channel_in,
   // show new active channel || server log, refresh
   ACE_ASSERT (state_in.sessionState);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock, false);
+    ACE_ASSERT (state_in.sessionState->activeChannel != channel_in);
     state_in.activePanel =
       state_in.panels.find (state_in.sessionState->activeChannel);
   } // end lock scope

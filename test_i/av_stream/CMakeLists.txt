@@ -465,7 +465,7 @@ if (WIN32)
 
 # add PCH
  target_precompile_headers (${LIBRARY_DS}
-                            PUBLIC stdafx.h)
+                            REUSE_FROM ${EXECUTABLE_CLIENT})
 
 # add all targets to the build-tree export set
  export (TARGETS ${LIBRARY_DS}
@@ -538,7 +538,7 @@ if (WIN32)
 
 # add PCH
  target_precompile_headers (${LIBRARY_MF}
-                            PUBLIC stdafx.h)
+                            REUSE_FROM ${EXECUTABLE_CLIENT})
 
 # add all targets to the build-tree export set
  export (TARGETS ${LIBRARY_MF}
@@ -681,7 +681,7 @@ target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE_SERVER}
-                           PUBLIC stdafx.h)
+                           REUSE_FROM ${EXECUTABLE_CLIENT})
 
 install (TARGETS ${EXECUTABLE_SERVER}
          EXPORT ${PROJECT_NAME}Targets

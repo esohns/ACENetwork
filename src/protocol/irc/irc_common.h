@@ -106,6 +106,7 @@ typedef std::bitset<14> IRC_ChannelModes_t;
 enum IRC_UserMode
 {
   USERMODE_AWAY = 0,       // 'a'
+  USERMODE_HIDE_OPER,      // 'H'
   USERMODE_INVISIBLE,      // 'i'
   USERMODE_OPERATOR,       // 'o'
   USERMODE_LOCALOPERATOR,  // 'O'

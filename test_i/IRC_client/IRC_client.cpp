@@ -128,7 +128,7 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:") << std::endl;
   // *NOTE*: the default behaviour is to use the first 'connection' entry in the
   //         configuration file (if any)
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-a [IP Address]: IRC server address {\"")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-a [HOST]  : IRC server address {\"")
             << ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME)
             << ACE_TEXT_ALWAYS_CHAR ("\"}")
             << std::endl;
@@ -138,21 +138,21 @@ do_printUsage (const std::string& programName_in)
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILE] : configuration file {\"")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILE]  : configuration file {\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"}")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d        : debug parser {")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d         : debug parser {")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-l        : log to a file {")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-l         : log to a file {")
             << IRC_CLIENT_SESSION_DEFAULT_LOG
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n        : use (PD|n)curses library {")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n         : use (PD|n)curses library {")
 #if defined (CURSES_USE)
             << true
 #else
@@ -162,24 +162,24 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r        : use reactor {")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-N [STRING]: nickname {\"")
+            << ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME)
+            << ACE_TEXT_ALWAYS_CHAR ("\"}")
+            << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r         : use reactor {")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: reporting interval (seconds: 0 --> OFF) {")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE] : reporting interval (seconds: 0 --> OFF) {")
             << NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-t        : trace information {")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-t         : trace information {")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-v        : print version information and exit {")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-v         : print version information and exit {")
             << false
-            << ACE_TEXT_ALWAYS_CHAR ("}")
-            << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]: #thread pool threads {")
-            << COMMON_EVENT_REACTOR_DEFAULT_THREADPOOL_THREADS
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
 } // end print_usage
@@ -196,11 +196,11 @@ do_processArguments (int argc_in,
                      bool& useCursesLibrary_out,
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
+                     std::string& nickName_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
-                     bool& printVersionAndExit_out,
-                     unsigned int& numThreadPoolThreads_out)
+                     bool& printVersionAndExit_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
@@ -242,14 +242,14 @@ do_processArguments (int argc_in,
 #endif // CURSES_USE
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
+  nickName_out                   = ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
   useReactor_out                 =
     (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out = NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
-  numThreadPoolThreads_out       = COMMON_EVENT_REACTOR_DEFAULT_THREADPOOL_THREADS;
 
-  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("a:c:dlrs:tvx:");
+  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("a:c:dlN:rs:tv");
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   options_string += ACE_TEXT_ALWAYS_CHAR ("n");
@@ -311,6 +311,11 @@ do_processArguments (int argc_in,
       }
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
+      case 'N':
+      {
+        nickName_out = argumentParser.opt_arg ();
+        break;
+      }
       case 'r':
       {
         useReactor_out = true;
@@ -332,14 +337,6 @@ do_processArguments (int argc_in,
       case 'v':
       {
         printVersionAndExit_out = true;
-        break;
-      }
-      case 'x':
-      {
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter.clear ();
-        converter << argumentParser.opt_arg ();
-        converter >> numThreadPoolThreads_out;
         break;
       }
       // error handling
@@ -674,7 +671,8 @@ clean_up:
     connection_p->decrease ();
 
   Common_Event_Tools::finalizeEventDispatch (*thread_data_p->dispatchState,
-                                             false);                        // don't block
+                                             false,  // don't block
+                                             false); // don't delete singletons
 
   return return_value;
 }
@@ -686,8 +684,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         IRC_Client_SignalHandler& signalHandler_in,
-         unsigned int numberOfDispatchThreads_in)
+         IRC_Client_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
@@ -748,10 +745,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step2: initialize event dispatch
   configuration_in.dispatchConfiguration.numberOfReactorThreads =
-      ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
+      ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS
                                                                                           : 0);
   configuration_in.dispatchConfiguration.numberOfProactorThreads =
-      ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
+      ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS
                                                                                            : 0);
   if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
@@ -862,7 +859,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                                         *static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
                                         user_data_s,
                                         serverAddress_in,
-                                        false,
+                                        true,
                                         true);
   else
     handle =
@@ -870,15 +867,18 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                                         *static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
                                         user_data_s,
                                         serverAddress_in,
-                                        false,
+                                        true,
                                         true);
-  if (handle == ACE_INVALID_HANDLE)
+  if (unlikely (handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (serverAddress_in).c_str ())));
+    // *IMPORTANT NOTE*: cannot close event dispatch singletons here; still
+    //                   referenced by the connectors
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               false);                 // don't block
+                                               true,   // wait ?
+                                               false); // close singletons ?
     return;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
@@ -907,7 +907,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     connection_manager_p->abort ();
     connection_manager_p->wait ();
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               false);                 // don't block
+                                               true,
+                                               false);
     return;
   } // end IF
   ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
@@ -935,7 +936,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     connection_manager_p->abort ();
     connection_manager_p->wait ();
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               false);                 // don't block
+                                               true,
+                                               false);
     return;
   } // end IF
   Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
@@ -1149,14 +1151,14 @@ ACE_TMAIN (int argc_in,
 #endif // CURSES_USE
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
+  std::string nickname_string                =
+    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
   bool use_reactor                           =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
     NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
-  unsigned int number_of_thread_pool_threads =
-    COMMON_EVENT_REACTOR_DEFAULT_THREADPOOL_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             server_address,
@@ -1168,11 +1170,11 @@ ACE_TMAIN (int argc_in,
                             use_curses_library,
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
+                            nickname_string,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
-                            print_version_and_exit,
-                            number_of_thread_pool_threads))
+                            print_version_and_exit))
   {
     do_printUsage (ACE::basename (argv_in[0]));
 
@@ -1289,8 +1291,6 @@ ACE_TMAIN (int argc_in,
     configuration.GUIFramework = COMMON_UI_FRAMEWORK_CURSES;
 #endif // CURSES_SUPPORT
 #endif // GUI_SUPPORT
-  configuration.protocolConfiguration.loginOptions.nickname =
-    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
   //   userData.loginOptions.user.username = ;
   std::string host_name;
   if (!Net_Common_Tools::getHostname (host_name))
@@ -1386,6 +1386,10 @@ ACE_TMAIN (int argc_in,
       } // end IF
     } // end IF
   } // end IF
+  if (ACE_OS::strcmp (nickname_string.c_str (),
+                      ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME)))
+    configuration.protocolConfiguration.loginOptions.nickname = nickname_string;
+
   ///////////////////////////////////////
   configuration.dispatchConfiguration.dispatch =
       (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
@@ -1400,8 +1404,7 @@ ACE_TMAIN (int argc_in,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
-           signal_handler,
-           number_of_thread_pool_threads);
+           signal_handler);
 
   // debug info
   timer.stop ();

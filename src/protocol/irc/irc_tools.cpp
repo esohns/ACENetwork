@@ -367,23 +367,24 @@ IRC_Tools::merge (const std::string& modes_in,
   bool assign = (modes_in[0] == '+');
   bool toggled;
   std::string::const_iterator iterator = modes_in.begin ();
-  for (iterator++;
+  for (++iterator;
        iterator != modes_in.end ();
-       iterator++)
+       ++iterator)
   {
     mode = IRC_Tools::CharToUserMode (*iterator);
     if (mode >= USERMODE_MAX)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid user mode (was: \"%c\"), continuing\n"),
-                  ACE_TEXT (*iterator)));
+                  *iterator));
       continue; // unknown user mode...
     } // end IF
 
     toggled = (( modes_inout.test (mode) && !assign) ||
                (!modes_inout.test (mode) &&  assign));
     modes_inout.set (mode, assign);
-    if (toggled) ++result;
+    if (toggled)
+      ++result;
   } // end FOR
 
   return result;
@@ -402,23 +403,24 @@ IRC_Tools::merge (const std::string& modes_in,
   bool assign = (modes_in[0] == '+');
   bool toggled;
   std::string::const_iterator iterator = modes_in.begin ();
-  for (iterator++;
+  for (++iterator;
        iterator != modes_in.end ();
-       iterator++)
+       ++iterator)
   {
     mode = IRC_Tools::CharToChannelMode (*iterator);
     if (mode >= CHANNELMODE_MAX)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid channel mode (was: \"%c\"), continuing\n"),
-                  ACE_TEXT (*iterator)));
+                  *iterator));
       continue; // unknown channel mode...
     } // end IF
 
     toggled = (( modes_inout.test (mode) && !assign) ||
                (!modes_inout.test (mode) &&  assign));
     modes_inout.set (mode, assign);
-    if (toggled) ++result;
+    if (toggled)
+      ++result;
   } // end FOR
 
   return result;
@@ -474,6 +476,8 @@ IRC_Tools::UserModeToChar (enum IRC_UserMode mode_in)
   {
     case USERMODE_AWAY:
       return 'a';
+    case USERMODE_HIDE_OPER:
+      return 'H';
     case USERMODE_INVISIBLE:
       return 'i';
     case USERMODE_OPERATOR:
@@ -1447,6 +1451,8 @@ IRC_Tools::CharToUserMode (char mode_in)
   {
     case 'a':
       result = USERMODE_AWAY; break;
+    case 'H':
+      result = USERMODE_HIDE_OPER; break;
     case 'i':
       result = USERMODE_INVISIBLE; break;
     case 'o':
@@ -1555,19 +1561,21 @@ IRC_Tools::UserModeToString (enum IRC_UserMode mode_in)
   switch (mode_in)
   {
     case USERMODE_AWAY:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_AWAY"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("AWAY"); break;
+    case USERMODE_HIDE_OPER:
+      result = ACE_TEXT_ALWAYS_CHAR ("HIDE_OPER"); break;
     case USERMODE_INVISIBLE:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_INVISIBLE"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("INVISIBLE"); break;
     case USERMODE_OPERATOR:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_OPERATOR"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("OPERATOR"); break;
     case USERMODE_LOCALOPERATOR:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_LOCALOPERATOR"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("LOCAL_OPERATOR"); break;
     case USERMODE_RESTRICTEDCONN:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RESTRICTEDCONN"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("RESTRICTED_CONNECTION"); break;
     case USERMODE_RECVNOTICES:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RECVNOTICES"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("RECEIVE_NOTICES"); break;
     case USERMODE_RECVWALLOPS:
-      result = ACE_TEXT_ALWAYS_CHAR ("USERMODE_RECVWALLOPS"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("RECEIVE_WALLOPS"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,

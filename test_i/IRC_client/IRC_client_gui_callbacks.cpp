@@ -23,7 +23,6 @@
 
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
-#include "ace/Synch.h"
 
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_defines.h"
@@ -2779,63 +2778,40 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
-  int result = -1;
   IRC_UserMode mode = USERMODE_INVALID;
   // find out which button toggled...
   const gchar* name_p =
     gtk_buildable_get_name (GTK_BUILDABLE (toggleButton_in));
-  result = ACE_OS::strcmp (name_p,
-                           ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY));
-  if (result == 0)
+  if (!ACE_OS::strcmp (name_p,
+                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)))
     mode = USERMODE_AWAY;
+  else if (!ACE_OS::strcmp (name_p,
+                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_HIDEOPERATOR)))
+    mode = USERMODE_HIDE_OPER;
+  else if (!ACE_OS::strcmp (name_p,
+                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)))
+    mode = USERMODE_INVISIBLE;
+  else if (!ACE_OS::strcmp (name_p,
+                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)))
+    mode = USERMODE_OPERATOR;
+  else if (!ACE_OS::strcmp (name_p,
+                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)))
+    mode = USERMODE_LOCALOPERATOR;
+  else if (!ACE_OS::strcmp (name_p,
+                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)))
+    mode = USERMODE_RESTRICTEDCONN;
+  else if (!ACE_OS::strcmp (name_p,
+                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)))
+    mode = USERMODE_RECVNOTICES;
+  else if (!ACE_OS::strcmp (name_p,
+                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)))
+    mode = USERMODE_RECVWALLOPS;
   else
   {
-    result = ACE_OS::strcmp (name_p,
-                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE));
-    if (result == 0)
-      mode = USERMODE_INVISIBLE;
-    else
-    {
-      result = ACE_OS::strcmp (name_p,
-                               ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR));
-      if (result == 0)
-        mode = USERMODE_OPERATOR;
-      else
-      {
-        result = ACE_OS::strcmp (name_p,
-                                 ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR));
-        if (result == 0)
-          mode = USERMODE_LOCALOPERATOR;
-        else
-        {
-          result = ACE_OS::strcmp (name_p,
-                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED));
-          if (result == 0)
-            mode = USERMODE_RESTRICTEDCONN;
-          else
-          {
-            result = ACE_OS::strcmp (name_p,
-                                     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES));
-            if (result == 0)
-              mode = USERMODE_RECVNOTICES;
-            else
-            {
-              result = ACE_OS::strcmp (name_p,
-                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS));
-              if (result == 0)
-                mode = USERMODE_RECVWALLOPS;
-              else
-              {
-                ACE_DEBUG ((LM_ERROR,
-                            ACE_TEXT ("unknown/invalid user mode toggled (was: 0x%@/\"%s\"), returning\n"),
-                            toggleButton_in, ACE_TEXT (name_p)));
-                return;
-              } // end ELSE
-            } // end ELSE
-          } // end ELSE
-        } // end ELSE
-      } // end ELSE
-    } // end ELSE
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("unknown/invalid user mode toggled (was: 0x%@/\"%s\"), returning\n"),
+                toggleButton_in, ACE_TEXT (name_p)));
+    return;
   } // end ELSE
 
   // check if this change is actually an acknowledgement (avoids recursion too)

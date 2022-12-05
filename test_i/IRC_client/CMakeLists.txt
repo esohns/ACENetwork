@@ -315,7 +315,7 @@ target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${PROJECT_NAME}_Test_I)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE_GUI}
-                           PUBLIC stdafx.h)
+                           REUSE_FROM ${EXECUTABLE})
 
 install (TARGETS ${EXECUTABLE_GUI}
          EXPORT ${PROJECT_NAME}Targets
@@ -402,7 +402,7 @@ install (FILES
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t"
+                         ARGS "-a irc.eu.dal.net -l -n -N testeee -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../pdcurses/win32
@@ -438,7 +438,7 @@ elseif (WIN32)
                            ${GTK_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-l -t"
+                         ARGS "-a irc.eu.dal.net -l -n -N testeee -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}

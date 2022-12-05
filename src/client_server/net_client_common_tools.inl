@@ -108,6 +108,7 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (result_2))));
 #endif // ACE_WIN32 || ACE_WIN64
+      iasynch_connector_p->abort ();
       return ACE_INVALID_HANDLE;
     } // end IF
 

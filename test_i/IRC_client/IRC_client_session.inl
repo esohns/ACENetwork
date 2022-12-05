@@ -577,6 +577,18 @@ IRC_Client_Session_T<ConnectionType,
           if (record_r.prefix_.origin == inherited::state_.nickName)
           {
             std::string channel = record_r.parameters_.front ();
+            // sanity check(s)
+            channels_iterator_t iterator =
+              std::find (inherited::state_.channels.begin (),
+                         inherited::state_.channels.end (),
+                         channel);
+            if (unlikely (iterator != inherited::state_.channels.end ()))
+            {
+              ACE_DEBUG ((LM_WARNING,
+                          ACE_TEXT ("already joined channel (was: \"%s\"), continuing\n"),
+                          ACE_TEXT (channel.c_str ())));
+              break;
+            } // end IF
             inherited::state_.channels.push_back (channel);
             inherited::state_.channelModes.insert (std::make_pair (channel, 0));
             inherited::state_.activeChannel = channel;
@@ -615,7 +627,13 @@ IRC_Client_Session_T<ConnectionType,
               std::find (inherited::state_.channels.begin (),
                          inherited::state_.channels.end (),
                          channel);
-            ACE_ASSERT (iterator != inherited::state_.channels.end ());
+            if (iterator == inherited::state_.channels.end ())
+            {
+              ACE_DEBUG ((LM_WARNING,
+                          ACE_TEXT ("not in channel (was: \"%s\"), continuing\n"),
+                          ACE_TEXT (channel.c_str ())));
+              break;
+            } // end IF
             inherited::state_.channels.erase (iterator);
             if (inherited::state_.activeChannel == channel)
               inherited::state_.activeChannel.clear ();

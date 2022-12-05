@@ -110,6 +110,7 @@
 #define IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE        "togglebutton_voice"
 #define IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_TOOLS_1                  "togglebutton_tool_1"
 #define IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY            "togglebutton_away"
+#define IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_HIDEOPERATOR    "togglebutton_hideop"
 #define IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE       "togglebutton_invisible"
 #define IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR   "togglebutton_localoperator"
 #define IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES         "togglebutton_notices"
