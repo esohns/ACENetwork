@@ -84,7 +84,7 @@ template <typename AddressType,
           ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename UserDataType>
-void
+bool
 Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
                    ACE_SYNCH_USE,
@@ -100,14 +100,14 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (!inherited::isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
+                ACE_TEXT ("not initialized, aborting\n")));
+    return false;
   } // end IF
   if (unlikely (inherited::isActive_))
   {
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("already started, returning\n")));
-    return;
+                ACE_TEXT ("already started, aborting\n")));
+    return false;
   } // end IF
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::handle_ == ACE_INVALID_HANDLE);
@@ -134,8 +134,8 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (inherited::handle_ == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(AF_INET,SOCK_DGRAM,0): \"%m\", returning\n")));
-    return;
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET,SOCK_DGRAM,0): \"%m\", aborting\n")));
+    return false;
   } // end IF
 //  inherited::set_handle (inherited::handle_);
 
@@ -146,18 +146,18 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to iw_get_range_info(%d,\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT ("failed to iw_get_range_info(%d,\"%s\"): \"%m\", aborting\n"),
                 inherited::handle_,
                 ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ())));
-    return;
+    return false;
   } // end IFs
   // verify that the interface supports scanning
   if (range_.we_version_compiled < 14)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("interface (was: \"%s\") does not support scanning, returning\n"),
+                ACE_TEXT ("interface (was: \"%s\") does not support scanning, aborting\n"),
                 ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ())));
-    return;
+    return false;
   } // end IF
 
   // monitor the interface in a dedicated thread
@@ -168,8 +168,8 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
-    return;
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", aborting\n")));
+    return false;
   } // end IF
   do
   { // *NOTE*: the livelock here
@@ -182,13 +182,15 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (!inherited::TASK_T::isRunning ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
-    return;
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", aborting\n")));
+    return false;
   } // end IF
 
   inherited::isActive_ = true;
 
   inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
+
+  return true;
 }
 
 template <typename AddressType,
