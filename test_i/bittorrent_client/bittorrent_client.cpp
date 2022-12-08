@@ -78,19 +78,14 @@
 
 #include "stream_cachedallocatorheap.h"
 
-#include "stream_misc_messagehandler.h"
-
 #if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "net_defines.h"
 
-#include "bittorrent_bencoding_scanner.h"
-#include "bittorrent_common.h"
 #include "bittorrent_control.h"
 #include "bittorrent_defines.h"
-#include "bittorrent_tools.h"
 
 #include "test_i_defines.h"
 
@@ -101,7 +96,6 @@
 #include "bittorrent_client_session_common.h"
 #include "bittorrent_client_signalhandler.h"
 #include "bittorrent_client_stream_common.h"
-#include "bittorrent_client_tools.h"
 
 #if defined (GUI_SUPPORT)
 #include "bittorrent_client_gui_common.h"
