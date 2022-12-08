@@ -90,9 +90,11 @@ Net_WLAN_Monitor_T<AddressType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_WEXT,
-                   UserDataType>::start ()
+                   UserDataType>::start (ACE_Time_Value* timeout_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
+
+  ACE_UNUSED_ARG (timeout_in);
 
   // sanity check(s)
   if (unlikely (!inherited::isInitialized_))
