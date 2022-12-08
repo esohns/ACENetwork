@@ -122,12 +122,6 @@ do_printUsage (const std::string& programName_in)
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT ("usage: ")
             << programName_in
@@ -140,6 +134,9 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::string path = configuration_path;
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path +=
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
   std::cout << ACE_TEXT ("-f [FILE] : meta-info file")
@@ -802,14 +799,17 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
               ACE_TEXT ("session complete...\n")));
 
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
+                                             true,   // wait ?
+                                             false); // do not remove the event dispatch singletons here
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 
   // step7: clean up
 clean:
+  peer_connection_manager_p->stop (true, false);
   peer_connection_manager_p->abort (true);
+  tracker_connection_manager_p->stop (true, false);
   tracker_connection_manager_p->abort (true);
 
 #if defined (GUI_SUPPORT)
@@ -891,15 +891,16 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
   // step1: initialize libraries
-//  // *PORTABILITY*: on Windows, init ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  if (ACE::init () == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *PORTABILITY*: on Windows, init ACE...
+  result = ACE::init ();
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -911,18 +912,15 @@ ACE_TMAIN (int argc_in,
   // step2a: process commandline arguments
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
 
   bool debug_parser                          = false;
 
-  std::string meta_info_file_name        = configuration_path;
-  meta_info_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  meta_info_file_name                   +=
+  std::string meta_info_file_name            = configuration_path;
+  meta_info_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  meta_info_file_name                       +=
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+  meta_info_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  meta_info_file_name                       +=
       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   bool log_to_file                           = TEST_I_DEFAULT_SESSION_LOG;
@@ -932,7 +930,8 @@ ACE_TMAIN (int argc_in,
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
-  unsigned int number_of_thread_pool_threads = 2;
+  unsigned int number_of_thread_pool_threads =
+    TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
                             debug_parser,
@@ -945,13 +944,13 @@ ACE_TMAIN (int argc_in,
   {
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: on Windows, fini ACE...
+    result = ACE::fini ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -960,13 +959,13 @@ ACE_TMAIN (int argc_in,
   {
     do_printUsage (ACE::basename (argv_in[0]));
 
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: on Windows, fini ACE...
+    result = ACE::fini ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -975,8 +974,8 @@ ACE_TMAIN (int argc_in,
   if (log_to_file)
     log_file_name =
       Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0])));
-  if (!Common_Log_Tools::initializeLogging (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0])), // program name
+                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
+  if (!Common_Log_Tools::initializeLogging (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
                                             log_file_name,                                     // log file name
                                             false,                                             // log to syslog ?
                                             false,                                             // trace messages ?
@@ -986,13 +985,13 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
 
-//    // *PORTABILITY*: on Windows, need to fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if (ACE::fini () == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: on Windows, fini ACE...
+    result = ACE::fini ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1017,14 +1016,13 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: on Windows, fini ACE...
+    result = ACE::fini ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 //  ACE_SYNCH_RECURSIVE_MUTEX signal_lock;
@@ -1040,14 +1038,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: on Windows, fini ACE...
+    result = ACE::fini ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_SUCCESS;
   } // end IF
 
@@ -1097,14 +1094,13 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: on Windows, fini ACE...
+    result = ACE::fini ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
   ACE_Profile_Timer::Rusage elapsed_rusage;
@@ -1157,16 +1153,13 @@ ACE_TMAIN (int argc_in,
   Common_Log_Tools::finalizeLogging ();
 
   // step10: finalize libraries
-//  // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  result = ACE::fini ();
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//      ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: on Windows, fini ACE...
+    result = ACE::fini ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

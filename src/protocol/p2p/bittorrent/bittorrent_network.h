@@ -234,7 +234,8 @@ typedef BitTorrent_TrackerStreamHandler_T<struct BitTorrent_TrackerSessionData,
 struct BitTorrent_SessionState
 {
   BitTorrent_SessionState ()
-   : connections ()
+   : aborted (false)
+   , connections ()
    , fileName ()
    , metaInfo (NULL)
    , pieces ()
@@ -260,6 +261,7 @@ struct BitTorrent_SessionState
    , trackerStreamHandler (NULL)
   {}
 
+  bool                                      aborted;
   Net_ConnectionIds_t                       connections;
   std::string                               fileName; // .torrent file
   Bencoding_Dictionary_t*                   metaInfo;

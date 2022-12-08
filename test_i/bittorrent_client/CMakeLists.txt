@@ -337,6 +337,18 @@ install (FILES
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
+                         ARGS "-f etc/test.torrent -l -r -t"
+#                         FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              /usr/local/lib
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client
+                         ENVIRONMENT foo=bar)
+ create_target_launcher (${EXECUTABLE_GUI}
                          ARGS "-l -r -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
@@ -374,7 +386,7 @@ elseif (WIN32)
                            ${IMAGEMAGICK_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-f etc/test.torrent -l -r -t"
+                         ARGS "-f etc\\\\test.torrent -l -r -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}

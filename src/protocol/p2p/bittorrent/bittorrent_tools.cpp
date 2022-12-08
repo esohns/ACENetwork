@@ -1159,8 +1159,9 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
       Common_File_Tools::getUserDownloadDirectory (ACE_TEXT_ALWAYS_CHAR (""));
   pieces_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   pieces_path +=
-    ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR);
-  pieces_path += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECES_DIRECTORY_SUFFIX);
+    ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR));
+  pieces_path +=
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECES_DIRECTORY_SUFFIX);
   Common_File_IdentifierList_t piece_files =
     Common_File_Tools::files (pieces_path,
                               BitTorrent_Tools::selector);

@@ -1948,17 +1948,28 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
               id_in));
 
   bool notify_controller_b = false;
+  enum BitTorrent_Event event_e = BITTORRENT_EVENT_INVALID;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     if (inherited::state_.trackerConnectionId == id_in)
       inherited::state_.trackerConnectionId = 0;
-    if (inherited::state_.connections.empty ())
+
+    if (inherited::state_.aborted)
+    {
+      event_e = BITTORRENT_EVENT_CANCELLED;
       notify_controller_b = true;
+    } // end IF
+    else if (inherited::state_.connections.empty ())
+    {
+      event_e = BITTORRENT_EVENT_NO_MORE_PEERS;
+      notify_controller_b = true;
+    } // end IF
   } // end lock scope
+
   if (notify_controller_b)
   { ACE_ASSERT (inherited::configuration_->controller);
     try {
       inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
-                                                     BITTORRENT_EVENT_NO_MORE_PEERS,
+                                                     event_e,
                                                      ACE_TEXT_ALWAYS_CHAR (""));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
@@ -2233,7 +2244,25 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
        ++iterator)
     if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER))
       break;
-  ACE_ASSERT (iterator != record_in.end ());
+  if (iterator == record_in.end ())
+  {
+    iterator = record_in.begin ();
+    for (;
+         iterator != record_in.end ();
+         ++iterator)
+      if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_FAILURE_REASON_HEADER))
+        break;
+    ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to retrieve peers: \"%s\", returning\n"),
+                ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE_TEXT ((*iterator).second->string->c_str ())));
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+      inherited::state_.aborted = true;
+    } // end lock scope
+    return;
+  } // end IF
+
   // can be 'dictionary' or 'binary' model
   if ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY)
   { // *TODO*
@@ -2268,8 +2297,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   ACE_ASSERT (inherited::configuration_);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: connecting to %u peer(s)...\n"),
-              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
               peer_addresses.size ()));
 
   struct BitTorrent_SessionInitiationThreadData* thread_data_p = NULL;

@@ -1190,16 +1190,16 @@ IRC_Client_Module_IRCHandler::onChange (enum IRC_RegistrationStateType newState_
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::onChange"));
 
-  int result = -1;
+  //int result = -1;
 
-  if (newState_in == IRC_REGISTRATION_STATE_FINISHED)
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
-    result = condition_.broadcast ();
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Condition::broadcast(): \"%m\", continuing\n")));
-  } // end IF
+  //if (newState_in == IRC_REGISTRATION_STATE_FINISHED)
+  //{
+  //  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
+  //  result = condition_.broadcast ();
+  //  if (unlikely (result == -1))
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to ACE_Thread_Condition::broadcast(): \"%m\", continuing\n")));
+  //} // end IF
 
   return true;
 }
