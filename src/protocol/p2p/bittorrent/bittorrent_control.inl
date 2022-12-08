@@ -570,6 +570,8 @@ BitTorrent_Control_T<SessionAsynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::stop"));
 
+  ACE_UNUSED_ARG (highPriority_in);
+
   unsigned int sessions_i = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     sessions_i = sessions_.size ();
@@ -658,20 +660,20 @@ BitTorrent_Control_T<SessionAsynchType,
                      static_cast<enum BitTorrent_Event> (event_inout->type));
 
       SESSIONS_ITERATOR_T iterator;
+      typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
         iterator = sessions_.find (event_inout->metaInfoFileName);
-        ACE_ASSERT (iterator != sessions_.end ());
+        if (iterator == sessions_.end ())
+          goto continue_;
 
         // close tracker connection
-        Net_ConnectionId_t tracker_connection_id =
-            (*iterator).second->trackerConnectionId ();
-        typedef typename SessionType::TRACKER_CONNECTION_MANAGER_SINGLETON_T TRACKER_CONNECTION_MANAGER_SINGLETON_2;
-        typename SessionType::ITRACKER_CONNECTION_T* iconnection_p =
-            TRACKER_CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_connection_id);
+        typedef typename SessionType::TRACKER_CONNECTION_MANAGER_SINGLETON_T CONNECTION_MANAGER_SINGLETON_2;
+        iconnection_p =
+            CONNECTION_MANAGER_SINGLETON_2::instance ()->get ((*iterator).second->trackerConnectionId ());
         if (!iconnection_p)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve tracker connection (id was: %u) handle, continuing\n"),
-                      tracker_connection_id));
+                      (*iterator).second->trackerConnectionId ()));
         else
         {
           iconnection_p->abort ();
@@ -682,6 +684,7 @@ BitTorrent_Control_T<SessionAsynchType,
         (*iterator).second->close (true); // wait ?
 
         sessions_.erase (iterator);
+continue_:
         if (!sessions_.empty ())
           break;
 
@@ -690,10 +693,10 @@ BitTorrent_Control_T<SessionAsynchType,
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
-
-        stop (false,
-              true);
       } // end lock scope
+
+      stop (false,  // wait ? *WARNING*: cannot wait on 'this' !
+            false); // N/A
       break;
     }
     case BITTORRENT_EVENT_NO_MORE_PEERS:
