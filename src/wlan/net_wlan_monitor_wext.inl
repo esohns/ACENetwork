@@ -201,13 +201,11 @@ Net_WLAN_Monitor_T<AddressType,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_WEXT,
                    UserDataType>::stop (bool waitForCompletion_in,
-                                        bool highPriority_in,
-                                        bool lockedAccess_in)
+                                        bool highPriority_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
 
   ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
   if (!inherited::isActive_)
@@ -215,8 +213,7 @@ Net_WLAN_Monitor_T<AddressType,
 
   inherited::isActive_ = false;
   inherited::stop (waitForCompletion_in,
-                   highPriority_in,
-                   lockedAccess_in);
+                   highPriority_in);
 
   int result = -1;
 //  if (likely (inherited::isRegistered_))

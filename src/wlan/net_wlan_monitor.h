@@ -574,7 +574,7 @@ class Net_WLAN_Monitor_T<AddressType,
 #if defined (WLANAPI_SUPPORT)
 #include "net_wlan_monitor_win32_wlanapi.inl"
 #endif /* WLANAPI_SUPPORT */
-#elif defined (ACE_LINUX)
+#else
 #if defined (WEXT_SUPPORT)
 #include "net_wlan_monitor_wext.inl"
 #endif /* WEXT_SUPPORT */
@@ -584,6 +584,6 @@ class Net_WLAN_Monitor_T<AddressType,
 #if defined (DBUS_SUPPORT)
 #include "net_wlan_monitor_dbus.inl"
 #endif /* DBUS_SUPPORT */
-#endif /* ACE_WIN32 || ACE_WIN64 || ACE_LINUX */
+#endif /* ACE_WIN32 || ACE_WIN64 */
 
 #endif
