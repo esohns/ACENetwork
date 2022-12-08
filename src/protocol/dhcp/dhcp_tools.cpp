@@ -272,6 +272,7 @@ next_list:
       case DHCP_Codes::DHCP_OPTION_FIELDTYPE_LENGTH:
       {
         size_t num_bytes_i = (*iterator).second.size ();
+        ACE_UNUSED_ARG (num_bytes_i);
         break;
       }
       default:
