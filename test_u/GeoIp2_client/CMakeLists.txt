@@ -134,7 +134,7 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
@@ -156,9 +156,9 @@ elseif (WIN32)
                            ${ACE_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-f C:\\\\Users\\\\Erik\\\\Downloads\\\\GeoLite2-City.mmdb -l -t"
+                         ARGS "-f .\\\\etc\\\\GeoLite2-City.mmdb -l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                          ENVIRONMENT foo=bar)
 endif ()
