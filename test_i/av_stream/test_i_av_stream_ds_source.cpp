@@ -70,15 +70,15 @@ const struct REGPINTYPES sudMediaTypes[] =
 
 const struct REGFILTERPINS sudOutputPin =
 {
-  STREAM_LIB_DIRECTSHOW_FILTER_PIN_OUTPUT_NAME, // name
-  FALSE,                                        // rendered ?
-  TRUE,                                         // output ?
-  FALSE,                                        // can the filter create zero instances ?
-  FALSE,                                        // does the filter create multiple instances ?
-  &CLSID_NULL,                                  // connects to filter
-  NULL,                                         // connectes to pin
-  1,                                            // number of media types
-  sudMediaTypes                                 // pointer to media types
+  STREAM_LIB_DIRECTSHOW_FILTER_PIN_OUTPUT_NAME_L, // name
+  FALSE,                                          // rendered ?
+  TRUE,                                           // output ?
+  FALSE,                                          // can the filter create zero instances ?
+  FALSE,                                          // does the filter create multiple instances ?
+  &CLSID_NULL,                                    // connects to filter
+  NULL,                                           // connectes to pin
+  1,                                              // number of media types
+  sudMediaTypes                                   // pointer to media types
 };
 //const struct REGFILTERPINS2 sudOutputPin2 = 
 //{
@@ -117,15 +117,15 @@ const struct REGFILTER2 sudFilterReg =
 //};
 const struct REGFILTERPINS sudOutputPinAM =
 {
-  STREAM_LIB_DIRECTSHOW_FILTER_PIN_OUTPUT_NAME, // name
-  FALSE,                                        // rendered ?
-  TRUE,                                         // output ?
-  FALSE,                                        // can the filter create zero instances ?
-  FALSE,                                        // does the filter create multiple instances ?
-  &CLSID_NULL,                                  // connects to filter
-  NULL,                                         // connects to pin
-  1,                                            // number of media types
-  sudMediaTypes                                 // pointer to media types
+  STREAM_LIB_DIRECTSHOW_FILTER_PIN_OUTPUT_NAME_L, // name
+  FALSE,                                          // rendered ?
+  TRUE,                                           // output ?
+  FALSE,                                          // can the filter create zero instances ?
+  FALSE,                                          // does the filter create multiple instances ?
+  &CLSID_NULL,                                    // connects to filter
+  NULL,                                           // connects to pin
+  1,                                              // number of media types
+  sudMediaTypes                                   // pointer to media types
 };
 
 const struct _AMOVIESETUP_FILTER sudFilterRegAM =

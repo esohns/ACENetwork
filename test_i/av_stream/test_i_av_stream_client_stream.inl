@@ -213,7 +213,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
       goto error;
     } // end IF
     if (!Stream_MediaFramework_DirectShow_Tools::getBufferNegotiation ((*iterator).second.second->builder,
-                                                                       STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO,
+                                                                       STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L,
                                                                        buffer_negotiation_p))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -293,14 +293,14 @@ continue_:
   } // end IF
 
   result_2 =
-    (*iterator).second.second->builder->FindFilterByName (STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB,
+    (*iterator).second.second->builder->FindFilterByName (STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB_L,
                                                          &filter_p);
   if (FAILED (result_2))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to IGraphBuilder::FindFilterByName(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB),
+                ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB_L),
                 ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
@@ -373,7 +373,7 @@ continue_:
   //         --> reconnect the AVI decompressor to the (connected) sample
   //             grabber; this seems to work
   if (!Stream_MediaFramework_DirectShow_Tools::connected ((*iterator).second.second->builder,
-                                                          STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO))
+                                                          STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L))
   {
 #if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
@@ -381,7 +381,7 @@ continue_:
                 ACE_TEXT (stream_name_string_)));
 #endif // _DEBUG
     if (!Stream_MediaFramework_DirectShow_Tools::connectFirst ((*iterator).second.second->builder,
-                                                               STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO))
+                                                               STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::connectFirst(), aborting\n"),
@@ -390,7 +390,7 @@ continue_:
     } // end IF
   } // end IF
   ACE_ASSERT (Stream_MediaFramework_DirectShow_Tools::connected ((*iterator).second.second->builder,
-                                                                 STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO));
+                                                                 STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L));
 
 #if defined (_DEBUG)
   ACE_OS::memset (&allocator_properties, 0, sizeof (allocator_properties));
@@ -401,7 +401,7 @@ continue_:
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s/%s: failed to IAMBufferNegotiation::GetAllocatorProperties(): \"%s\", continuing\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO),
+                ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L),
                 ACE_TEXT (Common_Error_Tools::errorToString (result_2, true).c_str ())));
     //goto error;
   } // end IF
@@ -503,13 +503,13 @@ continue_:
   session_data_p->formats.push_back (format_s);
   ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
   if (!Stream_MediaFramework_DirectShow_Tools::getOutputFormat ((*iterator).second.second->builder,
-                                                                STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB,
+                                                                STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB_L,
                                                                 media_type_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::getOutputFormat(\"%s\"), aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB)));
+                ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_GRAB_L)));
     goto error;
   } // end IF
   ACE_OS::memset (&format_s.audio, 0, sizeof (struct _AMMediaType));

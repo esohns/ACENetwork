@@ -178,14 +178,14 @@ load_capture_devices (GtkListStore* listStore_in)
         ACE_ASSERT (properties_p);
 
         result_2 =
-          properties_p->Read (STREAM_LIB_DIRECTSHOW_PROPERTIES_NAME_STRING,
+          properties_p->Read (STREAM_LIB_DIRECTSHOW_PROPERTIES_NAME_STRING_L,
                               &variant_s,
                               0);
         if (FAILED (result_2))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to IPropertyBag::Read(%s): \"%s\", aborting\n"),
-                      ACE_TEXT (STREAM_LIB_DIRECTSHOW_PROPERTIES_NAME_STRING),
+                      ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_PROPERTIES_NAME_STRING_L),
                       ACE_TEXT (Common_Error_Tools::errorToString (result_2, true).c_str ())));
           goto error;
         } // end IF
@@ -195,14 +195,14 @@ load_capture_devices (GtkListStore* listStore_in)
         friendly_name_string = converter.char_rep ();
 
         result_2 =
-          properties_p->Read (STREAM_LIB_DIRECTSHOW_PROPERTIES_PATH_STRING,
+          properties_p->Read (STREAM_LIB_DIRECTSHOW_PROPERTIES_PATH_STRING_L,
                               &variant_s,
                               0);
         if (FAILED (result_2))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to IPropertyBag::Read(%s): \"%s\", aborting\n"),
-                      ACE_TEXT (STREAM_LIB_DIRECTSHOW_PROPERTIES_PATH_STRING),
+                      ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_PROPERTIES_PATH_STRING_L),
                       ACE_TEXT (Common_Error_Tools::errorToString (result_2, true).c_str ())));
           goto error;
         } // end IF

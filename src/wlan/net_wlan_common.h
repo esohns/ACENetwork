@@ -21,22 +21,26 @@
 #ifndef NET_WLAN_COMMON_H
 #define NET_WLAN_COMMON_H
 
-#include <map>
-#include <string>
-#include <vector>
-
+#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <cstdint>
+#endif // ACE_WIN32 || ACE_WIN64
+
+#include <map>
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (NL80211_SUPPORT)
 #include <set>
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "guiddef.h"
 #if defined (WLANAPI_SUPPORT)
-#include <wlanapi.h>
+#include "wlanapi.h"
 #endif // WLANAPI_SUPPORT
 #else
 #include "net/ethernet.h"
@@ -46,18 +50,19 @@
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include "ace/Basic_Types.h"
 #include "ace/Containers_T.h"
 #include "ace/INET_Addr.h"
 #include "ace/OS.h"
-
-#if defined (GUI_SUPPORT)
-#include "common_ui_common.h"
-#endif // GUI_SUPPORT
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_xml_common.h"
 #include "common_xml_parser.h"
 #endif // ACE_WIN32 || ACE_WIN64
+
+#if defined (GUI_SUPPORT)
+#include "common_ui_common.h"
+#endif // GUI_SUPPORT
 
 #include "net_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -121,9 +126,9 @@ enum Net_WLAN_MonitorAPIType
 #endif // _MSC_VER
 struct Net_WLAN_IEEE802_11_InformationElement
 {
-  uint8_t  id;
-  uint8_t  length;
-  uint8_t  data[];
+  uint8_t id;
+  uint8_t length;
+  uint8_t data[];
 #if defined (__GNUC__)
 } __attribute__ ((__packed__));
 #else
@@ -138,7 +143,7 @@ struct Net_WLAN_AccessPointState
   Net_WLAN_AccessPointState ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
    : frequency (0)
-#elif defined (ACE_LINUX)
+#else
 #if defined (NL80211_SUPPORT)
    : authenticationType (NL80211_AUTHTYPE_AUTOMATIC)
    , frequency (0)
@@ -155,7 +160,7 @@ struct Net_WLAN_AccessPointState
   }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#elif defined (ACE_LINUX)
+#else
 #if defined (NL80211_SUPPORT)
   enum nl80211_auth_type authenticationType;
 #endif // NL80211_SUPPORT
@@ -168,7 +173,7 @@ struct Net_WLAN_AccessPointState
 #if defined (WLANAPI_SUPPORT)
   WLAN_SIGNAL_QUALITY    signalQuality;
 #endif // WLANAPI_SUPPORT
-#elif defined (ACE_LINUX)
+#else
   unsigned int           signalQuality; // mBm
 #endif // ACE_WIN32 || ACE_WIN64
 };
@@ -219,7 +224,7 @@ typedef Common_XML_Parser_T<ACE_MT_SYNCH,
                             struct Common_XML_ParserConfiguration,
                             struct Net_WLAN_Profile_ParserContext,
                             Net_WLAN_Profile_XML_ListHandler> Net_WLAN_Profile_ListParser_t;
-#elif defined (ACE_LINUX)
+#else
 typedef std::map<std::string, unsigned int> Net_WLAN_WiPhyIdentifiers_t;
 typedef Net_WLAN_WiPhyIdentifiers_t::iterator Net_WLAN_WiPhyIdentifiersIterator_t;
 typedef std::pair<std::string, unsigned int> Net_WLAN_WiPhyIdentifiersEntry_t;
@@ -327,9 +332,7 @@ struct Net_WLAN_AssociationConfiguration
    : accessPointLinkLayerAddress ()
    , authenticationType (0)
   {
-    ACE_OS::memset (&accessPointLinkLayerAddress,
-                    0,
-                    sizeof (struct ether_addr));
+    ACE_OS::memset (&accessPointLinkLayerAddress, 0, sizeof (struct ether_addr));
   }
 
   struct ether_addr accessPointLinkLayerAddress;
