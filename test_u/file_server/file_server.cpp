@@ -1001,17 +1001,17 @@ do_work (
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  if (!useUDP_in)
-    Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
-  stop_event_dispatch = false;
-
-  // clean up
-  // *NOTE*: listener has stopped, interval timer has been cancelled,
-  // and connections have been aborted...
-
-  //// wait for connection processing to complete
-  //NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
-  //NET_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  // wait for connection processing to complete
+  if (useUDP_in)
+  {
+    FILESERVER_UDPCONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+    FILESERVER_UDPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  } // end IF
+  else
+  {
+    FILESERVER_TCPCONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+    FILESERVER_TCPCONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  } // end ELSE
 
   result = event_handler.close (ACE_Module_Base::M_DELETE_NONE);
   if (result == -1)

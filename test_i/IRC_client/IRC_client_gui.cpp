@@ -645,7 +645,7 @@ do_work (unsigned int numberOfDispatchThreads_in,
   timer_manager_p->stop ();
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  gtk_manager_p->wait ();
+  gtk_manager_p->wait (false); // don't wait for message queue
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

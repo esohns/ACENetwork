@@ -175,7 +175,7 @@ install (FILES etc/file_server.glade
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-f /mnt/win_d/temp/H264_720p.ts -g -l -p 5555 -t"
+                         ARGS "-f /run/media/eriks/ARCHIVE_2/video/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
