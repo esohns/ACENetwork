@@ -37,6 +37,8 @@
 #include "stream_lib_v4l_defines.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include "stream_net_common.h"
+
 #include "stream_dev_common.h"
 
 #include "test_i_common.h"
@@ -124,8 +126,9 @@ struct Test_I_StreamSessionData
   Test_I_StreamSessionData ()
    : Stream_SessionData ()
    , connection (NULL)
+   , connectionStates ()
    , fileIdentifier ()
-  {};
+  {}
 
   struct Test_I_StreamSessionData& operator+= (const struct Test_I_StreamSessionData& rhs_in)
   {
@@ -133,7 +136,8 @@ struct Test_I_StreamSessionData
     Stream_SessionData::operator+= (rhs_in);
 
     connection = (connection ? connection : rhs_in.connection);
-
+    connectionStates.insert (rhs_in.connectionStates.begin (),
+                             rhs_in.connectionStates.end ());
     fileIdentifier =
       (fileIdentifier.empty () ? rhs_in.fileIdentifier : fileIdentifier);
 
@@ -141,6 +145,7 @@ struct Test_I_StreamSessionData
   }
 
   Net_IINETConnection_t*        connection;
+  Stream_Net_ConnectionStates_t connectionStates;
   struct Common_File_Identifier fileIdentifier; // target-
 };
 typedef Stream_SessionData_T<struct Test_I_StreamSessionData> Test_I_StreamSessionData_t;

@@ -42,6 +42,7 @@
 
 #include "test_i_common.h"
 #include "test_i_configuration.h"
+#include "test_i_stream_common.h"
 
 #include "test_i_trending_connection_common.h"
 #include "test_i_trending_defines.h"
@@ -111,11 +112,10 @@ typedef std::list<struct Test_I_StockRecord> Test_I_StockRecords_t;
 typedef Test_I_StockRecords_t::const_iterator Test_I_StockRecordsIterator_t;
 
 struct Test_I_Trending_SessionData
- : Stream_SessionData
+ : Test_I_StreamSessionData
 {
   Test_I_Trending_SessionData ()
-   : Stream_SessionData ()
-   , connection (NULL)
+   : Test_I_StreamSessionData ()
    , data ()
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
    //, parserContext (NULL)
@@ -124,14 +124,8 @@ struct Test_I_Trending_SessionData
   struct Test_I_Trending_SessionData& operator+= (const struct Test_I_Trending_SessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
-    Stream_SessionData::operator+= (rhs_in);
+    Test_I_StreamSessionData::operator+= (rhs_in);
 
-    if (rhs_in.connection)
-    {
-      if (connection)
-        connection->decrease ();
-      connection = rhs_in.connection;
-    } // end IF
     data.insert (data.end (), rhs_in.data.begin (), rhs_in.data.end ());
     //parserContext = (parserContext ? parserContext : rhs_in.parserContext);
     targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
@@ -141,7 +135,6 @@ struct Test_I_Trending_SessionData
     return *this;
   }
 
-  Net_IINETConnection_t*                    connection;
   Test_I_StockRecords_t                     data; // html parser/spreadsheet writer module
   enum Stream_Decoder_CompressionFormatType format; // decompressor module
   //Test_I_SAXParserContext*                  parserContext; // html parser/handler module

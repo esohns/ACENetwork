@@ -26,6 +26,8 @@
 #include "stream_control_message.h"
 #include "stream_session_data.h"
 
+#include "stream_net_common.h"
+
 #include "net_common.h"
 
 struct Test_U_StreamSessionData
@@ -34,9 +36,11 @@ struct Test_U_StreamSessionData
   Test_U_StreamSessionData ()
    : Stream_SessionData ()
    , connection (NULL)
+   , connectionStates ()
   {}
 
-  Net_IINETConnection_t* connection;
+  Net_IINETConnection_t*        connection;
+  Stream_Net_ConnectionStates_t connectionStates;
 };
 typedef Stream_SessionData_T<struct Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 

@@ -41,6 +41,8 @@
 
 #include "stream_misc_messagehandler.h"
 
+#include "stream_net_common.h"
+
 #include "net_common.h"
 #include "net_defines.h"
 
@@ -183,6 +185,7 @@ struct BitTorrent_PeerSessionData
 {
   BitTorrent_PeerSessionData ()
    : Stream_SessionData ()
+   , connectionStates ()
    , filename ()
    , forwardedHandshake (false)
    , handshake (NULL)
@@ -194,9 +197,13 @@ struct BitTorrent_PeerSessionData
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionData::operator+= (rhs_in);
 
+    connectionStates.insert (rhs_in.connectionStates.begin (),
+                             rhs_in.connectionStates.end ());
+
     return *this;
   }
 
+  Stream_Net_ConnectionStates_t    connectionStates;
   std::string                      filename; // .torrent file
   bool                             forwardedHandshake;
   struct BitTorrent_PeerHandShake* handshake;
@@ -210,6 +217,7 @@ struct BitTorrent_TrackerSessionData
   BitTorrent_TrackerSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
+   , connectionStates ()
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
    , stream (NULL)
   {}
@@ -219,14 +227,14 @@ struct BitTorrent_TrackerSessionData
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionData::operator+= (rhs_in);
 
-//    currentStatistic =
-//        ((currentStatistic.timeStamp > rhs_in.currentStatistic.timeStamp) ? currentStatistic
-//                                                                          : rhs_in.currentStatistic);
+    connectionStates.insert (rhs_in.connectionStates.begin (),
+                             rhs_in.connectionStates.end ());
 
     return *this;
   }
 
   struct BitTorrent_ConnectionState*        connectionState;
+  Stream_Net_ConnectionStates_t             connectionStates;
   enum Stream_Decoder_CompressionFormatType format;
   ACE_Stream<ACE_MT_SYNCH,
              Common_TimePolicy_t>*          stream; // aggregator

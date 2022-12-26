@@ -28,6 +28,8 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#include "stream_net_common.h"
+
 #include "net_common.h"
 #include "net_iconnection.h"
 
@@ -49,12 +51,13 @@ struct SMTP_Stream_SessionData
   SMTP_Stream_SessionData ()
    : Stream_SessionData ()
    , connection (NULL)
+   , connectionStates ()
    , statistic ()
   {}
 
-  SMTP_IConnection_t* connection;
-
-  SMTP_Statistic_t    statistic;
+  SMTP_IConnection_t*           connection;
+  Stream_Net_ConnectionStates_t connectionStates;
+  SMTP_Statistic_t              statistic;
 };
 typedef Stream_SessionData_T<struct SMTP_Stream_SessionData> SMTP_Stream_SessionData_t;
 

@@ -28,6 +28,8 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#include "stream_net_common.h"
+
 #include "net_common.h"
 #include "net_iconnection.h"
 
@@ -49,12 +51,13 @@ struct POP_Stream_SessionData
   POP_Stream_SessionData ()
    : Stream_SessionData ()
    , connection (NULL)
+   , connectionStates ()
    , statistic ()
   {}
 
-  POP_IConnection_t* connection;
-
-  POP_Statistic_t    statistic;
+  POP_IConnection_t*            connection;
+  Stream_Net_ConnectionStates_t connectionStates;
+  POP_Statistic_t               statistic;
 };
 typedef Stream_SessionData_T<struct POP_Stream_SessionData> POP_Stream_SessionData_t;
 
