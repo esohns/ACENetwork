@@ -186,7 +186,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   message_inout = NULL;
 
   if (!missing_bytes)
-    inherited::finished_ = true;
+    inherited::PARSER_BASE_T::finished_ = true;
 }
 
 bool
@@ -238,5 +238,5 @@ Test_I_M3U_Module_Parser::record (struct M3U_Playlist*& record_inout)
 
   inherited::headFragment_ = NULL;
   inherited::fragment_ = NULL;
-  inherited::finished_ = true;
+  inherited::PARSER_BASE_T::finished_ = true;
 }
