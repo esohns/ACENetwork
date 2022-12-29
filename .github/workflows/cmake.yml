@@ -21,6 +21,7 @@ jobs:
      - os: 'ubuntu-latest'
        platform: 'x86'
      - os: 'windows-latest'
+       platform: 'x86'
      - os: 'macos-latest'
 
   # The CMake configure and build commands are platform agnostic and should work equally
@@ -36,21 +37,42 @@ jobs:
    - name: Checkout submodules
      run: git submodule update --init --recursive
 
-   - name: Install dependencies (packages)
+   - name: Install dependencies (packages) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      uses: ./.github/actions/install_deps
      with:
       os: ${{matrix.os}}
 
-   - name: Install dependencies (ACE)
+   - name: Install dependencies (packages) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     uses: ./.github/actions/install_deps_win32
+     with:
+      os: ${{matrix.os}}
+
+   - name: Install dependencies (ACE) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      uses: ./.github/actions/install_ACE
      with:
       os: ${{matrix.os}}
 
-   - name: Remove Common & ACEStream links
+   - name: Install dependencies (ACE) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     uses: ./.github/actions/install_ACE_win32
+     with:
+      os: ${{matrix.os}}
+
+   - name: Remove Common & ACEStream links [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           sudo rm -f modules/Common
           sudo rm -f modules/ACEStream
+
+   - name: Remove Common & ACEStream links [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          del /F /Q modules/Common
+          del /F /Q modules/ACEStream
+     shell: cmd
 
    - name: Checkout (Common)
      uses: actions/checkout@v2
@@ -134,12 +156,6 @@ jobs:
           sudo rm -f modules/ACEStream/modules/ACE
           sudo ln -s /usr/include modules/ACEStream/modules/ACE
 
-   - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
-     run: |
-          cd modules/ACEStream
-          patch -f -p1 < scripts/github_repo_build.patch
-          cd ${{github.workspace}}
-
    - name: Generate LibreOffice headers (ACEStream) [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
@@ -153,6 +169,14 @@ jobs:
      run: |
           cd modules\\ACEStream\\src\\modules\\doc\\scripts
           .\\make_oo_headers.bat
+          cd ${{github.workspace}}
+
+   - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          cd modules/ACEStream
+#          git apply -C3 --verbose scripts/github_repo_build.patch
+          patch -f -p1 < scripts/github_repo_build.patch
           cd ${{github.workspace}}
 
    - name: Update git sub-modules (ACEStream)
