@@ -32,7 +32,7 @@ jobs:
 
   steps:
    - name: Checkout
-     uses: actions/checkout@v2
+     uses: actions/checkout@v3
 
    - name: Checkout submodules
      run: git submodule update --init --recursive
@@ -70,12 +70,12 @@ jobs:
    - name: Remove Common & ACEStream links [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
-          del /F /Q modules/Common
-          del /F /Q modules/ACEStream
+          del /F /Q modules\\Common
+          del /F /Q modules\\ACEStream
      shell: cmd
 
    - name: Checkout (Common)
-     uses: actions/checkout@v2
+     uses: actions/checkout@v3
      with:
       repository: esohns/Common
       path: modules/Common
@@ -114,7 +114,7 @@ jobs:
           cd ${{github.workspace}}
 
    - name: Checkout (ACEStream)
-     uses: actions/checkout@v2
+     uses: actions/checkout@v3
      with:
       repository: esohns/ACEStream
       path: modules/ACEStream
