@@ -7,7 +7,7 @@ inputs:
 runs:
  using: "composite"
  steps:
-  - run: vcpkg install ace[ssl,xml]
+  - run: vcpkg install ace[ssl,xml]:x64-windows
     shell: cmd
 #    if: inputs.os == 'ubuntu-latest'
 #  - run:
