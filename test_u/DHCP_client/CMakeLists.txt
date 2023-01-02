@@ -196,7 +196,9 @@ if (WIN32)
  set (ACE_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_DLL_FILE})
  install (FILES ${ACE_DLL_FQPATH}
           DESTINATION bin COMPONENT bin)
- install (FILES etc/${UI_FILE}
+ install (FILES etc/test_u.gtk2
+                etc/test_u.gtk3
+                etc/test_u.xrc
                 etc/resources.rc
           DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 #          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
