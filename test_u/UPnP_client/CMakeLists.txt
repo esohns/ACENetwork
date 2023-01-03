@@ -194,6 +194,9 @@ if (GUI_SUPPORT)
  elseif (WXWIDGETS_USE)
    set (UI_FILE "test_u.xrc")
  endif ()
+ if (NOT ${UI_FILE} STREQUAL "")
+  set (UI_FILE "etc/${UI_FILE}")
+ endif (NOT ${UI_FILE} STREQUAL "")
 endif (GUI_SUPPORT)
 
 install (TARGETS ${EXECUTABLE}
@@ -206,7 +209,7 @@ if (WIN32)
  set (ACE_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_DLL_FILE})
  install (FILES ${ACE_DLL_FQPATH}
           DESTINATION bin COMPONENT bin)
- install (FILES etc/${UI_FILE}
+ install (FILES ${UI_FILE}
                 etc/resources.rc
           DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 #          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
