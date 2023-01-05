@@ -326,69 +326,71 @@ if (WIN32)
  set (ACE_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_DLL_FILE})
  set (ACE_SSL_DLL_FILE ACE_SSL${LIB_FILE_SUFFIX}.dll)
  set (ACE_SSL_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_SSL_DLL_FILE})
- file (TO_NATIVE_PATH $ENV{LIB_ROOT} LIB_ROOT)
- string (REPLACE "\\" "\\\\" LIB_ROOT ${LIB_ROOT})
- install (FILES ${ACE_DLL_FQPATH}
-                ${ACE_SSL_DLL_FQPATH}
-                ${LIB_ROOT}/gtk3/bin/libatk-1.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libfreetype-6.dll
-                ${LIB_ROOT}/gtk3/bin/libintl-8.dll
-                ${LIB_ROOT}/gtk3/bin/libcairo-2.dll
-                ${LIB_ROOT}/gtk3/bin/libfontconfig-1.dll
-                ${LIB_ROOT}/gtk3/bin/libgio-2.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libglib-2.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libgmodule-2.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libgobject-2.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libgthread-2.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libgdk_pixbuf-2.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libgdk-3-0.dll
-                ${LIB_ROOT}/gtk3/bin/libgtk-3-0.dll
-                ${LIB_ROOT}/gtk3/bin/libpango-1.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libpangocairo-1.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libpangoft2-1.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libpangowin32-1.0-0.dll
-                ${LIB_ROOT}/gtk3/bin/libiconv-2.dll
-                ${LIB_ROOT}/gtk3/bin/libpng15-15.dll
-                ${LIB_ROOT}/gtk3/bin/liblzma-5.dll
-                ${LIB_ROOT}/gtk3/bin/zlib1.dll
-                ${LIB_ROOT}/gtk3/bin/libxml2-2.dll
-                ${LIB_ROOT}/gtk3/bin/libffi-6.dll
-                ${LIB_ROOT}/gtk3/bin/libcairo-gobject-2.dll
-                ${LIB_ROOT}/gtk3/bin/libpixman-1-0.dll
-                ${LIB_ROOT}/gtk3/bin/libwinpthread-1.dll
-                ${LIB_ROOT}/assimp/cmake/bin/Debug/assimp-vc142-mtd.dll
-                ${LIB_ROOT}/libpng/build/Debug/libpng16d.dll
-                ${LIB_ROOT}/ffmpeg/bin/swresample-4.dll
-                ${LIB_ROOT}/ffmpeg/bin/swscale-6.dll
-                ${LIB_ROOT}/ffmpeg/bin/avformat-59.dll
-                ${LIB_ROOT}/ffmpeg/bin/avcodec-59.dll
-                ${LIB_ROOT}/ffmpeg/bin/avutil-57.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_MagickCore_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_MagickWand_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_bzlib_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_freetype_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_fribidi_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_glib_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_harfbuzz_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_lcms_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_libxml_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_lqr_.dll
-                ${LIB_ROOT}/ImageMagick/CORE_RL_zlib_.dll
-                ${LIB_ROOT}/libepoxy/bin/epoxy-0.dll
-                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_core_vc_x64_custom.dll
-                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_html_vc_x64_custom.dll
-                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_xrc_vc_x64_custom.dll
-                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316d_vc_x64_custom.dll
-                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316d_xml_vc_x64_custom.dll
-                ${LIB_ROOT}/openssl/libcrypto-3-x64.dll
-                ${LIB_ROOT}/openssl/libssl-3-x64.dll
-                ${LIB_ROOT}/zlib/build/Debug/zlibd.dll
-          DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
- install (FILES
-          ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/gschemas.compiled
-          ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/org.gtk.Settings.ColorChooser.gschema.xml
-          ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/org.gtk.Settings.FileChooser.gschema.xml
-          DESTINATION "share/glib-2.0/schemas" COMPONENT config)
+ if (DEFINED ENV{LIB_ROOT})
+  file (TO_NATIVE_PATH $ENV{LIB_ROOT} LIB_ROOT)
+  string (REPLACE "\\" "\\\\" LIB_ROOT ${LIB_ROOT})
+  install (FILES ${ACE_DLL_FQPATH}
+                 ${ACE_SSL_DLL_FQPATH}
+                 ${LIB_ROOT}/gtk3/bin/libatk-1.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libfreetype-6.dll
+                 ${LIB_ROOT}/gtk3/bin/libintl-8.dll
+                 ${LIB_ROOT}/gtk3/bin/libcairo-2.dll
+                 ${LIB_ROOT}/gtk3/bin/libfontconfig-1.dll
+                 ${LIB_ROOT}/gtk3/bin/libgio-2.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libglib-2.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libgmodule-2.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libgobject-2.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libgthread-2.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libgdk_pixbuf-2.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libgdk-3-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libgtk-3-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libpango-1.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libpangocairo-1.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libpangoft2-1.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libpangowin32-1.0-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libiconv-2.dll
+                 ${LIB_ROOT}/gtk3/bin/libpng15-15.dll
+                 ${LIB_ROOT}/gtk3/bin/liblzma-5.dll
+                 ${LIB_ROOT}/gtk3/bin/zlib1.dll
+                 ${LIB_ROOT}/gtk3/bin/libxml2-2.dll
+                 ${LIB_ROOT}/gtk3/bin/libffi-6.dll
+                 ${LIB_ROOT}/gtk3/bin/libcairo-gobject-2.dll
+                 ${LIB_ROOT}/gtk3/bin/libpixman-1-0.dll
+                 ${LIB_ROOT}/gtk3/bin/libwinpthread-1.dll
+                 ${LIB_ROOT}/assimp/cmake/bin/Debug/assimp-vc142-mtd.dll
+                 ${LIB_ROOT}/libpng/build/Debug/libpng16d.dll
+                 ${LIB_ROOT}/ffmpeg/bin/swresample-4.dll
+                 ${LIB_ROOT}/ffmpeg/bin/swscale-6.dll
+                 ${LIB_ROOT}/ffmpeg/bin/avformat-59.dll
+                 ${LIB_ROOT}/ffmpeg/bin/avcodec-59.dll
+                 ${LIB_ROOT}/ffmpeg/bin/avutil-57.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_MagickCore_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_MagickWand_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_bzlib_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_freetype_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_fribidi_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_glib_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_harfbuzz_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_lcms_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_libxml_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_lqr_.dll
+                 ${LIB_ROOT}/ImageMagick/CORE_RL_zlib_.dll
+                 ${LIB_ROOT}/libepoxy/bin/epoxy-0.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_core_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_html_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_xrc_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316d_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316d_xml_vc_x64_custom.dll
+                 ${LIB_ROOT}/openssl/libcrypto-3-x64.dll
+                 ${LIB_ROOT}/openssl/libssl-3-x64.dll
+                 ${LIB_ROOT}/zlib/build/Debug/zlibd.dll
+           DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
+  install (FILES
+           ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/gschemas.compiled
+           ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/org.gtk.Settings.ColorChooser.gschema.xml
+           ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/org.gtk.Settings.FileChooser.gschema.xml
+           DESTINATION "share/glib-2.0/schemas" COMPONENT config)
+ endif (DEFINED ENV{LIB_ROOT})
 endif (WIN32)
 install (FILES
          etc/IRC_client.ini
@@ -429,8 +431,8 @@ elseif (WIN32)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_GUI}.exe" COMMAND_GUI)
  string (REPLACE "\\" "\\\\" COMMAND_GUI ${COMMAND_GUI})
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
+ file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIB_PATH)
+ file (TO_CMAKE_PATH ${ACE_LIB_DIR} ACE_LIB_PATH)
  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}

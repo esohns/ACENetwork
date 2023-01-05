@@ -185,16 +185,18 @@ if (WIN32)
  set (ACE_SSL_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_SSL_DLL_FILE})
  file (TO_CMAKE_PATH "$ENV{OO_SDK_HOME}" OO_SDK_HOME)
 # string (REPLACE "\\" "\\\\" OO_SDK_HOME "${OO_SDK_HOME}")
- file (TO_CMAKE_PATH $ENV{LIB_ROOT} LIB_ROOT)
+ if (DEFINED ENV{LIB_ROOT})
+  file (TO_CMAKE_PATH $ENV{LIB_ROOT} LIB_ROOT)
 # string (REPLACE "\\" "\\\\" LIB_ROOT ${LIB_ROOT})
- install (FILES ${ACE_DLL_FQPATH}
-                ${ACE_SSL_DLL_FQPATH}
-                ${OO_SDK_HOME}/bin/sal3.dll
-                ${OO_SDK_HOME}/../program/cppu3.dll
-                ${OO_SDK_HOME}/../program/cppuhelper3MSC.dll
-                ${OO_SDK_HOME}/../program/sal3.dll
-                ${LIB_ROOT}/openssl/libssl-3-x64.dll
-          DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
+  install (FILES ${ACE_DLL_FQPATH}
+                 ${ACE_SSL_DLL_FQPATH}
+                 ${OO_SDK_HOME}/bin/sal3.dll
+                 ${OO_SDK_HOME}/../program/cppu3.dll
+                 ${OO_SDK_HOME}/../program/cppuhelper3MSC.dll
+                 ${OO_SDK_HOME}/../program/sal3.dll
+                 ${LIB_ROOT}/openssl/libssl-3-x64.dll
+           DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
+ endif (DEFINED ENV{LIB_ROOT})
 endif (WIN32)
 
 if (UNIX)
@@ -219,8 +221,8 @@ elseif (WIN32)
 # file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libmysql/lib LIBMYSQL_LIBRARY_PATH)
 # file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${LIBREOFFICE_LIB_DIRS}" OO_LIBRARY_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIBRARY_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIBRARY_PATH)
+ file (TO_CMAKE_PATH ${ACE_LIB_DIR} ACE_LIBRARY_PATH)
+ file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIBRARY_PATH)
  file (TO_CMAKE_PATH ${ZLIB_LIB_DIR} ZLIB_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${ACE_LIBRARY_PATH}
                            ${GTK_LIBRARY_PATH}
