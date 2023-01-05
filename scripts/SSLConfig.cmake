@@ -21,10 +21,30 @@ if (UNIX)
   endif (OPENSSL_FOUND)
  endif (SSL_FOUND)
 elseif (WIN32)
- set (SSL_FOUND TRUE)
- set (SSL_INCLUDE_DIRS $ENV{LIB_ROOT}/openssl/include)
- set (SSL_LIBRARIES "$ENV{LIB_ROOT}/openssl/libcrypto.lib;$ENV{LIB_ROOT}/openssl/libssl.lib")
- set (SSL_LIB_DIR "$ENV{LIB_ROOT}/openssl")
+ if (VCPKG_USE)
+  find_library (SSL_CRYPTO_LIBRARY libcrypto.lib
+                PATHS ${VCPKG_LIB_DIR}
+                PATH_SUFFIXES lib
+                DOC "searching for libcrypto.lib"
+                NO_DEFAULT_PATH)
+  find_library (SSL_LIBRARY libssl.lib
+                PATHS ${VCPKG_LIB_DIR}
+                PATH_SUFFIXES lib
+                DOC "searching for libssl.lib"
+                NO_DEFAULT_PATH)
+  if (SSL_CRYPTO_LIBRARY AND SSL_LIBRARY)
+   set (SSL_FOUND TRUE)
+   set (SSL_INCLUDE_DIRS ${VCPKG_INCLUDE_DIR_BASE})
+   set (SSL_LIBRARIES "${SSL_CRYPTO_LIBRARY};${SSL_LIBRARY}")
+   set (SSL_LIB_DIR "${VCPKG_LIB_DIR}/bin")
+  endif (SSL_CRYPTO_LIBRARY AND SSL_LIBRARY)
+ endif (VCPKG_USE)
+ if (NOT SSL_FOUND) 
+  set (SSL_FOUND TRUE)
+  set (SSL_INCLUDE_DIRS $ENV{LIB_ROOT}/openssl/include)
+  set (SSL_LIBRARIES "$ENV{LIB_ROOT}/openssl/libcrypto.lib;$ENV{LIB_ROOT}/openssl/libssl.lib")
+  set (SSL_LIB_DIR "$ENV{LIB_ROOT}/openssl")
+ endif (NOT SSL_FOUND)
 endif ()
 
 if (UNIX)
@@ -34,15 +54,21 @@ if (UNIX)
                PATH_SUFFIXES lib
                DOC "searching for ${ACE_SSL_LIB_FILE}")
 elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
- endif ()
  set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               PATHS $ENV{ACE_ROOT} $ENV{LIB_ROOT}/ACE_TAO/ACE
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_SSL_LIB_FILE}"
-               NO_DEFAULT_PATH)
+ if (VCPKG_USE)
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                PATHS ${VCPKG_LIB_DIR}
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_SSL_LIB_FILE}"
+                NO_DEFAULT_PATH)
+ endif (VCPKG_USE)
+ if (NOT ACE_SSL_LIBRARY)
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                PATHS $ENV{ACE_ROOT} $ENV{LIB_ROOT}/ACE_TAO/ACE
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_SSL_LIB_FILE}"
+                NO_DEFAULT_PATH)
+ endif (NOT ACE_SSL_LIBRARY)
 endif ()
 #if (NOT EXISTS ACE_SSL_LIBRARY)
 if (NOT ACE_SSL_LIBRARY)

@@ -145,12 +145,6 @@ jobs:
           sudo rm -f ACENetwork
           sudo ln -s ../../.. ACENetwork
 
-   - name: Add ACEStream link [UNIX]
-     if: ${{ matrix.os=='ubuntu-latest' }}
-     run: |
-          cd ..
-          sudo ln -s ACENetwork/modules/ACEStream ACEStream
-
    - name: Add ACEStream link [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
