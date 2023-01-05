@@ -1,0 +1,24 @@
+{
+  "name": "esohns-acenetwork",
+  "dependencies": [
+    {
+      "name": "ace",
+      "features": [ "ssl", "xml" ]
+    },
+    "assimp",
+    "directxsdk",
+    "faad2",
+    "ffmpeg",
+    "freeglut",
+    "glm",
+    "gtk",
+    "libiconv",
+    "libmaxminddb",
+    "libnoise",
+    "libxml2",
+    "mpg123",
+    "opencv",
+    "pdcurses",
+    "zlib"
+  ]
+}

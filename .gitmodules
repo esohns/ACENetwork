@@ -1,3 +1,6 @@
-[submodule "modules/cmake-modules"]
+[submodule "CMakeHelpers"]
+	path = modules/CMakeHelpers
+	url = https://github.com/halex2005/CMakeHelpers.git
+[submodule "cmake-modules"]
 	path = modules/cmake-modules
-	url = https://github.com/rpavlik/cmake-modules.git
+	url = https://github.com/esohns/cmake-modules.git

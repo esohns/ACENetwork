@@ -1,14 +1,17 @@
 name: continuous integration
 
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+ push:
+  branches: [ master ]
+ pull_request:
+  branches: [ master ]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+ # set CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+ BUILD_TYPE: Release
+ # set vcpkg root/installed directories
+ VCPKG_ROOT: C:/vcpkg
+ VCPKG_INSTALLED_DIR: C:/vcpkg/installed
 
 jobs:
       
@@ -55,11 +58,21 @@ jobs:
      with:
       os: ${{matrix.os}}
 
-   - name: Install dependencies (ACE) [Win32]
-     if: ${{ matrix.os=='windows-latest' }}
-     uses: ./.github/actions/install_ACE_win32
-     with:
-      os: ${{matrix.os}}
+#   - name: Install dependencies (ACE) [Win32]
+#     if: ${{ matrix.os=='windows-latest' }}
+#     uses: ./.github/actions/install_ACE_win32
+#     with:
+#      os: ${{matrix.os}}
+
+#   - name: Set environment variables [UNIX]
+#     if: ${{ matrix.os=='ubuntu-latest' }}
+#     run: |
+#          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
+
+#   - name: Set environment variables [Win32]
+#     if: ${{ matrix.os=='windows-latest' }}
+#     run: |
+#          echo "VCPKG_ROOT=$Env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
    - name: Remove Common & ACEStream links [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
@@ -85,14 +98,12 @@ jobs:
      run: |
           cd ..
           sudo ln -s ACENetwork/modules/Common Common
-          cd ${{github.workspace}}
 
    - name: Add Common link [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd ..
-          mklink /D Common ACENetwork/modules/Common
-          cd ${{github.workspace}}
+          mklink /D Common ACENetwork\\modules\\Common
      shell: cmd
 
    - name: Reset ACE link (Common) [UNIX]
@@ -105,13 +116,19 @@ jobs:
      run: |
           cd modules/Common
           git submodule update --init --recursive
-          cd ${{github.workspace}}
 
-   - name: Configure CMake (Common)
+   - name: Configure CMake (Common) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/Common
           cmake -B ${{github.workspace}}/modules/Common/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-          cd ${{github.workspace}}
+
+   - name: Configure CMake (Common) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\Common
+          cmake -B ${{github.workspace}}\\modules\\Common\\build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+     shell: cmd
 
    - name: Checkout (ACEStream)
      uses: actions/checkout@v3
@@ -125,14 +142,12 @@ jobs:
           cd modules/ACEStream/modules
           sudo rm -f Common
           sudo ln -s ../../Common Common
-          cd ${{github.workspace}}
 
    - name: Add Common link (ACEStream) [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd ..
-          mklink /D Common ACEStream/modules/Common
-          cd ${{github.workspace}}
+          mklink /D Common ACEStream\\modules\\Common
      shell: cmd
 
    - name: Add ACEStream link [UNIX]
@@ -140,14 +155,12 @@ jobs:
      run: |
           cd ..
           sudo ln -s ACENetwork/modules/ACEStream ACEStream
-          cd ${{github.workspace}}
 
    - name: Add ACEStream link [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd ..
-          mklink /D ACEStream ACENetwork/modules/ACEStream
-          cd ${{github.workspace}}
+          mklink /D ACEStream ACENetwork\\modules\\ACEStream
      shell: cmd
 
    - name: Reset ACE link (ACEStream) [UNIX]
@@ -162,36 +175,52 @@ jobs:
           cd modules/ACEStream/src/modules/doc/scripts
           chmod u+x make_oo_headers.sh
           sudo ./make_oo_headers.sh
-          cd ${{github.workspace}}
 
    - name: Generate LibreOffice headers (ACEStream) [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd modules\\ACEStream\\src\\modules\\doc\\scripts
-          .\\make_oo_headers.bat
-          cd ${{github.workspace}}
+          .\\make_oo_headers.cmd
 
-   - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork
+   - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork  [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream
           patch -f -p1 < scripts/github_repo_build.patch
-          cd ${{github.workspace}}
+
+   - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\ACEStream
+          git apply -v --reject --whitespace=fix scripts/github_repo_build.patch
+     shell: cmd
 
    - name: Update git sub-modules (ACEStream)
      run: |
           cd modules/ACEStream
           git submodule update --init --recursive
-          cd ${{github.workspace}}
 
-   - name: Configure CMake (ACEStream)
+   - name: Configure CMake (ACEStream) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream
-          cmake -B ${{github.workspace}}/modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-          cd ${{github.workspace}}
+          cmake -B ${{github.workspace}}/modules/ACEStream/build -DCommon_DIR=modules/Common/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-   - name: Configure CMake
+   - name: Configure CMake (ACEStream) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\ACEStream
+          cmake -B ${{github.workspace}}\\modules\\ACEStream\\build -DCommon_DIR=modules/Common/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+     shell: cmd
+
+   - name: Configure CMake [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+   - name: Configure CMake [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+     shell: cmd
 
    - name: Build
      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
