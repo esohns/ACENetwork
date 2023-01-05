@@ -1,11 +1,15 @@
 include (ffmpeg)
 include (ImageMagick)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 include (PreXMLImplementation)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
 include (zlib)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/doc/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/doc/scripts")
 include (Office)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../scripts")
 include (SSLConfig)
 
@@ -222,8 +226,12 @@ elseif (WIN32)
 # file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${LIBREOFFICE_LIB_DIRS}" OO_LIBRARY_PATH)
  file (TO_CMAKE_PATH ${ACE_LIB_DIR} ACE_LIBRARY_PATH)
- file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIBRARY_PATH)
- file (TO_CMAKE_PATH ${ZLIB_LIB_DIR} ZLIB_LIBRARY_PATH)
+ if (SSL_SUPPORT)
+  file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIBRARY_PATH)
+ endif (SSL_SUPPORT)
+ if (ZLIB_SUPPORT)
+  file (TO_CMAKE_PATH ${ZLIB_LIB_DIR} ZLIB_LIBRARY_PATH)
+ endif (ZLIB_SUPPORT)
  set (RUNTIME_LIBRARY_DIRS ${ACE_LIBRARY_PATH}
                            ${GTK_LIBRARY_PATH}
                            ${WXWIDGETS_LIBRARY_PATH}
