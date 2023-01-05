@@ -9,8 +9,13 @@ runs:
  steps:
   - uses: lukka/run-vcpkg@v10
     with:
+     vcpkgDirectory: '${{ env.VCPKG_ROOT }}'
      vcpkgGitCommitId: '30a20e8f15ff26eec665205dea52f4ffc6f0814b'
-  - run: |
-         vcpkg update
-         vcpkg install assimp:x64-windows ffmpeg:x64-windows freeglut:x64-windows glm:x64-windows gtk:x64-windows
+     # Run vcpkg with the command specified by the `runVcpkgFormatString` input
+     runVcpkgInstall: true
+     vcpkgJsonGlob: '**/vcpkg.json'
+     #vcpkgJsonGlob: '${{ runner.workspace }}/a/ACEStream/vcpkg.json'
+     appendedCacheKey: vcpkginstall
+
+  - run: choco install libreoffice-fresh
     shell: cmd
