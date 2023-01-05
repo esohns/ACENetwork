@@ -136,19 +136,14 @@ jobs:
       repository: esohns/ACEStream
       path: modules/ACEStream
 
-   - name: Add Common link (ACEStream) [UNIX]
+   - name: Add Common/ACENetwork link (ACEStream) [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream/modules
           sudo rm -f Common
           sudo ln -s ../../Common Common
-
-   - name: Add Common link (ACEStream) [Win32]
-     if: ${{ matrix.os=='windows-latest' }}
-     run: |
-          cd ..
-          mklink /D Common ACEStream\\modules\\Common
-     shell: cmd
+          sudo rm -f ACENetwork
+          sudo ln -s ../../.. ACENetwork
 
    - name: Add ACEStream link [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
