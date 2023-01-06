@@ -53,8 +53,11 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "net_wlan_defines.h"
 #include "net_wlan_tools.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

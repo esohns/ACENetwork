@@ -172,6 +172,8 @@ struct Net_WLAN_AccessPointState
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
   WLAN_SIGNAL_QUALITY    signalQuality;
+#else
+  unsigned int           signalQuality; // mBm
 #endif // WLANAPI_SUPPORT
 #else
   unsigned int           signalQuality; // mBm
