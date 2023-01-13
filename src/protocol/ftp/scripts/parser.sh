@@ -14,14 +14,14 @@ command -v bison >/dev/null 2>&1 || { echo "bison is not installed, aborting" >&
 #command -v dot >/dev/null 2>&1 || { echo "graphviz is not installed, aborting" >&2; exit 1; }
 
 PROJECT_ROOT=$(dirname $0)/../../../..
-SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/smtp/scripts
+SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/ftp/scripts
 
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/parser.y
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
 #bison --no-lines --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
 bison --no-lines --locations --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
 [ $? -ne 0 ] && echo "ERROR: \"${SOURCE_FILE}\" failed (status was: $?), aborting" && exit 1
-#DOT_FILE=${SCRIPTS_DIRECTORY}/pcp_parser.dot
+#DOT_FILE=${SCRIPTS_DIRECTORY}/ftp_parser.dot
 #[ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
 #IMAGE_FILE=pcp_parser.png
 #dot -Tpng ${DOT_FILE} >${IMAGE_FILE}
@@ -48,7 +48,7 @@ bison --no-lines --locations --graph --report=all --report-file=parser_report.tx
 #rm -f ${SOURCE_FILE}
 #[ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
-FILES="smtp_parser.h smtp_parser.cpp"
+FILES="ftp_parser.h ftp_parser.cpp"
 #location.hh
 #position.hh
 #stack.hh"
