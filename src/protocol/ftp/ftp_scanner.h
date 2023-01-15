@@ -1,23 +1,24 @@
-#ifndef SMTP_Scanner_HEADER_H
-#define SMTP_Scanner_HEADER_H 1
-#define SMTP_Scanner_IN_HEADER 1
+#ifndef FTP_Scanner_HEADER_H
+#define FTP_Scanner_HEADER_H 1
+#define FTP_Scanner_IN_HEADER 1
 
-#include "smtp_parser.h"
+#undef YYTOKENTYPE
+#include "ftp_parser.h"
 
 /*
-#define YY_DECL                                                 \
-yy::SMTP_Parser::token_type                                     \
-SMTP_Scanner_lex (yy::SMTP_Parser::semantic_type* yylval_param, \
-                  yy::SMTP_Parser::location_type* yylloc_param, \
-                  SMTP_IParser* driver,                         \
+#define YY_DECL                                               \
+yy::FTP_Parser::token_type                                    \
+FTP_Scanner_lex (yy::FTP_Parser::semantic_type* yylval_param, \
+                 yy::FTP_Parser::location_type* yylloc_param, \
+                 FTP_IParser* driver,                         \
                   yyscan_t yyscanner) */
 /* yytokentype */
-#define YY_DECL                          \
-int                                      \
-SMTP_Scanner_lex (YYSTYPE* yylval_param, \
-                  YYLTYPE* yylloc_param, \
-                  SMTP_IParser* driver,  \
-                  yyscan_t yyscanner)
+#define YY_DECL                         \
+int                                     \
+FTP_Scanner_lex (YYSTYPE* yylval_param, \
+                 YYLTYPE* yylloc_param, \
+                 FTP_IParser* driver,   \
+                 yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 extern YY_DECL;
 
@@ -25,15 +26,15 @@ extern YY_DECL;
 extern "C"
 {
 #endif /* __cplusplus */
-int SMTP_Scanner_reset (yyscan_t);
+int FTP_Scanner_reset (yyscan_t);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-//extern void SMTP_Scanner_set_column (int, yyscan_t);
+//extern void FTP_Scanner_set_column (int, yyscan_t);
 
 //using namespace yy;
-//#define YYLTYPE SMTP_Parser::location_type
-//#define YYSTYPE SMTP_Parser::semantic_type
+//#define YYLTYPE FTP_Parser::location_type
+//#define YYSTYPE FTP_Parser::semantic_type
 
 
 
@@ -76,228 +77,228 @@ int SMTP_Scanner_reset (yyscan_t);
 
 /* %if-c-only */
 #ifdef yy_create_buffer
-#define SMTP_Scanner__create_buffer_ALREADY_DEFINED
+#define FTP_Scanner__create_buffer_ALREADY_DEFINED
 #else
-#define yy_create_buffer SMTP_Scanner__create_buffer
+#define yy_create_buffer FTP_Scanner__create_buffer
 #endif
 
     
 #ifdef yy_delete_buffer
-#define SMTP_Scanner__delete_buffer_ALREADY_DEFINED
+#define FTP_Scanner__delete_buffer_ALREADY_DEFINED
 #else
-#define yy_delete_buffer SMTP_Scanner__delete_buffer
+#define yy_delete_buffer FTP_Scanner__delete_buffer
 #endif
 
     
 #ifdef yy_scan_buffer
-#define SMTP_Scanner__scan_buffer_ALREADY_DEFINED
+#define FTP_Scanner__scan_buffer_ALREADY_DEFINED
 #else
-#define yy_scan_buffer SMTP_Scanner__scan_buffer
+#define yy_scan_buffer FTP_Scanner__scan_buffer
 #endif
 
     
 #ifdef yy_scan_string
-#define SMTP_Scanner__scan_string_ALREADY_DEFINED
+#define FTP_Scanner__scan_string_ALREADY_DEFINED
 #else
-#define yy_scan_string SMTP_Scanner__scan_string
+#define yy_scan_string FTP_Scanner__scan_string
 #endif
 
     
 #ifdef yy_scan_bytes
-#define SMTP_Scanner__scan_bytes_ALREADY_DEFINED
+#define FTP_Scanner__scan_bytes_ALREADY_DEFINED
 #else
-#define yy_scan_bytes SMTP_Scanner__scan_bytes
+#define yy_scan_bytes FTP_Scanner__scan_bytes
 #endif
 
     
 #ifdef yy_init_buffer
-#define SMTP_Scanner__init_buffer_ALREADY_DEFINED
+#define FTP_Scanner__init_buffer_ALREADY_DEFINED
 #else
-#define yy_init_buffer SMTP_Scanner__init_buffer
+#define yy_init_buffer FTP_Scanner__init_buffer
 #endif
 
     
 #ifdef yy_flush_buffer
-#define SMTP_Scanner__flush_buffer_ALREADY_DEFINED
+#define FTP_Scanner__flush_buffer_ALREADY_DEFINED
 #else
-#define yy_flush_buffer SMTP_Scanner__flush_buffer
+#define yy_flush_buffer FTP_Scanner__flush_buffer
 #endif
 
     
 #ifdef yy_load_buffer_state
-#define SMTP_Scanner__load_buffer_state_ALREADY_DEFINED
+#define FTP_Scanner__load_buffer_state_ALREADY_DEFINED
 #else
-#define yy_load_buffer_state SMTP_Scanner__load_buffer_state
+#define yy_load_buffer_state FTP_Scanner__load_buffer_state
 #endif
 
     
 #ifdef yy_switch_to_buffer
-#define SMTP_Scanner__switch_to_buffer_ALREADY_DEFINED
+#define FTP_Scanner__switch_to_buffer_ALREADY_DEFINED
 #else
-#define yy_switch_to_buffer SMTP_Scanner__switch_to_buffer
+#define yy_switch_to_buffer FTP_Scanner__switch_to_buffer
 #endif
 
     
 #ifdef yypush_buffer_state
-#define SMTP_Scanner_push_buffer_state_ALREADY_DEFINED
+#define FTP_Scanner_push_buffer_state_ALREADY_DEFINED
 #else
-#define yypush_buffer_state SMTP_Scanner_push_buffer_state
+#define yypush_buffer_state FTP_Scanner_push_buffer_state
 #endif
 
     
 #ifdef yypop_buffer_state
-#define SMTP_Scanner_pop_buffer_state_ALREADY_DEFINED
+#define FTP_Scanner_pop_buffer_state_ALREADY_DEFINED
 #else
-#define yypop_buffer_state SMTP_Scanner_pop_buffer_state
+#define yypop_buffer_state FTP_Scanner_pop_buffer_state
 #endif
 
     
 #ifdef yyensure_buffer_stack
-#define SMTP_Scanner_ensure_buffer_stack_ALREADY_DEFINED
+#define FTP_Scanner_ensure_buffer_stack_ALREADY_DEFINED
 #else
-#define yyensure_buffer_stack SMTP_Scanner_ensure_buffer_stack
+#define yyensure_buffer_stack FTP_Scanner_ensure_buffer_stack
 #endif
 
     
 #ifdef yylex
-#define SMTP_Scanner_lex_ALREADY_DEFINED
+#define FTP_Scanner_lex_ALREADY_DEFINED
 #else
-#define yylex SMTP_Scanner_lex
+#define yylex FTP_Scanner_lex
 #endif
 
     
 #ifdef yyrestart
-#define SMTP_Scanner_restart_ALREADY_DEFINED
+#define FTP_Scanner_restart_ALREADY_DEFINED
 #else
-#define yyrestart SMTP_Scanner_restart
+#define yyrestart FTP_Scanner_restart
 #endif
 
     
 #ifdef yylex_init
-#define SMTP_Scanner_lex_init_ALREADY_DEFINED
+#define FTP_Scanner_lex_init_ALREADY_DEFINED
 #else
-#define yylex_init SMTP_Scanner_lex_init
+#define yylex_init FTP_Scanner_lex_init
 #endif
 
     
 #ifdef yylex_init_extra
-#define SMTP_Scanner_lex_init_extra_ALREADY_DEFINED
+#define FTP_Scanner_lex_init_extra_ALREADY_DEFINED
 #else
-#define yylex_init_extra SMTP_Scanner_lex_init_extra
+#define yylex_init_extra FTP_Scanner_lex_init_extra
 #endif
 
     
 #ifdef yylex_destroy
-#define SMTP_Scanner_lex_destroy_ALREADY_DEFINED
+#define FTP_Scanner_lex_destroy_ALREADY_DEFINED
 #else
-#define yylex_destroy SMTP_Scanner_lex_destroy
+#define yylex_destroy FTP_Scanner_lex_destroy
 #endif
 
     
 #ifdef yyget_debug
-#define SMTP_Scanner_get_debug_ALREADY_DEFINED
+#define FTP_Scanner_get_debug_ALREADY_DEFINED
 #else
-#define yyget_debug SMTP_Scanner_get_debug
+#define yyget_debug FTP_Scanner_get_debug
 #endif
 
     
 #ifdef yyset_debug
-#define SMTP_Scanner_set_debug_ALREADY_DEFINED
+#define FTP_Scanner_set_debug_ALREADY_DEFINED
 #else
-#define yyset_debug SMTP_Scanner_set_debug
+#define yyset_debug FTP_Scanner_set_debug
 #endif
 
     
 #ifdef yyget_extra
-#define SMTP_Scanner_get_extra_ALREADY_DEFINED
+#define FTP_Scanner_get_extra_ALREADY_DEFINED
 #else
-#define yyget_extra SMTP_Scanner_get_extra
+#define yyget_extra FTP_Scanner_get_extra
 #endif
 
     
 #ifdef yyset_extra
-#define SMTP_Scanner_set_extra_ALREADY_DEFINED
+#define FTP_Scanner_set_extra_ALREADY_DEFINED
 #else
-#define yyset_extra SMTP_Scanner_set_extra
+#define yyset_extra FTP_Scanner_set_extra
 #endif
 
     
 #ifdef yyget_in
-#define SMTP_Scanner_get_in_ALREADY_DEFINED
+#define FTP_Scanner_get_in_ALREADY_DEFINED
 #else
-#define yyget_in SMTP_Scanner_get_in
+#define yyget_in FTP_Scanner_get_in
 #endif
 
     
 #ifdef yyset_in
-#define SMTP_Scanner_set_in_ALREADY_DEFINED
+#define FTP_Scanner_set_in_ALREADY_DEFINED
 #else
-#define yyset_in SMTP_Scanner_set_in
+#define yyset_in FTP_Scanner_set_in
 #endif
 
     
 #ifdef yyget_out
-#define SMTP_Scanner_get_out_ALREADY_DEFINED
+#define FTP_Scanner_get_out_ALREADY_DEFINED
 #else
-#define yyget_out SMTP_Scanner_get_out
+#define yyget_out FTP_Scanner_get_out
 #endif
 
     
 #ifdef yyset_out
-#define SMTP_Scanner_set_out_ALREADY_DEFINED
+#define FTP_Scanner_set_out_ALREADY_DEFINED
 #else
-#define yyset_out SMTP_Scanner_set_out
+#define yyset_out FTP_Scanner_set_out
 #endif
 
     
 #ifdef yyget_leng
-#define SMTP_Scanner_get_leng_ALREADY_DEFINED
+#define FTP_Scanner_get_leng_ALREADY_DEFINED
 #else
-#define yyget_leng SMTP_Scanner_get_leng
+#define yyget_leng FTP_Scanner_get_leng
 #endif
 
     
 #ifdef yyget_text
-#define SMTP_Scanner_get_text_ALREADY_DEFINED
+#define FTP_Scanner_get_text_ALREADY_DEFINED
 #else
-#define yyget_text SMTP_Scanner_get_text
+#define yyget_text FTP_Scanner_get_text
 #endif
 
     
 #ifdef yyget_lineno
-#define SMTP_Scanner_get_lineno_ALREADY_DEFINED
+#define FTP_Scanner_get_lineno_ALREADY_DEFINED
 #else
-#define yyget_lineno SMTP_Scanner_get_lineno
+#define yyget_lineno FTP_Scanner_get_lineno
 #endif
 
     
 #ifdef yyset_lineno
-#define SMTP_Scanner_set_lineno_ALREADY_DEFINED
+#define FTP_Scanner_set_lineno_ALREADY_DEFINED
 #else
-#define yyset_lineno SMTP_Scanner_set_lineno
+#define yyset_lineno FTP_Scanner_set_lineno
 #endif
 
     
         
 #ifdef yyget_column
-#define SMTP_Scanner_get_column_ALREADY_DEFINED
+#define FTP_Scanner_get_column_ALREADY_DEFINED
 #else
-#define yyget_column SMTP_Scanner_get_column
+#define yyget_column FTP_Scanner_get_column
 #endif
 
         
 #ifdef yyset_column
-#define SMTP_Scanner_set_column_ALREADY_DEFINED
+#define FTP_Scanner_set_column_ALREADY_DEFINED
 #else
-#define yyset_column SMTP_Scanner_set_column
+#define yyset_column FTP_Scanner_set_column
 #endif
 
     
     
 #ifdef yywrap
-#define SMTP_Scanner_wrap_ALREADY_DEFINED
+#define FTP_Scanner_wrap_ALREADY_DEFINED
 #else
-#define yywrap SMTP_Scanner_wrap
+#define yywrap FTP_Scanner_wrap
 #endif
 
 
@@ -306,16 +307,16 @@ int SMTP_Scanner_reset (yyscan_t);
 
     
 #ifdef yyget_lval
-#define SMTP_Scanner_get_lval_ALREADY_DEFINED
+#define FTP_Scanner_get_lval_ALREADY_DEFINED
 #else
-#define yyget_lval SMTP_Scanner_get_lval
+#define yyget_lval FTP_Scanner_get_lval
 #endif
 
     
 #ifdef yyset_lval
-#define SMTP_Scanner_set_lval_ALREADY_DEFINED
+#define FTP_Scanner_set_lval_ALREADY_DEFINED
 #else
-#define yyset_lval SMTP_Scanner_set_lval
+#define yyset_lval FTP_Scanner_set_lval
 #endif
 
 
@@ -323,39 +324,39 @@ int SMTP_Scanner_reset (yyscan_t);
 
     
 #ifdef yyget_lloc
-#define SMTP_Scanner_get_lloc_ALREADY_DEFINED
+#define FTP_Scanner_get_lloc_ALREADY_DEFINED
 #else
-#define yyget_lloc SMTP_Scanner_get_lloc
+#define yyget_lloc FTP_Scanner_get_lloc
 #endif
 
     
 #ifdef yyset_lloc
-#define SMTP_Scanner_set_lloc_ALREADY_DEFINED
+#define FTP_Scanner_set_lloc_ALREADY_DEFINED
 #else
-#define yyset_lloc SMTP_Scanner_set_lloc
+#define yyset_lloc FTP_Scanner_set_lloc
 #endif
 
 
 
 
 #ifdef yyalloc
-#define SMTP_Scanner_alloc_ALREADY_DEFINED
+#define FTP_Scanner_alloc_ALREADY_DEFINED
 #else
-#define yyalloc SMTP_Scanner_alloc
+#define yyalloc FTP_Scanner_alloc
 #endif
 
     
 #ifdef yyrealloc
-#define SMTP_Scanner_realloc_ALREADY_DEFINED
+#define FTP_Scanner_realloc_ALREADY_DEFINED
 #else
-#define yyrealloc SMTP_Scanner_realloc
+#define yyrealloc FTP_Scanner_realloc
 #endif
 
     
 #ifdef yyfree
-#define SMTP_Scanner_free_ALREADY_DEFINED
+#define FTP_Scanner_free_ALREADY_DEFINED
 #else
-#define yyfree SMTP_Scanner_free
+#define yyfree FTP_Scanner_free
 #endif
 
 
@@ -678,14 +679,14 @@ void yyfree ( void * , yyscan_t yyscanner );
 #define INITIAL 0
 #define reply_code 1
 #define text_begin 2
-#define text 3
+#define multiline_text_begin 3
 #define multiline_text 4
-#define multiline_text_cr 5
+#define last_line_text 5
+#define text 6
 
 #endif
 
 
-    
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
  * down here because we want the user's section 1 to have been scanned first.
@@ -697,11 +698,10 @@ void yyfree ( void * , yyscan_t yyscanner );
 /* %if-c++-only */
 /* %endif */
 #endif
-    
 
 
 
-#define YY_EXTRA_TYPE SMTP_IParser*
+#define YY_EXTRA_TYPE FTP_IParser*
 
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
@@ -947,152 +947,152 @@ extern int yylex \
 #undef YY_DECL
 #endif
 
-#ifndef SMTP_Scanner__create_buffer_ALREADY_DEFINED
+#ifndef FTP_Scanner__create_buffer_ALREADY_DEFINED
 #undef yy_create_buffer
 #endif
-#ifndef SMTP_Scanner__delete_buffer_ALREADY_DEFINED
+#ifndef FTP_Scanner__delete_buffer_ALREADY_DEFINED
 #undef yy_delete_buffer
 #endif
-#ifndef SMTP_Scanner__scan_buffer_ALREADY_DEFINED
+#ifndef FTP_Scanner__scan_buffer_ALREADY_DEFINED
 #undef yy_scan_buffer
 #endif
-#ifndef SMTP_Scanner__scan_string_ALREADY_DEFINED
+#ifndef FTP_Scanner__scan_string_ALREADY_DEFINED
 #undef yy_scan_string
 #endif
-#ifndef SMTP_Scanner__scan_bytes_ALREADY_DEFINED
+#ifndef FTP_Scanner__scan_bytes_ALREADY_DEFINED
 #undef yy_scan_bytes
 #endif
-#ifndef SMTP_Scanner__init_buffer_ALREADY_DEFINED
+#ifndef FTP_Scanner__init_buffer_ALREADY_DEFINED
 #undef yy_init_buffer
 #endif
-#ifndef SMTP_Scanner__flush_buffer_ALREADY_DEFINED
+#ifndef FTP_Scanner__flush_buffer_ALREADY_DEFINED
 #undef yy_flush_buffer
 #endif
-#ifndef SMTP_Scanner__load_buffer_state_ALREADY_DEFINED
+#ifndef FTP_Scanner__load_buffer_state_ALREADY_DEFINED
 #undef yy_load_buffer_state
 #endif
-#ifndef SMTP_Scanner__switch_to_buffer_ALREADY_DEFINED
+#ifndef FTP_Scanner__switch_to_buffer_ALREADY_DEFINED
 #undef yy_switch_to_buffer
 #endif
-#ifndef SMTP_Scanner_push_buffer_state_ALREADY_DEFINED
+#ifndef FTP_Scanner_push_buffer_state_ALREADY_DEFINED
 #undef yypush_buffer_state
 #endif
-#ifndef SMTP_Scanner_pop_buffer_state_ALREADY_DEFINED
+#ifndef FTP_Scanner_pop_buffer_state_ALREADY_DEFINED
 #undef yypop_buffer_state
 #endif
-#ifndef SMTP_Scanner_ensure_buffer_stack_ALREADY_DEFINED
+#ifndef FTP_Scanner_ensure_buffer_stack_ALREADY_DEFINED
 #undef yyensure_buffer_stack
 #endif
-#ifndef SMTP_Scanner_lex_ALREADY_DEFINED
+#ifndef FTP_Scanner_lex_ALREADY_DEFINED
 #undef yylex
 #endif
-#ifndef SMTP_Scanner_restart_ALREADY_DEFINED
+#ifndef FTP_Scanner_restart_ALREADY_DEFINED
 #undef yyrestart
 #endif
-#ifndef SMTP_Scanner_lex_init_ALREADY_DEFINED
+#ifndef FTP_Scanner_lex_init_ALREADY_DEFINED
 #undef yylex_init
 #endif
-#ifndef SMTP_Scanner_lex_init_extra_ALREADY_DEFINED
+#ifndef FTP_Scanner_lex_init_extra_ALREADY_DEFINED
 #undef yylex_init_extra
 #endif
-#ifndef SMTP_Scanner_lex_destroy_ALREADY_DEFINED
+#ifndef FTP_Scanner_lex_destroy_ALREADY_DEFINED
 #undef yylex_destroy
 #endif
-#ifndef SMTP_Scanner_get_debug_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_debug_ALREADY_DEFINED
 #undef yyget_debug
 #endif
-#ifndef SMTP_Scanner_set_debug_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_debug_ALREADY_DEFINED
 #undef yyset_debug
 #endif
-#ifndef SMTP_Scanner_get_extra_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_extra_ALREADY_DEFINED
 #undef yyget_extra
 #endif
-#ifndef SMTP_Scanner_set_extra_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_extra_ALREADY_DEFINED
 #undef yyset_extra
 #endif
-#ifndef SMTP_Scanner_get_in_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_in_ALREADY_DEFINED
 #undef yyget_in
 #endif
-#ifndef SMTP_Scanner_set_in_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_in_ALREADY_DEFINED
 #undef yyset_in
 #endif
-#ifndef SMTP_Scanner_get_out_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_out_ALREADY_DEFINED
 #undef yyget_out
 #endif
-#ifndef SMTP_Scanner_set_out_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_out_ALREADY_DEFINED
 #undef yyset_out
 #endif
-#ifndef SMTP_Scanner_get_leng_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_leng_ALREADY_DEFINED
 #undef yyget_leng
 #endif
-#ifndef SMTP_Scanner_get_text_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_text_ALREADY_DEFINED
 #undef yyget_text
 #endif
-#ifndef SMTP_Scanner_get_lineno_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_lineno_ALREADY_DEFINED
 #undef yyget_lineno
 #endif
-#ifndef SMTP_Scanner_set_lineno_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_lineno_ALREADY_DEFINED
 #undef yyset_lineno
 #endif
-#ifndef SMTP_Scanner_get_column_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_column_ALREADY_DEFINED
 #undef yyget_column
 #endif
-#ifndef SMTP_Scanner_set_column_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_column_ALREADY_DEFINED
 #undef yyset_column
 #endif
-#ifndef SMTP_Scanner_wrap_ALREADY_DEFINED
+#ifndef FTP_Scanner_wrap_ALREADY_DEFINED
 #undef yywrap
 #endif
-#ifndef SMTP_Scanner_get_lval_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_lval_ALREADY_DEFINED
 #undef yyget_lval
 #endif
-#ifndef SMTP_Scanner_set_lval_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_lval_ALREADY_DEFINED
 #undef yyset_lval
 #endif
-#ifndef SMTP_Scanner_get_lloc_ALREADY_DEFINED
+#ifndef FTP_Scanner_get_lloc_ALREADY_DEFINED
 #undef yyget_lloc
 #endif
-#ifndef SMTP_Scanner_set_lloc_ALREADY_DEFINED
+#ifndef FTP_Scanner_set_lloc_ALREADY_DEFINED
 #undef yyset_lloc
 #endif
-#ifndef SMTP_Scanner_alloc_ALREADY_DEFINED
+#ifndef FTP_Scanner_alloc_ALREADY_DEFINED
 #undef yyalloc
 #endif
-#ifndef SMTP_Scanner_realloc_ALREADY_DEFINED
+#ifndef FTP_Scanner_realloc_ALREADY_DEFINED
 #undef yyrealloc
 #endif
-#ifndef SMTP_Scanner_free_ALREADY_DEFINED
+#ifndef FTP_Scanner_free_ALREADY_DEFINED
 #undef yyfree
 #endif
-#ifndef SMTP_Scanner_text_ALREADY_DEFINED
+#ifndef FTP_Scanner_text_ALREADY_DEFINED
 #undef yytext
 #endif
-#ifndef SMTP_Scanner_leng_ALREADY_DEFINED
+#ifndef FTP_Scanner_leng_ALREADY_DEFINED
 #undef yyleng
 #endif
-#ifndef SMTP_Scanner_in_ALREADY_DEFINED
+#ifndef FTP_Scanner_in_ALREADY_DEFINED
 #undef yyin
 #endif
-#ifndef SMTP_Scanner_out_ALREADY_DEFINED
+#ifndef FTP_Scanner_out_ALREADY_DEFINED
 #undef yyout
 #endif
-#ifndef SMTP_Scanner__flex_debug_ALREADY_DEFINED
+#ifndef FTP_Scanner__flex_debug_ALREADY_DEFINED
 #undef yy_flex_debug
 #endif
-#ifndef SMTP_Scanner_lineno_ALREADY_DEFINED
+#ifndef FTP_Scanner_lineno_ALREADY_DEFINED
 #undef yylineno
 #endif
-#ifndef SMTP_Scanner_tables_fload_ALREADY_DEFINED
+#ifndef FTP_Scanner_tables_fload_ALREADY_DEFINED
 #undef yytables_fload
 #endif
-#ifndef SMTP_Scanner_tables_destroy_ALREADY_DEFINED
+#ifndef FTP_Scanner_tables_destroy_ALREADY_DEFINED
 #undef yytables_destroy
 #endif
-#ifndef SMTP_Scanner_TABLES_NAME_ALREADY_DEFINED
+#ifndef FTP_Scanner_TABLES_NAME_ALREADY_DEFINED
 #undef yyTABLES_NAME
 #endif
 
 
 
-#undef SMTP_Scanner_IN_HEADER
-#endif /* SMTP_Scanner_HEADER_H */
+#undef FTP_Scanner_IN_HEADER
+#endif /* FTP_Scanner_HEADER_H */

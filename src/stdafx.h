@@ -18,7 +18,7 @@
 #include <string>
 
 // System Library Header Files
-#include "ace/config-lite.h"
+#include "ace/config.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
 

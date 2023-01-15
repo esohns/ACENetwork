@@ -21,6 +21,8 @@ SCRIPTS_DIRECTORY=${PROJECT_ROOT}/scripts
 #[ ! -f ${SCRIPTS_DIRECTORY}/${BISECT_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${BISECT_L}), aborting" && exit 1
 SCANNER_L=scanner.l
 [ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_L}), aborting" && exit 1
+SCANNER_DATA_L=scanner_data.l
+[ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_DATA_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_DATA_L}), aborting" && exit 1
 
 # generate a scanner for bisecting HTTP messages from the input stream
 #flex ${SCRIPTS_DIRECTORY}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bisector_report.txt
@@ -34,9 +36,11 @@ SCANNER_L=scanner.l
 # generate a scanner for use by the HTTP message parser
 flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/scanner_report.txt
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_L}\", aborting" && exit 1
+flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_DATA_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/scanner_data_report.txt
+[ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_DATA_L}\", aborting" && exit 1
 
 # append to list
-FILES="${FILES} ftp_scanner.cpp ftp_scanner.h"
+FILES="${FILES} ftp_scanner.cpp ftp_scanner.h ftp_scanner_data.h ftp_scanner_data.cpp"
 
 # move the files into the project directory
 for FILE in $FILES

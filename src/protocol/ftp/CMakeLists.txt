@@ -80,20 +80,27 @@ set (source_files
      ftp_module_parser.cpp
      ftp_module_parser.h
      ftp_module_parser.inl
-     ftp_module_send.cpp
-     ftp_module_send.h
-     ftp_module_send.inl
+     ftp_module_parser_data.cpp
+     ftp_module_parser_data.h
+     ftp_module_parser_data.inl
      ftp_module_streamer.cpp
      ftp_module_streamer.h
      ftp_module_streamer.inl
      ftp_network.h
      ftp_parser.cpp
      ftp_parser.h
+     ftp_parser_data.cpp
+     ftp_parser_data.h
+     ftp_parser_data_driver.cpp
+     ftp_parser_data_driver.h
+     ftp_parser_data_driver.inl
      ftp_parser_driver.cpp
      ftp_parser_driver.h
      ftp_parser_driver.inl
      ftp_scanner.cpp
      ftp_scanner.h
+     ftp_scanner_data.cpp
+     ftp_scanner_data.h
      ftp_sessionmessage.cpp
      ftp_sessionmessage.h
      ftp_sessionmessage.inl
@@ -105,7 +112,9 @@ set (source_files
      ftp_tools.h)
 set (script_files
      scripts/scanner.l
-     scripts/parser.y)
+     scripts/parser.y
+     scripts/scanner_data.l
+     scripts/parser_data.y)
 
 #set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -128,7 +137,9 @@ target_sources (${PROJECT_NAME}_Protocol_FTP
                 PRIVATE ${absolute_source_files}
 #                INTERFACE ${absolute_script_files}
                 scripts/scanner.l
-                scripts/parser.y)
+                scripts/parser.y
+                scripts/scanner_data.l
+                scripts/parser_data.y)
 target_precompile_headers (${PROJECT_NAME}_Protocol_FTP
                            PUBLIC stdafx.h)
 
@@ -137,7 +148,7 @@ target_precompile_headers (${PROJECT_NAME}_Protocol_FTP
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
 # set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
- source_group (scripts FILES ${PROJECT_NAME}_Protocol_DCHP_SCRIPTS)
+ source_group (scripts FILES ${PROJECT_NAME}_Protocol_FTP_SCRIPTS)
 endif (WIN32)
 
 set_property (TARGET ${PROJECT_NAME}_Protocol_FTP PROPERTY FOLDER "protocols")
@@ -184,15 +195,19 @@ install (FILES
          ftp_message.inl
          ftp_module_parser.h
          ftp_module_parser.inl
-         ftp_module_send.h
-         ftp_module_send.inl
+         ftp_module_parser_data.h
+         ftp_module_parser_data.inl
          ftp_module_streamer.h
          ftp_module_streamer.inl
          ftp_network.h
          ftp_parser.h
+         ftp_parser_data.h
+         ftp_parser_data_driver.h
+         ftp_parser_data_driver.inl
          ftp_parser_driver.h
          ftp_parser_driver.inl
          ftp_scanner.h
+         ftp_scanner_data.h
          ftp_sessionmessage.h
          ftp_sessionmessage.inl
          ftp_stream.h

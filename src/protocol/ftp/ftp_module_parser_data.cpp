@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ftp_module_send.h"
+#include "ftp_module_parser_data.h"
 
 #include "ftp_defines.h"
 
-//NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_ftp_send_module_name_string[] =
-const char libacenetwork_protocol_default_ftp_send_module_name_string[] =
-  ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_SEND_NAME_STRING);
+//NET_PROTOCOL_PCP_Export const char libacenetwork_protocol_default_ftp_parser_data_module_name_string[] =
+const char libacenetwork_protocol_default_ftp_parser_data_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING);

@@ -28,8 +28,10 @@
 
 #include "ftp_defines.h"
 
-template <typename MessageType>
-FTP_Message_T<MessageType>::FTP_Message_T (Stream_SessionId_t sessionId_in,
+template <typename MessageData,
+          typename MessageType>
+FTP_Message_T<MessageData,
+              MessageType>::FTP_Message_T (Stream_SessionId_t sessionId_in,
                                            unsigned int requestedSize_in)
  : inherited (sessionId_in,
               requestedSize_in)
@@ -38,16 +40,21 @@ FTP_Message_T<MessageType>::FTP_Message_T (Stream_SessionId_t sessionId_in,
 
 }
 
-template <typename MessageType>
-FTP_Message_T<MessageType>::FTP_Message_T (const FTP_Message_T<MessageType>& message_in)
+template <typename MessageData,
+          typename MessageType>
+FTP_Message_T<MessageData,
+              MessageType>::FTP_Message_T (const FTP_Message_T<MessageData,
+                                                               MessageType>& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Message_T::FTP_Message_T"));
 
 }
 
-template <typename MessageType>
-FTP_Message_T<MessageType>::FTP_Message_T (Stream_SessionId_t sessionId_in,
+template <typename MessageData,
+          typename MessageType>
+FTP_Message_T<MessageData,
+              MessageType>::FTP_Message_T (Stream_SessionId_t sessionId_in,
                                            ACE_Data_Block* dataBlock_in,
                                            ACE_Allocator* messageAllocator_in,
                                            bool incrementMessageCounter_in)
@@ -69,9 +76,11 @@ FTP_Message_T<MessageType>::FTP_Message_T (Stream_SessionId_t sessionId_in,
 //
 // }
 
-template <typename MessageType>
+template <typename MessageData,
+          typename MessageType>
 FTP_Code_t
-FTP_Message_T<MessageType>::command () const
+FTP_Message_T<MessageData,
+              MessageType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Message_T::command"));
 
@@ -83,9 +92,11 @@ FTP_Message_T<MessageType>::command () const
   return inherited::data_->getR ().code;
 }
 
-template <typename MessageType>
+template <typename MessageData,
+          typename MessageType>
 void
-FTP_Message_T<MessageType>::dump_state () const
+FTP_Message_T<MessageData,
+              MessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Message_T::dump_state"));
 
@@ -118,9 +129,11 @@ FTP_Message_T<MessageType>::dump_state () const
                 ACE_TEXT (FTP_Tools::dump (inherited::data_->getR ()).c_str ())));
 }
 
-template <typename MessageType>
+template <typename MessageData,
+          typename MessageType>
 ACE_Message_Block*
-FTP_Message_T<MessageType>::duplicate (void) const
+FTP_Message_T<MessageData,
+              MessageType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Message_T::duplicate"));
 

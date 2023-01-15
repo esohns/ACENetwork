@@ -25,6 +25,7 @@
 
 #include "ace/Global_Macros.h"
 
+#include "stream_common.h"
 #include "stream_control_message.h"
 #include "stream_data_message_base.h"
 #include "stream_session_data.h"
@@ -56,23 +57,23 @@ class Stream_CachedMessageAllocator_T;
 //  //{}
 //  //~FTP_MessageData () {}
 //};
-typedef Stream_DataBase_T<struct FTP_Record> FTP_MessageData_t;
 struct FTP_Stream_SessionData;
 typedef Stream_SessionData_T<struct FTP_Stream_SessionData> FTP_Stream_SessionData_t;
-template <//typename AllocatorType,
+template <typename MessageData,
           ////////////////////////////////
           typename SessionDataType, // reference-counted
           ////////////////////////////////
           typename UserDataType>
 class FTP_SessionMessage_T;
 
-template <typename MessageType = enum Stream_MessageType>
+template <typename MessageData = FTP_MessageData_t,
+          typename MessageType = enum Stream_MessageType>
 class FTP_Message_T
- : public Stream_DataMessageBase_2<FTP_MessageData_t,
+ : public Stream_DataMessageBase_2<MessageData,
                                    MessageType,
                                    FTP_Code_t>
 {
-  typedef Stream_DataMessageBase_2<FTP_MessageData_t,
+  typedef Stream_DataMessageBase_2<MessageData,
                                    MessageType,
                                    FTP_Code_t> inherited;
 
@@ -80,22 +81,27 @@ class FTP_Message_T
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                                  struct FTP_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
-                                                 FTP_Message_T<MessageType>,
-                                                 FTP_SessionMessage_T<FTP_Stream_SessionData_t,
-                                                                       struct Stream_UserData> >;
+                                                 FTP_Message_T<MessageData,
+                                                               MessageType>,
+                                                 FTP_SessionMessage_T<MessageData,
+                                                                      FTP_Stream_SessionData_t,
+                                                                      struct Stream_UserData> >;
   friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
                                                struct FTP_AllocatorConfiguration,
                                                Stream_ControlMessage_t,
-                                               FTP_Message_T<MessageType>,
-                                               FTP_SessionMessage_T<FTP_Stream_SessionData_t,
-                                                                     struct Stream_UserData> >;
+                                               FTP_Message_T<MessageData,
+                                                             MessageType>,
+                                               FTP_SessionMessage_T<MessageData,
+                                                                    FTP_Stream_SessionData_t,
+                                                                    struct Stream_UserData> >;
 
  public:
   // convenient types
-  typedef FTP_Message_T<MessageType> OWN_TYPE_T;
+  typedef FTP_Message_T<MessageData,
+                        MessageType> OWN_TYPE_T;
 
   FTP_Message_T (Stream_SessionId_t, // session id
-                  unsigned int);      // size
+                 unsigned int);      // size
   inline virtual ~FTP_Message_T () {}
 
   virtual FTP_Code_t command () const; // return value: message type
@@ -112,9 +118,9 @@ class FTP_Message_T
  protected:
   // *NOTE*: to be used by allocators
   FTP_Message_T (Stream_SessionId_t, // session id
-                  ACE_Data_Block*,    // data block to use
-                  ACE_Allocator*,     // message allocator
-                  bool = true);       // increment running message counter ?
+                 ACE_Data_Block*,    // data block to use
+                 ACE_Allocator*,     // message allocator
+                 bool = true);       // increment running message counter ?
 //   FTP_Message_T (ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and derived classes
@@ -127,6 +133,6 @@ class FTP_Message_T
 };
 
 // include template definition
-#include "FTP_message.inl"
+#include "ftp_message.inl"
 
 #endif

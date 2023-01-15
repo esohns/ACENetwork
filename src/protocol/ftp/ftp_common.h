@@ -21,6 +21,7 @@
 #ifndef FTP_COMMON_H
 #define FTP_COMMON_H
 
+#include <list>
 #include <string>
 #include <vector>
 
@@ -37,11 +38,22 @@
 #include "ftp_codes.h"
 #include "ftp_defines.h"
 
-// forward declarations
-struct FTP_Configuration;
-struct FTP_Record;
-
 /////////////////////////////////////////
+
+struct FTP_LoginOptions
+{
+  FTP_LoginOptions ()
+   : cwd ()
+   , password (ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_ANONYMOUS_PASS))
+   , server ((u_short)0, (ACE_UINT32)0)
+   , user (ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_ANONYMOUS_USER))
+  {};
+
+  std::string   cwd; // initial-
+  std::string   password;
+  ACE_INET_Addr server;
+  std::string   user;
+};
 
 // convenient type definitions
 typedef FTP_Codes::CommandType FTP_Command_t;
@@ -50,28 +62,17 @@ typedef FTP_Codes::CodeType FTP_Code_t;
 typedef std::vector<std::string> FTP_Parameters_t;
 typedef FTP_Parameters_t::const_iterator FTP_ParametersConstIterator_t;
 
-typedef std::vector<std::string> FTP_To_t;
-typedef FTP_To_t::const_iterator FTP_ToConstIterator_t;
-
 struct FTP_Request
 {
   FTP_Request ()
-   : command (FTP_Codes::FTP_COMMAND_INVALID)
-   , domain (static_cast<u_short> (0),
-             ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST),
-             AF_INET)
-   , from ()
+   : address ((u_short)0, (ACE_UINT32)0)
+   , command (FTP_Codes::FTP_COMMAND_INVALID)
    , parameters ()
-   , to ()
-   , data ()
   {}
 
+  ACE_INET_Addr    address;
   FTP_Command_t    command;
-  ACE_INET_Addr     domain;
-  std::string       from;
   FTP_Parameters_t parameters;
-  FTP_To_t         to;
-  std::string       data;
 };
 
 typedef std::vector<std::string> FTP_Text_t;
@@ -83,37 +84,49 @@ struct FTP_Record
    : request ()
    , code (FTP_Codes::FTP_CODE_INVALID)
    , text ()
+   , type (FTP_Codes::FTP_RECORD_INVALID)
   {}
   void operator+= (struct FTP_Record rhs_in)
   { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   // request
-  struct FTP_Request       request;
+  struct FTP_Request         request;
 
   // response
-  enum FTP_Codes::CodeType code;
-  FTP_Text_t               text;
+  enum FTP_Codes::CodeType   code;
+  FTP_Text_t                 text;
+
+  // data
+  enum FTP_Codes::RecordType type;
 };
+
+typedef std::list<struct FTP_Record> FTP_Records_t;
+typedef FTP_Records_t::const_iterator FTP_RecordsConstIterator_t;
 
 //////////////////////////////////////////
 
 enum FTP_ProtocolState
 {
-  FTP_STATE_GREETING_RECEIVED = 0,
-  FTP_STATE_EHLO_SENT,
-  FTP_STATE_AUTH_SENT, // rfc4954
-  FTP_STATE_AUTH_LOGIN_USER_SENT, // rfc4954
-  FTP_STATE_AUTH_LOGIN_PASSWORD_SENT, // rfc4954
-  FTP_STATE_AUTH_COMPLETE, // i.e. AUTH mechanism completed
-  FTP_STATE_MAIL_SENT,
-  FTP_STATE_RCPT_SENT,
-  FTP_STATE_RCPTS_SENT,
-  FTP_STATE_DATA_SENT,
-  FTP_STATE_DATA_2_SENT, // i.e. message sent
+  FTP_STATE_INITIAL = 0,
+  FTP_STATE_USER_SENT,
+  FTP_STATE_PASS_SENT,
+  FTP_STATE_READY,
+  FTP_STATE_REQUEST_SENT,
   FTP_STATE_QUIT_SENT,
   /////////////////////////////////////
   FTP_STATE_MAX,
   FTP_STATE_INVALID
+};
+
+enum FTP_ProtocolDataState
+{
+  FTP_STATE_DATA_INITIAL = 0,
+  FTP_STATE_DATA_LIST_DIRECTORY,
+  FTP_STATE_DATA_LIST_FILE,
+  FTP_STATE_DATA_DATA,
+  /////////////////////////////////////
+  FTP_STATE_DATA_MAX,
+  FTP_STATE_DATA_INVALID
 };
 
 inline enum FTP_ProtocolState&
@@ -121,7 +134,7 @@ operator++ (enum FTP_ProtocolState& state_inout)
 { ACE_ASSERT (state_inout != FTP_STATE_MAX);
   if (state_inout == FTP_STATE_INVALID)
   {
-    state_inout = FTP_STATE_GREETING_RECEIVED;
+    state_inout = FTP_STATE_INITIAL;
     return state_inout;
   } // end IF
 
@@ -131,8 +144,8 @@ operator++ (enum FTP_ProtocolState& state_inout)
 }
 inline enum FTP_ProtocolState&
 operator-- (enum FTP_ProtocolState& state_inout)
-{ ACE_ASSERT (!((state_inout == FTP_STATE_GREETING_RECEIVED) ||
-                (state_inout == FTP_STATE_MAX)               ||
+{ ACE_ASSERT (!((state_inout == FTP_STATE_INITIAL)   ||
+                (state_inout == FTP_STATE_MAX)       ||
                 (state_inout == FTP_STATE_INVALID)));
   state_inout =
     static_cast<enum FTP_ProtocolState> ((static_cast<int> (state_inout) - 1));
@@ -141,7 +154,7 @@ operator-- (enum FTP_ProtocolState& state_inout)
 
 //////////////////////////////////////////
 
-typedef struct Stream_Statistic FTP_Statistic_t;
+typedef struct Net_StreamStatistic FTP_Statistic_t;
 typedef Common_IStatistic_T<FTP_Statistic_t> FTP_IStatistic_t;
 typedef Common_StatisticHandler_T<FTP_Statistic_t> FTP_StatisticHandler_t;
 

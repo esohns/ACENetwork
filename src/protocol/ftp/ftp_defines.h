@@ -24,7 +24,7 @@
 // stream
 #define FTP_DEFAULT_MODULE_MARSHAL_NAME_STRING           "FTPMarshal"
 #define FTP_DEFAULT_MODULE_PARSER_NAME_STRING            "FTPParser"
-#define FTP_DEFAULT_MODULE_SEND_NAME_STRING              "FTPSend"
+#define FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING       "FTPParserData"
 #define FTP_DEFAULT_MODULE_STREAMER_NAME_STRING          "FTPStreamer"
 
 #define FTP_DEFAULT_STREAM_NAME_STRING                   "FTPStream"
@@ -48,8 +48,19 @@
 #define FTP_DEFAULT_PRINT_PROGRESSDOT                    false
 
 // protocol
-#define FTP_DEFAULT_SERVER_PORT                          25  // TCP
-#define FTP_DEFAULT_SERVER_PORT_2                        587 // TCP / STARTTLS
-#define FTP_DEFAULT_TLS_SERVER_PORT                      465 // SMTPS
+#define FTP_DEFAULT_CLIENT_DATA_PORT                     10101 // TCP
+#define FTP_DEFAULT_SERVER_CONTROL_PORT                  21 // TCP
+#define FTP_DEFAULT_SERVER_DATA_PORT                     20 // TCP
+
+#define FTP_DEFAULT_ANONYMOUS_USER                       "anonymous"
+#define FTP_DEFAULT_ANONYMOUS_PASS                       "test@test.com"
+
+#define FTP_TYPE_ASCII                                   "A"
+#define FTP_TYPE_EBCDIC                                  "E"
+#define FTP_TYPE_IMAGE                                   "I"
+#define FTP_TYPE_LOCAL                                   "L"
+#define FTP_TYPE_2_NON_PRINT                             "N"
+#define FTP_TYPE_2_TELNET                                "T"
+#define FTP_TYPE_2_CARRIAGE_CONTROL                      "C"
 
 #endif

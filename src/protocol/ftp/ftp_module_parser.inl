@@ -72,9 +72,22 @@ FTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::headFragment_);
   ACE_ASSERT (!inherited::headFragment_->isInitialized ());
 
+  typename DataMessageType::DATA_T::DATA_T* data_p = NULL;
   typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
   int result = -1;
+
+  ACE_NEW_NORETURN (data_p,
+                    typename DataMessageType::DATA_T::DATA_T ());
+  if (!data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    delete record_inout; record_inout = NULL;
+    return;
+  } // end IF
+  *data_p = *record_inout;
+  delete record_inout; record_inout = NULL;
 
   ACE_NEW_NORETURN (data_container_p,
                     typename DataMessageType::DATA_T ());
@@ -85,8 +98,8 @@ FTP_Module_Parser_T<ACE_SYNCH_USE,
     delete record_inout; record_inout = NULL;
     return;
   } // end IF
-  data_container_p->setPR (record_inout);
-  ACE_ASSERT (!record_inout);
+  data_container_p->setPR (data_p);
+  ACE_ASSERT (!data_p);
   data_container_2 = data_container_p;
   inherited::headFragment_->initialize (data_container_2,
                                         inherited::headFragment_->sessionId (),

@@ -77,6 +77,9 @@ class FTP_Module_Parser_T
 #endif // ACE_WIN32 || ACE_WIN64
   inline virtual ~FTP_Module_Parser_T () {}
 
+  // implement (part of) FTP_IParser
+  inline virtual ACE_UINT64 availableBytes () { ACE_ASSERT (inherited::headFragment_); return inherited::headFragment_->total_length (); }
+
  private:
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_T (const FTP_Module_Parser_T&))

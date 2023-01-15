@@ -64,6 +64,7 @@ class FTP_ParserDriver_T
 
   // implement Common_IYaccStreamParser_T
   inline virtual struct FTP_Record& current () { ACE_ASSERT (record_); return *record_; }
+
   ////////////////////////////////////////
   //virtual void record (struct FTP_Record*&); // data record
 
@@ -125,9 +126,6 @@ class FTP_ParserDriver_T
 
   struct Common_FlexBisonParserConfiguration* configuration_;
   bool                                        finished_;
-
-  //// parser
-  //yy::FTP_Parser    parser_;
 
   // scanner
   yyscan_t                                    scannerState_;

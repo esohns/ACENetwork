@@ -24,6 +24,7 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
 #include "ftp_common.h"
 
@@ -34,12 +35,13 @@ class FTP_Tools
   static std::string dump (const struct FTP_Record&);
 
   static std::string CodeToString (FTP_Code_t);
-
   static std::string CommandToString (FTP_Command_t);
-
   static std::string StateToString (enum FTP_ProtocolState);
+  static std::string DataStateToString (enum FTP_ProtocolDataState);
 
   inline static bool isSuccess (FTP_Code_t code_in) { return ((code_in >= 200) && (code_in < 300)); }
+
+  static ACE_INET_Addr parsePASVResponse (const std::string&); // PASV response line #1
 
  private:
   ACE_UNIMPLEMENTED_FUNC (FTP_Tools ())

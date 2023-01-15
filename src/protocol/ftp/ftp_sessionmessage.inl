@@ -23,10 +23,10 @@
 
 #include "net_macros.h"
 
-template <//typename AllocatorType,
+template <typename MessageData,
           typename SessionDataType,
           typename UserDataType>
-FTP_SessionMessage_T<//AllocatorType,
+FTP_SessionMessage_T<MessageData,
                      SessionDataType,
                      UserDataType>::FTP_SessionMessage_T (Stream_SessionId_t sessionId_in,
                                                           enum Stream_SessionMessageType messageType_in,
@@ -43,25 +43,25 @@ FTP_SessionMessage_T<//AllocatorType,
 
 }
 
-template <//typename AllocatorType,
+template <typename MessageData,
           typename SessionDataType,
           typename UserDataType>
-FTP_SessionMessage_T<//AllocatorType,
-                      SessionDataType,
-                      UserDataType>::FTP_SessionMessage_T (const FTP_SessionMessage_T& message_in)
+FTP_SessionMessage_T<MessageData,
+                     SessionDataType,
+                     UserDataType>::FTP_SessionMessage_T (const FTP_SessionMessage_T& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_SessionMessage_T::FTP_SessionMessage_T"));
 
 }
 
-template <//typename AllocatorType,
+template <typename MessageData,
           typename SessionDataType,
           typename UserDataType>
-FTP_SessionMessage_T<//AllocatorType,
-                      SessionDataType,
-                      UserDataType>::FTP_SessionMessage_T (Stream_SessionId_t sessionId_in,
-                                                           ACE_Allocator* messageAllocator_in)
+FTP_SessionMessage_T<MessageData,
+                     SessionDataType,
+                     UserDataType>::FTP_SessionMessage_T (Stream_SessionId_t sessionId_in,
+                                                          ACE_Allocator* messageAllocator_in)
  : inherited (sessionId_in,
               messageAllocator_in)
 {
@@ -69,14 +69,14 @@ FTP_SessionMessage_T<//AllocatorType,
 
 }
 
-template <//typename AllocatorType,
+template <typename MessageData,
           typename SessionDataType,
           typename UserDataType>
-FTP_SessionMessage_T<//AllocatorType,
-                      SessionDataType,
-                      UserDataType>::FTP_SessionMessage_T (Stream_SessionId_t sessionId_in,
-                                                           ACE_Data_Block* dataBlock_in,
-                                                           ACE_Allocator* messageAllocator_in)
+FTP_SessionMessage_T<MessageData,
+                     SessionDataType,
+                     UserDataType>::FTP_SessionMessage_T (Stream_SessionId_t sessionId_in,
+                                                          ACE_Data_Block* dataBlock_in,
+                                                          ACE_Allocator* messageAllocator_in)
  : inherited (sessionId_in,
               dataBlock_in,
               messageAllocator_in)
@@ -85,13 +85,13 @@ FTP_SessionMessage_T<//AllocatorType,
 
 }
 
-template <//typename AllocatorType,
+template <typename MessageData,
           typename SessionDataType,
           typename UserDataType>
 ACE_Message_Block*
-FTP_SessionMessage_T<//AllocatorType,
-                      SessionDataType,
-                      UserDataType>::duplicate (void) const
+FTP_SessionMessage_T<MessageData,
+                     SessionDataType,
+                     UserDataType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_SessionMessage_T::duplicate"));
 

@@ -341,7 +341,7 @@ Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& address_in)
 #endif // NETLINK_SUPPORT
 
 std::string
-Net_Common_Tools::IPAddressToString (unsigned short port_in,
+Net_Common_Tools::IPAddressToString (ACE_UINT16 port_in,
                                      ACE_UINT32 IPAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddressToString"));
@@ -350,8 +350,9 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
   std::string return_value;
 
   int result = -1;
-  ACE_INET_Addr inet_addr;
-  char buffer_a[BUFSIZ]; // "xxx.xxx.xxx.xxx:yyyyy\0"
+  ACE_INET_Addr inet_addr ((u_short)0, (ACE_UINT32)0);
+  ACE_TCHAR buffer_a[BUFSIZ]; // "xxx.xxx.xxx.xxx:yyyyy\0"
+  ACE_OS::memset (&buffer_a, 0, sizeof(ACE_TCHAR[BUFSIZ]));
 
   result = inet_addr.set (port_in,
                           IPAddress_in,
@@ -363,7 +364,6 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
     return return_value;
   } // end IF
-  ACE_OS::memset (&buffer_a, 0, sizeof(char[BUFSIZ]));
   result = inet_addr.addr_to_string (buffer_a,
                                      sizeof (char[BUFSIZ]),
                                      1); // want IP address, not hostname !
@@ -373,14 +373,13 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
                 ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string(): \"%m\", aborting\n")));
     return return_value;
   } // end IF
-  return_value = buffer_a;
+  return_value = ACE_TEXT_ALWAYS_CHAR (buffer_a);
 
   // clean up: if port number was 0, cut off the trailing ":0" !
   if (!port_in)
   {
     std::string::size_type last_colon_pos =
-      return_value.find_last_of (':',
-                                 std::string::npos); // begin searching at the end !
+      return_value.rfind (':', std::string::npos); // begin searching at the end !
     ACE_ASSERT (last_colon_pos != std::string::npos);
     return_value = return_value.substr (0, last_colon_pos);
   } // end IF
@@ -3314,8 +3313,9 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       ULONG buffer_length = 0;
       ULONG result_2 = 0;
       std::map<ULONG, std::string> connected_interfaces;
-      ACE_INET_Addr inet_address, gateway_address;
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+      ACE_INET_Addr inet_address ((u_short)0, (ACE_UINT32)0);
+      ACE_INET_Addr gateway_address ((u_short)0, (ACE_UINT32)0);
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
 #else
       ULONG index_i = 0;
 #endif // _WIN32_WINNT_VISTA
@@ -3421,7 +3421,6 @@ error:
       if (likely (!connected_interfaces.empty ()))
       {
         result = connected_interfaces.begin ()->second;
-#if defined (_DEBUG)
         if (unlikely (!Net_Common_Tools::interfaceToIPAddress (result,
                                                                inet_address,
                                                                gateway_address)))
@@ -3435,7 +3434,6 @@ error:
                     ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
                     ACE_TEXT (result.c_str ()),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address).c_str ())));
-#endif // _DEBUG
         return result;
       } // end IF
 #else

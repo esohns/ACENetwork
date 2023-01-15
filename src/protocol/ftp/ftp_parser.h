@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.7.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Skeleton interface for Bison GLR parsers in C
 
-   Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2015, 2018-2021 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_SMTP_PARSER_H_INCLUDED
-# define YY_YY_SMTP_PARSER_H_INCLUDED
+#ifndef YY_YY_FTP_PARSER_H_INCLUDED
+# define YY_YY_FTP_PARSER_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 1
@@ -44,8 +44,8 @@ extern int yydebug;
 #include <cstdio>
 #include <string>
 
-class SMTP_IParser;
-//class SMTP_Scanner;
+class FTP_IParser;
+//class FTP_Scanner;
 struct YYLTYPE;
 //union YYSTYPE;
 
@@ -60,8 +60,8 @@ typedef yytoken yytoken_t;
 typedef void* yyscan_t;
 
 //#define YYERROR_VERBOSE
-extern void yyerror (YYLTYPE*, SMTP_IParser*, yyscan_t, const char*);
-extern int yyparse (SMTP_IParser*, yyscan_t);
+extern void yyerror (YYLTYPE*, FTP_IParser*, yyscan_t, const char*);
+extern int yyparse (FTP_IParser*, yyscan_t);
 
 #undef YYPRINT
 //extern void yyprint (FILE*, yytokentype, YYSTYPE);
@@ -114,6 +114,6 @@ struct YYLTYPE
 
 
 
-int yyparse (SMTP_IParser* driver, yyscan_t yyscanner);
+int yyparse (FTP_IParser* driver, yyscan_t yyscanner);
 
-#endif /* !YY_YY_SMTP_PARSER_H_INCLUDED  */
+#endif /* !YY_YY_FTP_PARSER_H_INCLUDED  */

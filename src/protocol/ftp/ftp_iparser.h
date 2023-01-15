@@ -42,4 +42,32 @@ class FTP_IParser
   using IPARSER_T::error;
 };
 
+//////////////////////////////////////////
+
+struct FTP_IParserDataDummy
+{};
+class FTP_IParserData
+ : public Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct FTP_IParserDataDummy>
+ , public Common_ILexScanner_T<struct Common_FlexScannerState,
+                               FTP_IParserData>
+{
+ public:
+  // convenient types
+  typedef Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct FTP_IParserDataDummy> IPARSER_T;
+
+  using IPARSER_T::error;
+
+  virtual void directory () = 0;
+  virtual void file () = 0;
+  virtual void data () = 0;
+
+  virtual enum FTP_ProtocolDataState state () const = 0;
+  virtual void state (enum FTP_ProtocolDataState) = 0;
+
+  virtual void resetOffset () = 0;
+  virtual ACE_UINT64 availableBytes () = 0;
+};
+
 #endif

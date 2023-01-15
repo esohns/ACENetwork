@@ -84,45 +84,73 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
   std::string text_string;
   switch (data_r.request.command)
   {
-    case FTP_Codes::FTP_COMMAND_EHLO:
-    {
-      text_string = ACE_TEXT_ALWAYS_CHAR ("EHLO [");
-      text_string +=
-        Net_Common_Tools::IPAddressToString (data_r.request.domain, true, false);
-      text_string += ACE_TEXT_ALWAYS_CHAR ("]\r\n");
+    case FTP_Codes::FTP_COMMAND_USER:
+    { ACE_ASSERT (!data_r.request.parameters.empty ());
+      text_string = ACE_TEXT_ALWAYS_CHAR ("USER ");
+      text_string += data_r.request.parameters.front ();
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
       if (result == -1)
         goto error;
       break;
     }
-    case FTP_Codes::FTP_COMMAND_MAIL:
-    {
-      text_string = ACE_TEXT_ALWAYS_CHAR ("MAIL FROM:<");
-      text_string += data_r.request.from;
-      text_string += ACE_TEXT_ALWAYS_CHAR (">\r\n");
-      // *TODO*: support 'Mail-parameters'
+    case FTP_Codes::FTP_COMMAND_PASS:
+    { ACE_ASSERT (!data_r.request.parameters.empty ());
+      text_string = ACE_TEXT_ALWAYS_CHAR ("PASS ");
+      text_string += data_r.request.parameters.front ();
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
       if (result == -1)
         goto error;
       break;
     }
-    case FTP_Codes::FTP_COMMAND_RCPT:
-    { ACE_ASSERT (!data_r.request.to.empty ());
-      text_string = ACE_TEXT_ALWAYS_CHAR ("RCPT TO:<");
-      text_string += data_r.request.to.front ();
-      text_string += ACE_TEXT_ALWAYS_CHAR (">\r\n");
-      // *TODO*: support 'Rcpt-parameters'
+    case FTP_Codes::FTP_COMMAND_PORT:
+    {
+      text_string = ACE_TEXT_ALWAYS_CHAR ("PORT");
+      ACE_ASSERT (false); // *TODO*
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
       if (result == -1)
         goto error;
       break;
     }
-    case FTP_Codes::FTP_COMMAND_DATA:
+    case FTP_Codes::FTP_COMMAND_PASV:
     {
-      text_string = ACE_TEXT_ALWAYS_CHAR ("DATA\r\n");
+      text_string = ACE_TEXT_ALWAYS_CHAR ("PASV");
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
+      result = message_inout->copy (text_string.c_str (),
+                                    text_string.size ());
+      if (result == -1)
+        goto error;
+      break;
+    }
+    case FTP_Codes::FTP_COMMAND_LIST:
+    {
+      text_string = ACE_TEXT_ALWAYS_CHAR ("LIST");
+      if (!data_r.request.parameters.empty ())
+      {
+        text_string = ACE_TEXT_ALWAYS_CHAR (" ");
+        text_string += data_r.request.parameters.front ();
+      } // end IF
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
+      result = message_inout->copy (text_string.c_str (),
+                                    text_string.size ());
+      if (result == -1)
+        goto error;
+      break;
+    }
+    case FTP_Codes::FTP_COMMAND_NLST:
+    {
+      text_string = ACE_TEXT_ALWAYS_CHAR ("NLST");
+      if (!data_r.request.parameters.empty ())
+      {
+        text_string = ACE_TEXT_ALWAYS_CHAR (" ");
+        text_string += data_r.request.parameters.front ();
+      } // end IF
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
       if (result == -1)
@@ -131,55 +159,8 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
     }
     case FTP_Codes::FTP_COMMAND_QUIT:
     {
-      text_string = ACE_TEXT_ALWAYS_CHAR ("QUIT\r\n");
-      result = message_inout->copy (text_string.c_str (),
-                                    text_string.size ());
-      if (result == -1)
-        goto error;
-      break;
-    }
-    case FTP_Codes::FTP_COMMAND_AUTH:
-    {
-      if (data_r.request.parameters.empty ())
-      { // --> send initial AUTH
-        text_string = ACE_TEXT_ALWAYS_CHAR ("AUTH LOGIN\r\n");
-        result = message_inout->copy (text_string.c_str (),
-                                      text_string.size ());
-        if (result == -1)
-          goto error;
-      } // end IF
-      else
-      { // --> send username/password
-        result =
-          message_inout->copy (data_r.request.parameters.front ().c_str (),
-                               data_r.request.parameters.front ().size ());
-        if (result == -1)
-          goto error;
-        result = message_inout->copy (ACE_TEXT_ALWAYS_CHAR ("\r\n"),
-                                      2);
-        if (result == -1)
-          goto error;
-      } // end ELSE
-      break;
-    }
-    case FTP_Codes::FTP_COMMAND_DATA_2:
-    {
-      std::string end_sequence = ACE_TEXT_ALWAYS_CHAR ("\r\n.\r\n");
-      // sanity check(s)
-      std::string::size_type position =
-        data_r.request.data.find (end_sequence, std::string::npos);
-      if (unlikely (position != std::string::npos))
-      {
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("%s: illegal message data (contained end-of-message sequence at: %d), cropping and continuing\n"),
-                    inherited::mod_->name (),
-                    position));
-        text_string = data_r.request.data;
-        text_string.erase (position, std::string::npos);
-      } // end IF
-      else
-        text_string = data_r.request.data;
-      text_string += end_sequence;
+      text_string = ACE_TEXT_ALWAYS_CHAR ("QUIT");
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
       if (result == -1)
@@ -189,7 +170,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: invalid/unknown SMTP command (was: \"%s\"), returning\n"),
+                  ACE_TEXT ("%s: invalid/unknown FTP command (was: \"%s\"), returning\n"),
                   inherited::mod_->name (),
                   ACE_TEXT (FTP_Tools::CommandToString (data_r.request.command).c_str ())));
       return;

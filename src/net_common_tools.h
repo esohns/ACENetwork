@@ -219,8 +219,8 @@ class Net_Common_Tools
   // *NOTE*: if the first argument is '0', the trailing ":0" will be cropped
   //         from the return value
   // *NOTE*: returns dotted decimal
-  static std::string IPAddressToString (unsigned short, // port (network byte order !)
-                                        ACE_UINT32);    // IP address (network byte order !)
+  static std::string IPAddressToString (ACE_UINT16,  // port (network byte order !)
+                                        ACE_UINT32); // IP address (network byte order !)
   static std::string IPProtocolToString (unsigned char); // protocol
 
   static bool matchIPAddress (std::string&); // dotted-decimal

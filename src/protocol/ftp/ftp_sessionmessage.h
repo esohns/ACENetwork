@@ -23,6 +23,7 @@
 
 #include "ace/Global_Macros.h"
 
+#include "stream_common.h"
 #include "stream_control_message.h"
 #include "stream_session_message_base.h"
 
@@ -46,10 +47,11 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
-template <typename MessageType>
+template <typename MessageData,
+          typename MessageType>
 class FTP_Message_T;
 
-template <//typename AllocatorType,
+template <typename MessageData,
           ////////////////////////////////
           typename SessionDataType, // reference-counted
           ////////////////////////////////
@@ -68,32 +70,36 @@ class FTP_SessionMessage_T
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                                  struct FTP_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
-                                                 FTP_Message_T<enum Stream_MessageType>,
-                                                 FTP_SessionMessage_T<SessionDataType,
-                                                                       UserDataType> >;
+                                                 FTP_Message_T<MessageData,
+                                                               enum Stream_MessageType>,
+                                                 FTP_SessionMessage_T<MessageData,
+                                                                      SessionDataType,
+                                                                      UserDataType> >;
   friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
                                                struct FTP_AllocatorConfiguration,
                                                Stream_ControlMessage_t,
-                                               FTP_Message_T<enum Stream_MessageType>,
-                                               FTP_SessionMessage_T<SessionDataType,
-                                                                     UserDataType> >;
+                                               FTP_Message_T<MessageData,
+                                                             enum Stream_MessageType>,
+                                               FTP_SessionMessage_T<MessageData,
+                                                                    SessionDataType,
+                                                                    UserDataType> >;
 
  public:
   // convenient types
-  typedef FTP_SessionMessage_T<//AllocatorType,
-                                SessionDataType,
-                                UserDataType> OWN_TYPE_T;
+  typedef FTP_SessionMessage_T<MessageData,
+                               SessionDataType,
+                               UserDataType> OWN_TYPE_T;
 
   // *NOTE*: assume lifetime responsibility for the second argument !
   // *TODO*: (using gcc) cannot pass reference to pointer for some reason
   FTP_SessionMessage_T (Stream_SessionId_t,
-                         enum Stream_SessionMessageType, // session message type
-                         SessionDataType*&,              // session data container handle
-                         UserDataType*,                  // user data handle
-                         bool);                          // expedited ?
+                        enum Stream_SessionMessageType, // session message type
+                        SessionDataType*&,              // session data container handle
+                        UserDataType*,                  // user data handle
+                        bool);                          // expedited ?
   // *NOTE*: to be used by message allocators
   FTP_SessionMessage_T (Stream_SessionId_t,
-                         ACE_Allocator*); // message allocator
+                        ACE_Allocator*); // message allocator
   FTP_SessionMessage_T (Stream_SessionId_t,
                          ACE_Data_Block*, // data block
                          ACE_Allocator*); // message allocator

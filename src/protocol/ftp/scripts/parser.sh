@@ -18,9 +18,15 @@ SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/ftp/scripts
 
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/parser.y
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
+SOURCE_FILE_2=${SCRIPTS_DIRECTORY}/parser_data.y
+[ ! -f ${SOURCE_FILE_2} ] && echo "ERROR: file ${SOURCE_FILE_2} not found, aborting" && exit 1
+
 #bison --no-lines --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
 bison --no-lines --locations --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${SOURCE_FILE}
 [ $? -ne 0 ] && echo "ERROR: \"${SOURCE_FILE}\" failed (status was: $?), aborting" && exit 1
+bison --no-lines --locations --graph --report=all --report-file=parser_data_report.txt --xml --warnings=all ${SOURCE_FILE_2}
+[ $? -ne 0 ] && echo "ERROR: \"${SOURCE_FILE_2}\" failed (status was: $?), aborting" && exit 1
+
 #DOT_FILE=${SCRIPTS_DIRECTORY}/ftp_parser.dot
 #[ ! -f ${DOT_FILE} ] && echo "ERROR: file ${DOT_FILE} not found, aborting" && exit 1
 #IMAGE_FILE=pcp_parser.png
@@ -48,7 +54,7 @@ bison --no-lines --locations --graph --report=all --report-file=parser_report.tx
 #rm -f ${SOURCE_FILE}
 #[ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
-FILES="ftp_parser.h ftp_parser.cpp"
+FILES="ftp_parser.h ftp_parser.cpp ftp_parser_data.h ftp_parser_data.cpp"
 #location.hh
 #position.hh
 #stack.hh"

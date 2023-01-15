@@ -45,6 +45,8 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           struct FTP_ConnectionState,
                           struct Net_StreamStatistic> FTP_IConnection_t;
 
+typedef Stream_DataBase_T<struct FTP_Record> FTP_MessageData_t;
+
 struct FTP_Stream_SessionData
  : Stream_SessionData
 {
@@ -61,9 +63,11 @@ struct FTP_Stream_SessionData
 };
 typedef Stream_SessionData_T<struct FTP_Stream_SessionData> FTP_Stream_SessionData_t;
 
-typedef FTP_Message_T<enum Stream_MessageType> FTP_Message_t;
-typedef FTP_SessionMessage_T<FTP_Stream_SessionData_t,
-                              struct Stream_UserData> FTP_SessionMessage_t;
+typedef FTP_Message_T<FTP_MessageData_t,
+                      enum Stream_MessageType> FTP_Message_t;
+typedef FTP_SessionMessage_T<FTP_MessageData_t,
+                             FTP_Stream_SessionData_t,
+                             struct Stream_UserData> FTP_SessionMessage_t;
 typedef Stream_ISessionDataNotify_T<struct FTP_Stream_SessionData,
                                     enum Stream_SessionMessageType,
                                     FTP_Message_t,

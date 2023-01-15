@@ -91,6 +91,7 @@ class Net_StreamConnectionBase_T
                                   HandlerConfigurationType,
                                   StreamType,
                                   StreamStatusType> ISTREAM_CONNECTION_T;
+  typedef StreamType STREAM_T;
 
   virtual ~Net_StreamConnectionBase_T ();
 
@@ -233,6 +234,7 @@ class Net_AsynchStreamConnectionBase_T
                                   HandlerConfigurationType,
                                   StreamType,
                                   StreamStatusType> ISTREAM_CONNECTION_T;
+  typedef StreamType STREAM_T;
 
   inline virtual ~Net_AsynchStreamConnectionBase_T () {}
 
@@ -284,7 +286,6 @@ class Net_AsynchStreamConnectionBase_T
 
  protected:
   typedef HandlerType HANDLER_T;
-  typedef StreamType STREAM_T;
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
