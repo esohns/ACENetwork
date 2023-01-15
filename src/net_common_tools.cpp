@@ -4613,14 +4613,6 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
 #endif // _WIN32_WINNT_WIN8
 #endif // ACE_WIN32 || ACE_WIN64
 
-//Net_IInetConnectionManager_t*
-//Net_Common_Tools::getConnectionManager ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getConnectionManager"));
-
-//  return NET_CONNECTIONMANAGER_SINGLETON::instance ();
-//}
-
 std::string
 Net_Common_Tools::URLToHostName (const std::string& URL_in,
                                  bool returnProtocol_in,
@@ -4666,8 +4658,28 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
 }
 
 std::string
+Net_Common_Tools::bufferToString (ACE_Message_Block* messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::bufferToString"));
+
+  std::string result;
+
+  for (ACE_Message_Block* message_block_p = messageBlock_in;
+       message_block_p;
+       message_block_p = message_block_p->cont ())
+  {
+    result.append (message_block_p->rd_ptr (),
+                   message_block_p->length ());
+  } // end FOR
+
+  return result;
+}
+
+std::string
 Net_Common_Tools::makeUUID ()
 {
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::makeUUID"));
+
   time_t time_i = ACE_OS::time (NULL);
   uint16_t clock_sequence_i =
     Common_Tools::getRandomNumber (static_cast<uint16_t> (0),
@@ -4766,7 +4778,7 @@ Net_Common_Tools::SSLErrorToString ()
   char error_string[256];
 // OpenSSL < 0.9.6a doesn't have ERR_error_string_n() function.
 #if OPENSSL_VERSION_NUMBER >= 0x0090601fL
-  (void) ::ERR_error_string_n (error_i, error_string, sizeof (error_string));
+  (void) ::ERR_error_string_n (error_i, error_string, sizeof (char[256]));
 #else /* OPENSSL_VERSION_NUMBER >= 0x0090601fL */
   (void) ::ERR_error_string (error_i, error_string);
 #endif /* OPENSSL_VERSION_NUMBER >= 0x0090601fL */

@@ -247,6 +247,9 @@ class Net_Common_Tools
                                     bool = true,        // return protocol (if any) ?
                                     bool = true);       // return port (if any) ?
 
+  // buffer
+  static std::string bufferToString (ACE_Message_Block*); // buffer (chain)
+
   // --- socket API ---
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -84,12 +84,12 @@ typedef FTP_Module_Parser_Data_T<ACE_MT_SYNCH,
                                  Stream_ControlMessage_t,
                                  Test_I_Message,
                                  Test_I_SessionMessage> FTP_Client_Module_Parser_Data;
-DATASTREAM_MODULE_OUTPUT_ONLY (struct FTP_Client_SessionData,                // session data type
-                               enum Stream_SessionMessageType,               // session event type
-                               struct FTP_Client_ModuleHandlerConfiguration, // module handler configuration type
-                               libacenetwork_protocol_default_ftp_parser_data_module_name_string,
-                               Stream_INotify_t,                             // stream notification interface type
-                               FTP_Client_Module_Parser_Data);               // reader type
+DATASTREAM_MODULE_INPUT_ONLY (struct FTP_Client_SessionData,                // session data type
+                              enum Stream_SessionMessageType,               // session event type
+                              struct FTP_Client_ModuleHandlerConfiguration, // module handler configuration type
+                              libacenetwork_protocol_default_ftp_parser_data_module_name_string,
+                              Stream_INotify_t,                             // stream notification interface type
+                              FTP_Client_Module_Parser_Data);               // reader type
 
 Test_I_ConnectionStream_2::Test_I_ConnectionStream_2 ()
  : inherited ()

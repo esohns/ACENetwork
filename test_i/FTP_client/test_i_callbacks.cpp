@@ -748,6 +748,26 @@ allocate_2:
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->connectionConfiguration_2.socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
+      // set data parser state
+      FTP_Client_ConnectionManager_t* connection_manager_p =
+        FTP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+      ACE_ASSERT (connection_manager_p);
+      FTP_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+        connection_manager_p->operator[] (1);
+      ACE_ASSERT (iconnection_p);
+      FTP_Client_IStreamConnection_2* istream_connection_p =
+        dynamic_cast<FTP_Client_IStreamConnection_2*> (iconnection_p);
+      ACE_ASSERT (istream_connection_p);
+      Test_I_ConnectionStream_2& stream_r =
+        const_cast<Test_I_ConnectionStream_2&> (istream_connection_p->stream ());
+      Stream_Module_t* module_p =
+        const_cast<Stream_Module_t*> (stream_r.find (ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING), false, false));
+      ACE_ASSERT (module_p);
+      FTP_IParserData* iparser_data_p =
+        dynamic_cast<FTP_IParserData*> (module_p->writer ());
+      ACE_ASSERT (iparser_data_p);
+      iparser_data_p->state (FTP_STATE_DATA_LIST_DIRECTORY);
+
       // request list
       struct FTP_Client_MessageData* record_p = NULL;
       ACE_NEW_NORETURN (record_p,
