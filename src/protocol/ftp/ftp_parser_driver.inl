@@ -32,11 +32,11 @@
 
 template <typename SessionMessageType>
 FTP_ParserDriver_T<SessionMessageType>::FTP_ParserDriver_T ()
- : fragment_ (NULL)
+ : finished_ (false)
+ , fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
  , configuration_ (NULL)
- , finished_ (false)
 //, parser_ (this,               // driver
 //           &numberOfMessages_, // counter
 //           scannerState_)      // scanner

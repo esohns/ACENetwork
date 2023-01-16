@@ -30,6 +30,8 @@
 #include "common_istatistic.h"
 #include "common_statistic_handler.h"
 
+#include "common_file_common.h"
+
 #include "stream_common.h"
 #include "stream_data_base.h"
 
@@ -85,6 +87,7 @@ struct FTP_Record
    , code (FTP_Codes::FTP_CODE_INVALID)
    , text ()
    , type (FTP_Codes::FTP_RECORD_INVALID)
+   , entries ()
   {}
   void operator+= (struct FTP_Record rhs_in)
   { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
@@ -98,6 +101,7 @@ struct FTP_Record
 
   // data
   enum FTP_Codes::RecordType type;
+  Common_File_Entries_t      entries;
 };
 
 typedef std::list<struct FTP_Record> FTP_Records_t;

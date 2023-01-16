@@ -59,7 +59,7 @@ class FTP_IParserData
 
   using IPARSER_T::error;
 
-  virtual void directory () = 0;
+  virtual void directory (const std::string&) = 0;
   virtual void file () = 0;
   virtual void data () = 0;
 

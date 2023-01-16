@@ -32,10 +32,10 @@
 
 template <typename SessionMessageType>
 FTP_ParserDataDriver_T<SessionMessageType>::FTP_ParserDataDriver_T ()
- : fragment_ (NULL)
+ : finished_ (false)
+ , fragment_ (NULL)
  , offset_ (0)
  , configuration_ (NULL)
- , finished_ (false)
 //, parser_ (this,               // driver
 //           &numberOfMessages_, // counter
 //           scannerState_)      // scanner
@@ -299,16 +299,17 @@ FTP_ParserDataDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (fragment_);
 
-  if (!fragment_->cont ())
+  if (!fragment_ ||
+      !fragment_->cont ())
   {
     // sanity check(s)
     if (!configuration_->block)
       return false; // not enough data, cannot proceed
 
     waitBuffer (); // <-- wait for data
-    if (!fragment_->cont ())
+    if (!fragment_ ||
+        !fragment_->cont ())
     {
       // *NOTE*: most probable reason: received session end
 //      ACE_DEBUG ((LM_DEBUG,
@@ -385,7 +386,7 @@ FTP_ParserDataDriver_T<SessionMessageType>::waitBuffer ()
         is_data_b = true;
         break;
       case ACE_Message_Block::MB_STOP:
-        finished_ = true; requeue_b = false;
+        finished_ = true;
         break;
       case STREAM_MESSAGE_SESSION_TYPE:
       {

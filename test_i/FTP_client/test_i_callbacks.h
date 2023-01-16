@@ -29,6 +29,7 @@ bool load_network_interfaces (GtkListStore*);
 
 // idle routines
 gboolean idle_response_received_cb (gpointer);
+gboolean idle_list_received_cb (gpointer);
 gboolean idle_data_received_cb (gpointer);
 gboolean idle_login_complete_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);

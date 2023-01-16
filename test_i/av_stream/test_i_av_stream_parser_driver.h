@@ -76,6 +76,7 @@ class AVStream_ParserDriver
 
   ACE_Message_Block*                          buffer_;
   struct acestream_av_stream_header           header_;
+  bool                                        finished_; // *TODO*: not needed; remove ASAP
   ACE_UINT32                                  missing_;
 
  private:

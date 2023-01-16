@@ -37,6 +37,7 @@
 AVStream_ParserDriver::AVStream_ParserDriver ()
  : buffer_ (NULL)
  , header_ ()
+ , finished_ (false)
  , missing_ (0)
  , configuration_ (NULL)
  , scannerState_ (NULL)

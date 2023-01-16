@@ -108,7 +108,6 @@ CRLF           \x0D\x0A
 
 <INITIAL>{
 {OCTET}{1}                 {
-                             driver->resetOffset ();
                              switch (driver->state ())
                              {
                                case FTP_STATE_DATA_LIST_DIRECTORY:
@@ -148,14 +147,13 @@ CRLF           \x0D\x0A
                              yyless (0); }
 } // end <INITIAL>
 <list_directory>{
-{OCTET}{1}                 { driver->offset (yyleng);
+{CRLF}                     { driver->offset (yyleng);
+                             BEGIN(INITIAL);
+                             return yytokentype::LIST_DIRECTORY;
+                             /* return yy::FTP_Parser_Data::token::LIST_DIRECTORY; */
+                           }
+[^\r]+                     { driver->offset (yyleng);
                              yylval->sval->append (yytext);
-                             if (driver->offset () == driver->availableBytes ())
-                             {
-                               BEGIN(INITIAL);
-                               return yytokentype::LIST_DIRECTORY;
-                               /* return yy::FTP_Parser_Data::token::LIST_DIRECTORY; */
-                             } // end IF
                            }
 } // end <list_directory>
 <list_file>{

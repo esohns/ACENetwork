@@ -361,6 +361,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   // sanity check(s)
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
+  CBData_->entries.clear ();
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
@@ -381,7 +382,11 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       std::istringstream converter (buffer_string);
       char buffer_a[BUFSIZ];
       struct Common_File_Entry file_entry_s;
-      Common_File_Entries_t file_entries_a;
+
+#if defined (GUI_SUPPORT)
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GUI_SUPPORT
+
       do
       {
         converter.getline (buffer_a, sizeof (char[BUFSIZ]));
@@ -392,8 +397,24 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
         file_entry_s = Common_File_Tools::parseFileEntry (buffer_string_2);
         if (unlikely (file_entry_s.type == Common_File_Entry::INVALID))
           continue;
-        file_entries_a.push_back (file_entry_s);
+#if defined (GUI_SUPPORT)
+        CBData_->entries.push_back (file_entry_s);
+#endif // GUI_SUPPORT
       } while (!converter.fail ());
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+      guint event_source_id = g_idle_add (idle_list_received_cb,
+                                          CBData_);
+      if (event_source_id == 0)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_list_received_cb): \"%m\", returning\n")));
+        return;
+      } // end IF
+      state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
       break;
     }
@@ -401,6 +422,28 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     {
       std::string buffer_string =
         Net_Common_Tools::bufferToString (&const_cast<Test_I_Message&> (message_in));
+      std::istringstream converter (buffer_string);
+      char buffer_a[BUFSIZ];
+      struct Common_File_Entry file_entry_s;
+
+#if defined (GUI_SUPPORT)
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#endif // GUI_SUPPORT
+
+      do
+      {
+        converter.getline (buffer_a, sizeof (char[BUFSIZ]));
+        std::string buffer_string_2 = buffer_a;
+        buffer_string_2 = Common_String_Tools::strip (buffer_string_2);
+        if (unlikely (buffer_string_2.empty ()))
+          continue;
+        file_entry_s = Common_File_Tools::parseFileEntry (buffer_string_2);
+        if (unlikely (file_entry_s.type == Common_File_Entry::INVALID))
+          continue;
+#if defined (GUI_SUPPORT)
+        CBData_->entries.push_back (file_entry_s);
+#endif // GUI_SUPPORT
+      } while (!converter.fail ());
 
       break;
     }

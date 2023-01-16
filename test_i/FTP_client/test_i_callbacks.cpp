@@ -352,6 +352,30 @@ idle_initialize_UI_cb (gpointer userData_in)
   //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
   //                              (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR));
 
+  GtkTreeView* tree_view_p =
+    GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_DIRECTORIES_NAME)));
+  ACE_ASSERT (tree_view_p);
+  cell_renderer_p = gtk_cell_renderer_text_new ();
+  if (!cell_renderer_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  GtkTreeViewColumn* tree_view_column_p =
+    gtk_tree_view_column_new_with_attributes ("Directory",
+                                              cell_renderer_p,
+                                              "text", 0,
+                                              NULL);
+  if (!tree_view_column_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
@@ -867,6 +891,81 @@ default_:
     message_block_p = NULL;
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_list_received_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_list_received_cb"));
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  //GtkTreeView* tree_view_p =
+  //  GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
+  //                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_NAME)));
+  //ACE_ASSERT (tree_view_p);
+  GtkTreeStore* tree_store_p =
+    GTK_TREE_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME)));
+  ACE_ASSERT (tree_store_p);
+  //gtk_tree_store_clear (tree_store_p);
+  GtkTreeIter iterator_2;
+
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+
+  gchar* string_p = NULL;
+  for (Common_File_EntriesIterator_t iterator_3 = data_p->entries.begin ();
+       iterator_3 != data_p->entries.end ();
+       ++iterator_3)
+  {
+    if ((*iterator_3).type != Common_File_Entry::DIRECTORY)
+      continue;
+
+    string_p = 
+      Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).name);
+    ACE_ASSERT (string_p);
+    gtk_tree_store_append (tree_store_p, &iterator_2, NULL);
+    gtk_tree_store_set (tree_store_p, &iterator_2,
+                        0, string_p,
+                        1, ((*iterator_3).type == Common_File_Entry::DIRECTORY ? TRUE : FALSE),
+                        -1);
+    g_free (string_p);
+    string_p = NULL;
+  } // end FOR
+
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_FILES_NAME)));
+  ACE_ASSERT (list_store_p);
+  gtk_list_store_clear (list_store_p);
+
+  for (Common_File_EntriesIterator_t iterator_3 = data_p->entries.begin ();
+       iterator_3 != data_p->entries.end ();
+       ++iterator_3)
+  {
+    if ((*iterator_3).type != Common_File_Entry::FILE)
+      continue;
+
+    string_p = 
+      Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).name);
+    ACE_ASSERT (string_p);
+    gtk_list_store_append (list_store_p, &iterator_2);
+    gtk_list_store_set (list_store_p, &iterator_2,
+                        0, string_p,
+                        1, ((*iterator_3).type == Common_File_Entry::DIRECTORY ? TRUE : FALSE),
+                        2, (*iterator_3).size,
+                        -1);
+    g_free (string_p);
+    string_p = NULL;
+  } // end FOR
 
   return G_SOURCE_REMOVE;
 }
@@ -1606,7 +1705,7 @@ textview_size_allocate_cb (GtkWidget* widget_in,
 
   GtkScrolledWindow* scrolled_window_p =
     GTK_SCROLLED_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SCROLLEDWINDOW_NAME)));
+                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SCROLLEDWINDOW_LOG_NAME)));
   ACE_ASSERT (scrolled_window_p);
   GtkAdjustment* adjustment_p =
     gtk_scrolled_window_get_vadjustment (scrolled_window_p);

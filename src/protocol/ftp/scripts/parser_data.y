@@ -60,13 +60,13 @@ class FTP_IParserData;
 struct YYLTYPE;
 //union YYSTYPE;
 
-union yytoken
+union zztoken
 {
   ACE_UINT16   ival;
   std::string* sval;
 };
-typedef yytoken yytoken_t;
-#define YYSTYPE yytoken_t
+typedef zztoken zztoken_t;
+#define YYSTYPE zztoken_t
 
 typedef void* yyscan_t;
 
@@ -157,9 +157,8 @@ using namespace std;
 stream:                  items                                     { $$ = $1; }
 items:                   item items                                { $$ = $1 + $2; }
                          | /* empty */                             { $$ = 0; }
-item:                    "directory"                               { $$ = $1->length ();
-                                                                     driver->directory ();
-                                                                     YYACCEPT; }
+item:                    "directory"                               { $$ = $1->length () + 2;
+                                                                     driver->directory (*$1); }
                          | "file"                                  { $$ = $1->length ();
                                                                      driver->file ();
                                                                      YYACCEPT; }

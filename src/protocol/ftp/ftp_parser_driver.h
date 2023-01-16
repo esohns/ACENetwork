@@ -78,6 +78,8 @@ class FTP_ParserDriver_T
   //inline bool getDebugScanner () const { return (FTP_Scanner_get_debug (scannerState_) != 0); }
   inline virtual const struct Common_FlexScannerState& getR () const { static struct Common_FlexScannerState dummy;  ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
 
+ protected:
+  bool                                        finished_;
   // *NOTE*: current (unscanned) data fragment
   ACE_Message_Block*                          fragment_;
   unsigned int                                offset_; // parsed entity bytes
@@ -125,7 +127,6 @@ class FTP_ParserDriver_T
   void scan_end ();
 
   struct Common_FlexBisonParserConfiguration* configuration_;
-  bool                                        finished_;
 
   // scanner
   yyscan_t                                    scannerState_;

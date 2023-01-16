@@ -51,7 +51,7 @@ struct YYLTYPE;
 
 union zztoken
 {
-  ACE_UINT32   ival;
+  ACE_UINT16   ival;
   std::string* sval;
 };
 typedef zztoken zztoken_t;

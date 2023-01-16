@@ -45,12 +45,13 @@
 #define TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
 #define TEST_I_UI_GTK_ENTRY_SERVER_ADDRESS_NAME           "entry_server_address"
 #define TEST_I_UI_GTK_HBOX_OPTIONS_NAME                   "hbox_options"
+#define TEST_I_UI_GTK_LISTSTORE_FILES_NAME                "liststore_files"
 #define TEST_I_UI_GTK_LISTSTORE_INTERFACE_NAME            "liststore_interface"
 #define TEST_I_UI_GTK_PANGO_LOG_FONT_DESCRIPTION          "Monospace 8"
 #define TEST_I_UI_GTK_PANGO_LOG_COLOR_BASE                "#FFFFFF" // white
 #define TEST_I_UI_GTK_PANGO_LOG_COLOR_TEXT                "#000000" // black
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                    "progressbar"
-#define TEST_I_UI_GTK_SCROLLEDWINDOW_NAME                 "scrolledwindow"
+#define TEST_I_UI_GTK_SCROLLEDWINDOW_LOG_NAME             "scrolledwindow_log"
 //#define TEST_I_UI_GTK_SCROLLMARK_NAME                 "insert"
 #define TEST_I_UI_GTK_SPINBUTTON_DATA_NAME                "spinbutton_data"
 #define TEST_I_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME        "spinbutton_data_messages"
@@ -60,6 +61,8 @@
 //#define TEST_I_UI_GTK_TABLE_OPTIONS_NAME                  "table_options"
 #define TEST_I_UI_GTK_TOGGLEACTION_LISTEN_NAME            "toggleaction_listen"
 #define TEST_I_UI_GTK_TEXTVIEW_NAME                       "textview"
+#define TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME          "treestore_directories"
+#define TEST_I_UI_GTK_TREEVIEW_DIRECTORIES_NAME           "treeview_directories"
 
 // GTK progress/status bar
 #define TEST_I_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL         27 // ms (?)

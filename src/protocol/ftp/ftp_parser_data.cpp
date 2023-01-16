@@ -460,7 +460,7 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   157,   157,   158,   159,   160,   163,   166
+       0,   157,   157,   158,   159,   160,   162,   165
 };
 #endif
 
@@ -1206,9 +1206,8 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 5: /* item: "directory"  */
-                                                                   { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->length ();
-                                                                     driver->directory ();
-                                                                     YYACCEPT; }
+                                                                   { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->length () + 2;
+                                                                     driver->directory (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)); }
     break;
 
   case 6: /* item: "file"  */

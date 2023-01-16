@@ -290,12 +290,14 @@ struct FTP_Client_UI_CBData
 #endif // GTK_USE
    , progressData ()
    , records ()
+   , entries ()
   {}
 
   struct FTP_Client_Configuration*  configuration;
   Test_I_EventHandler_2*            eventHandler;
   struct FTP_Client_UI_ProgressData progressData;
   FTP_Records_t                     records;
+  Common_File_Entries_t             entries;
 };
 
 struct FTP_Client_ThreadData

@@ -20,6 +20,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_file_tools.h"
+
 #include "common_timer_manager_common.h"
 
 #include "net_defines.h"
@@ -45,9 +47,13 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
                          SessionMessageType>::FTP_Module_Parser_Data_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
+ , record_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::FTP_Module_Parser_Data_T"));
 
+  ACE_NEW_NORETURN (record_,
+                    struct FTP_Record);
+  ACE_ASSERT (record_);
 }
 
 template <ACE_SYNCH_DECL,
@@ -62,13 +68,44 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          ControlMessageType,
                          DataMessageType,
-                         SessionMessageType>::directory ()
+                         SessionMessageType>::directory (const std::string& directoryEntry_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::directory"));
 
   // sanity check(s)
+  ACE_ASSERT (record_);
+
+  struct Common_File_Entry file_entry_s =
+    Common_File_Tools::parseFileEntry (directoryEntry_in);
+  record_->entries.push_back (file_entry_s);
+
+  if (inherited::offset_ == inherited::headFragment_->total_length ())
+  {
+    push (FTP_Codes::FTP_RECORD_DIRECTORY);
+    record_->entries.clear ();
+  } // end IF
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+void
+FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
+                         TimePolicyType,
+                         ConfigurationType,
+                         ControlMessageType,
+                         DataMessageType,
+                         SessionMessageType>::push (FTP_Codes::RecordType type_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::push"));
+
+  // sanity check(s)
   ACE_ASSERT (inherited::headFragment_);
   ACE_ASSERT (!inherited::headFragment_->isInitialized ());
+  ACE_ASSERT (record_);
 
   typename DataMessageType::DATA_T::DATA_T* data_p = NULL;
   typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
@@ -83,7 +120,8 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
     return;
   } // end IF
-  data_p->type = FTP_Codes::FTP_RECORD_DIRECTORY;
+  *data_p = *record_;
+  data_p->type = type_in;
 
   ACE_NEW_NORETURN (data_container_p,
                     typename DataMessageType::DATA_T ());
@@ -123,6 +161,7 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
     message_p->release (); message_p = NULL;
   } // end IF
   inherited::headFragment_ = NULL;
+  inherited::fragment_ = NULL;
 }
 
 template <ACE_SYNCH_DECL,
@@ -142,62 +181,18 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::file"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::headFragment_);
-  ACE_ASSERT (!inherited::headFragment_->isInitialized ());
+  ACE_ASSERT (record_);
 
-  typename DataMessageType::DATA_T::DATA_T* data_p = NULL;
-  typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
-  DataMessageType* message_p = NULL;
-  int result = -1;
+  ACE_ASSERT (false); // *TODO*
+  //struct Common_File_Entry file_entry_s =
+  //  Common_File_Tools::parseFileEntry (directoryEntry_in);
+  //record_->entries.push_back (file_entry_s);
 
-  ACE_NEW_NORETURN (data_p,
-                    typename DataMessageType::DATA_T::DATA_T ());
-  if (!data_p)
+  if (inherited::offset_ == inherited::headFragment_->total_length ())
   {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
+    push (FTP_Codes::FTP_RECORD_FILE);
+    record_->entries.clear ();
   } // end IF
-  data_p->type = FTP_Codes::FTP_RECORD_FILE;
-
-  ACE_NEW_NORETURN (data_container_p,
-                    typename DataMessageType::DATA_T ());
-  if (!data_container_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
-  } // end IF
-  data_container_p->setPR (data_p);
-  ACE_ASSERT (!data_p);
-  data_container_2 = data_container_p;
-  inherited::headFragment_->initialize (data_container_2,
-                                        inherited::headFragment_->sessionId (),
-                                        NULL);
-
-  // make sure the whole fragment chain references the same data record
-  // sanity check(s)
-  message_p =
-      static_cast<DataMessageType*> (inherited::headFragment_->cont ());
-  while (message_p)
-  {
-    data_container_p->increase ();
-    data_container_2 = data_container_p;
-    message_p->initialize (data_container_2,
-                           inherited::headFragment_->sessionId (),
-                           NULL);
-    message_p = static_cast<DataMessageType*> (message_p->cont ());
-  } // end WHILE
-
-  // push message downstream
-  result = inherited::put_next (inherited::headFragment_);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to put_next(): \"%m\", returning\n")));
-    message_p->release (); message_p = NULL;
-  } // end IF
-  inherited::headFragment_ = NULL;
 }
 
 template <ACE_SYNCH_DECL,

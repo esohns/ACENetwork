@@ -75,10 +75,10 @@ class FTP_Module_Parser_Data_T
 #else
   FTP_Module_Parser_Data_T (typename inherited::ISTREAM_T*); // stream handle
 #endif // ACE_WIN32 || ACE_WIN64
-  inline virtual ~FTP_Module_Parser_Data_T () {}
+  inline virtual ~FTP_Module_Parser_Data_T () { delete record_; }
 
   // implement (part of) FTP_IParserData
-  virtual void directory ();
+  virtual void directory (const std::string&);
   virtual void file ();
   virtual void data ();
   inline virtual ACE_UINT64 availableBytes () { ACE_ASSERT (inherited::headFragment_); return inherited::headFragment_->total_length (); }
@@ -87,6 +87,10 @@ class FTP_Module_Parser_Data_T
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_Data_T ())
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_Data_T (const FTP_Module_Parser_Data_T&))
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_Data_T& operator= (const FTP_Module_Parser_Data_T&))
+
+  void push (FTP_Codes::RecordType);
+
+  struct FTP_Record* record_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
