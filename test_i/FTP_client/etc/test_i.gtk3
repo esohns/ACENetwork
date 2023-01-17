@@ -8,16 +8,6 @@
     <property name="stock_id">gtk-connect</property>
     <signal name="activate" handler="action_connect_activate_cb" swapped="no"/>
   </object>
-  <object class="GtkAdjustment" id="adjustment_data">
-    <property name="upper">10000000</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment_data_messages">
-    <property name="upper">10000000</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
   <object class="GtkAdjustment" id="adjustment_server_port">
     <property name="lower">1</property>
     <property name="upper">65535</property>
@@ -26,6 +16,23 @@
     <property name="page_increment">100</property>
   </object>
   <object class="GtkAdjustment" id="adjustment_sessionmessages">
+    <property name="upper">10000000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkToggleAction" id="toggleaction_listen">
+    <property name="label">Listen</property>
+    <property name="short_label">Listen</property>
+    <property name="tooltip">Listen</property>
+    <property name="stock_id">gtk-connect</property>
+    <signal name="toggled" handler="toggleaction_listen_toggled_cb" swapped="no"/>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_data">
+    <property name="upper">10000000</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_data_messages">
     <property name="upper">10000000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
@@ -65,25 +72,23 @@
       </object>
     </child>
   </object>
-  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
+  <object class="GtkListStore" id="liststore_files">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name is_directory -->
+      <column type="gboolean"/>
+      <!-- column-name size -->
+      <column type="guint64"/>
+    </columns>
   </object>
-  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
-  </object>
-  <object class="GtkTextBuffer" id="textbuffer"/>
-  <object class="GtkToggleAction" id="toggleaction_listen">
-    <property name="label">Listen</property>
-    <property name="short_label">Listen</property>
-    <property name="tooltip">Listen</property>
-    <property name="stock_id">gtk-connect</property>
-    <signal name="toggled" handler="toggleaction_listen_toggled_cb" swapped="no"/>
+  <object class="GtkListStore" id="liststore_interface">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name identifier -->
+      <column type="gchararray"/>
+    </columns>
   </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
@@ -343,7 +348,9 @@
                         <property name="search_column">0</property>
                         <property name="enable_tree_lines">True</property>
                         <child internal-child="selection">
-                          <object class="GtkTreeSelection" id="treeview_selection"/>
+                          <object class="GtkTreeSelection" id="treeview_selection_directories">
+                            <signal name="changed" handler="treeview_selection_directories_changed_cb" swapped="no"/>
+                          </object>
                         </child>
                       </object>
                     </child>
@@ -528,24 +535,19 @@
       <action-widget response="0">button_clear</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkListStore" id="liststore_files">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name is_directory -->
-      <column type="gboolean"/>
-      <!-- column-name size -->
-      <column type="guint64"/>
-    </columns>
+  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
   </object>
-  <object class="GtkListStore" id="liststore_interface">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name identifier -->
-      <column type="gchararray"/>
-    </columns>
+  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
   </object>
+  <object class="GtkTextBuffer" id="textbuffer"/>
   <object class="GtkTreeStore" id="treestore_directories">
     <columns>
       <!-- column-name text -->

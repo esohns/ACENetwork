@@ -75,6 +75,11 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (record_);
 
+  // *IMPORTANT NOTE*: unfortunately, this doesn't work, because lex cannot
+  //                   currently parse across fragments... that means that
+  //                   entries spanning across fragments will not be
+  //                   correctly forwarded here. --> parse manually in the
+  //                   event handler
   struct Common_File_Entry file_entry_s =
     Common_File_Tools::parseFileEntry (directoryEntry_in);
   record_->entries.push_back (file_entry_s);

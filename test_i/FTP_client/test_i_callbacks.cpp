@@ -376,6 +376,14 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end IF
   gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
 
+  //GtkTreeStore* tree_store_p =
+  //  GTK_TREE_STORE (gtk_builder_get_object ((*iterator).second.second,
+  //                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME)));
+  //ACE_ASSERT (tree_store_p);
+  //gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (tree_store_p),
+  //                                     &data_p->treeIter,
+  //                                     ACE_TEXT_ALWAYS_CHAR ("0"));
+  
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
@@ -895,6 +903,38 @@ default_:
   return G_SOURCE_REMOVE;
 }
 
+void
+treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
+                                           gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::treeview_selection_directories_changed_cb"));
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  GtkTreeModel* tree_model_p = NULL;
+  char* string_p = NULL;
+
+  if (gtk_tree_selection_get_selected (treeSelection_in,
+                                       &tree_model_p,
+                                       &data_p->treeIter))
+  {
+    gtk_tree_model_get (tree_model_p,
+                        &data_p->treeIter,
+                        0, &string_p,
+                        -1);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("selected directory: \"%s\"\n"),
+                ACE_TEXT (string_p)));
+    g_free (string_p); string_p = NULL;
+
+
+
+  } // end IF
+}
+
 gboolean
 idle_list_received_cb (gpointer userData_in)
 {
@@ -922,6 +962,7 @@ idle_list_received_cb (gpointer userData_in)
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
 
   gchar* string_p = NULL;
+  static bool is_first_b = true;
   for (Common_File_EntriesIterator_t iterator_3 = data_p->entries.begin ();
        iterator_3 != data_p->entries.end ();
        ++iterator_3)
@@ -929,10 +970,10 @@ idle_list_received_cb (gpointer userData_in)
     if ((*iterator_3).type != Common_File_Entry::DIRECTORY)
       continue;
 
-    string_p = 
+    string_p =
       Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).name);
     ACE_ASSERT (string_p);
-    gtk_tree_store_append (tree_store_p, &iterator_2, NULL);
+    gtk_tree_store_append (tree_store_p, &iterator_2, (is_first_b ? NULL : &data_p->treeIter));
     gtk_tree_store_set (tree_store_p, &iterator_2,
                         0, string_p,
                         1, ((*iterator_3).type == Common_File_Entry::DIRECTORY ? TRUE : FALSE),
@@ -940,6 +981,7 @@ idle_list_received_cb (gpointer userData_in)
     g_free (string_p);
     string_p = NULL;
   } // end FOR
+  is_first_b = false;
 
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,

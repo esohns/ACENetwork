@@ -72,7 +72,11 @@ set (source_files
      ftp_common.h
      ftp_common_modules.h
      ftp_configuration.h
+     ftp_control.cpp
+     ftp_control.h
+     ftp_control.inl
      ftp_defines.h
+     ftp_icontrol.h
      ftp_iparser.h
      ftp_message.cpp
      ftp_message.h
@@ -189,7 +193,10 @@ install (FILES
          ftp_common.h
          ftp_common_modules.h
          ftp_configuration.h
+         ftp_control.h
+         ftp_control.inl
          ftp_defines.h
+         ftp_icontrol.h
          ftp_iparser.h
          ftp_message.h
          ftp_message.inl

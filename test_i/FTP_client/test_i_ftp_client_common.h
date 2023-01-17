@@ -291,13 +291,19 @@ struct FTP_Client_UI_CBData
    , progressData ()
    , records ()
    , entries ()
+#if defined (GTK_USE)
+   , treeIter ()
+#endif // GTK_USE
   {}
 
   struct FTP_Client_Configuration*  configuration;
   Test_I_EventHandler_2*            eventHandler;
   struct FTP_Client_UI_ProgressData progressData;
-  FTP_Records_t                     records;
-  Common_File_Entries_t             entries;
+  FTP_Records_t                     records; // responses
+  Common_File_Entries_t             entries; // list entries
+#if defined (GTK_USE)
+  GtkTreeIter                       treeIter; // current-
+#endif // GTK_USE
 };
 
 struct FTP_Client_ThreadData
