@@ -65,6 +65,7 @@
 #include "net_ilistener.h"
 
 #include "ftp_common.h"
+#include "ftp_control.h"
 #include "ftp_network.h"
 #include "ftp_stream_common.h"
 
@@ -257,6 +258,12 @@ struct FTP_Client_Configuration
   struct FTP_LoginOptions                      loginOptions;
 };
 
+typedef FTP_Control_T<FTP_Client_AsynchConnector_t,
+                      FTP_Client_Connector_t,
+                      FTP_Client_AsynchConnector_2,
+                      FTP_Client_Connector_2,
+                      struct Net_UserData> FTP_Control_t;
+
 //////////////////////////////////////////
 
 #if defined (GUI_SUPPORT)
@@ -288,6 +295,7 @@ struct FTP_Client_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE
+   , control (NULL)
    , progressData ()
    , records ()
    , entries ()
@@ -297,6 +305,7 @@ struct FTP_Client_UI_CBData
   {}
 
   struct FTP_Client_Configuration*  configuration;
+  FTP_IControl*                     control;
   Test_I_EventHandler_2*            eventHandler;
   struct FTP_Client_UI_ProgressData progressData;
   FTP_Records_t                     records; // responses

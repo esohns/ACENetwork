@@ -622,283 +622,27 @@ idle_response_received_cb (gpointer userData_in)
     data_p->records.pop_front ();
   } // end lock scope
 
-  std::ostringstream converter;
-  ACE_Message_Block* message_block_p = NULL;
-  switch (record_s.code)
-  {
-    case FTP_Codes::FTP_CODE_USER_OK_NEED_PASSWORD:
-    {
-      struct FTP_Client_MessageData* record_p = NULL;
-      ACE_NEW_NORETURN (record_p,
-                        struct FTP_Client_MessageData ());
-      if (!record_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
-        return G_SOURCE_REMOVE;
-      } // end IF
-      record_p->request.command = FTP_Codes::CommandType::FTP_COMMAND_PASS;
-      record_p->request.parameters.push_back (data_p->configuration->loginOptions.password);
+  std::string text_string = FTP_Tools::CodeToString (record_s.code);
+  text_string += ACE_TEXT_ALWAYS_CHAR (": ");
+  for (FTP_TextConstIterator_t iterator_2 = record_s.text.begin ();
+        iterator_2 != record_s.text.end ();
+        ++iterator_2)
+    text_string += *iterator_2;
 
-      FTP_Client_MessageData_t* message_data_container_p = NULL;
-      // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-      ACE_NEW_NORETURN (message_data_container_p,
-                        FTP_Client_MessageData_t (record_p,
-                                                  true)); // delete record in dtor ?
-      if (!message_data_container_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
-        delete record_p;
-        return G_SOURCE_REMOVE;
-      } // end IF
+  GtkStatusbar* statusbar_p =
+  GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_NAME)));
+  ACE_ASSERT (statusbar_p);
 
-      ACE_UINT32 pdu_size_i =
-        data_p->configuration->allocatorConfiguration.defaultBufferSize;// +
-    //    (*iterator_2).second->allocatorConfiguration->paddingBytes;
-      Test_I_Message* message_p = NULL;
-allocate:
-      message_p =
-        static_cast<Test_I_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (pdu_size_i));
-      // keep retrying ?
-      if (!message_p && !data_p->configuration->connectionConfiguration.messageAllocator->block ())
-        goto allocate;
-      if (!message_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", returning\n")));
-        message_data_container_p->decrease (); message_data_container_p = NULL;
-        return G_SOURCE_REMOVE;
-      } // end IF
-      // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-      message_p->initialize (message_data_container_p,
-                             1,//message_p->sessionId (),
-                             NULL);
-      // *IMPORTANT NOTE*: fire-and-forget API (message_p)
-      message_block_p = message_p;
-
-      goto default_;
-    }
-    case FTP_Codes::FTP_CODE_USER_LOGGED_IN:
-    {
-      struct FTP_Client_MessageData* record_p = NULL;
-      ACE_NEW_NORETURN (record_p,
-                        struct FTP_Client_MessageData ());
-      if (!record_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
-        return G_SOURCE_REMOVE;
-      } // end IF
-      record_p->request.command = FTP_Codes::CommandType::FTP_COMMAND_PASV;
-
-      FTP_Client_MessageData_t* message_data_container_p = NULL;
-      // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-      ACE_NEW_NORETURN (message_data_container_p,
-                        FTP_Client_MessageData_t (record_p,
-                                                  true)); // delete record in dtor ?
-      if (!message_data_container_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
-        delete record_p;
-        return G_SOURCE_REMOVE;
-      } // end IF
-
-      ACE_UINT32 pdu_size_i =
-        data_p->configuration->allocatorConfiguration.defaultBufferSize;// +
-    //    (*iterator_2).second->allocatorConfiguration->paddingBytes;
-      Test_I_Message* message_p = NULL;
-allocate_2:
-      message_p =
-        static_cast<Test_I_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (pdu_size_i));
-      // keep retrying ?
-      if (!message_p && !data_p->configuration->connectionConfiguration.messageAllocator->block ())
-        goto allocate_2;
-      if (!message_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", returning\n")));
-        message_data_container_p->decrease (); message_data_container_p = NULL;
-        return G_SOURCE_REMOVE;
-      } // end IF
-      // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-      message_p->initialize (message_data_container_p,
-                             1,//message_p->sessionId (),
-                             NULL);
-      // *IMPORTANT NOTE*: fire-and-forget API (message_p)
-      message_block_p = message_p;
-
-      goto default_;
-    }
-    case FTP_Codes::FTP_CODE_ENTERING_PASSIVE_MODE:
-    {
-      // parse ip address and port
-      ACE_ASSERT (!record_s.text.empty ());
-      data_p->configuration->connectionConfiguration_2.socketConfiguration.address =
-        FTP_Tools::parsePASVResponse (record_s.text.front ());
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("PASV mode response: server is listening at \"%s\"\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->connectionConfiguration_2.socketConfiguration.address).c_str ())));
-
-      // connect to PASV server address
-      ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-      FTP_Client_Connector_2 connector (true);
-      FTP_Client_AsynchConnector_2 asynch_connector (true);
-      if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
-        handle_h =
-          Net_Client_Common_Tools::connect<FTP_Client_Connector_2> (connector,
-                                                                    data_p->configuration->connectionConfiguration_2,
-                                                                    data_p->configuration->userData,
-                                                                    data_p->configuration->connectionConfiguration_2.socketConfiguration.address,
-                                                                    true,  // wait ?
-                                                                    true); // is peer address ?
-      else
-        handle_h =
-          Net_Client_Common_Tools::connect<FTP_Client_AsynchConnector_2> (asynch_connector,
-                                                                          data_p->configuration->connectionConfiguration_2,
-                                                                          data_p->configuration->userData,
-                                                                          data_p->configuration->connectionConfiguration_2.socketConfiguration.address,
-                                                                          true,  // wait ?
-                                                                          true); // is peer address ?
-      if (unlikely (handle_h == ACE_INVALID_HANDLE))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to connect to %s, returning\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->connectionConfiguration_2.socketConfiguration.address).c_str ())));
-        return G_SOURCE_REMOVE;
-      } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("0x%@: opened TCP socket: %s\n"),
-                  handle_h,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->connectionConfiguration_2.socketConfiguration.address).c_str ())));
-#else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%d: opened TCP socket: %s\n"),
-                  handle_h,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->connectionConfiguration_2.socketConfiguration.address).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
-
-      // set data parser state
-      FTP_Client_ConnectionManager_t* connection_manager_p =
-        FTP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-      ACE_ASSERT (connection_manager_p);
-      FTP_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
-        connection_manager_p->operator[] (1);
-      ACE_ASSERT (iconnection_p);
-      FTP_Client_IStreamConnection_2* istream_connection_p =
-        dynamic_cast<FTP_Client_IStreamConnection_2*> (iconnection_p);
-      ACE_ASSERT (istream_connection_p);
-      Test_I_ConnectionStream_2& stream_r =
-        const_cast<Test_I_ConnectionStream_2&> (istream_connection_p->stream ());
-      Stream_Module_t* module_p =
-        const_cast<Stream_Module_t*> (stream_r.find (ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING), false, false));
-      ACE_ASSERT (module_p);
-      FTP_IParserData* iparser_data_p =
-        dynamic_cast<FTP_IParserData*> (module_p->writer ());
-      ACE_ASSERT (iparser_data_p);
-      iparser_data_p->state (FTP_STATE_DATA_LIST_DIRECTORY);
-
-      // request list
-      struct FTP_Client_MessageData* record_p = NULL;
-      ACE_NEW_NORETURN (record_p,
-                        struct FTP_Client_MessageData ());
-      if (!record_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
-        return G_SOURCE_REMOVE;
-      } // end IF
-      record_p->request.command = FTP_Codes::CommandType::FTP_COMMAND_LIST;
-
-      FTP_Client_MessageData_t* message_data_container_p = NULL;
-      // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-      ACE_NEW_NORETURN (message_data_container_p,
-                        FTP_Client_MessageData_t (record_p,
-                                                  true)); // delete record in dtor ?
-      if (!message_data_container_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
-        delete record_p;
-        return G_SOURCE_REMOVE;
-      } // end IF
-
-      ACE_UINT32 pdu_size_i =
-        data_p->configuration->allocatorConfiguration.defaultBufferSize;// +
-    //    (*iterator_2).second->allocatorConfiguration->paddingBytes;
-      Test_I_Message* message_p = NULL;
-allocate_3:
-      message_p =
-        static_cast<Test_I_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (pdu_size_i));
-      // keep retrying ?
-      if (!message_p && !data_p->configuration->connectionConfiguration.messageAllocator->block ())
-        goto allocate_3;
-      if (!message_p)
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", returning\n")));
-        message_data_container_p->decrease (); message_data_container_p = NULL;
-        return G_SOURCE_REMOVE;
-      } // end IF
-      // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-      message_p->initialize (message_data_container_p,
-                             1,//message_p->sessionId (),
-                             NULL);
-      // *IMPORTANT NOTE*: fire-and-forget API (message_p)
-      message_block_p = message_p;
-
-      goto default_;
-    }
-    default:
-    {
-default_:
-      std::string text_string = FTP_Tools::CodeToString (record_s.code);
-      text_string += ACE_TEXT_ALWAYS_CHAR (": ");
-      for (FTP_TextConstIterator_t iterator_2 = record_s.text.begin ();
-           iterator_2 != record_s.text.end ();
-           ++iterator_2)
-        text_string += *iterator_2;
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("received response: \"%s\"\n"),
-                  ACE_TEXT (text_string.c_str ())));
-
-      GtkStatusbar* statusbar_p =
-      GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_NAME)));
-      ACE_ASSERT (statusbar_p);
-
-      gchar* string_p = Common_UI_GTK_Tools::localeToUTF8 (text_string);
-      if (!string_p)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (text_string.c_str ())));
-      gtk_statusbar_push (statusbar_p,
-                          0,
-                          string_p);
-      g_free (string_p); string_p = NULL;
-
-      break;
-    }
-  } // end SWITCH
-
-  // send next message ?
-  if (message_block_p)
-  {
-    FTP_Client_ConnectionManager_t* connection_manager_p =
-      FTP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-    ACE_ASSERT (connection_manager_p);
-    FTP_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
-      connection_manager_p->operator[] (0);
-    ACE_ASSERT (iconnection_p);
-    FTP_Client_IStreamConnection_t* istream_connection_p =
-      dynamic_cast<FTP_Client_IStreamConnection_t*> (iconnection_p);
-    ACE_ASSERT (istream_connection_p);
-    istream_connection_p->send (message_block_p);
-    message_block_p = NULL;
-    iconnection_p->decrease (); iconnection_p = NULL;
-  } // end IF
+  gchar* string_p = Common_UI_GTK_Tools::localeToUTF8 (text_string);
+  if (!string_p)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"): \"%m\", continuing\n"),
+                ACE_TEXT (text_string.c_str ())));
+  gtk_statusbar_push (statusbar_p,
+                      0,
+                      string_p);
+  g_free (string_p); string_p = NULL;
 
   return G_SOURCE_REMOVE;
 }
@@ -928,10 +672,11 @@ treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("selected directory: \"%s\"\n"),
                 ACE_TEXT (string_p)));
+    data_p->control->cwd (string_p);
     g_free (string_p); string_p = NULL;
 
-
-
+    data_p->control->queue (FTP_Codes::FTP_COMMAND_LIST);
+    data_p->control->command (FTP_Codes::FTP_COMMAND_PASV);
   } // end IF
 }
 
@@ -958,6 +703,8 @@ idle_list_received_cb (gpointer userData_in)
   ACE_ASSERT (tree_store_p);
   //gtk_tree_store_clear (tree_store_p);
   GtkTreeIter iterator_2;
+
+  data_p->configuration->parserConfiguration.messageQueue = NULL;
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
 
@@ -1045,6 +792,9 @@ idle_login_complete_cb (gpointer userData_in)
                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ACTION_CONNECT_NAME)));
   ACE_ASSERT (action_p);
   gtk_action_set_sensitive (action_p, FALSE);
+
+  data_p->control->queue (FTP_Codes::FTP_COMMAND_LIST);
+  data_p->control->command (FTP_Codes::FTP_COMMAND_PASV);
 
   return G_SOURCE_REMOVE;
 }
@@ -1440,25 +1190,7 @@ allocate:
   ACE_Message_Block* message_block_p = message_p;
 
   // connect
-  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-  FTP_Client_Connector_t connector (true);
-  FTP_Client_AsynchConnector_t asynch_connector (true);
-  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
-    handle_h =
-      Net_Client_Common_Tools::connect<FTP_Client_Connector_t> (connector,
-                                                                data_p->configuration->connectionConfiguration,
-                                                                data_p->configuration->userData,
-                                                                data_p->configuration->connectionConfiguration.socketConfiguration.address,
-                                                                true,  // wait ?
-                                                                true); // is peer address ?
-  else
-    handle_h =
-      Net_Client_Common_Tools::connect<FTP_Client_AsynchConnector_t> (asynch_connector,
-                                                                      data_p->configuration->connectionConfiguration,
-                                                                      data_p->configuration->userData,
-                                                                      data_p->configuration->connectionConfiguration.socketConfiguration.address,
-                                                                      true,  // wait ?
-                                                                      true); // is peer address ?
+  ACE_HANDLE handle_h = data_p->control->connectControl ();
   if (unlikely (handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,

@@ -539,6 +539,11 @@ do_work (//bool requestBroadcastReplies_in,
       (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                      : COMMON_EVENT_DISPATCH_PROACTOR);
 
+  FTP_Control_t ftp_control (configuration_in.dispatchConfiguration.dispatch,
+                            configuration_in.connectionConfiguration,
+                            configuration_in.connectionConfiguration_2,
+                            configuration_in.loginOptions);
+
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct FTP_Client_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration_in.allocatorConfiguration))
@@ -553,9 +558,10 @@ do_work (//bool requestBroadcastReplies_in,
 
   Test_I_EventHandler ui_event_handler (
 #if defined (GUI_SUPPORT)
-                                        &CBData_in);
+                                        &CBData_in,
+                                        &ftp_control);
 #else
-                                        NULL);
+                                        &ftp_control);
 #endif // GUI_SUPPORT
   FTP_Client_MessageHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
@@ -676,6 +682,10 @@ do_work (//bool requestBroadcastReplies_in,
 #if defined (GTK_USE)
   CBData_in.eventHandler = &ui_event_handler_2;
 #endif // GTK_USE
+#endif // GUI_SUPPORT
+
+#if defined (GUI_SUPPORT)
+  CBData_in.control = &ftp_control,
 #endif // GUI_SUPPORT
 
   configuration_in.connectionConfiguration.allocatorConfiguration =

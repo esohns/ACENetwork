@@ -40,9 +40,10 @@ class Test_I_EventHandler
 {
  public:
 #if defined (GUI_SUPPORT)
-  Test_I_EventHandler (struct FTP_Client_UI_CBData*); // UI callback data handle
+  Test_I_EventHandler (struct FTP_Client_UI_CBData*, // UI callback data handle
+                       FTP_IControl*);               // FTP control handle
 #else
-  Test_I_EventHandler ();
+  Test_I_EventHandler (FTP_IControl*);               // FTP control handle
 #endif // GUI_SUPPORT
   inline virtual ~Test_I_EventHandler () {}
 
@@ -65,21 +66,11 @@ class Test_I_EventHandler
 #if defined (GUI_SUPPORT)
   struct FTP_Client_UI_CBData*   CBData_;
 #endif // GUI_SUPPORT
+  FTP_IControl*                  control_;
   struct FTP_Client_SessionData* sessionData_;
 };
 
 //////////////////////////////////////////
-
-enum Test_I_EventHandlerState
-{
-  EVENT_HANDLER_STATE_DEVICE = 0, // got device description --> retrieve service description
-  EVENT_HANDLER_STATE_SERVICE, // got service description --> send SOAP commands
-  EVENT_HANDLER_STATE_EXTERNAL_ADDRESS_CONTROL, // receive SOAP reply
-  EVENT_HANDLER_STATE_MAP_CONTROL, // receive SOAP reply
-  ////////////////////////////////////////
-  EVENT_HANDLER_STATE_MAX,
-  EVENT_HANDLER_STATE_INVALID
-};
 
 class Test_I_EventHandler_2
  : public FTP_Client_ISessionNotify_t

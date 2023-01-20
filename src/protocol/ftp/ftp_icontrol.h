@@ -23,13 +23,24 @@
 
 #include <string>
 
+#include "ace/config-macros.h"
+
+#include "ftp_common.h"
+
 class FTP_IControl
 {
  public:
   inline virtual ~FTP_IControl () {}
 
+  virtual ACE_HANDLE connectControl () = 0;
+  virtual ACE_HANDLE connectData () = 0;
+
+  virtual void command (FTP_Command_t) = 0; // command (no parameters)
   virtual void cwd (const std::string&) = 0; // path
-  virtual void list () = 0;
+  virtual void queue (FTP_Command_t) = 0; // command (no parameters)
+
+  ////////////////////////////////////////
+  virtual void responseCB (const struct FTP_Record&) = 0;
 };
 
 #endif

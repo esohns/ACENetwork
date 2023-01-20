@@ -55,19 +55,23 @@
 #include "test_i_ftp_client_defines.h"
 
 #if defined (GUI_SUPPORT)
-Test_I_EventHandler::Test_I_EventHandler (struct FTP_Client_UI_CBData* CBData_in)
+Test_I_EventHandler::Test_I_EventHandler (struct FTP_Client_UI_CBData* CBData_in,
+                                          FTP_IControl* control_in)
 #else
-Test_I_EventHandler::Test_I_EventHandler ()
+Test_I_EventHandler::Test_I_EventHandler (FTP_IControl* control_in)
 #endif // GUI_SUPPORT
 #if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
- , sessionData_ (NULL)
+ , control_ (control_in)
 #else
- : sessionData_ (NULL)
+ : control_(control_in)
 #endif // GUI_SUPPORT
+ , sessionData_(NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::Test_I_EventHandler"));
 
+  // sanity check(s)
+  ACE_ASSERT (control_);
 }
 
 void
@@ -163,6 +167,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   struct FTP_Client_MessageData& record_r =
     const_cast<struct FTP_Client_MessageData&> (data_r.getR ());
 
+  control_->responseCB (record_r);
+
 #if defined (GUI_SUPPORT)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->records.push_back (record_r);
@@ -177,6 +183,19 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     return;
   } // end IF
   state_r.eventSourceIds.insert (event_source_id);
+
+  if (record_r.code == FTP_Codes::FTP_CODE_USER_LOGGED_IN)
+  {
+    event_source_id = g_idle_add (idle_login_complete_cb,
+                                  CBData_);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_login_complete_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
+    state_r.eventSourceIds.insert (event_source_id);
+  } // end IF
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

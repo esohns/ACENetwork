@@ -28,27 +28,50 @@
 
 #include "ftp_icontrol.h"
 
-template <typename DataMessageType>
+template <typename ControlAsynchConnectorType,
+          typename ControlConnectorType,
+          typename DataAsynchConnectorType, // PASV mode
+          typename DataConnectorType,
+          typename UserDataType>
 class FTP_Control_T
  : public FTP_IControl
 {
  public:
-  FTP_Control_T ();
-  inline virtual ~FTP_Control_T () { }
+  FTP_Control_T (enum Common_EventDispatchType,                                                     // dispatch type
+                 const typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::CONFIGURATION_T&, // connection configuration (control-)
+                 const typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::CONFIGURATION_T&,    // connection configuration (data-)
+                 const struct FTP_LoginOptions&);                                                   // login options
+  inline virtual ~FTP_Control_T () {}
 
   // implement FTP_IControl
+  virtual ACE_HANDLE connectControl ();
+  virtual ACE_HANDLE connectData ();
+  virtual void command (FTP_Command_t); // command (no parameters)
   virtual void cwd (const std::string&); // path
-  virtual void list ();
+  inline virtual void queue (FTP_Command_t command_in) { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_); queue_.push_back (command_in); }
+
+  ////////////////////////////////////////
+  virtual void responseCB (const struct FTP_Record&);
 
  private:
-  //ACE_UNIMPLEMENTED_FUNC (FTP_Control_T ())
+  ACE_UNIMPLEMENTED_FUNC (FTP_Control_T ())
   ACE_UNIMPLEMENTED_FUNC (FTP_Control_T (const FTP_Control_T&))
   ACE_UNIMPLEMENTED_FUNC (FTP_Control_T& operator= (const FTP_Control_T&))
 
-  bool getDataConnectionAndMessage (ACE_HANDLE&,        // return value: connection handle
-                                    DataMessageType*&); // return value: message handle
+  // convenient types
+  typedef std::deque<FTP_Command_t> QUEUE_T;
+  typedef QUEUE_T::const_iterator   QUEUE_ITERATOR_T;
 
-  ACE_HANDLE currentDataConnection_;
+  bool getControlConnectionAndMessage (typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T*&,                       // return value: connection handle
+                                       typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T*&); // return value: message handle
+
+  typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::CONFIGURATION_T* connectionConfiguration_; // control-
+  typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::CONFIGURATION_T*    connectionConfiguration_2; // data-
+  ACE_HANDLE                                                                  controlConnection_;
+  enum Common_EventDispatchType                                               dispatch_;
+  ACE_Thread_Mutex                                                            lock_;
+  struct FTP_LoginOptions                                                     loginOptions_;
+  QUEUE_T                                                                     queue_;
 };
 
 // include template definition
