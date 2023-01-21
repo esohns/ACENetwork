@@ -182,9 +182,9 @@ FTP_Control_T<ControlAsynchConnectorType,
               ControlConnectorType,
               DataAsynchConnectorType,
               DataConnectorType,
-              UserDataType>::cwd (const std::string& path_in)
+              UserDataType>::request (const struct FTP_Request& request_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("FTP_Control_T::cwd"));
+  NETWORK_TRACE (ACE_TEXT ("FTP_Control_T::request"));
 
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
@@ -207,68 +207,7 @@ FTP_Control_T<ControlAsynchConnectorType,
     &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T&> (message_p->getR ());
   data_p =
     &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T&> (data_container_p->getR ());
-  data_p->request.command = FTP_Codes::CommandType::FTP_COMMAND_CWD;
-  data_p->request.parameters.push_back (path_in);
-
-  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
-  message_block_p = message_p;
-  try {
-    istream_connection_p->send (message_block_p);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IStreamConnection_T::send(), returning\n")));
-    goto error;
-  }
-  message_p = NULL;
-
-  // step5: clean up
-  istream_connection_p->decrease ();
-
-  return;
-
-error:
-  if (istream_connection_p)
-    istream_connection_p->decrease ();
-  if (message_p)
-    message_p->release ();
-}
-
-template <typename ControlAsynchConnectorType,
-          typename ControlConnectorType,
-          typename DataAsynchConnectorType,
-          typename DataConnectorType,
-          typename UserDataType>
-void
-FTP_Control_T<ControlAsynchConnectorType,
-              ControlConnectorType,
-              DataAsynchConnectorType,
-              DataConnectorType,
-              UserDataType>::command (FTP_Command_t command_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("FTP_Control_T::command"));
-
-  typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
-  typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
-      NULL;
-  ACE_Message_Block* message_block_p = NULL;
-  typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
-      NULL;
-  typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
-      NULL;
-
-  // step4: send request
-  if (unlikely (!getControlConnectionAndMessage (istream_connection_p,
-                                                 message_p)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to FTP_Control_T::getControlConnectionAndMessage(), aborting\n")));
-    goto error;
-  } // end IF
-  data_container_p =
-    &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T&> (message_p->getR ());
-  data_p =
-    &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T&> (data_container_p->getR ());
-  data_p->request.command = command_in;
+  data_p->request = request_in;
 
   // *IMPORTANT NOTE*: fire-and-forget API (message_p)
   message_block_p = message_p;
@@ -315,7 +254,7 @@ FTP_Control_T<ControlAsynchConnectorType,
       NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
       NULL;
-  FTP_Command_t command_e = FTP_Codes::FTP_COMMAND_INVALID;
+  struct FTP_Request request_s;
 
   switch (record_in.code)
   {
@@ -372,6 +311,12 @@ FTP_Control_T<ControlAsynchConnectorType,
         return;
       } // end IF
 
+      { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
+        ACE_ASSERT (!queue_.empty ());
+        request_s = queue_.front ();
+        queue_.pop_front ();
+      } // end lock scope
+
       // set data parser state
       typedef typename DataAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_2_SINGLETON;
       typename DataAsynchConnectorType::CONNECTION_MANAGER_T* connection_manager_p =
@@ -391,13 +336,9 @@ FTP_Control_T<ControlAsynchConnectorType,
       FTP_IParserData* iparser_data_p =
         dynamic_cast<FTP_IParserData*> (module_p->writer ());
       ACE_ASSERT (iparser_data_p);
-      iparser_data_p->state (FTP_STATE_DATA_LIST_DIRECTORY);
-
-      { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
-        ACE_ASSERT (!queue_.empty ());
-        command_e = queue_.front ();
-        queue_.pop_front ();
-      } // end lock scope
+      iparser_data_p->state (request_s.command == FTP_Codes::FTP_COMMAND_LIST ? (request_s.is_directory_list ? FTP_STATE_DATA_LIST_DIRECTORY
+                                                                                                             : FTP_STATE_DATA_LIST_FILE)
+                                                                              : FTP_STATE_DATA_DATA);
 
       goto default_;
     }
@@ -418,8 +359,8 @@ default_:
     }
   } // end SWITCH
 
-  if (command_e != FTP_Codes::FTP_COMMAND_INVALID)
-    command (command_e);
+  if (request_s.command != FTP_Codes::FTP_COMMAND_INVALID)
+    request (request_s);
 }
 
 template <typename ControlAsynchConnectorType,

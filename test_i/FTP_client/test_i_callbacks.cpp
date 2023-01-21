@@ -403,18 +403,18 @@ idle_initialize_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
-  tree_view_column_p =
-    gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("size"),
-                                              cell_renderer_p,
-                                              ACE_TEXT_ALWAYS_CHAR ("size"), 1,
-                                              NULL);
-  if (!tree_view_column_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+  //tree_view_column_p =
+  //  gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("size"),
+  //                                            cell_renderer_p,
+  //                                            ACE_TEXT_ALWAYS_CHAR ("size"), 1,
+  //                                            NULL);
+  //if (!tree_view_column_p)
+  //{
+  //  ACE_DEBUG ((LM_CRITICAL,
+  //              ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
+  //  return G_SOURCE_REMOVE;
+  //} // end IF
+  //gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -704,11 +704,57 @@ treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("selected directory: \"%s\"\n"),
                 ACE_TEXT (string_p)));
-    data_p->control->cwd (string_p);
+    struct FTP_Request request_s;
+    request_s.command = FTP_Codes::FTP_COMMAND_CWD;
+    request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
+    data_p->control->request (request_s);
     g_free (string_p); string_p = NULL;
 
-    data_p->control->queue (FTP_Codes::FTP_COMMAND_LIST);
-    data_p->control->command (FTP_Codes::FTP_COMMAND_PASV);
+    request_s.command = FTP_Codes::FTP_COMMAND_LIST;
+    request_s.parameters.clear ();
+    data_p->control->queue (request_s);
+    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+    data_p->control->request (request_s);
+  } // end IF
+}
+
+void
+treeview_selection_files_changed_cb (GtkTreeSelection* treeSelection_in,
+                                     gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::treeview_selection_files_changed_cb"));
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  GtkTreeModel* tree_model_p = NULL;
+  gchar* string_p = NULL;
+
+  if (gtk_tree_selection_get_selected (treeSelection_in,
+                                       &tree_model_p,
+                                       &data_p->treeIter))
+  {
+    gtk_tree_model_get (tree_model_p,
+                        &data_p->treeIter,
+                        0, &string_p,
+                        -1);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("selected file: \"%s\"\n"),
+                ACE_TEXT (string_p)));
+
+    data_p->fileName = ACE_TEXT_ALWAYS_CHAR (string_p);
+
+    struct FTP_Request request_s;
+    request_s.command = FTP_Codes::FTP_COMMAND_RETR;
+    request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
+    data_p->control->queue (request_s);
+    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+    request_s.parameters.clear ();
+    data_p->control->request (request_s);
+
+    g_free (string_p); string_p = NULL;
   } // end IF
 }
 
@@ -825,8 +871,11 @@ idle_login_complete_cb (gpointer userData_in)
   ACE_ASSERT (action_p);
   gtk_action_set_sensitive (action_p, FALSE);
 
-  data_p->control->queue (FTP_Codes::FTP_COMMAND_LIST);
-  data_p->control->command (FTP_Codes::FTP_COMMAND_PASV);
+  struct FTP_Request request_s;
+  request_s.command = FTP_Codes::FTP_COMMAND_LIST;
+  data_p->control->queue (request_s);
+  request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+  data_p->control->request (request_s);
 
   return G_SOURCE_REMOVE;
 }

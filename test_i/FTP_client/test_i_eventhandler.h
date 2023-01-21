@@ -21,6 +21,7 @@
 #ifndef TEST_I_EVENTHANDLER_H
 #define TEST_I_EVENTHANDLER_H
 
+#include "ace/FILE_IO.h"
 #include "ace/Global_Macros.h"
 
 #include "common_inotify.h"
@@ -102,6 +103,7 @@ class Test_I_EventHandler_2
 #if defined (GUI_SUPPORT)
   struct FTP_Client_UI_CBData*   CBData_;
 #endif // GUI_SUPPORT
+  ACE_FILE_IO                    stream_;
   struct FTP_Client_SessionData* sessionData_;
 };
 

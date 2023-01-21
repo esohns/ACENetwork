@@ -69,11 +69,13 @@ struct FTP_Request
   FTP_Request ()
    : address ((u_short)0, (ACE_UINT32)0)
    , command (FTP_Codes::FTP_COMMAND_INVALID)
+   , is_directory_list (true)
    , parameters ()
   {}
 
   ACE_INET_Addr    address;
   FTP_Command_t    command;
+  bool             is_directory_list; // ? : file-
   FTP_Parameters_t parameters;
 };
 

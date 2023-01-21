@@ -299,6 +299,7 @@ struct FTP_Client_UI_CBData
    , progressData ()
    , records ()
    , entries ()
+   , fileName ()
 #if defined (GTK_USE)
    , treeIter ()
 #endif // GTK_USE
@@ -310,6 +311,7 @@ struct FTP_Client_UI_CBData
   struct FTP_Client_UI_ProgressData progressData;
   FTP_Records_t                     records; // responses
   Common_File_Entries_t             entries; // list entries
+  std::string                       fileName; // current-
 #if defined (GTK_USE)
   GtkTreeIter                       treeIter; // current-
 #endif // GTK_USE

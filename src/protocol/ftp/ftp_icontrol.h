@@ -35,9 +35,9 @@ class FTP_IControl
   virtual ACE_HANDLE connectControl () = 0;
   virtual ACE_HANDLE connectData () = 0;
 
-  virtual void command (FTP_Command_t) = 0; // command (no parameters)
-  virtual void cwd (const std::string&) = 0; // path
-  virtual void queue (FTP_Command_t) = 0; // command (no parameters)
+  virtual void request (const struct FTP_Request&) = 0; // request
+  // *NOTE*: to be executed as soon as the PASV connection has opened
+  virtual void queue (const struct FTP_Request&) = 0; // request
 
   ////////////////////////////////////////
   virtual void responseCB (const struct FTP_Record&) = 0;

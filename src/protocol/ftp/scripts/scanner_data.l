@@ -169,7 +169,6 @@ CRLF           \x0D\x0A
 } // end <list_file>
 <data>{
 {OCTET}{1}                 { driver->offset (yyleng);
-                             yylval->sval->append (yytext);
                              if (driver->offset () == driver->availableBytes ())
                              {
                                BEGIN(INITIAL);

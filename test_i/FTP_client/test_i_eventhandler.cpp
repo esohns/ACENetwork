@@ -29,6 +29,8 @@
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
+#include "ace/FILE_Addr.h"
+#include "ace/FILE_Connector.h"
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
 
@@ -293,6 +295,7 @@ Test_I_EventHandler_2::Test_I_EventHandler_2 ()
 #else
  : sessionData_ (NULL)
 #endif // GUI_SUPPORT
+ , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::Test_I_EventHandler_2"));
 
@@ -367,6 +370,25 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 #endif // GUI_SUPPORT
 
   sessionData_ = NULL;
+
+  if (stream_.get_handle () != ACE_INVALID_HANDLE)
+  {
+    stream_.close ();
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+    guint event_source_id = g_idle_add (idle_data_received_cb,
+                                        CBData_);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_data_received_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
+    state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+  }
 }
 
 void
@@ -468,24 +490,37 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     }
     case FTP_Codes::FTP_RECORD_DATA:
     {
+      if (stream_.get_handle () == ACE_INVALID_HANDLE)
+      {
+        std::string filename_string = Common_File_Tools::getWorkingDirectory ();
+        filename_string += ACE_TEXT_ALWAYS_CHAR (ACE_DIRECTORY_SEPARATOR_STR);
+#if defined (GUI_SUPPORT)
+        filename_string += CBData_->fileName;
+#endif // GUI_SUPPORT
+        ACE_FILE_Addr file_address (filename_string.c_str ());
+
+        ACE_FILE_Connector file_connector (stream_,
+                                           file_address,
+                                           NULL,
+                                           ACE_Addr::sap_any,
+                                           0,
+                                           O_RDWR | O_CREAT,
+                                           ACE_DEFAULT_FILE_PERMS);
+        ACE_ASSERT (stream_.get_handle () != ACE_INVALID_HANDLE);
+      } // end IF
+
+      ACE_Message_Block* message_block_p = &const_cast<Test_I_Message&> (message_in);
+      while (message_block_p)
+      {
+        stream_.send (message_block_p->rd_ptr (),
+                      message_block_p->length ());
+        message_block_p = message_block_p->cont ();
+      } // end WHILE
+
 #if defined (GUI_SUPPORT)
       { ACE_GUARD(ACE_SYNCH_MUTEX, aGuard, state_r.lock);
         CBData_->progressData.transferred += message_in.total_length ();
       } // end lock scope
-#endif // GUI_SUPPORT
-
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-      guint event_source_id = g_idle_add (idle_data_received_cb,
-                                          CBData_);
-      if (event_source_id == 0)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_idle_add(idle_data_received_cb): \"%m\", returning\n")));
-        return;
-      } // end IF
-      state_r.eventSourceIds.insert (event_source_id);
-#endif // GTK_USE
 #endif // GUI_SUPPORT
 
       break;

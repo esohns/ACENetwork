@@ -2043,7 +2043,6 @@ case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
 { driver->offset (yyleng);
-                             yylval->sval->append (yytext);
                              if (driver->offset () == driver->availableBytes ())
                              {
                                BEGIN(INITIAL);

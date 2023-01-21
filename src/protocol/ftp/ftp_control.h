@@ -46,9 +46,8 @@ class FTP_Control_T
   // implement FTP_IControl
   virtual ACE_HANDLE connectControl ();
   virtual ACE_HANDLE connectData ();
-  virtual void command (FTP_Command_t); // command (no parameters)
-  virtual void cwd (const std::string&); // path
-  inline virtual void queue (FTP_Command_t command_in) { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_); queue_.push_back (command_in); }
+  virtual void request (const struct FTP_Request&); // request
+  inline virtual void queue (const struct FTP_Request& request_in) { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_); queue_.push_back (request_in); }
 
   ////////////////////////////////////////
   virtual void responseCB (const struct FTP_Record&);
@@ -59,8 +58,8 @@ class FTP_Control_T
   ACE_UNIMPLEMENTED_FUNC (FTP_Control_T& operator= (const FTP_Control_T&))
 
   // convenient types
-  typedef std::deque<FTP_Command_t> QUEUE_T;
-  typedef QUEUE_T::const_iterator   QUEUE_ITERATOR_T;
+  typedef std::deque<struct FTP_Request> QUEUE_T;
+  typedef QUEUE_T::const_iterator        QUEUE_ITERATOR_T;
 
   bool getControlConnectionAndMessage (typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T*&,                       // return value: connection handle
                                        typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T*&); // return value: message handle
