@@ -364,9 +364,9 @@ idle_initialize_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   GtkTreeViewColumn* tree_view_column_p =
-    gtk_tree_view_column_new_with_attributes ("Directory",
+    gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("directory"),
                                               cell_renderer_p,
-                                              "text", 0,
+                                              ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                               NULL);
   if (!tree_view_column_p)
   {
@@ -376,14 +376,46 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end IF
   gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
 
-  //GtkTreeStore* tree_store_p =
-  //  GTK_TREE_STORE (gtk_builder_get_object ((*iterator).second.second,
-  //                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME)));
-  //ACE_ASSERT (tree_store_p);
-  //gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (tree_store_p),
-  //                                     &data_p->treeIter,
-  //                                     ACE_TEXT_ALWAYS_CHAR ("0"));
-  
+  list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_FILES_NAME)));
+  ACE_ASSERT (list_store_p);
+  tree_view_p =
+    GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_FILES_NAME)));
+  ACE_ASSERT (tree_view_p);
+  cell_renderer_p = gtk_cell_renderer_text_new ();
+  if (!cell_renderer_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  tree_view_column_p =
+    gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("name"),
+                                              cell_renderer_p,
+                                              ACE_TEXT_ALWAYS_CHAR ("text"), 0,
+                                              NULL);
+  if (!tree_view_column_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+  tree_view_column_p =
+    gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("size"),
+                                              cell_renderer_p,
+                                              ACE_TEXT_ALWAYS_CHAR ("size"), 1,
+                                              NULL);
+  if (!tree_view_column_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));

@@ -63,6 +63,7 @@
 #define TEST_I_UI_GTK_TEXTVIEW_NAME                       "textview"
 #define TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME          "treestore_directories"
 #define TEST_I_UI_GTK_TREEVIEW_DIRECTORIES_NAME           "treeview_directories"
+#define TEST_I_UI_GTK_TREEVIEW_FILES_NAME                 "treeview_files"
 
 // GTK progress/status bar
 #define TEST_I_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL         27 // ms (?)

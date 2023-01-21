@@ -364,7 +364,7 @@ FTP_Control_T<ControlAsynchConnectorType,
 
       // connect to PASV server address
       ACE_HANDLE handle_h = connectData ();
-      if (unlikely (handle_h == ACE_INVALID_HANDLE))
+      if (unlikely (!handle_h))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s, returning\n"),
