@@ -850,6 +850,19 @@ idle_data_received_cb (gpointer userData_in)
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
+  GtkWidget* dialog_p =
+    gtk_message_dialog_new (NULL,
+                            GTK_DIALOG_DESTROY_WITH_PARENT,
+                            GTK_MESSAGE_INFO,
+                            GTK_BUTTONS_CLOSE,
+                            ACE_TEXT_ALWAYS_CHAR ("file \"%s\" received"),
+                            data_p->fileName.c_str ());
+  ACE_ASSERT (dialog_p);
+  gtk_dialog_run (GTK_DIALOG (dialog_p));
+  gtk_widget_destroy (dialog_p); dialog_p = NULL;
+
+  data_p->fileName.clear ();
+
   return G_SOURCE_REMOVE;
 }
 
