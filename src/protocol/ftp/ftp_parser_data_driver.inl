@@ -300,8 +300,10 @@ FTP_ParserDataDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
   // sanity check(s)
   ACE_ASSERT (configuration_);
 
+  bool get_next_b = fragment_ != NULL;
+
   if (!fragment_ ||
-      !fragment_->cont ())
+      (get_next_b && !fragment_->cont ()))
   {
     // sanity check(s)
     if (!configuration_->block)
@@ -309,7 +311,7 @@ FTP_ParserDataDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
 
     waitBuffer (); // <-- wait for data
     if (!fragment_ ||
-        !fragment_->cont ())
+        (get_next_b && !fragment_->cont ()))
     {
       // *NOTE*: most probable reason: received session end
 //      ACE_DEBUG ((LM_DEBUG,
@@ -317,7 +319,9 @@ FTP_ParserDataDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
       return false;
     } // end IF
   } // end IF
-  fragment_ = fragment_->cont ();
+  if (get_next_b)
+    fragment_ = fragment_->cont ();
+  //setP (fragment_);
 
   // switch to the next fragment
 
@@ -420,12 +424,17 @@ FTP_ParserDataDriver_T<SessionMessageType>::waitBuffer ()
 
   // 2. append data ?
   if (message_block_p)
-  { ACE_ASSERT (fragment_);
-    ACE_Message_Block* message_block_2 = fragment_;
-    for (;
-         message_block_2->cont ();
-         message_block_2 = message_block_2->cont ());
-    message_block_2->cont (message_block_p);
+  {
+    if (fragment_)
+    { 
+      ACE_Message_Block* message_block_2 = fragment_;
+      for (;
+           message_block_2->cont ();
+           message_block_2 = message_block_2->cont ());
+      message_block_2->cont (message_block_p);
+    } // end IF
+    else
+      fragment_ = message_block_p;
   } // end IF
 }
 

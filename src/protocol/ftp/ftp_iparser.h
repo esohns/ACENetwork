@@ -21,6 +21,10 @@
 #ifndef FTP_IPARSER_H
 #define FTP_IPARSER_H
 
+#include "ace/Message_Block.h"
+
+#include "common_iget.h"
+
 #include "common_parser_common.h"
 
 #include "common_iscanner.h"
@@ -51,6 +55,7 @@ class FTP_IParserData
                                      struct FTP_IParserDataDummy>
  , public Common_ILexScanner_T<struct Common_FlexScannerState,
                                FTP_IParserData>
+ , public Common_ISetP_T<ACE_Message_Block>
 {
  public:
   // convenient types
@@ -60,7 +65,7 @@ class FTP_IParserData
   using IPARSER_T::error;
 
   virtual void directory (const std::string&) = 0;
-  virtual void file () = 0;
+  virtual void file (const std::string&) = 0;
   virtual void data () = 0;
 
   virtual enum FTP_ProtocolDataState state () const = 0;

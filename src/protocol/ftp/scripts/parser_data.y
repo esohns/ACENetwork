@@ -159,9 +159,8 @@ items:                   item items                                { $$ = $1 + $
                          | /* empty */                             { $$ = 0; }
 item:                    "directory"                               { $$ = $1->length () + 2;
                                                                      driver->directory (*$1); }
-                         | "file"                                  { $$ = $1->length ();
-                                                                     driver->file ();
-                                                                     YYACCEPT; }
+                         | "file"                                  { $$ = $1->length () + 2;
+                                                                     driver->file (*$1); }
                          | "data"                                  { $$ = $1;
                                                                      driver->data ();
                                                                      YYACCEPT; }

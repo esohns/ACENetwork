@@ -79,9 +79,10 @@ class FTP_Module_Parser_Data_T
 
   // implement (part of) FTP_IParserData
   virtual void directory (const std::string&);
-  virtual void file ();
+  virtual void file (const std::string&);
   virtual void data ();
   inline virtual ACE_UINT64 availableBytes () { ACE_ASSERT (inherited::headFragment_); return inherited::headFragment_->total_length (); }
+  inline virtual void setP (ACE_Message_Block* messageBlock_in) { ACE_ASSERT (!inherited::headFragment_); inherited::headFragment_ = static_cast<DataMessageType*> (messageBlock_in); }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_Data_T ())

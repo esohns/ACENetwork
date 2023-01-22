@@ -181,7 +181,7 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          ControlMessageType,
                          DataMessageType,
-                         SessionMessageType>::file ()
+                         SessionMessageType>::file (const std::string& fileEntry_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::file"));
 
@@ -273,6 +273,7 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
     message_p->release (); message_p = NULL;
   } // end IF
   inherited::headFragment_ = NULL;
+  inherited::fragment_ = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1135,7 +1135,7 @@ idle_update_log_display_cb (gpointer userData_in)
     // step1: convert text
     for (Common_MessageStackConstIterator_t iterator_2 = data_p->UIState->logStack.begin ();
          iterator_2 != data_p->UIState->logStack.end ();
-         iterator_2++)
+         ++iterator_2)
     {
       string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
       if (!string_p)
