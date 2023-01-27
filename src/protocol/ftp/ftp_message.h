@@ -49,14 +49,8 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
-//struct FTP_MessageData
-// : FTP_Record
-//{
-//  //FTP_MessageData ()
-//  //  : FTP_Record ()
-//  //{}
-//  //~FTP_MessageData () {}
-//};
+typedef Stream_DataBase_T<struct FTP_Record> FTP_MessageData_t;
+
 struct FTP_Stream_SessionData;
 typedef Stream_SessionData_T<struct FTP_Stream_SessionData> FTP_Stream_SessionData_t;
 template <typename MessageData,

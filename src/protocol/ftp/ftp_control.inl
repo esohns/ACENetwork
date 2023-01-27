@@ -26,6 +26,7 @@
 #include "net_client_common_tools.h"
 
 #include "ftp_iparser.h"
+#include "ftp_tools.h"
 
 template <typename ControlAsynchConnectorType,
           typename ControlConnectorType,
@@ -92,7 +93,7 @@ FTP_Control_T<ControlAsynchConnectorType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (connectionConfiguration_->socketConfiguration.address).c_str ())));
-    return G_SOURCE_REMOVE;
+    return 0;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
@@ -155,7 +156,7 @@ FTP_Control_T<ControlAsynchConnectorType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (connectionConfiguration_2->socketConfiguration.address).c_str ())));
-    return G_SOURCE_REMOVE;
+    return 0;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,

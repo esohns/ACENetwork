@@ -113,7 +113,7 @@ FTP_ParserDataDriver_T<SessionMessageType>::initialize (const struct Common_Flex
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
-  yydebug = (configuration_->debugParser ? 1 : 0);
+  zzdebug = (configuration_->debugParser ? 1 : 0);
 #endif // YYDEBUG
 #endif // _DEBUG
 
@@ -154,7 +154,7 @@ FTP_ParserDataDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
   int debug_level = 0;
 #if YYDEBUG
   //debug_level = parser_.debug_level ();
-  debug_level = yydebug;
+  debug_level = zzdebug;
 #endif // YYDEBUG
 
   // parse data fragment
@@ -542,7 +542,7 @@ FTP_ParserDataDriver_T<SessionMessageType>::scan_begin ()
   ACE_ASSERT (fragment_);
 
   // reset scanner state
-  FTP_Scanner_reset (scannerState_);
+  FTP_Scanner_Data_reset (scannerState_);
 
   // create/initialize a new buffer state
   if (configuration_->useYYScanBuffer)
