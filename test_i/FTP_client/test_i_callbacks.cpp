@@ -356,6 +356,17 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_DIRECTORIES_NAME)));
   ACE_ASSERT (tree_view_p);
+#if GTK_CHECK_VERSION (3,0,0)
+#else
+  GtkTreeSelection* tree_selection_p = gtk_tree_view_get_selection (tree_view_p);
+  gulong result_3 =
+    g_signal_connect (tree_selection_p,
+                      ACE_TEXT_ALWAYS_CHAR ("changed"),
+                      G_CALLBACK (treeview_selection_directories_changed_cb),
+                      userData_in);
+  ACE_ASSERT (result_3);
+#endif // GTK_CHECK_VERSION (3,0,0)
+
   cell_renderer_p = gtk_cell_renderer_text_new ();
   if (!cell_renderer_p)
   {
@@ -376,14 +387,21 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end IF
   gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
 
-  list_store_p =
-    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_FILES_NAME)));
-  ACE_ASSERT (list_store_p);
   tree_view_p =
     GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_FILES_NAME)));
   ACE_ASSERT (tree_view_p);
+#if GTK_CHECK_VERSION (3,0,0)
+#else
+  tree_selection_p = gtk_tree_view_get_selection (tree_view_p);
+  result_3 =
+    g_signal_connect (tree_selection_p,
+                      ACE_TEXT_ALWAYS_CHAR ("changed"),
+                      G_CALLBACK (treeview_selection_files_changed_cb),
+                      userData_in);
+  ACE_ASSERT (result_3);
+#endif // GTK_CHECK_VERSION (3,0,0)
+
   cell_renderer_p = gtk_cell_renderer_text_new ();
   if (!cell_renderer_p)
   {
@@ -578,7 +596,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                     ACE_TEXT ("failed to gtk_tree_model_get_iter_first(): \"%m\", aborting\n")));
         return G_SOURCE_REMOVE;
       } // end IF
-#if GTK_CHECK_VERSION(2,30,0)
+#if GTK_CHECK_VERSION (2,30,0)
       GValue value = G_VALUE_INIT;
 #else
       GValue value;
