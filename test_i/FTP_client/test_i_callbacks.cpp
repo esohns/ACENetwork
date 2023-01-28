@@ -606,7 +606,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         if (ACE_OS::strcmp (interface_identifier.c_str (),
 #else
-        if (ACE_OS::strcmp (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str (),
+        if (ACE_OS::strcmp (data_p->configuration->connectionConfiguration.socketConfiguration.interfaceIdentifier.c_str (),
 #endif // ACE_WIN32 || ACE_WIN64
                             g_value_get_string (&value)) == 0)
         {
