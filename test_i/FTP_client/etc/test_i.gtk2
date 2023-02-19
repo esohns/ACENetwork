@@ -7,7 +7,7 @@
     <property name="short_label">Connect</property>
     <property name="tooltip">Connect</property>
     <property name="stock_id">gtk-connect</property>
-    <signal name="activate" handler="action_discovery_activate_cb" swapped="no"/>
+    <signal name="activate" handler="action_connect_activate_cb" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="adjustment_data">
     <property name="upper">10000000</property>
