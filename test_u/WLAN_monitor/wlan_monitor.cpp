@@ -46,7 +46,9 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
+
 #include "common_file_tools.h"
+#include "common_os_tools.h"
 
 #include "common_event_tools.h"
 
@@ -305,7 +307,7 @@ do_processArguments (const int& argc_in,
         interfaceIdentifier_out =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-            Common_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ()));
+            Common_OS_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ()));
 #else
             ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
@@ -1065,12 +1067,12 @@ ACE_TMAIN (int argc_in,
   bool use_signal_based_proactor = !use_reactor;
 //  bool use_signal_based_proactor =
 //      (COMMON_EVENT_DEFAULT_DISPATCH != COMMON_EVENT_DISPATCH_REACTOR);
-  if (!Common_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
-                                        stack_traces,               // stack traces
-                                        use_signal_based_proactor)) // pending signals
+  if (!Common_OS_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
+                                           stack_traces,               // stack traces
+                                           use_signal_based_proactor)) // pending signals
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
+                ACE_TEXT ("failed to Common_OS_Tools::setResourceLimits(), aborting\n")));
     Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    previous_signal_actions,

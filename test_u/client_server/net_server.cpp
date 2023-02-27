@@ -46,7 +46,9 @@
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
+
 #include "common_file_tools.h"
+#include "common_os_tools.h"
 
 #include "common_event_tools.h"
 
@@ -1522,12 +1524,12 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
   bool stack_traces = true;
   bool use_signal_based_proactor = !use_reactor;
-  if (!Common_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
-                                        stack_traces,               // stack traces
-                                        use_signal_based_proactor)) // pending signals
+  if (!Common_OS_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
+                                           stack_traces,               // stack traces
+                                           use_signal_based_proactor)) // pending signals
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
+                ACE_TEXT ("failed to Common_OS_Tools::setResourceLimits(), aborting\n")));
 
     Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),

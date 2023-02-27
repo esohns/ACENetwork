@@ -191,7 +191,7 @@ DllRegisterServer ()
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to RegisterObject(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (CLSID_ACEStream_MediaFramework_MF_MediaSource).c_str ()),
+                ACE_TEXT (Common_OS_Tools::GUIDToString (CLSID_ACEStream_MediaFramework_MF_MediaSource).c_str ()),
                 ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return result;
   } // end IF
@@ -224,7 +224,7 @@ DllUnregisterServer ()
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to UnregisterObject(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (CLSID_ACEStream_MediaFramework_MF_MediaSource).c_str ()),
+                ACE_TEXT (Common_OS_Tools::GUIDToString (CLSID_ACEStream_MediaFramework_MF_MediaSource).c_str ()),
                 ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return result;
   } // end IF
@@ -259,7 +259,7 @@ DllGetClassObject (REFCLSID CLSID_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ClassFactory() (CLSID was: %s): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (CLSID_in).c_str ()),
+                ACE_TEXT (Common_OS_Tools::GUIDToString (CLSID_in).c_str ()),
                 ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return result;
   } // end IF
@@ -269,8 +269,8 @@ DllGetClassObject (REFCLSID CLSID_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ClassFactory::QueryInterface() (CLSID was: %s, IID was: %s): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (CLSID_in).c_str ()),
-                ACE_TEXT (Common_Tools::GUIDToString (IID_in).c_str ()),
+                ACE_TEXT (Common_OS_Tools::GUIDToString (CLSID_in).c_str ()),
+                ACE_TEXT (Common_OS_Tools::GUIDToString (IID_in).c_str ()),
                 ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     class_factory_p->Release (); class_factory_p = NULL;
     return result;
@@ -345,7 +345,7 @@ RegisterByteStreamHandler (REFCLSID CLSID_in,
   int result_2 = -1;
   HKEY key_p = NULL;
   HKEY subkey_p = NULL;
-  std::string clsid_string = Common_Tools::GUIDToString (CLSID_in);
+  std::string clsid_string = Common_OS_Tools::GUIDToString (CLSID_in);
   size_t length_i = 0;
   result = StringCchLength (description_in,
                             STRSAFE_MAX_CCH,
@@ -422,7 +422,7 @@ UnregisterByteStreamHandler (REFCLSID CLSID_in,
 
   HRESULT result = S_OK;
   TCHAR buffer_a[MAX_PATH];
-  std::string clsid_string = Common_Tools::GUIDToString (CLSID_in);
+  std::string clsid_string = Common_OS_Tools::GUIDToString (CLSID_in);
   LSTATUS result_2;
 
   // create the subkey name

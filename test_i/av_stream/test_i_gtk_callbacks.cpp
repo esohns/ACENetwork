@@ -45,8 +45,9 @@
 
 #include "ace/Guard_T.h"
 
-#include "common.h"
 #include "common_file_tools.h"
+#include "common_os_tools.h"
+
 #include "common_timer_manager.h"
 
 #include "common_ui_gtk_common.h"
@@ -510,7 +511,7 @@ load_formats (IAMStreamConfig* IAMStreamConfig_in,
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
                         0, Stream_MediaFramework_Tools::mediaSubTypeToString (*iterator_2, STREAM_MEDIAFRAMEWORK_DIRECTSHOW).c_str (),
-                        1, Common_Tools::GUIDToString (*iterator_2).c_str (),
+                        1, Common_OS_Tools::GUIDToString (*iterator_2).c_str (),
                         -1);
   } // end FOR
 
@@ -622,7 +623,7 @@ load_formats (IMFMediaSource* IMFMediaSource_in,
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
                         0, Stream_MediaFramework_Tools::mediaSubTypeToString (*iterator_2, STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION).c_str (),
-                        1, Common_Tools::GUIDToString (*iterator_2).c_str (),
+                        1, Common_OS_Tools::GUIDToString (*iterator_2).c_str (),
                         -1);
   } // end FOR
 
@@ -1433,7 +1434,7 @@ set_capture_format (struct Test_I_AVStream_UI_CBData* CBData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (G_VALUE_HOLDS (&value, G_TYPE_STRING));
   std::string format_string = g_value_get_string (&value);
-  struct _GUID media_subtype = Common_Tools::StringToGUID (format_string);
+  struct _GUID media_subtype = Common_OS_Tools::StringToGUID (format_string);
   ACE_ASSERT (!InlineIsEqualGUID (media_subtype, GUID_NULL));
 #else
   ACE_ASSERT (G_VALUE_HOLDS (&value, G_TYPE_UINT));
@@ -6738,7 +6739,7 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Stream_MediaFramework_MediaFoundation_Tools::getMediaSource(\"%s\"), returning\n"),
-                    ACE_TEXT (Common_Tools::GUIDToString ((*mediafoundation_modulehandler_iterator).second.second->deviceIdentifier.identifier._guid).c_str ())));
+                    ACE_TEXT (Common_OS_Tools::GUIDToString ((*mediafoundation_modulehandler_iterator).second.second->deviceIdentifier.identifier._guid).c_str ())));
         return;
       } // end IF
       ACE_ASSERT ((*mediafoundation_modulehandler_iterator).second.second->mediaSource);
@@ -7028,7 +7029,7 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
         return;
       }
     } // end SWITCH
-    format_string = Common_Tools::GUIDToString (GUID_s);
+    format_string = Common_OS_Tools::GUIDToString (GUID_s);
     g_value_init (&value, G_TYPE_STRING);
     g_value_set_string (&value,
                         format_string.c_str ());
@@ -7162,7 +7163,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
   std::string format_string = g_value_get_string (&value);
-  struct _GUID GUID_s = Common_Tools::StringToGUID (format_string);
+  struct _GUID GUID_s = Common_OS_Tools::StringToGUID (format_string);
   ACE_ASSERT (!InlineIsEqualGUID (GUID_s, GUID_NULL));
 #else
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
@@ -7411,7 +7412,7 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
   struct _GUID GUID_s =
-    Common_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value)));
+    Common_OS_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value)));
 #else
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
   __u32 format_i = g_value_get_uint (&value);

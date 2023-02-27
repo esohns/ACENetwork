@@ -35,6 +35,8 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_file_tools.h"
+#include "common_os_tools.h"
+
 #include "common_timer_manager.h"
 
 #include "common_ui_gtk_common.h"
@@ -491,7 +493,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       std::string interface_identifier =
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-        Common_Tools::GUIDToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
+        Common_OS_Tools::GUIDToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
         NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
@@ -1295,8 +1297,8 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 //#endif
   NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    Common_Tools::StringToGUID (g_value_get_string (&value));
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+    Common_OS_Tools::StringToGUID (g_value_get_string (&value));
 #else
     g_value_get_string (&value);
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)

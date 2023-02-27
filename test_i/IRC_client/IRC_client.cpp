@@ -65,6 +65,7 @@ using namespace std;
 #endif // HAVE_CONFIG_H
 
 #include "common_defines.h"
+#include "common_os_tools.h"
 
 #include "common_event_tools.h"
 
@@ -1334,12 +1335,12 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_CHANNEL);
   // populate user/realname
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Common_Tools::getUserName (configuration.protocolConfiguration.loginOptions.user.userName,
-                             configuration.protocolConfiguration.loginOptions.user.realName);
+  Common_OS_Tools::getUserName (configuration.protocolConfiguration.loginOptions.user.userName,
+                                configuration.protocolConfiguration.loginOptions.user.realName);
 #else
-  Common_Tools::getUserName (static_cast<uid_t> (-1),
-                             configuration.protocolConfiguration.loginOptions.user.userName,
-                             configuration.protocolConfiguration.loginOptions.user.realName);
+  Common_OS_Tools::getUserName (static_cast<uid_t> (-1),
+                                configuration.protocolConfiguration.loginOptions.user.userName,
+                                configuration.protocolConfiguration.loginOptions.user.realName);
 #endif // ACE_WIN32 || ACE_WIN64
 
   // step7: parse configuration file(s) (if any)

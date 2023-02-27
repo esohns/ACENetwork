@@ -63,8 +63,9 @@
 
 #include "common_defines.h"
 #include "common_file_tools.h"
-#include "common_tools.h"
+#include "common_os_tools.h"
 #include "common_process_tools.h"
+#include "common_tools.h"
 
 #if defined (ACE_LINUX)
 #if defined (DBUS_SUPPORT)
@@ -1781,7 +1782,7 @@ Net_Common_Tools::interfaceToConnection (REFGUID interfaceIdentifier_in)
 
   std::string section_string =
     ACE_TEXT_ALWAYS_CHAR ("SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}\\");
-  section_string += Common_Tools::GUIDToString (interfaceIdentifier_in);
+  section_string += Common_OS_Tools::GUIDToString (interfaceIdentifier_in);
   HKEY key_p = NULL;
   // *NOTE*: this fails intermittently (*TODO*: why ?) --> retry a few times
 retry:
@@ -1808,9 +1809,9 @@ retry:
 #endif // _DEBUG
     goto retry;
   } // end IF
-  result = Common_Tools::getKeyValue (key_p,
-                                      ACE_TEXT_ALWAYS_CHAR ("Connection"),
-                                      ACE_TEXT_ALWAYS_CHAR ("Name"));
+  result = Common_OS_Tools::getKeyValue (key_p,
+                                         ACE_TEXT_ALWAYS_CHAR ("Connection"),
+                                         ACE_TEXT_ALWAYS_CHAR ("Name"));
   ACE_ASSERT (!result.empty ());
   //RegCloseKey (key_p); key_p = NULL;
 
@@ -1912,7 +1913,7 @@ Net_Common_Tools::interfaceToIndex_2 (REFGUID interfaceIdentifier_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::ConvertInterfaceGuidToLuid(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ()),
+                ACE_TEXT (Common_OS_Tools::GUIDToString (interfaceIdentifier_in).c_str ()),
                 ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return result;
   } // end IF
@@ -2124,9 +2125,9 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
   if (interfaceIdentifier_in.empty ())
     return 0;
   struct _GUID interface_identifier_s = GUID_NULL, interface_identifier_2 = GUID_NULL;
-  if (Common_Tools::isGUID (interfaceIdentifier_in))
+  if (Common_OS_Tools::isGUID (interfaceIdentifier_in))
     interface_identifier_s =
-      Common_Tools::StringToGUID (interfaceIdentifier_in);
+      Common_OS_Tools::StringToGUID (interfaceIdentifier_in);
 
   std::string interface_identifier;
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
@@ -2161,10 +2162,10 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
   adapter_info_2 = adapter_info_p;
   while (adapter_info_2)
   {
-    if (Common_Tools::isGUID (adapter_info_2->AdapterName))
+    if (Common_OS_Tools::isGUID (adapter_info_2->AdapterName))
     {
       interface_identifier_2 =
-        Common_Tools::StringToGUID (adapter_info_2->AdapterName);
+        Common_OS_Tools::StringToGUID (adapter_info_2->AdapterName);
       interface_identifier =
         Net_Common_Tools::interfaceToConnection (interface_identifier_2);
       ACE_ASSERT (!interface_identifier.empty ());
@@ -2236,9 +2237,9 @@ Net_Common_Tools::indexToInterface (NET_IFINDEX interfaceIndex_in)
       // *NOTE*: apparently AdapterName contains the interface identifier GUID
       //         --> look up its 'friendly name' in the registry
       // *TODO*: use GetAdaptersAddresses() instead
-      if (Common_Tools::isGUID (adapter_info_2->AdapterName))
+      if (Common_OS_Tools::isGUID (adapter_info_2->AdapterName))
         result =
-          Net_Common_Tools::interfaceToConnection (Common_Tools::StringToGUID (adapter_info_2->AdapterName));
+          Net_Common_Tools::interfaceToConnection (Common_OS_Tools::StringToGUID (adapter_info_2->AdapterName));
       else
         result = adapter_info_2->AdapterName;
       break;
@@ -2453,7 +2454,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
+                ACE_TEXT (Common_OS_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),

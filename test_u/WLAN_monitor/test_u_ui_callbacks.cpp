@@ -24,6 +24,8 @@
 #include "ace/Log_Msg.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_os_tools.h"
+
 #include "common_error_tools.h"
 
 #include "common_timer_manager.h"
@@ -99,10 +101,10 @@ load_wlan_interfaces (GtkListStore* listStore_in
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
                         0, Net_Common_Tools::interfaceToString (*iterator).c_str (),
-                        1, Common_Tools::GUIDToString (*iterator).c_str (),
+                        1, Common_OS_Tools::GUIDToString (*iterator).c_str (),
 #else
                         0, (*iterator).c_str (),
-                        1, Common_Tools::GUIDToString (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator))).c_str (),
+                        1, Common_OS_Tools::GUIDToString (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator))).c_str (),
 #endif // _WIN32_WINNT_VISTA
 #else
                         0, (*iterator).c_str (),
@@ -980,9 +982,9 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                                 1, &value_s);
       ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
       ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
-        Common_Tools::StringToGUID (g_value_get_string (&value_s));
+        Common_OS_Tools::StringToGUID (g_value_get_string (&value_s));
 #else
-                                0, &value_s);
+                                       0, &value_s);
       ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
       ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
           ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value_s));
@@ -1301,7 +1303,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
-    Common_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value)));
+    Common_OS_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value)));
 #else
   ui_cb_data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
     ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value));
