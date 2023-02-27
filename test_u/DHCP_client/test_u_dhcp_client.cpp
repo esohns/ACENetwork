@@ -546,8 +546,8 @@ do_work (bool requestBroadcastReplies_in,
 #if defined (_DEBUG)
 //  Common_Tools::printCapabilities ();
 #endif // _DEBUG
-  if (!Common_Tools::hasCapability (CAP_NET_BIND_SERVICE))
-    if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
+  if (!Common_OS_Tools::hasCapability (CAP_NET_BIND_SERVICE))
+    if (!Common_OS_Tools::setCapability (CAP_NET_BIND_SERVICE))
     {
       char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
       ACE_ASSERT (capability_name_string_p);
@@ -558,7 +558,7 @@ do_work (bool requestBroadcastReplies_in,
       ACE_UNUSED_ARG (result);
       return;
     } // end IF
-  ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
+  ACE_ASSERT (Common_OS_Tools::hasCapability (CAP_NET_BIND_SERVICE));
 //  Common_Tools::printPriviledges ();
 #endif // ACE_WIN32 || ACE_WIN64
 

@@ -37,9 +37,9 @@
 #include "ace/SStringfwd.h"
 
 #include "common_file_tools.h"
-#include "common_string_tools.h"
-#include "common_tools.h"
+#include "common_os_tools.h"
 #include "common_process_tools.h"
+#include "common_string_tools.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -880,10 +880,10 @@ next_3:
     bool drop_privileges = false;
     if (!Common_File_Tools::canWrite (configuration_file_path, static_cast<uid_t> (-1)))
     {
-      if (Common_Tools::canCapability (CAP_DAC_OVERRIDE))
-        drop_capabilities = Common_Tools::setCapability (CAP_DAC_OVERRIDE,
-                                                         CAP_EFFECTIVE);
-      else if (Common_Tools::switchUser (0)) // try seteuid()
+      if (Common_OS_Tools::canCapability (CAP_DAC_OVERRIDE))
+        drop_capabilities = Common_OS_Tools::setCapability (CAP_DAC_OVERRIDE,
+                                                            CAP_EFFECTIVE);
+      else if (Common_OS_Tools::switchUser (0)) // try seteuid()
         drop_privileges = true;
     } // end IF
 
@@ -900,15 +900,15 @@ next_3:
                   ACE_TEXT ("failed to ACE_Ini_ImpExp::export_config(\"%s\"): \"%m\", aborting\n"),
                   ACE_TEXT (configuration_file_path.c_str ())));
       if (drop_capabilities)
-        Common_Tools::dropCapability (CAP_DAC_OVERRIDE);
+        Common_OS_Tools::dropCapability (CAP_DAC_OVERRIDE);
       else if (drop_privileges)
-        Common_Tools::switchUser (static_cast<uid_t> (-1));
+        Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
       return false;
     } // end IF
     if (drop_capabilities)
-      Common_Tools::dropCapability (CAP_DAC_OVERRIDE);
+      Common_OS_Tools::dropCapability (CAP_DAC_OVERRIDE);
     else if (drop_privileges)
-      Common_Tools::switchUser (static_cast<uid_t> (-1));
+      Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
   } // end IF
 
   return true;

@@ -30,7 +30,7 @@
 #include "common_defines.h"
 #include "common_macros.h"
 #if defined (ACE_LINUX)
-#include "common_tools.h"
+#include "common_os_tools.h"
 #endif // ACE_LINUX
 
 #include "stream_iallocator.h"
@@ -212,10 +212,10 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   if (unlikely (!inherited::configuration_->writeOnly &&
                 (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (Common_Tools::canCapability (CAP_NET_BIND_SERVICE))
-      drop_capabilities = Common_Tools::setCapability (CAP_NET_BIND_SERVICE,
-                                                       CAP_EFFECTIVE);
-    else if (Common_Tools::switchUser (0)) // try seteuid()
+    if (Common_OS_Tools::canCapability (CAP_NET_BIND_SERVICE))
+      drop_capabilities = Common_OS_Tools::setCapability (CAP_NET_BIND_SERVICE,
+                                                          CAP_EFFECTIVE);
+    else if (Common_OS_Tools::switchUser (0)) // try seteuid()
       drop_privileges = true;
   } // end IF
 #endif // ACE_LINUX
@@ -235,13 +235,13 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #if defined (ACE_LINUX)
   if (drop_capabilities)
   {
-    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE,
-                                  CAP_EFFECTIVE);
+    Common_OS_Tools::dropCapability (CAP_NET_BIND_SERVICE,
+                                     CAP_EFFECTIVE);
     drop_capabilities = false;
   } // end IF
   if (drop_privileges)
   {
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
     drop_privileges = false;
   } // end IF
 #endif // ACE_LINUX
@@ -600,10 +600,10 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 error:
 #if defined (ACE_LINUX)
   if (drop_capabilities)
-    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE,
-                                  CAP_EFFECTIVE);
+    Common_OS_Tools::dropCapability (CAP_NET_BIND_SERVICE,
+                                     CAP_EFFECTIVE);
   if (drop_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   if (handle_sockets)
   {
@@ -1141,10 +1141,10 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
   if (unlikely (!inherited::configuration_->writeOnly &&
                 (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (Common_Tools::canCapability (CAP_NET_BIND_SERVICE))
-      drop_capabilities = Common_Tools::setCapability (CAP_NET_BIND_SERVICE,
-                                                       CAP_EFFECTIVE);
-    else if (Common_Tools::switchUser (0)) // try seteuid()
+    if (Common_OS_Tools::canCapability (CAP_NET_BIND_SERVICE))
+      drop_capabilities = Common_OS_Tools::setCapability (CAP_NET_BIND_SERVICE,
+                                                          CAP_EFFECTIVE);
+    else if (Common_OS_Tools::switchUser (0)) // try seteuid()
       drop_privileges = true;
   } // end IF
 #endif // ACE_LINUX
@@ -1182,13 +1182,13 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 #if defined (ACE_LINUX)
   if (drop_capabilities)
   {
-    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE,
-                                  CAP_EFFECTIVE);
+    Common_OS_Tools::dropCapability (CAP_NET_BIND_SERVICE,
+                                     CAP_EFFECTIVE);
     drop_capabilities = false;
   } // end IF
   if (drop_privileges)
   {
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
     drop_privileges = false;
   } // end IF
 #endif // ACE_LINUX
@@ -1514,10 +1514,10 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 error:
 #if defined (ACE_LINUX)
   if (drop_capabilities)
-    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE,
-                                  CAP_EFFECTIVE);
+    Common_OS_Tools::dropCapability (CAP_NET_BIND_SERVICE,
+                                     CAP_EFFECTIVE);
   if (drop_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   if (handle_sockets)
   {

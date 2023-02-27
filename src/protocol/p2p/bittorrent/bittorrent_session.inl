@@ -27,6 +27,7 @@
 #include "ace/Log_Msg.h"
 
 #include "common_file_tools.h"
+#include "common_tools.h"
 
 #include "common_parser_common.h"
 #include "net_defines.h"

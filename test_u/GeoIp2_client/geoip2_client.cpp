@@ -43,7 +43,7 @@
 #endif // HAVE_CONFIG_H
 
 #include "common_file_tools.h"
-#include "common_tools.h"
+#include "common_os_tools.h"
 
 #include "common_logger.h"
 #include "common_log_tools.h"
@@ -588,9 +588,9 @@ ACE_TMAIN (int argc_in,
   bool use_signal_based_proactor = true;
 #endif // ACE_WIN32 || ACE_WIN64
   bool stack_traces = true;
-  if (unlikely (!Common_Tools::setResourceLimits (use_fd_based_reactor,        // file descriptors
-                                                  stack_traces,                // stack traces
-                                                  use_signal_based_proactor))) // pending signals
+  if (unlikely (!Common_OS_Tools::setResourceLimits (use_fd_based_reactor,        // file descriptors
+                                                     stack_traces,                // stack traces
+                                                     use_signal_based_proactor))) // pending signals
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));

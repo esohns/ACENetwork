@@ -23,7 +23,7 @@
 #include "ace/Reactor.h"
 
 #include "common_defines.h"
-#include "common_tools.h"
+#include "common_os_tools.h"
 
 #include "net_common_tools.h"
 #include "net_configuration.h"
@@ -202,9 +202,9 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   if (unlikely (!configuration_p->writeOnly &&
                 (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (!Common_Tools::hasCapability (CAP_NET_BIND_SERVICE))
+    if (!Common_OS_Tools::hasCapability (CAP_NET_BIND_SERVICE))
     {
-      if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
+      if (!Common_OS_Tools::setCapability (CAP_NET_BIND_SERVICE))
       {
         char* capability_name_string_p = ::cap_to_name (CAP_NET_BIND_SERVICE);
         ACE_ASSERT (capability_name_string_p);
@@ -213,7 +213,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                     ACE_TEXT (capability_name_string_p)));
         result = ::cap_free (capability_name_string_p);
         ACE_UNUSED_ARG (result);
-        if (!Common_Tools::switchUser (0))
+        if (!Common_OS_Tools::switchUser (0))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
@@ -221,7 +221,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
         } // end IF
       } // end IF
       else
-        ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
+        ACE_ASSERT (Common_OS_Tools::hasCapability (CAP_NET_BIND_SERVICE));
     } // end IF
     handle_privileges = true;
   } // end IF
@@ -245,8 +245,8 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_LINUX)
   if (handle_privileges)
   {
-    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE);
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::dropCapability (CAP_NET_BIND_SERVICE);
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
   } // end IF
 #endif // ACE_LINUX
   handle = inherited2::peer_.get_handle ();
@@ -497,7 +497,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   if (handle_sockets)
   {
@@ -749,7 +749,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   if (unlikely (!configuration_p->writeOnly &&
                 (configuration_p->listenAddress.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (!Common_Tools::switchUser (0))
+    if (!Common_OS_Tools::switchUser (0))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
@@ -778,7 +778,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   handle = inherited2::peer_.get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -1018,7 +1018,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   if (handle_sockets)
   {
@@ -1330,10 +1330,10 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   if (unlikely (!configuration_p->writeOnly &&
                 (configuration_p->listenAddress.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (!Common_Tools::switchUser (0))
+    if (!Common_OS_Tools::switchUser (0))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Common_OS_Tools::switchUser(0): \"%m\", aborting\n")));
       goto error;
     } // end IF
     handle_privileges = true;
@@ -1357,7 +1357,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   handle = inherited2::peer_.get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -1597,7 +1597,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   if (handle_sockets)
   {

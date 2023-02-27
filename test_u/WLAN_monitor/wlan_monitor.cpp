@@ -495,7 +495,7 @@ do_work (bool autoAssociate_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (_DEBUG)
-  Common_Tools::printCapabilities ();
+  Common_OS_Tools::printCapabilities ();
 #endif // _DEBUG
 #endif // ACE_WIN32 || ACE_WIN64
 

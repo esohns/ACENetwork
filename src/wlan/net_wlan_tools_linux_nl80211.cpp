@@ -42,7 +42,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
-#include "common_tools.h"
+#include "common_os_tools.h"
 
 #include "net_common.h"
 #include "net_common_tools.h"
@@ -1946,16 +1946,16 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
 
 #if defined (ACE_LINUX)
   // (temporarily try to) elevate privileges to start scan
-  if (!Common_Tools::hasCapability (CAP_NET_ADMIN,
-                                    CAP_EFFECTIVE))
+  if (!Common_OS_Tools::hasCapability (CAP_NET_ADMIN,
+                                       CAP_EFFECTIVE))
   {
-    if (likely (Common_Tools::setCapability (CAP_NET_ADMIN,
-                                             CAP_EFFECTIVE)))
+    if (likely (Common_OS_Tools::setCapability (CAP_NET_ADMIN,
+                                                CAP_EFFECTIVE)))
       handle_capabilities_b = true;
     else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Tools::setCapability(%s), continuing\n"),
-                  ACE_TEXT (Common_Tools::capabilityToString (CAP_NET_ADMIN).c_str ())));
+                  ACE_TEXT (Common_OS_Tools::capabilityToString (CAP_NET_ADMIN).c_str ())));
   } // end IF
 #endif // ACE_LINUX
 
@@ -2099,7 +2099,7 @@ nla_put_failure:
     nlmsg_free (message_p);
 #if defined (ACE_LINUX)
   if (handle_capabilities_b)
-    if (!Common_Tools::dropCapability (CAP_NET_ADMIN))
+    if (!Common_OS_Tools::dropCapability (CAP_NET_ADMIN))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Tools::dropCapability(CAP_NET_ADMIN): \"%m\", continuing\n")));
 #endif // ACE_LINUX

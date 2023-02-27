@@ -23,7 +23,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/Proactor.h"
 
-#include "common_tools.h"
+#include "common_os_tools.h"
 
 #include "stream_common.h"
 
@@ -168,7 +168,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    Common_OS_Tools::switchUser (static_cast<uid_t> (-1));
 #endif
 
   if (handle_socket)
