@@ -32,9 +32,8 @@
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
-//#include "ace/Synch.h"
 
-#include "common_tools.h"
+#include "common_os_tools.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -587,15 +586,15 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
 
 #if defined (ACE_LINUX)
   // (temporarily) elevate privileges to start scan
-  if (!Common_Tools::hasCapability (CAP_NET_ADMIN,
-                                    CAP_EFFECTIVE))
+  if (!Common_OS_Tools::hasCapability (CAP_NET_ADMIN,
+                                       CAP_EFFECTIVE))
   {
-    if (unlikely (!Common_Tools::setCapability (CAP_NET_ADMIN,
-                                                CAP_EFFECTIVE)))
+    if (unlikely (!Common_OS_Tools::setCapability (CAP_NET_ADMIN,
+                                                   CAP_EFFECTIVE)))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setCapability(%s): \"%m\", aborting\n"),
-                  ACE_TEXT (Common_Tools::capabilityToString (CAP_NET_ADMIN).c_str ())));
+                  ACE_TEXT ("failed to Common_OS_Tools::setCapability(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (Common_OS_Tools::capabilityToString (CAP_NET_ADMIN).c_str ())));
       goto error;
     } // end IF
     handle_capabilities = true;
@@ -672,9 +671,9 @@ error:
 
 #if defined (ACE_LINUX)
   if (handle_capabilities)
-    if (!Common_Tools::dropCapability (CAP_NET_ADMIN))
+    if (!Common_OS_Tools::dropCapability (CAP_NET_ADMIN))
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::dropCapability(CAP_NET_ADMIN): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to Common_OS_Tools::dropCapability(CAP_NET_ADMIN): \"%m\", continuing\n")));
 #endif // ACE_LINUX
 }
 
@@ -990,14 +989,12 @@ retry:
         //        else
         //          printf("                    ESSID:off/any/hidden\n");
         result.push_back (essid_string);
-#if defined (_DEBUG)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("\"%s\": found wireless access point (MAC address: %s, ESSID: %s)...\n"),
                     ACE_TEXT (interfaceIdentifier_in.c_str ()),
                     ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address),
                                                                           NET_LINKLAYER_802_11).c_str ()),
                     ACE_TEXT (essid_string.c_str ())));
-#endif
         break;
       }
       default:
