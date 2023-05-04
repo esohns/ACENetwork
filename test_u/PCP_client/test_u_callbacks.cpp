@@ -909,12 +909,12 @@ idle_update_log_display_cb (gpointer userData_in)
 
   gchar* string_p = NULL;
   // sanity check
-  if (data_p->UIState->logStack.empty ())
+  if (data_p->UIState->logQueue.empty ())
     return G_SOURCE_CONTINUE;
 
   // step1: convert text
-  for (Common_MessageStackConstIterator_t iterator_2 = data_p->UIState->logStack.begin ();
-       iterator_2 != data_p->UIState->logStack.end ();
+  for (Common_Log_MessageQueueConstIterator_t iterator_2 = data_p->UIState->logQueue.begin ();
+       iterator_2 != data_p->UIState->logQueue.end ();
        iterator_2++)
   {
     string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
@@ -935,7 +935,7 @@ idle_update_log_display_cb (gpointer userData_in)
     g_free (string_p); string_p = NULL;
   } // end FOR
 
-  data_p->UIState->logStack.clear ();
+  data_p->UIState->logQueue.clear ();
 
   // step3: scroll the view accordingly
 //  // move the iterator to the beginning of line, so it doesn't scroll

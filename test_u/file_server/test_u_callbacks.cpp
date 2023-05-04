@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "common_log_common.h"
 #include "stdafx.h"
 
 #include "test_u_callbacks.h"
@@ -82,14 +83,14 @@ idle_update_log_display_cb (gpointer userData_in)
                                 &text_iterator);
 
   gchar* converted_text = NULL;
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->logQueueLock, G_SOURCE_REMOVE);
     // sanity check
-    if (data_p->UIState->logStack.empty ())
+    if (data_p->UIState->logQueue.empty ())
       return G_SOURCE_CONTINUE;
 
     // step1: convert text
-    for (Common_MessageStackConstIterator_t iterator_2 = data_p->UIState->logStack.begin ();
-         iterator_2 != data_p->UIState->logStack.end ();
+    for (Common_Log_MessageQueueConstIterator_t iterator_2 = data_p->UIState->logQueue.begin ();
+         iterator_2 != data_p->UIState->logQueue.end ();
          ++iterator_2)
     {
       converted_text = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
@@ -111,26 +112,26 @@ idle_update_log_display_cb (gpointer userData_in)
       g_free (converted_text);
     } // end FOR
 
-    data_p->UIState->logStack.clear ();
+    data_p->UIState->logQueue.clear ();
   } // end lock scope
 
-    // step3: scroll the view accordingly
-    //  // move the iterator to the beginning of line, so it doesn't scroll
-    //  // in horizontal direction
-    //  gtk_text_iter_set_line_offset (&text_iterator, 0);
+  // step3: scroll the view accordingly
+  //  // move the iterator to the beginning of line, so it doesn't scroll
+  //  // in horizontal direction
+  //  gtk_text_iter_set_line_offset (&text_iterator, 0);
 
-    //  // ...and place the mark at iter. The mark will stay there after insertion
-    //  // because it has "right" gravity
-    //  GtkTextMark* text_mark_p =
-    //      gtk_text_buffer_get_mark (buffer_p,
-    //                                ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SCROLLMARK_NAME));
-    ////  gtk_text_buffer_move_mark (buffer_p,
-    ////                             text_mark_p,
-    ////                             &text_iterator);
+  //  // ...and place the mark at iter. The mark will stay there after insertion
+  //  // because it has "right" gravity
+  //  GtkTextMark* text_mark_p =
+  //      gtk_text_buffer_get_mark (buffer_p,
+  //                                ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SCROLLMARK_NAME));
+  ////  gtk_text_buffer_move_mark (buffer_p,
+  ////                             text_mark_p,
+  ////                             &text_iterator);
 
-    //  // scroll the mark onscreen
-    //  gtk_text_view_scroll_mark_onscreen (view_p,
-    //                                      text_mark_p);
+  //  // scroll the mark onscreen
+  //  gtk_text_view_scroll_mark_onscreen (view_p,
+  //                                      text_mark_p);
   GtkAdjustment* adjustment_p =
     GTK_ADJUSTMENT (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_ADJUSTMENT_NAME)));

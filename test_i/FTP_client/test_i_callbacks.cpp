@@ -17,6 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "common_log_common.h"
 #include "stdafx.h"
 
 #include "test_i_callbacks.h"
@@ -1148,13 +1149,13 @@ idle_update_log_display_cb (gpointer userData_in)
   gchar* string_p = NULL;
 
   // sanity check(s)
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-    if (data_p->UIState->logStack.empty ())
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->logQueueLock, G_SOURCE_REMOVE);
+    if (data_p->UIState->logQueue.empty ())
       return G_SOURCE_CONTINUE;
 
     // step1: convert text
-    for (Common_MessageStackConstIterator_t iterator_2 = data_p->UIState->logStack.begin ();
-         iterator_2 != data_p->UIState->logStack.end ();
+    for (Common_Log_MessageQueueConstIterator_t iterator_2 = data_p->UIState->logQueue.begin ();
+         iterator_2 != data_p->UIState->logQueue.end ();
          ++iterator_2)
     {
       string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
@@ -1175,7 +1176,7 @@ idle_update_log_display_cb (gpointer userData_in)
       g_free (string_p); string_p = NULL;
     } // end FOR
 
-    data_p->UIState->logStack.clear ();
+    data_p->UIState->logQueue.clear ();
   } // end lock scope
 
   // step3: scroll the view accordingly

@@ -4430,16 +4430,16 @@ idle_update_log_display_cb (gpointer userData_in)
                                 &text_iterator);
 
   gchar* string_p = NULL;
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.logStackLock, G_SOURCE_REMOVE);
-    while (!state_r.logStack.empty ())
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.logQueueLock, G_SOURCE_REMOVE);
+    while (!state_r.logQueue.empty ())
     {
       // step1: convert text
-      string_p = Common_UI_GTK_Tools::localeToUTF8 (state_r.logStack.front ());
+      string_p = Common_UI_GTK_Tools::localeToUTF8 (state_r.logQueue.front ());
       if (!string_p)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
-                    ACE_TEXT (state_r.logStack.front ().c_str ())));
+                    ACE_TEXT (state_r.logQueue.front ().c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
 
@@ -4452,7 +4452,7 @@ idle_update_log_display_cb (gpointer userData_in)
       // clean up
       g_free (string_p); string_p = NULL;
 
-      state_r.logStack.pop_front ();
+      state_r.logQueue.pop_front ();
     } // end WHILE
   } // end lock scope
 

@@ -52,7 +52,7 @@
 
 #include "common_event_tools.h"
 
-#include "common_logger.h"
+#include "common_logger_queue.h"
 #include "common_log_tools.h"
 
 #include "common_signal_tools.h"
@@ -911,23 +911,20 @@ ACE_TMAIN (int argc_in,
   // step1d: initialize logging and/or tracing
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
   WLANMonitor_UI_GTK_Manager_t* gtk_manager_p =
     WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   struct WLANMonitor_UI_GTK_State& state_r =
     const_cast<struct WLANMonitor_UI_GTK_State&> (gtk_manager_p->getR ());
-  logstack_p = &state_r.logStack;
-  lock_p = &state_r.logStackLock;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
   // step1d: initialize logging and/or tracing
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Common_Logger_t logger (logstack_p,
-                          lock_p);
+  Common_Logger_Queue_t logger;
+  logger.initialize (&state_r.logQueue,
+                     &state_r.logQueueLock);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   std::string log_file_name;
@@ -936,15 +933,16 @@ ACE_TMAIN (int argc_in,
       Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
                                         ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                              ACE_DIRECTORY_SEPARATOR_CHAR)));
-  if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
-                                            log_file_name,                 // log file name
-                                            true,                          // log to syslog ?
-                                            false,                         // trace messages ?
-                                            trace_information,             // debug messages ?
+  if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]),                    // program name
+                                            log_file_name,                                 // log file name
+                                            true,                                          // log to syslog ?
+                                            false,                                         // trace messages ?
+                                            trace_information,                             // debug messages ?
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                            (UI_definition_file_path.empty () ? NULL
-                                                                              : &logger))) // (ui) logger ?
+                                            NULL))                                         // (ui) logger ?
+//                                            (UI_definition_file_path.empty () ? NULL
+//                                                                              : &logger))) // (ui) logger ?
 #elif defined (WXWIDGETS_USE)
                                             NULL))                                         // (ui) logger ?
 #else

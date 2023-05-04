@@ -51,7 +51,7 @@
 
 #include "common_event_tools.h"
 
-#include "common_logger.h"
+#include "common_logger_queue.h"
 #include "common_log_tools.h"
 
 #include "common_signal_tools.h"
@@ -1333,15 +1333,11 @@ ACE_TMAIN (int argc_in,
   // step1d: initialize logging and/or tracing
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  logstack_p = &state_r.logStack;
-  lock_p = &state_r.logStackLock;
   ui_cb_data.UIState = &state_r;
   ui_cb_data.progressData.state = &state_r;
 #endif // GTK_USE
@@ -1349,8 +1345,9 @@ ACE_TMAIN (int argc_in,
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Common_Logger_t logger (logstack_p,
-                          lock_p);
+  Common_Logger_Queue_t logger;
+  logger.initialize (&state_r.logQueue,
+                     &state_r.logQueueLock);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   std::string log_file_name;

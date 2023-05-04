@@ -105,7 +105,7 @@ SSDP_Module_Streamer_T<ACE_SYNCH_USE,
   buffer += ACE_TEXT_ALWAYS_CHAR (" ");
   buffer += record_r.URI;
 
-  switch (record_r.method)
+  switch (static_cast<SSDP_Method_t> (record_r.method))
   {
     case SSDP_Codes::SSDP_METHOD_M_SEARCH:
     {

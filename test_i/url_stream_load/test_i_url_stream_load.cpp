@@ -51,11 +51,12 @@
 #endif // HAVE_CONFIG_H
 
 #include "common_os_tools.h"
+#include "common_tools.h"
 
 #include "common_event_tools.h"
 
+#include "common_logger_queue.h"
 #include "common_log_tools.h"
-#include "common_logger.h"
 
 #include "common_timer_tools.h"
 
@@ -1016,8 +1017,6 @@ ACE_TMAIN (int argc_in,
   ACE_INET_Addr address;
   bool use_ssl;
   struct Test_I_URLStreamLoad_Configuration configuration;
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
   struct Test_I_URLStreamLoad_UI_CBData ui_cb_data;
   ui_cb_data.configuration = &configuration;
@@ -1087,13 +1086,12 @@ ACE_TMAIN (int argc_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  logstack_p = &state_r.logStack;
-  lock_p = &state_r.logStackLock;
   ui_cb_data.UIState = &state_r;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  Common_Logger_t logger (logstack_p,
-                          lock_p);
+  Common_Logger_Queue_t logger;
+  logger.initialize (&state_r.logQueue,
+                     &state_r.logQueueLock);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   show_console = false;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1217,8 +1215,9 @@ ACE_TMAIN (int argc_in,
                                             false,                                                                             // log to syslog ?
                                             false,                                                                             // trace messages ?
                                             trace_information,                                                                 // debug messages ?
-                                            (ui_definition_file.empty () ? NULL
-                                                                         : &logger)))                                          // logger ?
+                                            NULL))                                                                             // (ui-) logger ?
+//                                            (ui_definition_file.empty () ? NULL
+//                                                                         : &logger)))                                          // (ui-) logger ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));

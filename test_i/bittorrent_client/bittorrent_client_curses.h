@@ -50,7 +50,7 @@ struct BitTorrent_Client_SessionState;
 typedef std::map<std::string, struct panel*> BitTorrent_Client_CursesSessions_t;
 typedef BitTorrent_Client_CursesSessions_t::iterator BitTorrent_Client_CursesSessionsIterator_t;
 
-typedef std::map<std::string, Common_MessageStack_t> BitTorrent_Client_CursesMessages_t;
+typedef std::map<std::string, Common_Log_MessageQueue_t> BitTorrent_Client_CursesMessages_t;
 typedef BitTorrent_Client_CursesMessages_t::iterator BitTorrent_Client_CursesMessagesIterator_t;
 
 struct BitTorrent_Client_CursesState

@@ -52,7 +52,7 @@
 #include "common_log_tools.h"
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-#include "common_logger.h"
+#include "common_logger_queue.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
@@ -1474,22 +1474,19 @@ ACE_TMAIN (int argc_in,
   // step1d: initialize logging and/or tracing
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  logstack_p = &state_r.logStack;
-  lock_p = &state_r.logStackLock;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  Common_Logger_t logger (logstack_p,
-                          lock_p);
+  Common_Logger_Queue_t logger;
+  logger.initialize (&state_r.logQueue,
+                     &state_r.logQueueLock);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   std::string log_file_name;
@@ -1521,8 +1518,9 @@ ACE_TMAIN (int argc_in,
                                             trace_information,                        // debug messages ?
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                            (ui_definition_file.empty () ? NULL
-                                                                         : &logger))) // (ui) logger ?
+                                            NULL))                                    // (ui) logger ?
+//                                            (ui_definition_file.empty () ? NULL
+//                                                                         : &logger))) // (ui) logger ?
 #elif defined (WXWIDGETS_USE)
                                             NULL))                                    // (ui) logger ?
 #else

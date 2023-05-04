@@ -141,9 +141,9 @@ curses_log (const std::string& URI_in,
   if (iterator == state_in.panels.end ())
   {
     // not connected yet/not on a channel --> store
-    Common_MessageStack_t message_stack;
-    message_stack.push_front (text_in);
-    state_in.backLog.insert (std::make_pair (URI_in, message_stack));
+    Common_Log_MessageQueue_t message_queue;
+    message_queue.push_front (text_in);
+    state_in.backLog.insert (std::make_pair (URI_in, message_queue));
     goto release;
   } // end IF
   ACE_ASSERT ((*iterator).second);
@@ -488,7 +488,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
     for (BitTorrent_Client_CursesMessagesIterator_t iterator = state_in.backLog.begin ();
          iterator != state_in.backLog.end ();
          ++iterator)
-      for (Common_MessageStackConstReverseIterator_t iterator_2 = (*iterator).second.rbegin ();
+      for (Common_Log_MessageQueueConstReverseIterator_t iterator_2 = (*iterator).second.rbegin ();
            iterator_2 != (*iterator).second.rend ();
            ++iterator_2)
       curses_log ((*iterator).first,

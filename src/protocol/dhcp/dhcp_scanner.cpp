@@ -9916,9 +9916,9 @@ extern int DHCP_Scanner_lex \
  */
 YY_DECL
 {
-	register yy_state_type yy_current_state;
-	register char *yy_cp, *yy_bp;
-	register int yy_act;
+	yy_state_type yy_current_state;
+	char *yy_cp, *yy_bp;
+	int yy_act;
 		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 		yylval = yylval_param;
@@ -10543,9 +10543,9 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %endif */
 {
 		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
-	register char *source = yyg->yytext_ptr;
-	register int number_to_move, i;
+	char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
+	char *source = yyg->yytext_ptr;
+	int number_to_move, i;
 	int ret_val;
 
 	if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
@@ -10683,8 +10683,8 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-	register yy_state_type yy_current_state;
-	register char *yy_cp;
+	yy_state_type yy_current_state;
+	char *yy_cp;
 		struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 /* %% [15.0] code to get the start state into yy_current_state goes here */
@@ -10720,10 +10720,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  register int yy_is_jam;
+  int yy_is_jam;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
 /* %% [17.0] code to find the next state, and perhaps do backing up, goes here */
-  register char *yy_cp = yyg->yy_c_buf_p;
+  char *yy_cp = yyg->yy_c_buf_p;
 
 	yy_current_state = yy_NUL_trans[yy_current_state];
 	yy_is_jam = (yy_current_state == 0);
@@ -10743,12 +10743,12 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 /* %if-c-only */
 
-		static void yyunput (int c, register char * yy_bp , yyscan_t yyscanner)
+		static void yyunput (int c, char * yy_bp , yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-  register char *yy_cp;
+  char *yy_cp;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     yy_cp = yyg->yy_c_buf_p;
@@ -10759,10 +10759,10 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register yy_size_t number_to_move = yyg->yy_n_chars + 2;
-		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
+		yy_size_t number_to_move = yyg->yy_n_chars + 2;
+		char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		register char *source =
+		char *source =
 				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
 
 		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
