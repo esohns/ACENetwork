@@ -24,12 +24,13 @@
 #include "common_event_common.h"
 #include "common_event_defines.h"
 
-#include "common_parser_common.h"
+//#include "common_parser_common.h"
 
 //typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
 //typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
 
-struct Common_FlexBisonParserConfiguration;
+struct Net_ConnectionConfigurationBase;
+struct Common_ParserConfiguration;
 struct Net_SessionConfiguration
 {
   Net_SessionConfiguration ()
