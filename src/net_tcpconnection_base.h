@@ -37,10 +37,10 @@
 
 #include "stream_statemachine_control.h"
 
+#include "net_connection_configuration.h"
 #include "net_iconnectionmanager.h"
 #include "net_sock_acceptor.h"
 #include "net_sock_connector.h"
-#include "net_socket_common.h"
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_tcp.h"
 

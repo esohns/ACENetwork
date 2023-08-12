@@ -23,13 +23,13 @@
 
 #include "ace/Global_Macros.h"
 
-#include "net_configuration.h"
+#include "net_connection_configuration.h"
 #include "net_transportlayer_base.h"
 
 class Net_TransportLayer_UDP
- : public Net_InetTransportLayerBase_T<struct Net_UDPSocketConfiguration>
+ : public Net_InetTransportLayerBase_T<Net_UDPSocketConfiguration_t>
 {
-  typedef Net_InetTransportLayerBase_T<struct Net_UDPSocketConfiguration> inherited;
+  typedef Net_InetTransportLayerBase_T<Net_UDPSocketConfiguration_t> inherited;
 
  public:
   Net_TransportLayer_UDP ();

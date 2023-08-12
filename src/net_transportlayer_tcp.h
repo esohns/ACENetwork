@@ -23,13 +23,13 @@
 
 #include "ace/Global_Macros.h"
 
-#include "net_configuration.h"
+#include "net_connection_configuration.h"
 #include "net_transportlayer_base.h"
 
 class Net_TransportLayer_TCP
- : public Net_InetTransportLayerBase_T<struct Net_TCPSocketConfiguration>
+ : public Net_InetTransportLayerBase_T<Net_TCPSocketConfiguration_t>
 {
-  typedef Net_InetTransportLayerBase_T<struct Net_TCPSocketConfiguration> inherited;
+  typedef Net_InetTransportLayerBase_T<Net_TCPSocketConfiguration_t> inherited;
 
  public:
   Net_TransportLayer_TCP ();

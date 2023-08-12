@@ -20,31 +20,3 @@
 #include "stdafx.h"
 
 #include "net_transportlayer_base.h"
-
-/////////////////////////////////////////
-
-#if defined (NETLINK_SUPPORT)
-Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
- : dispatch_(COMMON_EVENT_DISPATCH_INVALID)
- , role_(NET_ROLE_INVALID)
- , transportLayer_ (NET_TRANSPORTLAYER_NETLINK)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base"));
-
-}
-
-bool
-Net_NetlinkTransportLayer_Base::initialize (enum Common_EventDispatchType dispatch_in,
-                                            enum Net_ClientServerRole role_in,
-                                            const Net_NetlinkSocketConfiguration_t& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
-
-  ACE_UNUSED_ARG (configuration_in);
-
-  dispatch_ = dispatch_in;
-  role_ = role_in;
-
-  return true;
-}
-#endif // NETLINK_SUPPORT

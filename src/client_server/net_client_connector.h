@@ -24,6 +24,7 @@
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#include "ace/SOCK_Connector.h"
 #include "ace/Time_Value.h"
 
 #include "common_timer_manager_common.h"
@@ -31,10 +32,11 @@
 #include "stream_statemachine_control.h"
 
 #include "net_common.h"
+#include "net_connection_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-#include "net_udpconnection_base.h"
+//#include "net_udpconnection_base.h"
 
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T

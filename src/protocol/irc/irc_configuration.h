@@ -28,7 +28,7 @@
 
 #include "common_defines.h"
 
-#include "stream_common.h"
+#include "stream_configuration.h"
 
 #include "net_configuration.h"
 #include "net_defines.h"

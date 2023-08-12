@@ -22,7 +22,7 @@
 #define NET_CONNECTION_CONFIGURATION_H
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <Ks.h>
+#include "Ks.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include <map>
@@ -34,18 +34,19 @@
 #include "ace/Time_Value.h"
 
 #include "common_configuration.h"
+#include "common_event_common.h"
 
 #include "common_timer_common.h"
 
-#include "stream_common.h"
-#include "stream_configuration.h"
+//#include "stream_common.h"
+//#include "stream_configuration.h"
 
 #include "net_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "net_common_tools.h"
 #endif // ACE_WIN32 || ACE_WIN64
 #include "net_defines.h"
-#include "net_iconnectionmanager.h"
+//#include "net_iconnectionmanager.h"
 #if defined (NETLINK_SUPPORT)
 #include "net_netlink_address.h"
 #endif // NETLINK_SUPPORT
@@ -128,26 +129,6 @@ class Net_SocketConfiguration_T
 };
 
 //////////////////////////////////////////
-
-#if defined (NETLINK_SUPPORT)
-template <>
-class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK>
- : public Net_SocketConfigurationBase
-{
-  typedef Net_SocketConfigurationBase inherited;
-
- public:
-  Net_SocketConfiguration_T ()
-   : inherited ()
-   , address ()
-   , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
-  {}
-  //inline virtual ~Net_SocketConfiguration_T () {}
-
-  Net_Netlink_Addr address;
-  int              protocol;
-};
-#endif // NETLINK_SUPPORT
 
 template <>
 class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
@@ -245,6 +226,26 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
   ACE_UINT16    sourcePort; // specify a specific source port (outbound)
   bool          writeOnly; // *TODO*: remove ASAP
 };
+
+#if defined (NETLINK_SUPPORT)
+template <>
+class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_NETLINK>
+ : public Net_SocketConfigurationBase
+{
+  typedef Net_SocketConfigurationBase inherited;
+
+ public:
+  Net_SocketConfiguration_T ()
+   : inherited ()
+   , address ()
+   , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
+  {}
+  //inline virtual ~Net_SocketConfiguration_T () {}
+
+  Net_Netlink_Addr address;
+  int              protocol;
+};
+#endif // NETLINK_SUPPORT
 
 //#define NET_SOCKET_CONFIGURATION_TCP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>* > (X)
 //#define NET_SOCKET_CONFIGURATION_UDP_CAST(X) static_cast<Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>* > (X)

@@ -23,8 +23,46 @@
 
 #include "ace/Global_Macros.h"
 
-#include "net_transportlayer_base.h"
+#include "common.h"
 
+#include "net_common.h"
+#include "net_connection_configuration.h"
+#include "net_itransportlayer.h"
+
+#if defined (NETLINK_SUPPORT)
+class Net_NetlinkTransportLayer_Base
+ : public virtual Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t>
+{
+ public:
+  inline virtual ~Net_NetlinkTransportLayer_Base () {}
+
+         // implement (part of) Net_ITransportLayer_T
+  inline virtual enum Common_EventDispatchType dispatch () { return dispatch_; }
+  inline virtual enum Net_ClientServerRole role () { return role_; }
+  virtual bool initialize (enum Common_EventDispatchType,
+                           enum Net_ClientServerRole,
+                           const Net_NetlinkSocketConfiguration_t&);
+  inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; }
+
+ protected:
+  Net_NetlinkTransportLayer_Base ();
+
+         // implement (part of) Net_ITransportLayer_T
+  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
+  enum Common_EventDispatchType dispatch_;
+  enum Net_ClientServerRole     role_;
+  enum Net_TransportLayerType   transportLayer_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base (const Net_NetlinkTransportLayer_Base&))
+  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base& operator= (const Net_NetlinkTransportLayer_Base&))
+};
+#endif // NETLINK_SUPPORT
+
+//////////////////////////////////////////
+
+#if defined (NETLINK_SUPPORT)
 class Net_TransportLayer_Netlink
  : public Net_NetlinkTransportLayer_Base
 {
@@ -38,5 +76,6 @@ class Net_TransportLayer_Netlink
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink (const Net_TransportLayer_Netlink&))
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink& operator= (const Net_TransportLayer_Netlink&))
 };
+#endif // NETLINK_SUPPORT
 
 #endif

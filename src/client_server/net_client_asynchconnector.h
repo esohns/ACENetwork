@@ -35,7 +35,7 @@
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-#include "net_udpconnection_base.h"
+//#include "net_udpconnection_base.h"
 
 template <typename HandlerType,
           ////////////////////////////////

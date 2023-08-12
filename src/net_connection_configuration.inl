@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "net_macros.h"
+//#include "ace/Log_Msg.h"
 
-#include "ace/Log_Msg.h"
+//#include "net_macros.h"
 
 //template <typename StreamConfigurationType,
 //          enum Net_TransportLayerType TransportLayerType>

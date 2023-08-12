@@ -30,7 +30,6 @@
 
 #include "net_asynch_tcpsockethandler.h"
 #include "net_asynch_udpsockethandler.h"
-#include "net_common.h"
 #include "net_connection_configuration.h"
 #include "net_sock_dgram.h"
 #include "net_tcpsockethandler.h"
@@ -78,6 +77,8 @@ typedef Net_TCPSocketHandler_T<ACE_NULL_SYNCH,
                                ACE_SSL_SOCK_Stream,
                                Net_TCPSocketConfiguration_t> Net_SSLSocketHandler_t;
 #endif // SSL_SUPPORT
+
+//////////////////////////////////////////
 
 #if defined (NETLINK_SUPPORT)
 typedef Net_NetlinkSocketHandler_T<Net_NetlinkSocketConfiguration_t> Net_NetlinkSocketHandler_t;

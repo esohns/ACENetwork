@@ -37,6 +37,7 @@
 
 #include "common_timer_manager_common.h"
 
+#include "net_socket_common.h"
 #include "net_tcpconnection_base.h"
 
 #include "test_u_network_common.h"
