@@ -291,11 +291,11 @@ Test_I_EventHandler_2::Test_I_EventHandler_2 ()
 #endif // GUI_SUPPORT
 #if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
- , sessionData_ (NULL)
-#else
- : sessionData_ (NULL)
-#endif // GUI_SUPPORT
  , stream_ ()
+#else
+ : stream_ ()
+#endif // GUI_SUPPORT
+ , sessionData_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::Test_I_EventHandler_2"));
 

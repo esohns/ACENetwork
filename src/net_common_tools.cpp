@@ -3721,6 +3721,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
       hostName_inout.clear ();
       return false;
     } // end IF
+    hostName_inout = buffer_a;
   } // end IF
   else
   { ACE_ASSERT (!hostName_inout.empty ());

@@ -545,11 +545,21 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 
     switch (message_block_p->msg_type ())
     {
+      case ACE_Message_Block::MB_STOP:
+      { // *NOTE*: some other error occured: connection failed ?
+        done_b = true;
+        break;
+      }
+      case STREAM_MESSAGE_CONTROL:
+      {
+        handle_message_inline_b = true;
+        break;
+      }
       case ACE_Message_Block::MB_DATA:
       case ACE_Message_Block::MB_PROTO:
         is_data_b = true;
         break;
-      case STREAM_MESSAGE_SESSION_TYPE:
+      case STREAM_MESSAGE_SESSION:
       {
         SessionMessageType* session_message_p =
           static_cast<SessionMessageType*> (message_block_p);
