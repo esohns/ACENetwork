@@ -237,7 +237,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                                                false))) // expedited ?
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
-                inherited::name (),
+                inherited::mod_->name (),
                 STREAM_SESSION_MESSAGE_STEP));
 
 continue_:
@@ -276,6 +276,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   {
     case STREAM_SESSION_MESSAGE_ABORT:
     {
+      if (headFragment_)
+      {
+        headFragment_->release (); headFragment_ = NULL;
+      } // end IF
+      chunks_.clear ();
+
       break;
     }
     case STREAM_SESSION_MESSAGE_END:
@@ -700,6 +706,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   int result = -1;
   bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
+  typename SessionMessageType::DATA_T* session_data_container_p =
+    inherited::sessionData_;
 
   // initialize return value(s)
   passMessageDownstream_out = false;
@@ -780,6 +788,19 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     headFragment_ = NULL;
   } // end lock scope
 
+  // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
+  //                   that the complete document data has arrived
+  if (likely (session_data_container_p))
+    session_data_container_p->increase ();
+  if (unlikely (!inherited::putSessionMessage (STREAM_SESSION_MESSAGE_STEP,
+                                               session_data_container_p,
+                                               NULL,
+                                               false))) // expedited ?
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
+                inherited::mod_->name (),
+                STREAM_SESSION_MESSAGE_STEP));
+
 continue_:
 error:
   if (release_inbound_message)
@@ -830,14 +851,24 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   switch (message_inout->type ())
   {
+    case STREAM_SESSION_MESSAGE_ABORT:
+    {
+      if (headFragment_)
+      {
+        headFragment_->release (); headFragment_ = NULL;
+      } // end IF
+      chunks_.clear ();
+
+      break;
+    }
     case STREAM_SESSION_MESSAGE_UNLINK:
     {
       if (inherited::endSeen_ && // <-- there was (!) an upstream
           inherited::configuration_->stopOnUnlink)
       {
         ACE_DEBUG ((LM_DEBUG,
-                   ACE_TEXT ("%s: received unlink from upstream, updating state\n"),
-                   inherited::mod_->name ()));
+                    ACE_TEXT ("%s: received unlink from upstream, updating state\n"),
+                    inherited::mod_->name ()));
         inherited::change (STREAM_STATE_SESSION_STOPPING);
       } // end IF
       break;
@@ -1145,6 +1176,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       } // end ELSE
     } // end FOR
     ACE_ASSERT (headFragment_->total_length () == total_data);
+    chunks_.clear ();
   } // end ELSE
 
   inherited2::finished_ = true;

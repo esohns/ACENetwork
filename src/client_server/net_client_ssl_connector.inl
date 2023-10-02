@@ -225,16 +225,23 @@ Net_Client_SSL_Connector_T<HandlerType,
               ACE_TEXT ("set TLS SNI hostname: \"%s\"\n"),
               ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ())));
 
+  // set options
+  ACE_ASSERT (context_p);
+  SSL_CTX* context_2 = SSL_get_SSL_CTX (context_p);
+  ACE_ASSERT (context_2);
   if (configuration_->socketConfiguration.version)
-  {
-    SSL_CTX* context_2 = SSL_get_SSL_CTX (context_p);
-    ACE_ASSERT (context_2);
+  { ACE_ASSERT (context_2);
     SSL_CTX_set_max_proto_version (context_2,
                                    configuration_->socketConfiguration.version);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("set maximum protocol version: 0x%x\n"),
                 configuration_->socketConfiguration.version));
   } // end IF
+
+//  uint64_t options_i = SSL_CTX_get_options (context_2);
+//  if (options_i != SSL_CTX_set_options (context_2, SSL_OP_IGNORE_UNEXPECTED_EOF))
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("set SSL_OP_IGNORE_UNEXPECTED_EOF option\n")));
 
   return 0;
 }

@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <limits>
+#include <openssl/prov_ssl.h>
 #include <regex>
 #include <string>
 
@@ -772,7 +773,7 @@ do_work (const std::string& configurationFile_in,
   Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3b;
   connection_configuration_3b.allocatorConfiguration = &allocator_configuration;
   connection_configuration_3b.socketConfiguration.useLoopBackDevice = false;
-  //connection_configuration_3b.socketConfiguration.version = TLS1_VERSION;
+//  connection_configuration_3b.socketConfiguration.version = TLS1_VERSION; // required for "Das Erste" ?
 //  connection_configuration_3b.statisticReportingInterval =
 //    statisticReportingInterval_in;
   connection_configuration_3b.messageAllocator = &message_allocator_3;
