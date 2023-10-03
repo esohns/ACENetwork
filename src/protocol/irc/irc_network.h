@@ -21,10 +21,15 @@
 #ifndef IRC_NETWORK_H
 #define IRC_NETWORK_H
 
+#include <map>
+#include <string>
+
+#include "ace/INET_Addr.h"
+
 #include "common_parser_common.h"
 
 #include "net_common.h"
-#include "net_connection_configuration.h"
+#include "net_iconnection.h"
 
 #include "irc_common.h"
 #include "irc_defines.h"

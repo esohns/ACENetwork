@@ -34,6 +34,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "common_iinitialize.h"
+
 #include "net_common.h"
 #if defined (NETLINK_SUPPORT)
 #include "net_netlink_address.h"
@@ -55,8 +57,12 @@ enum Net_LinkLayerType  operator++ (enum Net_LinkLayerType&, int);
 //////////////////////////////////////////
 
 class Net_Common_Tools
+ : public Common_SInitializeFinalize_T<Net_Common_Tools>
 {
  public:
+  static bool initialize ();
+  static void finalize ();
+
   // physical layer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // *NOTE*: as of Vista, interface GUIDs can be used consistently; prior to
@@ -100,9 +106,9 @@ class Net_Common_Tools
   //         does not check connectedness yet)
   //         - the Win32 is incomplete (returns first 'connected' interface)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   inline static struct _GUID getDefaultInterface_2 (enum Net_LinkLayerType type_in = NET_LINKLAYER_802_3) { return (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::getDefaultInterface (type_in)))); }
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
   static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
 #else
   static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);

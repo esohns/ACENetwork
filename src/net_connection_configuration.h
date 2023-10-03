@@ -23,10 +23,15 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "Ks.h"
+#include "WinSock2.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include <map>
 #include <string>
+
+#if defined (SSL_SUPPORT)
+#include "openssl/ssl.h"
+#endif // SSL_SUPPORT
 
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
@@ -38,15 +43,11 @@
 
 #include "common_timer_common.h"
 
-//#include "stream_common.h"
-//#include "stream_configuration.h"
-
 #include "net_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "net_common_tools.h"
 #endif // ACE_WIN32 || ACE_WIN64
 #include "net_defines.h"
-//#include "net_iconnectionmanager.h"
 #if defined (NETLINK_SUPPORT)
 #include "net_netlink_address.h"
 #endif // NETLINK_SUPPORT
@@ -60,11 +61,11 @@ struct Net_SocketConfigurationBase
   Net_SocketConfigurationBase ()
    : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
    , interfaceIdentifier (GUID_NULL)
 #else
    , interfaceIdentifier ()
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
    , interfaceIdentifier (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
 #endif // ACE_WIN32 || ACE_WIN64
@@ -80,11 +81,13 @@ struct Net_SocketConfigurationBase
    , protocol (IPPROTO_TCP)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    //interfaceIdentifier =
-    //  Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+    interfaceIdentifier = Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_3);
+#else
+    interfaceIdentifier = Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #endif // ACE_WIN32 || ACE_WIN64
   }
-  //inline virtual ~Net_SocketConfigurationBase () {}
 
   int          bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -96,7 +99,6 @@ struct Net_SocketConfigurationBase
 #else
   std::string  interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64
-  // *TODO*: win32 udp sockets do not linger
   bool         linger;
   bool         useLoopBackDevice; // (if any)
   bool         reuseAddress;
@@ -112,7 +114,7 @@ struct Net_SocketConfigurationBase
 
 template <enum Net_TransportLayerType TransportLayerType_e>
 class Net_SocketConfiguration_T
- : public Net_SocketConfigurationBase
+ : public Net_SocketConfigurationBase // *NOTE*: POD
 {
   typedef Net_SocketConfigurationBase inherited;
 
@@ -143,7 +145,8 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
               static_cast<ACE_UINT32> (INADDR_ANY))
 #if defined (SSL_SUPPORT)
    , hostname ()
-   , version (0)
+   , method (NULL)
+   , maximalVersion (0)
 #endif // SSL_SUPPORT
   {
     int result = -1;
@@ -162,9 +165,10 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
   //inline virtual ~Net_SocketConfiguration_T () {}
 
   ACE_INET_Addr address;  // listening/peer-
-#if defined (SSL_SUPPORT)
-  std::string  hostname; // peer- (supports TLS SNI, iff name resolution fails)
-  long         version; // minimal-
+#if defined (SSL_SUPPORT) // *TODO*: move these somewhere else
+  std::string       hostname; // peer- (supports TLS SNI)
+  const SSL_METHOD* method;
+  long              maximalVersion; // maximal protocol-
 #endif // SSL_SUPPORT
 };
 
@@ -178,8 +182,6 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
   Net_SocketConfiguration_T ()
    : inherited ()
    , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
-// *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
-//                SO_LINGER
    , listenAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
                     static_cast<ACE_UINT32> (INADDR_ANY))
    , peerAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
@@ -187,6 +189,11 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_UDP>
    , sourcePort (0)
    , writeOnly (false) // *TODO*: remove ASAP
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
+    //                SO_LINGER
+    linger = false;
+#endif // ACE_WIN32 || ACE_WIN64
     type = SOCK_DGRAM;
     protocol = IPPROTO_UDP;
 

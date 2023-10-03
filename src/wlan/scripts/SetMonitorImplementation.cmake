@@ -59,4 +59,3 @@ elseif (WIN32)
   add_definitions (-DWLANAPI_USE)
  endif ()
 endif ()
-

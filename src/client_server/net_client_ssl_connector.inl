@@ -208,40 +208,56 @@ Net_Client_SSL_Connector_T<HandlerType,
   // support TLS SNI
   typename HandlerType::stream_type& stream_r = handler_out->peer ();
   SSL* context_p = stream_r.ssl ();
-  ACE_ASSERT (context_p);
-  int result =
+  int result = -1;
+  if (!configuration_->socketConfiguration.hostname.empty ())
+  { ACE_ASSERT (context_p);
+    result =
       SSL_set_tlsext_host_name (context_p,
                                 configuration_->socketConfiguration.hostname.c_str ());
-  if (unlikely (result == 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SSL_set_tlsext_host_name(\"%s\"): \"%s\", aborting\n"),
-                ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ()),
-                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
-    delete handler_out; handler_out = NULL;
-    return -1;
+    if (unlikely (result == 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to SSL_set_tlsext_host_name(\"%s\"): \"%s\", aborting\n"),
+                  ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+      delete handler_out; handler_out = NULL;
+      return -1;
+    } // end IF
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set TLS SNI hostname: \"%s\"\n"),
+                ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ())));
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("set TLS SNI hostname: \"%s\"\n"),
-              ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ())));
 
   // set options
-  ACE_ASSERT (context_p);
-  SSL_CTX* context_2 = SSL_get_SSL_CTX (context_p);
-  ACE_ASSERT (context_2);
-  if (configuration_->socketConfiguration.version)
-  { ACE_ASSERT (context_2);
-    SSL_CTX_set_max_proto_version (context_2,
-                                   configuration_->socketConfiguration.version);
+  if (configuration_->socketConfiguration.method)
+  { ACE_ASSERT (context_p);
+    result = SSL_set_ssl_method (context_p,
+                                 configuration_->socketConfiguration.method);
+    if (unlikely (result == 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to SSL_set_ssl_method(): \"%s\", aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+      delete handler_out; handler_out = NULL;
+      return -1;
+    } // end IF
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("set maximum protocol version: 0x%x\n"),
-                configuration_->socketConfiguration.version));
+                ACE_TEXT ("set SSL method\n")));
   } // end IF
 
-//  uint64_t options_i = SSL_CTX_get_options (context_2);
-//  if (options_i != SSL_CTX_set_options (context_2, SSL_OP_IGNORE_UNEXPECTED_EOF))
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("set SSL_OP_IGNORE_UNEXPECTED_EOF option\n")));
+  if (configuration_->socketConfiguration.maximalVersion)
+  { ACE_ASSERT (context_p);
+    SSL_set_max_proto_version (context_p,
+                               configuration_->socketConfiguration.maximalVersion);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set maximum protocol version: 0x%x\n"),
+                configuration_->socketConfiguration.maximalVersion));
+  } // end IF
+
+  uint64_t options_i = SSL_get_options (context_p);
+  if (likely (options_i != SSL_set_options (context_p, SSL_OP_IGNORE_UNEXPECTED_EOF)))
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set SSL_OP_IGNORE_UNEXPECTED_EOF option\n")));
 
   return 0;
 }

@@ -49,6 +49,7 @@
 
 #if defined (SSL_SUPPORT)
 #include "openssl/err.h"
+#include "openssl/ssl.h"
 #endif // SSL_SUPPORT
 
 #include "ace/Configuration.h"
@@ -121,6 +122,35 @@ operator++ (enum Net_LinkLayerType& lhs_in, int) // postfix-
 }
 
 //////////////////////////////////////////
+
+bool
+Net_Common_Tools::initialize ()
+{
+#if defined (SSL_SUPPORT)
+  int result = SSL_library_init ();
+  if (unlikely (result == 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SSL_library_init: \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+    return false;
+  } // end IF
+
+  // initialize ACE SSL support
+  ACE_SSL_Context* context_p = ACE_SSL_Context::instance ();
+#endif // SSL_SUPPORT
+
+  return true;
+}
+
+void
+Net_Common_Tools::finalize ()
+{
+#if defined (SSL_SUPPORT)
+  // finalize ACE SSL support
+  ACE_SSL_Context::close ();
+#endif // SSL_SUPPORT
+}
 
 bool
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -4824,8 +4854,8 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
   SSL_CTX* real_context_p = context_p->context ();
   ACE_ASSERT (real_context_p);
   uint64_t new_options_i = 0;
-  new_options_i = SSL_CTX_set_options (real_context_p, SSL_OP_ALL);
-  ACE_UNUSED_ARG (new_options_i);
+  //new_options_i = SSL_CTX_set_options (real_context_p, SSL_OP_ALL);
+  //ACE_UNUSED_ARG (new_options_i);
   //new_options_i = SSL_CTX_clear_options (real_context_p, SSL_OP_ALL);
   //ACE_UNUSED_ARG (new_options_i);
 //  new_options_i =
@@ -4835,6 +4865,7 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
   //    SSL_CTX_set_options (real_context_p,
   //                         SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2
   //ACE_UNUSED_ARG (new_options_i);
+
   //SSL_CTX_set_verify (real_context_p,
   //                    SSL_VERIFY_NONE,
   //                    NULL);
