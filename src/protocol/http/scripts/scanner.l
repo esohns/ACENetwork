@@ -247,7 +247,8 @@ PRODUCT         {PRODUCT_TOKEN}(\/{PRODUCT_VERSION}){0,1}
 /* Message Headers (generic) */
 FIELD_NAME      {TOKEN}+
 /* ({TEXT}|[{TOKEN}{T_SPECIALS}{QUOTED_STRING}]*|{LWS})* */
-FIELD_VALUE     {TOKEN}+
+/* *NOTE*: support "<FieldName>: \r\n" */
+FIELD_VALUE     {TOKEN}*
 HEADER          {FIELD_NAME}:({SP}{FIELD_VALUE}){0,1}
 
 /* General Headers */

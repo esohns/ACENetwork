@@ -704,7 +704,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   DataMessageType* message_p = NULL;
   int result = -1;
-  bool release_inbound_message = true; // message_inout
   bool release_message = false; // message_p
   typename SessionMessageType::DATA_T* session_data_container_p =
     inherited::sessionData_;
@@ -740,7 +739,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   } // end lock scope
   ACE_ASSERT (message_p);
   message_inout = NULL;
-  release_inbound_message = false;
+  release_message = true;
 
   { // *NOTE*: protect scanner/parser state
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
@@ -776,17 +775,17 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     //if (message_2)
     //  message_p->cont (NULL);
 
-    result = inherited::put_next (headFragment_, NULL);
+    result = inherited::put_next (message_p, NULL);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
                   inherited::mod_->name ()));
-      headFragment_->release ();
       goto error;
     } // end IF
     headFragment_ = NULL;
   } // end lock scope
+  release_message = false;
 
   // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
   //                   that the complete document data has arrived
@@ -803,13 +802,10 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
 continue_:
 error:
-  if (release_inbound_message)
-  { ACE_ASSERT (message_inout);
-    message_inout->release (); message_inout = NULL;
-  } // end IF
   if (release_message)
   { ACE_ASSERT (message_p);
     message_p->release (); message_p = NULL;
+    headFragment_ = NULL;
   } // end IF
 }
 
