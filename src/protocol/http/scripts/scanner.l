@@ -166,7 +166,7 @@ ABSOLUTE_PATH  \/{RELATIVE_PATH}
 NET_PATH       \/\/{NET_LOCATION}({ABSOLUTE_PATH}){0,1}
 RELATIVE_URI   ({NET_PATH}|{ABSOLUTE_PATH}|{RELATIVE_PATH})
 SCHEME         [[:alpha:][:digit:]+\-.]+
-ABSOLUTE_URI   {SCHEME}:({U_CHAR}|{RESERVED})*
+ABSOLUTE_URI   {SCHEME}:({U_CHAR}|{RESERVED})*|\*
 FRAGMENT       ({U_CHAR}|{RESERVED})*
 URI            ({ABSOLUTE_URI}|{RELATIVE_URI})({FRAGMENT}(,{FRAGMENT})*)
 
@@ -249,7 +249,7 @@ FIELD_NAME      {TOKEN}+
 /* ({TEXT}|[{TOKEN}{T_SPECIALS}{QUOTED_STRING}]*|{LWS})* */
 /* *NOTE*: support "<FieldName>: \r\n" */
 FIELD_VALUE     {TOKEN}*
-HEADER          {FIELD_NAME}:({SP}{FIELD_VALUE}){0,1}
+HEADER          {FIELD_NAME}:({SP}{0,1}{FIELD_VALUE}){0,1}
 
 /* General Headers */
 HEADER_DATE     Date:{SP}{DATE}
@@ -275,7 +275,7 @@ REQUEST_TOKEN   {CHAR}+
 /* TODO*: allowing {REQUEST_TOKEN} breaks precedence in INITIAL state, as it
           gobbles the whole buffer */
 /* METHOD          (GET|HEAD|POST|{REQUEST_TOKEN}) */
-METHOD          (GET|HEAD|POST)
+METHOD          (GET|HEAD|POST|M-SEARCH|NOTIFY)
 REQUEST_URI     ({ABSOLUTE_URI}|{ABSOLUTE_PATH})
 REQUEST         {METHOD}{SP}{REQUEST_URI}{SP}{VERSION}
 
@@ -423,7 +423,62 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              return yytokentype::HEADER; }
 {CRLF}                     { iparser_p->offset (yyleng);
                              yylval->ival = 2;
-                             BEGIN (body);
+                             struct HTTP_Record& record_r =
+                               iparser_p->current ();
+                             HTTP_HeadersIterator_t iterator =
+                                 record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                             if (iterator != record_r.headers.end ())
+                             {
+                               converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+                               converter.clear ();
+                               converter.str ((*iterator).second);
+                               converter >> content_length_or_chunk_size;
+                               if (!content_length_or_chunk_size)
+                                 BEGIN (INITIAL); // no data
+                               else
+                                 BEGIN (body);
+                             } // end IF
+                             else
+                             {
+                               iterator =
+                                   record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
+                               if (iterator != record_r.headers.end ())
+                               {
+                                 // *NOTE*: the default locale is the 'C' locale (as in:
+                                 //         'std::setlocale(LC_ALL, "C")')
+                                 //         --> replace with (C++-)US-ASCII
+//                                 std::locale locale;
+//                                 //  std::locale locale (ACE_TEXT_ALWAYS_CHAR (""));
+//                                 try {
+//                                   std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
+//                                   locale = us_ascii_locale;
+//                                 } catch (std::runtime_error exception_in) {
+//                                   ACE_DEBUG ((LM_ERROR,
+//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
+//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
+//                                               ACE_TEXT (exception_in.what ())));
+//                                   Common_Tools::printLocales ();
+//                                   yyterminate ();
+//                                 } catch (...) {
+//                                   ACE_DEBUG ((LM_ERROR,
+//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
+//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
+//                                   Common_Tools::printLocales ();
+//                                   yyterminate ();
+//                                 }
+//                                 ACE_ASSERT (std::has_facet<std::ctype<char> >(locale));
+                                 std::string value_string =
+                                     Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
+                                 if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
+                                   BEGIN (chunked_body);
+                                 else
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("invalid/unknown transfer encoding (was: \"%s\"), continuing\n"),
+                                               ACE_TEXT ((*iterator).second.c_str ())));
+                               } // end IF
+                               else
+                                 BEGIN (INITIAL); // no data
+                             } // end ELSE
 /*                             return yy::HTTP_Parser::token::DELIMITER; } */
                              return yytokentype::DELIMITER; }
 } // end <request_headers>

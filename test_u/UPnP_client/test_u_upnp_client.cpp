@@ -351,11 +351,6 @@ do_processArguments (int argc_in,
         break;
       }
 #endif // ACE_WIN32 || ACE_WIN64
-      //case 'o':
-      //{
-      //  useLoopback_out = true;
-      //  break;
-      //}
       //case 'q':
       //{
       //  sendRequestOnOffer_out = true;
@@ -601,6 +596,7 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // _DEBUG
   // *********************** socket configuration data *************************
   ACE_INET_Addr interface_address, gateway_address;
+  ACE_INET_Addr external_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier = interfaceIdentifier_in;
@@ -682,7 +678,6 @@ do_work (//bool requestBroadcastReplies_in,
   } // end IF
   interface_address.set_port_number (UPNP_CLIENT_DEFAULT_PORT,
                                      1);
-  ACE_INET_Addr external_address;
   if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
                                                        external_address))
   {
@@ -711,6 +706,8 @@ do_work (//bool requestBroadcastReplies_in,
   UPnP_Client_SSDP_ConnectionConfiguration connection_configuration_inbound_multicast;
   UPnP_Client_HTTP_ConnectionConfiguration connection_configuration_http;
 
+  configuration_in.allocatorConfiguration.defaultBufferSize = 16384;
+
   connection_configuration_outbound_multicast.allocatorConfiguration =
     &configuration_in.allocatorConfiguration;
   connection_configuration_outbound_multicast.delayRead = true;
@@ -721,8 +718,8 @@ do_work (//bool requestBroadcastReplies_in,
       true;
   connection_configuration_outbound_multicast.socketConfiguration.interfaceIdentifier =
     interface_identifier;
-  connection_configuration_outbound_multicast.socketConfiguration.peerAddress =
-    gateway_address;
+//  connection_configuration_outbound_multicast.socketConfiguration.peerAddress =
+//    gateway_address;
   connection_configuration_outbound_multicast.socketConfiguration.peerAddress.set (static_cast<u_short> (SSDP_DEFAULT_SERVER_PORT),
                                                                                    ACE_TEXT_ALWAYS_CHAR (SSDP_ADDRESS_IPV4_MULTICAST),
                                                                                    1, // encode
@@ -751,6 +748,10 @@ do_work (//bool requestBroadcastReplies_in,
     false;
   connection_configuration_inbound_unicast.socketConfiguration.listenAddress =
     interface_address;
+  //connection_configuration_inbound_unicast.socketConfiguration.listenAddress.set (static_cast<u_short> (UPNP_CLIENT_DEFAULT_PORT),
+  //                                                                                static_cast<ACE_UINT32> (INADDR_ANY),
+  //                                                                                1, // encode
+  //                                                                                0);
   connection_configuration_inbound_unicast.socketConfiguration.peerAddress.set (static_cast<u_short> (0),
                                                                                 static_cast<ACE_UINT32> (INADDR_ANY),
                                                                                 1, // encode
@@ -1216,17 +1217,17 @@ do_work (//bool requestBroadcastReplies_in,
     } // end IF
 #endif // GTK_USE
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    HWND window_p = ::GetConsoleWindow ();
-    if (!window_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-      return;
-    } // end IF
-    BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
-    ACE_UNUSED_ARG (was_visible_b);
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    HWND window_p = ::GetConsoleWindow ();
+//    if (!window_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
+//      return;
+//    } // end IF
+//    BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
+//    ACE_UNUSED_ARG (was_visible_b);
+//#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GTK_USE)
     gtk_manager_p->wait (false);

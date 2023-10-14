@@ -332,12 +332,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (headFragment_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
-#if defined (_DEBUG)
-  if (unlikely (inherited2::configuration_->debugParser))
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s"),
-                ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
-#endif // _DEBUG
+  //if (unlikely (inherited2::configuration_->debugParser))
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("%s"),
+  //              ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
   // set session data format
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
@@ -429,10 +427,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                   inherited::mod_->name ()));
       bytes_to_skip = headFragment_->total_length ();
     } // end ELSE
-    ACE_ASSERT (bytes_to_skip && (headFragment_->total_length () == bytes_to_skip));
+    ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
   } // end IF
   else
-  { ACE_ASSERT (!chunks_.empty ());
+  { //ACE_ASSERT (!chunks_.empty ());
     ACE_Message_Block* message_block_2 = NULL;
     CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
     CHUNKS_ITERATOR_T iterator_3;
@@ -1010,12 +1008,10 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_ASSERT (headFragment_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
-#if defined (_DEBUG)
-  if (unlikely (inherited2::configuration_->debugParser))
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s"),
-                ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
-#endif // _DEBUG
+  //if (unlikely (inherited2::configuration_->debugParser))
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("%s"),
+  //              ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
   // set session data format
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =

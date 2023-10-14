@@ -225,14 +225,15 @@ class Net_Common_Tools
   // *NOTE*: if the first argument is '0', the trailing ":0" will be cropped
   //         from the return value
   // *NOTE*: returns dotted decimal
-  static std::string IPAddressToString (ACE_UINT16,  // port (network byte order !)
-                                        ACE_UINT32); // IP address (network byte order !)
+  static std::string IPv4AddressToString (ACE_UINT16,  // port (network byte order !)
+                                          ACE_UINT32); // IP address (network byte order !)
   static std::string IPProtocolToString (unsigned char); // protocol
 
-  static bool matchIPAddress (std::string&); // dotted-decimal
+  static bool matchIPv4Address (std::string&); // dotted-decimal
+  static bool matchIPv6Address (std::string&);
   // *NOTE*: (see also: ace/INET_Addr.h:237)
-  static ACE_INET_Addr stringToIPAddress (std::string&,        // host name (DNS name or dotted-decimal)
-                                          unsigned short = 0); // port# if none provided (i.e. no trailing ":x")
+  static ACE_INET_Addr stringToIPAddress (std::string&,        // host name (DNS name or dotted-decimal or IPv6 in "[]")
+                                          unsigned short = 0); // port#
   static bool isBroadcast (const ACE_INET_Addr&);
   static bool isLocal (const ACE_INET_Addr&);
 

@@ -6,7 +6,7 @@
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 
 // *NOTE*: work around quirky MSVC...
-#define NOMINMAX
+//#define NOMINMAX
 
 #include "targetver.h"
 

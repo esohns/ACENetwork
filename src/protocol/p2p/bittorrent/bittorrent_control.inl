@@ -281,7 +281,7 @@ BitTorrent_Control_T<SessionAsynchType,
   if (!user_agent.empty ())
     data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
                                             user_agent));
-  if (Net_Common_Tools::matchIPAddress (host_name_string))
+  if (Net_Common_Tools::matchIPv4Address (host_name_string))
   {
     std::string host_name_string_2;
     Net_Common_Tools::getAddress (host_name_string_2,
@@ -1072,7 +1072,7 @@ BitTorrent_Control_T<SessionAsynchType,
   if (!user_agent.empty ())
     data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
                                             user_agent));
-  if (Net_Common_Tools::matchIPAddress (host_name_string))
+  if (Net_Common_Tools::matchIPv4Address (host_name_string))
   {
     std::string host_name_string_2;
     Net_Common_Tools::getAddress (host_name_string_2,

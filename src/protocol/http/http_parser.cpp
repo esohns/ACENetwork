@@ -483,9 +483,9 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   224,   224,   224,   240,   246,   274,   275,   280,   286,
-     287,   297,   302,   343,   345,   366,   366,   375,   397,   410,
-     410,   419
+       0,   224,   224,   224,   240,   246,   274,   275,   280,   309,
+     310,   320,   325,   366,   368,   389,   389,   398,   420,   433,
+     433,   442
 };
 #endif
 
@@ -1330,7 +1330,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 4: /* head: "method" head_rest1  */
-                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size () + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
+                                                     { ((*yyvalp).ival) = static_cast<int> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size ()) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.method =
@@ -1339,7 +1339,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 5: /* head: "version" head_rest2  */
-                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size () + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
+                                                     { ((*yyvalp).ival) = static_cast<int> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size ()) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        std::string regex_string =
@@ -1374,7 +1374,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 7: /* request_line_rest1: "uri" request_line_rest2  */
-                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size () + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
+                                                     { ((*yyvalp).ival) = static_cast<int> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size ()) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.URI = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval);
@@ -1382,11 +1382,34 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 8: /* request_line_rest2: "version"  */
-                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->size () + 2;
+                                                     { ((*yyvalp).ival) = static_cast<int> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->size ()) + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
+
+                                                       std::string regex_string =
+                                                         ACE_TEXT_ALWAYS_CHAR ("^");
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR ("([[:digit:]]{1}\\.[[:digit:]]{1})$");
+                                                       std::regex regex (regex_string);
+                                                       std::smatch match_results;
+                                                       if (!std::regex_match (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval),
+                                                                              match_results,
+                                                                              regex,
+                                                                              std::regex_constants::match_default))
+                                                       {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("invalid HTTP version (was: \"%s\"), aborting\n"),
+                                                                     ACE_TEXT ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->c_str ())));
+                                                         YYABORT;
+                                                       } // end IF
+//                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                                                       ACE_ASSERT (!match_results.empty ());
+                                                       ACE_ASSERT (match_results[1].matched);
+
                                                        record_r.version =
-                                                         HTTP_Tools::VersionToType (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval));
+                                                         HTTP_Tools::VersionToType (match_results[1].str ());
                                                      }
     break;
 
@@ -1395,7 +1418,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 10: /* status_line_rest1: "status" status_line_rest2  */
-                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size () + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
+                                                     { ((*yyvalp).ival) = static_cast<int> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.sval)->size ()) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        std::istringstream converter;
@@ -1408,7 +1431,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 11: /* status_line_rest2: "reason"  */
-                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->size () + 2;
+                                                     { ((*yyvalp).ival) = static_cast<int> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->size ()) + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.reason = *(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval);
@@ -1419,7 +1442,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
                                                                  act on any set transfer encoding. */
-                                                       ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->size ();
+                                                       ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival) + static_cast<int> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->size ());
                                                        /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
                                                          ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s*(.*)$");
@@ -1506,14 +1529,14 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      { ((*yyvalp).ival) = 0;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-//                                                       HTTP_HeadersIterator_t iterator =
-//                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-//                                                       ACE_ASSERT (iterator != record_r.headers.end ());
-//                                                       std::istringstream converter;
-//                                                       converter.str ((*iterator).second);
-//                                                       unsigned int content_length = 0;
-//                                                       converter >> content_length;
-//                                                       ACE_ASSERT (!content_length);
+                                                       HTTP_HeadersIterator_t iterator =
+                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                                                       ACE_ASSERT (iterator != record_r.headers.end ());
+                                                       std::istringstream converter;
+                                                       converter.str ((*iterator).second);
+                                                       unsigned int content_length = 0;
+                                                       converter >> content_length;
+                                                       ACE_ASSERT (!content_length);
                                                        struct HTTP_Record* record_p =
                                                          &record_r;
                                                        try {

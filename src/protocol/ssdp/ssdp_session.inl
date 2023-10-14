@@ -186,7 +186,8 @@ SSDP_Session_T<StateType,
                                                      *configuration_,
                                                      *userData_,
                                                      configuration_->socketConfiguration.address,
-                                                     true, true);
+                                                     true,  // wait ?
+                                                     true); // peer address ?
   if (unlikely (handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -199,7 +200,19 @@ SSDP_Session_T<StateType,
   ACE_ASSERT (connection_manager_p);
   connection_p =
       connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
-  ACE_ASSERT (connection_p);
+  if (unlikely (!connection_p))
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve connection handle (handle was: \"%@\"), returning\n"),
+                handle_h));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve connection handle (handle was: \"%d\"), returning\n"),
+                handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
+    return;
+  } // end IF
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
               connection_p->id (),

@@ -99,16 +99,16 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
   string_buffer += converter.str ();
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("ciaddr: \t");
-  string_buffer += Net_Common_Tools::IPAddressToString (0, record_in.ciaddr);
+  string_buffer += Net_Common_Tools::IPv4AddressToString (0, record_in.ciaddr);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("yiaddr: \t");
-  string_buffer += Net_Common_Tools::IPAddressToString (0, record_in.yiaddr);
+  string_buffer += Net_Common_Tools::IPv4AddressToString (0, record_in.yiaddr);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("siaddr: \t");
-  string_buffer += Net_Common_Tools::IPAddressToString (0, record_in.siaddr);
+  string_buffer += Net_Common_Tools::IPv4AddressToString (0, record_in.siaddr);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("giaddr: \t");
-  string_buffer += Net_Common_Tools::IPAddressToString (0, record_in.giaddr);
+  string_buffer += Net_Common_Tools::IPv4AddressToString (0, record_in.giaddr);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("chaddr: \t");
   string_buffer +=
@@ -153,7 +153,7 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
         ACE_UINT32 ip_address =
           *reinterpret_cast<const unsigned int*> ((*iterator).second.c_str ());
         if ((*iterator).second.size () == 4)
-          string_buffer += Net_Common_Tools::IPAddressToString (0, ip_address);
+          string_buffer += Net_Common_Tools::IPv4AddressToString (0, ip_address);
         else
           for (unsigned int i = 0;
                i < ((*iterator).second.size () / 4);
@@ -168,7 +168,7 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
             converter << (i + 1);
             string_buffer += converter.str ();
             string_buffer += ACE_TEXT_ALWAYS_CHAR (": ");
-            string_buffer += Net_Common_Tools::IPAddressToString (0, ip_address);
+            string_buffer += Net_Common_Tools::IPv4AddressToString (0, ip_address);
           } // end FOR
         break;
       }
@@ -237,7 +237,7 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
         ACE_UINT32 ip_address =
           *reinterpret_cast<const unsigned int*> ((*iterator).second.c_str () + 1);
         if (num_ip_addresses == 1)
-          string_buffer += Net_Common_Tools::IPAddressToString (0, ip_address);
+          string_buffer += Net_Common_Tools::IPv4AddressToString (0, ip_address);
         else
         {
           char* pointer_p =
@@ -260,7 +260,7 @@ next_list:
             converter << (i + 1);
             string_buffer += converter.str ();
             string_buffer += ACE_TEXT_ALWAYS_CHAR (": ");
-            string_buffer += Net_Common_Tools::IPAddressToString (0, ip_address);
+            string_buffer += Net_Common_Tools::IPv4AddressToString (0, ip_address);
           } // end FOR
           pointer_p += num_ip_addresses * 4;
           used_bytes += num_ip_addresses * 4;

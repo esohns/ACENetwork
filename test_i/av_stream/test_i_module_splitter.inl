@@ -99,8 +99,9 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
     ACE_ASSERT ((*iterator).second);
     typename inherited::QUEUE_TO_MODULE_CONST_ITERATOR_T iterator_2 =
       std::find_if (inherited::modules_.begin (), inherited::modules_.end (),
-                    std::bind2nd (typename inherited::QUEUE_TO_MODULE_MAP_FIND_S (),
-                                  (*iterator).second));
+                    std::bind (typename inherited::QUEUE_TO_MODULE_MAP_FIND_S (),
+                               std::placeholders::_1,
+                               (*iterator).second));
     ACE_ASSERT (iterator_2 != inherited::modules_.end ());
     ACE_ASSERT ((*iterator_2).first);
     result = (*iterator_2).first->enqueue_tail (message_in, NULL);

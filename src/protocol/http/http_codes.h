@@ -31,6 +31,8 @@ class HTTP_Codes
     HTTP_METHOD_GET   = 0,
     HTTP_METHOD_POST,
     HTTP_METHOD_HEAD,
+    HTTP_METHOD_M_SEARCH,
+    HTTP_METHOD_NOTIFY,
     /////////////////////////////////////
     HTTP_METHOD_MAX,
     HTTP_METHOD_INVALID

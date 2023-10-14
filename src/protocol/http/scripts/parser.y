@@ -237,13 +237,13 @@ message :           head "delimiter"                 { if (unlikely (iparser_p->
                                                        } // end IF
                                                      }
                     body                             { $$ = $1 + $2 + $4; };
-head:               "method" head_rest1              { $$ = $1->size () + $2 + 1;
+head:               "method" head_rest1              { $$ = static_cast<int> ($1->size ()) + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.method =
                                                          HTTP_Tools::MethodToType (*$1);
                                                      }
-                    | "version" head_rest2           { $$ = $1->size () + $2 + 1;
+                    | "version" head_rest2           { $$ = static_cast<int> ($1->size ()) + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        std::string regex_string =
@@ -272,19 +272,42 @@ head:               "method" head_rest1              { $$ = $1->size () + $2 + 1
                                                            HTTP_Tools::VersionToType (match_results[1].str ());
                                                      }
 head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; }
-request_line_rest1: "uri" request_line_rest2         { $$ = $1->size () + $2 + 1;
+request_line_rest1: "uri" request_line_rest2         { $$ = static_cast<int> ($1->size ()) + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.URI = *$1;
                                                      }
-request_line_rest2: "version"                        { $$ = $1->size () + 2;
+request_line_rest2: "version"                        { $$ = static_cast<int> ($1->size ()) + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
+
+                                                       std::string regex_string =
+                                                         ACE_TEXT_ALWAYS_CHAR ("^");
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+                                                       regex_string +=
+                                                         ACE_TEXT_ALWAYS_CHAR ("([[:digit:]]{1}\\.[[:digit:]]{1})$");
+                                                       std::regex regex (regex_string);
+                                                       std::smatch match_results;
+                                                       if (!std::regex_match (*$1,
+                                                                              match_results,
+                                                                              regex,
+                                                                              std::regex_constants::match_default))
+                                                       {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("invalid HTTP version (was: \"%s\"), aborting\n"),
+                                                                     ACE_TEXT ($1->c_str ())));
+                                                         YYABORT;
+                                                       } // end IF
+//                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                                                       ACE_ASSERT (!match_results.empty ());
+                                                       ACE_ASSERT (match_results[1].matched);
+
                                                        record_r.version =
-                                                         HTTP_Tools::VersionToType (*$1);
+                                                         HTTP_Tools::VersionToType (match_results[1].str ());
                                                      }
 head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; }
-status_line_rest1:  "status" status_line_rest2       { $$ = $1->size () + $2 + 1;
+status_line_rest1:  "status" status_line_rest2       { $$ = static_cast<int> ($1->size ()) + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        std::istringstream converter;
@@ -294,7 +317,7 @@ status_line_rest1:  "status" status_line_rest2       { $$ = $1->size () + $2 + 1
                                                        record_r.status =
                                                            static_cast<HTTP_Status_t> (status);
                                                      }
-status_line_rest2:  "reason"                         { $$ = $1->size () + 2;
+status_line_rest2:  "reason"                         { $$ = static_cast<int> ($1->size ()) + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.reason = *$1;
@@ -302,7 +325,7 @@ status_line_rest2:  "reason"                         { $$ = $1->size () + 2;
 headers:            headers "header"                 { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
                                                                  act on any set transfer encoding. */
-                                                       $$ = $1 + $2->size ();
+                                                       $$ = $1 + static_cast<int> ($2->size ());
                                                        /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
                                                          ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s*(.*)$");

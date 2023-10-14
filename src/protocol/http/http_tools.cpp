@@ -174,6 +174,10 @@ HTTP_Tools::MethodToString (const HTTP_Method_t& method_in)
       result = ACE_TEXT_ALWAYS_CHAR ("POST"); break;
     case HTTP_Codes::HTTP_METHOD_HEAD:
       result = ACE_TEXT_ALWAYS_CHAR ("HEAD"); break;
+    case HTTP_Codes::HTTP_METHOD_M_SEARCH:
+      result = ACE_TEXT_ALWAYS_CHAR ("M-SEARCH"); break;
+    case HTTP_Codes::HTTP_METHOD_NOTIFY:
+      result = ACE_TEXT_ALWAYS_CHAR ("NOTIFY"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -281,6 +285,10 @@ HTTP_Tools::MethodToType (const std::string& method_in)
     return HTTP_Codes::HTTP_METHOD_POST;
   else if (method_in == ACE_TEXT_ALWAYS_CHAR ("HEAD"))
     return HTTP_Codes::HTTP_METHOD_HEAD;
+  else if (method_in == ACE_TEXT_ALWAYS_CHAR ("M-SEARCH"))
+    return HTTP_Codes::HTTP_METHOD_M_SEARCH;
+  else if (method_in == ACE_TEXT_ALWAYS_CHAR ("NOTIFY"))
+    return HTTP_Codes::HTTP_METHOD_NOTIFY;
   else
   {
     ACE_DEBUG ((LM_ERROR,

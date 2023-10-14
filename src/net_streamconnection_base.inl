@@ -2225,6 +2225,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         (error != EPIPE)                   && // 32
         (error != 64)                      && // *TODO*: EHOSTDOWN (- 10000), happens on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+        (error != ERROR_MORE_DATA)         && // 234  : message block too small ?
         (error != ERROR_OPERATION_ABORTED) && // 995  : local close (), happens on Win32
 #endif // ACE_WIN32 || ACE_WIN64
         (error != ECONNREFUSED))              // 111: happens on Linux

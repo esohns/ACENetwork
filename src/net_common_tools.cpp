@@ -372,10 +372,10 @@ Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& address_in)
 #endif // NETLINK_SUPPORT
 
 std::string
-Net_Common_Tools::IPAddressToString (ACE_UINT16 port_in,
-                                     ACE_UINT32 IPAddress_in)
+Net_Common_Tools::IPv4AddressToString (ACE_UINT16 port_in,
+                                       ACE_UINT32 IPAddress_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddressToString"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPv4AddressToString"));
 
   // initialize return value(s)
   std::string return_value;
@@ -419,9 +419,9 @@ Net_Common_Tools::IPAddressToString (ACE_UINT16 port_in,
 }
 
 bool
-Net_Common_Tools::matchIPAddress (std::string& address_in)
+Net_Common_Tools::matchIPv4Address (std::string& address_in)
 {
-  NETWORK_TRACE ("Net_Common_Tools::matchIPAddress");
+  NETWORK_TRACE ("Net_Common_Tools::matchIPv4Address");
 
   std::string regex_string =
     //ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{0,3})(\\.[[:digit:]]{0,3}){0,3}$");
@@ -429,21 +429,13 @@ Net_Common_Tools::matchIPAddress (std::string& address_in)
   std::regex::flag_type flags = std::regex_constants::ECMAScript;
   std::regex regex;
   std::smatch match_results;
-  //try {
-    regex.assign (regex_string, flags);
-  //} catch (std::regex_error exception_in) {
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("caught regex exception (was: \"%s\"), returning\n"),
-  //              ACE_TEXT (exception_in.what ())));
-  //  goto refuse;
-  //}
+  regex.assign (regex_string, flags);
   if (unlikely (!std::regex_match (address_in,
                                    match_results,
                                    regex,
                                    std::regex_constants::match_default)))
     return false;
-//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
-  ACE_ASSERT (!match_results.empty ());
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
   // validate all groups
   std::stringstream converter;
@@ -469,6 +461,44 @@ Net_Common_Tools::matchIPAddress (std::string& address_in)
     if (unlikely ((start_position == 0) &&
                   (group_string.size () > 1)))
       return false; // refuse leading 0s
+  } // end FOR
+
+  return true;
+}
+
+bool
+Net_Common_Tools::matchIPv6Address (std::string& address_in)
+{
+  NETWORK_TRACE ("Net_Common_Tools::matchIPv6Address");
+
+  std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4})$");
+  std::regex::flag_type flags = std::regex_constants::ECMAScript;
+  std::regex regex;
+  std::smatch match_results;
+  regex.assign (regex_string, flags);
+  if (unlikely (!std::regex_match (address_in,
+                                   match_results,
+                                   regex,
+                                   std::regex_constants::match_default)))
+    return false;
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+  std::string group_string;
+  std::stringstream converter;
+  unsigned int dummy_i;
+  for (unsigned int i = 1; i < match_results.size (); ++i)
+  {
+    if (unlikely (!match_results[i].matched))
+      return false;
+
+    group_string = match_results[i].str ();
+    converter << std::hex << group_string;
+    converter >> dummy_i;
+    if (converter.rdbuf ()->in_avail ()) // were there any bytes unaccounted for ?
+      return false;
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
   } // end FOR
 
   return true;
@@ -760,28 +790,34 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
 
 ACE_INET_Addr
 Net_Common_Tools::stringToIPAddress (std::string& address_in,
-                                     unsigned short portIfNoneProvided_in)
+                                     unsigned short portNumber_in)
 {
   NETWORK_TRACE ("Net_Common_Tools::stringToIPAddress");
 
-  // sanity check(s)
+  bool is_ipv4_b = true;
+  std::string ip_address_string = address_in;
+  // *NOTE*: ACE_INET_Addr::string_to_address() needs enlcosing "[]" for IPv6
+  //         addresses to function properly
+  //         --> append if necessary
+  if (Net_Common_Tools::matchIPv6Address (address_in))
+  {
+    ip_address_string.insert (ip_address_string.begin (), '[');
+    ip_address_string.push_back (']');
+    is_ipv4_b = false;
+  } // end IF
+
   // *NOTE*: ACE_INET_Addr::string_to_address() needs a trailing port number to
   //         function properly (see: ace/INET_Addr.h:237)
-  //         --> append one if necessary
-  std::string ip_address_string = address_in;
-  std::string::size_type position = ip_address_string.find (':', 0);
-  if (likely (position == std::string::npos))
-  {
-    ip_address_string += ':';
-    std::ostringstream converter;
-    converter << portIfNoneProvided_in;
-    ip_address_string += converter.str ();
-  } // end IF
+  //         --> append one
+  ip_address_string.push_back (':');
+  std::ostringstream converter;
+  converter << portNumber_in;
+  ip_address_string += converter.str ();
 
   int result = -1;
   ACE_INET_Addr inet_address;
   result = inet_address.string_to_addr (ip_address_string.c_str (),
-                                        AF_INET);
+                                        (is_ipv4_b ? AF_INET : AF_INET6));
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1247,6 +1283,8 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToExternalIPAddress"));
 
+  ACE_INET_Addr internal_ip_address, gateway_ip_address;
+
   // initialize return value(s)
   IPAddress_out = ACE_sap_any_cast (ACE_INET_Addr&);
 
@@ -1275,7 +1313,6 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 #endif // ACE_WIN32 || ACE_WIN64
 
   // step1: determine the 'internal' IP address
-  ACE_INET_Addr internal_ip_address, gateway_ip_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
@@ -1367,14 +1404,6 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   std::string external_ip_address;
   std::istringstream converter;
   char buffer_a[BUFSIZ];
-//  std::string regex_string =
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)(?:\r)$");
-//#else
-//    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)$");
-//#endif // ACE_WIN32 || ACE_WIN64
-//  std::regex regex (regex_string);
-//  std::smatch match_results;
   converter.str (resolution_record_string);
 //  bool is_first = true;
   std::string buffer_string;
@@ -1382,33 +1411,11 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   {
     converter.getline (buffer_a, sizeof (char[BUFSIZ]));
     buffer_string = buffer_a;
-//    if (!std::regex_match (buffer_string,
-//                           match_results,
-//                           regex,
-//                           std::regex_constants::match_default))
-//      continue;
-////    ACE_ASSERT (match_results.ready () && !match_results.empty ());
-//    ACE_ASSERT (!match_results.empty ());
-//
-//    if (match_results[1].matched &&
-//        !ACE_OS::strcmp (match_results[1].str ().c_str (),
-//                         ACE_TEXT_ALWAYS_CHAR (NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING)))
-//    {
-//      if (is_first)
-//      {
-//        is_first = false;
-//        continue;
-//      } // end IF
-//
-//      ACE_ASSERT (match_results[2].matched);
-//      external_ip_address = match_results[2];
-//      break;
-//    } // end IF
     external_ip_address = buffer_string;
     break;
   } while (!converter.fail ());
-//  if (unlikely (external_ip_address.empty ()))
-  if (!Net_Common_Tools::matchIPAddress (external_ip_address))
+  if (!Net_Common_Tools::matchIPv4Address (external_ip_address) &&
+      !Net_Common_Tools::matchIPv6Address (external_ip_address))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to resolve internal IP address (was: %s, result was: \"%s\"), aborting\n"),
@@ -2830,18 +2837,18 @@ continue_:
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
 #endif // _WIN32_WINNT_VISTA
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (result).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
   return result;
@@ -3269,15 +3276,13 @@ continue_:
         reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_netmask);
     inet_address_network =
         sockaddr_in_2->sin_addr.s_addr & sockaddr_in_3->sin_addr.s_addr;
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("verifying %s against \"%s\" [%s] (mask: %s --> network: %s)\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_in, true).c_str ()),
                 ACE_TEXT (ifaddrs_2->ifa_name),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (0, sockaddr_in_2->sin_addr.s_addr).c_str ()),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (0, sockaddr_in_3->sin_addr.s_addr).c_str ()),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (0, inet_address_network).c_str ())));
-#endif // _DEBUG
+                ACE_TEXT (Net_Common_Tools::IPv4AddressToString (0, sockaddr_in_2->sin_addr.s_addr).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPv4AddressToString (0, sockaddr_in_3->sin_addr.s_addr).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPv4AddressToString (0, inet_address_network).c_str ())));
     if (inet_address_network !=
         (sockaddr_in_p->sin_addr.s_addr & sockaddr_in_3->sin_addr.s_addr))
       continue;
@@ -3305,22 +3310,39 @@ Net_Common_Tools::IPAddressToString (const ACE_INET_Addr& address_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddressToString"));
 
-  std::string result =
-      Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0
-                                                           : ACE_HTONS (address_in.get_port_number ())),
-                                           ACE_HTONL (address_in.get_ip_address ()));
-  if (resolve_in)
+  std::string result;
+
+  ACE_TCHAR buffer_a[MAXHOSTNAMELEN + 1];
+  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[MAXHOSTNAMELEN + 1]));
+  int result_2 =
+    address_in.addr_to_string (buffer_a,
+                               sizeof (ACE_TCHAR[MAXHOSTNAMELEN + 1]),
+                               (resolve_in ? 0 : 1));
+  if (unlikely (result_2 == -1))
   {
-    std::string hostname_string;
-    if (!Net_Common_Tools::getAddress (hostname_string,
-                                       result))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::getAddress(%s), aborting\n"),
-                  ACE_TEXT (result.c_str ())));
-      return ACE_TEXT_ALWAYS_CHAR ("");
-    } // end IF
-    result = hostname_string;
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  result = ACE_TEXT_ALWAYS_CHAR (buffer_a);
+
+  // remove "[]" from IPv6 addresses
+  if (address_in.get_type () == AF_INET6)
+  {
+    result.erase (result.begin ());
+    std::string::size_type last_bracket_pos =
+      result.rfind (']', std::string::npos); // begin searching at the end !
+    ACE_ASSERT (last_bracket_pos != std::string::npos);
+    result.erase (last_bracket_pos, 1);
+  } // end IF
+
+  // clean up: if port number was 0, cut off the trailing ":0" !
+  if (addressOnly_in)
+  {
+    std::string::size_type last_colon_pos =
+      result.rfind (':', std::string::npos); // begin searching at the end !
+    ACE_ASSERT (last_colon_pos != std::string::npos);
+    result = result.substr (0, last_colon_pos);
   } // end IF
 
   return result;
@@ -3464,7 +3486,7 @@ error:
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
                     ACE_TEXT (result.c_str ()),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address, true, false).c_str ())));
         return result;
       } // end IF
 #else

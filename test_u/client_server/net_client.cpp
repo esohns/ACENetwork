@@ -461,10 +461,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 //  signals_out.sig_add (SIGSEGV);           // 11      /* segment violation */
   signals_out.sig_add (SIGTERM);           // 15      /* Software termination signal from kill */
   if (allowUserRuntimeConnect_in)
-  {
     signals_out.sig_add (SIGBREAK);        // 21      /* Ctrl-Break sequence */
-    ignoredSignals_out.sig_add (SIGBREAK); // 21      /* Ctrl-Break sequence */
-  } // end IF
   signals_out.sig_add (SIGABRT);           // 22      /* abnormal termination triggered by abort call */
   signals_out.sig_add (SIGABRT_COMPAT);    // 6       /* SIGABRT compatible with other platforms, same as SIGABRT */
 #else
@@ -780,7 +777,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                               AF_INET);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("set peer address: %s\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address, false, false).c_str ())));
   tcp_connection_configuration.socketConfiguration.address = peer_address;
   if (!useReactor_in)
     udp_connection_configuration.socketConfiguration.connect = true;

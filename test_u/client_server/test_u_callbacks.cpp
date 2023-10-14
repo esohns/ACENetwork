@@ -1298,12 +1298,14 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
         typename Test_U_UDPConnectionManager_t::ICONNECTION_T* connection_p =
           connection_manager_p->get (connection_configuration_p->socketConfiguration.listenAddress,
                                      false);
-        ACE_ASSERT (connection_p);
-        connection_p->abort ();
-        connection_p->decrease (); connection_p = NULL;
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("disconnected from %s\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->socketConfiguration.listenAddress).c_str ())));
+        if (connection_p)
+        {
+          connection_p->abort ();
+          connection_p->decrease (); connection_p = NULL;
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("disconnected from %s\n"),
+                      ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->socketConfiguration.listenAddress).c_str ())));
+        } // end IF
         break;
       }
       case NET_TRANSPORTLAYER_SSL:

@@ -160,6 +160,11 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
     const_cast<UPnP_Client_MessageData_t&> (message_in.getR ());
   struct UPnP_Client_MessageData& record_r =
     const_cast<struct UPnP_Client_MessageData&> (data_r.getR ());
+  // *NOTE*: listening on 239.255.255.250:1900 will also receive requests
+  //         --> drop requests
+  if ((record_r.method == HTTP_Codes::HTTP_METHOD_M_SEARCH) ||
+      (record_r.method == HTTP_Codes::HTTP_METHOD_NOTIFY))
+    return;
 
 #if defined (GUI_SUPPORT)
   SSDP_StringList_t arguments_a;
