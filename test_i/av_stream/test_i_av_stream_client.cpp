@@ -961,9 +961,9 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t mediafoundation_stream_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
 
-  Test_I_AVStream_Client_DirectShow_Streamer_Module directshow_streamer ((useUDP_in ? directShowCBData_in.UDPStream : directShowCBData_in.videoStream),
+  Test_I_AVStream_Client_DirectShow_Streamer_Module directshow_streamer (directShowCBData_in.videoStream,
                                                                          ACE_TEXT_ALWAYS_CHAR ("Streamer"));
-  Test_I_AVStream_Client_DirectShow_EventHandler_Module directshow_event_handler ((useUDP_in ? directShowCBData_in.UDPStream : directShowCBData_in.videoStream),
+  Test_I_AVStream_Client_DirectShow_EventHandler_Module directshow_event_handler (directShowCBData_in.videoStream,
                                                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_AVStream_Client_MediaFoundation_Streamer_Module mediafoundation_streamer ((useUDP_in ? mediaFoundationCBData_in.UDPStream : mediaFoundationCBData_in.videoStream),
                                                                                    ACE_TEXT_ALWAYS_CHAR ("Streamer"));
@@ -1211,13 +1211,14 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       {
         ACE_NEW_NORETURN (directShowCBData_in.audioStream,
                           Test_I_AVStream_Client_DirectShow_Audio_Stream ());
-        ACE_NEW_NORETURN (directShowCBData_in.videoStream,
-                          Test_I_AVStream_Client_DirectShow_TCPStream_t ());
-        ACE_NEW_NORETURN (directShowCBData_in.UDPStream,
-                          Test_I_AVStream_Client_DirectShow_UDPStream_t ());
+        if (useUDP_in)
+          ACE_NEW_NORETURN (directShowCBData_in.videoStream,
+                            Test_I_AVStream_Client_DirectShow_UDPStream_t ());
+        else
+          ACE_NEW_NORETURN (directShowCBData_in.videoStream,
+                            Test_I_AVStream_Client_DirectShow_TCPStream_t ());
         result =
-          (directShowCBData_in.audioStream && directShowCBData_in.videoStream &&
-           directShowCBData_in.UDPStream);
+          (directShowCBData_in.audioStream && directShowCBData_in.videoStream);
         break;
       }
       case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1259,13 +1260,14 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       {
         ACE_NEW_NORETURN (directShowCBData_in.audioStream,
                           Test_I_AVStream_Client_DirectShow_Audio_Stream ());
-        ACE_NEW_NORETURN (directShowCBData_in.videoStream,
-                          Test_I_AVStream_Client_DirectShow_AsynchTCPStream_t ());
-        ACE_NEW_NORETURN (directShowCBData_in.UDPStream,
-                          Test_I_AVStream_Client_DirectShow_AsynchUDPStream_t ());
+        if (useUDP_in)
+          ACE_NEW_NORETURN (directShowCBData_in.videoStream,
+                            Test_I_AVStream_Client_DirectShow_AsynchUDPStream_t ());
+        else
+          ACE_NEW_NORETURN (directShowCBData_in.videoStream,
+                            Test_I_AVStream_Client_DirectShow_AsynchTCPStream_t ());
         result =
-          (directShowCBData_in.audioStream && directShowCBData_in.videoStream &&
-           directShowCBData_in.UDPStream);
+          (directShowCBData_in.audioStream && directShowCBData_in.videoStream);
         break;
       }
       case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1380,7 +1382,9 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 #endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Test_I_AVStream_Client_MediaFoundation_TCPConnectionConfiguration_t mediafoundation_tcp_connection_configuration;
+  Test_I_AVStream_Client_MediaFoundation_UDPConnectionConfiguration_t mediafoundation_udp_connection_configuration;
   Test_I_AVStream_Client_DirectShow_TCPConnectionConfiguration_t directshow_tcp_connection_configuration;
+  Test_I_AVStream_Client_DirectShow_UDPConnectionConfiguration_t directshow_udp_connection_configuration;
   switch (mediaFramework_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
@@ -1392,9 +1396,16 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       directshow_tcp_connection_configuration.allocatorConfiguration = allocator_configuration_p;
       directshow_tcp_connection_configuration.streamConfiguration =
         &(*directshow_stream_iterator).second;
-      ACE_ASSERT (result);
-      directShowCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+      directShowCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                                           &directshow_tcp_connection_configuration));
+      directshow_udp_connection_configuration.allocatorConfiguration = allocator_configuration_p;
+      directshow_udp_connection_configuration.streamConfiguration =
+        &(*directshow_stream_iterator).second;
+      directshow_udp_connection_configuration.delayRead = true;
+      directshow_udp_connection_configuration.socketConfiguration.writeOnly =
+        true;
+      directShowCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
+                                                                                          &directshow_udp_connection_configuration));
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1406,8 +1417,10 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       mediafoundation_tcp_connection_configuration.allocatorConfiguration = allocator_configuration_p;
       mediafoundation_tcp_connection_configuration.streamConfiguration =
         &(*mediafoundation_stream_iterator).second;
-      mediaFoundationCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+      mediaFoundationCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                                                &mediafoundation_tcp_connection_configuration));
+      mediaFoundationCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
+                                                                                               &mediafoundation_udp_connection_configuration));
 
       mediafoundation_stream_iterator =
         mediaFoundationCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -1452,40 +1465,47 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
     NULL;
   Test_I_AVStream_Client_DirectShow_UDPConnectionManager_t* directshow_udp_connection_manager_p =
     NULL;
-  Net_ConnectionConfigurationsIterator_t connection_iterator;
   switch (mediaFramework_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      connection_iterator =
-        directShowCBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (connection_iterator != directShowCBData_in.configuration->connectionConfigurations.end ());
-
       directshow_tcp_connection_manager_p =
         TEST_I_AVSTREAM_CLIENT_DIRECTSHOW_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
       ACE_ASSERT (directshow_tcp_connection_manager_p);
       directshow_tcp_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                                        ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-      directshow_tcp_connection_manager_p->set (*static_cast<Test_I_AVStream_Client_DirectShow_TCPConnectionConfiguration_t*> ((*connection_iterator).second),
+      directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
                                                 &user_data_s);
-      (*directshow_modulehandler_iterator).second.second->connectionManager =
-        directshow_tcp_connection_manager_p;
-      iconnection_manager_p = directshow_tcp_connection_manager_p;
-      //report_handler_p = directshow_tcp_connection_manager_p;
+      directshow_udp_connection_manager_p =
+        TEST_I_AVSTREAM_CLIENT_DIRECTSHOW_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
+      ACE_ASSERT (directshow_udp_connection_manager_p);
+      directshow_udp_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
+                                                       ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
+      directshow_udp_connection_manager_p->set (directshow_udp_connection_configuration,
+                                                &user_data_s);
+
+      if (useUDP_in)
+      {
+        iconnection_manager_p = directshow_udp_connection_manager_p;
+        directshow_modulehandler_configuration.connectionConfigurationName =
+          ACE_TEXT_ALWAYS_CHAR ("UDP");
+      } // end IF
+      else
+      {
+        iconnection_manager_p = directshow_tcp_connection_manager_p;
+        directshow_modulehandler_configuration.connectionConfigurationName =
+          ACE_TEXT_ALWAYS_CHAR ("TCP");
+      } // end ELSE
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
-      connection_iterator =
-        mediaFoundationCBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (connection_iterator != mediaFoundationCBData_in.configuration->connectionConfigurations.end ());
-
       mediafoundation_tcp_connection_manager_p =
         TEST_I_AVSTREAM_CLIENT_MEDIAFOUNDATION_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
       ACE_ASSERT (mediafoundation_tcp_connection_manager_p);
       mediafoundation_tcp_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-      mediafoundation_tcp_connection_manager_p->set (*static_cast<Test_I_AVStream_Client_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_iterator).second),
+      mediafoundation_tcp_connection_manager_p->set (mediafoundation_tcp_connection_configuration,
                                                      &user_data_s);
 
       mediafoundation_modulehandler_iterator =
@@ -1561,10 +1581,10 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
       result_2 =
-        NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.address.set (port_in,
-                                                                                                     hostName_in.c_str (),
-                                                                                                     1,
-                                                                                                     AF_INET);
+        directshow_tcp_connection_configuration.socketConfiguration.address.set (port_in,
+                                                                                 hostName_in.c_str (),
+                                                                                 1,
+                                                                                 AF_INET);
       if (result_2 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1573,17 +1593,33 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                     port_in));
         goto clean;
       } // end IF
-      NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.useLoopBackDevice =
-        NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.address.is_loopback ();
-      //(*connection_iterator).second->writeOnly = true;
-
-      (*connection_iterator).second->statisticReportingInterval =
+      directshow_tcp_connection_configuration.socketConfiguration.useLoopBackDevice =
+        directshow_tcp_connection_configuration.socketConfiguration.address.is_loopback ();
+      directshow_tcp_connection_configuration.statisticReportingInterval =
         statisticReportingInterval_in;
-
-      static_cast<Test_I_AVStream_Client_DirectShow_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->messageAllocator =
+      directshow_tcp_connection_configuration.messageAllocator =
         &directshow_message_allocator;
-      //(*connection_iterator).second->PDUSize = bufferSize_in;
-      //dynamic_cast<Test_I_AVStream_Client_DirectShow_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->initialize ((*directshow_stream_iterator).second);
+
+      result_2 =
+        directshow_udp_connection_configuration.socketConfiguration.peerAddress.set (port_in,
+                                                                                     hostName_in.c_str (),
+                                                                                     1,
+                                                                                     AF_INET);
+      if (result_2 == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s:%u\"): \"%m\", returning\n"),
+                    ACE_TEXT (hostName_in.c_str ()),
+                    port_in));
+        goto clean;
+      } // end IF
+      directshow_udp_connection_configuration.socketConfiguration.useLoopBackDevice =
+        directshow_udp_connection_configuration.socketConfiguration.peerAddress.is_loopback ();
+      directshow_udp_connection_configuration.statisticReportingInterval =
+        statisticReportingInterval_in;
+      directshow_udp_connection_configuration.messageAllocator =
+        &directshow_message_allocator;
+
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1594,10 +1630,10 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                                                       : mediaFoundationCBData_in.UDPStream);
 
       result_2 =
-        NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.address.set (port_in,
-                                                                                                     hostName_in.c_str (),
-                                                                                                     1,
-                                                                                                     AF_INET);
+        mediafoundation_tcp_connection_configuration.socketConfiguration.address.set (port_in,
+                                                                                      hostName_in.c_str (),
+                                                                                      1,
+                                                                                      AF_INET);
       if (result_2 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1606,17 +1642,12 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                     port_in));
         goto clean;
       } // end IF
-      NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.useLoopBackDevice =
-        NET_CONFIGURATION_TCP_CAST ((*connection_iterator).second)->socketConfiguration.address.is_loopback ();
-      //(*connection_iterator).second->writeOnly = true;
-
-      (*connection_iterator).second->statisticReportingInterval =
+      mediafoundation_tcp_connection_configuration.socketConfiguration.useLoopBackDevice =
+        mediafoundation_tcp_connection_configuration.socketConfiguration.address.is_loopback ();
+      mediafoundation_tcp_connection_configuration.statisticReportingInterval =
         statisticReportingInterval_in;
-
-      static_cast<Test_I_AVStream_Client_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->messageAllocator =
+      mediafoundation_tcp_connection_configuration.messageAllocator =
         &mediafoundation_message_allocator;
-      //(*connection_iterator).second->PDUSize = bufferSize_in;
-      //dynamic_cast<Test_I_AVStream_Client_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_iterator).second)->initialize ((*mediafoundation_stream_iterator).second);
       break;
     }
     default:
@@ -1908,22 +1939,13 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
           directShowCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
         ACE_ASSERT (directshow_stream_iterator != directShowCBData_in.configuration->streamConfigurations.end ());
 
-        if (directShowCBData_in.configuration->protocol == NET_TRANSPORTLAYER_TCP)
-        {
-          stream_p = directShowCBData_in.audioStream;
-          stream_2 = directShowCBData_in.videoStream;
+        stream_p = directShowCBData_in.audioStream;
+        stream_2 = directShowCBData_in.videoStream;
 
-          result =
-            directShowCBData_in.audioStream->initialize ((*directshow_stream_iterator).second);
-          result &=
-            directShowCBData_in.videoStream->initialize ((*directshow_stream_iterator).second);
-        } // end IF
-        else
-        {
-          stream_p = directShowCBData_in.UDPStream;
-          result =
-            directShowCBData_in.UDPStream->initialize ((*directshow_stream_iterator).second);
-        } // end ELSE
+        result =
+          directShowCBData_in.audioStream->initialize ((*directshow_stream_iterator).second);
+        result &=
+          directShowCBData_in.videoStream->initialize ((*directshow_stream_iterator).second);
         break;
       }
       case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -2048,7 +2070,6 @@ clean:
       directShowCBData_in.videoStream->remove (&directshow_streamer, true, true);
       delete directShowCBData_in.audioStream; directShowCBData_in.audioStream = NULL;
       delete directShowCBData_in.videoStream; directShowCBData_in.videoStream = NULL;
-      delete directShowCBData_in.UDPStream; directShowCBData_in.UDPStream = NULL;
       do_finalize_directshow (directShowCBData_in);
       break;
     }

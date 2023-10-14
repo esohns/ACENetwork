@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "test_u_eventhandler.h"
 
 #if defined (GUI_SUPPORT)
@@ -193,9 +192,12 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
   switch (sessionMessage_in.type ())
   {
+    case STREAM_SESSION_MESSAGE_CONNECT:
+      event_e = COMMON_UI_EVENT_CONNECT;
+      break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
       event_e = COMMON_UI_EVENT_DISCONNECT;
-      return;
+      break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       // sanity check(s)

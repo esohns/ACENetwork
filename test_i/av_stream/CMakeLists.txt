@@ -564,6 +564,12 @@ set (EXECUTABLE_SERVER av_stream_server)
 set (${EXECUTABLE_SERVER}_EXE_SRCS
 #     stdafx.cpp
      stdafx.h
+     # *TODO*: remove these client dependencies ASAP
+     test_i_av_stream_client_message.cpp
+     test_i_av_stream_client_message.h
+     test_i_av_stream_client_session_message.cpp
+     test_i_av_stream_client_session_message.h
+     # /end *TODO*
      test_i_av_stream_common.h
      test_i_av_stream_defines.h
      test_i_av_stream_parser.cpp

@@ -1527,9 +1527,8 @@ ACE_TMAIN (int argc_in,
                                             trace_information,                        // debug messages ?
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                            NULL))                                    // (ui) logger ?
-//                                            (ui_definition_file.empty () ? NULL
-//                                                                         : &logger))) // (ui) logger ?
+                                            (ui_definition_file.empty () ? NULL
+                                                                         : &logger))) // (ui) logger ?
 #elif defined (WXWIDGETS_USE)
                                             NULL))                                    // (ui) logger ?
 #else

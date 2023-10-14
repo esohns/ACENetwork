@@ -354,7 +354,7 @@ struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration
    , builder (NULL)
    , connection (NULL)
    , connectionConfigurations (NULL)
-   , connectionManager (NULL)
+   //, connectionManager (NULL)
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , contextId (0)
@@ -401,7 +401,7 @@ struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration
       connection = rhs_in.connection;
     } // end IF
     connectionConfigurations = rhs_in.connectionConfigurations;
-    connectionManager = rhs_in.connectionManager;
+    //connectionManager = rhs_in.connectionManager;
     filterConfiguration = rhs_in.filterConfiguration;
     filterCLSID = rhs_in.filterCLSID;
     Stream_MediaFramework_DirectShow_Tools::free (outputFormat);
@@ -455,7 +455,7 @@ struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration
   IGraphBuilder*                                                builder;
   Net_IINETConnection_t*                                        connection; // TCP target/IO module
   Net_ConnectionConfigurations_t*                               connectionConfigurations;
-  Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t*     connectionManager; // TCP IO module
+  //Test_I_AVStream_Client_DirectShow_TCPConnectionManager_t*     connectionManager; // TCP IO module
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   guint                                                         contextId;
@@ -871,7 +871,6 @@ struct Test_I_AVStream_Client_DirectShow_UI_CBData
    , subscribers ()
    , subscribersLock ()
    , streamConfiguration (NULL)
-   , UDPStream (NULL)
   {}
 
   struct Test_I_AVStream_Client_DirectShow_Configuration* configuration;
@@ -880,7 +879,6 @@ struct Test_I_AVStream_Client_DirectShow_UI_CBData
   Test_I_AVStream_Client_DirectShow_Subscribers_t         subscribers;
   ACE_SYNCH_RECURSIVE_MUTEX                               subscribersLock;
   IAMStreamConfig*                                        streamConfiguration;
-  Test_I_AVStream_Client_DirectShow_Video_StreamBase_t*   UDPStream;
 };
 
 struct Test_I_AVStream_Client_MediaFoundation_UI_CBData

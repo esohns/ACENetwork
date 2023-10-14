@@ -352,15 +352,6 @@ typedef std::map<std::string,
                  struct Net_ConnectionConfigurationBase*> Net_ConnectionConfigurations_t;
 typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationsIterator_t;
 
-//#if defined (NETLINK_SUPPORT)
-//typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
-//                                            NET_TRANSPORTLAYER_NETLINK> Net_NetlinkStreamConnectionConfiguration_t;
-//#endif // NETLINK_SUPPORT
-//typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
-//                                            NET_TRANSPORTLAYER_TCP> Net_TCPStreamConnectionConfiguration_t;
-//typedef Net_StreamConnectionConfiguration_T<Stream_Configuration_t,
-//                                            NET_TRANSPORTLAYER_UDP> Net_UDPStreamConnectionConfiguration_t;
-
 // include template definition
 #include "net_connection_configuration.inl"
 

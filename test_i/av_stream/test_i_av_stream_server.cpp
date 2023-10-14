@@ -102,6 +102,10 @@
 #include "test_i_av_stream_server_stream.h"
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("AVStream");
+// *TODO*: unneeded (from client), remove ASAP
+const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Video");
+const char stream_name_string_3[] =
+  ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING);
 
 void
 do_printUsage (const std::string& programName_in)
@@ -1251,17 +1255,20 @@ do_work (unsigned int maximumNumberOfConnections_in,
     NULL;
   Test_I_AVStream_Server_DirectShow_UDPConnectionManager_t* directshow_udp_connection_manager_p =
     NULL;
-  Net_ConnectionConfigurationsIterator_t connection_configuration_iterator;
+  //Net_ConnectionConfigurationsIterator_t connection_configuration_iterator;
   switch (mediaFramework_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
       directshow_tcp_connection_configuration.allocatorConfiguration = &allocator_configuration;
-      directshow_configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+      directshow_udp_connection_configuration.allocatorConfiguration = &allocator_configuration;
+      directshow_configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                                 &directshow_tcp_connection_configuration));
-      connection_configuration_iterator =
-        directshow_configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (connection_configuration_iterator != directshow_configuration.connectionConfigurations.end ());
+      directshow_configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
+                                                                                &directshow_udp_connection_configuration));
+      //connection_configuration_iterator =
+      //  directshow_configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+      //ACE_ASSERT (connection_configuration_iterator != directshow_configuration.connectionConfigurations.end ());
 
       directshow_tcp_connection_manager_p =
         TEST_I_AVSTREAM_SERVER_DIRECTSHOW_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -1280,11 +1287,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
-      mediafoundation_configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+      mediafoundation_configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                                      &mediafoundation_tcp_connection_configuration));
-      connection_configuration_iterator =
-        mediafoundation_configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (connection_configuration_iterator != mediafoundation_configuration.connectionConfigurations.end ());
+      //connection_configuration_iterator =
+      //  mediafoundation_configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+      //ACE_ASSERT (connection_configuration_iterator != mediafoundation_configuration.connectionConfigurations.end ());
 
       mediafoundation_tcp_connection_manager_p =
         TEST_I_AVSTREAM_SERVER_MEDIAFOUNDATION_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -1372,52 +1379,50 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                                                                1);
-      //NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.bufferSize =
-      //  bufferSize_in;
-      NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.useLoopBackDevice =
+      directshow_tcp_connection_configuration.socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                                           1);
+      directshow_tcp_connection_configuration.socketConfiguration.useLoopBackDevice =
         useLoopBack_in;
-      if (NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.useLoopBackDevice)
+      if (directshow_tcp_connection_configuration.socketConfiguration.useLoopBackDevice)
       {
-        result =
-          NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.address.set (listeningPortNumber_in,
-                                                                                                                     INADDR_LOOPBACK,
-                                                                                                                     1,
-                                                                                                                     0);
+        result = directshow_tcp_connection_configuration.socketConfiguration.address.set (listeningPortNumber_in,
+                                                                                          INADDR_LOOPBACK,
+                                                                                          1,
+                                                                                          0);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
       } // end IF
-      //if (bufferSize_in)
-      //  NET_SOCKET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->PDUSize =
-      //    bufferSize_in;
-      NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->statisticReportingInterval =
-        statisticReportingInterval_in;
-      static_cast<Test_I_AVStream_Server_DirectShow_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second)->messageAllocator =
-        &directshow_message_allocator;
-      static_cast<Test_I_AVStream_Server_DirectShow_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second)->streamConfiguration =
+      directshow_tcp_connection_configuration.statisticReportingInterval = statisticReportingInterval_in;
+      directshow_tcp_connection_configuration.messageAllocator = &directshow_message_allocator;
+      directshow_tcp_connection_configuration.streamConfiguration =
         &directshow_configuration.streamConfiguration;
 
-      directshow_tcp_connection_manager_p->set (*static_cast<Test_I_AVStream_Server_DirectShow_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second),
+      directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
+                                                &user_data_s);
+
+      directshow_udp_connection_configuration.statisticReportingInterval = statisticReportingInterval_in;
+      directshow_udp_connection_configuration.messageAllocator = &directshow_message_allocator;
+      directshow_udp_connection_configuration.streamConfiguration =
+        &directshow_configuration.streamConfiguration;
+
+      directshow_udp_connection_manager_p->set (directshow_udp_connection_configuration,
                                                 &user_data_s);
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
-      NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                                                                             1);
-      //NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.bufferSize =
-      //  bufferSize_in;
-      NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.useLoopBackDevice =
+      mediafoundation_tcp_connection_configuration.socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                                                1);
+      mediafoundation_tcp_connection_configuration.socketConfiguration.useLoopBackDevice =
         useLoopBack_in;
-      if (NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.useLoopBackDevice)
+      if (mediafoundation_tcp_connection_configuration.socketConfiguration.useLoopBackDevice)
       {
         result =
-          NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.address.set (listeningPortNumber_in,
-                                                                                                                     INADDR_LOOPBACK,
-                                                                                                                     1,
-                                                                                                                     0);
+          mediafoundation_tcp_connection_configuration.socketConfiguration.address.set (listeningPortNumber_in,
+                                                                                        INADDR_LOOPBACK,
+                                                                                        1,
+                                                                                        0);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
@@ -1425,15 +1430,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //if (bufferSize_in)
       //  (*connection_configuration_iterator).second->PDUSize =
       //    bufferSize_in;
-      (*connection_configuration_iterator).second->statisticReportingInterval =
+      mediafoundation_tcp_connection_configuration.statisticReportingInterval =
         statisticReportingInterval_in;
 
-      static_cast<Test_I_AVStream_Server_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second)->messageAllocator =
+      mediafoundation_tcp_connection_configuration.messageAllocator =
         &mediafoundation_message_allocator;
-      static_cast<Test_I_AVStream_Server_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second)->streamConfiguration =
+      mediafoundation_tcp_connection_configuration.streamConfiguration =
         &mediafoundation_configuration.streamConfiguration;
 
-      mediafoundation_tcp_connection_manager_p->set (*static_cast<Test_I_AVStream_Server_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second),
+      mediafoundation_tcp_connection_manager_p->set (mediafoundation_tcp_connection_configuration,
                                                      &user_data_s);
       break;
     } // end IF
@@ -2224,13 +2229,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
         case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
         {
           result_2 =
-            directShowCBData_in.configuration->signalHandlerConfiguration.listener->initialize (*static_cast<Test_I_AVStream_Server_DirectShow_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second));
+            directShowCBData_in.configuration->signalHandlerConfiguration.listener->initialize (directshow_tcp_connection_configuration);
           break;
         }
         case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
         {
           result_2 =
-            mediaFoundationCBData_in.configuration->signalHandlerConfiguration.listener->initialize (*static_cast<Test_I_AVStream_Server_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second));
+            mediaFoundationCBData_in.configuration->signalHandlerConfiguration.listener->initialize (mediafoundation_tcp_connection_configuration);
           break;
         }
         default:

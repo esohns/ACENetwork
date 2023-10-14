@@ -24,8 +24,6 @@
  // *** trace log ***
 #define FILE_SERVER_LOG_FILENAME_PREFIX                   "file_server"
 
-#define FILE_SERVER_DEFAULT_FILE                          "test.mp4"
-
  // stream
 #define FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE      65536 // bytes
 #define FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER        1
@@ -33,7 +31,13 @@
 
 //////////////////////////////////////////
 
+#if defined (GTK_SUPPORT)
+#if defined (GTK2_USE)
 #define FILE_SERVER_UI_FILE                               "file_server.glade"
+#else
+#define FILE_SERVER_UI_FILE                               "file_server.gtk3"
+#endif // GTK2_USE
+#endif // GTK_SUPPORT
 
 // glade/GTKBuilder definitions
 #define FILE_SERVER_GTK_ABOUTDIALOG_NAME                   "aboutdialog"

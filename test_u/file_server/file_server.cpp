@@ -107,7 +107,7 @@ unsigned int random_seed;
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 struct random_data random_data;
 char random_state_buffer[BUFSIZ];
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("FileServerStream");
 
@@ -137,12 +137,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
-  std::string source_file = Common_File_Tools::getTempDirectory ();
-  source_file += ACE_DIRECTORY_SEPARATOR_STR;
-  source_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_DEFAULT_FILE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [FILE]    : source file [")
-            << source_file
-            << ACE_TEXT_ALWAYS_CHAR ("]")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [FILE]    : source file")
             << std::endl;
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_STR;
@@ -229,11 +224,9 @@ do_processArguments (const int& argc_in,
   // initialize results
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
-  fileName_out = Common_File_Tools::getTempDirectory ();
-  fileName_out += ACE_DIRECTORY_SEPARATOR_STR;
-  fileName_out += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_DEFAULT_FILE);
+  fileName_out.clear ();
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_STR;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
@@ -261,7 +254,7 @@ do_processArguments (const int& argc_in,
                               ACE_TEXT ("cf:g::i:k:ln:op:rs:tuvx:"));
 #else
                               ACE_TEXT ("f:g::i:k:ln:op:rs:tuvx:"));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   int option = 0;
   std::stringstream converter;
   while ((option = argumentParser ()) != EOF)
@@ -274,7 +267,7 @@ do_processArguments (const int& argc_in,
         showConsole_out = true;
         break;
       }
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       case 'f':
       {
         fileName_out =
@@ -470,7 +463,7 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 void
@@ -506,6 +499,7 @@ do_work (
   struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+  Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -557,6 +551,7 @@ do_work (
     return;
   } // end IF
 
+  configuration.allocatorConfiguration.defaultBufferSize = 1 << 20; // 1Mb
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
@@ -819,7 +814,6 @@ do_work (
 #if defined (GTK_USE)
     //Common_UI_GladeDefinition ui_definition (argc_in,
 //                                         argv_in);
-    Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
     //CBData_in.configuration->GTKConfiguration.argc = argc_in;
     //CBData_in.configuration->GTKConfiguration.argv = argv_in;
     CBData_in.configuration->GTKConfiguration.CBData = &CBData_in;
@@ -863,7 +857,7 @@ do_work (
     } // end IF
     if (!showConsole_in)
       was_visible_b = ShowWindow (window_p, SW_HIDE);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 #endif // GUI_SUPPORT
 
@@ -1137,9 +1131,7 @@ ACE_TMAIN (int argc_in,
   bool show_console = false;
 #endif
   std::string path = configuration_path;
-  std::string source_file = Common_File_Tools::getTempDirectory ();
-  source_file += ACE_DIRECTORY_SEPARATOR_STR;
-  source_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_DEFAULT_FILE);
+  std::string source_file;
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_STR;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
@@ -1166,7 +1158,7 @@ ACE_TMAIN (int argc_in,
                             argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                             show_console,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                             source_file,
                             UI_file_path,
                             network_interface,
@@ -1190,7 +1182,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1223,7 +1215,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1257,9 +1249,8 @@ ACE_TMAIN (int argc_in,
                                             trace_information,             // debug messages ?
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                            NULL))                         // (ui) logger ?
-//                                            (UI_file_path.empty () ? NULL
-//                                                                   : &logger))) // (ui) logger ?
+                                            (UI_file_path.empty () ? NULL
+                                                                   : &logger))) // (ui) logger ?
 #elif defined (WXWIDGETS_USE)
                                             NULL))                              // (ui) logger ?
 #else
@@ -1278,7 +1269,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1294,7 +1285,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_SUCCESS;
   } // end IF
 
@@ -1336,7 +1327,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
@@ -1354,7 +1345,7 @@ ACE_TMAIN (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
     (use_reactor && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   bool stack_traces = true;
   bool use_signal_based_proactor = !use_reactor;
   if (!Common_OS_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
@@ -1375,7 +1366,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1385,7 +1376,7 @@ ACE_TMAIN (int argc_in,
   do_work (
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
            show_console,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
            source_file,
            UI_file_path,
            network_interface,
@@ -1437,8 +1428,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
   ACE_Profile_Timer::Rusage elapsed_rusage;
@@ -1452,29 +1442,7 @@ ACE_TMAIN (int argc_in,
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT(" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
-             elapsed_time.real_time,
-             elapsed_time.user_time,
-             elapsed_time.system_time,
-             user_time_string.c_str(),
-             system_time_string.c_str(),
-             elapsed_rusage.ru_maxrss,
-             elapsed_rusage.ru_ixrss,
-             elapsed_rusage.ru_idrss,
-             elapsed_rusage.ru_isrss,
-             elapsed_rusage.ru_minflt,
-             elapsed_rusage.ru_majflt,
-             elapsed_rusage.ru_nswap,
-             elapsed_rusage.ru_inblock,
-             elapsed_rusage.ru_oublock,
-             elapsed_rusage.ru_msgsnd,
-             elapsed_rusage.ru_msgrcv,
-             elapsed_rusage.ru_nsignals,
-             elapsed_rusage.ru_nvcsw,
-             elapsed_rusage.ru_nivcsw));
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
               elapsed_time.real_time,
@@ -1482,7 +1450,29 @@ ACE_TMAIN (int argc_in,
               elapsed_time.system_time,
               ACE_TEXT (user_time_string.c_str ()),
               ACE_TEXT (system_time_string.c_str ())));
-#endif
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT(" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
+              elapsed_time.real_time,
+              elapsed_time.user_time,
+              elapsed_time.system_time,
+              user_time_string.c_str(),
+              system_time_string.c_str(),
+              elapsed_rusage.ru_maxrss,
+              elapsed_rusage.ru_ixrss,
+              elapsed_rusage.ru_idrss,
+              elapsed_rusage.ru_isrss,
+              elapsed_rusage.ru_minflt,
+              elapsed_rusage.ru_majflt,
+              elapsed_rusage.ru_nswap,
+              elapsed_rusage.ru_inblock,
+              elapsed_rusage.ru_oublock,
+              elapsed_rusage.ru_msgsnd,
+              elapsed_rusage.ru_msgrcv,
+              elapsed_rusage.ru_nsignals,
+              elapsed_rusage.ru_nvcsw,
+              elapsed_rusage.ru_nivcsw));
+#endif // ACE_WIN32 || ACE_WIN64
 
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
@@ -1499,7 +1489,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

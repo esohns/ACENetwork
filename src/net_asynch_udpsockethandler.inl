@@ -878,7 +878,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != EPIPE)                 &&     // 32
         //(error != ERROR_INVALID_NETNAME) &&     // 1214: most probable reason: socket not connect()ed to a valid address
-        //(error != ERROR_INVALID_USER_BUFFER) && // 1784
+        //(error != ERROR_INVALID_USER_BUFFER) && // 1784: too many outstanding asynchronous I/O requests ?
         (error != ECONNRESET))                  // 10054
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@, address: %s): \"%s\", aborting\n"),

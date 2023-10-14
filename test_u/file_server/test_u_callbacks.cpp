@@ -17,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "common_log_common.h"
 #include "stdafx.h"
 
 #include "test_u_callbacks.h"
@@ -25,7 +24,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/Synch_Traits.h"
 
-//#include "ace/Synch.h"
 #include "common_timer_manager.h"
 
 #include "common_ui_gtk_common.h"
@@ -321,6 +319,7 @@ idle_initialize_ui_cb (gpointer userData_in)
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  ACE_ASSERT ((*iterator).second.second);
 
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
@@ -347,7 +346,7 @@ idle_initialize_ui_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<double> (std::numeric_limits<int64_t>::max ()));
 
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -355,21 +354,21 @@ idle_initialize_ui_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<double> (std::numeric_limits<int64_t>::max ()));
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<double> (std::numeric_limits<int64_t>::max ()));
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_DATA_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<double> (std::numeric_limits<int64_t>::max ()));
 
   spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -377,7 +376,7 @@ idle_initialize_ui_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
-                             std::numeric_limits<double>::max ());
+                             static_cast<double> (std::numeric_limits<int64_t>::max ()));
 
   Net_ConnectionConfigurationsIterator_t iterator_3 =
     data_p->configuration->connectionConfigurations.find(ACE_TEXT_ALWAYS_CHAR(""));

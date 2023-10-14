@@ -111,7 +111,8 @@ endif (GUI_SUPPORT)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${file_server_SRCS}
-                etc/file_server.glade)
+                etc/file_server.glade
+                etc/file_server.gtk3)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
@@ -175,7 +176,7 @@ install (FILES etc/file_server.glade
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-f /run/media/eriks/ARCHIVE_2/video/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
+                         ARGS "-f /run/media/eriks/ARCHIVE_2/video/other/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
@@ -198,20 +199,20 @@ elseif (WIN32)
    file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
   endif (WXWIDGETS_SUPPORT)
  endif (GUI_SUPPORT)
- if (OPENSSL_SUPPORT)
-  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl OPENSSL_LIB_PATH)
- endif (OPENSSL_SUPPORT)
+ if (SSL_SUPPORT)
+  file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIB_PATH)
+ endif (SSL_SUPPORT)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${GTK_LIB_PATH}
                            ${WXWIDGETS_LIB_PATH}
                            ${ACE_LIB_PATH})
- if (OPENSSL_SUPPORT)
+ if (SSL_SUPPORT)
   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                            ${OPENSSL_LIB_PATH})
- endif (OPENSSL_SUPPORT)
+                            ${SSL_LIB_PATH})
+ endif (SSL_SUPPORT)
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-c -l -p 5555 -t"
+                         ARGS "-c -f G:/video/other/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
