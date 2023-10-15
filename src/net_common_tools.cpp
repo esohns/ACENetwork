@@ -3483,10 +3483,10 @@ error:
                       ACE_TEXT (result.c_str ())));
           break;
         } // end IF
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
-                    ACE_TEXT (result.c_str ()),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address, true, false).c_str ())));
+        //ACE_DEBUG ((LM_DEBUG,
+        //            ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
+        //            ACE_TEXT (result.c_str ()),
+        //            ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address, true, false).c_str ())));
         return result;
       } // end IF
 #else
@@ -3538,10 +3538,10 @@ error:
       } // end IF
       else
       {
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
-                    ACE_TEXT (result.c_str ()),
-                    ACE_TEXT (match_results[1].str ().c_str ())));
+        //ACE_DEBUG ((LM_DEBUG,
+        //            ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
+        //            ACE_TEXT (result.c_str ()),
+        //            ACE_TEXT (match_results[1].str ().c_str ())));
         return result;
       } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64

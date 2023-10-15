@@ -66,6 +66,14 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
   int result = -1;
   const typename MessageType::DATA_T& message_data_r = message_in->getR ();
   std::string branch_name_string;
+  ACE_Message_Block* message_block_p = message_in->duplicate ();
+  if (unlikely (!message_block_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Message_Block::duplicate(): \"%m\", returning\n"),
+                inherited::mod_->name ()));
+    return;
+  } // end IF
 
   // map message type to branch name
   switch (message_data_r.header.type)
@@ -88,6 +96,7 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
                   ACE_TEXT ("%s: invalid/unknown message type (was: %d), returning\n"),
                   inherited::mod_->name (),
                   message_data_r.header.type));
+      message_block_p->release (); message_block_p = NULL;
       return;
     }
   } // end SWITCH
@@ -104,13 +113,13 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
                                (*iterator).second));
     ACE_ASSERT (iterator_2 != inherited::modules_.end ());
     ACE_ASSERT ((*iterator_2).first);
-    result = (*iterator_2).first->enqueue_tail (message_in, NULL);
+    result = (*iterator_2).first->enqueue_tail (message_block_p, NULL);
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Message_Queue_Base::enqueue_tail(): \"%m\", returning\n"),
                   inherited::mod_->name ()));
-      message_in->release (); message_in = NULL;
+      message_block_p->release (); message_block_p = NULL;
       return;
     } // end IF
   } // end lock scope

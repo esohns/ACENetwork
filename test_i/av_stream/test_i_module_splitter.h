@@ -65,7 +65,7 @@ class Test_I_AVStream_Splitter_T
   inline virtual ~Test_I_AVStream_Splitter_T () {}
 
   //virtual void handleControlMessage (ControlMessageType&); // control message handle
-  inline virtual void handleDataMessage (MessageType*& message_inout, bool& passMessageDownstream_out) { passMessageDownstream_out = false; forward (message_inout); }
+  inline virtual void handleDataMessage (MessageType*& message_inout, bool& passMessageDownstream_out) { forward (message_inout); }
   //virtual void handleSessionMessage (SessionMessageType*&, // session message handle
   //                                   bool&);               // return value: pass message downstream ?
   //inline virtual void handleUserMessage (ACE_Message_Block*& message_inout, bool& passMessageDownstream_out) { ACE_UNUSED_ARG (passMessageDownstream_out); forward (message_inout, false); }

@@ -2179,7 +2179,7 @@ idle_initialize_source_UI_cb (gpointer userData_in)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), aborting\n"),
                   ui_cb_data_base_p->mediaFramework));
-      return false;
+      return G_SOURCE_REMOVE;
     }
   } // end SWITCH
 #else
@@ -2386,18 +2386,46 @@ idle_initialize_source_UI_cb (gpointer userData_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      Net_ConnectionConfigurationsIterator_t iterator_2 =
-        directshow_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
-      ACE_ASSERT (iterator_2 != directshow_ui_cb_data_p->configuration->connectionConfigurations.end ());
-      string_p =
-        NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.address.get_host_name ();
-      port_number =
-        NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.address.get_port_number ();
+      switch (directshow_ui_cb_data_p->configuration->protocol)
+      {
+        case NET_TRANSPORTLAYER_TCP:
+        {
+          Net_ConnectionConfigurationsIterator_t iterator_2 =
+            directshow_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
+          ACE_ASSERT (iterator_2 != directshow_ui_cb_data_p->configuration->connectionConfigurations.end ());
+          string_p =
+            NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.address.get_host_name ();
+          port_number =
+            NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.address.get_port_number ();
+          use_loopback =
+            NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice;
+          break;
+        }
+        case NET_TRANSPORTLAYER_UDP:
+        {
+          Net_ConnectionConfigurationsIterator_t iterator_2 =
+            directshow_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+          ACE_ASSERT (iterator_2 != directshow_ui_cb_data_p->configuration->connectionConfigurations.end ());
+          string_p =
+            NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.get_host_name ();
+          port_number =
+            NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.get_port_number ();
+          use_loopback =
+            NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice;
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown protocol (was: %d), aborting\n"),
+                      directshow_ui_cb_data_p->configuration->protocol));
+          return G_SOURCE_REMOVE;
+        }
+      } // end SWITCH
+
       protocol = directshow_ui_cb_data_p->configuration->protocol;
       use_reactor =
         (directshow_ui_cb_data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0);
-      use_loopback =
-        NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice;
       buffer_size =
         (*directshow_stream_iterator).second.configuration_->allocatorConfiguration->defaultBufferSize;
       break;
@@ -2425,7 +2453,7 @@ idle_initialize_source_UI_cb (gpointer userData_in)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), aborting\n"),
                   ui_cb_data_base_p->mediaFramework));
-      return false;
+      return G_SOURCE_REMOVE;
     }
   } // end SWITCH
 #else
@@ -2831,7 +2859,7 @@ idle_initialize_source_UI_cb (gpointer userData_in)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), aborting\n"),
                   ui_cb_data_base_p->mediaFramework));
-      return false;
+      return G_SOURCE_REMOVE;
     }
   } // end SWITCH
 #else
@@ -2871,7 +2899,7 @@ idle_initialize_source_UI_cb (gpointer userData_in)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown media framework (was: %d), aborting\n"),
                   ui_cb_data_base_p->mediaFramework));
-      return false;
+      return G_SOURCE_REMOVE;
     }
   } // end SWITCH
 #else
@@ -3385,25 +3413,48 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   unsigned short port_number = 0;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Net_ConnectionConfigurationsIterator_t tcp_connection_configuration_iterator, udp_connection_configuration_iterator;
+  Net_ConnectionConfigurationsIterator_t connection_configuration_iterator;
   switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      tcp_connection_configuration_iterator =
-        directshow_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
-      ACE_ASSERT (tcp_connection_configuration_iterator != directshow_ui_cb_data_p->configuration->connectionConfigurations.end ());
-      port_number =
-        NET_CONFIGURATION_TCP_CAST ((*tcp_connection_configuration_iterator).second)->socketConfiguration.address.get_port_number ();
+      switch (directshow_ui_cb_data_p->configuration->protocol)
+      {
+        case NET_TRANSPORTLAYER_TCP:
+        {
+          connection_configuration_iterator =
+            directshow_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
+          ACE_ASSERT (connection_configuration_iterator != directshow_ui_cb_data_p->configuration->connectionConfigurations.end ());
+          port_number =
+            NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.address.get_port_number ();
+          break;
+        }
+        case NET_TRANSPORTLAYER_UDP:
+        {
+          connection_configuration_iterator =
+            directshow_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+          ACE_ASSERT (connection_configuration_iterator != directshow_ui_cb_data_p->configuration->connectionConfigurations.end ());
+          port_number =
+            NET_CONFIGURATION_UDP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.listenAddress.get_port_number ();
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown protocol (was: %d), aborting\n"),
+                      directshow_ui_cb_data_p->configuration->protocol));
+          return G_SOURCE_REMOVE;
+        }
+      } // end SWITCH
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
-      tcp_connection_configuration_iterator =
+      connection_configuration_iterator =
         mediafoundation_ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
-      ACE_ASSERT (tcp_connection_configuration_iterator != mediafoundation_ui_cb_data_p->configuration->connectionConfigurations.end ());
+      ACE_ASSERT (connection_configuration_iterator != mediafoundation_ui_cb_data_p->configuration->connectionConfigurations.end ());
       port_number =
-        NET_CONFIGURATION_TCP_CAST ((*tcp_connection_configuration_iterator).second)->socketConfiguration.address.get_port_number ();
+        NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.address.get_port_number ();
       break;
     }
     default:
@@ -3482,9 +3533,31 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
-      use_loopback =
-        NET_CONFIGURATION_TCP_CAST ((*tcp_connection_configuration_iterator).second)->socketConfiguration.useLoopBackDevice;
+    {
+      switch (protocol)
+      {
+        case NET_TRANSPORTLAYER_TCP:
+        {
+          use_loopback =
+            NET_CONFIGURATION_TCP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.useLoopBackDevice;
+          break;
+        }
+        case NET_TRANSPORTLAYER_UDP:
+        {
+          use_loopback =
+            NET_CONFIGURATION_UDP_CAST ((*connection_configuration_iterator).second)->socketConfiguration.useLoopBackDevice;
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown protocol (was: %d), aborting\n"),
+                      protocol));
+          return G_SOURCE_REMOVE;
+        }
+      } // end SWITCH
       break;
+    }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -3532,7 +3605,7 @@ idle_initialize_target_UI_cb (gpointer userData_in)
     ui_cb_data_p->configuration->streamConfiguration.configuration_->allocatorConfiguration->defaultBufferSize;
 #endif
   gtk_spin_button_set_value (spin_button_p,
-                              static_cast<double> (buffer_size));
+                             static_cast<double> (buffer_size));
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,

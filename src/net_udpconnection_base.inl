@@ -791,51 +791,61 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   ACE_ASSERT (message_block_p);
 
   // fragment the data ?
-  //message_block_2 = message_block_p;
-  //do
-  //{
-  //  length = message_block_2->length ();
-  //  if (length > inherited::CONNECTION_BASE_T::configuration_->PDUSize)
-  //  {
-  //    message_block_3 = message_block_2->duplicate ();
-  //    if (unlikely (!message_block_3))
-  //    {
-  //      ACE_DEBUG ((LM_ERROR,
-  //                  ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
-  //      message_block_p->release (); message_block_p = NULL;
-  //      return -1;
-  //    } // end IF
-  //    message_block_2->cont (message_block_3);
+  ACE_Message_Block* message_block_2 = message_block_p;
+  size_t length = 0;
+  do
+  {
+    length = message_block_2->length ();
+    if (length > inherited::PDUSize_)
+    {
+      ACE_Message_Block* message_block_3 = message_block_2->duplicate ();
+      if (unlikely (!message_block_3))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
+        message_block_p->release (); message_block_p = NULL;
+        return -1;
+      } // end IF
+      message_block_2->cont (message_block_3);
 
-  //    message_block_2->length (inherited::CONNECTION_BASE_T::configuration_->PDUSize);
-  //    message_block_3->rd_ptr (inherited::CONNECTION_BASE_T::configuration_->PDUSize);
+      message_block_2->length (inherited::PDUSize_);
+      message_block_3->rd_ptr (inherited::PDUSize_);
 
-  //    message_block_2 = message_block_3;
-  //    continue;
-  //  } // end IF
+      message_block_2 = message_block_3;
+      continue;
+    } // end IF
 
-  //  message_block_2 = message_block_2->cont ();
-  //} while (message_block_2);
+    message_block_2 = message_block_2->cont ();
+  } while (message_block_2);
 
   // start (asynchronous) write(s)
-  //do
-  //{
-    //length = 0;
-    //message_block_2 = message_block_p;
-    //while (length < inherited::CONNECTION_BASE_T::configuration_->PDUSize)
-    //{
-    //  length += message_block_2->length ();
-    //  message_block_2 = message_block_2->cont ();
-    //  if (!message_block_2)
-    //    break;
-    //} // end WHILE
-    //if (message_block_2)
-    //{
-    //  message_block_3 = message_block_p;
-    //  while (message_block_3->cont () != message_block_2)
-    //    message_block_3 = message_block_3->cont ();
-    //  message_block_3->cont (NULL);
-    //} // end IF
+  do
+  {
+    length = 0;
+    message_block_2 = message_block_p;
+    do
+    {
+      size_t current_size = message_block_2->length ();
+      if (length + current_size < inherited::PDUSize_)
+      {
+        length += current_size;
+        message_block_2 = message_block_2->cont ();
+      } // end IF
+      else
+        break;
+      if (!message_block_2)
+        break;
+    } while (true);
+    if (message_block_2)
+    {
+      ACE_Message_Block* message_block_3 = message_block_p;
+      if (message_block_3 != message_block_2)
+        while (message_block_3->cont () != message_block_2)
+          message_block_3 = message_block_3->cont ();
+      else
+        message_block_2 = message_block_2->cont ();
+      message_block_3->cont (NULL);
+    } // end IF
 
     this->increase ();
     inherited::counter_.increase ();
@@ -872,8 +882,8 @@ send:
 
       return -1;
     } // end IF
-  //  message_block_p = message_block_2;
-  //} while (message_block_p);
+    message_block_p = message_block_2;
+  } while (message_block_p);
 
   return 0;
 }

@@ -173,8 +173,17 @@ do_printUsage (const std::string& programName_in)
             << UI_file
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
+  std::string default_interface_string =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+  ACE_ASSERT (!default_interface_string.empty ());
+  ACE_INET_Addr interface_address, gateway_address;
+  Net_Common_Tools::interfaceToIPAddress (default_interface_string,
+                                          interface_address,
+                                          gateway_address);
+  std::string interface_address_string =
+    Net_Common_Tools::IPAddressToString (interface_address, true, false);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-h [STRING] : target host [\"")
-            << ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_TARGET_HOSTNAME)
+            << ACE_TEXT_ALWAYS_CHAR (interface_address_string.c_str ())
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l          : log to a file [")
@@ -266,7 +275,15 @@ do_processArguments (int argc_in,
   //gtkRcFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   //gtkRcFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
   useUncompressedFormat_out = false;
-  hostName_out = ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_TARGET_HOSTNAME);
+  std::string default_interface_string =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+  ACE_ASSERT (!default_interface_string.empty ());
+  ACE_INET_Addr interface_address, gateway_address;
+  Net_Common_Tools::interfaceToIPAddress (default_interface_string,
+                                          interface_address, gateway_address);
+  std::string interface_address_string =
+    Net_Common_Tools::IPAddressToString (interface_address, true, false);
+  hostName_out = interface_address_string;
   gtkGladeFile_out = path;
   gtkGladeFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtkGladeFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_SOURCE_GLADE_FILE);
@@ -897,6 +914,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   allocator_configuration_p = &CBData_in.configuration->allocatorConfiguration;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (allocator_configuration_p);
+  allocator_configuration_p->defaultBufferSize = 1 << 20; // 1Mb
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (*allocator_configuration_p))
@@ -2212,7 +2230,15 @@ ACE_TMAIN (int argc_in,
   gtk_glade_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_glade_filename +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_SOURCE_GLADE_FILE);
-  std::string host_name = ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_TARGET_HOSTNAME);
+  std::string default_interface_string =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+  ACE_ASSERT (!default_interface_string.empty ());
+  ACE_INET_Addr interface_address, gateway_address;
+  Net_Common_Tools::interfaceToIPAddress (default_interface_string,
+                                          interface_address, gateway_address);
+  std::string interface_address_string =
+    Net_Common_Tools::IPAddressToString (interface_address, true, false);
+  std::string host_name = interface_address_string;
   bool log_to_file = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   enum Stream_MediaFramework_Type media_framework_e =

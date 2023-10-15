@@ -829,13 +829,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   int result = -1;
 
   // step0a: initialize event dispatch
-  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-  if (useReactor_in)
-    event_dispatch_configuration_s.numberOfReactorThreads =
-      TEST_I_DEFAULT_NUMBER_OF_SERVER_DISPATCH_THREADS;
-  else
-    event_dispatch_configuration_s.numberOfProactorThreads =
-      TEST_I_DEFAULT_NUMBER_OF_SERVER_DISPATCH_THREADS;
+  struct Common_EventDispatchConfiguration* event_dispatch_configuration_p =
+    NULL;
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   bool serialize_output = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -847,6 +842,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
+      if (useReactor_in)
+        directshow_configuration.dispatchConfiguration.numberOfReactorThreads =
+          numberOfDispatchThreads_in;
+      else
+        directshow_configuration.dispatchConfiguration.numberOfProactorThreads =
+          numberOfDispatchThreads_in;
+      event_dispatch_configuration_p =
+        &directshow_configuration.dispatchConfiguration;
+
       directShowCBData_in.configuration = &directshow_configuration;
       serialize_output =
         directshow_stream_configuration.serializeOutput;
@@ -854,6 +858,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
+      if (useReactor_in)
+        mediafoundation_configuration.dispatchConfiguration.numberOfReactorThreads =
+          numberOfDispatchThreads_in;
+      else
+        mediafoundation_configuration.dispatchConfiguration.numberOfProactorThreads =
+          numberOfDispatchThreads_in;
+      event_dispatch_configuration_p =
+        &mediafoundation_configuration.dispatchConfiguration;
+
       mediaFoundationCBData_in.configuration = &mediafoundation_configuration;
       serialize_output =
         mediafoundation_stream_configuration.serializeOutput;
@@ -870,15 +883,19 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
   struct Test_I_AVStream_Server_Configuration configuration;
   struct Test_I_AVStream_Server_StreamConfiguration stream_configuration;
+  if (useReactor_in)
+    configuration.dispatchConfiguration.numberOfReactorThreads =
+      numberOfDispatchThreads_in;
+  else
+    configuration.dispatchConfiguration.numberOfProactorThreads =
+      numberOfDispatchThreads_in;
+  event_dispatch_configuration_p = &configuration.dispatchConfiguration;
   CBData_in.configuration = &configuration;
   serialize_output = stream_configuration.serializeOutput;
 #endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (event_dispatch_configuration_p);
   ACE_UNUSED_ARG (serialize_output);
-  event_dispatch_configuration_s.numberOfProactorThreads =
-          numberOfDispatchThreads_in;
-  event_dispatch_configuration_s.numberOfReactorThreads =
-          numberOfDispatchThreads_in;
-  if (!Common_Event_Tools::initializeEventDispatch (event_dispatch_configuration_s))
+  if (!Common_Event_Tools::initializeEventDispatch (*event_dispatch_configuration_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
@@ -886,7 +903,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
+      event_dispatch_configuration_p;
 
   // step0b: initialize configuration and stream
   struct Test_I_AVStream_Configuration* camstream_configuration_p = NULL;
@@ -920,11 +937,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   CBData_in.configuration = &configuration;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (camstream_configuration_p);
-  camstream_configuration_p->dispatchConfiguration.numberOfReactorThreads =
-      numberOfDispatchThreads_in;
-  camstream_configuration_p->dispatchConfiguration.numberOfProactorThreads =
-      numberOfDispatchThreads_in;
-
   camstream_configuration_p->protocol = (useUDP_in ? NET_TRANSPORTLAYER_UDP
                                                    : NET_TRANSPORTLAYER_TCP);
 
@@ -1174,11 +1186,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Stream_IAllocator* allocator_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Test_I_AVStream_Server_DirectShow_MessageAllocator_t directshow_message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
-                                                                            &heap_allocator,     // heap allocator handle
-                                                                            true);               // block ?
+                                                                                     &heap_allocator,     // heap allocator handle
+                                                                                     true);               // block ?
   Test_I_AVStream_Server_MediaFoundation_MessageAllocator_t mediafoundation_message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
-                                                                                      &heap_allocator,     // heap allocator handle
-                                                                                      true);               // block ?
+                                                                                               &heap_allocator,     // heap allocator handle
+                                                                                               true);               // block ?
   switch (mediaFramework_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
@@ -1209,13 +1221,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Test_I_AVStream_Server_DirectShow_EventHandler_Module directshow_event_handler (NULL,
-                                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+                                                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_AVStream_Server_MediaFoundation_EventHandler_Module mediafoundation_event_handler (NULL,
-                                                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+                                                                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 #else
   Test_I_AVStream_Server_EventHandler_t ui_event_handler (&CBData_in);
   Test_I_AVStream_Server_Module_EventHandler_Module event_handler (NULL,
-                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+                                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   modulehandler_configuration.subscriber = &ui_event_handler;
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -1401,6 +1413,27 @@ do_work (unsigned int maximumNumberOfConnections_in,
       directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
                                                 &user_data_s);
 
+      result = directshow_udp_connection_configuration.socketConfiguration.peerAddress.set (listeningPortNumber_in + 1,
+                                                                                            INADDR_LOOPBACK,
+                                                                                            1,
+                                                                                            0);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+      directshow_udp_connection_configuration.socketConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
+                                                                                                 1);
+      directshow_udp_connection_configuration.socketConfiguration.useLoopBackDevice =
+        useLoopBack_in;
+      if (directshow_udp_connection_configuration.socketConfiguration.useLoopBackDevice)
+      {
+        result = directshow_udp_connection_configuration.socketConfiguration.listenAddress.set (listeningPortNumber_in,
+                                                                                                INADDR_LOOPBACK,
+                                                                                                1,
+                                                                                                0);
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+      } // end IF
       directshow_udp_connection_configuration.statisticReportingInterval = statisticReportingInterval_in;
       directshow_udp_connection_configuration.messageAllocator = &directshow_message_allocator;
       directshow_udp_connection_configuration.streamConfiguration =

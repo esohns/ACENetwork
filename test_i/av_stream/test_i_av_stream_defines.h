@@ -46,7 +46,7 @@
 //// *TODO*: implement a format negotiation handshake protocol
 //#define TEST_I_DEFAULT_FRAME_SIZE                                 AVSTREAM_DEFAULT_BUFFER_SIZE // bytes
 
-#define TEST_I_DEFAULT_TARGET_HOSTNAME                            ACE_LOCALHOST
+//#define TEST_I_DEFAULT_TARGET_HOSTNAME                            ACE_LOCALHOST
 #define TEST_I_DEFAULT_PORT                                       10001
 #define TEST_I_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS                 0 // 0 --> no limits
 
