@@ -826,24 +826,22 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     do
     {
       size_t current_size = message_block_2->length ();
-      if (length + current_size < inherited::PDUSize_)
+      if (length + current_size <= inherited::PDUSize_)
       {
         length += current_size;
         message_block_2 = message_block_2->cont ();
+        if (!message_block_2)
+          break;
       } // end IF
       else
         break;
-      if (!message_block_2)
-        break;
     } while (true);
     if (message_block_2)
-    {
+    { // *NOTE*: message_block_2 points at the first block AFTER the last block
+      //         that will be sent next --> crop after previous block
       ACE_Message_Block* message_block_3 = message_block_p;
-      if (message_block_3 != message_block_2)
-        while (message_block_3->cont () != message_block_2)
-          message_block_3 = message_block_3->cont ();
-      else
-        message_block_2 = message_block_2->cont ();
+      while (message_block_3->cont () != message_block_2)
+        message_block_3 = message_block_3->cont ();
       message_block_3->cont (NULL);
     } // end IF
 
@@ -877,6 +875,8 @@ send:
 
       // clean up
       message_block_p->release ();
+      if (message_block_2)
+        message_block_2->release ();
       this->decrease ();
       inherited::counter_.decrease ();
 

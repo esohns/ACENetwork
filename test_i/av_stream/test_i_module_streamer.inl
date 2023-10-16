@@ -80,7 +80,7 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
   ACE_ASSERT (message_block_p);
   struct acestream_av_stream_header header_s;
   ACE_OS::memset (&header_s, 0, sizeof (struct acestream_av_stream_header));
-  header_s.length = message_inout->length ();
+  header_s.length = message_inout->total_length ();
   switch (message_inout->getMediaType ())
   {
     case STREAM_MEDIATYPE_AUDIO:
