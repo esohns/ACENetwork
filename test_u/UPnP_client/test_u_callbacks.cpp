@@ -1718,7 +1718,7 @@ continue_2:
     } // end IF
 
     // stop progress reporting
-    ACE_ASSERT (data_p->progressData.eventSourceId);
+    if (data_p->progressData.eventSourceId)
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
       if (!g_source_remove (data_p->progressData.eventSourceId))
         ACE_DEBUG ((LM_ERROR,

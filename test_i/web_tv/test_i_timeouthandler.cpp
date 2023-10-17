@@ -93,7 +93,8 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
     return; // '1' because at least one URL is required to compute subsequent URLs
   ACE_ASSERT (lock_);
   { ACE_GUARD (ACE_Thread_Mutex, aGuard, *lock_);
-    ACE_ASSERT (!segment_->URLs.empty ());
+    if (segment_->URLs.empty ())
+      return; // try again next time around
     current_URL = segment_->URLs.front ();
     segment_->URLs.pop_front ();
   } // end lock scope

@@ -419,6 +419,13 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       std::istringstream converter;
       converter.str ((*iterator).second);
       converter >> bytes_to_skip;
+      if (bytes_to_skip == 0)
+      {
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("%s: content length was 0, continuing\n"),
+                    inherited::mod_->name ()));
+        bytes_to_skip = headFragment_->total_length ();
+      } // end IF
     } // end IF
     else
     {
