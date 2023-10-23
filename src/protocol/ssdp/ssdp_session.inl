@@ -204,11 +204,11 @@ SSDP_Session_T<StateType,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve connection handle (handle was: \"%@\"), returning\n"),
+                ACE_TEXT ("failed to retrieve connection handle (handle was: %@), returning\n"),
                 handle_h));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve connection handle (handle was: \"%d\"), returning\n"),
+                ACE_TEXT ("failed to retrieve connection handle (handle was: %d), returning\n"),
                 handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
     return;

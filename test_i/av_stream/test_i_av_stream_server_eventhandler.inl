@@ -75,7 +75,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
 #if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #endif // GUI_SUPPORT
-  ACE_ASSERT (!sessionData_);
+//  ACE_ASSERT (!sessionData_); // *TODO*: when does this happen ?
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)

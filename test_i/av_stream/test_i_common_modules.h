@@ -78,6 +78,7 @@
 #include "stream_vis_libav_resize.h"
 #endif // FFMPEG_SUPPORT
 
+#include "stream_misc_defragment.h"
 #include "stream_misc_distributor.h"
 #include "stream_misc_splitter.h"
 
@@ -912,6 +913,12 @@ typedef Stream_Vis_Target_MediaFoundation_T<ACE_MT_SYNCH,
 //                                            Test_I_AVStream_Server_MediaFoundation_StreamSessionData_t> Test_I_AVStream_Server_Stream_DisplayNull;
 #else
 #if defined (GUI_SUPPORT)
+typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+                                   Stream_ControlMessage_t,
+                                   Test_I_AVStream_Server_Message,
+                                   Test_I_AVStream_Server_SessionMessage> Test_I_AVStream_Server_Defragment;
 #if defined (FFMPEG_SUPPORT)
 typedef Stream_Visualization_LibAVResize_T<Test_I_Server_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Resize;
@@ -1375,6 +1382,12 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_MediaFoundation_StreamSessi
                               Test_I_AVStream_Server_MediaFoundation_Display);                          // writer type
 #else
 #if defined (GUI_SUPPORT)
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_AVStream_Server_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_misc_defragment_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_AVStream_Server_Defragment);                       // writer type
 #if defined (FFMPEG_SUPPORT)
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                  // session data type
                              enum Stream_SessionMessageType,                         // session event type

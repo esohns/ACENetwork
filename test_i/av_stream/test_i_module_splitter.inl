@@ -65,6 +65,11 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
 
   int result = -1;
   const typename MessageType::DATA_T& message_data_r = message_in->getR ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  const typename MessageType::DATA_T::DATA_T& message_data_2 =
+    message_data_r.getR ();
+#endif // ACE_WIN32 || ACE_WIN64
   std::string branch_name_string;
   ACE_Message_Block* message_block_p = message_in->duplicate ();
   if (unlikely (!message_block_p))
@@ -76,7 +81,11 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
   } // end IF
 
   // map message type to branch name
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   switch (message_data_r.header.type)
+#else
+  switch (message_data_2.header.type)
+#endif // ACE_WIN32 || ACE_WIN64
   {
     case AVSTREAM_MESSAGE_AUDIO:
     {
@@ -92,10 +101,17 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
     }
     default:
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: invalid/unknown message type (was: %d), returning\n"),
                   inherited::mod_->name (),
                   message_data_r.header.type));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: invalid/unknown message type (was: %d), returning\n"),
+                  inherited::mod_->name (),
+                  message_data_2.header.type));
+#endif // ACE_WIN32 || ACE_WIN64
       message_block_p->release (); message_block_p = NULL;
       return;
     }

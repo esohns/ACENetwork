@@ -144,11 +144,11 @@ class Test_I_AVStream_Server_MediaFoundation_Message
 };
 #else
 class Test_I_AVStream_Server_Message
- : public Stream_DataMessageBase_T<struct Test_I_AVStream_Server_MessageData,
+ : public Stream_DataMessageBase_T<Test_I_AVStream_Server_MessageData_t,
                                    enum Stream_MessageType,
                                    int>
 {
-  typedef Stream_DataMessageBase_T<struct Test_I_AVStream_Server_MessageData,
+  typedef Stream_DataMessageBase_T<Test_I_AVStream_Server_MessageData_t,
                                    enum Stream_MessageType,
                                    int> inherited;
 

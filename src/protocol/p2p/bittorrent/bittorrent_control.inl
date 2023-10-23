@@ -59,8 +59,8 @@ BitTorrent_Control_T<SessionAsynchType,
               1,                                                             // # thread(s)
               false,                                                         // auto-start ?
               NULL)                                                          // queue handle
- , condition_ (lock_)
  , lock_ ()
+ , condition_ (lock_)
  , sessionConfiguration_ (sessionConfiguration_in)
  , sessions_ ()
 {

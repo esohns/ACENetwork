@@ -25,7 +25,7 @@
 
 // interface
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0602) // _WIN32_WINNT_WIN8
 #define NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH                         true // SIO_LOOPBACK_FAST_PATH
 #else
 #define NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH                         false // SIO_LOOPBACK_FAST_PATH
@@ -37,12 +37,26 @@
 #define NET_INTERFACE_DEFAULT_LOOPBACK                                 ""
 #define NET_INTERFACE_DEFAULT_PPP                                      ""
 #define NET_INTERFACE_DEFAULT_WLAN                                     ""
+#elif defined (ACE_LINUX)
+#if defined (IS_FEDORA_LINUX)
+#define NET_INTERFACE_DEFAULT_ETHERNET                                 "enp0s25"
+#else
+#define NET_INTERFACE_DEFAULT_ETHERNET                                 "eth0"
+#endif // IS_FEDORA_LINUX
+#define NET_INTERFACE_DEFAULT_LOOPBACK                                 "lo"
+#define NET_INTERFACE_DEFAULT_PPP                                      "ppp0"
+#if defined (IS_DEBIAN_LINUX)
+#define NET_INTERFACE_DEFAULT_WLAN                                     "wlan0"
+#elif defined (IS_FEDORA_LINUX) || defined (IS_UBUNTU_LINUX)
+#define NET_INTERFACE_DEFAULT_WLAN                                     "wlp3s0"
+#else
+#define NET_INTERFACE_DEFAULT_WLAN                                     "wlan0"
+#endif
 #else
 #define NET_INTERFACE_DEFAULT_ETHERNET                                 "eth0"
 #define NET_INTERFACE_DEFAULT_LOOPBACK                                 "lo"
 #define NET_INTERFACE_DEFAULT_PPP                                      "ppp0"
-//#define NET_INTERFACE_DEFAULT_WLAN                          "wlan0" // Debian-style
-#define NET_INTERFACE_DEFAULT_WLAN                                     "wlp3s0" // openSUSE/Ubuntu-style
+#define NET_INTERFACE_DEFAULT_WLAN                                     "wlan0"
 #endif // ACE_WIN32 || ACE_WIN64
 #define NET_INTERFACE_DEFAULT_USE_LOOPBACK                             false
 

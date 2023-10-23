@@ -80,8 +80,12 @@ typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticReportingHandl
 //  }
 //};
 struct ci_less
- : public std::binary_function<std::string, std::string, bool>
+// : public std::binary_function<std::string, std::string, bool>
 {
+  typedef std::string first_argument_type;
+  typedef std::string second_argument_type;
+  typedef bool        result_type;
+
   bool operator() (const std::string& s1, const std::string& s2) const
   {
     return ACE_OS::strcasecmp (s1.c_str (), s2.c_str ()) < 0;

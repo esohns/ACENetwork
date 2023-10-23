@@ -157,10 +157,12 @@ do_process_arguments (int argc_in,
       }
       case 'i':
       {
+        std::string address_string =
+          ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         IPAddress_out.set ((u_short)0,
-                           ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ()),
+                           address_string.c_str (),
                            1,
-                           AF_INET);
+                           Net_Common_Tools::matchIPv4Address (address_string) ? AF_INET : AF_INET6);
         break;
       }
       case 'l':

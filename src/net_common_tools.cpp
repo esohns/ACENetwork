@@ -2832,24 +2832,24 @@ continue_:
     } // end IF
   } while (!converter.fail ());
 #endif // ACE_WIN32 || ACE_WIN64
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
-              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
-              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
-#endif // _WIN32_WINNT_VISTA
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
-              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
+//              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
+//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
+//#endif // _WIN32_WINNT_VISTA
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("interface (was: \"%s\") gateway: %s\n"),
+//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (result, true, false).c_str ())));
+//#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
 }

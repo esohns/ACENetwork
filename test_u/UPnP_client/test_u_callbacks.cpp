@@ -684,7 +684,7 @@ idle_end_session_success_cb (gpointer userData_in)
       gtk_statusbar_push (statusbar_p, 0,
                           Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
 
-      GtkDialog* dialog_p = 
+      GtkDialog* dialog_p =
         GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
       ACE_ASSERT (dialog_p);
@@ -693,9 +693,10 @@ idle_end_session_success_cb (gpointer userData_in)
                                 GTK_DIALOG_DESTROY_WITH_PARENT,
                                 GTK_MESSAGE_INFO,
                                 GTK_BUTTONS_CLOSE,
-                                ACE_TEXT_ALWAYS_CHAR ("Success: \"%s\""),
+                                ACE_TEXT_ALWAYS_CHAR ("success: %s"),
                                 Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
-      gtk_dialog_run (GTK_DIALOG (widget_p));
+      gint result = gtk_dialog_run (GTK_DIALOG (widget_p));
+      ACE_UNUSED_ARG (result);
       gtk_widget_destroy (widget_p); widget_p = NULL;
 
       break;
@@ -711,7 +712,7 @@ idle_end_session_success_cb (gpointer userData_in)
                                 GTK_DIALOG_DESTROY_WITH_PARENT,
                                 GTK_MESSAGE_INFO,
                                 GTK_BUTTONS_CLOSE,
-                                ACE_TEXT_ALWAYS_CHAR ("Success"));
+                                ACE_TEXT_ALWAYS_CHAR ("success"));
       gtk_dialog_run (GTK_DIALOG (widget_p));
       gtk_widget_destroy (widget_p); widget_p = NULL;
 
@@ -1226,7 +1227,7 @@ action_external_address_activate_cb (GtkAction* action_in,
 
   ACE_ASSERT (data_p->control);
   data_p->control->getP ()->externalAddress ();
-} // action_presentation_url_activate_cb
+} // action_external_address_activate_cb
 
 void
 action_map_activate_cb (GtkAction* action_in,

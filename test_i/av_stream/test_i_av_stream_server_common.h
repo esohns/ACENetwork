@@ -137,8 +137,16 @@ struct Test_I_AVStream_Server_MessageData
    : header ()
   {}
 
+  Test_I_AVStream_Server_MessageData& operator+= (const Test_I_AVStream_Server_MessageData& rhs_in)
+  {
+    header = rhs_in.header;
+
+    return *this;
+  }
+
   struct acestream_av_stream_header header;
 };
+typedef Stream_DataBase_T<struct Test_I_AVStream_Server_MessageData> Test_I_AVStream_Server_MessageData_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -3466,11 +3466,35 @@ idle_initialize_target_UI_cb (gpointer userData_in)
     }
   } // end SWITCH
 #else
-  Net_ConnectionConfigurationsIterator_t iterator_3 =
-    ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->connectionConfigurations.end ());
-  port_number =
-    NET_CONFIGURATION_TCP_CAST ((*iterator_3).second)->socketConfiguration.address.get_port_number ();
+  Net_ConnectionConfigurationsIterator_t iterator_3;
+  switch (ui_cb_data_p->configuration->protocol)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+    {
+      iterator_3 =
+        ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
+      ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->connectionConfigurations.end ());
+      port_number =
+        NET_CONFIGURATION_TCP_CAST ((*iterator_3).second)->socketConfiguration.address.get_port_number ();
+      break;
+    }
+    case NET_TRANSPORTLAYER_UDP:
+    {
+      iterator_3 =
+        ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+      ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->connectionConfigurations.end ());
+      port_number =
+        NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress.get_port_number ();
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown protocol (was: %d), aborting\n"),
+                  ui_cb_data_p->configuration->protocol));
+      return G_SOURCE_REMOVE;
+    }
+  } // end SWITCH
 #endif // ACE_WIN32 || ACE_WIN64
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (port_number));
@@ -5591,10 +5615,6 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
   Test_I_AVStream_Server_UDPConnectionManager_t* udp_connection_manager_p =
     TEST_I_AVSTREAM_SERVER_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (udp_connection_manager_p);
-
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
-    ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != ui_cb_data_p->configuration->connectionConfigurations.end ());
 #endif // ACE_WIN32 || ACE_WIN64
   bool result = false;
   Common_ITask* itask_p = NULL;
@@ -5674,6 +5694,9 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
         ACE_ASSERT (ui_cb_data_p->configuration->signalHandlerConfiguration.listener);
         itask_p =
           ui_cb_data_p->configuration->signalHandlerConfiguration.listener;
+        Net_ConnectionConfigurationsIterator_t iterator_2 =
+          ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("TCP"));
+        ACE_ASSERT (iterator_2 != ui_cb_data_p->configuration->connectionConfigurations.end ());
         result =
           ui_cb_data_p->configuration->signalHandlerConfiguration.listener->initialize (*static_cast<Test_I_AVStream_Server_TCPConnectionConfiguration_t*> ((*iterator_2).second));
 #endif // ACE_WIN32 || ACE_WIN64
@@ -5814,7 +5837,7 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
         Test_I_AVStream_Server_UDPConnectionManager_t::ICONNECTION_T* connection_p =
           NULL;
         Net_ConnectionConfigurationsIterator_t iterator_3 =
-          ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+          ui_cb_data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
         ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->connectionConfigurations.end ());
         inet_address =
             NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress;

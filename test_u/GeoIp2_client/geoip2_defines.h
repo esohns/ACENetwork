@@ -26,6 +26,7 @@
 
 // -----------------------------------------------------------------------------
 
+// *NOTE*: get it here: https://github.com/P3TERX/GeoLite.mmdb
 #define GEOIP2_CLIENT_DATABASE_FILE_NAME                  "GeoLite2-City.mmdb"
 
 #endif

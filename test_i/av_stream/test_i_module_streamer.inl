@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <string>
-
 #include "ace/Assert.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
@@ -80,7 +78,8 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
   ACE_ASSERT (message_block_p);
   struct acestream_av_stream_header header_s;
   ACE_OS::memset (&header_s, 0, sizeof (struct acestream_av_stream_header));
-  header_s.length = message_inout->total_length ();
+  ACE_ASSERT (!message_inout->cont ());
+  header_s.length = message_inout->length ();
   switch (message_inout->getMediaType ())
   {
     case STREAM_MEDIATYPE_AUDIO:

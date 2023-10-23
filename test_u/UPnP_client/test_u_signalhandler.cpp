@@ -23,6 +23,11 @@
 
 #include "ace/Log_Msg.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include "common_error_tools.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "common_event_tools.h"
 
 #include "net_macros.h"
@@ -46,6 +51,13 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
   switch (signal_in.signal)
   {
     case SIGINT:
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      if (Common_Error_Tools::inDebugSession ())
+        break;
+#endif // ACE_WIN32 || ACE_WIN64
+    }
 // *PORTABILITY*: on Windows SIGQUIT is not defined
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

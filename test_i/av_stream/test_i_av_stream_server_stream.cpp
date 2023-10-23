@@ -1213,6 +1213,12 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
 
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Server_Defragment_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
                  Test_I_AVStream_Server_Target_ALSA_Module (this,
                                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
                  false);
@@ -1222,6 +1228,12 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
   module_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Server_Defragment_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Resize_Module (this,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),

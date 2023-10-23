@@ -162,7 +162,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 
   ++index_i;
 
-continue_:
+//continue_:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_NEW_RETURN (module_p,
                   Test_I_VideoHWDecoder_Module (this,

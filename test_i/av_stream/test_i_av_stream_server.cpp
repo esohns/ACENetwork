@@ -824,8 +824,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 {
   STREAM_TRACE (ACE_TEXT ("::do_work"));
 
-  ACE_UNUSED_ARG (networkInterface_in);
-
   int result = -1;
 
   // step0a: initialize event dispatch
@@ -1069,6 +1067,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   modulehandler_configuration.configuration = &configuration;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
+  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_DEFRAGMENT;
   modulehandler_configuration.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
   modulehandler_configuration.inbound = true;
@@ -1253,6 +1252,17 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
+  ACE_INET_Addr inet_address, gateway_address;
+  if (!Net_Common_Tools::interfaceToIPAddress (networkInterface_in,
+                                               inet_address,
+                                               gateway_address))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), returning\n")));
+    return;
+  } // end IF
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Test_I_AVStream_Server_MediaFoundation_TCPConnectionConfiguration_t mediafoundation_tcp_connection_configuration;
   Test_I_AVStream_Server_DirectShow_TCPConnectionConfiguration_t directshow_tcp_connection_configuration;
@@ -1278,9 +1288,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                                                 &directshow_tcp_connection_configuration));
       directshow_configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
                                                                                 &directshow_udp_connection_configuration));
-      //connection_configuration_iterator =
-      //  directshow_configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      //ACE_ASSERT (connection_configuration_iterator != directshow_configuration.connectionConfigurations.end ());
 
       directshow_tcp_connection_manager_p =
         TEST_I_AVSTREAM_SERVER_DIRECTSHOW_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -1301,9 +1308,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       mediafoundation_configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                                      &mediafoundation_tcp_connection_configuration));
-      //connection_configuration_iterator =
-      //  mediafoundation_configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-      //ACE_ASSERT (connection_configuration_iterator != mediafoundation_configuration.connectionConfigurations.end ());
 
       mediafoundation_tcp_connection_manager_p =
         TEST_I_AVSTREAM_SERVER_MEDIAFOUNDATION_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -1329,7 +1333,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end ELSE
   } // end SWITCH
 #else
-  Test_I_AVStream_Server_TCPConnectionConfiguration_t connection_configuration;
+  Test_I_AVStream_Server_TCPConnectionConfiguration_t tcp_connection_configuration;
+  Test_I_AVStream_Server_UDPConnectionConfiguration_t udp_connection_configuration;
+  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
+                                                                 &tcp_connection_configuration));
+  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
+                                                                 &udp_connection_configuration));
   Test_I_AVStream_Server_TCPConnectionManager_t* tcp_connection_manager_p =
     TEST_I_AVSTREAM_SERVER_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
   Test_I_AVStream_Server_UDPConnectionManager_t* udp_connection_manager_p =
@@ -1373,7 +1382,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end SWITCH
   ACE_ASSERT (mediafoundation_event_handler_p || directshow_event_handler_p);
 #else
-  Net_ConnectionConfigurationsIterator_t iterator_2;
+//  Net_ConnectionConfigurationsIterator_t iterator_2;
   event_handler_p =
     dynamic_cast<Test_I_AVStream_Server_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -1405,18 +1414,21 @@ do_work (unsigned int maximumNumberOfConnections_in,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
       } // end IF
-      directshow_tcp_connection_configuration.statisticReportingInterval = statisticReportingInterval_in;
-      directshow_tcp_connection_configuration.messageAllocator = &directshow_message_allocator;
+      directshow_tcp_connection_configuration.statisticReportingInterval =
+        statisticReportingInterval_in;
+      directshow_tcp_connection_configuration.messageAllocator =
+        &directshow_message_allocator;
       directshow_tcp_connection_configuration.streamConfiguration =
         &directshow_configuration.streamConfiguration;
 
       directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
                                                 &user_data_s);
 
-      result = directshow_udp_connection_configuration.socketConfiguration.peerAddress.set (listeningPortNumber_in + 1,
-                                                                                            INADDR_LOOPBACK,
-                                                                                            1,
-                                                                                            0);
+      result =
+        directshow_udp_connection_configuration.socketConfiguration.peerAddress.set (listeningPortNumber_in + 1,
+                                                                                     INADDR_LOOPBACK,
+                                                                                     1,
+                                                                                     0);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
@@ -1426,16 +1438,19 @@ do_work (unsigned int maximumNumberOfConnections_in,
         useLoopBack_in;
       if (directshow_udp_connection_configuration.socketConfiguration.useLoopBackDevice)
       {
-        result = directshow_udp_connection_configuration.socketConfiguration.listenAddress.set (listeningPortNumber_in,
-                                                                                                INADDR_LOOPBACK,
-                                                                                                1,
-                                                                                                0);
+        result =
+          directshow_udp_connection_configuration.socketConfiguration.listenAddress.set (listeningPortNumber_in,
+                                                                                         INADDR_LOOPBACK,
+                                                                                         1,
+                                                                                         0);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
       } // end IF
-      directshow_udp_connection_configuration.statisticReportingInterval = statisticReportingInterval_in;
-      directshow_udp_connection_configuration.messageAllocator = &directshow_message_allocator;
+      directshow_udp_connection_configuration.statisticReportingInterval =
+        statisticReportingInterval_in;
+      directshow_udp_connection_configuration.messageAllocator =
+        &directshow_message_allocator;
       directshow_udp_connection_configuration.streamConfiguration =
         &directshow_configuration.streamConfiguration;
 
@@ -1484,35 +1499,65 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end ELSE
   } // end SWITCH
 #else
-  connection_configuration.socketConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                        1);
-  connection_configuration.allocatorConfiguration = &allocator_configuration;
-  connection_configuration.socketConfiguration.useLoopBackDevice =
+  tcp_connection_configuration.socketConfiguration.address = inet_address;
+  tcp_connection_configuration.socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                            1);
+  tcp_connection_configuration.allocatorConfiguration =
+    &allocator_configuration;
+  tcp_connection_configuration.socketConfiguration.useLoopBackDevice =
     useLoopBack_in;
-  if (connection_configuration.socketConfiguration.useLoopBackDevice)
+  if (tcp_connection_configuration.socketConfiguration.useLoopBackDevice)
   {
     result =
-      connection_configuration.socketConfiguration.address.set (listeningPortNumber_in,
-                                                                INADDR_LOOPBACK,
-                                                                1,
-                                                                0);
+      tcp_connection_configuration.socketConfiguration.address.set (listeningPortNumber_in,
+                                                                    INADDR_LOOPBACK,
+                                                                    1,
+                                                                    0);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
   } // end IF
-  connection_configuration.statisticReportingInterval =
+  tcp_connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.streamConfiguration =
+  tcp_connection_configuration.messageAllocator = &message_allocator;
+  tcp_connection_configuration.streamConfiguration =
     &configuration.streamConfiguration;
 
-  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 &connection_configuration));
-  iterator_2 =
-    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != configuration.connectionConfigurations.end ());
+  tcp_connection_manager_p->set (tcp_connection_configuration,
+                                 &user_data_s);
 
-  tcp_connection_manager_p->set (*static_cast<Test_I_AVStream_Server_TCPConnectionConfiguration_t*> ((*iterator_2).second),
+  result =
+    udp_connection_configuration.socketConfiguration.peerAddress.set (listeningPortNumber_in + 1,
+                                                                      INADDR_LOOPBACK,
+                                                                      1,
+                                                                      0);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+  udp_connection_configuration.socketConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
+                                                                                  1);
+  udp_connection_configuration.allocatorConfiguration =
+    &allocator_configuration;
+  udp_connection_configuration.socketConfiguration.useLoopBackDevice =
+    useLoopBack_in;
+  if (udp_connection_configuration.socketConfiguration.useLoopBackDevice)
+  {
+    result =
+      udp_connection_configuration.socketConfiguration.listenAddress.set (listeningPortNumber_in,
+                                                                          INADDR_LOOPBACK,
+                                                                          1,
+                                                                          0);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+  } // end IF
+  udp_connection_configuration.statisticReportingInterval =
+    statisticReportingInterval_in;
+  udp_connection_configuration.messageAllocator = &message_allocator;
+  udp_connection_configuration.streamConfiguration =
+    &configuration.streamConfiguration;
+
+  udp_connection_manager_p->set (udp_connection_configuration,
                                  &user_data_s);
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -1602,51 +1647,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
   // ********************* listener configuration data *************************
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  switch (mediaFramework_in)
-  {
-    case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-    {
-      //directshow_configuration.listenerConfiguration.connectionConfiguration =
-      //  dynamic_cast<Test_I_AVStream_Server_DirectShow_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second);
-      //directshow_configuration.listenerConfiguration.connectionManager =
-      //  directshow_tcp_connection_manager_p;
-      //directshow_configuration.listenerConfiguration.statisticReportingInterval =
-      //  statisticReportingInterval_in;
-      //(*connection_configuration_iterator).second->useLoopBackDevice =
-      //  useLoopBack_in;
-      break;
-    }
-    case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
-    {
-      //mediafoundation_configuration.listenerConfiguration.connectionConfiguration =
-      //  dynamic_cast<Test_I_AVStream_Server_MediaFoundation_TCPConnectionConfiguration_t*> ((*connection_configuration_iterator).second);
-      //mediafoundation_configuration.listenerConfiguration.connectionManager =
-      //  mediafoundation_tcp_connection_manager_p;
-      //mediafoundation_configuration.listenerConfiguration.statisticReportingInterval =
-      //  statisticReportingInterval_in;
-      //(*connection_configuration_iterator).second->useLoopBackDevice =
-      //  useLoopBack_in;
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
-                  mediaFramework_in));
-      return;
-    } // end ELSE
-  } // end SWITCH
-#else
-//  configuration.listenerConfiguration.connectionConfiguration =
-//      dynamic_cast<Test_I_AVStream_Server_TCPConnectionConfiguration_t*> ((*iterator_2).second);
-//  configuration.listenerConfiguration.connectionManager =
-//      tcp_connection_manager_p;
-//  configuration.listenerConfiguration.statisticReportingInterval =
-//      statisticReportingInterval_in;
-  NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
-      useLoopBack_in;
-#endif // ACE_WIN32 || ACE_WIN64
 
   // step0d: initialize regular (global) statistic reporting
   timer_manager_p->initialize (timer_configuration);
@@ -1901,9 +1901,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 //      else
         ACE_NEW_NORETURN (i_udp_connector_p,
                           Test_I_AVStream_Server_UDPAsynchConnector_t (true));
-      ACE_ASSERT (i_udp_connector_p);
-      result_2 =
-          i_udp_connector_p->initialize (*static_cast<Test_I_AVStream_Server_UDPConnectionConfiguration_t*> ((*iterator_2).second));
       if (!i_udp_connector_p)
 #endif // ACE_WIN32 || ACE_WIN64
       {
@@ -1932,7 +1929,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         timer_manager_p->stop ();
         goto clean;
       } // end IF
-      //  Stream_IInetConnector_t* iconnector_p = &connector;
+      result_2 = i_udp_connector_p->initialize (udp_connection_configuration);
       if (!result_2)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -2012,8 +2009,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
         } // end ELSE
       } // end SWITCH
 #else
-      listen_address =
-          NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.listenAddress;
+      listen_address = udp_connection_configuration.socketConfiguration.listenAddress;
 #endif // ACE_WIN32 || ACE_WIN64
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
@@ -2281,7 +2277,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       } // end SWITCH
 #else
       result_2 =
-        CBData_in.configuration->signalHandlerConfiguration.listener->initialize (*static_cast<Test_I_AVStream_Server_TCPConnectionConfiguration_t*> ((*iterator_2).second));
+        CBData_in.configuration->signalHandlerConfiguration.listener->initialize (tcp_connection_configuration);
 #endif // ACE_WIN32 || ACE_WIN64
       if (!result_2)
       {

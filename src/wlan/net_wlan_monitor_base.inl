@@ -2798,8 +2798,9 @@ Net_WLAN_Monitor_Base_T<AddressType,
     {
       iterator =
           std::find_if (SSIDCache_.begin (), SSIDCache_.end (),
-                        std::bind2nd (Net_WLAN_AccessPointCacheFindPredicate (),
-                                      interfaceIdentifier_in));
+                        std::bind (Net_WLAN_AccessPointCacheFindPredicate (),
+                                   std::placeholders::_1,
+                                   interfaceIdentifier_in));
       if (iterator == SSIDCache_.end ())
         break;
 

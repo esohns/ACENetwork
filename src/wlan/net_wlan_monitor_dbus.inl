@@ -362,8 +362,9 @@ Net_WLAN_Monitor_T<AddressType,
 
   INTERFACEIDENTIFIER_TO_OBJECTPATH_CONSTITERATOR_T iterator =
     std::find_if (objectPathCache_.begin (), objectPathCache_.end (),
-                  std::bind2nd (INTERFACEIDENTIFIER_TO_OBJECTPATH_FIND_PREDICATE (),
-                                value_in));
+                  std::bind (INTERFACEIDENTIFIER_TO_OBJECTPATH_FIND_PREDICATE (),
+                             std::placeholders::_1,
+                             value_in));
   if (iterator != objectPathCache_.end ())
     return (*iterator).first;
 //    ACE_DEBUG ((LM_DEBUG,
