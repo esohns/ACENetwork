@@ -1863,10 +1863,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
       {
         case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
         {
-          //if (useReactor_in)
-          //  ACE_NEW_NORETURN (directshow_iconnector_p,
-          //                    Test_I_AVStream_Server_DirectShow_UDPConnector_t (true));
-          //else
+          if (useReactor_in)
+            ACE_NEW_NORETURN (directshow_iconnector_p,
+                              Test_I_AVStream_Server_DirectShow_UDPConnector_t (true));
+          else
             ACE_NEW_NORETURN (directshow_iconnector_p,
                               Test_I_AVStream_Server_DirectShow_UDPAsynchConnector_t (true));
           result_2 =
@@ -1875,10 +1875,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
         }
         case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
         {
-          //if (useReactor_in)
-          //  ACE_NEW_NORETURN (mediafoundation_iconnector_p,
-          //                    Test_I_AVStream_Server_MediaFoundation_UDPConnector_t (true));
-          //else
+          if (useReactor_in)
+            ACE_NEW_NORETURN (mediafoundation_iconnector_p,
+                              Test_I_AVStream_Server_MediaFoundation_UDPConnector_t (true));
+          else
             ACE_NEW_NORETURN (mediafoundation_iconnector_p,
                               Test_I_AVStream_Server_MediaFoundation_UDPAsynchConnector_t (true));
           result_2 =
@@ -1893,43 +1893,16 @@ do_work (unsigned int maximumNumberOfConnections_in,
           return;
         } // end ELSE
       } // end SWITCH
-      if (!mediafoundation_iconnector_p && !directshow_iconnector_p)
 #else
-//      if (useReactor_in)
-//        ACE_NEW_NORETURN (i_udp_connector_p,
-//                          Test_I_AVStream_Server_UDPConnector_t (true));
-//      else
+      if (useReactor_in)
+        ACE_NEW_NORETURN (i_udp_connector_p,
+                          Test_I_AVStream_Server_UDPConnector_t (true));
+      else
         ACE_NEW_NORETURN (i_udp_connector_p,
                           Test_I_AVStream_Server_UDPAsynchConnector_t (true));
-      if (!i_udp_connector_p)
-#endif // ACE_WIN32 || ACE_WIN64
-      {
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory, returning\n")));
 
-        // clean up
-        Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                                   true); // wait ?
-        //		{ // synch access
-        //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-        //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-        //					 iterator != CBData_in.event_source_ids.end();
-        //					 iterator++)
-        //				g_source_remove(*iterator);
-        //		} // end lock scope
-#if defined (GUI_SUPPORT)
-        if (!UIDefinitionFilename_in.empty ())
-#if defined (GTK_USE)
-          gtk_manager_p->stop (true, true);
-#else
-          ;
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-        timer_manager_p->stop ();
-        goto clean;
-      } // end IF
       result_2 = i_udp_connector_p->initialize (udp_connection_configuration);
+#endif // ACE_WIN32 || ACE_WIN64
       if (!result_2)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -2127,8 +2100,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
         if (connection_p)
         {
-          configuration.handle =
-              static_cast<ACE_HANDLE> (connection_p->id ());
+          configuration.handle = static_cast<ACE_HANDLE> (connection_p->id ());
           connection_p->decrease (); connection_p = NULL;
           break;
         } // end IF
