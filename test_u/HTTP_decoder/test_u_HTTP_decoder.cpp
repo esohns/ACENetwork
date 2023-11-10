@@ -32,12 +32,11 @@
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
-//#include "ace/Synch.h"
 #include "ace/Version.h"
 
-#if defined (VALGRIND_SUPPORT)
+#if defined (VALGRIND_USE)
 #include "valgrind/valgrind.h"
-#endif // VALGRIND_SUPPORT
+#endif // VALGRIND_USE
 
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"

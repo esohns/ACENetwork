@@ -21,8 +21,6 @@
 #ifndef TEST_I_CONFIGURATION_H
 #define TEST_I_CONFIGURATION_H
 
-#include <string>
-
 #include "ace/config-lite.h"
 #include "ace/Time_Value.h"
 
@@ -30,7 +28,13 @@
 #include "common_configuration.h"
 #include "common_file_common.h"
 
+#include "common_event_common.h"
+
 #include "common_parser_common.h"
+
+#if defined (GUI_SUPPORT)
+#include "common_ui_common.h"
+#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 #include "stream_configuration.h"
@@ -41,23 +45,19 @@
 #include "stream_lib_mediafoundation_common.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include "stream_dev_common.h"
+#include "net_common.h"
 
 #include "test_i_defines.h"
 
 // forward declarations
 class Stream_IStreamControlBase;
 
-struct Net_Configuration;
 struct Test_I_UserData
  : Net_UserData
 {
   Test_I_UserData ()
    : Net_UserData ()
-   , configuration (NULL)
   {}
-
-  struct Net_Configuration* configuration;
 };
 
 struct Test_I_SignalHandlerConfiguration

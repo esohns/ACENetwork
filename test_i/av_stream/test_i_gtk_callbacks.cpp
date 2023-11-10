@@ -8074,18 +8074,18 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
 #else
-  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* ui_cb_data_p =
+  struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData* alsa_ui_cb_data_p =
     static_cast<struct Test_I_AVStream_Client_ALSA_V4L_UI_CBData*> (userData_in);
   // sanity check(s)
-  ACE_ASSERT (ui_cb_data_p->configuration);
+  ACE_ASSERT (alsa_ui_cb_data_p->configuration);
 
   Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t stream_iterator =
-    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
+    alsa_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (stream_iterator != alsa_ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   //if (!ui_cb_data_p->configuration->moduleHandlerConfiguration.window) // <-- window not realized yet ?
   //  return;
@@ -8143,9 +8143,11 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
 #else
-  (*modulehandler_iterator).second.second->area.width = allocation_in->width;
-  (*modulehandler_iterator).second.second->area.height = allocation_in->height;
-#endif
+  (*modulehandler_iterator).second.second->outputFormat.resolution.height =
+    allocation_in->height;
+  (*modulehandler_iterator).second.second->outputFormat.resolution.width =
+    allocation_in->width;
+#endif // ACE_WIN32 || ACE_WIN64
 } // drawingarea_size_allocate_source_cb
 void
 drawingarea_size_allocate_target_cb (GtkWidget* widget_in,
@@ -8203,11 +8205,11 @@ drawingarea_size_allocate_target_cb (GtkWidget* widget_in,
   } // end SWITCH
 #else
   // sanity check(s)
-  struct Test_I_AVStream_Server_V4L_UI_CBData* ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Server_V4L_UI_CBData*> (userData_in);
+  struct Test_I_AVStream_Server_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Server_UI_CBData*> (userData_in);
   ACE_ASSERT (ui_cb_data_p);
   ACE_ASSERT (ui_cb_data_p->configuration);
-  Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
+  Test_I_AVStream_Server_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
     ui_cb_data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_iterator != ui_cb_data_p->configuration->streamConfiguration.end ());
 #endif // ACE_WIN32 || ACE_WIN64
@@ -8264,10 +8266,10 @@ drawingarea_size_allocate_target_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
 #else
-  (*modulehandler_iterator).second.second->area.height =
-      static_cast<__u32> (allocation_in->height);
-  (*modulehandler_iterator).second.second->area.width =
-      static_cast<__u32> (allocation_in->width);
+  (*modulehandler_iterator).second.second->outputFormat.resolution.height =
+    allocation_in->height;
+  (*modulehandler_iterator).second.second->outputFormat.resolution.width =
+    allocation_in->width;
 #endif // ACE_WIN32 || ACE_WIN64
 } // drawingarea_size_allocate_target_cb
 #else

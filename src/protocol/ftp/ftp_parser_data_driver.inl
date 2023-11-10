@@ -355,8 +355,8 @@ FTP_ParserDataDriver_T<SessionMessageType>::waitBuffer ()
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
   SessionMessageType* session_message_p = NULL;
-  Stream_SessionMessageType session_message_type =
-      STREAM_SESSION_MESSAGE_INVALID;
+//  Stream_SessionMessageType session_message_type =
+//      STREAM_SESSION_MESSAGE_INVALID;
   bool is_data_b = false;
   bool requeue_b = true;
 

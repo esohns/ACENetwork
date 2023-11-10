@@ -26,7 +26,7 @@
 
 #include "common_parser_bencoding_tools.h"
 
-#include "stream_dec_common.h"
+//#include "stream_dec_common.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
