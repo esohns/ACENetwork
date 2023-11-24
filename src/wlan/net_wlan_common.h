@@ -193,19 +193,25 @@ typedef std::pair<Net_WLAN_AccessPointCacheIterator_t, bool> Net_WLAN_AccessPoin
 typedef std::pair<std::string,
                   Net_WLAN_AccessPointCacheValue_t> Net_WLAN_AccessPointCacheEntry_t;
 struct Net_WLAN_AccessPointCacheFindPredicate
- : public std::binary_function<Net_WLAN_AccessPointCacheEntry_t,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               struct _GUID,
-#else
-                               std::string,
-#endif // ACE_WIN32 || ACE_WIN64
-                               bool>
+// : public std::binary_function<Net_WLAN_AccessPointCacheEntry_t,
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//                               struct _GUID,
+//#else
+//                               std::string,
+//#endif // ACE_WIN32 || ACE_WIN64
+//                               bool>
 {
+  typedef Net_WLAN_AccessPointCacheEntry_t first_argument_type;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  typedef struct _GUID second_argument_type;
+
   inline bool operator() (const Net_WLAN_AccessPointCacheEntry_t& entry_in, struct _GUID value_in) const { return InlineIsEqualGUID (entry_in.second.first, value_in); }
 #else
+  typedef std::string second_argument_type;
+
   inline bool operator() (const Net_WLAN_AccessPointCacheEntry_t& entry_in, std::string value_in) const { return entry_in.second.first == value_in; }
 #endif // ACE_WIN32 || ACE_WIN64
+  typedef bool result_type;
 };
 
 typedef std::vector<std::string> Net_WLAN_SSIDs_t;

@@ -868,8 +868,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
     input_mediatype_was_null = true;
   } // end IF
   ACE_ASSERT (configuration_in.configuration_->format.video);
-  ACE_ASSERT ((*iterator).second.second->deviceIdentifier.identifierDiscriminator == Stream_Device_Identifier::GUID);
-  if (!Stream_Module_Decoder_Tools::loadVideoRendererTopology ((*iterator).second.second->deviceIdentifier.identifier._guid,
+  if (!Stream_Module_Decoder_Tools::loadVideoRendererTopology ((*iterator).second.second->deviceIdentifier,
                                                                configuration_in.configuration_->format.video,
                                                                source_impl_p,
                                                                (*iterator).second.second->window,

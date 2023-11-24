@@ -177,10 +177,14 @@ struct BitTorrent_PeerRecord
 };
 
 struct net_bittorrent_piece_index_remove_predicate
- : public std::binary_function<unsigned int,
-                               std::vector<unsigned int>,
-                               bool>
+ //: public std::binary_function<unsigned int,
+ //                              std::vector<unsigned int>,
+ //                              bool>
 {
+  typedef unsigned int first_argument_type;
+  typedef std::vector<unsigned int> second_argument_type;
+  typedef bool result_type;
+
   inline bool operator() (const unsigned int index_in, const std::vector<unsigned int>& array_in) const { return std::find (array_in.begin (), array_in.end (), index_in) != array_in.end (); }
 };
 
