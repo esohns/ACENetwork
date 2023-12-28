@@ -149,10 +149,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleDataMessage"));
 
-  DataMessageType* message_p = NULL;
+  ACE_Message_Block* message_block_p = NULL;
   int result = -1;
   bool release_inbound_message = true; // message_inout
-  bool release_message = false; // message_p
   typename SessionMessageType::DATA_T* session_data_container_p =
     inherited::sessionData_;
 
@@ -170,14 +169,14 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       headFragment_ = message_inout;
     else
     {
-      for (message_p = headFragment_;
-           message_p->cont ();
-           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
-      message_p->cont (message_inout);
+      for (message_block_p = headFragment_;
+           message_block_p->cont ();
+           message_block_p = message_block_p->cont ());
+      message_block_p->cont (message_inout);
     } // end ELSE
-    message_p = headFragment_;
+    message_block_p = headFragment_;
   } // end lock scope
-  ACE_ASSERT (message_p);
+  ACE_ASSERT (message_block_p);
   message_inout = NULL;
   release_inbound_message = false;
 
@@ -187,17 +186,17 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     // OK: parse the message (fragment)
 
     //  ACE_DEBUG ((LM_DEBUG,
-    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->id (),
-    //              message_p->length ()));
+    //              ACE_TEXT ("parsing message (id:%u (%u byte(s))...\n"),
+    //              dynamic_cast<DataMessageType*> (message_block_p)->id (),
+    //              message_block_p->total_length ()));
 
-    if (!this->parse (message_p))
+    if (!this->parse (message_block_p))
     { // *NOTE*: most probable reason: connection
       //         has been closed --> session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message ID was: %d), returning\n"),
+                  ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
                   inherited::mod_->name (),
-                  message_p->id ()));
+                  dynamic_cast<DataMessageType*> (message_block_p)->id ()));
       goto error;
     } // end IF
     // the message fragment has been parsed successfully
@@ -211,17 +210,17 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
     //// *NOTE*: new data fragments may have arrived by now
     ////         --> set the next head fragment ?
-    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
+    //message_2 = dynamic_cast<DataMessageType*> (message_block_p->cont ());
     //if (message_2)
-    //  message_p->cont (NULL);
+    //  message_block_p->cont (NULL);
 
     result = inherited::put_next (headFragment_, NULL);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
                   inherited::mod_->name ()));
-      headFragment_->release ();
+      headFragment_->release (); headFragment_ = NULL;
       goto error;
     } // end IF
     headFragment_ = NULL;
@@ -242,13 +241,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
 continue_:
 error:
-  if (release_inbound_message)
+  if (unlikely (release_inbound_message))
   { ACE_ASSERT (message_inout);
     message_inout->release (); message_inout = NULL;
-  } // end IF
-  if (release_message)
-  { ACE_ASSERT (message_p);
-    message_p->release (); message_p = NULL;
   } // end IF
 }
 
@@ -530,6 +525,59 @@ error:
   inherited2::record_ = NULL;
 }
 
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+int
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::put (ACE_Message_Block* messageBlock_in,
+                                               ACE_Time_Value* timeValue_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::put"));
+
+  switch (messageBlock_in->msg_type ())
+  {
+    case STREAM_MESSAGE_DATA:
+    case STREAM_MESSAGE_OBJECT:
+    {
+      typename SessionMessageType::DATA_T* session_data_container_p =
+        inherited::sessionData_;
+
+      // *IMPORTANT NOTE*: send 'step data' session message so downstream modules know
+      //                   that some data has arrived
+      if (likely (session_data_container_p))
+      {
+        session_data_container_p->increase ();
+
+        typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+          const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_data_container_p->getR ());
+        session_data_r.bytes += messageBlock_in->total_length ();
+      } // end IF
+      if (unlikely (!inherited::putSessionMessage (STREAM_SESSION_MESSAGE_STEP_DATA,
+                                                   session_data_container_p,
+                                                   NULL,
+                                                   false))) // expedited ?
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
+                    inherited::mod_->name (),
+                    STREAM_SESSION_MESSAGE_STEP_DATA));
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
+
+  return inherited::put (messageBlock_in,
+                         timeValue_in);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <ACE_SYNCH_DECL,
@@ -707,9 +755,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleDataMessage"));
 
-  DataMessageType* message_p = NULL;
+  ACE_Message_Block* message_block_p = NULL;
   int result = -1;
-  bool release_message = false; // message_p
+  bool release_inbound_message = true; // message_inout
   typename SessionMessageType::DATA_T* session_data_container_p =
     inherited::sessionData_;
 
@@ -727,24 +775,16 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       headFragment_ = message_inout;
     else
     {
-      for (message_p = headFragment_;
-           message_p->cont ();
-           message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
-      message_p->cont (message_inout);
-
-      //// just signal the parser (see below for an explanation)
-      //result = condition_.broadcast ();
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("%s: failed to ACE_SYNCH_CONDITION::broadcast(): \"%s\", continuing\n"),
-      //              inherited::mod_->name ()));
+      for (message_block_p = headFragment_;
+           message_block_p->cont ();
+           message_block_p = message_block_p->cont ());
+      message_block_p->cont (message_inout);
     } // end ELSE
-
-    message_p = headFragment_;
+    message_block_p = headFragment_;
   } // end lock scope
-  ACE_ASSERT (message_p);
+  ACE_ASSERT (message_block_p);
   message_inout = NULL;
-  release_message = true;
+  release_inbound_message = false;
 
   { // *NOTE*: protect scanner/parser state
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
@@ -752,17 +792,17 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     // OK: parse the message (fragment)
 
     //  ACE_DEBUG ((LM_DEBUG,
-    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->id (),
-    //              message_p->length ()));
+    //              ACE_TEXT ("parsing message (id:%u (%u byte(s))...\n"),
+    //              dynamic_cast<DataMessageType*> (message_block_p)->id (),
+    //              message_block_p->total_length ()));
 
-    if (!this->parse (message_p))
+    if (!this->parse (message_block_p))
     { // *NOTE*: most probable reason: connection
       //         has been closed --> session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message ID was: %d), returning\n"),
+                  ACE_TEXT ("%s: failed to HTTP_ParserDriver::parse() (message id was: %u), returning\n"),
                   inherited::mod_->name (),
-                  message_p->id ()));
+                  dynamic_cast<DataMessageType*> (message_block_p)->id ()));
       goto error;
     } // end IF
     // the message fragment has been parsed successfully
@@ -776,21 +816,21 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
     //// *NOTE*: new data fragments may have arrived by now
     ////         --> set the next head fragment ?
-    //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
+    //message_2 = dynamic_cast<DataMessageType*> (message_block_p->cont ());
     //if (message_2)
-    //  message_p->cont (NULL);
+    //  message_block_p->cont (NULL);
 
-    result = inherited::put_next (message_p, NULL);
-    if (result == -1)
+    result = inherited::put_next (headFragment_, NULL);
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
                   inherited::mod_->name ()));
+      headFragment_->release (); headFragment_ = NULL;
       goto error;
     } // end IF
     headFragment_ = NULL;
   } // end lock scope
-  release_message = false;
 
   // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
   //                   that the complete document data has arrived
@@ -807,10 +847,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
 continue_:
 error:
-  if (release_message)
-  { ACE_ASSERT (message_p);
-    message_p->release (); message_p = NULL;
-    headFragment_ = NULL;
+  if (release_inbound_message)
+  { ACE_ASSERT (message_block_p);
+    message_inout->release (); message_inout = NULL;
   } // end IF
 }
 
@@ -1181,4 +1220,73 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   inherited2::finished_ = true;
 error:
   inherited2::record_ = NULL;
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConfigurationType,
+          typename StreamControlType,
+          typename StreamNotificationType,
+          typename StreamStateType,
+          typename SessionDataType,
+          typename SessionDataContainerType,
+          typename StatisticContainerType,
+          typename TimerManagerType,
+          typename UserDataType>
+int
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType,
+                      TimerManagerType,
+                      UserDataType>::put (ACE_Message_Block* messageBlock_in,
+                                          ACE_Time_Value* timeValue_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::put"));
+
+  switch (messageBlock_in->msg_type ())
+  {
+    case STREAM_MESSAGE_DATA:
+    case STREAM_MESSAGE_OBJECT:
+    {
+      typename SessionMessageType::DATA_T* session_data_container_p =
+        inherited::sessionData_;
+
+      // *IMPORTANT NOTE*: send 'step data' session message so downstream modules know
+      //                   that some data has arrived
+      if (likely (session_data_container_p))
+      {
+        session_data_container_p->increase ();
+
+        typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+          const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_data_container_p->getR ());
+        session_data_r.bytes += messageBlock_in->total_length ();
+      } // end IF
+      if (unlikely (!inherited::putSessionMessage (STREAM_SESSION_MESSAGE_STEP_DATA,
+                                                   session_data_container_p,
+                                                   NULL,
+                                                   false))) // expedited ?
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
+                    inherited::mod_->name (),
+                    STREAM_SESSION_MESSAGE_STEP_DATA));
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
+
+  return inherited::put (messageBlock_in,
+                         timeValue_in);
 }

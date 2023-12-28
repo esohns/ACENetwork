@@ -79,6 +79,10 @@ class HTTP_Module_Parser_T
   HTTP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
   virtual ~HTTP_Module_Parser_T ();
 
+  // override some baseclass methods
+  virtual int put (ACE_Message_Block*,
+                   ACE_Time_Value* = NULL);
+
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,
                            Stream_IAllocator* = NULL);
@@ -107,11 +111,6 @@ class HTTP_Module_Parser_T
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-
-  // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
-  //         the 'document entity' content. The protocol data is then available
-  //         only from the HTTP_Record (i.e. DATA_T)
-  //bool     crunch_;
 
   //                            offset        size
   typedef std::vector<std::pair<unsigned int, unsigned int> > CHUNKS_T;
@@ -203,6 +202,10 @@ class HTTP_Module_ParserH_T
                                     TimerManagerType,
                                     UserDataType>::setP;
 
+  // override some baseclass methods
+  virtual int put (ACE_Message_Block*,
+                   ACE_Time_Value* = NULL);
+
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,
                            Stream_IAllocator* = NULL);
@@ -236,11 +239,6 @@ class HTTP_Module_ParserH_T
   // convenience types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-
-  // *NOTE*: 'strips' the http protocol data from the message buffer, leaving
-  //         the 'document entity' content. The protocol data is then available
-  //         only from the HTTP_Record (i.e. DATA_T)
-  //bool     crunch_;
 
   //                            offset        size
   typedef std::vector<std::pair<unsigned int, unsigned int> > CHUNKS_T;
