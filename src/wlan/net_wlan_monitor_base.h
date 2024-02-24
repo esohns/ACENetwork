@@ -24,7 +24,6 @@
 #include <list>
 #include <string>
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #if defined (WLANAPI_SUPPORT)
@@ -32,6 +31,9 @@
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (DHCLIENT_SUPPORT)
+#define __GNUC_ATOMICS 1
+#define HAVE_STDATOMIC_H 1
+using namespace std;
 extern "C"
 {
 #include "dhcpctl/dhcpctl.h"

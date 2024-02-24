@@ -26,6 +26,9 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (DHCLIENT_SUPPORT)
+#define __GNUC_ATOMICS 1
+#define HAVE_STDATOMIC_H 1
+using namespace std;
 extern "C"
 {
 #include "dhcpctl/dhcpctl.h"
