@@ -52,6 +52,7 @@
 #include "openssl/ssl.h"
 #endif // SSL_SUPPORT
 
+#include "ace/config.h"
 #include "ace/Configuration.h"
 #include "ace/Configuration_Import_Export.h"
 #include "ace/Dirent_Selector.h"
@@ -2862,8 +2863,8 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToIPAddress"));
 
   // initialize return value(s)
-  IPAddress_out.reset ();
-  gatewayIPAddress_out.reset ();
+  //IPAddress_out.reset ();
+  //gatewayIPAddress_out.reset ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   std::string interface_identifier = interfaceIdentifier_in;
@@ -2939,7 +2940,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
 
   IP_ADAPTER_ADDRESSES* ip_adapter_addresses_2 = ip_adapter_addresses_p;
   IP_ADAPTER_UNICAST_ADDRESS* unicast_address_p = NULL;
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   IP_ADAPTER_GATEWAY_ADDRESS_LH* gateway_address_p = NULL;
 #else
   IP_ADAPTER_UNICAST_ADDRESS* gateway_address_p = NULL;
@@ -2973,17 +2974,10 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
       return false;
     } // end IF
     sockaddr_in_p = (struct sockaddr_in*)socket_address_p->lpSockaddr;
-    result = IPAddress_out.set (sockaddr_in_p,
-                                socket_address_p->iSockaddrLength);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      ACE_FREE_FUNC (ip_adapter_addresses_p); ip_adapter_addresses_p = NULL;
-      return false;
-    } // end IF
+    IPAddress_out.set_addr (sockaddr_in_p,
+                            socket_address_p->iSockaddrLength);
 
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     gateway_address_p = ip_adapter_addresses_2->FirstGatewayAddress;
     while (gateway_address_p)
     {
@@ -3003,19 +2997,12 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
     } // end IF
     socket_address_p = &gateway_address_p->Address;
     sockaddr_in_p = (struct sockaddr_in*)socket_address_p->lpSockaddr;
-    result = gatewayIPAddress_out.set (sockaddr_in_p,
-                                       socket_address_p->iSockaddrLength);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      ACE_FREE_FUNC (ip_adapter_addresses_p); ip_adapter_addresses_p = NULL;
-      return false;
-    } // end IF
+    gatewayIPAddress_out.set_addr (sockaddr_in_p,
+                                   socket_address_p->iSockaddrLength);
 #else
     gatewayIPAddress_out =
       Net_Common_Tools::getGateway (ACE_TEXT_ALWAYS_CHAR (ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName)));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
     break;
 
 continue_:
