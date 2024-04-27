@@ -189,7 +189,7 @@ Test_I_Stream_HTMLParser::handleDataMessage (Test_I_Stream_Message*& message_ino
                            ACE_TEXT_ALWAYS_CHAR (""),
                            0,
                            1); // terminate
-  xmlErrorPtr error_p = xmlGetLastError ();
+  const xmlError* error_p = xmlGetLastError ();
   if (result)
   {
     xmlParserErrors parse_errors = static_cast<xmlParserErrors> (result);

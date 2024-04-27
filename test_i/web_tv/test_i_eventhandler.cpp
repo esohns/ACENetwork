@@ -431,6 +431,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       event_e = COMMON_UI_EVENT_DISCONNECT; break;
     case STREAM_SESSION_MESSAGE_STEP:
       event_e = COMMON_UI_EVENT_STEP; break;
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
+      event_e = COMMON_UI_EVENT_DATA; break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)
@@ -809,6 +811,8 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       event_e = COMMON_UI_EVENT_RESIZE; break;
     case STREAM_SESSION_MESSAGE_STEP:
       event_e = COMMON_UI_EVENT_STEP; break;
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
+      event_e = COMMON_UI_EVENT_DATA; break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)
@@ -1073,6 +1077,8 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
       event_e = COMMON_UI_EVENT_STEP;
       break;
     }
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
+      event_e = COMMON_UI_EVENT_DATA; break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)

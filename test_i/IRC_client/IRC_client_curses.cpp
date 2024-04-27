@@ -403,7 +403,7 @@ curses_init (struct Common_UI_Curses_State* state_in)
   state_r.activePanel = state_r.panels.begin ();
 
   result = wmove (state_r.log,
-                  state_r.log->_cury, 3);
+                  getcury (state_r.log), 3);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -414,7 +414,7 @@ curses_init (struct Common_UI_Curses_State* state_in)
 
   // status window
   state_r.status = newwin (1, COLS,
-                           state_r.std_window->_maxy - 2, 0);
+                           getmaxy (state_r.std_window) - 2, 0);
   if (!state_r.status)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -428,12 +428,12 @@ curses_init (struct Common_UI_Curses_State* state_in)
 
   // input window
   state_r.input = newwin (1, COLS,
-                          state_r.std_window->_maxy - 1, 0);
+                          getmaxy (state_r.std_window) - 1, 0);
   if (!state_r.input)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d,%d,%d), aborting\n"),
-                1, COLS, state_r.std_window->_maxy - 1, 0));
+                1, COLS, getmaxy (state_r.std_window) - 1, 0));
     result = ERR;
     goto error;
   } // end IF
@@ -491,7 +491,7 @@ error:
        iterator != state_r.panels.end ();
        iterator++)
   {
-    window_p = (*iterator).second->win;
+    window_p = panel_window ((*iterator).second);
     result = del_panel ((*iterator).second);
     if (result == ERR)
       ACE_DEBUG ((LM_ERROR,
@@ -560,7 +560,7 @@ curses_fini (struct Common_UI_Curses_State* state_in)
        iterator != state_r.panels.end ();
        iterator++)
   {
-    window_p = (*iterator).second->win;
+    window_p = panel_window ((*iterator).second);
     result = del_panel ((*iterator).second);
     if (result == ERR)
       ACE_DEBUG ((LM_ERROR,
@@ -709,12 +709,12 @@ curses_log (const std::string& channel_in,
   } // end IF
   ACE_ASSERT ((*iterator).second);
 
-  window_p = (*iterator).second->win;
+  window_p = panel_window ((*iterator).second);
   ACE_ASSERT (window_p);
-  if (window_p->_cury + 1 >= window_p->_maxy)
+  if (getcury (window_p) + 1 >= getmaxy (window_p))
   {
     result = wmove (window_p,
-                    window_p->_maxy, 0); // retain sanity
+                    getmaxy (window_p), 0); // retain sanity
     if (result == ERR)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -724,7 +724,7 @@ curses_log (const std::string& channel_in,
                   ACE_TEXT ("failed to scroll(), continuing\n")));
   } // end IF
   result = wmove (window_p,
-                  window_p->_cury + 1, 1);
+                  getcury (window_p) + 1, 1);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -830,7 +830,7 @@ curses_join (const std::string& channel_in,
   state_in.panels[channel_in] = panel_p;
 
   result = wmove (window_p,
-                  window_p->_cury, 3);
+                  getcury (window_p), 3);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -872,7 +872,7 @@ curses_part (const std::string& channel_in,
   Common_UI_Curses_PanelsIterator_t iterator =
       state_in.panels.find (channel_in);
   ACE_ASSERT (iterator != state_in.panels.end ());
-  WINDOW* window_p = (*iterator).second->win;
+  WINDOW* window_p = panel_window ((*iterator).second);
   result = del_panel ((*iterator).second);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
@@ -928,14 +928,16 @@ curses_mode (const std::string& channel_in,
       mode_string = IRC_Tools::ChannelModeToString ((*iterator_2).second);
     } // end ELSE
   } // end lock scope
+  WINDOW* window_p = panel_window ((*iterator).second);
+  ACE_ASSERT (window_p);
   result =
-    wmove ((*iterator).second->win,
-           (*iterator).second->win->_begy, (*iterator).second->win->_maxx - (3 + mode_string.size ()));
+    wmove (window_p,
+           getbegy (window_p), getmaxx (window_p) - (3 + mode_string.size ()));
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
   result =
-    waddstr ((*iterator).second->win, mode_string.c_str ());
+    waddstr (window_p, mode_string.c_str ());
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddstr(), continuing\n")));

@@ -53,8 +53,8 @@ curses_start (const std::string& URI_in,
   ACE_ASSERT (iterator != state_in.panels.end ());
   PANEL* panel_p = (*iterator).second;
   ACE_ASSERT (panel_p);
-  ACE_ASSERT (panel_p->win);
-  WINDOW* window_p = dupwin (panel_p->win);
+  ACE_ASSERT (panel_window (panel_p));
+  WINDOW* window_p = dupwin (panel_window (panel_p));
   if (!window_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -148,16 +148,16 @@ curses_log (const std::string& URI_in,
   } // end IF
   ACE_ASSERT ((*iterator).second);
 
-  window_p = (*iterator).second->win;
+  window_p = panel_window ((*iterator).second);
   ACE_ASSERT (window_p);
 //  result = wmove (window_p, window_p->_cury, 0);
 //  if (result == ERR)
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to wmove(), continuing\n")));
-  if (window_p->_cury + 1 >= window_p->_maxy)
+  if (getcury (window_p) + 1 >= getmaxy (window_p))
   {
     result = wmove (window_p,
-                    window_p->_maxy, 0); // retain sanity
+                    getmaxy (window_p), 0); // retain sanity
     if (result == ERR)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -171,7 +171,7 @@ curses_log (const std::string& URI_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddnstr(), continuing\n")));
   result = wmove (window_p,
-                  window_p->_cury + 1, 0); // next line, box
+                  getcury (window_p) + 1, 0); // next line, box
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -404,7 +404,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
 
   // status window
   state_in.status = newwin (1, COLS,
-                            stdscr_p->_maxy - 1, 0);
+                            getmaxy (stdscr_p) - 1, 0);
   if (!state_in.status)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -423,7 +423,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
 
   // input window
   state_in.input = newwin (1, COLS,
-                           stdscr_p->_maxy, 0);
+                           getmaxy (stdscr_p), 0);
   if (!state_in.input)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -640,7 +640,7 @@ clean:
        iterator != state_in.panels.end ();
        iterator++)
   {
-    window_p = (*iterator).second->win;
+    window_p = panel_window ((*iterator).second);
     result_2 = del_panel ((*iterator).second);
     if (result_2 == ERR)
       ACE_DEBUG ((LM_ERROR,
@@ -712,7 +712,7 @@ curses_stop (const std::string& URI_in,
   BitTorrent_Client_CursesSessionsIterator_t iterator =
       state_in.panels.find (URI_in);
   ACE_ASSERT (iterator != state_in.panels.end ());
-  WINDOW* window_p = (*iterator).second->win;
+  WINDOW* window_p = panel_window ((*iterator).second);
   result = del_panel ((*iterator).second);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,

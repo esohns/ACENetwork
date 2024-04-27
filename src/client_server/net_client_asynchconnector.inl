@@ -57,9 +57,9 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // initialize base class
   result =
-    inherited::open (true,                      // pass addresses ?
-                     ACE_Proactor::instance (), // default proactor
-                     true);                     // validate new connections ?
+    inherited::open (true,                       // pass addresses ?
+                     ACE_Proactor::instance (static_cast<size_t> (0)), // default proactor
+                     true);                      // validate new connections ?
   if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::open(): \"%m\", continuing\n")));

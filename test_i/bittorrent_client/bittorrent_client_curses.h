@@ -24,7 +24,6 @@
 #include <map>
 #include <string>
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
 #else
