@@ -1690,7 +1690,7 @@ idle_update_video_display_cb (gpointer userData_in)
                                                       : drawing_area_p);
   gdk_window_invalidate_rect (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)),
                               NULL,
-                              false);
+                              FALSE);
 
   return G_SOURCE_CONTINUE;
 }

@@ -1094,9 +1094,9 @@ do_work (const std::string& configurationFile_in,
 
   // step0b: initialize event dispatch
   configuration_in.dispatchConfiguration.numberOfReactorThreads =
-    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS : 0);
+    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS_REACTOR : 0);
   configuration_in.dispatchConfiguration.numberOfProactorThreads =
-    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS : 0);
+    ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS_PROACTOR : 0);
   if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,

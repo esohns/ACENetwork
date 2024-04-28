@@ -700,10 +700,11 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 {CHUNK_LINE}{CRLF}         { iparser_p->offset (yyleng);
                              if (content_length_or_chunk_size)
                              {
-                               ACE_DEBUG ((LM_DEBUG,
+/*                               ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found entity chunk @%d: %u byte(s)\n"),
                                            iparser_p->offset (),
-                                           content_length_or_chunk_size));
+                                           content_length_or_chunk_size)); */
+
 /*                               char c = 0;
                                for (unsigned int i = 0;
                                     i < content_length_or_chunk_size;

@@ -101,11 +101,16 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
       // [- data buffer is empty (SSL)]
       int error = ACE_OS::last_error ();
       if (error == EWOULDBLOCK)      // 11: SSL_read() failed (buffer is empty)
+      { // clean up
+        message_block_p->release ();
+ 
         goto continue_;
+      } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (//(error != EPIPE)  && // 9    : write() on a close()d socket *TODO*
-          (error != ENOTSOCK) && // 10038: local close()
-          (error != ECONNRESET)) // 10054: peer closed the connection
+      if (//(error != EPIPE)         && // 9    : write() on a close()d socket *TODO*
+          (error != ERROR_SUCCESS) && // 0    : no error
+          (error != ENOTSOCK)      && // 10038: local close()
+          (error != ECONNRESET))      // 10054: peer closed the connection
 #else
       if ((error != EPIPE)        && // 32 : connection reset by peer (write)
           // -----------------------------
