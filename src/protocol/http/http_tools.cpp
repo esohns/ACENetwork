@@ -411,7 +411,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::parseURL"));
 
   // intialize return value(s)
-  address_out.reset ();
+  //address_out.reset ();
   hostName_out.clear ();
   URI_out.clear ();
   useSSL_out = false;

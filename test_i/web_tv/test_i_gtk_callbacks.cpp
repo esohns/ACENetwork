@@ -960,7 +960,6 @@ idle_initialize_UI_cb (gpointer userData_in)
 
 void
 add_segment_URIs (unsigned int program_in,
-                  const std::string& lastURI_in,
                   Test_I_WebTV_ChannelSegmentURLs_t& URIs_out,
                   unsigned int maxIndex_in,
                   unsigned int indexPositions_in)
@@ -974,31 +973,121 @@ add_segment_URIs (unsigned int program_in,
   std::stringstream converter;
   bool URI_has_path = false;
   std::string::size_type position_i;
+  ACE_ASSERT (!URIs_out.empty ());
+  std::string last_URI_string = URIs_out.back ();
 
   switch (program_in)
   {
+    case 1:  // Das Erste
+    {
+      ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
+
+      position_i = last_URI_string.rfind ('/', std::string::npos);
+      ACE_ASSERT (position_i != std::string::npos);
+      URI_has_path = true;
+      URI_string_tail =
+          last_URI_string.substr (position_i + 1, std::string::npos);
+      URI_string_head = last_URI_string;
+      position_i = last_URI_string.find ('/', 0);
+      URI_string_head.erase (position_i, std::string::npos);
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (last_URI_string.substr (position_i + 1, indexPositions_in));
+      converter >> index_2;
+
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^([^-]+)(-)([[:alnum:]]+)(-)([[:digit:]]+)(T)([[:digit:]]+)(_)([[:digit:]]+)(.ts|.aac)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (URI_string_tail,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (last_URI_string.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[7].str ());
+      converter >> date_i;
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[9].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str () +
+                           match_results[3].str () +
+                           match_results[4].str () +
+                           match_results[5].str () +
+                           match_results[6].str () +
+                           match_results[7].str () + // date
+                           match_results[8].str ());
+      URI_string_tail = match_results[10].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        if (URI_has_path)
+        {
+          URI_string += '/';
+          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+          converter.clear ();
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << index_2;
+          URI_string += converter.str ();
+          URI_string += '/';
+          URI_string += URI_string_head_2;
+        } // end IF
+
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        if (indexPositions_in)
+          converter << std::setw (indexPositions_in) << std::setfill ('0') << ++index_i;
+        else
+          converter << ++index_i;
+        if (maxIndex_in &&
+            (index_i == maxIndex_in))
+        {
+          index_i = 1; // *TODO*: or 0 ?
+          ++index_2;
+        } // end IF
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
     case 5:  // ARTE
     case 8:  // MDR
     case 28: // NASA TV
     {
       ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
 
-      position_i = lastURI_in.rfind ('/', std::string::npos);
+      position_i = last_URI_string.rfind ('/', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
       URI_string_tail =
-          lastURI_in.substr (position_i + 1, std::string::npos);
+          last_URI_string.substr (position_i + 1, std::string::npos);
 
-      position_i = lastURI_in.find ('/', 0);
+      position_i = last_URI_string.find ('/', 0);
       ACE_ASSERT (position_i != std::string::npos);
-      position_i = lastURI_in.find ('/', position_i + 1);
+      position_i = last_URI_string.find ('/', position_i + 1);
       ACE_ASSERT (position_i != std::string::npos);
 
-      URI_string_head = lastURI_in;
+      URI_string_head = last_URI_string;
       URI_string_head.erase (position_i + 1, std::string::npos);
 
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter.str (last_URI_string.substr (position_i + 1, indexPositions_in));
       converter >> index_2;
 
       regex_string =
@@ -1011,7 +1100,7 @@ add_segment_URIs (unsigned int program_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                    ACE_TEXT (lastURI_in.c_str ())));
+                    ACE_TEXT (last_URI_string.c_str ())));
         return;
       } // end IF
       ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1062,17 +1151,17 @@ add_segment_URIs (unsigned int program_in,
     {
       ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
 
-      position_i = lastURI_in.rfind ('/', std::string::npos);
+      position_i = last_URI_string.rfind ('/', std::string::npos);
       URI_string_tail =
-          lastURI_in.substr (position_i + 1, std::string::npos);
-      URI_string_head = lastURI_in;
-      position_i = lastURI_in.find ('/', 0);
-      position_i = lastURI_in.find ('/', position_i + 1);
+          last_URI_string.substr (position_i + 1, std::string::npos);
+      URI_string_head = last_URI_string;
+      position_i = last_URI_string.find ('/', 0);
+      position_i = last_URI_string.find ('/', position_i + 1);
       URI_string_head.erase (position_i, std::string::npos);
 
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter.str (last_URI_string.substr (position_i + 1, indexPositions_in));
       converter >> index_2;
 
       regex_string =
@@ -1085,7 +1174,7 @@ add_segment_URIs (unsigned int program_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                    ACE_TEXT (lastURI_in.c_str ())));
+                    ACE_TEXT (last_URI_string.c_str ())));
         return;
       } // end IF
       ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1144,17 +1233,17 @@ add_segment_URIs (unsigned int program_in,
     {
       ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
 
-      position_i = lastURI_in.rfind ('/', std::string::npos);
+      position_i = last_URI_string.rfind ('/', std::string::npos);
       URI_string_tail =
-          lastURI_in.substr (position_i + 1, std::string::npos);
-      URI_string_head = lastURI_in;
-      position_i = lastURI_in.find ('/', 0);
-      position_i = lastURI_in.find ('/', position_i + 1);
+          last_URI_string.substr (position_i + 1, std::string::npos);
+      URI_string_head = last_URI_string;
+      position_i = last_URI_string.find ('/', 0);
+      position_i = last_URI_string.find ('/', position_i + 1);
       URI_string_head.erase (position_i, std::string::npos);
 
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter.str (last_URI_string.substr (position_i + 1, indexPositions_in));
       converter >> index_2;
 
       regex_string =
@@ -1167,7 +1256,7 @@ add_segment_URIs (unsigned int program_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                    ACE_TEXT (lastURI_in.c_str ())));
+                    ACE_TEXT (last_URI_string.c_str ())));
         return;
       } // end IF
       ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1230,16 +1319,16 @@ add_segment_URIs (unsigned int program_in,
     {
       ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
 
-      position_i = lastURI_in.rfind ('/', std::string::npos);
+      position_i = last_URI_string.rfind ('/', std::string::npos);
       URI_string_tail =
-          lastURI_in.substr (position_i + 1, std::string::npos);
-      URI_string_head = lastURI_in;
-      position_i = lastURI_in.find ('/', 0);
+          last_URI_string.substr (position_i + 1, std::string::npos);
+      URI_string_head = last_URI_string;
+      position_i = last_URI_string.find ('/', 0);
       URI_string_head.erase (position_i, std::string::npos);
 
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+      converter.str (last_URI_string.substr (position_i + 1, indexPositions_in));
       converter >> index_2;
 
       regex_string =
@@ -1252,7 +1341,7 @@ add_segment_URIs (unsigned int program_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                    ACE_TEXT (lastURI_in.c_str ())));
+                    ACE_TEXT (last_URI_string.c_str ())));
         return;
       } // end IF
       ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1309,23 +1398,23 @@ add_segment_URIs (unsigned int program_in,
     {
       ACE_UINT32 index_i = 0, date_i = 0;
 
-      position_i = lastURI_in.rfind ('_', std::string::npos);
+      position_i = last_URI_string.rfind ('_', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
 
-      URI_string_head = lastURI_in;
+      URI_string_head = last_URI_string;
       URI_string_head.erase (position_i + 1, std::string::npos);
 
       regex_string =
           ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(_)([^_]+)(_)([^_]+)(_)([[:digit:]]+)(.ts)$");
       regex.assign (regex_string);
-      if (unlikely(!std::regex_match (lastURI_in,
+      if (unlikely(!std::regex_match (last_URI_string,
                                       match_results,
                                       regex,
                                       std::regex_constants::match_default)))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                    ACE_TEXT (lastURI_in.c_str ())));
+                    ACE_TEXT (last_URI_string.c_str ())));
         return;
       } // end IF
       ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1362,23 +1451,23 @@ add_segment_URIs (unsigned int program_in,
     {
       ACE_UINT32 index_i = 0, date_i = 0;
 
-      position_i = lastURI_in.rfind ('_', std::string::npos);
+      position_i = last_URI_string.rfind ('_', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
 
-      URI_string_head = lastURI_in;
+      URI_string_head = last_URI_string;
       URI_string_head.erase (position_i + 1, std::string::npos);
 
       regex_string =
           ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([^_]+)(_)([[:digit:]]+)(.*)$");
       regex.assign (regex_string);
-      if (unlikely(!std::regex_match (lastURI_in,
+      if (unlikely(!std::regex_match (last_URI_string,
                                       match_results,
                                       regex,
                                       std::regex_constants::match_default)))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                    ACE_TEXT (lastURI_in.c_str ())));
+                    ACE_TEXT (last_URI_string.c_str ())));
         return;
       } // end IF
       ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1413,19 +1502,19 @@ add_segment_URIs (unsigned int program_in,
     {
       ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
 
-      position_i = lastURI_in.rfind ('/', std::string::npos);
+      position_i = last_URI_string.rfind ('/', std::string::npos);
       if (position_i != std::string::npos)
       {
         URI_has_path = true;
         URI_string_tail =
-            lastURI_in.substr (position_i + 1, std::string::npos);
-        URI_string_head = lastURI_in;
-        position_i = lastURI_in.find ('/', 0);
+            last_URI_string.substr (position_i + 1, std::string::npos);
+        URI_string_head = last_URI_string;
+        position_i = last_URI_string.find ('/', 0);
         URI_string_head.erase (position_i, std::string::npos);
 
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter.clear ();
-        converter.str (lastURI_in.substr (position_i + 1, indexPositions_in));
+        converter.str (last_URI_string.substr (position_i + 1, indexPositions_in));
         converter >> index_2;
 
         regex_string =
@@ -1438,7 +1527,7 @@ add_segment_URIs (unsigned int program_in,
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                      ACE_TEXT (lastURI_in.c_str ())));
+                      ACE_TEXT (last_URI_string.c_str ())));
           return;
         } // end IF
         ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1467,14 +1556,14 @@ add_segment_URIs (unsigned int program_in,
         std::string regex_string =
             ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(.ts|.aac)$");
         regex.assign (regex_string);
-        if (unlikely(!std::regex_match (lastURI_in,
+        if (unlikely(!std::regex_match (last_URI_string,
                                         match_results,
                                         regex,
                                         std::regex_constants::match_default)))
         {
           ACE_DEBUG ((LM_ERROR,
                      ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
-                     ACE_TEXT (lastURI_in.c_str ())));
+                     ACE_TEXT (last_URI_string.c_str ())));
           return;
         } // end IF
         ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1540,7 +1629,6 @@ idle_segment_download_complete_cb (gpointer userData_in)
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
   ACE_ASSERT (!(*channel_iterator).second.videoSegment.URLs.empty ());
   ACE_ASSERT (data_p->videoTimeoutHandler->lock_);
-  std::string current_URL;
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
       data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
@@ -1550,25 +1638,17 @@ idle_segment_download_complete_cb (gpointer userData_in)
         (*stream_iterator_3a).second.second->URL.empty ())
       goto continue_;
     if ((*channel_iterator).second.audioSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
-    {
-      current_URL = (*channel_iterator).second.audioSegment.URLs.back ();
       add_segment_URIs (data_p->currentChannel,
-                        current_URL,
                         (*channel_iterator).second.audioSegment.URLs,
                         (*channel_iterator).second.maxIndex,
                         (*channel_iterator).second.indexPositions);
-    } // end IF
 
 continue_:
     if ((*channel_iterator).second.videoSegment.URLs.size () <= TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM)
-    {
-      current_URL = (*channel_iterator).second.videoSegment.URLs.back ();
       add_segment_URIs (data_p->currentChannel,
-                        current_URL,
                         (*channel_iterator).second.videoSegment.URLs,
                         (*channel_iterator).second.maxIndex,
                         (*channel_iterator).second.indexPositions);
-    } // end ELSE IF
   } // end lock scope
 
   return G_SOURCE_REMOVE;
@@ -2087,6 +2167,7 @@ drawingarea_draw_cb (GtkWidget* widget_in,
 {
   STREAM_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
 
+  // sanity check(s)
   ACE_ASSERT (context_in);
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
@@ -2101,9 +2182,9 @@ drawingarea_draw_cb (GtkWidget* widget_in,
                 ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
   }
 
-  gtk_widget_queue_draw (widget_in);
+  //gtk_widget_queue_draw (widget_in);
 
-  return FALSE; // propagate further
+  return TRUE; // do not propagate further
 }
 #else
 gboolean
@@ -2120,7 +2201,7 @@ drawingarea_expose_event_cb (GtkWidget* widget_in,
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   if (!data_p->dispatch)
-    return FALSE;
+    return FALSE; // propagate further
 
   // sanity check(s)
   cairo_t* context_p =
@@ -2129,7 +2210,7 @@ drawingarea_expose_event_cb (GtkWidget* widget_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gdk_cairo_create(), aborting\n")));
-    return FALSE;
+    return FALSE; // propagate further
   } // end IF
 
   try {
@@ -2141,7 +2222,7 @@ drawingarea_expose_event_cb (GtkWidget* widget_in,
 
   cairo_destroy (context_p); context_p = NULL;
 
-  return FALSE; // propagate
+  return TRUE; // do not propagate further
 } // drawingarea_expose_event_cb
 #endif // GTK_CHECK_VERSION(3,0,0)
 

@@ -1025,7 +1025,7 @@ do_work (const std::string& configurationFile_in,
   stream_configuration_4b.mediaType.audio.sampleRate = 48000;
   stream_configuration_4b.mediaType.video.frameRate.num = 30;
   stream_configuration_4b.messageAllocator = &message_allocator_3;
-  stream_configuration_4b.cloneModule = false;
+  //stream_configuration_4b.cloneModule = false;
   stream_configuration_4b.module = &event_handler_module_3;
   stream_configuration_4b.printFinalReport = true;
   configuration_in.streamConfiguration_4b.initialize (module_configuration,

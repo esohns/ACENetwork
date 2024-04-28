@@ -741,21 +741,21 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
               &segment_p->end));
 
   // *TODO*: remove this altogether
-  ACE_ASSERT (segment_p->URLs.size () > 2);
-  Test_I_WebTV_ChannelSegmentURLsIterator_t iterator_3 =
-    segment_p->URLs.begin ();
-  ACE_UINT32 number_to_erase_i = segment_p->URLs.size () - 2;
-  //  ((segment_p->URLs.size () <= 10) ? 0
-  //                                   : (static_cast<float> (segment_p->URLs.size ()) * 0.95)); // keep the most recent 5% entries
-  if (number_to_erase_i)
-  {
-    number_to_erase_i =
-      std::min (static_cast<size_t> (number_to_erase_i), segment_p->URLs.size () - 3);
-    std::advance (iterator_3, number_to_erase_i);
-    segment_p->URLs.erase (segment_p->URLs.begin (),
-                           iterator_3);
-  } // end IF
-  ACE_ASSERT (segment_p->URLs.size () >= 2);
+  //ACE_ASSERT (segment_p->URLs.size () > 2);
+  //Test_I_WebTV_ChannelSegmentURLsIterator_t iterator_3 =
+  //  segment_p->URLs.begin ();
+  //ACE_UINT32 number_to_erase_i = segment_p->URLs.size () - 2;
+  ////  ((segment_p->URLs.size () <= 10) ? 0
+  ////                                   : (static_cast<float> (segment_p->URLs.size ()) * 0.95)); // keep the most recent 5% entries
+  //if (number_to_erase_i)
+  //{
+  //  number_to_erase_i =
+  //    std::min (static_cast<size_t> (number_to_erase_i), segment_p->URLs.size () - 3);
+  //  std::advance (iterator_3, number_to_erase_i);
+  //  segment_p->URLs.erase (segment_p->URLs.begin (),
+  //                         iterator_3);
+  //} // end IF
+  ACE_ASSERT (!segment_p->URLs.empty ());
 
   guint event_source_id = g_idle_add (idle_notify_segment_data_cb,
                                       CBData_);
@@ -765,8 +765,8 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
                 ACE_TEXT ("failed to g_idle_add(idle_notify_segment_data_cb): ""\"%m\", returning\n")));
     return;
   } // end IF
-  { ACE_GUARD(ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.eventSourceIds.insert(event_source_id);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 #endif // GTK_USE
 #endif // GUI_SUPPORT
