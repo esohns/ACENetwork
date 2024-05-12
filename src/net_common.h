@@ -198,16 +198,21 @@ enum Net_Connection_Status
 };
 
 struct Net_Statistic
+ : virtual Stream_StatisticBase
 {
   Net_Statistic ()
-   : sentBytes (0)
+   : Stream_StatisticBase ()
+   , sentBytes (0)
    , receivedBytes (0)
-   , timeStamp (ACE_Time_Value::zero)
+   //, timeStamp (ACE_Time_Value::zero)
    , previousBytes (0)
    , previousTimeStamp (ACE_Time_Value::zero)
   {}
+
   struct Net_Statistic operator+= (const struct Net_Statistic& rhs_in)
   {
+    Stream_StatisticBase::operator+= (rhs_in);
+
     sentBytes += rhs_in.sentBytes;
     receivedBytes += rhs_in.receivedBytes;
 
@@ -222,7 +227,7 @@ struct Net_Statistic
   ACE_UINT64     receivedBytes;
 
   // statistic and speed calculations
-  ACE_Time_Value timeStamp;
+  //ACE_Time_Value timeStamp;
   ACE_UINT64     previousBytes; // total-
   ACE_Time_Value previousTimeStamp;
 };
@@ -232,21 +237,20 @@ typedef Common_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
 
 struct Net_StreamStatistic
  : Net_Statistic
+ , Stream_Statistic
 {
   Net_StreamStatistic ()
    : Net_Statistic ()
-   , streamStatistic ()
+   , Stream_Statistic ()
   {}
+
   struct Net_StreamStatistic operator+= (const struct Net_StreamStatistic& rhs_in)
   {
     Net_Statistic::operator+= (rhs_in);
-
-    streamStatistic += rhs_in.streamStatistic;
+    Stream_Statistic::operator+= (rhs_in);
 
     return *this;
   }
-
-  struct Stream_Statistic streamStatistic;
 };
 typedef struct Net_StreamStatistic Net_StreamStatistic_t;
 typedef Common_IStatistic_T<Net_StreamStatistic_t> Net_IStreamStatisticHandler_t;

@@ -234,7 +234,7 @@ idle_update_info_display_cb (gpointer userData_in)
                                                       ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_DATA_NAME)));
           ACE_ASSERT (spin_button_p);
           gtk_spin_button_set_value (spin_button_p,
-                                     static_cast<gdouble> (data_p->progressData.statistic.streamStatistic.bytes));
+                                     static_cast<gdouble> (data_p->progressData.statistic.bytes));
 
           spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -740,18 +740,18 @@ idle_update_progress_cb (gpointer userData_in)
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   int result = -1;
-  float speed = data_p->statistic.streamStatistic.bytesPerSecond;
+  float speed = data_p->statistic.bytesPerSecond;
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
   if (speed)
   {
-    if (speed >= 1024.0F)
+    if (speed >= 1024.0f)
     {
-      speed /= 1024.0F;
+      speed /= 1024.0f;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("kbyte(s)/s");
     } // end IF
-    if (speed >= 1024.0F)
+    if (speed >= 1024.0f)
     {
-      speed /= 1024.0F;
+      speed /= 1024.0f;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
     result = ACE_OS::sprintf (buffer, ACE_TEXT ("%.2f %s"),

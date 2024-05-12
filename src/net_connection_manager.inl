@@ -922,13 +922,13 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 
   // step2: dump statistic information
   ACE_DEBUG ((LM_INFO,
-              ACE_TEXT ("*** CONNECTION STATISTIC ***\n--> [%B] connection(s) <--\n sent data: \t%Q \t(avg.: %.2f)\n received data: %Q \t(avg.: %.2f)\n msg./s: \t%.2f \tB/s: %.2f\n*** CONNECTION STATISTIC ***\\END\n"),
+              ACE_TEXT ("*** CONNECTION STATISTIC ***\n--> [%B] connection(s) <--\n sent data: \t%Q\t(avg.: %.2f)\n received data: %Q\t(avg.: %.2f)\n msg./s: \t%.2f \tB/s: %.2f\n*** CONNECTION STATISTIC ***\\END\n"),
               number_of_connections_i,
               statistic_s.sentBytes,
               (number_of_connections_i ? (statistic_s.sentBytes / static_cast<float> (number_of_connections_i)) : 0.0F),
               statistic_s.receivedBytes,
               (number_of_connections_i ? (statistic_s.receivedBytes / static_cast<float> (number_of_connections_i)) : 0.0F),
-              statistic_s.streamStatistic.messagesPerSecond, statistic_s.streamStatistic.bytesPerSecond));
+              statistic_s.messagesPerSecond, statistic_s.bytesPerSecond));
 }
 
 template <ACE_SYNCH_DECL,

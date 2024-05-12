@@ -239,7 +239,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
       } // end IF
 
 #if defined (GTK_USE)
-      CBData_->progressData.statistic.streamStatistic =
+      CBData_->progressData.statistic =
         sessionData_->statistic;
 #endif // GTK_USE
 
@@ -669,8 +669,7 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       } // end IF
 
 #if defined (GTK_USE)
-      CBData_->progressData.statistic.streamStatistic =
-        sessionData_->statistic;
+      CBData_->progressData.statistic = sessionData_->statistic;
 #endif // GTK_USE
 
       if (sessionData_->lock)

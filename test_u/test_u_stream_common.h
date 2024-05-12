@@ -37,10 +37,12 @@ struct Test_U_StreamSessionData
    : Stream_SessionData ()
    , connection (NULL)
    , connectionStates ()
+   , statistic ()
   {}
 
   Net_IINETConnection_t*        connection;
   Stream_Net_ConnectionStates_t connectionStates;
+  struct Net_StreamStatistic    statistic; // *TODO*: type should be a template parameter
 };
 typedef Stream_SessionData_T<struct Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 

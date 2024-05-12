@@ -214,7 +214,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
-      CBData_->progressData.statistic.streamStatistic = sessionData_->statistic;
+      CBData_->progressData.statistic = sessionData_->statistic;
 #endif // GTK_USE || WXWIDGETS_USE
 #endif // GUI_SUPPORT
 

@@ -780,25 +780,25 @@ idle_update_progress_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer_a[BUFSIZ];
-  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+  char buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (char[BUFSIZ]));
   int result = -1;
-  float speed = 0.0F;
+  float speed = 0.0f;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
-    speed = data_p->statistic.streamStatistic.bytesPerSecond;
+    speed = data_p->statistic.bytesPerSecond;
   } // end lock scope
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
   if (speed)
   {
-    if (speed >= 1024.0F)
+    if (speed >= 1024.0f)
     {
-      speed /= 1024.0F;
+      speed /= 1024.0f;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("kbyte(s)/s");
     } // end IF
-    if (speed >= 1024.0F)
+    if (speed >= 1024.0f)
     {
-      speed /= 1024.0F;
+      speed /= 1024.0f;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
     result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),

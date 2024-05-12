@@ -61,7 +61,7 @@ class Test_U_Stream_T
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_StreamState,
                                         struct Test_U_StreamConfiguration,
-                                        struct Stream_Statistic,
+                                        struct Net_StreamStatistic,
                                         Common_Timer_Manager_t,
                                         struct ClientServer_ModuleHandlerConfiguration,
                                         struct Test_U_StreamSessionData, // session data
@@ -81,7 +81,7 @@ class Test_U_Stream_T
                                         enum Stream_StateMachine_ControlState,
                                         struct Test_U_StreamState,
                                         struct Test_U_StreamConfiguration,
-                                        struct Stream_Statistic,
+                                        struct Net_StreamStatistic,
                                         Common_Timer_Manager_t,
                                         struct ClientServer_ModuleHandlerConfiguration,
                                         struct Test_U_StreamSessionData,
