@@ -431,7 +431,7 @@ Net_Client_AsynchConnector_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("0x%@: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
                 connectHandle_in,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_, false, false).c_str ()),
                 ACE::sock_error (static_cast<int> (error_in))));
 #else
     if ((error_in != EBADF) && // 9: happens on Linux
@@ -439,7 +439,7 @@ Net_Client_AsynchConnector_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%d: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
                   connectHandle_in,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_, false, false).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (error_in))));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
