@@ -161,18 +161,18 @@ class Net_Connection_Manager_T
   void abortMostRecent ();
 
   // timer
-  Common_Timer_ResetCounterHandler      resetTimeoutHandler_;
-  long                                  resetTimeoutHandlerId_;
-  ACE_Time_Value                        resetTimeoutInterval_;
+  Common_Timer_ResetCounterHandler             resetTimeoutHandler_;
+  long                                         resetTimeoutHandlerId_;
+  ACE_Time_Value                               resetTimeoutInterval_;
 
   // implement blocking wait
-  CONNECTION_CONTAINER_T                connections_;
-  bool                                  isActive_;
-  bool                                  isInitialized_;
+  CONNECTION_CONTAINER_T                       connections_;
+  bool                                         isActive_;
+  bool                                         isInitialized_;
   // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
-  mutable ACE_SYNCH_RECURSIVE_MUTEX     lock_;
+  mutable ACE_SYNCH_RECURSIVE_MUTEX            lock_;
   mutable ACE_Condition_Recursive_Thread_Mutex condition_;
-  unsigned int                          maximumNumberOfConnections_;
+  unsigned int                                 maximumNumberOfConnections_;
 
   ConfigurationType*                    configuration_; // default-
   UserDataType*                         userData_;

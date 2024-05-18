@@ -149,7 +149,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [VALUE]   : client ping interval (ms) [")
-            << NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL
+            << NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS
             << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
             << std::endl;
 //  std::cout << ACE_TEXT_ALWAYS_CHAR("-k [VALUE]  : client keep-alive timeout ([")
@@ -186,7 +186,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]   : statistic reporting interval (second(s)) [")
-            << NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S
             << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t           : trace information")
@@ -259,8 +259,8 @@ do_processArguments (const int& argc_in,
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
 #endif // GUI_SUPPORT
-  pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
-                        (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
+  pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS / 1000,
+                        (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS % 1000) * 1000);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
   logToFile_out = false;
   networkInterface_out =
@@ -270,7 +270,7 @@ do_processArguments (const int& argc_in,
   useReactor_out =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
-      NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+      NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   traceInformation_out = false;
   protocol_out = NET_TRANSPORTLAYER_TCP;
   printVersionAndExit_out = false;
@@ -1275,8 +1275,8 @@ ACE_TMAIN (int argc_in,
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
 #endif // GUI_SUPPORT
-  ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
-                                (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
+  ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS / 1000,
+                                (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS % 1000) * 1000);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
   std::string network_interface =
@@ -1286,7 +1286,7 @@ ACE_TMAIN (int argc_in,
   bool use_reactor =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
-    NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
   enum Net_TransportLayerType protocol_e = NET_TRANSPORTLAYER_TCP;
   bool print_version_and_exit = false;

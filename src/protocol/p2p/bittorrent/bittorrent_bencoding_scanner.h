@@ -59,7 +59,9 @@ class BitTorrent_Bencoding_Scanner
 
   // implement Common_ILexScanner_T
   inline virtual ACE_Message_Block* buffer () { ACE_ASSERT (parser_); return parser_->buffer (); }
-//  inline virtual bool debug () const { ACE_ASSERT (parser_); return parser_->debugScanner (); }
+#if defined (_DEBUG)
+  inline virtual bool debug () const { ACE_ASSERT (parser_); return parser_->debug (); }
+#endif // _DEBUG
   inline virtual bool isBlocking () const { ACE_ASSERT (parser_); return parser_->isBlocking (); }
   inline virtual unsigned int offset () const { ACE_ASSERT (parser_); return parser_->offset (); }
   inline virtual bool begin (const char* buffer_in, unsigned int bufferSize_in) { ACE_ASSERT (parser_); return parser_->begin (buffer_in, bufferSize_in); }
@@ -75,7 +77,7 @@ class BitTorrent_Bencoding_Scanner
   inline virtual const struct Common_FlexScannerState& getR () const { return state_; }
   inline virtual const BitTorrent_Bencoding_IParser* const getP_2 () const { return parser_; }
   inline virtual void setP (BitTorrent_Bencoding_IParser* parser_in) { parser_ = parser_in; }
-  inline virtual void debug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void setDebug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void reset () { inherited::yylineno = 1; }
   inline virtual bool initialize (yyscan_t&, BitTorrent_Bencoding_IParser*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

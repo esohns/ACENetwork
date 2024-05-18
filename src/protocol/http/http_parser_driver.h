@@ -61,7 +61,7 @@ class HTTP_ParserDriver_T
   // implement (part of) HTTP_IParser
   virtual bool initialize (const struct HTTP_ParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
-  inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); }
+  inline virtual bool debug () const { return HTTP_Scanner_get_debug (scannerState_); }
   inline virtual bool isBlocking () const { return blockInParse_; }
   virtual void error (const struct YYLTYPE&, // location
                       const std::string&); // message
@@ -99,7 +99,7 @@ class HTTP_ParserDriver_T
 
   inline virtual const Common_FlexScannerState& getR () const { static Common_FlexScannerState dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
   inline virtual void setP (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  inline virtual void debug (yyscan_t state_in, bool toggle_in) { HTTP_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); }
+  inline virtual void setDebug (yyscan_t state_in, bool toggle_in) { HTTP_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); }
   inline virtual void reset () { HTTP_Scanner_set_lineno (1, scannerState_); HTTP_Scanner_set_column (1, scannerState_); }
   inline virtual bool initialize (yyscan_t&, HTTP_IParser* extra_in) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

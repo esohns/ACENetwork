@@ -67,7 +67,7 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   if (unlikely (!wait_in))
@@ -99,13 +99,13 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
+                  ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\" aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                   ACE::sock_error (result_2)));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
+                  ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\" aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (result_2))));
 #endif // ACE_WIN32 || ACE_WIN64
       iasynch_connector_p->abort ();
@@ -140,7 +140,7 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
     connection_p->decrease ();
     return ACE_INVALID_HANDLE;
   } // end IF
@@ -157,7 +157,7 @@ continue_:
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   connection_p->decrease (); connection_p = NULL;

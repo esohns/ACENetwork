@@ -464,10 +464,10 @@ POP_ParserDriver_T<SessionMessageType>::waitBuffer ()
 
 template <typename SessionMessageType>
 void
-POP_ParserDriver_T<SessionMessageType>::debug (yyscan_t context_in,
-                                                bool debug_in)
+POP_ParserDriver_T<SessionMessageType>::setDebug (yyscan_t context_in,
+                                                  bool debug_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("POP_ParserDriver_T::debug"));
+  NETWORK_TRACE (ACE_TEXT ("POP_ParserDriver_T::setDebug"));
 
   ACE_ASSERT (context_in);
 

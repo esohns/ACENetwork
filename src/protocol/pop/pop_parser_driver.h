@@ -32,6 +32,7 @@
 #include "common_parser_common.h"
 
 #include "pop_iparser.h"
+#include "pop_scanner.h"
 
 // forward declaration(s)
 class ACE_Message_Queue_Base;
@@ -82,8 +83,8 @@ class POP_ParserDriver_T
   inline virtual const struct Common_FlexScannerState& getR () const { static struct Common_FlexScannerState dummy;  ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
 
   // *NOTE*: current (unscanned) data fragment
-  ACE_Message_Block*                          fragment_;
-  unsigned int                                offset_; // parsed entity bytes
+  ACE_Message_Block*                         fragment_;
+  unsigned int                               offset_; // parsed entity bytes
 
   // target
   struct POP_Record*                         record_;
@@ -96,7 +97,9 @@ class POP_ParserDriver_T
 
   // implement Common_IScannerBase
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
-//  virtual bool debug () const = 0;
+#if defined (_DEBUG)
+  inline virtual bool debug () const { return !(POP_Scanner_get_debug (scannerState_) == 0); }
+#endif // _DEBUG
   inline virtual bool isBlocking () const { return true; }
   inline virtual unsigned int offset () const { return offset_; }
 
@@ -111,8 +114,8 @@ class POP_ParserDriver_T
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }
 
   // implement Common_ILexScanner_T
-  virtual void debug (yyscan_t, // state handle
-                      bool);    // toggle
+  virtual void setDebug (yyscan_t, // state handle
+                         bool);    // toggle
   virtual void reset (); // resets the offsets (line/column to 1,1)
 
   virtual bool initialize (yyscan_t&,             // return value: state handle

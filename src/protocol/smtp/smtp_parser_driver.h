@@ -32,6 +32,7 @@
 #include "common_parser_common.h"
 
 #include "smtp_iparser.h"
+#include "smtp_scanner.h"
 
 // forward declaration(s)
 class ACE_Message_Queue_Base;
@@ -90,7 +91,9 @@ class SMTP_ParserDriver_T
 
   // implement Common_IScannerBase
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
-//  virtual bool debug () const = 0;
+#if defined (_DEBUG)
+  inline virtual bool debug () const { return !(SMTP_Scanner_get_debug (scannerState_) == 0); }
+#endif // _DEBUG
   inline virtual bool isBlocking () const { return true; }
   inline virtual unsigned int offset () const { return offset_; }
 
@@ -105,8 +108,8 @@ class SMTP_ParserDriver_T
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }
 
   // implement Common_ILexScanner_T
-  virtual void debug (yyscan_t, // state handle
-                      bool);    // toggle
+  virtual void setDebug (yyscan_t, // state handle
+                         bool);    // toggle
   virtual void reset (); // resets the offsets (line/column to 1,1)
 
   virtual bool initialize (yyscan_t&,             // return value: state handle

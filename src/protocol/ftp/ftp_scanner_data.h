@@ -2,7 +2,7 @@
 #define FTP_Scanner_Data_HEADER_H 1
 #define FTP_Scanner_Data_IN_HEADER 1
 
-#undef YYTOKENTYPE
+//#undef YYTOKENTYPE
 #include "ftp_parser_data.h"
 
 /*

@@ -242,14 +242,14 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
       goto error;
     } // end IF
     headFragment_->initialize (data_container_p,
-                                headFragment_->sessionId (),
-                                NULL);
+                               headFragment_->sessionId (),
+                               NULL);
   } // end IF
   else
   {
     for (message_p = headFragment_;
-          message_p->cont ();
-          message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
+         message_p->cont ();
+         message_p = dynamic_cast<DataMessageType*> (message_p->cont ()));
     message_p->cont (message_inout);
   } // end ELSE
   message_inout = NULL;

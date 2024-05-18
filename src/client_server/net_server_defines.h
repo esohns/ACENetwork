@@ -46,9 +46,9 @@
 //#define NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS    ACE::max_handles()
 #define NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS          std::numeric_limits<unsigned int>::max()
 
-#define NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL        3600 // seconds [0: off]
+#define NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S      3600 // seconds [0: off]
 
-#define NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL                10000 // ms [0: off]
+#define NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS             10000 // ms [0: off]
 //#define NET_SERVER_DEFAULT_TCP_KEEPALIVE              0  // seconds [0 --> no timeout]
 
 // *** socket ***
