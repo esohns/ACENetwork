@@ -91,6 +91,9 @@ class POP_ParserDriver_T
 
   bool                                       expectMultiline_;
 
+ protected:
+  bool                                       finished_;
+
  private:
   ACE_UNIMPLEMENTED_FUNC (POP_ParserDriver_T (const POP_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (POP_ParserDriver_T& operator= (const POP_ParserDriver_T&))
@@ -133,7 +136,6 @@ class POP_ParserDriver_T
   void scan_end ();
 
   struct Common_FlexBisonParserConfiguration* configuration_;
-  bool                                        finished_;
 
   //// parser
   //yy::POP_Parser    parser_;

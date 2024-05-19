@@ -85,6 +85,9 @@ class SMTP_ParserDriver_T
   // target
   struct SMTP_Record*                         record_;
 
+ protected:
+  bool                                        finished_;
+
  private:
   ACE_UNIMPLEMENTED_FUNC (SMTP_ParserDriver_T (const SMTP_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (SMTP_ParserDriver_T& operator= (const SMTP_ParserDriver_T&))
@@ -127,7 +130,6 @@ class SMTP_ParserDriver_T
   void scan_end ();
 
   struct Common_FlexBisonParserConfiguration* configuration_;
-  bool                                        finished_;
 
   //// parser
   //yy::SMTP_Parser    parser_;
