@@ -124,11 +124,14 @@ class Net_Connection_Manager_T
   // implement (part of) Common_IStatistic_T
   virtual void report () const;
 
- private:
+ protected:
+  // *NOTE*: support derived classes
   Net_Connection_Manager_T ();
+  virtual ~Net_Connection_Manager_T ();
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T (const Net_Connection_Manager_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T& operator= (const Net_Connection_Manager_T&))
-  virtual ~Net_Connection_Manager_T ();
 
   // convenient types
   typedef Net_Connection_Manager_T<ACE_SYNCH_USE,

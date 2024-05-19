@@ -36,7 +36,7 @@ class Net_IListener_T
 {
  public:
   // *TODO*: remove ASAP
-  virtual bool useReactor () const = 0; // ? : uses proactor
+  virtual bool useReactor () const = 0; // ? : is asynch --> uses proactor
 };
 
 #endif
