@@ -636,7 +636,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             ConfigurationType,
                             StateType,
                             StreamType,
-                            UserDataType>::handle_accept (const ACE_Asynch_Accept::Result &result)
+                            UserDataType>::handle_accept (const ACE_Asynch_Accept::Result& result)
 {
   ACE_TRACE ("Net_Server_AsynchListener_T::handle_accept");
 

@@ -93,6 +93,9 @@ class Net_Server_AsynchListener_T
   inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  protected:
+  Net_Server_AsynchListener_T ();
+  virtual ~Net_Server_AsynchListener_T ();
+
   // override default accept strategy
   virtual void handle_accept (const ACE_Asynch_Accept::Result&); // result
   // override default creation strategy
@@ -101,10 +104,8 @@ class Net_Server_AsynchListener_T
  private:
   typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
 
-  Net_Server_AsynchListener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T& operator= (const Net_Server_AsynchListener_T&))
-  virtual ~Net_Server_AsynchListener_T ();
 
   // implement (part of) Net_IListener_T
   inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

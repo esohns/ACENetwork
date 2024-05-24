@@ -90,6 +90,9 @@ class Net_Server_Listener_T
   virtual void dump_state () const;
 
  protected:
+  Net_Server_Listener_T ();
+  virtual ~Net_Server_Listener_T ();
+
   // override default instantiation strategy
   virtual int make_svc_handler (HandlerType*&);
   // override default accept strategy
@@ -101,10 +104,8 @@ class Net_Server_Listener_T
   // convenient types
   typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
 
-  Net_Server_Listener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T (const Net_Server_Listener_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Server_Listener_T& operator= (const Net_Server_Listener_T&))
-  virtual ~Net_Server_Listener_T ();
 
   // implement (part of) Common_IControl_T
   inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

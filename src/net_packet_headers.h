@@ -60,7 +60,7 @@ struct tcphdr
           syn:1,
           fin:1;
 #else
-#error "ACE_BYTE_ORDER not defined"
+#error ACE_BYTE_ORDER not defined
 #endif // ACE_LITTLE_ENDIAN
   u_short window;  // Window
   u_short check;   // Checksum
@@ -142,7 +142,7 @@ struct iphdr
   u_char  version:4,      // Version (4 bits) + Internet header length (4 bits)
           ihl:4;
 #else
-#error "ACE_BYTE_ORDER not defined"
+#error ACE_BYTE_ORDER not defined
 #endif
   u_char  tos;            // Type of service
   u_short tot_len;        // Total length
