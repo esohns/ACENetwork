@@ -130,9 +130,16 @@ jobs:
           cmake -B ${{github.workspace}}\\modules\\Common\\build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
      shell: cmd
 
-   - name: Build (Common)
+   - name: Build (Common) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/Common
+          cmake --build build --config ${{env.BUILD_TYPE}}
+
+   - name: Build (Common) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\Common
           cmake --build build --config ${{env.BUILD_TYPE}}
      shell: cmd
 
@@ -208,9 +215,16 @@ jobs:
           cmake -B ${{github.workspace}}\\modules\\ACEStream\\build -DCommon_DIR=modules/Common/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
      shell: cmd
 
-   - name: Build (ACEStream)
+   - name: Build (ACEStream) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
      run: |
           cd modules/ACEStream
+          cmake --build build --config ${{env.BUILD_TYPE}}
+
+   - name: Build (ACEStream) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\ACEStream
           cmake --build build --config ${{env.BUILD_TYPE}}
      shell: cmd
 
