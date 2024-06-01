@@ -130,6 +130,12 @@ jobs:
           cmake -B ${{github.workspace}}\\modules\\Common\\build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
      shell: cmd
 
+   - name: Build (Common)
+     run: |
+          cd modules/Common
+          cmake --build build --config ${{env.BUILD_TYPE}}
+     shell: cmd
+
    - name: Checkout (ACEStream)
      uses: actions/checkout@v4
      with:
@@ -200,6 +206,12 @@ jobs:
      run: |
           cd modules\\ACEStream
           cmake -B ${{github.workspace}}\\modules\\ACEStream\\build -DCommon_DIR=modules/Common/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+     shell: cmd
+
+   - name: Build (ACEStream)
+     run: |
+          cd modules/ACEStream
+          cmake --build build --config ${{env.BUILD_TYPE}}
      shell: cmd
 
    - name: Configure CMake [UNIX]
