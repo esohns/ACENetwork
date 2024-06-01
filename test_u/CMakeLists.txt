@@ -5,7 +5,9 @@ include (Threads)
 
 include (NetlinkConfig)
 include (SSLConfig)
-include (${CMAKE_CURRENT_SOURCE_DIR}/GeoIp2_client/scripts/geoip2.cmake)
+
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/GeoIp2_client/scripts")
+include (geoip2)
 
 include (ACE)
 
@@ -30,15 +32,10 @@ endif (UNIX)
 
 add_library (${PROJECT_NAME}_Test_U STATIC "")
 
-if (UNIX)
- if (GUI_SUPPORT)
-  if (CURSES_USE)
-# *WORKAROUND*
-   add_definitions (-DNCURSES_INTERNALS)
-  endif (CURSES_USE)
- endif (GUI_SUPPORT)
-elseif (WIN32)
-endif ()
+if (VCPKG_USE)
+ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/gl/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/gl/scripts")
+ include (glew)
+endif (VCPKG_USE)
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
