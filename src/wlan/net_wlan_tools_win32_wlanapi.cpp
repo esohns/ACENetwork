@@ -2207,8 +2207,8 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
      WLAN_AVAILABLE_NETWORK_INCLUDE_ALL_MANUAL_HIDDEN_PROFILES);
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
   struct _WLAN_AVAILABLE_NETWORK_LIST* wlan_network_list_p = NULL;
-#if defined (_DEBUG)
   std::string SSID_string;
+#if defined(_DEBUG)
   std::string bss_network_type_string;
 #endif // _DEBUG
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
