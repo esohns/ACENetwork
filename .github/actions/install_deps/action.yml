@@ -9,7 +9,7 @@ runs:
  steps:
   - run: |
          sudo apt-get update
-         sudo apt-get install -y lsb-release libaio-dev libcap-dev libdbus-1-dev libsystemd-dev libmagick++-6-headers libmagickwand-6.q16-dev libglu1-mesa-dev libglm-dev libassimp-dev libavcodec-dev libavformat-dev libswscale-dev libavutil-dev libgtk2.0-dev libcups2-dev libfl-dev
+         sudo apt-get install -y lsb-release libaio-dev libcap-dev libdbus-1-dev libsystemd-dev libmagick++-6-headers libmagickwand-6.q16-dev libglu1-mesa-dev libglew-dev libglm-dev libassimp-dev libavcodec-dev libavformat-dev libswscale-dev libavutil-dev libgtk2.0-dev libcups2-dev libfl-dev
          sudo apt-get install -y libmysqlclient-dev libsox-dev libmpg123-dev libasound2-dev libv4l-dev libreoffice-dev freeglut3-dev libwayland-dev libfl-dev libsdl2-dev
          sudo apt-get install -y libnl-3-dev libfl-dev isc-dhcp-dev libjson-c-dev libkrb5-dev libisc1105 libisc-export1105 libisccfg163 libisccfg-export163 libirs161 libirs-export161 libdns-export1110 libgeoip-dev libiw-dev libnl-3-dev libnl-genl-3-dev libnm-dev
     shell: bash
