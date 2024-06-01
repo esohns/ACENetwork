@@ -204,11 +204,11 @@ jobs:
 
    - name: Configure CMake [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
-     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DUI_FRAMEWORK=gtk -DBUILD_TEST_U=ON -DBUILD_TEST_I=ON
 
    - name: Configure CMake [Win32]
      if: ${{ matrix.os=='windows-latest' }}
-     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DUI_FRAMEWORK=gtk -DBUILD_TEST_U=ON -DBUILD_TEST_I=ON
      shell: cmd
 
    - name: Build
