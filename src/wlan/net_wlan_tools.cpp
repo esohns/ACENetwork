@@ -65,6 +65,7 @@ Net_WLAN_Tools::decodeSSID (void* data_in,
                            ACE_TEXT_ALWAYS_CHAR ("\\x%.2x"),
                            data_p[i + 1]);
       ACE_ASSERT (result_2 == 4);
+      ACE_UNUSED_ARG (result_2);
       result += buffer_a;
     } // end ELSE
   } // end FOR

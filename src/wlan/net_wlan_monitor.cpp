@@ -1130,6 +1130,7 @@ nla_put_failure:
       // sanity check(s)
       ACE_ASSERT ((data_p[0] & 0xFC) == 0xB0); // auth
       ACE_ASSERT (length_i >= 30);
+      ACE_UNUSED_ARG (length_i);
       ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
                       data_p + 10,
                       ETH_ALEN);
@@ -1211,6 +1212,7 @@ update_state:
       // sanity check(s)
       ACE_ASSERT ((data_p[0] & 0xFC) == 0x10); // assoc
       ACE_ASSERT (length_i >= 124);
+      ACE_UNUSED_ARG (length_i);
       ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
                       data_p + 10,
                       ETH_ALEN);
@@ -1276,6 +1278,7 @@ update_state_2:
       // sanity check(s)
       ACE_ASSERT ((data_p[0] & 0xFC) == 0xC0); // deauth
       ACE_ASSERT (length_i >= 26);
+      ACE_UNUSED_ARG (length_i);
       ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
                       data_p + 10,
                       ETH_ALEN);
