@@ -11,6 +11,8 @@ if (UNIX)
  pkg_check_modules (PKG_V4L2 REQUIRED libv4l2)
 # pkg_check_modules (PKG_FFMPEG REQUIRED libswscale libavutil libavcodec)
 elseif (WIN32)
+ include (directxsdk)
+
  set (DIRECTSHOW_BASECLASSES_DIRECTORY
       "$ENV{LIB_ROOT}/DShowBaseClasses")
 #      "$ENV{PROGRAMFILES(X86)}/Microsoft SDKs/Windows/v7.0/Samples/multimedia/directshow")
@@ -18,7 +20,6 @@ endif ()
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
-
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
