@@ -12,7 +12,7 @@
     "freeglut",
     "glew",
     "glm",
-    "gtk3",
+    "gtk",
     "libiconv",
     "libmaxminddb",
     "libnoise",
