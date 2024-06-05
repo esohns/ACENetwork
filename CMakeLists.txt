@@ -41,6 +41,9 @@ endif ()
 
 include (PrePreToolChain)
 
+# *NOTE*: sets CMAKE_TOOLCHAIN_FILE, so include BEFORE project()
+include (vcpkg)
+
 # project
 cmake_policy (SET CMP0048 NEW) # allow project VERSION
 #cmake_policy (SET CMP0056 OLD) # honor per-config flags in try_compile()
@@ -220,7 +223,6 @@ add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 include (libraries_init)
-include (vcpkg)
 
 ################################################################################
 
