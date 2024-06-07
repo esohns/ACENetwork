@@ -198,11 +198,9 @@ enum Net_Connection_Status
 };
 
 struct Net_Statistic
- : virtual Stream_StatisticBase
 {
   Net_Statistic ()
-   : Stream_StatisticBase ()
-   , sentBytes (0)
+   : sentBytes (0)
    , receivedBytes (0)
    //, timeStamp (ACE_Time_Value::zero)
    , previousBytes (0)
@@ -211,12 +209,10 @@ struct Net_Statistic
 
   struct Net_Statistic operator+= (const struct Net_Statistic& rhs_in)
   {
-    Stream_StatisticBase::operator+= (rhs_in);
-
     sentBytes += rhs_in.sentBytes;
     receivedBytes += rhs_in.receivedBytes;
 
-    timeStamp = rhs_in.timeStamp;
+    //timeStamp = rhs_in.timeStamp;
     previousBytes += rhs_in.previousBytes;
     previousTimeStamp = rhs_in.previousTimeStamp;
 

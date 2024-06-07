@@ -196,8 +196,10 @@ Test_I_M3U_Module_Parser::hasFinished () const
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::hasFinished"));
 
-  return (contentLength_ &&
-          (contentLength_ == inherited::scannerState_.offset));
+  if (contentLength_)
+    return (contentLength_ == inherited::scannerState_.offset);
+
+  return true;
 }
 
 void
