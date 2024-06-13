@@ -105,12 +105,7 @@ class DHCP_Stream_T
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool initialize (const CONFIGURATION_T&); // configuration
-#else
   virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-#endif
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to rntimeStatistic_

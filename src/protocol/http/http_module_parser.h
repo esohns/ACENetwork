@@ -178,12 +178,7 @@ class HTTP_Module_ParserH_T
                               SessionMessageType> inherited2;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HTTP_Module_ParserH_T (ISTREAM_T*); // stream handle
-#else
   HTTP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle
-#endif // ACE_WIN32 || ACE_WIN64
   virtual ~HTTP_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()

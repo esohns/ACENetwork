@@ -71,6 +71,7 @@ class POP_Module_Parser_T
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  typedef Stream_IStream_T<ACE_SYNCH_USE, TimePolicyType> ISTREAM_T;
   POP_Module_Parser_T (ISTREAM_T*); // stream handle
 #else
   POP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
@@ -140,6 +141,7 @@ class POP_Module_ParserH_T
  public:
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  typedef Stream_IStream_T<ACE_SYNCH_USE, TimePolicyType> ISTREAM_T;
   POP_Module_ParserH_T (ISTREAM_T*);                     // stream handle
 #else
   POP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle

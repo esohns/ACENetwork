@@ -67,12 +67,7 @@ class Test_I_Stream_Module_EventHandler_T
                                   Common_TimePolicy_t,
                                   ConfigurationType> IMODULEHANDLER_T;
 
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Test_I_Stream_Module_EventHandler_T (ISTREAM_T*);                     // stream handle
-#else
   Test_I_Stream_Module_EventHandler_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
   inline virtual ~Test_I_Stream_Module_EventHandler_T () {}
 
   // implement Common_IClone_T

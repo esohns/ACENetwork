@@ -43,11 +43,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
                                ControlMessageType,
                                DataMessageType,
                                SessionMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               UserDataType>::BitTorrent_Module_PeerParser_T (ISTREAM_T* stream_in)
-#else
                                UserDataType>::BitTorrent_Module_PeerParser_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
  , inherited2 ()
  , headFragment_ (NULL)
@@ -1320,11 +1316,7 @@ BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                  UserDataType>::BitTorrent_Module_TrackerParser_T (ISTREAM_T* stream_in)
-#else
                                   UserDataType>::BitTorrent_Module_TrackerParser_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
  , inherited2 (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
                COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?

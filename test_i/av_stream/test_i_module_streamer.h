@@ -54,9 +54,9 @@ class Test_I_AVStream_Streamer_T
                                                 SessionMessageType> inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Test_I_AVStream_Streamer_T (ISTREAM_T*);                     // stream handle
+  typedef Stream_IStream_T<ACE_SYNCH_USE, TimePolicyType> ISTREAM_T;
+  Test_I_AVStream_Streamer_T (ISTREAM_T*); // stream handle
 #else
   Test_I_AVStream_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
 #endif // ACE_WIN32 || ACE_WIN64

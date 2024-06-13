@@ -69,12 +69,7 @@ class FTP_Module_Parser_T
                                  struct Stream_UserData> inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  FTP_Module_Parser_T (ISTREAM_T*); // stream handle
-#else
   FTP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
-#endif // ACE_WIN32 || ACE_WIN64
   inline virtual ~FTP_Module_Parser_T () {}
 
   // implement (part of) FTP_IParser
@@ -141,12 +136,7 @@ class FTP_Module_ParserH_T
                                    FTP_ParserDriver_T<SessionMessageType> > inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  FTP_Module_ParserH_T (ISTREAM_T*);                     // stream handle
-#else
   FTP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle
-#endif // ACE_WIN32 || ACE_WIN64
   inline virtual ~FTP_Module_ParserH_T () {}
 
   // *PORTABILITY*: for some reason, this base class member is not exposed

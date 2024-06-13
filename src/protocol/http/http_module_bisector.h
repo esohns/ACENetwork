@@ -86,12 +86,7 @@ class HTTP_Module_Bisector_T
                                       struct Stream_UserData> inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HTTP_Module_Bisector_T (ISTREAM_T*,                     // stream handle
-#else
   HTTP_Module_Bisector_T (typename inherited::ISTREAM_T*, // stream handle
-#endif
                           bool = false,                   // auto-start ?
                           bool = true);                   // generate session messages ?
   virtual ~HTTP_Module_Bisector_T ();

@@ -39,11 +39,7 @@ PCP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                     SessionMessageType>::PCP_Module_Parser_T (ISTREAM_T* stream_in)
-#else
                      SessionMessageType>::PCP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
-#endif
  : inherited (stream_in)
  , driver_ (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
             COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
@@ -219,13 +215,9 @@ PCP_Module_ParserH_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      StatisticHandlerType>::PCP_Module_ParserH_T (ISTREAM_T* stream_in,
-#else
                       StatisticHandlerType>::PCP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in,
-#endif
-                                                                    bool autoStart_in,
-                                                                    bool generateSessionMessages_in)
+                                                                   bool autoStart_in,
+                                                                   bool generateSessionMessages_in)
  : inherited (stream_in,
               autoStart_in,
               STREAM_HEADMODULECONCURRENCY_PASSIVE,

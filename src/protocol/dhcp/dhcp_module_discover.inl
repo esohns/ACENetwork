@@ -53,11 +53,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                       ConnectorType>::DHCP_Module_Discover_T (ISTREAM_T* stream_in)
-#else
                        ConnectorType>::DHCP_Module_Discover_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
  , connection_ (NULL)
  , sendRequestOnOffer_ (false)
@@ -816,11 +812,7 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         SessionDataType,
                         SessionDataContainerType,
                         StatisticContainerType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                        TimerManagerType>::DHCP_Module_DiscoverH_T (ISTREAM_T* stream_in,
-#else
                         TimerManagerType>::DHCP_Module_DiscoverH_T (typename inherited::ISTREAM_T* stream_in,
-#endif
                                                                     bool autoStart_in,
                                                                     bool generateSessionMessages_in)
  : inherited (stream_in,

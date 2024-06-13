@@ -42,11 +42,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                     SessionMessageType>::HTTP_Module_Parser_T (ISTREAM_T* stream_in)
-#else
                      SessionMessageType>::HTTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
  , inherited2 (this,
                ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
@@ -607,11 +603,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       SessionDataContainerType,
                       StatisticContainerType,
                       TimerManagerType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      UserDataType>::HTTP_Module_ParserH_T (ISTREAM_T* stream_in)
-#else
                       UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in) // stream handle
  , inherited2 (this,
                ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)

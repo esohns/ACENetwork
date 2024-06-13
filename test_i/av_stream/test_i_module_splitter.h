@@ -56,12 +56,7 @@ class Test_I_AVStream_Splitter_T
                                                         SessionDataType> inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Test_I_AVStream_Splitter_T (ISTREAM_T*);                     // stream handle
-#else
   Test_I_AVStream_Splitter_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
   inline virtual ~Test_I_AVStream_Splitter_T () {}
 
   //virtual void handleControlMessage (ControlMessageType&); // control message handle

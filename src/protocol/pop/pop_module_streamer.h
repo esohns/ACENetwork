@@ -59,12 +59,7 @@ class POP_Module_Streamer_T
                                  struct Stream_UserData> inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  POP_Module_Streamer_T (ISTREAM_T*);                     // stream handle
-#else
   POP_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
-#endif // ACE_WIN32 || ACE_WIN64
   inline virtual ~POP_Module_Streamer_T () {}
 
   // implement (part of) Stream_ITaskBase

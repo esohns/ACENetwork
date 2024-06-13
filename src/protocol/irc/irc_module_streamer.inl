@@ -42,11 +42,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
                       ControlMessageType,
                       DataMessageType,
                       SessionMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      UserDataType>::IRC_Module_Streamer_T (ISTREAM_T* stream_in)
-#else
                       UserDataType>::IRC_Module_Streamer_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::IRC_Module_Streamer_T"));

@@ -66,12 +66,7 @@ class PCP_Module_Parser_T
                                  struct Stream_UserData> inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  PCP_Module_Parser_T (ISTREAM_T*); // stream handle
-#else
   PCP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
   inline virtual ~PCP_Module_Parser_T () {}
 
   // override (part of) Stream_IModuleHandler_T
@@ -150,14 +145,9 @@ class PCP_Module_ParserH_T
                                       struct Stream_UserData> inherited;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  PCP_Module_ParserH_T (ISTREAM_T*,                     // stream handle
-#else
   PCP_Module_ParserH_T (typename inherited::ISTREAM_T*, // stream handle
-#endif
-                         bool = false,                   // auto-start ?
-                         bool = true);                   // generate session messages ?
+                        bool = false,                   // auto-start ?
+                        bool = true);                   // generate session messages ?
   inline virtual ~PCP_Module_ParserH_T () {}
 
   // *PORTABILITY*: for some reason, this base class member is not exposed

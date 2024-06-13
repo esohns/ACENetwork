@@ -131,11 +131,7 @@ HTTP_Stream_T<StreamStateType,
               DataMessageType,
               SessionMessageType,
               ConnectionManagerType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-              UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
-#else
               UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
-#endif
                                          ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::initialize"));

@@ -74,12 +74,7 @@ class BitTorrent_Module_PeerParser_T
   typedef BitTorrent_ParserDriver inherited2;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  BitTorrent_Module_PeerParser_T (ISTREAM_T*);                     // stream handle
-#else
   BitTorrent_Module_PeerParser_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
   virtual ~BitTorrent_Module_PeerParser_T ();
 
   virtual bool initialize (const ConfigurationType&,
@@ -273,12 +268,7 @@ class BitTorrent_Module_TrackerParser_T
   typedef BitTorrent_Bencoding_ParserDriver inherited2;
 
  public:
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  BitTorrent_Module_TrackerParser_T (ISTREAM_T*);                     // stream handle
-#else
   BitTorrent_Module_TrackerParser_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
   virtual ~BitTorrent_Module_TrackerParser_T ();
 
   virtual bool initialize (const ConfigurationType&,

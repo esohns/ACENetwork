@@ -113,11 +113,7 @@ POP_Stream_T<StreamStateType,
               SessionDataContainerType,
               ControlMessageType,
               DataMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-              SessionMessageType>::initialize (const CONFIGURATION_T& configuration_in)
-#else
               SessionMessageType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
-#endif
 {
   NETWORK_TRACE (ACE_TEXT ("POP_Stream_T::initialize"));
 

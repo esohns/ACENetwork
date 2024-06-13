@@ -47,11 +47,7 @@ POP_Module_Send_T<ACE_SYNCH_USE,
                    DataMessageType,
                    SessionMessageType,
                    ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                   ConnectionStateType>::POP_Module_Send_T (ISTREAM_T* stream_in)
-#else
                    ConnectionStateType>::POP_Module_Send_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
  , connection_ (NULL)
  , index_ (0)

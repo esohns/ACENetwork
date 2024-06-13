@@ -39,11 +39,7 @@ FTP_Module_Parser_T<ACE_SYNCH_USE,
                     ConfigurationType,
                     ControlMessageType,
                     DataMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                    SessionMessageType>::FTP_Module_Parser_T (ISTREAM_T* stream_in)
-#else
                     SessionMessageType>::FTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_T::FTP_Module_Parser_T"));
@@ -155,11 +151,7 @@ FTP_Module_ParserH_T<ACE_SYNCH_USE,
                      StreamStateType,
                      SessionDataType,
                      SessionDataContainerType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                     StatisticContainerType>::FTP_Module_ParserH_T (ISTREAM_T* stream_in)
-#else
                      StatisticContainerType>::FTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_ParserH_T::FTP_Module_ParserH_T"));

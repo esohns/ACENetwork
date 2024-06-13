@@ -33,11 +33,7 @@ Test_I_AVStream_Splitter_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            MessageType,
                            SessionMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                           SessionDataType>::Test_I_AVStream_Splitter_T (ISTREAM_T* stream_in)
-#else
                            SessionDataType>::Test_I_AVStream_Splitter_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Splitter_T::Test_I_AVStream_Splitter_T"));

@@ -40,11 +40,7 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        ControlMessageType,
                        DataMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                       SessionMessageType>::DHCP_Module_Streamer_T (ISTREAM_T* stream_in)
-#else
                        SessionMessageType>::DHCP_Module_Streamer_T (typename inherited::ISTREAM_T* stream_in)
-#endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Streamer_T::DHCP_Module_Streamer_T"));

@@ -59,11 +59,7 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        SessionDataType,
                        SessionDataContainerType,
                        StatisticContainerType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                       StatisticHandlerType>::HTTP_Module_Bisector_T (ISTREAM_T* stream_in,
-#else
                        StatisticHandlerType>::HTTP_Module_Bisector_T (typename inherited::ISTREAM_T* stream_in,
-#endif
                                                                       bool autoStart_in,
                                                                       bool generateSessionMessages_in)
  : inherited (stream_in,

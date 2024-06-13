@@ -106,11 +106,7 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_inout,
 
 template <typename TimerManagerType>
 bool
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-Test_U_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& configuration_in,
-#else
 Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
-#endif
                                                ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::initialize"));

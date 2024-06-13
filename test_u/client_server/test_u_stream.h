@@ -104,12 +104,7 @@ class Test_U_Stream_T
   // *TODO*: re-consider this API
   void ping ();
 
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool initialize (const CONFIGURATION_T&,
-#else
   virtual bool initialize (const typename inherited::CONFIGURATION_T&,
-#endif // ACE_WIN32 || ACE_WIN64
                            ACE_HANDLE); // socket handle
 
  private:
