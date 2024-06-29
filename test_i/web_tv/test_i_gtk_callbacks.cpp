@@ -3367,8 +3367,8 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
     if ((*iterator_3).resolution.width == resolution_s.width)
 #endif // ACE_WIN32 || ACE_WIN64
     {
-      (*iterator_4b).second.second->delayConfiguration->averageTokensPerInterval =
-          (*iterator_3).frameRate;
+      (*iterator_4b).second.second->delayConfiguration->interval.msec (static_cast<long> (1000 / (*iterator_3).frameRate));
+      (*iterator_4b).second.second->delayConfiguration->averageTokensPerInterval = 1;
       data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.frameRate.num =
           (*iterator_3).frameRate;
       break;
