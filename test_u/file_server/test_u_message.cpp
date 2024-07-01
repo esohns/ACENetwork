@@ -27,7 +27,7 @@
 #include "net_macros.h"
 
 Test_U_Message::Test_U_Message (Stream_SessionId_t sessionId_in,
-                                unsigned int requestedSize_in)
+                                size_t requestedSize_in)
  : inherited (sessionId_in,
               requestedSize_in)
  , mediaType_ (STREAM_MEDIATYPE_INVALID)

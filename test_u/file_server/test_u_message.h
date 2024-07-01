@@ -26,6 +26,7 @@
 #include "ace/Global_Macros.h"
 
 #include "stream_common.h"
+#include "stream_data_base.h"
 #include "stream_message_base.h"
 #include "stream_messageallocatorheap_base.h"
 
@@ -40,12 +41,12 @@ class ACE_Message_Block;
 class Test_U_SessionMessage;
 
 class Test_U_Message
- : public Stream_MessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
+ : public Stream_MessageBase_T<Stream_DataBase_T<Stream_CommandType_t>,
                                enum Stream_MessageType,
                                int>
  , public Stream_IMediaType
 {
-  typedef Stream_MessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
+  typedef Stream_MessageBase_T<Stream_DataBase_T<Stream_CommandType_t>,
                                enum Stream_MessageType,
                                int> inherited;
 
@@ -58,7 +59,7 @@ class Test_U_Message
 
  public:
   Test_U_Message (Stream_SessionId_t, // session id
-                  unsigned int);      // size
+                  size_t);            // size
   inline virtual ~Test_U_Message () {}
 
   // implement Stream_IMediaType
