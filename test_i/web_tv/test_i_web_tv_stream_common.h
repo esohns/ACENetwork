@@ -26,16 +26,6 @@
 #include <set>
 #include <string>
 
-#if defined (FFMPEG_SUPPORT)
-#ifdef __cplusplus
-extern "C"
-{
-#include "libavcodec/avcodec.h"
-//#include "libavutil/pixfmt.h"
-}
-#endif // __cplusplus
-#endif // FFMPEG_SUPPORT
-
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
@@ -72,8 +62,6 @@ extern "C"
 #if defined (FFMPEG_SUPPORT)
 #include "stream_lib_ffmpeg_common.h"
 #endif // FFMPEG_SUPPORT
-
-//#include "stream_module_htmlparser.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -198,36 +186,6 @@ struct Test_I_WebTV_StreamState
 
 //////////////////////////////////////////
 
-//typedef Stream_ISessionDataNotify_T<struct Test_I_WebTV_SessionData,
-//                                    enum Stream_SessionMessageType,
-//                                    Test_I_Message,
-//                                    Test_I_SessionMessage_2> Test_I_ISessionNotify_2;
-////typedef std::list<Test_I_ISessionNotify_2*> Test_I_Subscribers_2;
-////typedef Test_I_Subscribers_2::const_iterator Test_I_SubscribersIterator_2;
-//
-//struct Test_I_WebTV_ModuleHandlerConfiguration_2
-// : HTTP_ModuleHandlerConfiguration
-//{
-//  Test_I_WebTV_ModuleHandlerConfiguration_2 ()
-//   : HTTP_ModuleHandlerConfiguration ()
-//   , connectionConfigurations (NULL)
-//   , subscriber (NULL)
-//  {
-//    concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-//    inbound = true;
-//  }
-//
-//  Net_ConnectionConfigurations_t* connectionConfigurations;
-//  Test_I_ISessionNotify_2*        subscriber;
-//};
-//
-////extern const char stream_name_string_[];
-//typedef Stream_Configuration_T<//stream_name_string_,
-//                               struct Test_I_WebTV_StreamConfiguration,
-//                               struct Test_I_WebTV_ModuleHandlerConfiguration_2> Test_I_WebTV_StreamConfiguration_2;
-
-//////////////////////////////////////////
-
 struct Test_I_WebTV_StreamState_3;
 class Test_I_WebTV_SessionData_3
  : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
@@ -292,14 +250,11 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
    : HTTP_ModuleHandlerConfiguration ()
    , ALSAConfiguration (NULL)
 #if defined (FFMPEG_SUPPORT)
-   , codecId (AV_CODEC_ID_NONE)
+   , codecConfiguration (NULL)
 #endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
    , delayConfiguration (NULL)
    , deviceIdentifier ()
-#if defined (FFMPEG_SUPPORT)
-   , deviceType (AV_HWDEVICE_TYPE_NONE)
-#endif // FFMPEG_SUPPORT
    , display ()
    , program (1)
    , audioStreamType (15) // AAC
@@ -321,14 +276,11 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 
   struct Stream_MediaFramework_ALSA_Configuration* ALSAConfiguration;
 #if defined (FFMPEG_SUPPORT)
-  enum AVCodecID                                   codecId;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration* codecConfiguration;
 #endif // FFMPEG_SUPPORT
   Net_ConnectionConfigurations_t*                  connectionConfigurations;
   struct Stream_Miscellaneous_DelayConfiguration*  delayConfiguration;
   struct Stream_Device_Identifier                  deviceIdentifier;
-#if defined (FFMPEG_SUPPORT)
-  enum AVHWDeviceType                              deviceType;
-#endif // FFMPEG_SUPPORT
   struct Common_UI_DisplayDevice                   display;
   unsigned int                                     program;                  // MPEG TS decoder module
   unsigned int                                     audioStreamType;          // MPEG TS decoder module
@@ -352,9 +304,11 @@ struct Test_I_WebTV_StreamConfiguration_3
   Test_I_WebTV_StreamConfiguration_3 ()
    : HTTP_StreamConfiguration ()
    , mediaType ()
+   , useHardwareDecoder (false)
   {}
 
   struct Stream_MediaFramework_FFMPEG_MediaType mediaType;
+  bool                                          useHardwareDecoder;
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,

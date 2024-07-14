@@ -205,6 +205,10 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-z        : use hardware decoder [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
 }
 
 bool
@@ -226,7 +230,8 @@ do_process_arguments (int argc_in,
                       ACE_Time_Value& statisticReportingInterval_out,
                       bool& traceInformation_out,
                       unsigned int& channel_out,
-                      bool& printVersionAndExit_out)
+                      bool& printVersionAndExit_out,
+                      bool& useHardwareDecoder_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
 
@@ -268,8 +273,9 @@ do_process_arguments (int argc_in,
   traceInformation_out = false;
   channel_out = 0;
   printVersionAndExit_out = false;
+  useHardwareDecoder_out = false;
 
-  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("c:df:lrs:tu:v");
+  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("c:df:lrs:tu:vz");
 #if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   options_string += ACE_TEXT_ALWAYS_CHAR ("e:");
@@ -360,6 +366,11 @@ do_process_arguments (int argc_in,
       case 'v':
       {
         printVersionAndExit_out = true;
+        break;
+      }
+      case 'z':
+      {
+        useHardwareDecoder_out = true;
         break;
       }
       // error handling
@@ -608,7 +619,8 @@ do_work (const std::string& configurationFile_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         Test_I_SignalHandler& signalHandler_in)
+         Test_I_SignalHandler& signalHandler_in,
+         bool useHardwareDecoder_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
@@ -681,7 +693,26 @@ do_work (const std::string& configurationFile_in,
                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
-  allocator_configuration.defaultBufferSize =TEST_I_DEFAULT_BUFFER_SIZE;
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_AllocatorConfiguration allocator_configuration_2;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration video_codec_configuration;
+  video_codec_configuration.codecId = AV_CODEC_ID_H264;
+  video_codec_configuration.profile = FF_PROFILE_H264_HIGH;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_DXVA2;
+  //video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+  //video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_D3D12VA;
+#else
+  video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_VAAPI;
+#endif // ACE_WIN32 || ACE_WIN64
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration;
+  audio_codec_configuration.codecId = AV_CODEC_ID_AAC;
+#else
+  struct Stream_AllocatorConfiguration allocator_configuration_2;
+#endif // FFMPEG_SUPPORT
+  allocator_configuration.defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE;
+  allocator_configuration_2.defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE * 10;
+
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (allocator_configuration))
@@ -738,7 +769,7 @@ do_work (const std::string& configurationFile_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
 
-    Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2a;
+  Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2a;
 //  connection_configuration.socketConfiguration.address = remoteHost_in;
   connection_configuration_2a.allocatorConfiguration = &allocator_configuration;
   connection_configuration_2a.statisticReportingInterval =
@@ -748,7 +779,7 @@ do_work (const std::string& configurationFile_in,
     &configuration_in.streamConfiguration_2a;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2a"),
                                                                     &connection_configuration_2a));
-    Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2b;
+  Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2b;
 //  connection_configuration.socketConfiguration.address = remoteHost_in;
   connection_configuration_2b.allocatorConfiguration = &allocator_configuration;
   connection_configuration_2b.statisticReportingInterval =
@@ -956,9 +987,9 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.ALSAConfiguration = &ALSA_configuration;
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_4b.allocatorConfiguration =
-    &allocator_configuration;
+    &allocator_configuration_2;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_4b.codecId = AV_CODEC_ID_H264;
+  modulehandler_configuration_4b.codecConfiguration = &video_codec_configuration;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_4b.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
@@ -972,14 +1003,11 @@ do_work (const std::string& configurationFile_in,
     Stream_Device_Identifier::GUID;
   modulehandler_configuration_4b.deviceIdentifier.identifier._guid =
     Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false); // playback
-  modulehandler_configuration_4b.deviceType = AV_HWDEVICE_TYPE_DXVA2;
-  //modulehandler_configuration_4.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   struct tWAVEFORMATEX* waveformatex_p =
     Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_4b.deviceIdentifier.identifier._guid);
 #else
   modulehandler_configuration_4b.deviceIdentifier.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
-  modulehandler_configuration_4b.deviceType = AV_HWDEVICE_TYPE_VAAPI;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1028,6 +1056,7 @@ do_work (const std::string& configurationFile_in,
   //stream_configuration_4b.cloneModule = false;
   stream_configuration_4b.module = &event_handler_module_3;
   stream_configuration_4b.printFinalReport = true;
+  stream_configuration_4b.useHardwareDecoder = useHardwareDecoder_in;
   configuration_in.streamConfiguration_4b.initialize (module_configuration,
                                                       modulehandler_configuration_4b,
                                                       stream_configuration_4b);
@@ -1037,7 +1066,9 @@ do_work (const std::string& configurationFile_in,
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_audio_injector_4b)));
   modulehandler_configuration_audio_decoder_4b = modulehandler_configuration_4b;
-  modulehandler_configuration_audio_decoder_4b.codecId = AV_CODEC_ID_AAC;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_audio_decoder_4b.codecConfiguration = &audio_codec_configuration;
+#endif // FFMPEG_SUPPORT
   configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING),
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_audio_decoder_4b)));
@@ -1327,6 +1358,8 @@ ACE_TMAIN (int argc_in,
   bool trace_information;
   unsigned int channel_i;
   bool print_version_and_exit;
+  bool use_hardware_decoder_b;
+
   struct Test_I_WebTV_Configuration configuration;
 #if defined (GUI_SUPPORT)
   struct Test_I_WebTV_UI_CBData ui_cb_data;
@@ -1433,6 +1466,7 @@ ACE_TMAIN (int argc_in,
   trace_information = false;
   channel_i = 0;
   print_version_and_exit = false;
+  use_hardware_decoder_b = false;
   ACE_OS::memset (&elapsed_rusage, 0, sizeof (elapsed_rusage));
 
   // step1b: parse/process/validate configuration
@@ -1454,7 +1488,8 @@ ACE_TMAIN (int argc_in,
                              statistic_reporting_interval,
                              trace_information,
                              channel_i,
-                             print_version_and_exit))
+                             print_version_and_exit,
+                             use_hardware_decoder_b))
   {
     do_print_usage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                           ACE_DIRECTORY_SEPARATOR_CHAR)));
@@ -1623,7 +1658,8 @@ ACE_TMAIN (int argc_in,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
-           signal_handler);
+           signal_handler,
+           use_hardware_decoder_b);
   timer.stop ();
 
   // debug info

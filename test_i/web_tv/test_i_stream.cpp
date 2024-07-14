@@ -163,17 +163,16 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   ++index_i;
 
 //continue_:
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_VideoHWDecoder_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
-                  false);
-#else
-  ACE_NEW_RETURN (module_p,
-                  Test_I_VideoDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
-                  false);
-#endif // ACE_WIN32 || ACE_WIN64
+  if (inherited::configuration_->configuration_->useHardwareDecoder)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoHWDecoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+  else
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoDecoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                    false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 

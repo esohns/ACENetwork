@@ -139,6 +139,7 @@ Net_Common_Tools::initialize ()
 
   // initialize ACE SSL support
   ACE_SSL_Context* context_p = ACE_SSL_Context::instance ();
+  ACE_UNUSED_ARG(context_p);
 #endif // SSL_SUPPORT
 
   return true;
@@ -4862,7 +4863,7 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
 
   SSL_CTX* real_context_p = context_p->context ();
   ACE_ASSERT (real_context_p);
-  uint64_t new_options_i = 0;
+  // uint64_t new_options_i = 0;
   //new_options_i = SSL_CTX_set_options (real_context_p, SSL_OP_ALL);
   //ACE_UNUSED_ARG (new_options_i);
   //new_options_i = SSL_CTX_clear_options (real_context_p, SSL_OP_ALL);
