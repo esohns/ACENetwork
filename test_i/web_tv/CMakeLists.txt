@@ -259,7 +259,7 @@ endif (GUI_SUPPORT)
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-c${configuration_file} -e${ui_rc_file} -g${ui_definition_file} -l -r -t -u 1"
+                         ARGS "-c${configuration_file} -e${ui_rc_file} -g${ui_definition_file} -l -r -t -z"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
@@ -267,7 +267,8 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/web_tv
-                         ENVIRONMENT foo=bar)
+#                         ENVIRONMENT foo=bar)
+                         ENVIRONMENT LIBVA_DRIVER_NAME=i965)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})

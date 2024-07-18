@@ -17,6 +17,7 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
+#include "libavutil/pixfmt.h"
 #include "stdafx.h"
 
 #include <iostream>
@@ -697,13 +698,18 @@ do_work (const std::string& configurationFile_in,
   struct Stream_MediaFramework_FFMPEG_AllocatorConfiguration allocator_configuration_2;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration video_codec_configuration;
   video_codec_configuration.codecId = AV_CODEC_ID_H264;
-  video_codec_configuration.profile = FF_PROFILE_H264_HIGH;
+  // video_codec_configuration.profile = FF_PROFILE_H264_HIGH;
+  video_codec_configuration.profile = FF_PROFILE_H264_BASELINE;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_DXVA2;
   //video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   //video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_D3D12VA;
+  video_codec_configuration.format = AV_PIX_FMT_DXVA2_VLD;
 #else
   video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_VAAPI;
+  video_codec_configuration.format = AV_PIX_FMT_VAAPI;
+  // video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_VDPAU;
+  // video_codec_configuration.format = AV_PIX_FMT_VDPAU;
 #endif // ACE_WIN32 || ACE_WIN64
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration;
   audio_codec_configuration.codecId = AV_CODEC_ID_AAC;

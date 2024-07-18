@@ -209,6 +209,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
 
   int result = -1;
   ssize_t bytes_sent = 0;
+  static ACE_Time_Value no_wait = ACE_OS::gettimeofday ();
 
   // *NOTE*: in a threaded environment, workers could be dispatching the reactor
   //         notification queue concurrently (most notably, ACE_TP_Reactor)
@@ -230,8 +231,8 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
   // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
   //                   been notified to the reactor
   result =
-    (unlikely (inherited::CONNECTION_BASE_T::configuration_->useThreadPerConnection) ? inherited::getq (inherited::writeBuffer_, NULL)
-                                                                                     : inherited::stream_.get (inherited::writeBuffer_, NULL));
+    (unlikely (inherited::CONNECTION_BASE_T::configuration_->useThreadPerConnection) ? inherited::getq (inherited::writeBuffer_, &no_wait)
+                                                                                     : inherited::stream_.get (inherited::writeBuffer_, &no_wait));
   if (unlikely (result == -1))
   {
     // *NOTE*: a number of issues can occur here:
