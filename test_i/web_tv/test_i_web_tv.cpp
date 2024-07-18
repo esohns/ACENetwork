@@ -1092,6 +1092,7 @@ do_work (const std::string& configurationFile_in,
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_save_queue_source_4b)));
   modulehandler_configuration_save_converter_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_save_converter_4b.flipImage = true;
   modulehandler_configuration_save_converter_4b.handleResize = false;
   modulehandler_configuration_save_converter_4b.outputFormat.video.format =
     AV_PIX_FMT_BGR24;
