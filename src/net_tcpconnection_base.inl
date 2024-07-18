@@ -495,6 +495,7 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
 #else
   ACE_Message_Block* message_block_2 = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
+  static ACE_Time_Value no_wait = ACE_OS::gettimeofday ();
 
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
       inherited::stream_.upstream (true);
@@ -507,7 +508,7 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
   // dequeue message from the stream
   // *IMPORTANT NOTE*: this should NEVER block as available outbound data has
   //                   been notified
-  result = stream_p->get (message_block_p, NULL);
+  result = stream_p->get (message_block_p, &no_wait);
   if (unlikely (result == -1))
   { // *NOTE*: most probable reason: socket has been closed by the peer, which
     //         close()s the processing stream (see: handle_close()),
