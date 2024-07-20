@@ -60,10 +60,6 @@
 #include "stream_misc_queue_source.h"
 #include "stream_misc_queue_target.h"
 
-//#include "stream_stat_statistic_report.h"
-
-//#include "stream_module_source_http_get.h"
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "stream_dev_target_wasapi.h"
 #endif // ACE_WIN32 || ACE_WIN64
