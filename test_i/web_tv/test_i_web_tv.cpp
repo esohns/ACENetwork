@@ -1054,10 +1054,12 @@ do_work (const std::string& configurationFile_in,
                                                                                   &modulehandler_configuration_queue_sink_4a)));
 
   struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4b; // AV input-
+#if defined (FFMPEG_SUPPORT)
   stream_configuration_4b.mediaType.audio.channels = 2;
   stream_configuration_4b.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
   stream_configuration_4b.mediaType.audio.sampleRate = 48000;
-  stream_configuration_4b.mediaType.video.frameRate.num = 30;
+  //stream_configuration_4b.mediaType.video.frameRate.num = 30;
+#endif // FFMPEG_SUPPORT
   stream_configuration_4b.messageAllocator = &message_allocator_3;
   //stream_configuration_4b.cloneModule = false;
   stream_configuration_4b.module = &event_handler_module_3;

@@ -304,7 +304,7 @@ elseif (WIN32)
                            ${ACE_LIBRARY_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-l -r -t"
+                         ARGS "-l -r -t -z"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/web_tv
