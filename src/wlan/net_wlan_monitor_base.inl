@@ -2142,8 +2142,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   const void* ACT_p = NULL;
   try {
     result_2 = timerInterface_->cancel_timer (scanTimerId_,
-                                              &ACT_p,
-                                              1);
+                                              &ACT_p);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_ITimer_T::cancel_timer(%d), aborting\n"),
