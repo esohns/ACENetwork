@@ -4,8 +4,9 @@ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../Comm
 include (Configuration)
 include (Macros)
 include (OS)
+include (compiler_init)
 
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8...3.12)
 
 cmake_policy (SET CMP0069 NEW) # IPO is enforced when enabled
 include (CheckIPOSupported)
