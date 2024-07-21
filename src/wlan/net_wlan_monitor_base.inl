@@ -779,7 +779,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // ACE_WIN32 || ACE_WIN64
   else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     interface_identifiers_a.push_back (interfaceIdentifier_in);
 #else
     interface_identifiers_a.push_back (Net_Common_Tools::interfaceToString (interfaceIdentifier_in));
@@ -2094,7 +2094,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
   // *NOTE*: the timer is restarted automatically in the callback handler
   //         --> do not delay
-  ACE_Time_Value elapsed = COMMON_TIME_NOW;
   // *NOTE*: the timer handler might trigger before scanTimerId_ has been set
   //         --> grab the lock
   { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, result);
@@ -2116,11 +2115,9 @@ Net_WLAN_Monitor_Base_T<AddressType,
                   &delay_in));
       return false;
     } // end IF
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("started WLAN scan timer (id: %d)\n"),
                 scanTimerId_));
-#endif // _DEBUG
   } // end lock scope
 
   return true;
@@ -2153,13 +2150,12 @@ Net_WLAN_Monitor_Base_T<AddressType,
                 ACE_TEXT ("failed to Common_ITimer_T::cancel_timer(%d): \"%m\", aborting\n"),
                 scanTimerId_));
   else
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("cancelled WLAN scan timer (id was: %d)\n"),
+                scanTimerId_));
     result = true;
-
-#if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("cancelled WLAN scan timer (id was: %d)\n"),
-              scanTimerId_));
-#endif // _DEBUG
+  } // end ELSE
   scanTimerId_ = -1;
   ACE_UNUSED_ARG (ACT_p);
 
@@ -2181,7 +2177,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
       scanTimerId_ = -1;
   } // end lock scope
 
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501) // _WIN32_WINNT_WINXP
   // *NOTE*: the WinXP SP2/SP3 WLAN API does not report completed scans (see
   //         also: https://docs.microsoft.com/en-us/windows/desktop/api/wlanapi/nf-wlanapi-wlanscan)
   //         so the scan timer also serves as timeout after which results are
@@ -2199,7 +2195,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
   inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
 #endif // _WIN32_WINNT_WINXP
 }
-
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
