@@ -81,7 +81,8 @@ class BitTorrent_PeerStreamHandler_T
   virtual void start (Stream_SessionId_t,      // session id
                       const SessionDataType&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const enum Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t); // session id
   virtual void notify (Stream_SessionId_t,                         // session id
                        const BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
@@ -150,7 +151,8 @@ class BitTorrent_TrackerStreamHandler_T
   virtual void start (Stream_SessionId_t,      // session id
                       const SessionDataType&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const enum Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t); // session id
   virtual void notify (Stream_SessionId_t,                                // session id
                        const BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,

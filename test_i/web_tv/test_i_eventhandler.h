@@ -48,7 +48,8 @@ class Test_I_EventHandler // master m3u
   virtual void start (Stream_SessionId_t,                      // session id
                       const struct Test_I_WebTV_SessionData&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const enum Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t);                // session id
   virtual void notify (Stream_SessionId_t,              // session id
                        const Test_I_Message&);          // (protocol) message
@@ -89,7 +90,8 @@ class Test_I_EventHandler_2 // playlist m3u
   virtual void start (Stream_SessionId_t,               // session id
                       const Test_I_WebTV_SessionData&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const enum Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t); // session id
   virtual void notify (Stream_SessionId_t,     // session id
                        const Test_I_Message&); // (protocol) message
@@ -130,7 +132,8 @@ class Test_I_EventHandler_3 // content
   virtual void start (Stream_SessionId_t,                 // session id
                       const Test_I_WebTV_SessionData_3&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const enum Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t); // session id
   virtual void notify (Stream_SessionId_t,     // session id
                        const Test_I_Message&); // (protocol) message

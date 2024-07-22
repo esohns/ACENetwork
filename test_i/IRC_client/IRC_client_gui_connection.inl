@@ -142,12 +142,14 @@ IRC_Client_GUI_Connection_T<GUIType>::start (Stream_SessionId_t sessionId_in,
 template <enum Common_UI_FrameworkType GUIType>
 void
 IRC_Client_GUI_Connection_T<GUIType>::notify (Stream_SessionId_t sessionId_in,
-                                              const Stream_SessionMessageType& sessionEvent_in)
+                                              const Stream_SessionMessageType& sessionEvent_in,
+                                              bool expedite_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
 
   ACE_ASSERT (false);
   ACE_NOTSUP;

@@ -136,12 +136,19 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 #else
                                >::notify (Stream_SessionId_t sessionId_in,
 #endif // GUI_SUPPORT
-                                                     const enum Stream_SessionMessageType& sessionEvent_in)
+                                                     const enum Stream_SessionMessageType& sessionEvent_in,
+                                                     bool expedite_in)
 {
   STREAM_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
 }
 
 template <typename SessionDataType,
@@ -388,12 +395,19 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #else
                                   >::notify (Stream_SessionId_t sessionId_in,
 #endif // GUI_SUPPORT
-                                                        const enum Stream_SessionMessageType& sessionEvent_in)
+                                                        const enum Stream_SessionMessageType& sessionEvent_in,
+                                                        bool expedite_in)
 {
   STREAM_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
 }
 
 template <typename SessionDataType,

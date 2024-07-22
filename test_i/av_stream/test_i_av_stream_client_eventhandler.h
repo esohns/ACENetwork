@@ -49,8 +49,9 @@ class Test_I_AVStream_Client_EventHandler_T
   // implement Stream_ISessionDataNotify_T
   virtual void start (Stream_SessionId_t,      // session id
                       const SessionDataType&); // session data
-  virtual void notify (Stream_SessionId_t,       // session id
-                       const SessionEventType&); // event (state/status change, ...)
+  virtual void notify (Stream_SessionId_t,      // session id
+                       const SessionEventType&, // event (state/status change, ...)
+                       bool = false);           // expedite ?
   virtual void end (Stream_SessionId_t); // session id
   virtual void notify (Stream_SessionId_t,  // session id
                        const MessageType&); // (protocol) data

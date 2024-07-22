@@ -96,12 +96,14 @@ Test_U_EventHandler_T<CallbackDataType>::start (Stream_SessionId_t sessionId_in,
 template <typename CallbackDataType>
 void
 Test_U_EventHandler_T<CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
-                                                 const enum Stream_SessionMessageType& sessionEvent_in)
+                                                 const enum Stream_SessionMessageType& sessionEvent_in,
+                                                 bool expedite_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_EventHandler_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
 
   ACE_ASSERT (false);
   ACE_NOTSUP;

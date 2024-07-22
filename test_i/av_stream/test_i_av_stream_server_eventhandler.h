@@ -48,7 +48,7 @@ class Test_I_Server_EventHandler_T
   // implement Stream_ISessionDataNotify_T
   virtual void start (Stream_SessionId_t,      // session id
                       const SessionDataType&); // session data
-  inline virtual void notify (Stream_SessionId_t, const SessionEventType&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void notify (Stream_SessionId_t, const SessionEventType&, bool = false) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   virtual void end (Stream_SessionId_t); // session id
   virtual void notify (Stream_SessionId_t,       // session id
                        const MessageType&); // (protocol) data

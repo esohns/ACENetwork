@@ -119,12 +119,14 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
 
 void
 Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
-                             const enum Stream_SessionMessageType& sessionEvent_in)
+                             const enum Stream_SessionMessageType& sessionEvent_in,
+                             bool expedite_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -536,12 +538,14 @@ Test_I_EventHandler_2::start (Stream_SessionId_t sessionId_in,
 
 void
 Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
-                               const enum Stream_SessionMessageType& sessionEvent_in)
+                               const enum Stream_SessionMessageType& sessionEvent_in,
+                               bool expedite_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -916,12 +920,14 @@ Test_I_EventHandler_3::start (Stream_SessionId_t sessionId_in,
 
 void
 Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
-                               const enum Stream_SessionMessageType& sessionEvent_in)
+                               const enum Stream_SessionMessageType& sessionEvent_in,
+                               bool expedite_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_3::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
 
   ACE_ASSERT (false);
   ACE_NOTSUP;

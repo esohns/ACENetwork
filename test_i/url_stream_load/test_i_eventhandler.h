@@ -49,7 +49,8 @@ class Test_I_EventHandler
   virtual void start (Stream_SessionId_t,                              // session id
                       const struct Test_I_URLStreamLoad_SessionData&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const enum Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t);                // session id
   virtual void notify (Stream_SessionId_t,              // session id
                        const Test_I_Message&);          // (protocol) message

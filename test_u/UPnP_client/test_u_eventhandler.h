@@ -50,7 +50,8 @@ class Test_U_EventHandler
   virtual void start (Stream_SessionId_t,                    // session id
                       const struct UPnP_Client_SessionData&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const Stream_SessionMessageType&);
+                       const Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t);                // session id
   virtual void notify (Stream_SessionId_t,              // session id
                        const Test_U_Message&);          // (protocol) message
@@ -96,7 +97,8 @@ class Test_U_EventHandler_2
   virtual void start (Stream_SessionId_t,                    // session id
                       const struct UPnP_Client_SessionData&); // session data
   virtual void notify (Stream_SessionId_t,
-                       const Stream_SessionMessageType&);
+                       const Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t);                // session id
   virtual void notify (Stream_SessionId_t,              // session id
                        const Test_U_Message&);          // (protocol) message
