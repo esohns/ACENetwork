@@ -63,6 +63,9 @@ class Net_UDPSocketHandler_T
   using SVC_HANDLER_T::get_handle;
   using SVC_HANDLER_T::set_handle;
 
+  // resolve ambiguity between ACE_Svc_Handler and ACE_Reactor_Notification_Strategy
+  using SVC_HANDLER_T::reactor;
+
  protected:
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
