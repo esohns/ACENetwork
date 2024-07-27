@@ -660,7 +660,7 @@ DHCP_Tools::hasDHClientOmapiSupport ()
   std::string configuration_file_path =
       ACE_TEXT_ALWAYS_CHAR ("/etc/dhcp/dhclient.conf");
   unsigned char* data_p = NULL;
-  unsigned int file_size_i = 0;
+  ACE_UINT64 file_size_i = 0;
 
   // sanity check(s)
   if (unlikely (!Common_File_Tools::canRead (configuration_file_path)))
@@ -1029,7 +1029,7 @@ DHCP_Tools::hasActiveLease (const std::string& leasesFilename_in,
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
 
   unsigned char* data_p = NULL;
-  unsigned int file_size_i = 0;
+  ACE_UINT64 file_size_i = 0;
   std::string file_content_string;
   std::string::size_type position_i = std::string::npos;
   if (unlikely (!Common_File_Tools::load (leasesFilename_in,
@@ -1496,7 +1496,7 @@ DHCP_Tools::DHClientOmapiSupport (bool toggle_in)
     return true; // nothing to do
 
   unsigned char* data_p = NULL;
-  unsigned int file_size_i = 0;
+  ACE_UINT64 file_size_i = 0;
   char buffer_a [BUFSIZ];
   std::string buffer_line_string;
   std::string regex_string =
