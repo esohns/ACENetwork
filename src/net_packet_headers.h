@@ -23,7 +23,6 @@
 
 #include <cstdint>
 
-#include "ace/config-lite.h"
 #include "ace/Basic_Types.h"
 
 #if defined (_MSC_VER)
@@ -65,11 +64,7 @@ struct tcphdr
   u_short window;  // Window
   u_short check;   // Checksum
   u_short urg_ptr; // Urgent pointer
-//#ifdef __GNUC__
-//} __attribute__ ((__packed__));
-//#else
 };
-//#endif
 #else
 #include "netinet/tcp.h"
 #endif // ACE_WIN32 || ACE_WIN64
@@ -81,11 +76,7 @@ struct udphdr
   u_short dest;   // Destination port
   u_short len;    // Datagram length
   u_short check;  // Checksum
-//#ifdef __GNUC__
-//} __attribute__ ((__packed__));
-//#else
 };
-//#endif
 #else
 #include "netinet/udp.h"
 #endif // ACE_WIN32 || ACE_WIN64
@@ -103,11 +94,8 @@ struct udphdr
 //#define s6_addr     in6_u.u6_addr8
 //#define s6_addr16   in6_u.u6_addr16
 //#define s6_addr32   in6_u.u6_addr32
-//#ifdef __GNUC__
-//} __attribute__ ((__packed__));
-//#else
 //};
-//#endif
+
 //struct ip6_hdr
 //{
 //  union
@@ -123,11 +111,7 @@ struct udphdr
 //  } ip6_ctlun;
 //  struct in6_addr ip6_src;     /* source address */
 //  struct in6_addr ip6_dst;     /* destination address */
-//#ifdef __GNUC__
-//} __attribute__ ((__packed__));
-//#else
 //};
-//#endif
 #else
 #include "netinet/ip6.h"
 #endif // ACE_WIN32 || ACE_WIN64
@@ -163,11 +147,7 @@ struct iphdr
   u_long  daddr;          // Destination address
 // *IMPORTANT NOTE*: this field is optional (i.e. it only exists if ihl > 5 !
 //  u_int   op_pad;       // Option + Padding
-//#ifdef __GNUC__
-//} __attribute__ ((__packed__));
-//#else
 };
-//#endif
 #else
 #include "netinet/ip.h"
 #endif // ACE_WIN32 || ACE_WIN64
