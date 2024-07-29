@@ -163,9 +163,8 @@ class Net_WLAN_Monitor_T<//AddressType,
 
   // override (part of) Common_ITask
   virtual bool start (ACE_Time_Value* = NULL); // N/A
-  virtual void stop (bool = true,  // N/A
-                     bool = true); // N/A
-//  inline bool isRunning () const { return isActive_; }
+  virtual void stop (bool = true,   // wait for completion ?
+                     bool = false); // high priority ?
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
@@ -186,9 +185,6 @@ class Net_WLAN_Monitor_T<//AddressType,
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
-
-  // implement (part of) Common_IStateMachine_T
-//  virtual void onChange (enum Net_WLAN_MonitorState); // new state
 
   // hide (part of) Common_ITask
   inline virtual void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

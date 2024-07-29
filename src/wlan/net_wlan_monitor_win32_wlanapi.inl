@@ -85,36 +85,33 @@ Net_WLAN_Monitor_T<//AddressType,
   ACE_ASSERT (inherited::configuration_);
 
   // sanity check(s)
-  ACE_ASSERT (inherited::clientHandle_ == ACE_INVALID_HANDLE);
-
-  if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientHandle_)))
+  if (likely (inherited::clientHandle_ == ACE_INVALID_HANDLE))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), aborting\n")));
-    return false;
-  } // end IF
-  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
+    if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientHandle_)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), aborting\n")));
+      return false;
+    } // end IF
+    ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
 
-  Net_InterfaceIdentifiers_t interface_identifiers_a =
-      Net_WLAN_Tools::getInterfaces (inherited::clientHandle_);
-
-  struct _WLAN_INTERFACE_INFO_LIST* interface_list_p = NULL;
-  DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ALL;
-  DWORD previous_notification_mask = 0;
-  DWORD result =
-      WlanRegisterNotification (inherited::clientHandle_,
-                                notification_mask,
-                                FALSE,
-                                inherited::configuration_->notificationCB,
-                                inherited::configuration_->notificationCBData,
-                                NULL,
-                                &previous_notification_mask);
-  if (unlikely (result != ERROR_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::WlanRegisterNotification(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
-    goto error;
+    DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ALL;
+    DWORD previous_notification_mask = 0;
+    DWORD result =
+        WlanRegisterNotification (inherited::clientHandle_,
+                                  notification_mask,
+                                  FALSE,
+                                  inherited::configuration_->notificationCB,
+                                  inherited::configuration_->notificationCBData,
+                                  NULL,
+                                  &previous_notification_mask);
+    if (unlikely (result != ERROR_SUCCESS))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::WlanRegisterNotification(): \"%s\", aborting\n"),
+                  ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
+      goto error;
+    } // end IF
   } // end IF
 
   goto continue_;
@@ -142,10 +139,12 @@ Net_WLAN_Monitor_T<//AddressType,
                    ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
-                   UserDataType>::stop (bool,
-                                        bool)
+                   UserDataType>::stop (bool waitForCompletion_in,
+                                        bool highPriority_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
+
+  ACE_UNUSED_ARG (waitForCompletion_in);
 
   // sanity check(s)
   if (unlikely (!inherited::isActive_))
@@ -154,9 +153,10 @@ Net_WLAN_Monitor_T<//AddressType,
 
   if (likely (inherited::scanTimerId_ != -1))
     inherited::cancelScanTimer ();
-  Net_WLAN_Tools::finalize (inherited::clientHandle_);
-  inherited::clientHandle_ = ACE_INVALID_HANDLE;
-
+  if (unlikely (highPriority_in))
+  { // "...Do not call WlanCloseHandle from a callback function. ..."
+    Net_WLAN_Tools::finalize (inherited::clientHandle_); inherited::clientHandle_ = ACE_INVALID_HANDLE;
+  } // end IF
   inherited::isActive_ = false;
 
   inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_INITIALIZED);

@@ -455,14 +455,12 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
                 ACE_TEXT (notification_string.c_str ()),
                 ACE_TEXT_WCHAR_TO_TCHAR (buffer_a)));
   } // end IF
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": received notification %s%s%s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (data_in->InterfaceGuid).c_str ()),
               ACE_TEXT (notification_string.c_str ()),
               ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT (": ")   : ACE_TEXT ("")),
               ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT_WCHAR_TO_TCHAR (buffer_a) : ACE_TEXT (""))));
-#endif // _DEBUG
 }
 #endif // WLANAPI_SUPPORT
 
@@ -1982,17 +1980,17 @@ Net_WLAN_Tools::scan (HANDLE clientHandle_in,
   // *NOTE*: this returns immediately
   DWORD result_2 = WlanScan (clientHandle_in,
                              &interfaceIdentifier_in,
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501) // _WIN32_WINNT_WINXP
                              NULL, // *NOTE*: support WinXP
 #else
                              (ESSID_in.empty () ? NULL : &ssid_s),
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0501)
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501)
                              NULL, // *NOTE*: support WinXP
 #else
                              NULL,
                              //&raw_data_s,
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0501)
                              NULL);
   if (unlikely (result_2 != ERROR_SUCCESS))
   {
@@ -2200,7 +2198,7 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
   DWORD result_2 = 0;
   struct _GUID interface_identifier_s = GUID_NULL;
   DWORD flags_i =
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501) // _WIN32_WINNT_WINXP
     0;
 #else
     (WLAN_AVAILABLE_NETWORK_INCLUDE_ALL_ADHOC_PROFILES        |
@@ -2208,9 +2206,7 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
   struct _WLAN_AVAILABLE_NETWORK_LIST* wlan_network_list_p = NULL;
   std::string SSID_string;
-#if defined(_DEBUG)
-  std::string bss_network_type_string;
-#endif // _DEBUG
+  std::string bss_network_type_string, not_connectable_reason_string;
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
        iterator != interface_identifiers_a.end ();
        ++iterator)
@@ -2244,32 +2240,34 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
     {
       SSID_string.assign (reinterpret_cast<CHAR*> (wlan_network_list_p->Network[i].dot11Ssid.ucSSID),
                           static_cast<std::string::size_type> (wlan_network_list_p->Network[i].dot11Ssid.uSSIDLength));
-#if defined (_DEBUG)
-      //switch (wlan_network_list_p->Network[i].dot11BssType)
-      //{
-      //  case dot11_BSS_type_infrastructure:
-      //    bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("infrastructure");
-      //    break;
-      //  case dot11_BSS_type_independent:
-      //    bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("ad-hoc");
-      //    break;
-      //  case dot11_BSS_type_any:
-      //  default:
-      //    bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("unknown type");
-      //    break;
-      //} // end SWITCH
-      //// *TODO*: report all available information here
+
+      switch (wlan_network_list_p->Network[i].dot11BssType)
+      {
+        case dot11_BSS_type_infrastructure:
+          bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("infrastructure");
+          break;
+        case dot11_BSS_type_independent:
+          bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("ad-hoc");
+          break;
+        case dot11_BSS_type_any:
+        default:
+          bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("unknown type");
+          break;
+      } // end SWITCH
+      not_connectable_reason_string =
+        Net_WLAN_Tools::toString (wlan_network_list_p->Network[i].wlanNotConnectableReason);
+      not_connectable_reason_string.insert (0, ACE_TEXT_ALWAYS_CHAR (" \""));
+      not_connectable_reason_string += '"';
       //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("[#%u] profile \"%s\"; SSID: %s; type: %s; connectable: \"%s\"%s; signal quality %d%% [RSSI: %d (dBm)]; security enabled: \"%s\"\n"),
+      //            ACE_TEXT ("[#%u] profile \"%s\"; SSID: \"%s\"; type: %s; connectable: %s%s; signal quality %d%% [RSSI: %d (dBm)]; security enabled: %s\n"),
       //            i + 1,
       //            (wlan_network_list_p->Network[i].strProfileName ? (ACE_OS::strlen (wlan_network_list_p->Network[i].strProfileName) ? ACE_TEXT_WCHAR_TO_TCHAR (wlan_network_list_p->Network[i].strProfileName) : ACE_TEXT ("N/A")) : ACE_TEXT ("N/A")),
       //            ACE_TEXT (SSID_string.c_str ()),
       //            ACE_TEXT (bss_network_type_string.c_str ()),
       //            (wlan_network_list_p->Network[i].bNetworkConnectable ? ACE_TEXT ("yes") : ACE_TEXT ("no")),
-      //            (wlan_network_list_p->Network[i].bNetworkConnectable ? ACE_TEXT ("") : ACE_TEXT (" [reason]")),
+      //            (wlan_network_list_p->Network[i].bNetworkConnectable ? ACE_TEXT ("") : ACE_TEXT (not_connectable_reason_string.c_str ())),
       //            wlan_network_list_p->Network[i].wlanSignalQuality, (-100 + static_cast<int> (static_cast<float> (wlan_network_list_p->Network[i].wlanSignalQuality) * ::abs ((-100.0F - -50.0F) / 100.0F))),
       //            (wlan_network_list_p->Network[i].bSecurityEnabled ? ACE_TEXT ("yes") : ACE_TEXT ("no"))));
-#endif // _DEBUG
       result.push_back (SSID_string);
     } // end FOR
     WlanFreeMemory (wlan_network_list_p); wlan_network_list_p = NULL;
@@ -2296,7 +2294,7 @@ Net_WLAN_Tools::hasSSID (HANDLE clientHandle_in,
                          REFGUID interfaceIdentifier_in,
                          const std::string& SSID_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associatedSSID"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::hasSSID"));
 
   // initialize return value(s)
   bool result = false;
@@ -2314,4 +2312,24 @@ Net_WLAN_Tools::hasSSID (HANDLE clientHandle_in,
   ACE_NOTSUP_RETURN (false);
 
   ACE_NOTREACHED (return result;)
+}
+
+std::string
+Net_WLAN_Tools::toString (WLAN_REASON_CODE reasonCode_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::toString"));
+
+  std::string result;
+
+  WCHAR buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (WCHAR[BUFSIZ]));
+  DWORD result_2 = WlanReasonCodeToString (reasonCode_in,
+                                           BUFSIZ,
+                                           buffer_a,
+                                           NULL);
+  ACE_ASSERT (result_2 != ERROR_INVALID_PARAMETER);
+
+  result = ACE_TEXT_ALWAYS_CHAR (ACE_TEXT_WCHAR_TO_TCHAR (buffer_a));
+
+  return result;
 }

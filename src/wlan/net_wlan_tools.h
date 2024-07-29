@@ -23,10 +23,9 @@
 
 #include <string>
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
-#include <wlanapi.h>
+#include "wlanapi.h"
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
@@ -130,6 +129,8 @@ class Net_WLAN_Tools
   static void scan (HANDLE,              // API client handle
                     REFGUID,             // interface identifier
                     const std::string&); // (E)SSID ("": scan all)
+
+  static std::string toString (WLAN_REASON_CODE);
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)

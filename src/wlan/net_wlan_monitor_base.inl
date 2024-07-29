@@ -973,9 +973,7 @@ continue_:
         //         set --> grab the lock
         { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, false);
           if (unlikely (scanTimerId_ == -1))
-          {
-            ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_,
-                                                                          ACE_Acquire_Method::ACE_REGULAR);
+          { ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_, ACE_Acquire_Method::ACE_REGULAR);
             { ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock, false);
               if (!startScanTimer (ACE_Time_Value::zero))
                 ACE_DEBUG ((LM_ERROR,
@@ -1019,9 +1017,7 @@ continue_:
         //         set --> grab the lock
         { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, false);
           if (unlikely (scanTimerId_ == -1))
-          {
-            ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_,
-                                                                          ACE_Acquire_Method::ACE_REGULAR);
+          { ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_, ACE_Acquire_Method::ACE_REGULAR);
             { ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock, false);
               if (!startScanTimer (ACE_Time_Value::zero))
                 ACE_DEBUG ((LM_ERROR,
@@ -1084,6 +1080,9 @@ reset_state:
                   ACE_TEXT ("\"%s\": [%T] scanning...\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
 #elif defined (ACE_LINUX)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": [%T] scanning...\n"),
+                  ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
 #if defined (WEXT_USE)
       ACE_Time_Value scan_time;
       std::string scan_time_string;
@@ -1093,9 +1092,6 @@ reset_state:
       nl80211CBData_.timestamp = COMMON_TIME_NOW;
 #endif // _DEBUG
 #endif // WEXT_USE || NL80211_USE
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("\"%s\": scanning...\n"),
-                  ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
 
 #if defined (WEXT_USE)
       timer.start ();
@@ -2096,13 +2092,24 @@ Net_WLAN_Monitor_Base_T<AddressType,
   //         --> do not delay
   // *NOTE*: the timer handler might trigger before scanTimerId_ has been set
   //         --> grab the lock
+  ACE_Time_Value interval = ACE_Time_Value::zero; // one-shot by default
+#if defined (ACE_WIN32) || defined (ACE_WIN64)  
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501) // _WIN32_WINNT_WINXP
+  // *NOTE*: the WinXP SP2/SP3 WLAN API does not report completed scans (see
+  //         also: https://docs.microsoft.com/en-us/windows/desktop/api/wlanapi/nf-wlanapi-wlanscan)
+  //         so the scan timer also serves as timeout, after which results
+  //         are retrieved 'manually'
+  //         --> set an interval
+  interval = ACE_Time_Value (NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL_S, 0);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0501)
+#endif // ACE_WIN32 || ACE_WIN64
   { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, result);
     try {
       scanTimerId_ =
         timerInterface_->schedule_timer (&timerHandler_,
                                          NULL, // no ACT
                                          delay_in,
-                                         ACE_Time_Value::zero);
+                                         interval);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITimer_T::schedule_timer(%T#), continuing\n"),
@@ -2171,17 +2178,24 @@ Net_WLAN_Monitor_Base_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::handle"));
 
   // *NOTE*: the timer handler might trigger before scanTimerId_ has been set
-  //         --> grab the lock
+  //         --> grab the lock to prevent this race condition
+  // *NOTE*: on
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501) // _WIN32_WINNT_WINXP
+  // *NOTE*: the timer is recurring --> do not reset its' id here
+#else
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     if (likely (scanTimerId_ != -1))
       scanTimerId_ = -1;
   } // end lock scope
+#endif // _WIN32_WINNT_WINXP
 
 #if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501) // _WIN32_WINNT_WINXP
   // *NOTE*: the WinXP SP2/SP3 WLAN API does not report completed scans (see
   //         also: https://docs.microsoft.com/en-us/windows/desktop/api/wlanapi/nf-wlanapi-wlanscan)
-  //         so the scan timer also serves as timeout after which results are
-  //         retrieved 'manually'
+  //         so the scan timer also serves as timeout, after which results
+  //         are retrieved 'manually'
+
+  // sanity check(s)
   ACE_ASSERT (configuration_);
 
   try {
@@ -2191,9 +2205,9 @@ Net_WLAN_Monitor_Base_T<AddressType,
                 ACE_TEXT ("\"%s\": caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
   }
-#else
-  inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
 #endif // _WIN32_WINNT_WINXP
+
+  inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
 }
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -2776,9 +2790,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // step1: update the cache
   Net_WLAN_AccessPointCacheConstIterator_t iterator;
-#if defined (_DEBUG)
   std::set<std::string> known_ssids, current_ssids;
-#endif // _DEBUG
   Net_WLAN_SSIDs_t ssids = Net_WLAN_Tools::getSSIDs (clientHandle_,
                                                      interfaceIdentifier_in);
   struct Net_WLAN_AccessPointState access_point_state_s;
@@ -2798,9 +2810,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
       if (iterator == SSIDCache_.end ())
         break;
 
-#if defined (_DEBUG)
       known_ssids.insert ((*iterator).first);
-#endif // _DEBUG
       SSIDCache_.erase ((*iterator).first);
     } while (true);
 
@@ -2811,21 +2821,17 @@ Net_WLAN_Monitor_Base_T<AddressType,
       SSIDCache_.insert (std::make_pair (*iterator_2,
                                          std::make_pair (interfaceIdentifier_in,
                                                          access_point_state_s)));
-#if defined (_DEBUG)
       current_ssids.insert (*iterator_2);
-#endif // _DEBUG
     } // end lock scope
   } // end lock scope
-#if defined (_DEBUG)
   for (std::set<std::string>::const_iterator iterator_2 = known_ssids.begin ();
        iterator_2 != known_ssids.end ();
        ++iterator_2)
     if (current_ssids.find (*iterator_2) == current_ssids.end ())
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("\"%s\": lost contact to (E)SSID (was: %s)\n"),
+                  ACE_TEXT ("\"%s\": lost contact to (E)SSID (was: \"%s\")\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ()),
                   ACE_TEXT ((*iterator_2).c_str ())));
-#endif // _DEBUG
 #endif // ACE_WIN32 || ACE_WIN64
 
   // synch access
@@ -2849,6 +2855,14 @@ Net_WLAN_Monitor_Base_T<AddressType,
   } // end lock scope
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *NOTE*: the WinXP SP2/SP3 WLAN API does not report completed scans (see
+  //         also: https://docs.microsoft.com/en-us/windows/desktop/api/wlanapi/nf-wlanapi-wlanscan)
+  //         so the scan timer also serves as timeout, after which results
+  //         are retrieved 'manually'.
+  // --> iff reached via timeout, do not update the state
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0501) // _WIN32_WINNT_WINXP
+#else
   inherited::change (NET_WLAN_MONITOR_STATE_SCANNED);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0501)
 #endif // ACE_WIN32 || ACE_WIN64
 }

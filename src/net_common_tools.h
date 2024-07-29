@@ -24,7 +24,6 @@
 #include <limits>
 #include <string>
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ifdef.h"
 #else
@@ -68,13 +67,13 @@ class Net_Common_Tools
   // *NOTE*: as of Vista, interface GUIDs can be used consistently; prior to
   //         that, the 'FriendlyName' attribute must be used (which may not be
   //         truly unique)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   static bool isInterfaceEnabled (REFGUID);
   static bool toggleInterface (REFGUID);
 #else
   static bool isInterfaceEnabled (const std::string&);
   static bool toggleInterface (const std::string&);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
   static bool isInterfaceEnabled (const std::string&);
   static bool toggleInterface (const std::string&);
@@ -106,6 +105,7 @@ class Net_Common_Tools
   //         does not check connectedness yet)
   //         - the Win32 is incomplete (returns first 'connected' interface)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *NOTE*: on win32, 'bridged' (wifi only ?) interfaces do not show up for some reason
 #if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   inline static struct _GUID getDefaultInterface_2 (enum Net_LinkLayerType type_in = NET_LINKLAYER_802_3) { return (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::getDefaultInterface (type_in)))); }
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
@@ -117,9 +117,9 @@ class Net_Common_Tools
   //         'default' one (bitmask-version of the above)
   // *TODO*: only Ethernet (IEEE 802.3) and PPP is currently supported
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   inline static struct _GUID getDefaultInterface_2 (int types_in) { return (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::getDefaultInterface (types_in)))); }
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #endif // ACE_WIN32 || ACE_WIN64
   static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
 
@@ -179,11 +179,11 @@ class Net_Common_Tools
   //         policy (e.g. routing table entry metric/priority/...).
   //         Consequently, this API is non-functional at this point
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   static ACE_INET_Addr getGateway (REFGUID); // interface identifier
 #else
   static ACE_INET_Addr getGateway (const std::string&); // interface identifier ('FriendlyName')
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
   static ACE_INET_Addr getGateway (const std::string&); // interface identifier
 #endif // ACE_WIN32 || ACE_WIN64
@@ -194,7 +194,7 @@ class Net_Common_Tools
   //         interface, but returns the external IP of the interface that
   //         happens to route the DNS resolution query (see below)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   static bool interfaceToExternalIPAddress (REFGUID,            // interface identifier
 #else
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier ('FriendlyName')
@@ -210,9 +210,9 @@ class Net_Common_Tools
                                     ACE_INET_Addr&,         // return value: (first) IP address
                                     ACE_INET_Addr&);        // return value: (first) gateway IP address
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   inline static struct _GUID IPAddressToInterface_2 (const ACE_INET_Addr& IPAddress_in) { return (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::IPAddressToInterface (IPAddress_in)))); }
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #endif // ACE_WIN32 || ACE_WIN64
   static std::string IPAddressToInterface (const ACE_INET_Addr&); // IP address
 

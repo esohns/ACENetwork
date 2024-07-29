@@ -25,6 +25,7 @@
 #include <regex>
 #include <sstream>
 
+#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #include "iphlpapi.h"
@@ -52,7 +53,6 @@
 #include "openssl/ssl.h"
 #endif // SSL_SUPPORT
 
-#include "ace/config.h"
 #include "ace/Configuration.h"
 #include "ace/Configuration_Import_Export.h"
 #include "ace/Dirent_Selector.h"
@@ -1943,7 +1943,7 @@ Net_Common_Tools::interfaceToIndex_2 (REFGUID interfaceIdentifier_in)
   // sanity check(s)
   ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
 
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   union _NET_LUID_LH interface_luid_u;
   interface_luid_u.Value = 0;
   DWORD result_2 = ConvertInterfaceGuidToLuid (&interfaceIdentifier_in,

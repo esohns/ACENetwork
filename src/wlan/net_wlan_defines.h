@@ -52,7 +52,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define NET_WLAN_MONITOR_DEFAULT_API                                      NET_WLAN_MONITOR_API_WLANAPI
 // *TODO*: see timeout below
-#define NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL                              NET_WLAN_MONITOR_WIN32_SCAN_SSID_TIMEOUT // s
+#define NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL_S                            NET_WLAN_MONITOR_WIN32_SCAN_SSID_TIMEOUT_S // s
 #else
 #define NET_WLAN_MONITOR_DEFAULT_API                                      NET_WLAN_MONITOR_API_NL80211
 #define NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL                               3 // s
@@ -61,7 +61,7 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 // *NOTE*: this is a 'Windows-Logo' requirement (see also: https://docs.microsoft.com/en-us/windows/desktop/api/wlanapi/nf-wlanapi-wlanscan)
-#define NET_WLAN_MONITOR_WIN32_SCAN_SSID_TIMEOUT                          4 // seconds
+#define NET_WLAN_MONITOR_WIN32_SCAN_SSID_TIMEOUT_S                        4 // seconds
 
 #define NET_WLAN_MONITOR_WIN32_DEFAULT_AUTOCONF                           true
 // *NOTE*: 'background' refers to an associated state
