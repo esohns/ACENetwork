@@ -125,7 +125,7 @@ class Net_WLAN_Monitor_Base_T
 
   // implement Net_IWLANMonitor_T
   inline virtual const ConfigurationType& getR_4 () const { ACE_ASSERT (configuration_); return *configuration_; }
-  virtual const Net_WLAN_AccessPointCacheValue_t& get1RR (const std::string&) const;
+  virtual const Net_WLAN_AccessPointCacheValue_t& get1RR (const std::string&) const; // SSID
   virtual void set3R (const std::string&,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                       REFGUID,

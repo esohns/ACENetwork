@@ -21,6 +21,8 @@
 
 #include "net_wlan_tools.h"
 
+#include <cerrno>
+
 #include <sys/capability.h>
 #include <linux/capability.h>
 //#include <linux/ieee80211.h>
@@ -101,8 +103,9 @@ network_wlan_nl80211_error_cb (struct sockaddr_nl* address_in,
   {
     case NL80211_CMD_TRIGGER_SCAN:
     {
-      if (unlikely ((message_in->error != -EBUSY) &&  // 16: scan in progress ?
-                    (message_in->error != -ENOTSUP))) // 95: access point unreachable ?
+      if (unlikely ((message_in->error != -EBUSY)   && //  16: scan in progress ?
+                    (message_in->error != -ENOTSUP) && //  95: access point unreachable ?
+                    (message_in->error != -ENETDOWN))) // 100: network down ?
         return_value = NL_STOP;
       break;
     }

@@ -606,7 +606,9 @@ Net_WLAN_Monitor_T<AddressType,
     isRegistered_ = false;
   } // end IF
 
+  // *NOTE*: makes nl receiver thread leave (see svc())
   inherited::isActive_ = false;
+  // *NOTE*: stops state machine thread
   inherited::STATEMACHINE_T::stop (waitForCompletion_in,
                                    highPriority_in);
 }
@@ -630,8 +632,7 @@ Net_WLAN_Monitor_T<AddressType,
   {
     if (buffer_)
     {
-      buffer_->release ();
-      buffer_ = NULL;
+      buffer_->release (); buffer_ = NULL;
     } // end IF
 
     if (callbacks_)
@@ -1115,7 +1116,8 @@ retry:
       // - connection reset by peer
       // - connection abort()ed locally
       int error = ACE_OS::last_error ();
-      if (error == EWOULDBLOCK)      // 11: SSL_read() failed (buffer is empty)
+      if ((error == EWOULDBLOCK) ||     // 11 : SSL_read() failed (buffer is empty)
+          (error == ENOBUFS))           // 105: no buffer space (--> retry)
         goto retry;
       if ((error != EPIPE)        && // 32: connection reset by peer (write)
           // -------------------------------------------------------------------
@@ -1288,6 +1290,8 @@ Net_WLAN_Monitor_T<AddressType,
                     ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\" (%d), returning\n"),
                     inherited::socketHandle_,
                     ACE_TEXT (nl_geterror (result)), result));
+        inherited::STATEMACHINE_T::stop (false,  // stop the state machine ASAP
+                                         false);
         break;
       } // end IF
 //      ACE_DEBUG ((LM_DEBUG,
@@ -1302,6 +1306,8 @@ Net_WLAN_Monitor_T<AddressType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to nl_recvmsgs(%@): \"%m\", returning\n"),
                   inherited::socketHandle_));
+      inherited::STATEMACHINE_T::stop (false,  // stop the state machine ASAP
+                                       false);
       break;
     } // end IF
 
@@ -1310,10 +1316,6 @@ Net_WLAN_Monitor_T<AddressType,
   } while (true);
 
   nl_close (inherited::socketHandle_); //nl_socket_free (inherited::socketHandle_); inherited::socketHandle_ = NULL;
-
-  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, inherited::lock_, -1);
-    inherited::dispatchStarted_ = false;
-  } // end lock scope
 
   return result;
 
@@ -1356,7 +1358,11 @@ state_machine:
   if (unlikely (result_2 == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_MessageQueue_T::activate(): \"%m\", continuing\n")));
-  inherited::dispatchStarted_ = false;
+
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, inherited::lock_, -1);
+    inherited::isActive_ = false; // make the nl dispatch thread leave ASAP
+    inherited::dispatchStarted_ = false;
+  } // end lock scope
 
   return result;
 }

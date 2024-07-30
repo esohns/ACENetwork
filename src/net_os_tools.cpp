@@ -596,11 +596,14 @@ Net_OS_Tools::networkManagerManageInterface (const std::string& interfaceIdentif
       for (iterator = ++smatch.begin ();
            iterator != smatch.end ();
            ++iterator)
-      { ACE_ASSERT ((*iterator).matched);
-        value_string_2 = (*iterator).str ();
-        if (!ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR ("keyfile"),
-                             value_string_2.c_str ()))
-          break;
+      {
+        if ((*iterator).matched)
+        {
+          value_string_2 = (*iterator).str ();
+          if (!ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR ("keyfile"),
+                               value_string_2.c_str ()))
+            break;
+        } // end IF
       } // end FOR
       if ((iterator == smatch.end ()) &&
           toggle_in)

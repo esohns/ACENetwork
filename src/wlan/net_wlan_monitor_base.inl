@@ -226,7 +226,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
                         TimePolicyType>::get1RR (const std::string& SSID_in) const
 #endif // ACE_WIN32 || ACE_WIN64
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get1R"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get1RR"));
 
   // *NOTE*: this must be static so the returned reference does not fall off the
   //         stack early when no match has been found
@@ -458,7 +458,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   if (subscribe_this)
     subscribe (this);
 #endif // ACE_WIN32 || ACE_WIN64
-  if (unlikely (configuration_->subscriber))
+  if (configuration_->subscriber)
     subscribe (configuration_->subscriber);
   // *TODO*: remove type inference
 
@@ -706,9 +706,11 @@ continue_:
   if (likely (isActive_))
   {
     restart_b = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     stop ();
+    ACE_ASSERT (!isActive_);
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
-  ACE_ASSERT (!isActive_);
 
   // reconfigure ?
   if (likely (configuration_))
@@ -722,11 +724,11 @@ continue_:
   if (likely (restart_b))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-    initialize (*configuration_);
-#endif // ACE_WIN32 || ACE_WIN64
-
     start (NULL);
+    ACE_ASSERT (isActive_);
+#else
+//     initialize (*configuration_);
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   return true;

@@ -23,6 +23,7 @@
 
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
+#include "ace/Message_Block.h"
 
 #include "net_macros.h"
 
@@ -56,7 +57,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
   // sanity check(s)
   ACE_ASSERT (inherited::stateLock_);
 
-  enum Net_WLAN_MonitorState state_e = NET_WLAN_MONITOR_STATE_INVALID;
+  enum Net_WLAN_MonitorState state_e;
 
   // synchronize access to state machine
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -67,20 +68,25 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
   // *NOTE*: the state machine is asynchronous; the 'current' state may very
   //         well be at the tail end of the transitions stack
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard_2, inherited::msg_queue_->lock (), false);
+    state_e = inherited::state_;
     inherited::MESSAGE_QUEUE_ITERATOR_T iterator (*inherited::msg_queue_);
     if (iterator.done ())
-      state_e = inherited::state_;
+      ;
     else
-    {
+    { // *NOTE*: retrieve the tail-end state transition(, skipping over any
+      //         MB_STOP-message(s))
       ACE_Message_Block* message_block_p = NULL;
       for (;
            iterator.next (message_block_p);
            iterator.advance ())
+      { ACE_ASSERT (message_block_p);
         if (!message_block_p->next ())
           break;
-      ACE_ASSERT (message_block_p);
-      state_e =
+        if (message_block_p->msg_type () == ACE_Message_Block::MB_STOP)
+          continue;
+        state_e =
           static_cast<enum Net_WLAN_MonitorState> (message_block_p->msg_type ());
+      } // end FOR
     } // end ELSE
   } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
