@@ -4588,13 +4588,11 @@ Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
 #endif // ACE_WIN32 || ACE_WIN64
     goto error;
   } // end IF
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("dispatched %u byte(s): %s --> %s\n"),
+              ACE_TEXT ("dispatched %Q byte(s): %s --> %s\n"),
               bytes_to_send,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in, false).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in, false).c_str ())));
-#endif // _DEBUG
   // *TODO*: shutdown() first ?
 
   result = true;

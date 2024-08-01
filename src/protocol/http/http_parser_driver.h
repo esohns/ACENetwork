@@ -30,6 +30,7 @@
 
 #include "http_iparser.h"
 #include "http_parser.h"
+#include "http_scanner.h"
 
 #include "location.hh"
 
@@ -105,7 +106,7 @@ class HTTP_ParserDriver_T
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual YY_BUFFER_STATE create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-//  inline virtual bool lex () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual bool lex (yyscan_t state_in) { ACE_ASSERT (false); return false; /*HTTP_Scanner_lex (NULL, NULL, this, state_in);*/ };
 
   bool                               blockInParse_;
   bool                               isFirst_;

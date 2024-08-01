@@ -1456,28 +1456,13 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   DWORD result_3 = ERROR_INVALID_DATA;
 #if defined (MSXML_SUPPORT)
   // load/populate profile template
-  HRESULT result = CoInitializeEx (NULL,
-                                   (COINIT_MULTITHREADED    |
-                                    COINIT_DISABLE_OLE1DDE  |
-                                    COINIT_SPEED_OVER_MEMORY));
-  if (unlikely (FAILED (result))) // 0x80010106: RPC_E_CHANGED_MODE
-  {
-    if (result != RPC_E_CHANGED_MODE) // already initialized
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to CoInitializeEx(): \"%s\", aborting\n"),
-                  ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
-      return false;
-    } // end IF
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("failed to CoInitializeEx(): \"%s\", continuing\n"),
-                ACE_TEXT (Common_Error_Tools::errorToString (result, false).c_str ())));
-  } // end IF
+  HRESULT result = E_FAIL;
+  bool COMInitialized_b = Common_Tools::initializeCOM ();
   IXMLDOMDocument* document_p = NULL;
   IXMLDOMNode* node_p = NULL;
   struct tagVARIANT variant_s;
   VariantInit (&variant_s);
-  VARIANT_BOOL result_2 = VARIANT_TRUE;
+  VARIANT_BOOL result_2 = VARIANT_FALSE;
   BSTR string_p = NULL;
   BSTR xpath_query_p =
     SysAllocString (ACE_TEXT_ALWAYS_WCHAR (NET_WLAN_PROFILE_WLANCONFIG_SSIDCONFIG_SSID_XPATH_STRING));
@@ -1501,6 +1486,8 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   ACE_ASSERT (SUCCEEDED (result));
   result = document_p->put_preserveWhiteSpace (VARIANT_FALSE);
   ACE_ASSERT (SUCCEEDED (result));
+  result = document_p->put_validateOnParse (VARIANT_FALSE);
+  ACE_ASSERT (SUCCEEDED (result));
   // *TODO*: find a way to pass a valid path URL to IXMLDOMDocument::load()
   //         (already tried UrlCreateFromPath() and Common_File_Tools::escape()
   //         to no avail)
@@ -1520,14 +1507,15 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   } // end IF
   ACE_ASSERT (data_p);
   V_BSTR (&variant_s) =
-    Common_String_Tools::to (reinterpret_cast<char*> (data_p));
+    Common_String_Tools::to_2 (reinterpret_cast<char*> (data_p));
   ACE_ASSERT (V_BSTR (&variant_s));
   delete [] data_p; data_p = NULL;
-  result =
-    document_p->load (variant_s,
-                      &result_2);
-    document_p->loadXML (V_BSTR (&variant_s),
-                         &result_2);
+  //result =
+  //  document_p->load (variant_s,
+  //                    &result_2);
+  //ACE_ASSERT (result_2 == VARIANT_TRUE);
+  document_p->loadXML (V_BSTR (&variant_s),
+                        &result_2);
   if (unlikely ((result == S_FALSE) || (result_2 == VARIANT_FALSE)))
   {
     IXMLDOMParseError* error_p = NULL;
@@ -1736,7 +1724,8 @@ clean:
     node_p->Release ();
   if (document_p)
     document_p->Release ();
-  CoUninitialize ();
+  //if (COMInitialized_b)
+  //  Common_Tools::finalizeCOM ();
 #elif defined (LIBXML2_SUPPORT)
   if (xpath_context_p)
     xmlXPathFreeContext (xpath_context_p);
@@ -1791,13 +1780,11 @@ Net_WLAN_Tools::associate (HANDLE clientHandle_in,
   // *TODO*: do the research here
   if (likely (!profile_name_string.empty ()))
   {
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": found profile (SSID was: %s): \"%s\", applying\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 ACE_TEXT (SSID_in.c_str ()),
                 ACE_TEXT (profile_name_string.c_str ())));
-#endif // _DEBUG
     wlan_connection_parameters_s.strProfile =
       ACE_Ascii_To_Wide::convert (profile_name_string.c_str ());
     wlan_connection_parameters_s.wlanConnectionMode =
@@ -1807,27 +1794,29 @@ Net_WLAN_Tools::associate (HANDLE clientHandle_in,
   {
     // *TODO*: this specification is not precise enough
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": no applicable profile found (SSID was: %s), generating\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
-#endif // _DEBUG
     if (!Net_WLAN_Tools::setProfile (client_handle,
                                      interfaceIdentifier_in,
                                      SSID_in))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("\"%s\": failed to Net_WLAN_Tools::setProfile(0x%@,%s), aborting\n"),
+                  ACE_TEXT ("\"%s\": failed to Net_WLAN_Tools::setProfile(0x%@,%s), continuing\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   client_handle,
                   ACE_TEXT (SSID_in.c_str ())));
-      return false;
+      wlan_connection_parameters_s.wlanConnectionMode =
+        wlan_connection_mode_auto;
     } // end IF
-    wlan_connection_parameters_s.strProfile =
-      ACE_Ascii_To_Wide::convert (SSID_in.c_str ());
-    wlan_connection_parameters_s.wlanConnectionMode =
-      wlan_connection_mode_profile;
+    else
+    {
+      wlan_connection_parameters_s.strProfile =
+        ACE_Ascii_To_Wide::convert (SSID_in.c_str ());
+      wlan_connection_parameters_s.wlanConnectionMode =
+        wlan_connection_mode_profile;
+    } // end ELSE
 #else
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("\"%s\": no applicable profile found (SSID was: %s), trying 'wlan_connection_mode_auto'\n"),

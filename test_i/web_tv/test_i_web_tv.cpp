@@ -1243,6 +1243,8 @@ do_work (const std::string& configurationFile_in,
 #endif // GUI_SUPPORT
 
   // step3: clean up
+  timer_manager_p->stop ();
+
   connection_manager_p->stop (false, // wait ?
                               true); // high priority ?
   connection_manager_p->abort (false);
@@ -1267,8 +1269,6 @@ do_work (const std::string& configurationFile_in,
   av_input_stream.remove (&event_handler_module_3,
                           true,   // lock ?
                           false); // reset ?
-
-  timer_manager_p->stop ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));

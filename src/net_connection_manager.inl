@@ -620,9 +620,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 
   ICONNECTION_T* connection_p = NULL;
   CONNECTION_CONTAINER_T connections_a;
-#if defined (_DEBUG)
   bool is_first_b = true;
-#endif // _DEBUG
 
 begin:
   // step1: gather a set of open connection handles
@@ -660,7 +658,6 @@ begin:
     }
     connection_p->decrease (); connection_p = NULL;
   } // end FOR
-#if defined (_DEBUG)
   if (is_first_b)
   {
     is_first_b = false;
@@ -670,7 +667,6 @@ begin:
                   ACE_TEXT ("aborted %u connection(s)\n"),
                   connections_a.size ()));
   } // end IF
-#endif // _DEBUG
   if (unlikely (waitForCompletion_in))
   {
     connections_a.reset ();

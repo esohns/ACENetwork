@@ -124,6 +124,7 @@ class FTP_ParserDataDriver_T
                                           size_t);  // buffer size
   virtual void destroy (yyscan_t,                  // state handle
                         struct yy_buffer_state*&); // buffer handle
+  inline virtual bool lex (yyscan_t) { ACE_ASSERT (false); return FTP_Scanner_Data_lex (NULL, NULL, this, scannerState_); }
 
   // implement Common_IYaccStreamParser_T
   inline virtual struct FTP_IParserDataDummy& current () { static struct FTP_IParserDataDummy dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }

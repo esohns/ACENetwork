@@ -124,6 +124,7 @@ class SMTP_ParserDriver_T
                                           size_t);  // buffer size
   virtual void destroy (yyscan_t,                  // state handle
                         struct yy_buffer_state*&); // buffer handle
+  inline virtual bool lex (yyscan_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
 
   // helper methods
   bool scan_begin ();

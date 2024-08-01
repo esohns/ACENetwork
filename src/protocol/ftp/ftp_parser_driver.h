@@ -124,6 +124,7 @@ class FTP_ParserDriver_T
                                           size_t);  // buffer size
   virtual void destroy (yyscan_t,                  // state handle
                         struct yy_buffer_state*&); // buffer handle
+  inline virtual bool lex (yyscan_t state_in) { ACE_ASSERT (false); return FTP_Scanner_lex (NULL, NULL, this, state_in); };
 
   // helper methods
   bool scan_begin ();
