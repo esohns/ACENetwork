@@ -67,7 +67,7 @@ class Net_Client_Connector_T
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
   typedef UserDataType USERDATA_T;
-  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                    AddressType,
                                    ConfigurationType,
                                    StateType,
@@ -165,7 +165,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
   typedef UserDataType USERDATA_T;
-  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                    ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
@@ -284,7 +284,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef ConfigurationType CONFIGURATION_T;
   typedef StreamType STREAM_T;
   typedef UserDataType USERDATA_T;
-  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                    Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
