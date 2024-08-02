@@ -75,7 +75,7 @@ class Net_ConnectionBase_T
   // *NOTE*: iff using a connection manager ('managed', see ctor argument), the
   //         configuration is retrieved in the ctor already
   inline virtual bool initialize (const ConfigurationType& configuration_in) { /*ACE_ASSERT (!configuration_);*/ configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
-  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
+  inline virtual const struct Net_ConnectionConfigurationBase& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   // missing: Common_IDumpState
   // missing: info
   // missing: id

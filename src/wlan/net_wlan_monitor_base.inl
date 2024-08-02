@@ -2535,8 +2535,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&access_point_state_s.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_, true, false).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_, true, false).c_str ())));
 #else
   ether_addr_s =
       Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
@@ -2546,8 +2546,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&access_point_state_s.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_, true, false).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_, true, false).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

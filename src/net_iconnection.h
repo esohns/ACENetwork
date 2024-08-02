@@ -77,8 +77,7 @@ class Net_IConnection_T
  : virtual public Net_ISocketHandler // *TODO*: this is a mess !
  , virtual public Common_IReferenceCount
  , virtual public Common_IStatistic_T<StatisticContainerType>
- //, public Common_IInitialize_T<ConfigurationType>
- //, public Common_IGetR_T<ConfigurationType>
+ , public Common_IGetR_T<struct Net_ConnectionConfigurationBase>
  , public virtual Common_IDumpState
 {
  public:

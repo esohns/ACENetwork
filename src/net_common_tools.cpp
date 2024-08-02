@@ -4591,8 +4591,8 @@ Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("dispatched %Q byte(s): %s --> %s\n"),
               bytes_to_send,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in, false).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in, false).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in, false, false).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in, false, false).c_str ())));
   // *TODO*: shutdown() first ?
 
   result = true;

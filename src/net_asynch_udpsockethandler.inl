@@ -868,7 +868,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::handle_write_dgram"));
 
   int result = -1;
-  bool close = false;
+  bool close_b = false;
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
@@ -917,18 +917,16 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 //                    result_in.handle (),
 //                    ACE_TEXT (ACE_OS::strerror (error))));
 //#endif
-      close = true;
+      close_b = true;
       break;
     }
     // *** GOOD CASES ***
     default:
     {
-//#if defined (_DEBUG)
 //       ACE_DEBUG ((LM_DEBUG,
 //                   ACE_TEXT ("[%d]: sent %u bytes\n"),
 //                   result_in.handle (),
 //                   result_in.bytes_transferred ()));
-//#endif // _DEBUG
 
       // finished with this buffer ?
       if (unlikely (result_in.message_block ()->length () > 0))
@@ -948,7 +946,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                       ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_output(%d): \"%m\", aborting\n"),
                       result_in.handle ()));
 #endif // ACE_WIN32 || ACE_WIN64
-          close = true;
+          close_b = true;
         } // end IF
       } // end IF
 
@@ -958,7 +956,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
   result_in.message_block ()->release ();
 
-  if (unlikely (close))
+  if (unlikely (close_b))
     cancel ();
 
   counter_.decrease ();

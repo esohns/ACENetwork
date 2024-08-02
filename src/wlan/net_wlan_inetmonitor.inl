@@ -167,8 +167,8 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress_2 (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_, true, false).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_, true, false).c_str ())));
 #else
   Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
@@ -184,8 +184,8 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (SSID_in.c_str ()),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_, true, false).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_, true, false).c_str ())));
   } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
