@@ -1552,8 +1552,13 @@ associate:
       { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, false);
         Net_WLAN_AccessPointCacheConstIterator_t iterator =
           SSIDCache_.find (configuration_->SSID);
-        ACE_ASSERT (iterator != SSIDCache_.end ());
-        interface_identifier = (*iterator).second.first;
+        if (likely (iterator != SSIDCache_.end ()))
+          interface_identifier = (*iterator).second.first;
+        else
+          ACE_DEBUG ((LM_WARNING,
+                      ACE_TEXT ("SSID (was: %s) not found in cache; using configurred interface (was: \"%s\"), continuing\n"),
+                      ACE_TEXT (configuration_->SSID.c_str ()),
+                      ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
         //ap_mac_address_s = (*iterator).second.second.linkLayerAddress;
       } // end lock scope
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

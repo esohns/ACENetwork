@@ -85,9 +85,6 @@ class Net_Connection_Manager_T
   void initialize (unsigned int,           // maximum number of concurrent connections
                    const ACE_Time_Value&); // connection 'visit' interval
 
-  bool lock (bool = true); // block ?
-  int unlock (bool = false); // unblock ?
-
   // implement (part of) Net_IConnectionManager_T
   inline virtual bool isRunning () const { return isActive_; }
   inline virtual bool isShuttingDown () const { return !isRunning (); }
@@ -95,6 +92,13 @@ class Net_Connection_Manager_T
   virtual void stop (bool = true,   // wait for completion ?
                      bool = false); // N/A
   virtual void wait (bool = true) const; // N/A
+  // *NOTE*: before set()ing a particular configuration, lock() to prevent
+  //         other threads from doing the same. The lock must be held until the
+  //         connection picks up its configuration (via get()). Note that this
+  //         may happen asynchronously. See Net_Client_Common_Tools::connect()
+  //         for an example of how this could be done
+  virtual bool lock (bool = true);   // block ?
+  virtual int unlock (bool = false); // unblock ?
   virtual void dump_state () const;
   virtual void abort (enum Net_Connection_AbortStrategy); // strategy
                                                           // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead
@@ -116,6 +120,7 @@ class Net_Connection_Manager_T
   //                   overloads)
   virtual void get (ConfigurationType*&, // return value: (connection-) configuration handle
                     UserDataType*&);     // return value: user data handle
+
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
   virtual ICONNECTION_T* get (const AddressType&, // address
                               bool = true) const; // peer address ? : local address // *TODO*: this parameter is redundant; remove ASAP
@@ -168,17 +173,19 @@ class Net_Connection_Manager_T
   long                                         resetTimeoutHandlerId_;
   ACE_Time_Value                               resetTimeoutInterval_;
 
-  // implement blocking wait
+  // *NOTE*: block other threads from set()ting a different configuration while
+  //         a managed (!) connection is being set up
+  mutable ACE_SYNCH_RECURSIVE_MUTEX            configurationLock_;
   CONNECTION_CONTAINER_T                       connections_;
+  // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
+  mutable ACE_SYNCH_RECURSIVE_MUTEX            connectionsLock_;
+  mutable ACE_Condition_Recursive_Thread_Mutex connectionsCondition_;
   bool                                         isActive_;
   bool                                         isInitialized_;
-  // *NOTE*: MUST be recursive, otherwise asynchronous abort is not feasible
-  mutable ACE_SYNCH_RECURSIVE_MUTEX            lock_;
-  mutable ACE_Condition_Recursive_Thread_Mutex condition_;
   unsigned int                                 maximumNumberOfConnections_;
 
-  ConfigurationType*                    configuration_; // default-
-  UserDataType*                         userData_;
+  ConfigurationType*                           configuration_; // default-
+  UserDataType*                                userData_;
 };
 
 // include template definition

@@ -870,8 +870,9 @@ send:
         goto send;
 #endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                  message_block_p->total_length ()));
+                  ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u,%s): \"%m\", aborting\n"),
+                  message_block_p->total_length (),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::HANDLER_T::configuration_->peerAddress, false, false).c_str ())));
 
       // clean up
       message_block_p->release ();

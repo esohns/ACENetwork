@@ -882,7 +882,8 @@ Net_AsynchUDPSocketHandler_T<SocketType,
         (error != ECONNRESET))                  // 10054
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@, address: %s): \"%s\", aborting\n"),
-                  result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
+                  result_in.handle (),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress, false, false).c_str ()),
                   ACE_TEXT (Common_Error_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
 #else
     if ((error != EBADF) && // 9 : Linux (local close())
@@ -891,7 +892,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: %d, address: %s): \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress, false, false).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF

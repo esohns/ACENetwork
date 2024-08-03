@@ -26,6 +26,7 @@
 #include "common_idumpstate.h"
 #include "common_isubscribe.h"
 
+#include "common_ilock.h"
 #include "common_itask.h"
 
 #include "net_common.h"
@@ -33,6 +34,7 @@
 
 class Net_IConnectionManagerBase
  : public Common_ITask
+ , public Common_ILock
  , public Common_IDumpState
 {
  public:

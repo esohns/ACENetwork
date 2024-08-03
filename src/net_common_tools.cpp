@@ -25,7 +25,6 @@
 #include <regex>
 #include <sstream>
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #include "iphlpapi.h"
@@ -715,9 +714,9 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
       return false;
     } // end IF
     //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("found ip address %s on network %s\n"),
-    //            ACE_TEXT (ACE_OS::inet_ntoa (ip_address)),
-    //            ACE_TEXT (Net_Common_Tools::IPAddressToString (network_address, true).c_str ())));
+    //            ACE_TEXT ("found local ip address %u --> %s\n"),
+    //            table_p->table[i].dwAddr,
+    //            ACE_TEXT (Net_Common_Tools::IPAddressToString (local_ip_address, true).c_str ())));
 
     local_ip_addresses_a.push_back (local_ip_address);
   } // end FOR
@@ -781,10 +780,12 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
 #endif // ACE_WIN32 || ACE_WIN64
+
+  ACE_UINT32 ip_address_i = address_in.get_ip_address ();
   for (std::vector<ACE_INET_Addr>::const_iterator iterator = local_ip_addresses_a.begin ();
        iterator != local_ip_addresses_a.end ();
        ++iterator)
-    if (address_in.get_ip_address () == (*iterator).get_ip_address ())
+    if (ip_address_i == (*iterator).get_ip_address ())
       return true;
 
   return false;
@@ -3210,27 +3211,43 @@ continue_:
   else
   {
     DWORD result_2 = NO_ERROR;
-    struct _MIB_IPFORWARDROW route_s;
+    //struct _MIB_IPFORWARDROW route_s;
 
-    ACE_OS::memset (&route_s, 0, sizeof (struct _MIB_IPFORWARDROW));
-    result_2 = GetBestRoute (IPAddress_in.get_ip_address (),
-                             0,
-                             &route_s);
+    //ACE_OS::memset (&route_s, 0, sizeof (struct _MIB_IPFORWARDROW));
+    //result_2 = GetBestRoute (IPAddress_in.get_ip_address (),
+    //                         0,
+    //                         &route_s);
+    //if (unlikely (result_2 != NO_ERROR))
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to ::GetBestRoute(%s): \"%s\", aborting\n"),
+    //              ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_in).c_str ()),
+    //              ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    //  return result;
+    //} // end IF
+    DWORD interface_index_i = 0;
+
+    result_2 =
+      GetBestInterfaceEx (reinterpret_cast<struct sockaddr*> (IPAddress_in.get_addr ()),
+                          &interface_index_i);
     if (unlikely (result_2 != NO_ERROR))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::GetBestRoute(%s): \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to ::GetBestInterfaceEx(%s): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_in).c_str ()),
                   ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       return result;
     } // end IF
 
-    result =
-      Net_Common_Tools::indexToInterface (route_s.dwForwardIfIndex);
+    result = Net_Common_Tools::indexToInterface (interface_index_i);
     if (unlikely (result.empty ()))
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("failed to Net_Common_Tools::indexToInterface(%u), aborting\n"),
-                  route_s.dwForwardIfIndex));
+                  interface_index_i));
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("IP %s --> interface: \"%s\"\n"),
+    //            ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_in, false, false).c_str ()),
+    //            ACE_TEXT (Net_Common_Tools::interfaceToString (interface_index_i).c_str ())));
   } // end ELSE
 #else
 #if defined (ACE_HAS_GETIFADDRS)
