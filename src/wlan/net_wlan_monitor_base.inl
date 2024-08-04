@@ -1555,11 +1555,18 @@ associate:
         if (likely (iterator != SSIDCache_.end ()))
           interface_identifier = (*iterator).second.first;
         else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("SSID (was: %s) not found in cache; using configurred interface (was: \"%s\"), continuing\n"),
                       ACE_TEXT (configuration_->SSID.c_str ()),
                       ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
-        //ap_mac_address_s = (*iterator).second.second.linkLayerAddress;
+#else
+          ACE_DEBUG ((LM_WARNING,
+                      ACE_TEXT ("SSID (was: %s) not found in cache; using configurred interface (was: \"%s\"), continuing\n"),
+                      ACE_TEXT (configuration_->SSID.c_str ()),
+                      ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+            //ap_mac_address_s = (*iterator).second.second.linkLayerAddress;
       } // end lock scope
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       if (unlikely (!InlineIsEqualGUID (interface_identifier, configuration_->interfaceIdentifier)))

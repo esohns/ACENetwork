@@ -3025,27 +3025,47 @@ continue_:
   } // end IF
   ACE_ASSERT (ifaddrs_p);
 
+  bool address_found_b = false;
   struct sockaddr_in* sockaddr_in_p = NULL;
 //  struct sockaddr_ll* sockaddr_ll_p = NULL;
+  int len = 0;
   for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
        ifaddrs_2;
        ifaddrs_2 = ifaddrs_2->ifa_next)
   {
-//    if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
-//        (!ifaddrs_2->ifa_addr))
-//      continue;
     if (ACE_OS::strcmp (interface_identifier.c_str (),
-                        ifaddrs_2->ifa_name))
+                        ifaddrs_2->ifa_name) || // wrong interface
+        !ifaddrs_2->ifa_addr)                   // no address assigned ?
       continue;
+   if ((ifaddrs_2->ifa_flags & IFF_UP) == 0)    // interface is down ?
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("interface (was: \"%s\") is down, continuing\n"),
+                  ACE_TEXT (interface_identifier.c_str ())));
 
-    if (!ifaddrs_2->ifa_addr)
-      continue;
-    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
-      continue;
+    switch (ifaddrs_2->ifa_addr->sa_family)
+    {
+      case AF_INET:
+      {
+        sockaddr_in_p =
+          reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_addr);
+        len = sizeof (struct sockaddr_in);
+        break;
+      }
+      case AF_INET6:
+      { // *TODO*: this is problematic, but ACE_INET_Addr does not currently
+        //         have a ctor taking sockaddr_in6; should work though (see:
+        //         INET_Addr.cpp:579) iff ACE was compiled with ACE_HAS_IPV6...
+        sockaddr_in_p =
+          reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_addr);
+        len = sizeof (struct sockaddr_in6);
+        break;
+      }
+      default:
+        continue;
+    } // end SWITCH
 
-    sockaddr_in_p = reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_addr);
     result = IPAddress_out.set (sockaddr_in_p,
-                                sizeof (struct sockaddr_in));
+                                len);
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -3053,11 +3073,19 @@ continue_:
       ::freeifaddrs (ifaddrs_p); ifaddrs_p = NULL;
       return false;
     } // end IF
+    address_found_b = true;
     break;
   } // end FOR
-
-  // clean up
   ::freeifaddrs (ifaddrs_p); ifaddrs_p = NULL;
+
+  // sanity check(s)
+  if (unlikely (!address_found_b))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve IP address (interface was: \"%s\"), aborting\n"),
+                ACE_TEXT (interface_identifier.c_str ())));
+    return false;
+  } // end IF
 #else
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);
@@ -3066,20 +3094,6 @@ continue_:
 
   gatewayIPAddress_out = Net_Common_Tools::getGateway (interfaceIdentifier_in);
 #endif // ACE_WIN32 || ACE_WIN64
-
-//  result = IPAddress_out.addr_to_string (buffer,
-//                                         sizeof (buffer),
-//                                         1);
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
-//    return false;
-//  } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("interface \"%s\" --> %s\n"),
-//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-//              buffer));
 
   return true;
 }
