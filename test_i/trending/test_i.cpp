@@ -1064,15 +1064,15 @@ ACE_TMAIN (int argc_in,
     log_file_name =
       Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
                                         ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
-  if (!Common_Log_Tools::initializeLogging (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
-                                            log_file_name,                        // log file name
-                                            false,                                // log to syslog ?
-                                            false,                                // trace messages ?
-                                            trace_information,                    // debug messages ?
-                                            NULL))                                // logger ?
+  if (!Common_Log_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
+                                     log_file_name,                        // log file name
+                                     false,                                // log to syslog ?
+                                     false,                                // trace messages ?
+                                     trace_information,                    // debug messages ?
+                                     NULL))                                // logger ?
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
+                ACE_TEXT ("failed to Common_Log_Tools::initialize(), aborting\n")));
     goto error;
   } // end IF
   finalize_logging = true;
@@ -1081,8 +1081,7 @@ ACE_TMAIN (int argc_in,
   do_initializeSignals (signal_set,
                         ignored_signal_set);
   if (!Common_Signal_Tools::preInitialize (signal_set,
-                                           (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                           (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                            true,  // using networking ?
                                            false, // using asynch timers ?
                                            previous_signal_actions,
@@ -1205,7 +1204,7 @@ error:
                                    previous_signal_actions,
                                    previous_signal_mask);
   if (finalize_logging)
-    Common_Log_Tools::finalizeLogging ();
+    Common_Log_Tools::finalize ();
   Common_Tools::finalize ();
   // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

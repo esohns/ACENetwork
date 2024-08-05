@@ -1520,26 +1520,26 @@ ACE_TMAIN (int argc_in,
       return EXIT_FAILURE;
     } // end IF
   } // end IF
-  if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]),               // program name
-                                            log_file_name,                            // log file name
-                                            false,                                    // log to syslog ?
-                                            false,                                    // trace messages ?
-                                            trace_information,                        // debug messages ?
+  if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]),               // program name
+                                     log_file_name,                            // log file name
+                                     false,                                    // log to syslog ?
+                                     false,                                    // trace messages ?
+                                     trace_information,                        // debug messages ?
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-                                            (ui_definition_file.empty () ? NULL
-                                                                         : &logger))) // (ui) logger ?
+                                     (ui_definition_file.empty () ? NULL
+                                                                  : &logger))) // (ui) logger ?
 #elif defined (WXWIDGETS_USE)
-                                            NULL))                                    // (ui) logger ?
+                                     NULL))                                    // (ui) logger ?
 #else
-                                            NULL))                                    // (ui) logger ?
+                                     NULL))                                    // (ui) logger ?
 #endif // XXX_USE
 #else
-                                            NULL))                                    // (ui) logger ?
+                                     NULL))                                    // (ui) logger ?
 #endif // GUI_SUPPORT
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
+                ACE_TEXT ("failed to Common_Log_Tools::initialize(), aborting\n")));
 
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1557,7 +1557,7 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Log_Tools::finalizeLogging ();
+    Common_Log_Tools::finalize ();
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1588,7 +1588,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
-    Common_Log_Tools::finalizeLogging ();
+    Common_Log_Tools::finalize ();
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1620,7 +1620,7 @@ ACE_TMAIN (int argc_in,
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Log_Tools::finalizeLogging ();
+    Common_Log_Tools::finalize ();
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1661,7 +1661,7 @@ ACE_TMAIN (int argc_in,
                                                   : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                      previous_signal_actions,
                                      previous_signal_mask);
-      Common_Log_Tools::finalizeLogging ();
+      Common_Log_Tools::finalize ();
       Common_Tools::finalize ();
       // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1734,7 +1734,7 @@ ACE_TMAIN (int argc_in,
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Log_Tools::finalizeLogging ();
+    Common_Log_Tools::finalize ();
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1792,7 +1792,7 @@ ACE_TMAIN (int argc_in,
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  previous_signal_actions,
                                  previous_signal_mask);
-  Common_Log_Tools::finalizeLogging ();
+  Common_Log_Tools::finalize ();
   Common_Tools::finalize ();
 
   // *PORTABILITY*: on Windows, finalize ACE...

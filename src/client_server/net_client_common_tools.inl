@@ -104,17 +104,10 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
                                               timeout); // relative- !
     if (unlikely (result_2))
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
+      ACE_DEBUG (((result_2 == ETIME ? LM_WARNING: LM_ERROR),
                   ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\" aborting\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
-                  ACE::sock_error (result_2)));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
-                  ACE_TEXT (ACE_OS::strerror (result_2))));
-#endif // ACE_WIN32 || ACE_WIN64
+                  ACE_OS::strerror (result_2)));
       iasynch_connector_p->abort ();
       iconnection_manager_p->unlock (false);
       return ACE_INVALID_HANDLE;

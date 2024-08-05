@@ -382,15 +382,21 @@ Net_Client_AsynchConnector_T<HandlerType,
     if (unlikely (result == -1))
     {
       int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (unlikely ((error != ETIME) &&        // 137
+                    (error != ERROR_TIMEOUT))) // 1460
+#else
       if (unlikely (error != ETIME))
+#endif // ACE_WIN32 || ACE_WIN64
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Condition::wait(): \"%m\", returning\n")));
+                    ACE_TEXT ("failed to ACE_Condition::wait(): \"%m\", aborting\n")));
       } // end IF
       else
-      {
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to ACE_Condition::wait(): \"%m\", returning\n")));
+      { // --> timeout
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("failed to ACE_Condition::wait(): \"%s\", aborting\n"),
+                    ACE_TEXT (ACE_OS::strerror (ETIME))));
         result = ETIME;
       } // end ELSE
       goto continue_;
@@ -424,23 +430,25 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::onConnect"));
 
-  //if (error_in != ECONNREFUSED) // happens intermittently on Win32
   if (unlikely (error_in))
   {
+    bool is_error_b = true; // ? : warning
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("0x%@: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
+    // if (error_in != ECONNREFUSED) // *TODO*: happens intermittently on Win32 ?
+    is_error_b = (error_in != ERROR_OPERATION_ABORTED); // 995: --> connection refused [--> timed out]
+    ACE_DEBUG (((is_error_b ? LM_ERROR : LM_WARNING),
+                ACE_TEXT ("0x%@: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", returning\n"),
                 connectHandle_in,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_, false, false).c_str ()),
-                ACE::sock_error (static_cast<int> (error_in))));
+                Common_Error_Tools::errorToString (static_cast<DWORD> (error_in), false, false).c_str ()));
 #else
-    if ((error_in != EBADF) && // 9: happens on Linux
-        (error_in != EFAULT))  // 14: happens on Linux
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%d: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                  connectHandle_in,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_, false, false).c_str ()),
-                  ACE_TEXT (ACE_OS::strerror (error_in))));
+    is_error_b = ((error_in != EBADF) && // 9 : happens on Linux
+                  (error_in != EFAULT);  // 14: happens on Linux
+    ACE_DEBUG (((is_error_b ? LM_ERROR : LM_WARNING),
+                ACE_TEXT ("%d: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", returning\n"),
+                connectHandle_in,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_, false, false).c_str ()),
+                ACE_TEXT (ACE_OS::strerror (error_in))));
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 }

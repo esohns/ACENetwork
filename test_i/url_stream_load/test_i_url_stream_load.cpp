@@ -1211,18 +1211,17 @@ ACE_TMAIN (int argc_in,
       goto error;
     } // end IF
   } // end IF
-  if (!Common_Log_Tools::initializeLogging (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                                              ACE_DIRECTORY_SEPARATOR_CHAR))), // program name
-                                            log_file_name,                                                                     // log file name
-                                            false,                                                                             // log to syslog ?
-                                            false,                                                                             // trace messages ?
-                                            trace_information,                                                                 // debug messages ?
-                                            NULL))                                                                             // (ui-) logger ?
+  if (!Common_Log_Tools::initialize (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR))), // program name
+                                     log_file_name,                                                                     // log file name
+                                     false,                                                                             // log to syslog ?
+                                     false,                                                                             // trace messages ?
+                                     trace_information,                                                                 // debug messages ?
+                                     NULL))                                                                             // (ui-) logger ?
 //                                            (ui_definition_file.empty () ? NULL
 //                                                                         : &logger)))                                          // (ui-) logger ?
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
+                ACE_TEXT ("failed to Common_Log_Tools::initialize(), aborting\n")));
     goto error;
   } // end IF
 
@@ -1231,8 +1230,7 @@ ACE_TMAIN (int argc_in,
                          signal_set,
                          ignored_signal_set);
   if (!Common_Signal_Tools::preInitialize (signal_set,
-                                           (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                           (use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                            true,  // using networking ?
                                            false, // using asynch timers ?
                                            previous_signal_actions,
@@ -1246,14 +1244,12 @@ ACE_TMAIN (int argc_in,
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
-    do_print_version (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                        ACE_DIRECTORY_SEPARATOR_CHAR))));
+    do_print_version (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR))));
 
-    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Log_Tools::finalizeLogging ();
+    Common_Log_Tools::finalize ();
     Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1393,7 +1389,7 @@ ACE_TMAIN (int argc_in,
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  previous_signal_actions,
                                  previous_signal_mask);
-  Common_Log_Tools::finalizeLogging ();
+  Common_Log_Tools::finalize ();
   Common_Tools::finalize ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1410,7 +1406,7 @@ error:
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  previous_signal_actions,
                                  previous_signal_mask);
-  Common_Log_Tools::finalizeLogging ();
+  Common_Log_Tools::finalize ();
   Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();

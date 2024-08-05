@@ -118,7 +118,7 @@
 #define NET_CONNECTION_DEFAULT_SEND_RETRIES                            10
 
 // (asynchronous) connections
-#define NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S          15 // second(s)
+#define NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S          10 // second(s)
 #define NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_INTERVAL_S 1  // second(s)
 
 // stream
