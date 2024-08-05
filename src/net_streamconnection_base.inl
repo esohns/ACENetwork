@@ -2216,6 +2216,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   int result = -1;
   size_t bytes_transferred_i = 0;
+  bool release_message_block_b = true;
 
   // sanity check
   if (unlikely (!result_in.success ()))
@@ -2299,6 +2300,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                     ACE_TEXT (stream_.name ().c_str ())));
         goto error;
       } // end IF
+      release_message_block_b = false;
       break;
     }
   } // end SWITCH
@@ -2323,7 +2325,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   return;
 
 error:
-  result_in.message_block ()->release ();
+  if (release_message_block_b)
+    result_in.message_block ()->release ();
 
   result = handle_close (result_in.handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
