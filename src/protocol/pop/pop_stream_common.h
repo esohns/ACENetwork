@@ -43,7 +43,7 @@
 struct POP_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct POP_ConnectionState,
-                          struct Net_StreamStatistic> POP_IConnection_t;
+                          Net_StreamStatistic_t> POP_IConnection_t;
 
 struct POP_Stream_SessionData
  : Stream_SessionData

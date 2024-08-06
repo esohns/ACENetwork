@@ -63,16 +63,16 @@ struct POP_ConnectionState
 
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct POP_ConnectionState,
-                          struct Net_StreamStatistic> POP_IConnection_t;
+                          Net_StreamStatistic_t> POP_IConnection_t;
 typedef Net_ISocketConnection_T<ACE_INET_Addr,
                                 POP_ConnectionConfiguration_t,
                                 struct POP_ConnectionState,
-                                struct Net_StreamStatistic,
+                                Net_StreamStatistic_t,
                                 struct POP_SocketHandlerConfiguration> POP_ISocketConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 POP_ConnectionConfiguration_t,
                                 struct POP_ConnectionState,
-                                struct Net_StreamStatistic,
+                                Net_StreamStatistic_t,
                                 Net_TCPSocketConfiguration_t,
                                 POP_Stream_t,
                                 enum Stream_StateMachine_ControlState> POP_IStreamConnection_t;
@@ -81,7 +81,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_TCPSocketHandler_t,
                                 POP_ConnectionConfiguration_t,
                                 struct POP_ConnectionState,
-                                struct Net_StreamStatistic,
+                                Net_StreamStatistic_t,
                                 POP_Stream_t,
                                 struct Net_UserData> POP_Connection_t;
 #if defined (SSL_SUPPORT)
@@ -89,7 +89,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_SSLSocketHandler_t,
                                 POP_ConnectionConfiguration_t,
                                 struct POP_ConnectionState,
-                                struct Net_StreamStatistic,
+                                Net_StreamStatistic_t,
                                 POP_Stream_t,
                                 struct Net_UserData> POP_SSLConnection_t;
 #endif // SSL_SUPPORT
@@ -97,7 +97,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
 typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                       POP_ConnectionConfiguration_t,
                                       struct POP_ConnectionState,
-                                      struct Net_StreamStatistic,
+                                      Net_StreamStatistic_t,
                                       POP_Stream_t,
                                       struct Net_UserData> POP_AsynchConnection_t;
 
@@ -112,7 +112,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                ACE_INET_Addr,
                                POP_ConnectionConfiguration_t,
                                struct POP_ConnectionState,
-                               struct Net_StreamStatistic,
+                               Net_StreamStatistic_t,
                                Net_TCPSocketConfiguration_t,
                                POP_Stream_t,
                                struct Net_UserData> POP_Connector_t;
@@ -121,7 +121,7 @@ typedef Net_Client_SSL_Connector_T<POP_SSLConnection_t,
                                    ACE_SSL_SOCK_Connector,
                                    POP_ConnectionConfiguration_t,
                                    struct POP_ConnectionState,
-                                   struct Net_StreamStatistic,
+                                   Net_StreamStatistic_t,
                                    POP_Stream_t,
                                    struct Net_UserData> POP_SSLConnector_t;
 #endif // SSL_SUPPORT
@@ -130,7 +130,7 @@ typedef Net_Client_AsynchConnector_T<POP_AsynchConnection_t,
                                      ACE_INET_Addr,
                                      POP_ConnectionConfiguration_t,
                                      struct POP_ConnectionState,
-                                     struct Net_StreamStatistic,
+                                     Net_StreamStatistic_t,
                                      Net_TCPSocketConfiguration_t,
                                      POP_Stream_t,
                                      struct Net_UserData> POP_AsynchConnector_t;
@@ -140,13 +140,13 @@ typedef Net_Client_AsynchConnector_T<POP_AsynchConnection_t,
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  POP_ConnectionConfiguration_t,
                                  struct POP_ConnectionState,
-                                 struct Net_StreamStatistic,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> POP_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  POP_ConnectionConfiguration_t,
                                  struct POP_ConnectionState,
-                                 struct Net_StreamStatistic,
+                                 Net_StreamStatistic_t,
                                  struct Net_UserData> POP_Connection_Manager_t;
 
 typedef ACE_Singleton<POP_Connection_Manager_t,

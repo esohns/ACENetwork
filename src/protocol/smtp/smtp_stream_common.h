@@ -43,7 +43,7 @@
 struct SMTP_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct SMTP_ConnectionState,
-                          struct Net_StreamStatistic> SMTP_IConnection_t;
+                          Net_StreamStatistic_t> SMTP_IConnection_t;
 
 struct SMTP_Stream_SessionData
  : Stream_SessionData
