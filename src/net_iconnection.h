@@ -70,7 +70,6 @@ class Net_IAsynchSocketHandler
 //////////////////////////////////////////
 
 template <typename AddressType,
-          //typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType>
 class Net_IConnection_T

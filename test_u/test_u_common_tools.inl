@@ -24,13 +24,12 @@
 
 template <typename ConnectionConfigurationType>
 Net_IConnection_T<ACE_INET_Addr,
-                  //ConnectionConfigurationType,
                   struct Net_StreamConnectionState,
-                  struct Net_StreamStatistic>*
+                  Net_StreamStatistic_t>*
 Test_U_Common_Tools::getRandomConnection (Net_IConnectionManager_T<ACE_INET_Addr,
                                                                    ConnectionConfigurationType,
                                                                    struct Net_StreamConnectionState,
-                                                                   struct Net_StreamStatistic,
+                                                                   Net_StreamStatistic_t,
                                                                    struct Net_UserData>* imanager_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Common_Tools::getRandomConnection"));
@@ -39,9 +38,8 @@ Test_U_Common_Tools::getRandomConnection (Net_IConnectionManager_T<ACE_INET_Addr
   ACE_ASSERT (imanager_in);
 
   Net_IConnection_T<ACE_INET_Addr,
-                    //ConnectionConfigurationType,
                     struct Net_StreamConnectionState,
-                    struct Net_StreamStatistic>* connection_p = NULL;
+                    Net_StreamStatistic_t>* connection_p = NULL;
   int number_of_connections_i = 0;
   int index_i = 0;
   int result = -1;

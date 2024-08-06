@@ -22,7 +22,6 @@
 #define NET_COMMON_H
 
 #include <set>
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include <string>
@@ -33,25 +32,20 @@
 #include "guiddef.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include "ace/Basic_Types.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
-#include "common_istatistic.h"
-#include "common_statistic_handler.h"
-
-#include "stream_common.h"
+//#include "net_iconnection.h"
+#include "net_statistic.h"
 
 // forward declarations
 template <typename AddressType,
-          //typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType>
 class Net_IConnection_T;
-template <ACE_SYNCH_DECL>
-class Net_IConnectionManagerBase_T;
-template <typename ConfigurationType>
-class Net_ITransportLayer_T;
-class Net_Common_Tools;
+
+/////////////////////////////////////////
 
 enum Net_LinkLayerType
 {
@@ -114,11 +108,11 @@ enum Net_TransportLayerType
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 // *NOTE*: prior to Vista, Win32 used 'indexes' integer identifiers
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
 typedef std::vector<struct _GUID> Net_InterfaceIdentifiers_t;
 #else
 typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
 typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -197,61 +191,6 @@ enum Net_Connection_Status
   NET_CONNECTION_STATUS_MAX
 };
 
-struct Net_Statistic
-{
-  Net_Statistic ()
-   : sentBytes (0)
-   , receivedBytes (0)
-   //, timeStamp (ACE_Time_Value::zero)
-   , previousBytes (0)
-   , previousTimeStamp (ACE_Time_Value::zero)
-  {}
-
-  struct Net_Statistic operator+= (const struct Net_Statistic& rhs_in)
-  {
-    sentBytes += rhs_in.sentBytes;
-    receivedBytes += rhs_in.receivedBytes;
-
-    //timeStamp = rhs_in.timeStamp;
-    previousBytes += rhs_in.previousBytes;
-    previousTimeStamp = rhs_in.previousTimeStamp;
-
-    return *this;
-  }
-
-  ACE_UINT64     sentBytes;
-  ACE_UINT64     receivedBytes;
-
-  // statistic and speed calculations
-  //ACE_Time_Value timeStamp;
-  ACE_UINT64     previousBytes; // total-
-  ACE_Time_Value previousTimeStamp;
-};
-typedef struct Net_Statistic Net_Statistic_t;
-typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;
-typedef Common_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
-
-struct Net_StreamStatistic
- : Net_Statistic
- , Stream_Statistic
-{
-  Net_StreamStatistic ()
-   : Net_Statistic ()
-   , Stream_Statistic ()
-  {}
-
-  struct Net_StreamStatistic operator+= (const struct Net_StreamStatistic& rhs_in)
-  {
-    Net_Statistic::operator+= (rhs_in);
-    Stream_Statistic::operator+= (rhs_in);
-
-    return *this;
-  }
-};
-typedef struct Net_StreamStatistic Net_StreamStatistic_t;
-typedef Common_IStatistic_T<Net_StreamStatistic_t> Net_IStreamStatisticHandler_t;
-typedef Common_StatisticHandler_T<Net_StreamStatistic_t> Net_StreamStatisticHandler_t;
-
 struct Net_UserData
 {
   Net_UserData ()
@@ -284,6 +223,7 @@ struct Net_ConnectionState
 
   struct Net_UserData*       userData;
 };
+
 struct Net_StreamConnectionState
  : Net_ConnectionState
 {
@@ -300,6 +240,6 @@ typedef Net_ConnectionIds_t::iterator Net_ConnectionIdsIterator_t;
 
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct Net_StreamConnectionState,
-                          struct Net_StreamStatistic> Net_IINETConnection_t;
+                          Net_StreamStatistic_t> Net_IINETConnection_t;
 
 #endif

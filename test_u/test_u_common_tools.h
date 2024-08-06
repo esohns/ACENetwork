@@ -56,13 +56,12 @@ class Test_U_Common_Tools
 
   template <typename ConnectionConfigurationType>
   static Net_IConnection_T<ACE_INET_Addr,
-                           //ConnectionConfigurationType,
                            struct Net_StreamConnectionState,
-                           struct Net_StreamStatistic>* getRandomConnection (Net_IConnectionManager_T<ACE_INET_Addr,
-                                                                                                      ConnectionConfigurationType,
-                                                                                                      struct Net_StreamConnectionState,
-                                                                                                      struct Net_StreamStatistic,
-                                                                                                      struct Net_UserData>*);
+                           Net_StreamStatistic_t>* getRandomConnection (Net_IConnectionManager_T<ACE_INET_Addr,
+                                                                                                 ConnectionConfigurationType,
+                                                                                                 struct Net_StreamConnectionState,
+                                                                                                 Net_StreamStatistic_t,
+                                                                                                 struct Net_UserData>*);
 
   static std::function<int ()>              randomGenerator_;
 

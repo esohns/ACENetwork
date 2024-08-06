@@ -160,7 +160,7 @@ operator-- (enum FTP_ProtocolState& state_inout)
 
 //////////////////////////////////////////
 
-typedef struct Net_StreamStatistic FTP_Statistic_t;
+typedef Net_StreamStatistic_t FTP_Statistic_t;
 typedef Common_IStatistic_T<FTP_Statistic_t> FTP_IStatistic_t;
 typedef Common_StatisticHandler_T<FTP_Statistic_t> FTP_StatisticHandler_t;
 

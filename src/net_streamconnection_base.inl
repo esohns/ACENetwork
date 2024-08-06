@@ -594,7 +594,12 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   statistic_out = inherited2::state_.statistic;
 
-  return stream_.collect (statistic_out);
+  typename StreamType::STATISTIC_T stream_statistic_s;
+  stream_.collect (stream_statistic_s);
+
+  statistic_out += stream_statistic_s;
+
+  return true;
 }
 
 template <ACE_SYNCH_DECL,
@@ -1512,7 +1517,12 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   statistic_out = inherited2::state_.statistic;
 
-  return stream_.collect (statistic_out);
+  typename StreamType::STATISTIC_T stream_statistic_s;
+  stream_.collect (stream_statistic_s);
+
+  statistic_out += stream_statistic_s;
+
+  return true;
 }
 
 

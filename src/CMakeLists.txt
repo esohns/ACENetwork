@@ -175,6 +175,7 @@ set (source_files
      net_sockethandler_base.cpp
      net_sockethandler_base.h
      net_sockethandler_base.inl
+     net_statistic.h
      net_streamconnection_base.cpp
      net_streamconnection_base.h
      net_streamconnection_base.inl
@@ -341,6 +342,7 @@ install (FILES
          net_socket_common.h
          net_sockethandler_base.h
          net_sockethandler_base.inl
+         net_statistic.h
          net_streamconnection_base.h
          net_streamconnection_base.inl
          net_stream_asynch_tcpsocket_base.h

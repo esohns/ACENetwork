@@ -54,12 +54,12 @@ struct Test_U_GTK_ProgressData
    , transferred (0)
    , statistic ()
   {
-    ACE_OS::memset (&statistic, 0, sizeof (Net_StreamStatistic_t));
+    ACE_OS::memset (&statistic, 0, sizeof (struct Stream_Statistic));
   }
 
-  size_t                size; // bytes
-  size_t                transferred; // bytes
-  Net_StreamStatistic_t statistic;
+  size_t                  size; // bytes
+  size_t                  transferred; // bytes
+  struct Stream_Statistic statistic;
 };
 
 struct Test_U_GTK_CBData
