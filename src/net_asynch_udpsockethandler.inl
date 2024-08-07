@@ -770,6 +770,9 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::notify"));
 
   // sanity check(s)
+  // *IMPORTANT NOTE*: the connection may have abort()ed already and
+  //                   reset/close()d the write handle
+  //                   --> check: (handleCloseCalled_ == true)...
   ACE_ASSERT (writeHandle_ != ACE_INVALID_HANDLE);
 
   int result = -1;
