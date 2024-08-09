@@ -1063,20 +1063,18 @@ nla_put_failure:
         }
       } // end SWITCH
 
-#if defined (_DEBUG)
       // sanity check(s)
-      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
+      // ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
       ACE_ASSERT (cb_data_p->monitor);
       std::string interface_identifier_string =
           cb_data_p->monitor->interfaceIdentifier ();
-      unsigned int wiphy_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_WIPHY]);
+      // unsigned int wiphy_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_WIPHY]);
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("\"%s\"/\"%s\" [%u]: switched regulatory domain: %s\n"),
+                  ACE_TEXT ("\"%s\": switched regulatory domain: %s\n"),
                   ACE_TEXT (interface_identifier_string.c_str ()),
-                  ACE_TEXT (Net_WLAN_Tools::wiPhyIndexToWiPhyNameString (interface_identifier_string, NULL, cb_data_p->monitor->get_3 (), wiphy_index_i).c_str ()),
-                  wiphy_index_i,
+                  // ACE_TEXT (Net_WLAN_Tools::wiPhyIndexToWiPhyNameString (interface_identifier_string, NULL, cb_data_p->monitor->get_3 (), wiphy_index_i).c_str ()),
+                  // wiphy_index_i,
                   ACE_TEXT (reg_domain_string.c_str ())));
-#endif // _DEBUG
 
       break;
     }

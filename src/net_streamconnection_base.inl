@@ -781,6 +781,40 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 #endif // ACE_WIN32 || ACE_WIN64
     } // end IF
   } // end IF
+
+  // handle any (UDP) write-only connections
+  enum Net_TransportLayerType transport_layer_e = this->transportLayer ();
+  bool is_udp_write_only_b = false;
+  switch (transport_layer_e)
+  {
+    case NET_TRANSPORTLAYER_TCP:
+    case NET_TRANSPORTLAYER_SSL:
+      break;
+    case NET_TRANSPORTLAYER_UDP:
+    { ACE_ASSERT (inherited2::configuration_);
+      Net_UDPSocketConfiguration_t* socket_configuration_p =
+        (Net_UDPSocketConfiguration_t*)&inherited2::configuration_->socketConfiguration;
+      is_udp_write_only_b = socket_configuration_p->writeOnly;
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: invalid/unknown transport layer (was: %d), returning\n"),
+                  id (),
+                  transport_layer_e));
+      return;
+    }
+  } // end SWITCH
+  if (unlikely (is_udp_write_only_b))
+  {
+    result = handle_close (ACE_INVALID_HANDLE,
+                           ACE_Event_Handler::ALL_EVENTS_MASK);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to HandlerType::handle_close(): \"%m\", continuing\n"),
+                  id ()));
+  } // end IF
 }
 
 template <ACE_SYNCH_DECL,
@@ -1599,7 +1633,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // step1: cancel (pending) i/o operation(s)
   inherited::cancel ();
 
-  int result = ACE_OS::shutdown (inherited2::state_.handle, ACE_SHUTDOWN_BOTH);
+  int result = ACE_OS::shutdown (inherited2::state_.handle,
+                                 ACE_SHUTDOWN_BOTH);
   if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();
@@ -1620,7 +1655,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 #else
   if (likely (inherited::writeHandle_ != ACE_INVALID_HANDLE))
   {
-    result = ACE_OS::shutdown (inherited::writeHandle_, ACE_SHUTDOWN_BOTH);
+    result = ACE_OS::shutdown (inherited::writeHandle_,
+                               ACE_SHUTDOWN_BOTH);
     if (unlikely (result == -1))
     {
       int error = ACE_OS::last_error ();
@@ -1645,7 +1681,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
        ACE_ASSERT (inherited2::configuration_);
 
        Net_UDPSocketConfiguration_t* socket_configuration_p =
-           (Net_UDPSocketConfiguration_t*)&inherited2::configuration_->socketConfiguration;
+          (Net_UDPSocketConfiguration_t*)&inherited2::configuration_->socketConfiguration;
        is_udp_write_only_b = socket_configuration_p->writeOnly;
        break;
      }

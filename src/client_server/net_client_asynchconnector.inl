@@ -442,8 +442,8 @@ Net_Client_AsynchConnector_T<HandlerType,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_, false, false).c_str ()),
                 Common_Error_Tools::errorToString (static_cast<DWORD> (error_in), false, false).c_str ()));
 #else
-    is_error_b = ((error_in != EBADF) && // 9 : happens on Linux
-                  (error_in != EFAULT);  // 14: happens on Linux
+    is_error_b = ((error_in != EBADF) &&  // 9 : happens on Linux
+                  (error_in != EFAULT));  // 14: happens on Linux
     ACE_DEBUG (((is_error_b ? LM_ERROR : LM_WARNING),
                 ACE_TEXT ("%d: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", returning\n"),
                 connectHandle_in,
