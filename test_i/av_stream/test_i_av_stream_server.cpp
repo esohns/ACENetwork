@@ -1069,7 +1069,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     &configuration.connectionConfigurations;
   modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_DEFRAGMENT;
   modulehandler_configuration.deviceIdentifier.identifier =
-      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
+    Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
+                                                     SND_PCM_STREAM_PLAYBACK);
   modulehandler_configuration.inbound = true;
 
   //modulehandler_configuration.connectionManager = connection_manager_p;

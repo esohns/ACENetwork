@@ -61,18 +61,18 @@ add_definitions (-DACESTREAM_HAS_DLL)
 if (GUI_SUPPORT)
  if (CURSES_SUPPORT)
   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${CURSES_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${CURSES_INCLUDE_DIRS}>")
  endif (CURSES_SUPPORT)
  if (GTK_SUPPORT)
   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${GTK_INCLUDE_DIRS}>")
 
   if (GTKGLAREA_SUPPORT)
 # *NOTE*: check out the 'master' branch for gtk3-based applications
 # *NOTE*: check out the 'gtkglarea-2' branch for gtk2-based applications
 # *TODO*: verify automatically
    target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                               $<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>)
+                               "$<BUILD_INTERFACE:${GTKGLAREA_INCLUDES}>")
   endif (GTKGLAREA_SUPPORT)
  endif (GTK_SUPPORT)
  if (QT_SUPPORT)
@@ -80,11 +80,11 @@ if (GUI_SUPPORT)
    cmake_policy (SET CMP0020 OLD)
   endif (WIN32)
   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${Qt_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${Qt_INCLUDE_DIRS}>")
  endif (QT_SUPPORT)
  if (WXWIDGETS_SUPPORT)
   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                              $<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>")
  endif (WXWIDGETS_SUPPORT)
 endif (GUI_SUPPORT)
 
@@ -128,6 +128,8 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src/modules/lib>)
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src/modules/net>)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/${BUILD_PATH_SUFFIX}>)
@@ -168,6 +170,8 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src/modules/lib>)
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ACEStream/src/modules/net>)
 endif ()
 target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src>)
@@ -272,10 +276,13 @@ target_precompile_headers (${PROJECT_NAME}_Test_I
                            PUBLIC stdafx.h)
 
 ##########################################
+install (TARGETS ${PROJECT_NAME}_Test_I
+         EXPORT ${PROJECT_NAME}Targets
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Test_I
-       APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
+        APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
 
 # ----------------------------------------
 

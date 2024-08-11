@@ -129,6 +129,11 @@ set (${EXECUTABLE}_EXE_CFG
      etc/test_i.gtk2
      etc/test_i.gtk3)
 
+
+#if (UNIX)
+# set (CMAKE_ENABLE_EXPORTS ON)
+#endif (UNIX)
+
 #string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -207,6 +212,12 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
 # add PCH
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
+
+if (UNIX)
+ if (GTK_USE)
+  set_target_properties (${EXECUTABLE} PROPERTIES ENABLE_EXPORTS TRUE)
+ endif (GTK_USE)
+endif (UNIX)
 
 set (configuration_file "etc/web_tv.ini")
 set (ui_definition_file "")

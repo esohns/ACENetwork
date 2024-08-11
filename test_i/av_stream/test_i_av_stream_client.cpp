@@ -140,7 +140,8 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #else
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-a [STRING] : audio device [\"")
-            << ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_CAPTURE_DEFAULT_DEVICE_NAME)
+            << Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
+                                                                SND_PCM_STREAM_CAPTURE)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::string video_device_file = ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
@@ -261,7 +262,8 @@ do_processArguments (int argc_in,
   showConsole_out = false;
 #else
   audioDeviceIdentifier_out.identifier =
-    ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_CAPTURE_DEFAULT_DEVICE_NAME);
+    Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
+                                                     SND_PCM_STREAM_CAPTURE);
   videoDeviceIdentifier_out.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
   videoDeviceIdentifier_out.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -2211,7 +2213,8 @@ ACE_TMAIN (int argc_in,
   bool show_console = false;
 #else
   audio_device_identifier.identifier =
-      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_CAPTURE_DEFAULT_DEVICE_NAME);
+    Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
+                                                     SND_PCM_STREAM_CAPTURE);
   video_device_identifier.identifier =
     ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
   video_device_identifier.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;

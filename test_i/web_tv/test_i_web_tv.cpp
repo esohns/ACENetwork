@@ -56,6 +56,10 @@
 
 #include "common_os_tools.h"
 
+#if defined (SSL_SUPPORT)
+#include "common_error_tools.h"
+#endif // SSL_SUPPORT
+
 #include "common_event_tools.h"
 
 #include "common_logger_queue.h"
@@ -669,7 +673,7 @@ do_work (const std::string& configurationFile_in,
 #if defined (SSL_SUPPORT)
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      (Common_Error_Tools::inDebugSession () ? ACE_TEXT_ALWAYS_CHAR ("..") : ACE_TEXT_ALWAYS_CHAR ("")),
                                                       false); // data
   filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
   filename_string +=
@@ -1013,7 +1017,8 @@ do_work (const std::string& configurationFile_in,
     Stream_MediaFramework_DirectSound_Tools::getAudioEngineMixFormat (modulehandler_configuration_4b.deviceIdentifier.identifier._guid);
 #else
   modulehandler_configuration_4b.deviceIdentifier.identifier =
-      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEVICE_PLAYBACK_PREFIX);
+    Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
+                                                     SND_PCM_STREAM_PLAYBACK);
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
