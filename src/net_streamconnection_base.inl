@@ -403,7 +403,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       } // end IF
 
       // *WARNING*: falls through !
-      //[[fallthrough]];
+      ACE_FALLTHROUGH;
     }
     // called by external (e.g. reactor) thread wanting to close the connection
     // (e.g. cannot connect, too many connections, ...)

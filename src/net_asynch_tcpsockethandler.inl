@@ -546,7 +546,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const ACE_
                         ACE_TEXT (ACE_OS::strerror (error))));
 #endif // ACE_WIN32 || ACE_WIN64
       // *WARNING*: control falls through here
-      //[[fallthrough]];
+      ACE_FALLTHROUGH;
     }
     case 0:
     {
