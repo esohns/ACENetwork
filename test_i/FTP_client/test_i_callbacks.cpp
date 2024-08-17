@@ -17,7 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "common_log_common.h"
 #include "stdafx.h"
 
 #include "test_i_callbacks.h"
@@ -37,6 +36,8 @@
 
 #include "common_file_tools.h"
 #include "common_os_tools.h"
+
+#include "common_log_common.h"
 
 #include "common_timer_manager.h"
 
@@ -119,10 +120,10 @@ load_network_interfaces (GtkListStore* listStore_in)
   gchar* string_p = NULL;
   do
   {
-    //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("found network interface: \"%s\": \"%s\"...\n"),
-    //            ACE_TEXT (ip_adapter_info_2->Description),
-    //            ACE_TEXT (Net_Common_Tools::MACAddress2String (ip_adapter_info_2->Address).c_str ())));
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("found network interface: \"%s\": \"%s\"...\n"),
+                ACE_TEXT (ip_adapter_info_2->Description),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ip_adapter_info_2->Address, NET_LINKLAYER_802_3).c_str ())));
     string_p =
       Common_UI_GTK_Tools::localeToUTF8 (ip_adapter_info_2->Description);
     ACE_ASSERT (string_p);
@@ -1306,7 +1307,7 @@ allocate:
 
   // connect
   ACE_HANDLE handle_h = data_p->control->connectControl ();
-  if (unlikely (handle_h == ACE_INVALID_HANDLE))
+  if (unlikely (!handle_h || handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),

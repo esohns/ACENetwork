@@ -549,8 +549,8 @@ do_work (const std::string& bootstrapFileName_in,
   Stream_IStreamControlBase* istream_base_p = NULL;
 //  Stream_IStream_t* istream_p = NULL;
   Stream_Base* stream_base_p = NULL;
-  Test_I_StockItem stock_item;
-  Test_I_Trending_Configuration configuration;
+  struct Test_I_StockItem stock_item;
+  struct Test_I_Trending_Configuration configuration;
   Test_I_Trending_InetConnectionManager_t* connection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
@@ -560,7 +560,6 @@ do_work (const std::string& bootstrapFileName_in,
   Common_Timer_Manager_t* timer_manager_p = NULL;
   struct Common_TimerConfiguration timer_configuration;
   struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-//  ACE_thread_t thread_id = 0;
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
@@ -655,6 +654,7 @@ do_work (const std::string& bootstrapFileName_in,
   // ********************** module configuration data **************************
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
+  modulehandler_configuration.concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.configuration = &configuration;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
@@ -798,23 +798,11 @@ do_work (const std::string& bootstrapFileName_in,
   // - perform statistics collecting/reporting
 
   // step1a: initialize worker(s)
-  event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
+  event_dispatch_state_s.configuration = &event_dispatch_configuration_s;
   if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
-
-    // clean up
-    //		{ // synch access
-    //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-    //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-    //					 iterator != CBData_in.event_source_ids.end();
-    //					 iterator++)
-    //				g_source_remove(*iterator);
-    //		} // end lock scope
-
     goto error;
   } // end IF
   finalize_event_dispatch = true;
@@ -847,31 +835,13 @@ do_work (const std::string& bootstrapFileName_in,
   istream_base_p->wait (true, false, false);
 
   // step3: clean up
+  timer_manager_p->stop ();
   connection_manager_p->stop (false, true);
-  connection_manager_p->abort ();
+  connection_manager_p->abort (false);
   connection_manager_p->wait ();
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
-  timer_manager_p->stop ();
-
-  //		{ // synch access
-  //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //					 iterator != CBData_in.event_source_ids.end();
-  //					 iterator++)
-  //				g_source_remove(*iterator);
-  //		} // end lock scope
-  //timer_manager_p->stop ();
-
-  //  { // synch access
-  //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //		for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //				 iterator != CBData_in.event_source_ids.end();
-  //				 iterator++)
-  //			g_source_remove(*iterator);
-  //	} // end lock scope
+                                             true,   // wait ?
+                                             false); // close singletons ?
 
   //result = event_handler.close (ACE_Module_Base::M_DELETE_NONE);
   //if (result == -1)
@@ -888,7 +858,8 @@ do_work (const std::string& bootstrapFileName_in,
 error:
   if (finalize_event_dispatch)
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
+                                               true,   // wait ?
+                                               false); // close singletons ?
   if (stop_timers)
     timer_manager_p->stop ();
   if (stream_base_p)

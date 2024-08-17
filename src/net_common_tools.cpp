@@ -799,6 +799,8 @@ Net_Common_Tools::stringToIPAddress (std::string& address_in,
 
   bool is_ipv4_b = true;
   std::string ip_address_string = address_in;
+  bool address_string_already_has_port_b = false;
+
   // *NOTE*: ACE_INET_Addr::string_to_address() needs enlcosing "[]" for IPv6
   //         addresses to function properly
   //         --> append if necessary
@@ -809,13 +811,29 @@ Net_Common_Tools::stringToIPAddress (std::string& address_in,
     is_ipv4_b = false;
   } // end IF
 
-  // *NOTE*: ACE_INET_Addr::string_to_address() needs a trailing port number to
-  //         function properly (see: ace/INET_Addr.h:237)
-  //         --> append one
-  ip_address_string.push_back (':');
-  std::ostringstream converter;
-  converter << portNumber_in;
-  ip_address_string += converter.str ();
+  // test for trailing port#
+  std::string::size_type position_i =
+    ip_address_string.find_last_of (':', std::string::npos);
+  if (unlikely (position_i != std::string::npos))
+  { ACE_ASSERT (!portNumber_in); // *TODO*
+    std::string port_number_string =
+      ip_address_string.substr (position_i + 1, std::string::npos);
+    std::istringstream converter;
+    converter.str (port_number_string);
+    converter >> portNumber_in;
+    address_string_already_has_port_b = true;
+  } // end IF
+
+  if (!address_string_already_has_port_b)
+  {
+    // *NOTE*: ACE_INET_Addr::string_to_address() needs a trailing port number to
+    //         function properly (see: ace/INET_Addr.h:237)
+    //         --> append one ?
+    ip_address_string.push_back (':');
+    std::ostringstream converter;
+    converter << portNumber_in;
+    ip_address_string += converter.str ();
+  } // end IF
 
   int result = -1;
   ACE_INET_Addr inet_address;

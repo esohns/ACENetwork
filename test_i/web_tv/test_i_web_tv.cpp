@@ -17,12 +17,10 @@
 *   Free Software Foundation, Inc.,                                       *
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
-#include "libavutil/pixfmt.h"
 #include "stdafx.h"
 
 #include <iostream>
 #include <limits>
-#include <openssl/prov_ssl.h>
 #include <regex>
 #include <string>
 
@@ -36,6 +34,17 @@
 #elif defined (ACE_LINUX)
 #include "sys/capability.h"
 #include "linux/capability.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
+#if defined (SSL_SUPPORT)
+#include "openssl/prov_ssl.h"
+#endif // SSL_SUPPORT
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (FFMPEG_SUPPORT)
+#include "libavutil/pixfmt.h"
+#endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Configuration.h"

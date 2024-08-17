@@ -387,17 +387,17 @@ do_process_arguments (int argc_in,
 
         // step2: validate address/verify host name exists
         //        --> resolve
-        ACE_TCHAR buffer[HOST_NAME_MAX];
-        ACE_OS::memset (buffer, 0, sizeof (buffer));
-        result = remoteHost_out.get_host_name (buffer,
-                                               sizeof (buffer));
+        ACE_TCHAR buffer_a[HOST_NAME_MAX];
+        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
+        result = remoteHost_out.get_host_name (buffer_a,
+                                               sizeof (ACE_TCHAR[HOST_NAME_MAX]));
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(): \"%m\", aborting\n")));
           return false;
         } // end IF
-        std::string hostname = ACE_TEXT_ALWAYS_CHAR (buffer);
+        std::string hostname = ACE_TEXT_ALWAYS_CHAR (buffer_a);
         std::string dotted_decimal_string;
         if (!Net_Common_Tools::getAddress (hostname,
                                            dotted_decimal_string))
@@ -547,7 +547,7 @@ do_work (bool debugParser_in,
 #if defined (SSL_SUPPORT)
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      (Common_Error_Tools::inDebugSession () ? ACE_TEXT_ALWAYS_CHAR ("..") : ACE_TEXT_ALWAYS_CHAR ("")),
                                                       false); // data
   filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
   filename_string +=

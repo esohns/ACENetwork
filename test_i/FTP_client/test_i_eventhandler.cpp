@@ -268,6 +268,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       break;
     }
     case STREAM_SESSION_MESSAGE_STEP:
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
     {
       event_e = COMMON_UI_EVENT_STEP;
       break;
@@ -377,7 +378,13 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 
   if (stream_.get_handle () != ACE_INVALID_HANDLE)
   {
-    stream_.close ();
+    int result = stream_.close ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_FILE_IO::close(): \"%m\", continuing\n")));
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("closed file...\n")));
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -392,7 +399,7 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
     state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-  }
+  } // end IF
 }
 
 void
@@ -494,30 +501,54 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     }
     case FTP_Codes::FTP_RECORD_DATA:
     {
-      if (stream_.get_handle () == ACE_INVALID_HANDLE)
+      int result = -1; 
+      if (unlikely (stream_.get_handle () == ACE_INVALID_HANDLE))
       {
         std::string filename_string = Common_File_Tools::getWorkingDirectory ();
         filename_string += ACE_TEXT_ALWAYS_CHAR (ACE_DIRECTORY_SEPARATOR_STR);
 #if defined (GUI_SUPPORT)
         filename_string += CBData_->fileName;
 #endif // GUI_SUPPORT
-        ACE_FILE_Addr file_address (filename_string.c_str ());
+        ACE_FILE_Addr file_address (ACE_TEXT (filename_string.c_str ()));
 
-        ACE_FILE_Connector file_connector (stream_,
-                                           file_address,
-                                           NULL,
-                                           ACE_Addr::sap_any,
-                                           0,
-                                           O_RDWR | O_CREAT,
-                                           ACE_DEFAULT_FILE_PERMS);
-        ACE_ASSERT (stream_.get_handle () != ACE_INVALID_HANDLE);
+        ACE_FILE_Connector file_connector;
+        result = file_connector.connect (stream_,
+                                         file_address,
+                                         NULL,
+                                         ACE_Addr::sap_any,
+                                         0,
+                                         O_WRONLY | O_CREAT | O_BINARY,
+                                         ACE_DEFAULT_FILE_PERMS);
+        if (unlikely ((result == -1) ||
+                      (stream_.get_handle () == ACE_INVALID_HANDLE)))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_FILE_Connector::connect(%s): \"%m\", returning\n"),
+                      ACE_TEXT (filename_string.c_str ())));
+          return;
+        } // end IF
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("opened file \"%s\"...\n"),
+                    ACE_TEXT (filename_string.c_str ())));
       } // end IF
 
       ACE_Message_Block* message_block_p = &const_cast<Test_I_Message&> (message_in);
+      ssize_t result_2 = -1;
       while (message_block_p)
       {
-        stream_.send (message_block_p->rd_ptr (),
-                      message_block_p->length ());
+        result_2 = stream_.send (message_block_p->rd_ptr (),
+                                 message_block_p->length ());
+        if (unlikely (result_2 == -1))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_FILE_IO::send(%B): \"%m\", returning\n"),
+                      message_block_p->length ()));
+          return;
+        } // end IF
+        else
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("wrote %b byte(s)...\n"),
+                      message_block_p->length ()));
         message_block_p = message_block_p->cont ();
       } // end WHILE
 
@@ -605,6 +636,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       break;
     }
     case STREAM_SESSION_MESSAGE_STEP:
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
     {
       event_e = COMMON_UI_EVENT_STEP;
       break;

@@ -75,20 +75,20 @@ FTP_Control_T<ControlAsynchConnectorType,
   if (dispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
     handle_h =
       Net_Client_Common_Tools::connect<ControlConnectorType> (connector,
-                                                       *connectionConfiguration_,
-                                                       user_data,
-                                                       connectionConfiguration_->socketConfiguration.address,
-                                                       true,  // wait ?
-                                                       true); // is peer address ?
+                                                              *connectionConfiguration_,
+                                                              user_data,
+                                                              connectionConfiguration_->socketConfiguration.address,
+                                                              true,  // wait ?
+                                                              true); // is peer address ?
   else
     handle_h =
       Net_Client_Common_Tools::connect<ControlAsynchConnectorType> (asynch_connector,
-                                                             *connectionConfiguration_,
-                                                             user_data,
-                                                             connectionConfiguration_->socketConfiguration.address,
-                                                             true,  // wait ?
-                                                             true); // is peer address ?
-  if (unlikely (handle_h == ACE_INVALID_HANDLE))
+                                                                    *connectionConfiguration_,
+                                                                    user_data,
+                                                                    connectionConfiguration_->socketConfiguration.address,
+                                                                    true,  // wait ?
+                                                                    true); // is peer address ?
+  if (unlikely (!handle_h || handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),

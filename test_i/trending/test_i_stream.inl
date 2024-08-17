@@ -87,7 +87,7 @@ Test_I_Trending_Stream_T<ConnectorType>::load (Stream_ILayout* layout_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_NEW_RETURN (module_p,
                   Test_I_Stream_SpreadsheetWriter_Module (this,
-    //Test_I_MSOffice_SpreadsheetWriter_Module (this,
+                //Test_I_MSOffice_SpreadsheetWriter_Module (this,
                                                           ACE_TEXT_ALWAYS_CHAR ("SpreadsheetWriter")),
                   false);
 #else

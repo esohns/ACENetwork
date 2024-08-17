@@ -217,13 +217,12 @@ if (UNIX)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
+ # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
+ file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIBRARY_PATH)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libiconv/bin ICONV_LIBRARY_PATH)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libmysql/lib LIBMYSQL_LIBRARY_PATH)
-# file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libxml2/bin LIBXML_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${LIBREOFFICE_LIB_DIRS}" OO_LIBRARY_PATH)
  file (TO_CMAKE_PATH ${ACE_LIB_DIR} ACE_LIBRARY_PATH)
  if (SSL_SUPPORT)
@@ -232,17 +231,15 @@ elseif (WIN32)
  if (ZLIB_SUPPORT)
   file (TO_CMAKE_PATH ${ZLIB_LIB_DIR} ZLIB_LIBRARY_PATH)
  endif (ZLIB_SUPPORT)
- set (RUNTIME_LIBRARY_DIRS ${ACE_LIBRARY_PATH}
-                           ${GTK_LIBRARY_PATH}
+ set (RUNTIME_LIBRARY_DIRS ${GTK_LIBRARY_PATH}
                            ${WXWIDGETS_LIBRARY_PATH}
+                           ${VCPKG_LIB_PATH}
                            ${FFMPEG_LIBRARY_PATH}
                            ${IMAGEMAGICK_LIBRARY_PATH}
-#                           ${ICONV_LIBRARY_PATH}
- #                          ${LIBXML_LIBRARY_PATH}
-  #                         ${LIBMYSQL_LIBRARY_PATH}
                            ${SSL_LIBRARY_PATH}
                            ${ZLIB_LIBRARY_PATH}
-                           ${OO_LIBRARY_PATH})
+                           ${OO_LIBRARY_PATH}
+                           ${ACE_LIBRARY_PATH})
  file (TO_NATIVE_PATH "${UNO_HOME}" UNO_HOME_PATH)
  string (REPLACE "\\" "\\\\" UNO_HOME_PATH ${UNO_HOME_PATH})
  set (ENVIRONMENT "UNO_HOME=${UNO_HOME_PATH};URE_MORE_TYPES=$ORIGIN/types/offapi.rdb")
