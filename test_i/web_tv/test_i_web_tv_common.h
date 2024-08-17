@@ -59,6 +59,13 @@ typedef Test_I_WebTV_ChannelSegmentURLs_t::iterator Test_I_WebTV_ChannelSegmentU
 typedef Test_I_WebTV_ChannelSegmentURLs_t::const_iterator Test_I_WebTV_ChannelSegmentURLsConstIterator_t;
 struct Test_I_WebTV_ChannelSegment
 {
+  Test_I_WebTV_ChannelSegment ()
+   : start ()
+   , end ()
+   , length (0)
+   , URLs ()
+  {}
+
   ACE_Time_Value                    start;
   ACE_Time_Value                    end;
   unsigned int                      length; // s
@@ -85,6 +92,12 @@ typedef Test_I_WebTV_Channel_AudioChannels_t::const_iterator Test_I_WebTV_Channe
 
 struct Test_I_WebTV_Channel_Resolution
 {
+  Test_I_WebTV_Channel_Resolution ()
+   : frameRate (0)
+   , resolution ()
+   , URI ()
+  {}
+
   unsigned int              frameRate;
   Common_Image_Resolution_t resolution;
   std::string               URI; // relative to channel baseURI
@@ -146,7 +159,7 @@ struct Test_I_WebTV_Configuration
    : Test_I_Configuration ()
 #endif // GUI_SUPPORT
    , connectionConfigurations ()
-   , parserConfiguration ()
+   // , parserConfiguration ()
    , streamConfiguration ()
    , streamConfiguration_2a ()
    , streamConfiguration_2b ()
@@ -159,7 +172,7 @@ struct Test_I_WebTV_Configuration
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t       connectionConfigurations;
   // **************************** parser data **********************************
-  struct HTTP_ParserConfiguration      parserConfiguration;
+  // struct HTTP_ParserConfiguration      parserConfiguration;
   // **************************** stream data **********************************
   Test_I_WebTV_StreamConfiguration_t   streamConfiguration;
   Test_I_WebTV_StreamConfiguration_t   streamConfiguration_2a; // audio

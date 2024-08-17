@@ -277,13 +277,6 @@ Test_I_ConnectionStream_3::initialize (const inherited::CONFIGURATION_T& configu
 //                ACE_TEXT (stream_name_string_),
 //                ACE_TEXT (module_p->name ())));
 //    goto failed;
-  //} // end IF
-//  parser_impl_p->setP (&(inherited::state_));
-
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-//  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (configuration_in.configuration_->notificationStrategy))

@@ -30,6 +30,7 @@
 Test_I_M3U_Module_Parser::Test_I_M3U_Module_Parser (ISTREAM_T* stream_in)
  : inherited (stream_in)
  , contentLength_ (0)
+ , hasSeenContentLengthHeader_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::Test_I_M3U_Module_Parser"));
 
@@ -93,26 +94,35 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
   const Test_I_WebTV_MessageData& data_r = data_container_r.getR ();
   HTTP_HeadersConstIterator_t iterator =
     data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-  if (unlikely (iterator == data_r.headers.end ()))
+  bool append_line_break_b = true;
+  if (!hasSeenContentLengthHeader_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
-                inherited::mod_->name (),
-                ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-    // assume the message contains all of the content
-    contentLength_ =
-      (inherited::headFragment_ ? inherited::headFragment_->total_length () + message_inout->total_length ()
-                                : message_inout->total_length ());
+    if (unlikely (iterator == data_r.headers.end ()))
+    {
+      // assume the message contains all of the content; this is problematic and
+      // may lead to parsing errors later on
+      contentLength_ =
+        (inherited::headFragment_ ? inherited::headFragment_->total_length () + message_inout->total_length ()
+                                  : message_inout->total_length ());
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("%s: missing \"%s\" HTTP header (assuming %u content byte(s)), continuing\n"),
+                  inherited::mod_->name (),
+                  ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
+                  contentLength_));
+      // append_line_break_b = false; // cannot append line breaks reliably
+    } // end IF
+    else
+    {
+      hasSeenContentLengthHeader_ = true;
+      converter.str ((*iterator).second);
+      converter >> contentLength_;
+    } // end ELSE
   } // end IF
-  else
-  {
-    converter.str ((*iterator).second);
-    converter >> contentLength_;
-    missing_bytes =
-      contentLength_ - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
-                     - message_inout->total_length ();
-  } // end ELSE
-  if (!missing_bytes)
+  missing_bytes =
+    contentLength_ - (inherited::headFragment_ ? inherited::headFragment_->total_length () : 0)
+                   - message_inout->total_length ();
+
+  if (!missing_bytes && append_line_break_b)
   {
     int result = -1;
     size_t size_i = 0, capacity_i = 0;
@@ -199,7 +209,7 @@ Test_I_M3U_Module_Parser::hasFinished () const
   if (contentLength_)
     return (contentLength_ == inherited::scannerState_.offset);
 
-  return true;
+  return false;
 }
 
 void
@@ -216,14 +226,16 @@ Test_I_M3U_Module_Parser::record (struct M3U_Playlist*& record_inout)
 
   // make sure the whole fragment chain references the same data record
   ACE_ASSERT (inherited::headFragment_);
-  Test_I_Message* message_p = static_cast<Test_I_Message*> (inherited::headFragment_);
+  Test_I_Message* message_p =
+    static_cast<Test_I_Message*> (inherited::headFragment_);
   Test_I_MessageDataContainer& data_container_r =
     const_cast<Test_I_MessageDataContainer&> (message_p->getR ());
   struct Test_I_WebTV_MessageData& data_r =
     const_cast<struct Test_I_WebTV_MessageData&> (data_container_r.getR ());
   data_r.M3UPlaylist = record_inout;
   Test_I_MessageDataContainer* data_container_2 = NULL;
-  Test_I_Message* message_2 = static_cast<Test_I_Message*> (inherited::headFragment_->cont ());
+  Test_I_Message* message_2 =
+    static_cast<Test_I_Message*> (inherited::headFragment_->cont ());
   while (message_2)
   {
     data_container_r.increase ();

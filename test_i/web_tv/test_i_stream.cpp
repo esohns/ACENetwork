@@ -240,6 +240,13 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     layout_in->append (module_p, branch_2, index_2);
     module_p = NULL;
 
+    // ACE_NEW_RETURN (module_p,
+    //                 Test_I_Audio_Injector_Module (this,
+    //                                               ACE_TEXT_ALWAYS_CHAR ("Injector_2")),
+    //                 false);
+    // layout_in->append (module_p, branch_2, index_2);
+    // module_p = NULL;
+
     ACE_NEW_RETURN (module_p,
                     Test_I_AVIEncoder_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_ENCODER_AVI_DEFAULT_NAME_STRING)),

@@ -34,7 +34,8 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
                                   const typename ConnectorType::USERDATA_T& userData_in,
                                   const typename ConnectorType::ADDRESS_T& address_in,
                                   bool wait_in,
-                                  bool isPeerAddress_in)
+                                  bool isPeerAddress_in,
+                                  unsigned int retries_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Common_Tools::connect"));
 
@@ -65,9 +66,17 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   } // end IF
 
   // step3: connect
+retry:
   result = iconnector_p->connect (address_in);
   if (unlikely (result == ACE_INVALID_HANDLE))
   {
+    if (retries_in--)
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("failed to connect to %s, retrying\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
+      goto retry;
+    } // end IF
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
@@ -104,8 +113,17 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
                                               timeout); // relative- !
     if (unlikely (result_2))
     {
+      if (retries_in--)
+      {
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\", retrying\n"),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
+                    ACE_OS::strerror (result_2)));
+        iasynch_connector_p->abort ();
+        goto retry;
+      } // end IF
       ACE_DEBUG (((result_2 == ETIME ? LM_WARNING: LM_ERROR),
-                  ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\" aborting\n"),
+                  ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                   ACE_OS::strerror (result_2)));
       iasynch_connector_p->abort ();
@@ -139,6 +157,14 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   } while (ACE_OS::gettimeofday () < deadline);
   if (unlikely (status != NET_CONNECTION_STATUS_OK))
   {
+    if (retries_in--)
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("failed to connect to %s, retrying\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
+      connection_p->decrease (); connection_p = NULL;
+      goto retry;
+    } // end IF
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
@@ -157,6 +183,13 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
 continue_:
   if (unlikely (!connection_p))
   {
+    if (retries_in--)
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("failed to connect to %s, retrying\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
+      goto retry;
+    } // end IF
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));

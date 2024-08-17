@@ -33,8 +33,8 @@ class Net_Client_Common_Tools
                              const typename ConnectorType::USERDATA_T&,      // user data
                              const typename ConnectorType::ADDRESS_T&,       // (peer) address
                              bool = true,                                    // wait ?
-                             bool = true);                                   // peer address ? : local address
-
+                             bool = true,                                    // peer address ? : local address
+                             unsigned int = 0);                              // #retries
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Client_Common_Tools ())

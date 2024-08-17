@@ -83,6 +83,7 @@ class Test_I_M3U_Module_Parser
   virtual void record (struct M3U_Playlist*&); // data record
 
   ACE_UINT32 contentLength_;
+  bool       hasSeenContentLengthHeader_;
 };
 
 // declare module

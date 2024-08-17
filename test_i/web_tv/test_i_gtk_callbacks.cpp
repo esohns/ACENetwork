@@ -1066,7 +1066,7 @@ add_segment_URIs (unsigned int program_in,
 
       break;
     }
-    case 5:  // ARTE
+    case 5:  // ARTE // *TODO*
     case 8:  // MDR
     case 28: // NASA TV
     {
@@ -1093,10 +1093,10 @@ add_segment_URIs (unsigned int program_in,
       regex_string =
           ACE_TEXT_ALWAYS_CHAR ("^(master)(_)([[:alnum:]]+)(_)([[:digit:]]+)(.ts)$");
       regex.assign (regex_string);
-      if (unlikely(!std::regex_match (URI_string_tail,
-                                      match_results,
-                                      regex,
-                                      std::regex_constants::match_default)))
+      if (unlikely (!std::regex_match (URI_string_tail,
+                                       match_results,
+                                       regex,
+                                       std::regex_constants::match_default)))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
@@ -1924,7 +1924,8 @@ continue_:
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true,  // peer address ?
+                                            3);    // #retries
     else
 #endif // SSL_SUPPORT
       data_p->audioHandle =
@@ -1933,7 +1934,8 @@ continue_:
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true,  // peer address ?
+                                            3);    // #retries
   } // end IF
   else
   {
@@ -1947,7 +1949,8 @@ continue_:
                                           user_data_s,
                                           static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
                                           false, // wait ?
-                                          true); // peer address ?
+                                          true,  // peer address ?
+                                          3);    // #retries
   } // end ELSE
   if (data_p->audioHandle == ACE_INVALID_HANDLE)
   {
@@ -1979,7 +1982,8 @@ continue_2:
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true,  // peer address ?
+                                            3);    // #retries
     else
 #endif // SSL_SUPPORT
       data_p->videoHandle =
@@ -1988,7 +1992,8 @@ continue_2:
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true,  // peer address ?
+                                            3);    // #retries
   } // end IF
   else
   {
@@ -2002,7 +2007,8 @@ continue_2:
                                           user_data_s,
                                           static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
                                           false, // wait ?
-                                          true); // peer address ?
+                                          true,  // peer address ?
+                                          3);    // #retries
   } // end ELSE
   if (data_p->videoHandle == ACE_INVALID_HANDLE)
   {
@@ -2460,10 +2466,11 @@ drawing_area_resize_end (gpointer userData_in)
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
   ACE_ASSERT (toggle_button_p);
+  bool is_active_b = gtk_toggle_button_get_active (toggle_button_p);
   GtkDrawingArea* drawing_area_p =
-      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                                (gtk_toggle_button_get_active (toggle_button_p) ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)
-                                                                                                : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME))));
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              (is_active_b ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)
+                                                           : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME))));
   ACE_ASSERT (drawing_area_p);
 
   GtkAllocation allocation_s;
@@ -2513,8 +2520,8 @@ drawing_area_resize_end (gpointer userData_in)
 
   // step2
   data_p->AVStream->notify (STREAM_SESSION_MESSAGE_RESIZE,
-                          false, // recurse upstream ?
-                          true); // expedite ?
+                            false, // recurse upstream ?
+                            true); // expedite ?
 
   return FALSE;
 } // drawing_area_resize_end
@@ -2603,6 +2610,9 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     Net_ConnectionConfigurationsIterator_t iterator_2b =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2b"));
     ACE_ASSERT (iterator_2b != data_p->configuration->connectionConfigurations.end ());
+    Test_I_WebTV_StreamConfiguration_t::ITERATOR_T stream_iterator =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (stream_iterator != data_p->configuration->streamConfiguration.end ());
     Test_I_WebTV_StreamConfiguration_t::ITERATOR_T stream_iterator_2a =
       data_p->configuration->streamConfiguration_2a.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_2a != data_p->configuration->streamConfiguration_2a.end ());
@@ -2618,9 +2628,15 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
         data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
+    Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_marshal_3a =
+      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
+    ACE_ASSERT (stream_iterator_marshal_3a != data_p->configuration->streamConfiguration_3a.end ());
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3b =
         data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_3b != data_p->configuration->streamConfiguration_3b.end ());
+    Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_marshal_3b =
+      data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
+    ACE_ASSERT (stream_iterator_marshal_3b != data_p->configuration->streamConfiguration_3b.end ());
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_4b =
         data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
@@ -2646,10 +2662,15 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     struct Net_UserData user_data_s;
 
     data_p->configuration->parserConfiguration.messageQueue = NULL;
+    (*stream_iterator).second.second->parserConfiguration->messageQueue = NULL;
     (*stream_iterator_2a).second.second->parserConfiguration->messageQueue = NULL;
     (*stream_iterator_marshal_2a).second.second->parserConfiguration->messageQueue = NULL;
     (*stream_iterator_2b).second.second->parserConfiguration->messageQueue = NULL;
     (*stream_iterator_marshal_2b).second.second->parserConfiguration->messageQueue = NULL;
+    (*stream_iterator_3a).second.second->parserConfiguration->messageQueue = NULL;
+    (*stream_iterator_marshal_3a).second.second->parserConfiguration->messageQueue = NULL;
+    (*stream_iterator_3b).second.second->parserConfiguration->messageQueue = NULL;
+    (*stream_iterator_marshal_3b).second.second->parserConfiguration->messageQueue = NULL;
 
     // retrieve stream URLs
     GtkComboBox* combo_box_p =
@@ -2868,7 +2889,8 @@ continue_3:
                                               user_data_s,
                                               static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
                                               false, // wait ?
-                                              true); // peer address ?
+                                              true,  // peer address ?
+                                              3);    // #retries
       else
 #endif // SSL_SUPPORT
         data_p->audioHandle =
@@ -2877,7 +2899,8 @@ continue_3:
                                               user_data_s,
                                               static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
                                               false, // wait ?
-                                              true); // peer address ?
+                                              true,  // peer address ?
+                                              3);    // #retries
     } // end IF
     else
     {
@@ -2891,7 +2914,8 @@ continue_3:
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true,  // peer address ?
+                                            3);    // #retries
     } // end ELSE
     if (data_p->audioHandle == ACE_INVALID_HANDLE)
     {
@@ -2923,7 +2947,8 @@ continue_4:
                                               user_data_s,
                                               static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
                                               false, // wait ?
-                                              true); // peer address ?
+                                              true,  // peer address ?
+                                              3);    // #retries
       else
 #endif // SSL_SUPPORT
         data_p->videoHandle =
@@ -2932,7 +2957,8 @@ continue_4:
                                               user_data_s,
                                               static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
                                               false, // wait ?
-                                              true); // peer address ?
+                                              true,  // peer address ?
+                                              3);    // #retries
     } // end IF
     else
     {
@@ -2946,7 +2972,8 @@ continue_4:
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true,  // peer address ?
+                                            3);    // #retries
     } // end ELSE
     if (data_p->videoHandle == ACE_INVALID_HANDLE)
     {
@@ -3038,19 +3065,20 @@ continue_4:
     data_p->videoTimeoutHandler->timerId_ = 0;
   } // end IF
 
-  iconnection_manager_p->abort ();
-  iconnection_manager_2->abort ();
+  iconnection_manager_p->abort (false);
+  iconnection_manager_2->abort (false);
   data_p->audioHandle = ACE_INVALID_HANDLE;
   data_p->videoHandle = ACE_INVALID_HANDLE;
 
   data_p->dispatch = NULL;
   data_p->AudioStream->stop (false, // wait for completion ?
-                             false, // recurse ?
+                             true,  // recurse ?
                              true); // high priority
   data_p->AVStream->stop (false, // wait for completion ?
-                          false, // recurse ?
+                          true,  // recurse ?
                           true); // high priority
 
+  // *NOTE*: untoggling hopefully happens in idle_end_session_cb()
   return;
 
 error:
