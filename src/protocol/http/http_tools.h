@@ -64,7 +64,8 @@ class HTTP_Tools
   // *NOTE*: this 'escapes' the input so it can be sent in an URL
   //         (see also: RFC 1738, RFC 3986)
   static std::string URLEncode (const std::string&, // input string
-                                bool = false);      // '%xx' everything ?
+                                bool = false,       // '%xx' everything ?
+                                bool = true);       // upper-case all hex digits ?
   // *NOTE*: removes any parameters (i.e. ?name=value&name=value...)
   static std::string stripURI (const std::string&);
 

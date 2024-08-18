@@ -68,6 +68,30 @@ typedef BitTorrent_Session_T<BitTorrent_Client_PeerConnectionConfiguration,
                              struct Net_UserData,
                              BitTorrent_Client_IControl_t,
                              struct BitTorrent_Client_UI_CBData> BitTorrent_Client_Session_t;
+#if defined (SSL_SUPPORT)
+typedef BitTorrent_Session_T<BitTorrent_Client_PeerConnectionConfiguration,
+                             BitTorrent_Client_TrackerConnectionConfiguration,
+                             struct BitTorrent_Client_PeerConnectionState,
+                             BitTorrent_Client_PeerStream_t,
+                             BitTorrent_Client_TrackerStream_t,
+                             enum Stream_StateMachine_ControlState,
+                             BitTorrent_Client_PeerStreamHandler_t,
+                             BitTorrent_Client_TrackerStreamHandler_t,
+                             BitTorrent_Client_PeerTCPConnection_t,
+                             BitTorrent_Client_TrackerSSLConnection_t,
+                             BitTorrent_Client_PeerConnection_Manager_t,
+                             BitTorrent_Client_TrackerConnection_Manager_t,
+                             BitTorrent_Client_PeerConnector_t,
+                             BitTorrent_Client_TrackerSSLConnector_t,
+                             struct BitTorrent_Client_SessionConfiguration,
+                             struct BitTorrent_Client_SessionState,
+                             struct Stream_UserData,
+                             struct Stream_UserData,
+                             struct Net_UserData,
+                             struct Net_UserData,
+                             BitTorrent_Client_IControl_t,
+                             struct BitTorrent_Client_UI_CBData> BitTorrent_Client_SSLSession_t;
+#endif // SSL_SUPPORT
 typedef BitTorrent_Session_T<BitTorrent_Client_PeerConnectionConfiguration,
                              BitTorrent_Client_TrackerConnectionConfiguration,
                              struct BitTorrent_Client_PeerConnectionState,
@@ -98,5 +122,12 @@ typedef BitTorrent_Control_T<BitTorrent_Client_AsynchSession_t,
                              struct BitTorrent_Client_SessionConfiguration,
                              BitTorrent_Client_ISession_t,
                              struct BitTorrent_Client_SessionState> BitTorrent_Client_Control_t;
+#if defined (SSL_SUPPORT)
+typedef BitTorrent_Control_T<BitTorrent_Client_AsynchSession_t,
+                             BitTorrent_Client_SSLSession_t,
+                             struct BitTorrent_Client_SessionConfiguration,
+                             BitTorrent_Client_ISession_t,
+                             struct BitTorrent_Client_SessionState> BitTorrent_Client_SSLControl_t;
+#endif // SSL_SUPPORT
 
 #endif

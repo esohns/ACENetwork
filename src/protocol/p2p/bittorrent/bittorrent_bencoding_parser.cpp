@@ -38,15 +38,7 @@
 
 #include "stdafx.h"
 
-#include "ace/Synch.h"
 #include "bittorrent_bencoding_parser.h"
-
-
-
-
-
-#include "bittorrent_bencoding_parser.h"
-
 
 // Unqualified %code blocks.
 

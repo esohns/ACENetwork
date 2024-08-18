@@ -514,13 +514,13 @@ BitTorrent_Tools::generateKey ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   char buffer_a[BUFSIZ];
   ACE_OS::memset (&buffer_a, 0, BUFSIZ);
-  ACE_OS::strcpy (buffer_a, ACE_TEXT ("XXXXXXXXXXXXXXXXXXXX"));
+  ACE_OS::strcpy (buffer_a, ACE_TEXT_ALWAYS_CHAR ("XXXXXXXXXXXXXXXXXXXX"));
   ACE_OS::mktemp (buffer_a);
   if (unlikely (!ACE_OS::strlen (buffer_a)))
   {
     ACE_DEBUG ((LM_ERROR,
-      ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
-    return std::string ();
+                ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
+    return ACE_TEXT_ALWAYS_CHAR ("");
   } // end IF
   result += buffer_a;
 #else
@@ -611,6 +611,9 @@ BitTorrent_Tools::havePiece (unsigned int index_in,
 
   unsigned int array_index_i = index_in / (sizeof (ACE_UINT8) * 8);
   unsigned int array_offset_i = index_in % (sizeof (ACE_UINT8) * 8);
+
+  // sanity check(s)
+  ACE_ASSERT (bitfield_in.size () >= array_index_i + 1);
 
   return bitfield_in[array_index_i] & (0x80 >> array_offset_i);
 }

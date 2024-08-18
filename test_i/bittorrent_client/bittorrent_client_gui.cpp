@@ -833,9 +833,7 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_MAIN_FILE);
 
   // step2b: validate argument(s)
-  if ((!torrent_file_name.empty () &&
-       !Common_File_Tools::isReadable (torrent_file_name)) ||
-      !Common_File_Tools::isReadable (ui_definition_file_name))
+  if (!Common_File_Tools::isReadable (ui_definition_file_name))
   {
     do_printUsage (ACE::basename (argv_in[0]));
 
@@ -855,8 +853,8 @@ ACE_TMAIN (int argc_in,
   if (log_to_file)
     log_file_name =
       Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                        ACE::basename (argv_in[0]));
-  if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]), // program name
+                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0])));
+  if (!Common_Log_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0])), // program name
                                      log_file_name,              // log file name
                                      false,                      // log to syslog ?
                                      false,                      // trace messages ?

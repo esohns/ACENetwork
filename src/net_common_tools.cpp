@@ -1311,7 +1311,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 
   // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier = interfaceIdentifier_in;
   if (InlineIsEqualGUID (interface_identifier, GUID_NULL))
 #else
@@ -1323,7 +1323,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   if (interface_identifier.empty ())
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     interface_identifier =
       Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::getDefaultInterface ()));
 #else
@@ -1335,7 +1335,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 
   // step1: determine the 'internal' IP address
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
                                                            internal_ip_address,
                                                            gateway_ip_address)))
@@ -1351,7 +1351,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 #endif // ACE_WIN32 || ACE_WIN64
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(\"%s\"), aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
@@ -1359,7 +1359,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
                 ACE_TEXT (interface_identifier.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
@@ -1381,7 +1381,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
       Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""), true);
   std::string command_line_string =
       //ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
-    ACE_TEXT_ALWAYS_CHAR ("curl -f -L -s http://myexternalip.com/raw >> ");
+    ACE_TEXT_ALWAYS_CHAR ("curl -f -L -s https://www.myexternalip.com/raw >> "); // --> ipv4
   command_line_string += filename_string;
 
   result = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
@@ -1415,8 +1415,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
                 ACE_TEXT ("failed to Common_File_Tools::deleteFile(\"%s\"), continuing\n"),
                 ACE_TEXT (filename_string.c_str ())));
 
-  std::string resolution_record_string = reinterpret_cast<char*> (data_p);
-  resolution_record_string.resize (file_size_i);
+  std::string resolution_record_string (reinterpret_cast<char*> (data_p), file_size_i);
   delete [] data_p; data_p = NULL;
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("nslookup data: \"%s\"\n"),
@@ -1446,11 +1445,19 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   } // end IF
   IPAddress_out = Net_Common_Tools::stringToIPAddress (external_ip_address);
 
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("interface \"%s\" --> %s (--> %s)\n"),
-  //            ACE_TEXT (interfaceIdentifier_in.c_str ()),
-  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (internal_ip_address).c_str ()),
-  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_out).c_str ())));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("interface \"%s\" --> %s (--> %s)\n"),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (internal_ip_address, true, false).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_out, true, false).c_str ())));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("interface \"%s\" --> %s (--> %s)\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (internal_ip_address, true, false).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_out, true, false).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
 
   return true;
 }

@@ -144,11 +144,6 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
   ACE_UNUSED_ARG (expedite_in);
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
 }
 
 template <typename SessionDataType,
@@ -322,12 +317,12 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #else
                                   >::BitTorrent_TrackerStreamHandler_T (SessionInterfaceType* interfaceHandle_in)
 #endif // GUI_SUPPORT
+ : allocator_ (NULL)
+ , configuration_ (NULL)
 #if defined (GUI_SUPPORT)
- : CBData_ (CBData_in)
- , session_ (interfaceHandle_in)
-#else
- : session_ (interfaceHandle_in)
+ , CBData_ (CBData_in)
 #endif // GUI_SUPPORT
+ , session_ (interfaceHandle_in)
  , sessionData_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::BitTorrent_TrackerStreamHandler_T"));
@@ -403,11 +398,6 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
   ACE_UNUSED_ARG (expedite_in);
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
 }
 
 template <typename SessionDataType,
@@ -546,6 +536,11 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   } // end SWITCH
 
   // parse bencoded record
+  ACE_Message_Block* message_block_p =
+    &const_cast<BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
+                                                                 UserDataType>&> (message_in);
+  Stream_Tools::crunch (message_block_p,
+                        allocator_);
   struct Common_FlexBisonParserConfiguration parser_configuration = *configuration_;
   parser_configuration.block = false;
   parser_configuration.messageQueue = NULL;
@@ -620,4 +615,32 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 
   // sanity check(s)
   ACE_ASSERT (iterator != sessionData_.end ());
+}
+
+template <typename SessionDataType, typename UserDataType,
+          typename SessionInterfaceType
+#if defined(GUI_SUPPORT)
+          ,
+          typename CBDataType>
+#else
+          >
+#endif // GUI_SUPPORT
+bool
+BitTorrent_TrackerStreamHandler_T<SessionDataType,
+                                  UserDataType,
+                                  SessionInterfaceType
+#if defined (GUI_SUPPORT)
+                                  ,CBDataType>::initialize (const struct Common_FlexBisonParserConfiguration& configuration_in,
+#else
+                                  >::initialize (const struct Common_FlexBisonParserConfiguration& configuration_in,
+#endif // GUI_SUPPORT
+                                                            Stream_IAllocator* allocator_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::initialize"));
+
+  allocator_ = allocator_in;
+  configuration_ =
+    &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+
+  return true;
 }

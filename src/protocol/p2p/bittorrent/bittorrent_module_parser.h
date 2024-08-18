@@ -27,7 +27,6 @@
 #include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
-//#include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
 
 #include "bittorrent_defines.h"

@@ -355,7 +355,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     } // end IF
   } // end lock scope
 
-  if (!inherited::state_.trackerStreamHandler->initialize (*static_cast<struct Common_FlexBisonParserConfiguration*> (configuration_in.parserConfiguration)))
+  if (!inherited::state_.trackerStreamHandler->initialize (*static_cast<struct Common_FlexBisonParserConfiguration*> (configuration_in.parserConfiguration),
+                                                           configuration_in.trackerConnectionConfiguration->messageAllocator))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to BitTorrent_TrackerStreamHandler_T::initialize(), aborting\n")));
@@ -2671,13 +2672,21 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
           for (;
                iterator_2 != inherited::configuration_->metaInfo->end ();
                ++iterator_2)
-            if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECES_KEY))
+            if (*(*iterator_2).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY))
               break;
           ACE_ASSERT (iterator_2 != inherited::configuration_->metaInfo->end ());
-          ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
-          ACE_ASSERT (!((*iterator_2).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
+          ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+          Bencoding_DictionaryIterator_t iterator_3 =
+            (*iterator_2).second->dictionary->begin ();
+          for (; iterator_3 != (*iterator_2).second->dictionary->end ();
+               ++iterator_3)
+            if (*(*iterator_3).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_PIECES_KEY))
+              break;
+          ACE_ASSERT (iterator_3 != (*iterator_2).second->dictionary->end ());
+          ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
+          ACE_ASSERT (!((*iterator_3).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
           unsigned int pieces =
-              (*iterator_2).second->string->size () / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
+              (*iterator_3).second->string->size () / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
           for (unsigned int i = 0;
                i < pieces;
                ++i)

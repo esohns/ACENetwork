@@ -599,7 +599,8 @@ HTTP_Tools::URLRequiresSSL (const std::string& URL_in)
 
 std::string
 HTTP_Tools::URLEncode (const std::string& string_in,
-                       bool escapeAll_in)
+                       bool escapeAll_in,
+                       bool upperCaseHexDigits_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLEncode"));
 
@@ -619,29 +620,30 @@ HTTP_Tools::URLEncode (const std::string& string_in,
         (!std::isdigit (*iterator, c_locale) &&
          !std::isalpha (*iterator, c_locale) &&
          !((*iterator == '.') || (*iterator == '-') || (*iterator == '_') ||
-          (*iterator == '~')))                      ||
-        // 'unsafe' characters (see also: RFC 1738)
-        ((*iterator == '<') || (*iterator == '>') || (*iterator == '"') ||
-         (*iterator == '#') || (*iterator == '%') || (*iterator == '{') ||
-         (*iterator == '}') || (*iterator == '|') || (*iterator == '\\') ||
-         (*iterator == '^') || (*iterator == '~')  || (*iterator == '[') ||
-         (*iterator == ']')  || (*iterator == '`')) ||
-        // 'reserved' characters (see also: RFC 1738)
-        ((*iterator == ';') || (*iterator == '/') || (*iterator == '?') ||
-          (*iterator == ':') || (*iterator == '@') || (*iterator == '=') ||
-          (*iterator == '&')))
+           (*iterator == '~'))))//                     ||
+        //// 'unsafe' characters (see also: RFC 1738)
+        //((*iterator == '<') || (*iterator == '>') || (*iterator == '"') ||
+        // (*iterator == '#') || (*iterator == '%') || (*iterator == '{') ||
+        // (*iterator == '}') || (*iterator == '|') || (*iterator == '\\') ||
+        // (*iterator == '^') || (*iterator == '~') || (*iterator == '[') ||
+        // (*iterator == ']') || (*iterator == '`'))  ||
+        //// 'reserved' characters (see also: RFC 1738)
+        //((*iterator == ';') || (*iterator == '/') || (*iterator == '?') ||
+        // (*iterator == ':') || (*iterator == '@') || (*iterator == '=') ||
+        // (*iterator == '&')))
     {
       result += '%';
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       // *TODO*: there is probably a better way to do this...
-      converter << std::setw (2) << static_cast<ACE_UINT16> (*iterator);
+      converter << std::setw (2) << static_cast<ACE_UINT16> (static_cast<unsigned char> (*iterator));
       converted_string = converter.str ();
       // "...For consistency, URI producers and normalizers should use
       //  uppercase hexadecimal digits for all percent-encodings. ..."
-      std::transform (converted_string.begin (), converted_string.end (),
-                      converted_string.begin (),
-                      [](unsigned char c) { return std::toupper (c); });
+      if (upperCaseHexDigits_in)
+        std::transform (converted_string.begin (), converted_string.end (),
+                        converted_string.begin (),
+                        [](unsigned char c) { return std::toupper (c); });
       result +=
         ((converted_string.size () == 2) ? converted_string
                                          : converted_string.substr (2, std::string::npos));

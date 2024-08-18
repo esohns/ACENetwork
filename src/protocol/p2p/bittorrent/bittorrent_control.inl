@@ -24,9 +24,9 @@
 #include "ace/OS_Memory.h"
 #include "ace/Time_Value.h"
 
-#include "common_parser_bencoding_tools.h"
+#include "common_string_tools.h"
 
-//#include "stream_dec_common.h"
+#include "common_parser_bencoding_tools.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -90,11 +90,11 @@ BitTorrent_Control_T<SessionAsynchType,
   SessionStateType* session_state_p = NULL;
   Bencoding_DictionaryIterator_t iterator;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier = GUID_NULL;
 #else
   std::string interface_identifier;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
   std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -113,6 +113,7 @@ BitTorrent_Control_T<SessionAsynchType,
   std::string host_name_string;
   std::string URI_string;
   bool use_SSL = false;
+  std::string info_hash_sha1_string;
 
   // step1: parse metainfo
   ACE_ASSERT (sessionConfiguration_->parserConfiguration);
@@ -203,10 +204,17 @@ BitTorrent_Control_T<SessionAsynchType,
   data_p->method = HTTP_Codes::HTTP_METHOD_GET;
   data_p->URI = URI_string;
   data_p->version = HTTP_Codes::HTTP_VERSION_1_1;
+  info_hash_sha1_string =
+    BitTorrent_Tools::MetaInfoToInfoHash (*sessionConfiguration_->metaInfo);
+  // *NOTE*: you can probably google this string to verify the hash is correct...
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("hex string of info_hash: \"%s\"...\n"),
+              ACE_TEXT (Common_String_Tools::toHexString (info_hash_sha1_string).c_str ())));
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                                             HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*sessionConfiguration_->metaInfo))));
+                                       //Common_String_Tools::toHexString (info_hash_sha1_string)));
+                                       HTTP_Tools::URLEncode (info_hash_sha1_string)));
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
-                                                             HTTP_Tools::URLEncode (session_state_p->peerId)));
+                                       HTTP_Tools::URLEncode (session_state_p->peerId)));
   converter << BITTORRENT_DEFAULT_PORT;
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PORT_HEADER),
                                        converter.str ()));
@@ -234,8 +242,8 @@ BitTorrent_Control_T<SessionAsynchType,
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  interface_identifier = Net_Common_Tools::getDefaultInterface_2 ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+  interface_identifier = Net_Common_Tools::getDefaultInterface_2 (NET_LINKLAYER_802_3);
 #else
   interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
 #endif // _WIN32_WINNT_VISTA
@@ -245,7 +253,7 @@ BitTorrent_Control_T<SessionAsynchType,
   if (unlikely (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
                                                                  external_ip_address)))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
@@ -261,7 +269,7 @@ BitTorrent_Control_T<SessionAsynchType,
 #endif // ACE_WIN32 || ACE_WIN64
   else
     data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
-                                         Net_Common_Tools::IPAddressToString (external_ip_address).c_str ()));
+                                         Net_Common_Tools::IPAddressToString (external_ip_address, true, false).c_str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS;
@@ -273,14 +281,6 @@ BitTorrent_Control_T<SessionAsynchType,
   //                                     session_state_p->key));
   //data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_TRACKERID_HEADER),
   //                                     session_state_p->trackerId));
-#if defined (HAVE_CONFIG_H)
-  user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
-  user_agent += ACE_TEXT_ALWAYS_CHAR ("/");
-  user_agent += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION);
-#endif // HAVE_CONFIG_H
-  if (!user_agent.empty ())
-    data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
-                                            user_agent));
   if (Net_Common_Tools::matchIPv4Address (host_name_string))
   {
     std::string host_name_string_2;
@@ -293,8 +293,16 @@ BitTorrent_Control_T<SessionAsynchType,
                                           host_name_string));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
                                           ACE_TEXT_ALWAYS_CHAR ("*/*")));
-  data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
-                                          ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
+  //data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
+  //                                        ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
+#if defined (HAVE_CONFIG_H)
+  user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
+  user_agent += ACE_TEXT_ALWAYS_CHAR ("/");
+  user_agent += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION);
+#endif // HAVE_CONFIG_H
+  if (!user_agent.empty ())
+    data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
+                                            user_agent));
 
   // *IMPORTANT NOTE*: fire-and-forget API (message_p)
   message_block_p = message_p;

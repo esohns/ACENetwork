@@ -43,6 +43,9 @@
 
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
+#if defined (SSL_SUPPORT)
+#include "net_client_ssl_connector.h"
+#endif // SSL_SUPPORT
 
 #include "bittorrent_icontrol.h"
 #include "bittorrent_isession.h"
@@ -317,11 +320,6 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
-//typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
-//                               ACE_SOCK_STREAM,
-//                               Net_TCPSocketConfiguration_t> BitTorrent_Client_PeerTCPSocketHandler_t;
-//typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> BitTorrent_Client_AsynchPeerTCPSocketHandler_t;
-
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_TCPSocketHandler_t,
                                 BitTorrent_Client_PeerConnectionConfiguration,
@@ -338,11 +336,6 @@ typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
 
 //----------------------------------------
 
-//typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
-//                               ACE_SOCK_STREAM,
-//                               Net_TCPSocketConfiguration_t> BitTorrent_Client_TrackerTCPSocketHandler_t;
-//typedef Net_AsynchTCPSocketHandler_T<Net_TCPSocketConfiguration_t> BitTorrent_Client_AsynchTrackerTCPSocketHandler_t;
-
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_TCPSocketHandler_t,
                                 BitTorrent_Client_TrackerConnectionConfiguration,
@@ -350,6 +343,15 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_StreamStatistic_t,
                                 BitTorrent_Client_TrackerStream_t,
                                 struct Net_UserData> BitTorrent_Client_TrackerTCPConnection_t;
+#if defined (SSL_SUPPORT)
+typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+                                Net_SSLSocketHandler_t,
+                                BitTorrent_Client_TrackerConnectionConfiguration,
+                                struct BitTorrent_Client_TrackerConnectionState,
+                                Net_StreamStatistic_t,
+                                BitTorrent_Client_TrackerStream_t,
+                                struct Net_UserData> BitTorrent_Client_TrackerSSLConnection_t;
+#endif // SSL_SUPPORT
 typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
                                       BitTorrent_Client_TrackerConnectionConfiguration,
                                       struct BitTorrent_Client_TrackerConnectionState,
@@ -395,6 +397,16 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Net_TCPSocketConfiguration_t,
                                BitTorrent_Client_TrackerStream_t,
                                struct Net_UserData> BitTorrent_Client_TrackerConnector_t;
+#if defined (SSL_SUPPORT)
+typedef Net_Client_SSL_Connector_T<BitTorrent_Client_TrackerSSLConnection_t,
+                                   ACE_SSL_SOCK_Connector,
+                                   BitTorrent_Client_TrackerConnectionConfiguration,
+                                   struct BitTorrent_Client_TrackerConnectionState,
+                                   Net_StreamStatistic_t,
+                                   BitTorrent_Client_TrackerStream_t,
+                                   struct Net_UserData> BitTorrent_Client_TrackerSSLConnector_t;
+#endif // SSL_SUPPORT
+
 typedef Net_Client_AsynchConnector_T<BitTorrent_Client_AsynchTrackerTCPConnection_t,
                                      ACE_INET_Addr,
                                      BitTorrent_Client_TrackerConnectionConfiguration,

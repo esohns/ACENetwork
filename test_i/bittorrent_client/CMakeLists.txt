@@ -375,15 +375,18 @@ elseif (WIN32)
  endif (GUI_SUPPORT)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl OPENSSL_LIB_PATH)
+ # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
+ file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                           ${ACE_LIBRARY_PATH}
                            ${OPENSSL_LIB_PATH}
+                           ${VCPKG_LIB_PATH}
                            ${FFMPEG_PATH}
+                           ${IMAGEMAGICK_PATH}
                            ${GTK_PATH}
                            ${WXWIDGETS_PATH}
-                           ${IMAGEMAGICK_PATH})
+                           ${ACE_LIBRARY_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
                          ARGS "-f etc\\\\test.torrent -l -r -t"

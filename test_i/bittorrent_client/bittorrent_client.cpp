@@ -514,7 +514,11 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   ACE_Thread_Manager* thread_manager_p = NULL;
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
+#if defined (SSL_SUPPORT)
+  BitTorrent_Client_SSLControl_t bittorrent_control (&configuration_in.sessionConfiguration);
+#else
   BitTorrent_Client_Control_t bittorrent_control (&configuration_in.sessionConfiguration);
+#endif // SSL_SUPPORT
   BitTorrent_Client_PeerConnection_Manager_t* peer_connection_manager_p =
       BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
   BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =

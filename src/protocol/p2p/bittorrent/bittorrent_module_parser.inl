@@ -265,7 +265,7 @@ next:
       goto error;
     } // end IF
     goto next;
-  };
+  } // end WHILE
 
 error:
   if (release_inbound_message)
@@ -1607,7 +1607,8 @@ BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
   ACE_Message_Block* message_block_p = headFragment_;
   do
   {
-    if (!message_block_p->cont ()) break;
+    if (!message_block_p->cont ())
+      break;
     message_block_p = message_block_p->cont ();
   } while (true);
   if (message_block_p != inherited2::fragment_)
