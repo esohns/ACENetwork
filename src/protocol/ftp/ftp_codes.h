@@ -118,6 +118,15 @@ class FTP_Codes
     FTP_CODE_INVALID
   };
 
+  enum DataType
+  {
+    FTP_TYPE_ASCII = 'A',
+    FTP_TYPE_BINARY = 'I',
+    //////////////////////////////////////
+    FTP_TYPE_MAX,
+    FTP_TYPE_INVALID
+  };
+
   enum RecordType
   {
     FTP_RECORD_DIRECTORY = 0,

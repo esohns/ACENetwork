@@ -905,6 +905,11 @@ idle_login_complete_cb (gpointer userData_in)
                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ACTION_CONNECT_NAME)));
   ACE_ASSERT (action_p);
   gtk_action_set_sensitive (action_p, FALSE);
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_MODE_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), TRUE);
 
   struct FTP_Request request_s;
   request_s.command = FTP_Codes::FTP_COMMAND_LIST;
@@ -1462,6 +1467,33 @@ error:
   un_toggling_listen = true;
   gtk_toggle_action_set_active (toggleAction_in, FALSE);
 } // toggle_action_listen_toggled_cb
+
+void
+togglebutton_mode_toggled_cb (GtkToggleButton* toggleButton_in,
+                              gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::togglebutton_mode_toggled_cb"));
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  bool is_mode_binary_b = gtk_toggle_button_get_active (toggleButton_in);
+  gtk_button_set_label (GTK_BUTTON (toggleButton_in),
+                        (is_mode_binary_b ? ACE_TEXT_ALWAYS_CHAR ("Binary")
+                                          : ACE_TEXT_ALWAYS_CHAR ("ASCII")));
+
+  struct FTP_Request request_s;
+  request_s.command = FTP_Codes::FTP_COMMAND_TYPE;
+  request_s.parameters.push_back ((is_mode_binary_b ? ACE_TEXT_ALWAYS_CHAR ("I")
+                                                    : ACE_TEXT_ALWAYS_CHAR ("A")));
+  data_p->control->request (request_s);
+}
 
 // -----------------------------------------------------------------------------
 

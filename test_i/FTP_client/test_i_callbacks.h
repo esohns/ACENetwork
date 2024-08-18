@@ -53,6 +53,7 @@ G_MODULE_EXPORT void action_connect_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void spinbutton_server_port_value_changed_cb (GtkSpinButton*, gpointer);
 G_MODULE_EXPORT void toggleaction_listen_toggled_cb (GtkToggleAction*, gpointer);
+G_MODULE_EXPORT void togglebutton_mode_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void treeview_selection_directories_changed_cb (GtkTreeSelection*, gpointer);
 G_MODULE_EXPORT void treeview_selection_files_changed_cb (GtkTreeSelection*, gpointer);
 

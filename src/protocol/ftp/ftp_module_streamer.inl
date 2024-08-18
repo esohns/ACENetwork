@@ -87,7 +87,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -98,7 +98,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -109,7 +109,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -120,7 +120,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -130,7 +130,18 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
+        goto error;
+      break;
+    }
+    case FTP_Codes::FTP_COMMAND_TYPE:
+    { ACE_ASSERT (!data_r.request.parameters.empty ());
+      text_string = ACE_TEXT_ALWAYS_CHAR ("TYPE ");
+      text_string += data_r.request.parameters.front ();
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
+      result = message_inout->copy (text_string.c_str (),
+                                    text_string.size ());
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -141,7 +152,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -156,7 +167,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -171,7 +182,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }
@@ -181,7 +192,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
-      if (result == -1)
+      if (unlikely (result == -1))
         goto error;
       break;
     }

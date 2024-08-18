@@ -60,6 +60,7 @@
 #define TEST_I_UI_GTK_STATUSBAR_NAME                      "statusbar"
 //#define TEST_I_UI_GTK_TABLE_OPTIONS_NAME                  "table_options"
 #define TEST_I_UI_GTK_TOGGLEACTION_LISTEN_NAME            "toggleaction_listen"
+#define TEST_I_UI_GTK_TOGGLEBUTTON_MODE_NAME              "togglebutton_mode"
 #define TEST_I_UI_GTK_TEXTVIEW_NAME                       "textview"
 #define TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME          "treestore_directories"
 #define TEST_I_UI_GTK_TREEVIEW_DIRECTORIES_NAME           "treeview_directories"
