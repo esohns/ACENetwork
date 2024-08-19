@@ -231,7 +231,8 @@ class BitTorrent_Session_T
   bool getConnectionAndMessage (Net_ConnectionId_t,                    // connection id
                                 ISTREAM_CONNECTION_T*&,                // return value: connection handle
                                 typename PeerStreamType::MESSAGE_T*&); // return value: message handle
-  void requestNextPiece (Net_ConnectionId_t); // connection id
+  bool requestNextPiece (Net_ConnectionId_t); // connection id
+  void populatePeerPiecesBitfield (Net_ConnectionId_t); // connection id
 
   bool                             logToFile_;
   PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;

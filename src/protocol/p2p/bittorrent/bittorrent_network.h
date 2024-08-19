@@ -165,12 +165,17 @@ struct BitTorrent_PeerStatus
    , am_interested (false)
    , peer_choking (true)
    , peer_interested (false)
+   , requesting_piece (false)
   {};
 
+  // protocol
   bool am_choking;
   bool am_interested;
   bool peer_choking;
   bool peer_interested;
+
+  // other
+  bool requesting_piece;
 };
 typedef std::map<Net_ConnectionId_t, struct BitTorrent_PeerStatus> BitTorrent_PeerStatus_t;
 typedef BitTorrent_PeerStatus_t::iterator BitTorrent_PeerStatusIterator_t;
