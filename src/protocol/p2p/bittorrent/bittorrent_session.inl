@@ -30,6 +30,9 @@
 #include "common_tools.h"
 
 #include "common_parser_common.h"
+
+#include "common_timer_manager_common.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -99,9 +102,12 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                      >::BitTorrent_Session_T ()
 #endif // GUI_SUPPORT
  : inherited ()
+ , inherited2 (this,  // handler
+               false) // one-shot ?
  , logToFile_ (BITTORRENT_DEFAULT_SESSION_LOG)
  , peerHandlerModule_ (NULL)
  , trackerHandlerModule_ (NULL)
+ , timerId_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::BitTorrent_Session_T"));
 
@@ -165,13 +171,97 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::~BitTorrent_Session_T"));
 
+  if (timerId_ != -1)
+  {
+    int result =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerId_,
+                                                                NULL);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
+                  timerId_));
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("cancelled interval timer (id: %d)\n"),
+                  timerId_));
+  } // end IF
+
   if (peerHandlerModule_)
     delete peerHandlerModule_;
   if (trackerHandlerModule_)
     delete trackerHandlerModule_;
 }
 
-//////////////////////////////////////////
+template <typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
+          typename PeerConnectorType,
+          typename TrackerConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename PeerStreamUserDataType,
+          typename TrackerStreamUserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
+void
+BitTorrent_Session_T<PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
+                     PeerStreamType,
+                     TrackerStreamType,
+                     StreamStatusType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
+                     PeerConnectionType,
+                     TrackerConnectionType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
+                     PeerConnectorType,
+                     TrackerConnectorType,
+                     ConfigurationType,
+                     StateType,
+                     PeerStreamUserDataType,
+                     TrackerStreamUserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::handle (const void* ACT_in)
+#else
+                     >::handle (const void* ACT_in)
+#endif // GUI_SUPPORT
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::handle"));
+
+  ACE_UNUSED_ARG (ACT_in);
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->controller);
+
+  try {
+    inherited::configuration_->controller->notifyTracker (inherited::configuration_->metaInfoFileName,
+                                                          BITTORRENT_EVENT_TRACKER_REREQUEST);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in BitTorrent_IControl_T::notifyTracker(), continuing\n")));
+  }
+}
 
 template <typename PeerConnectionConfigurationType,
           typename TrackerConnectionConfigurationType,
@@ -244,7 +334,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     inherited::state_.metaInfo = configuration_in.metaInfo;
     // initialize piece data
     Bencoding_DictionaryIterator_t iterator =
-        configuration_in.metaInfo->begin ();
+      configuration_in.metaInfo->begin ();
     for (;
          iterator != configuration_in.metaInfo->end ();
          ++iterator)
@@ -253,7 +343,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     ACE_ASSERT (iterator != configuration_in.metaInfo->end ());
     ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
     Bencoding_DictionaryIterator_t iterator_2 =
-        (*iterator).second->dictionary->begin ();
+      (*iterator).second->dictionary->begin ();
     for (;
          iterator_2 != (*iterator).second->dictionary->end ();
          ++iterator_2)
@@ -264,7 +354,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     ACE_ASSERT (!((*iterator_2).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
     std::string piece_hashes = *(*iterator_2).second->string;
     Bencoding_DictionaryIterator_t iterator_3 =
-        (*iterator).second->dictionary->begin ();
+      (*iterator).second->dictionary->begin ();
     for (;
          iterator_3 != (*iterator).second->dictionary->end ();
          ++iterator_3)
@@ -274,7 +364,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
     struct BitTorrent_Piece piece_s;
     unsigned int total_length =
-        BitTorrent_Tools::MetaInfoToLength (*configuration_in.metaInfo);
+      BitTorrent_Tools::MetaInfoToLength (*configuration_in.metaInfo);
     while (!piece_hashes.empty ())
     {
       piece_s.filename =
@@ -515,8 +605,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: new peer connection (id: %d)\n"),
-              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
-                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
+                             ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
   BitTorrent_MessagePayload_Bitfield peer_pieces;
@@ -718,8 +808,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: peer connection closed (id was: %d)\n"),
-              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
-                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
+                             ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
   bool notify_controller_b = false;
@@ -1311,8 +1401,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("%s: sent chunk (piece %u, begin %u, length %u) to peer (id was: %d)...\n"),
-  //            ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
-  //                                     ACE_DIRECTORY_SEPARATOR_CHAR)),
+  //            ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
+  //                           ACE_DIRECTORY_SEPARATOR_CHAR),
   //            index_in,
   //            begin_in,
   //            length_in,
@@ -1741,10 +1831,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   configuration_p->socketConfiguration.address = address_in;
 
   iterator =
-      configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+    configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
   (*iterator).second.second->subscriber =
-      inherited::state_.trackerStreamHandler;
+    inherited::state_.trackerStreamHandler;
 
   configuration_p->streamConfiguration->configuration_->cloneModule =
     false;
@@ -1879,7 +1969,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: new tracker connection (id: %d)\n"),
               ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                       ACE_DIRECTORY_SEPARATOR_CHAR),
+                             ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 }
 
@@ -1977,6 +2067,22 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                   ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
     }
   } // end IF
+
+  //if (timerId_ != -1)
+  //{
+  //  int result =
+  //    COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerId_,
+  //                                                              NULL);
+  //  if (unlikely (result == -1))
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
+  //                timerId_));
+  //  else
+  //    ACE_DEBUG ((LM_DEBUG,
+  //                ACE_TEXT ("cancelled interval timer (id: %d)\n"),
+  //                timerId_));
+  //  timerId_ = -1;
+  //} // end IF
 }
 
 template <typename PeerConnectionConfigurationType,
@@ -2183,11 +2289,9 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
-//#if defined (_DEBUG)
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("%s\n"),
-//              ACE_TEXT (BitTorrent_Tools::Dictionary2String (record_in).c_str ())));
-//#endif
+//              ACE_TEXT (BitTorrent_Tools::DictionaryToString (record_in).c_str ())));
 
   // *NOTE*: this could be the response to either a response or a 'scrape', the
   //         type can be deduced from the dictionary schema
@@ -2207,6 +2311,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   } // end IF
 
   // response is regular --> (try to) connect to all peers
+
+  ACE_Time_Value rerequest_interval;
 
   // retain tracker id for future notifications
   iterator = record_in.begin ();
@@ -2233,8 +2339,52 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       Common_Parser_Bencoding_Tools::free (inherited::state_.trackerRequestResponse);
     inherited::state_.trackerRequestResponse =
         &const_cast<Bencoding_Dictionary_t&> (record_in);
+
+    Bencoding_DictionaryIterator_t iterator =
+      inherited::state_.trackerRequestResponse->begin ();
+    for (;
+         iterator != inherited::state_.trackerRequestResponse->end ();
+         ++iterator)
+      if (*(*iterator).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_INTERVAL_HEADER))
+        break;
+    ACE_ASSERT (iterator != inherited::state_.trackerRequestResponse->end ());
+    ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+    rerequest_interval.sec ((*iterator).second->integer);
   } // end lock scope
 
+  // start rerequest interval timer
+  if (unlikely (timerId_ != -1))
+  {
+    int result =
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (timerId_,
+                                                                NULL);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
+                  timerId_));
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("cancelled interval timer (id: %d)\n"),
+                  timerId_));
+    timerId_ = -1;
+  } // end IF
+  ACE_ASSERT (timerId_ == -1);
+  timerId_ =
+    COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (this,
+                                                                NULL,
+                                                                rerequest_interval,
+                                                                rerequest_interval);
+  if (unlikely (timerId_ == -1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Timer_Manager_T::schedule_timer (%#T), continuing\n"),
+                &rerequest_interval));
+  else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("scheduled interval timer (id: %d) for interval: %#T\n"),
+                timerId_,
+                &rerequest_interval));
+
+  // connect to peers
   BitTorrent_PeerAddresses_t peer_addresses;
   int result = -1;
   ACE_INET_Addr inet_address;
@@ -2285,7 +2435,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                                  *reinterpret_cast<const ACE_UINT32*> (char_p),
                                  0, // already in network byte order
                                  0);
-      if (result == -1)
+      if (unlikely (result == -1))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
@@ -2296,9 +2446,18 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     } // end FOR
   } // end ELSE
   ACE_ASSERT (inherited::configuration_);
+  if (unlikely (!peer_addresses.size ()))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: tracker sent no peers, returning\n"),
+                ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                               ACE_DIRECTORY_SEPARATOR_CHAR)));
+    return;
+  } // end IF
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: connecting to %u peer(s)...\n"),
-              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
+                             ACE_DIRECTORY_SEPARATOR_CHAR),
               peer_addresses.size ()));
 
   struct BitTorrent_SessionInitiationThreadData* thread_data_p = NULL;
@@ -2314,7 +2473,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   std::string buffer;
   std::ostringstream converter;
   int group_id_i = -1;
-  size_t number_of_threads_i = thread_data_p->addresses.size ();
+  size_t number_of_threads_i = peer_addresses.size ();
+  ACE_ASSERT (number_of_threads_i);
   ACE_thread_t* thread_ids_p = NULL;
   ACE_hthread_t* thread_handles_p = NULL;
   // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
@@ -2597,8 +2757,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
 
-  std::string record_string =
-    BitTorrent_Tools::RecordToString (record_in);
+  std::string record_string = BitTorrent_Tools::RecordToString (record_in);
   if (inherited::configuration_->subscriber)
     inherited::configuration_->subscriber->log (record_string);
   ACE_DEBUG ((LM_DEBUG,
@@ -2702,7 +2861,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
         ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
         unsigned int index = record_in.have / (sizeof (ACE_UINT8) * 8);
         unsigned int index_2 = record_in.have % (sizeof (ACE_UINT8) * 8);
-        ACE_ASSERT (!((*iterator).second[index] & (0x80 >> index_2)));
+        // *IMPORTANT NOTE*: the peer may 'repeat' itself, so cannot assert here
+        //ACE_ASSERT (!((*iterator).second[index] & (0x80 >> index_2)));
         (*iterator).second[index] |= (0x80 >> index_2);
 
         // send 'interested' ?

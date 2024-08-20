@@ -425,8 +425,10 @@ do_work (bool debug_in,
   allocator_configuration.defaultBufferSize =
       BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
 
-  Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                     BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
+                        struct Common_AllocatorConfiguration> heap_allocator;
+  //Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+  //                                                                                   BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -434,9 +436,11 @@ do_work (bool debug_in,
     return;
   } // end IF
   BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                   &heap_allocator);
+                                                                   &heap_allocator,
+                                                                   true);
   BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                         &heap_allocator);
+                                                                         &heap_allocator,
+                                                                         true);
   BitTorrent_Client_Control_t bittorrent_control (&CBData_in.configuration->sessionConfiguration);
 
   CBData_in.controller = &bittorrent_control;

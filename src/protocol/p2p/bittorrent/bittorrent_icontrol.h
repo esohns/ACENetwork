@@ -25,25 +25,22 @@
 #include <string>
 
 #include "common_iget.h"
+#include "common_itask.h"
 
 #include "bittorrent_common.h"
 
-template <typename SessionInterfaceType>
+template <typename SessionContextType>
 class BitTorrent_IControl_T
- : public Common_IGetR_T<std::map<std::string, SessionInterfaceType*> >
+ : public Common_IGetR_T<std::map<std::string, SessionContextType> >
+ , virtual public Common_ITask
 {
  public:
-  inline virtual ~BitTorrent_IControl_T () {}
-
   // *NOTE*: sending a request to the tracker allocates a session and initiates
   //         communication with the swarm of registered peers
   virtual void request (const std::string&) = 0; // metainfo (aka '.torrent') file URI
-  virtual SessionInterfaceType* get (const std::string&) = 0; // metainfo (aka '.torrent') file URI
+  virtual typename SessionContextType::INTERFACE_T* get (const std::string&) = 0; // metainfo (aka '.torrent') file URI
   virtual void notifyTracker (const std::string&,         // metainfo (aka '.torrent') file URI
                               enum BitTorrent_Event) = 0; // event
-
-//  virtual void stop (bool = false) = 0; // wait ?
-//  virtual void wait () = 0;
 
   ////////////////////////////////////////
   // callbacks

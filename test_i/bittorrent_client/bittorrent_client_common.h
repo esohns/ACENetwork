@@ -38,12 +38,13 @@ struct BitTorrent_Client_CursesState;
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
 
+struct BitTorrent_Client_Configuration;
 struct BitTorrent_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
   BitTorrent_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
-   , control (NULL)
+   , controller (NULL)
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
    , cursesState (NULL)
@@ -51,7 +52,7 @@ struct BitTorrent_Client_SignalHandlerConfiguration
 #endif // GUI_SUPPORT
   {}
 
-  Common_ITask*                         control;
+  BitTorrent_Client_IControl_t*         controller;
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   struct BitTorrent_Client_CursesState* cursesState;

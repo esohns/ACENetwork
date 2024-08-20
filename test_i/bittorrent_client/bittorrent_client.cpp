@@ -531,8 +531,10 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   allocator_configuration.defaultBufferSize =
     BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
-  Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                     BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
+                         struct Common_AllocatorConfiguration> heap_allocator;
+  //Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+  //                                                                                   BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -541,9 +543,11 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   } // end IF
 
   BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                   &heap_allocator);
+                                                                   &heap_allocator,
+                                                                   true);
   BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                         &heap_allocator);
+                                                                         &heap_allocator,
+                                                                         true);
 
   // step1: initialize configuration
 #if defined (GUI_SUPPORT)
@@ -640,6 +644,32 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   configuration_in.sessionConfiguration.controller =
     &bittorrent_control;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+  struct _GUID interface_identifier = Net_Common_Tools::getDefaultInterface_2 ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+#else
+  std::string interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+#endif // _WIN32_WINNT_VISTA
+#else
+  std::string interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+#endif // ACE_WIN32 || ACE_WIN64
+  if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
+                                                       configuration_in.sessionConfiguration.externalIPAddress))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (interface_identifier.c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (interface_identifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
   configuration_in.sessionConfiguration.metaInfoFileName =
     metaInfoFileName_in;
   configuration_in.sessionConfiguration.connectionConfiguration =
@@ -652,8 +682,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
       ((configuration_in.dispatchConfiguration.numberOfReactorThreads > 0) ? COMMON_EVENT_DISPATCH_REACTOR
                                                                            : COMMON_EVENT_DISPATCH_PROACTOR);
 
-  configuration_in.signalHandlerConfiguration.control = &bittorrent_control;
-#if defined (GUI_SUPPORT)
+  configuration_in.signalHandlerConfiguration.controller = &bittorrent_control;
+#if defined(GUI_SUPPORT)
 #if defined (CURSES_USE)
   configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
 #endif // CURSES_USE

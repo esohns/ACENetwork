@@ -21,18 +21,14 @@
 #ifndef BITTORRENT_COMMON_H
 #define BITTORRENT_COMMON_H
 
-//#include <unordered_map>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "ace/config-lite.h"
 #include "ace/Assert.h"
 #include "ace/Basic_Types.h"
 #include "ace/Message_Block.h"
 #include "ace/OS.h"
-
-//#include "common_statistic_handler.h"
 
 #include "bittorrent_defines.h"
 
@@ -196,6 +192,7 @@ enum BitTorrent_Event
   BITTORRENT_EVENT_CANCELLED = ACE_Message_Block::MB_USER,
   BITTORRENT_EVENT_COMPLETE,
   BITTORRENT_EVENT_NO_MORE_PEERS,
+  BITTORRENT_EVENT_TRACKER_REREQUEST,
   BITTORRENT_EVENT_TRACKER_REDIRECTED,
   ////////////////////////////////////////
   BITTORRENT_EVENT_MAX,
@@ -204,7 +201,17 @@ enum BitTorrent_Event
 
 //////////////////////////////////////////
 
-//typedef struct Net_StreamStatistic BitTorrent_Statistic_t;
-//typedef Common_StatisticHandler_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_t;
+template <typename SessionConfigurationType,
+          typename SessionInterfaceType>
+class BitTorrent_SessionContext_T
+{
+ public:
+  // convenient types
+  typedef SessionConfigurationType CONFIGURATION_T;
+  typedef SessionInterfaceType     INTERFACE_T;
+
+  SessionConfigurationType configuration;
+  SessionInterfaceType*    session;
+};
 
 #endif

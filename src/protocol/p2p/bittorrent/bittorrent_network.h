@@ -135,6 +135,8 @@ struct BitTorrent_SessionConfiguration
 {
   BitTorrent_SessionConfiguration ()
    : Net_SessionConfiguration ()
+   , externalIPAddress (static_cast<u_short> (0),
+                        static_cast<ACE_UINT32> (0))
    , metaInfo (NULL)
    , metaInfoFileName ()
    , subscriber (NULL)
@@ -144,6 +146,8 @@ struct BitTorrent_SessionConfiguration
    , trackerModuleHandlerConfiguration (NULL)
    , trackerStreamConfiguration (NULL)
   {}
+
+  ACE_INET_Addr                             externalIPAddress;
 
   Bencoding_Dictionary_t*                   metaInfo;
   std::string                               metaInfoFileName;

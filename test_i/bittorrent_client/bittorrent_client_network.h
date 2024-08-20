@@ -237,7 +237,10 @@ struct BitTorrent_Client_TrackerConnectionState
 
 //////////////////////////////////////////
 
-typedef BitTorrent_IControl_T<BitTorrent_Client_ISession_t> BitTorrent_Client_IControl_t;
+struct BitTorrent_Client_SessionConfiguration;
+typedef BitTorrent_SessionContext_T<struct BitTorrent_Client_SessionConfiguration,
+                                    BitTorrent_Client_ISession_t> BitTorrent_Client_SessionContext_t;
+typedef BitTorrent_IControl_T<BitTorrent_Client_SessionContext_t> BitTorrent_Client_IControl_t;
 
 //////////////////////////////////////////
 

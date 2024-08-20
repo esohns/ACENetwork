@@ -54,7 +54,8 @@ class BitTorrent_Control_T
  : public Common_Task_Ex_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            struct BitTorrent_Control_Event>
- , public BitTorrent_IControl_T<SessionInterfaceType>
+ , public BitTorrent_IControl_T<BitTorrent_SessionContext_T<SessionConfigurationType,
+                                                            SessionInterfaceType> >
 {
   typedef Common_Task_Ex_T<ACE_MT_SYNCH,
                            Common_TimePolicy_t,
@@ -62,11 +63,14 @@ class BitTorrent_Control_T
 
  public:
   // convenient types
-  typedef std::map<std::string, SessionInterfaceType*> SESSIONS_T;
+  typedef BitTorrent_SessionContext_T<SessionConfigurationType,
+                                      SessionInterfaceType> CONTEXT_T;
+  // *NOTE*: key is the metainfo (aka '.torrent') file URI
+  typedef std::map<std::string, CONTEXT_T> SESSIONS_T;
   typedef typename SESSIONS_T::iterator SESSIONS_ITERATOR_T;
 
-  BitTorrent_Control_T (SessionConfigurationType*);
-  inline virtual ~BitTorrent_Control_T () { stop (true, true); }
+  BitTorrent_Control_T (SessionConfigurationType*); // base session configuration
+  virtual ~BitTorrent_Control_T ();
 
   // override Common_ITask
   virtual void stop (bool = true,  // wait for completion ?
@@ -101,7 +105,7 @@ class BitTorrent_Control_T
 
   mutable ACE_Thread_Mutex           lock_;
   mutable ACE_Condition_Thread_Mutex condition_;
-  SessionConfigurationType*          sessionConfiguration_;
+  SessionConfigurationType*          sessionConfigurationBase_;
   SESSIONS_T                         sessions_;
 };
 

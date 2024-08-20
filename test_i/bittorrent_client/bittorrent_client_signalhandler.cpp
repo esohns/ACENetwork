@@ -51,7 +51,7 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   ACE_ASSERT (inherited::configuration_);
 
   bool abort = false;
-//  bool connect = false;
+  bool rerequest_peers_from_tracker = false;
   bool shutdown = false;
   switch (signal_in.signal)
   {
@@ -82,8 +82,8 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     case SIGUSR1:
 #endif
     {
-//      // (try to) connect
-//      connect = true;
+      // (try to) connect to tracjer and rerequst peers
+      rerequest_peers_from_tracker = true;
 
       break;
     }
@@ -126,18 +126,24 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
   } // end IF
 
+  if (rerequest_peers_from_tracker)
+  { ACE_ASSERT (inherited::configuration_->controller);
+    inherited::configuration_->controller->notifyTracker (ACE_TEXT_ALWAYS_CHAR (""),
+                                                          BITTORRENT_EVENT_TRACKER_REREQUEST);
+  } // end IF
+
   // ...shutdown ?
   if (shutdown)
   {
     connection_manager_p->stop (false, false);
     connection_manager_2->stop (false, false);
-
-    // step1: stop all sessions
-    ACE_ASSERT (inherited::configuration_->control);
-    inherited::configuration_->control->stop (false);
-
     connection_manager_p->abort (false);
     connection_manager_2->abort (false);
+
+    // step1: stop all sessions
+    ACE_ASSERT (inherited::configuration_->controller);
+    inherited::configuration_->controller->stop (false, // wait for completion ?
+                                                 true); // high priority ?
 
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)

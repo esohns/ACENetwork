@@ -30,6 +30,8 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_timer_handler.h"
+
 #include "net_connection_configuration.h"
 #include "net_session_base.h"
 
@@ -96,6 +98,7 @@ class BitTorrent_Session_T
                                                   StreamStatusType,
                                                   ConfigurationType,
                                                   StateType> >
+ , public Common_Timer_Handler
 {
   typedef Net_SessionBase_T<ACE_INET_Addr,
                             PeerConnectionConfigurationType,
@@ -115,6 +118,7 @@ class BitTorrent_Session_T
                                                   StreamStatusType,
                                                   ConfigurationType,
                                                   StateType> > inherited;
+  typedef Common_Timer_Handler inherited2;
 
  public:
   // convenient types
@@ -234,9 +238,13 @@ class BitTorrent_Session_T
   bool requestNextPiece (Net_ConnectionId_t); // connection id
   void populatePeerPiecesBitfield (Net_ConnectionId_t); // connection id
 
+  // implement Common_ITimerHandler
+  virtual void handle (const void*); // asynchronous completion token
+
   bool                             logToFile_;
   PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;
   TRACKER_MESSAGEHANDLER_MODULE_T* trackerHandlerModule_;
+  long                             timerId_;
 };
 
 // include template definition
