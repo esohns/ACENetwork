@@ -1149,8 +1149,92 @@ BitTorrent_Tools::pieceFileNameToIndex (const std::string& fileName_in)
 }
 
 bool
+BitTorrent_Tools::loadPiece (const std::string& metaInfoFileName_in,
+                             unsigned int index_in,
+                             struct BitTorrent_Piece& piece_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::loadPiece"));
+
+  // sanity check(s)
+  ACE_ASSERT (piece_inout.chunks.empty () && piece_inout.onDisk);
+
+  std::string pieces_path =
+      Common_File_Tools::getUserDownloadDirectory (ACE_TEXT_ALWAYS_CHAR (""));
+  pieces_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  pieces_path +=
+    ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR));
+  pieces_path +=
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECES_DIRECTORY_SUFFIX);
+  Common_File_IdentifierList_t piece_files =
+    Common_File_Tools::files (pieces_path,
+                              BitTorrent_Tools::selector);
+
+  // step2: sort by name
+  struct common_file_identifier_less file_identifier_less;
+  std::sort (piece_files.begin (),
+             piece_files.end (),
+             file_identifier_less);
+
+  std::string filename_string;
+  uint8_t* data_p = NULL;
+  ACE_UINT64 file_size_i = 0;
+  ACE_Message_Block* message_block_p = NULL;
+  struct BitTorrent_Piece_Chunk chunk_s;
+  unsigned int piece_index_i = 0;
+  for (Common_File_IdentifierListIterator_t iterator = piece_files.begin ();
+       iterator != piece_files.end ();
+       ++iterator)
+  {
+    piece_index_i =
+      BitTorrent_Tools::pieceFileNameToIndex ((*iterator).identifier);
+    if (likely (piece_index_i != index_in))
+      continue;
+
+    // load the current piece file into memory
+    filename_string = pieces_path;
+    filename_string += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    filename_string += (*iterator).identifier;
+    if (!Common_File_Tools::load (filename_string,
+                                  data_p,
+                                  file_size_i,
+                                  0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
+                  ACE_TEXT ((*iterator).identifier.c_str ())));
+      return false;
+    } // end IF
+    ACE_NEW_NORETURN (message_block_p,
+                      ACE_Message_Block (reinterpret_cast<char*> (data_p),
+                                         file_size_i,
+                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY));
+    if (!message_block_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+      delete [] data_p; data_p = NULL;
+      return false;
+    } // end IF
+    message_block_p->wr_ptr (file_size_i);
+    message_block_p->clr_flags (ACE_Message_Block::DONT_DELETE); // release with message block
+
+    chunk_s.data = message_block_p;
+    piece_inout.chunks.push_back (chunk_s);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: loaded piece %u (%Q byte(s))...\n"),
+                ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+                index_in,
+                file_size_i));
+    break; // done
+  } // end FOR
+
+  return true;
+}
+
+bool
 BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
-                              BitTorrent_Pieces_t& pieces_inout)
+                              BitTorrent_Pieces_t& pieces_inout,
+                              bool loadToMemory_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::loadPieces"));
 
@@ -1188,8 +1272,23 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
   {
     piece_index_i =
       BitTorrent_Tools::pieceFileNameToIndex ((*iterator).identifier);
+    iterator_2 = pieces_inout.begin ();
+    std::advance (iterator_2, piece_index_i);
+    ACE_ASSERT (iterator_2 != pieces_inout.end ());
 
-    // step1: load the current piece file into memory
+    if (!loadToMemory_in)
+    {
+      (*iterator_2).onDisk = true;
+
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: found piece %u...\n"),
+                  ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+                  piece_index_i));
+
+      continue;
+    } // end IF
+
+    // load the current piece file into memory
     filename_string = pieces_path;
     filename_string += ACE_DIRECTORY_SEPARATOR_CHAR_A;
     filename_string += (*iterator).identifier;
@@ -1215,12 +1314,9 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
       goto error;
     } // end IF
     message_block_p->wr_ptr (file_size_i);
-    message_block_p->clr_flags (ACE_Message_Block::DONT_DELETE);
+    message_block_p->clr_flags (ACE_Message_Block::DONT_DELETE); // release with message block
 
     chunk_s.data = message_block_p;
-    iterator_2 = pieces_inout.begin ();
-    std::advance (iterator_2, piece_index_i);
-    ACE_ASSERT (iterator_2 != pieces_inout.end ());
     (*iterator_2).chunks.push_back (chunk_s);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: loaded piece %u (%Q byte(s))...\n"),

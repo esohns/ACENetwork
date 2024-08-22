@@ -237,6 +237,7 @@ class BitTorrent_Session_T
                                 typename PeerStreamType::MESSAGE_T*&); // return value: message handle
   bool requestNextPiece (Net_ConnectionId_t); // connection id
   void populatePeerPiecesBitfield (Net_ConnectionId_t); // connection id
+  ACE_INET_Addr connectionIdToPeerAddress (Net_ConnectionId_t); // connection id
 
   // implement Common_ITimerHandler
   virtual void handle (const void*); // asynchronous completion token

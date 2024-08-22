@@ -71,7 +71,7 @@ struct BitTorrent_Piece_Chunk
   BitTorrent_Piece_Chunk ()
    : data (NULL)
    , offset (0)
-  {};
+  {}
 
   ACE_Message_Block* data;
   unsigned int       offset;
@@ -87,7 +87,7 @@ struct bittorrent_piece_chunks_less
     if (lhs_in.offset != rhs_in.offset)
       return (lhs_in.offset < rhs_in.offset);
     return (lhs_in.data->total_length () > rhs_in.data->total_length ());
-  };
+  }
 };
 
 struct BitTorrent_Piece
@@ -97,12 +97,14 @@ struct BitTorrent_Piece
    , filename ()
    , hash ()
    , length (0)
-  {};
+   , onDisk (false)
+  {}
 
   BitTorrent_PieceChunks_t chunks;
   std::string              filename;
   ACE_UINT8                hash[BITTORRENT_PRT_INFO_PIECE_HASH_SIZE]; // SHA1
   unsigned int             length;
+  bool                     onDisk; // --> (already) on disk ?
 };
 typedef std::vector<struct BitTorrent_Piece> BitTorrent_Pieces_t;
 typedef BitTorrent_Pieces_t::const_iterator BitTorrent_PiecesConstIterator_t;
@@ -181,7 +183,11 @@ struct net_bittorrent_piece_index_remove_predicate
   typedef std::vector<unsigned int> second_argument_type;
   typedef bool result_type;
 
-  inline bool operator() (const unsigned int index_in, const std::vector<unsigned int>& array_in) const { return std::find (array_in.begin (), array_in.end (), index_in) != array_in.end (); }
+  inline bool operator() (const unsigned int index_in,
+                          const std::vector<unsigned int>& array_in) const
+  {
+    return std::find (array_in.begin (), array_in.end (), index_in) != array_in.end ();
+  }
 };
 
 //////////////////////////////////////////

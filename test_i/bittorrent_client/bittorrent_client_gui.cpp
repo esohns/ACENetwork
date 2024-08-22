@@ -582,7 +582,7 @@ do_work (bool debug_in,
 
   // step4: initialize signal handling
   BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
-  signal_handler_configuration.control = &bittorrent_control;
+  signal_handler_configuration.controller = &bittorrent_control;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,

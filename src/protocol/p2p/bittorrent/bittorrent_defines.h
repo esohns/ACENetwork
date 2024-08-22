@@ -26,18 +26,7 @@
 #define BITTORRENT_DEFAULT_MODULE_HANDLER_NAME_STRING      "BitTorrentPeerHandler"
 #define BITTORRENT_DEFAULT_STREAM_NAME_STRING              "BitTorrentPeerStream"
 
-// (strip protocol data and) 'crunch' parsed messages for easier downstream
-// processing ?
-// *NOTE*: this comes at the cost of malloc/free and memcpy per
-//         (fragmented) message, i.e. should probably be avoided.
-#define BITTORRENT_DEFAULT_CRUNCH_MESSAGES                 false
-// *IMPORTANT NOTE*: scans buffers in-place (avoids a copy,
-//         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
-//         --> in order to use yy_scan_buffer(), the buffer needs to have been
-//             prepared for usage by flex: buffers need two trailing '\0's
-//             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
-//             length() + 2)
-//#define BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER             true
+#define BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE true
 
 #define BITTORRENT_DEFAULT_STATISTIC_REPORTING_INTERVAL    0 // seconds: 0 --> OFF
 

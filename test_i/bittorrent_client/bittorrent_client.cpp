@@ -122,6 +122,11 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT (" [OPTIONS]")
             << std::endl << std::endl;
   std::cout << ACE_TEXT ("currently available options:") << std::endl;
+  std::cout << ACE_TEXT ("-b        : do NOT send bitfield after peer handshake")
+            << ACE_TEXT (" [")
+            << !BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE
+            << ACE_TEXT ("]")
+            << std::endl;
   std::cout << ACE_TEXT ("-d        : debug parser")
             << ACE_TEXT (" [")
             << false
@@ -167,6 +172,7 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR* argv_in[], // cannot be const...
+                     bool& sendBitfieldAfterHandshake_out,
                      bool& debugParser_out,
                      std::string& metaInfoFileName_out,
                      bool& logToFile_out,
@@ -183,6 +189,8 @@ do_processArguments (int argc_in,
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
+  sendBitfieldAfterHandshake_out =
+    BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE;
   debugParser_out                = false;
 
   metaInfoFileName_out           = configuration_path;
@@ -200,7 +208,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("df:lrs:tv"),
+                              ACE_TEXT ("bdf:lrs:tv"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -211,6 +219,11 @@ do_processArguments (int argc_in,
   {
     switch (option)
     {
+      case 'b':
+      {
+        sendBitfieldAfterHandshake_out = false;
+        break;
+      }
       case 'd':
       {
         debugParser_out = true;
@@ -478,6 +491,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
          bool debugParser_in,
          const std::string& metaInfoFileName_in,
          bool useReactor_in,
+         bool sendBitfieldAfterHandshake_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -530,7 +544,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                                                   false);
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   allocator_configuration.defaultBufferSize =
-    BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
+    BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX * 2;
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   //Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
@@ -681,6 +695,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.sessionConfiguration.dispatch =
       ((configuration_in.dispatchConfiguration.numberOfReactorThreads > 0) ? COMMON_EVENT_DISPATCH_REACTOR
                                                                            : COMMON_EVENT_DISPATCH_PROACTOR);
+  configuration_in.sessionConfiguration.sendBitfieldAfterHandshake =
+    sendBitfieldAfterHandshake_in;
 
   configuration_in.signalHandlerConfiguration.controller = &bittorrent_control;
 #if defined(GUI_SUPPORT)
@@ -942,7 +958,8 @@ ACE_TMAIN (int argc_in,
     Common_File_Tools::getWorkingDirectory ();
 
   bool debug_parser                          = false;
-
+  bool send_bitfield_after_handshake_b =
+    BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE;
   std::string meta_info_file_name            = configuration_path;
   meta_info_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   meta_info_file_name                       +=
@@ -962,6 +979,7 @@ ACE_TMAIN (int argc_in,
     TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
+                            send_bitfield_after_handshake_b,
                             debug_parser,
                             meta_info_file_name,
                             log_to_file,
@@ -1089,6 +1107,7 @@ ACE_TMAIN (int argc_in,
            debug_parser,
            meta_info_file_name,
            use_reactor,
+           send_bitfield_after_handshake_b,
            ACE_Time_Value (statistic_reporting_interval, 0),
            signal_set,
            ignored_signal_set,

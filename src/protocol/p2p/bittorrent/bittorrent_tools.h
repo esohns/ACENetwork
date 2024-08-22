@@ -31,7 +31,6 @@
 #include "common_parser_bencoding_tools.h"
 
 #include "bittorrent_common.h"
-//#include "bittorrent_network.h"
 
 class BitTorrent_Tools
 {
@@ -87,8 +86,12 @@ class BitTorrent_Tools
   static std::vector<struct BitTorrent_MessagePayload_Request> getMissingChunks (unsigned int,                     // piece length
                                                                                  const BitTorrent_PieceChunks_t&); // chunks
 
-  static bool loadPieces (const std::string&,    // metainfo (aka .bittorrent) file
-                          BitTorrent_Pieces_t&); // return value: pieces
+  static bool loadPiece (const std::string&,        // metainfo (aka .bittorrent) file
+                         unsigned int,              // piece index
+                         struct BitTorrent_Piece&); // return value: piece
+  static bool loadPieces (const std::string&, // metainfo (aka .bittorrent) file
+                          BitTorrent_Pieces_t&, // return value: pieces
+                          bool);                // load to memory ? : merely set 'onDisk' flag
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
