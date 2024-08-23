@@ -613,7 +613,7 @@ BitTorrent_Tools::havePiece (unsigned int index_in,
   unsigned int array_offset_i = index_in % (sizeof (ACE_UINT8) * 8);
 
   // sanity check(s)
-  ACE_ASSERT (bitfield_in.size () >= array_index_i + 1);
+  ACE_ASSERT (bitfield_in.size () >= array_index_i);
 
   return bitfield_in[array_index_i] & (0x80 >> array_offset_i);
 }
@@ -1280,10 +1280,10 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
     {
       (*iterator_2).onDisk = true;
 
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: found piece %u...\n"),
-                  ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
-                  piece_index_i));
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("%s: found piece %u...\n"),
+      //            ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+      //            piece_index_i));
 
       continue;
     } // end IF
@@ -1318,11 +1318,12 @@ BitTorrent_Tools::loadPieces (const std::string& metaInfoFileName_in,
 
     chunk_s.data = message_block_p;
     (*iterator_2).chunks.push_back (chunk_s);
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s: loaded piece %u (%Q byte(s))...\n"),
-                ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
-                piece_index_i,
-                file_size_i));
+
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("%s: loaded piece %u (%Q byte(s))...\n"),
+    //            ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+    //            piece_index_i,
+    //            file_size_i));
   } // end FOR
 
   return true;

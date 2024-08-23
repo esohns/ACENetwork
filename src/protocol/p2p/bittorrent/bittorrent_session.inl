@@ -624,6 +624,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   unsigned int index_i = 0, offset_i = 0;
   ACE_INET_Addr peer_address = connectionIdToPeerAddress (id_in);
   ACE_UINT32 peer_address_i = peer_address.get_ip_address ();
+  bool populate_pieces_bitfield_b = false;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
     BitTorrent_PeerConnectionsIterator_t iterator =
@@ -641,10 +642,13 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     if (iterator_2 == inherited::state_.peerPieces.end ())
     {
       inherited::state_.peerPieces.insert (std::make_pair (peer_address_i, peer_pieces));
+      populate_pieces_bitfield_b = true;
       ACE_ASSERT (inherited::state_.peerStatus.find (peer_address_i) == inherited::state_.peerStatus.end ());
       inherited::state_.peerStatus.insert (std::make_pair (peer_address_i, peer_status));
     } // end IF
   } // end lock scope
+  if (unlikely (populate_pieces_bitfield_b))
+    populatePeerPiecesBitfield (id_in);
 
   // send handshake
   ACE_NEW_NORETURN (record_p,
@@ -2853,22 +2857,6 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
         is_not_first_connection_to_peer_b = (*iterator_2).second.size () > 1;
       } // end lock scope
 
-      bool populate_pieces_bitfield_b = false;
-      BitTorrent_PeerPiecesIterator_t iterator_2;
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator_2 = inherited::state_.peerPieces.find (peer_address_i);
-        ACE_ASSERT (iterator_2 != inherited::state_.peerPieces.end ());
-        if ((*iterator_2).second.empty ())
-        { // protocol error: no bitfield message received yet ?
-          ACE_DEBUG ((LM_WARNING,
-                      ACE_TEXT ("%u: populating pieces bitfield...\n"),
-                      id_in));
-          populate_pieces_bitfield_b = true;
-        } // end IF
-      } // end lock scope
-      if (unlikely (populate_pieces_bitfield_b))
-        populatePeerPiecesBitfield (id_in);
-
       if (is_not_first_connection_to_peer_b)
       { // get next piece !
         bool requesting_piece_b = requestNextPiece (id_in);
@@ -2907,26 +2895,11 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     }
     case BITTORRENT_MESSAGETYPE_HAVE:
     {
-      bool populate_pieces_bitfield_b = false;
-      BitTorrent_PeerPiecesIterator_t iterator;
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerPieces.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
-        if ((*iterator).second.empty ())
-        { // protocol error: no bitfield message received yet ?
-          ACE_DEBUG ((LM_WARNING,
-                      ACE_TEXT ("%u: populating pieces bitfield...\n"),
-                      id_in));
-          populate_pieces_bitfield_b = true;
-        } // end IF
-      } // end lock scope
-      if (unlikely (populate_pieces_bitfield_b))
-        populatePeerPiecesBitfield (id_in);
-
       bool send_interested_b = false;
       bool has_missing_piece_b = false;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerPieces.find (peer_address_i);
+        BitTorrent_PeerPiecesIterator_t iterator =
+          inherited::state_.peerPieces.find (peer_address_i);
         ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
         unsigned int index = record_in.have / (sizeof (ACE_UINT8) * 8);
         unsigned int index_2 = record_in.have % (sizeof (ACE_UINT8) * 8);
@@ -2980,7 +2953,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 #if defined (NET_BITTORRENT_SUPPORT_MULITPLE_CONNECTIONS_TO_SAME_PEER)
       else if (!am_choking_b &&
                has_missing_piece_b) // *TODO*: ...that is not already being requested...
-      { // open a new connection to the peer !
+      { // open a new connection to the peer
         connect (peer_address);
       } // end ELSE IF
 #endif // NET_BITTORRENT_SUPPORT_MULITPLE_CONNECTIONS_TO_SAME_PEER
@@ -3723,7 +3696,9 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     ACE_ASSERT (!((*iterator_3).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
     unsigned int pieces =
         (*iterator_3).second->string->size () / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
-    (*iterator).second.resize (pieces, 0);
+    unsigned int indices_i = pieces / (sizeof (ACE_UINT8) * 8);
+    unsigned int indices_2 = pieces % (sizeof (ACE_UINT8) * 8);
+    (*iterator).second.resize ((indices_2 ? indices_i + 1 : indices_i), 0);
   } // end lock scope
 }
 
