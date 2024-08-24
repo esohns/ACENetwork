@@ -247,11 +247,14 @@ BitTorrent_Control_T<SessionAsynchType,
       BitTorrent_Tools::MetaInfoToLength (*session_context.configuration.metaInfo);
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
                                        converter.str ()));
-  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-  converter.clear ();
-  converter << 1;
-  data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
-                                       converter.str ()));
+  if (likely (sessionConfigurationBase_->requestCompactPeerAddresses))
+  {
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << 1;
+    data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
+                                         converter.str ()));
+  } // end IF
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
   if (!sessionConfigurationBase_->externalIPAddress.is_any ())
@@ -281,7 +284,7 @@ BitTorrent_Control_T<SessionAsynchType,
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
                                           ACE_TEXT_ALWAYS_CHAR ("*/*")));
   data_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
-                                          ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
+                                          ACE_TEXT_ALWAYS_CHAR ("identity;q=1.0")));
 #if defined (HAVE_CONFIG_H)
   user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
   user_agent += ACE_TEXT_ALWAYS_CHAR ("/");
@@ -400,12 +403,7 @@ BitTorrent_Control_T<SessionAsynchType,
   std::string info_hash;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    if (metaInfoFileName_in.empty ())
-    { ACE_ASSERT (sessions_.size () == 1);
-      iterator = sessions_.begin ();
-    } // end IF
-    else
-      iterator = sessions_.find (metaInfoFileName_in);
+    iterator = sessions_.find (metaInfoFileName_in);
     if (unlikely (iterator == sessions_.end ()))
     { // *NOTE*: possible cause: tracker error
       ACE_DEBUG ((LM_WARNING,
@@ -635,9 +633,9 @@ BitTorrent_Control_T<SessionAsynchType,
         iterator = sessions_.find (event_inout->metaInfoFileName);
         if (iterator == sessions_.end ())
           goto continue_;
+        ACE_ASSERT ((*iterator).second.session);
 
         // close tracker connection
-        typedef typename SessionType::TRACKER_CONNECTION_MANAGER_SINGLETON_T CONNECTION_MANAGER_SINGLETON_2;
         iconnection_p =
             CONNECTION_MANAGER_SINGLETON_2::instance ()->get ((*iterator).second.session->trackerConnectionId ());
         if (!iconnection_p)
@@ -648,6 +646,7 @@ BitTorrent_Control_T<SessionAsynchType,
         {
           iconnection_p->abort ();
           iconnection_p->decrease (); iconnection_p = NULL;
+          CONNECTION_MANAGER_SINGLETON_2::instance ()->wait ();
         } // end IF
 
         // close all session connections
@@ -685,9 +684,8 @@ continue_:
         // close tracker connection
         Net_ConnectionId_t tracker_connection_id =
             (*iterator).second.session->trackerConnectionId ();
-        typedef typename SessionType::TRACKER_CONNECTION_MANAGER_SINGLETON_T TRACKER_CONNECTION_MANAGER_SINGLETON_2;
         typename SessionType::ITRACKER_CONNECTION_T* iconnection_p =
-            TRACKER_CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_connection_id);
+            CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_connection_id);
         if (!iconnection_p)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve tracker connection (id was: %u) handle, continuing\n"),
@@ -830,17 +828,16 @@ allocate:
 
   // reuse tracker connection(s)
   tracker_connection_id = session_in->trackerConnectionId ();
-  typedef typename SessionType::TRACKER_CONNECTION_MANAGER_SINGLETON_T TRACKER_CONNECTION_MANAGER_SINGLETON_2;
   if (!tracker_connection_id)
   {
     ACE_INET_Addr tracker_address = session_in->trackerAddress ();
     session_in->trackerConnect (tracker_address);
     iconnection_p =
-      TRACKER_CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_address);
+      CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_address);
   } // end IF
   else
     iconnection_p =
-      TRACKER_CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_connection_id);
+      CONNECTION_MANAGER_SINGLETON_2::instance ()->get (tracker_connection_id);
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,

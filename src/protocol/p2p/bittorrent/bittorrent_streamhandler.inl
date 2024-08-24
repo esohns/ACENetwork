@@ -472,7 +472,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   ACE_ASSERT (session_);
 
   ACE_HANDLE handle_h =
-      (*iterator).second->connectionStates.begin ()->second->handle;
+    (*iterator).second->connectionStates.begin ()->second->handle;
 
   const typename MESSAGE_T::DATA_T& data_container_r = message_in.getR ();
   const struct HTTP_Record& record_r = data_container_r.getR ();
@@ -539,6 +539,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   ACE_Message_Block* message_block_p =
     &const_cast<BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
                                                                  UserDataType>&> (message_in);
+  // *TODO*: parser should not need defragmentation
   Stream_Tools::crunch (message_block_p,
                         allocator_);
   struct Common_FlexBisonParserConfiguration parser_configuration = *configuration_;
@@ -548,7 +549,8 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   PARSER_T parser (parser_configuration.debugScanner,
                    parser_configuration.debugParser);
 #else
-  PARSER_T parser (false, false);
+  PARSER_T parser (false,
+                   false);
 #endif // _DEBUG
   if (!parser.initialize (parser_configuration))
   {

@@ -463,6 +463,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::handle_close"));
 
   int result = -1;
+  bool initialization_failed_b = false;
+  bool peer_closed_b = false;
   bool decrease_b = true;
 
   // step0a: set state
@@ -471,18 +473,22 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //                   invoked by stream_.finished()
   // *TODO*: remove type inference
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    initialization_failed_b =
+      (inherited2::state_.status == NET_CONNECTION_STATUS_INITIALIZATION_FAILED);
     if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
         (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)                && // local close ?
         (inherited2::state_.status != NET_CONNECTION_STATUS_PEER_CLOSED))             // --> peer closed
+    {
       inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+      peer_closed_b = true;
+    } // end IF
     decrease_b = !inherited2::state_.closed; // i.e. only decrease reference count the first time around
     inherited2::state_.closed = true;
   } // end lock scope
 
   // step0b: notify stream ?
 //  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
-    if (likely (notify_ &&
-                (inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED)))
+    if (likely (notify_ && !initialization_failed_b))
     {
       notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
@@ -490,10 +496,11 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     } // end IF
 
     // step1: shut down the processing stream
-    stream_.flush (false,  // flush inbound data ?
-                   false,  // flush session messages ?
-                   false); // recurse upstream (if any) ?
-    stream_.idle (inherited2::state_.status == NET_CONNECTION_STATUS_PEER_CLOSED, // wait forever ?
+    // *NOTE*: flush outbound data only !
+    stream_.flush (false, // flush inbound data ?
+                   false, // flush session messages ?
+                   true); // recurse upstream (if any) ?
+    stream_.idle (true,   // wait forever ?
                   false); // recurse upstream (if any) ?
     stream_.stop (true,   // wait for worker(s) (if any)
                   true,   // recurse upstream (if any) ?

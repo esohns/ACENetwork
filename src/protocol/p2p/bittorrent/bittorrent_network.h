@@ -135,10 +135,12 @@ struct BitTorrent_SessionConfiguration
 {
   BitTorrent_SessionConfiguration ()
    : Net_SessionConfiguration ()
+   , allowMultipleConnectionsPerPeer (BITTORRENT_DEFAULT_ALLOW_MULTIPLE_CONNECTIONS_PER_PEER)
    , externalIPAddress (static_cast<u_short> (0),
                         static_cast<ACE_UINT32> (0))
    , metaInfo (NULL)
    , metaInfoFileName ()
+   , requestCompactPeerAddresses (BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES)
    , sendBitfieldAfterHandshake (BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE)
    , subscriber (NULL)
    , peerModuleHandlerConfiguration (NULL)
@@ -148,10 +150,11 @@ struct BitTorrent_SessionConfiguration
    , trackerStreamConfiguration (NULL)
   {}
 
+  bool                                      allowMultipleConnectionsPerPeer;
   ACE_INET_Addr                             externalIPAddress;
-
   Bencoding_Dictionary_t*                   metaInfo;
   std::string                               metaInfoFileName;
+  bool                                      requestCompactPeerAddresses;
   bool                                      sendBitfieldAfterHandshake;
   BitTorrent_ISessionProgress*              subscriber; // session --> UI events
 

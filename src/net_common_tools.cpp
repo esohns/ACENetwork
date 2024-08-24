@@ -472,8 +472,9 @@ Net_Common_Tools::matchIPv6Address (std::string& address_in)
 {
   NETWORK_TRACE ("Net_Common_Tools::matchIPv6Address");
 
+  // *NOTE*: see also: https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses
   std::string regex_string =
-    ACE_TEXT_ALWAYS_CHAR ("^([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4}):([[:alnum:]]{1,4})$");
+    ACE_TEXT_ALWAYS_CHAR ("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$");
   std::regex::flag_type flags = std::regex_constants::ECMAScript;
   std::regex regex;
   std::smatch match_results;
@@ -485,22 +486,26 @@ Net_Common_Tools::matchIPv6Address (std::string& address_in)
     return false;
   ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
-  std::string group_string;
-  std::stringstream converter;
-  unsigned int dummy_i;
-  for (unsigned int i = 1; i < match_results.size (); ++i)
-  {
-    if (unlikely (!match_results[i].matched))
-      return false;
+  //std::string group_string;
+  //std::stringstream converter;
+  //unsigned int dummy_i;
+  //std::string::size_type position_i;
+  //for (unsigned int i = 1; i < match_results.size (); ++i)
+  //{
+  //  //if (unlikely (!match_results[i].matched))
+  //  //  return false;
 
-    group_string = match_results[i].str ();
-    converter << std::hex << group_string;
-    converter >> dummy_i;
-    if (converter.rdbuf ()->in_avail ()) // were there any bytes unaccounted for ?
-      return false;
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-  } // end FOR
+  //  group_string = match_results[i].str ();
+  //  position_i = group_string.find_last_of (':', std::string::npos);
+  //  if (position_i != std::string::npos)
+  //    group_string = group_string.substr (0, position_i);
+  //  converter << std::hex << group_string;
+  //  converter >> dummy_i;
+  //  if (converter.rdbuf ()->in_avail ()) // were there any bytes unaccounted for ?
+  //    return false;
+  //  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  //  converter.clear ();
+  //} // end FOR
 
   return true;
 }

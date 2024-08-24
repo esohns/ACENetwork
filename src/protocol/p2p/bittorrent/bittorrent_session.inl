@@ -622,8 +622,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   std::vector<unsigned int> piece_indexes_a;
   bool send_bitfield_b = false;
   unsigned int index_i = 0, offset_i = 0;
-  ACE_INET_Addr peer_address = connectionIdToPeerAddress (id_in);
-  ACE_UINT32 peer_address_i = peer_address.get_ip_address ();
+  ACE_UINT32 peer_address_i = connectionIdToPeerAddress (id_in);
   bool populate_pieces_bitfield_b = false;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
@@ -837,8 +836,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
-  ACE_INET_Addr peer_address = connectionIdToPeerAddress (id_in);
-  ACE_UINT32 peer_address_i = peer_address.get_ip_address ();
+  ACE_UINT32 peer_address_i = connectionIdToPeerAddress (id_in);
 
   bool notify_controller_b = false;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
@@ -2443,7 +2441,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                 &rerequest_interval));
 
   // connect to peers
-  BitTorrent_PeerAddresses_t peer_addresses;
+  BitTorrent_PeerAddresses_t peer_addresses_a;
   int result = -1;
   ACE_INET_Addr inet_address;
 
@@ -2473,41 +2471,100 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     return;
   } // end IF
 
-  // can be 'dictionary' or 'binary' model
-  if ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY)
-  { // *TODO*
-    ACE_ASSERT (false);
-    ACE_NOTSUP;
-    ACE_NOTREACHED (return;)
-  } // end IF
-  else
-  { ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
-    const char* char_p = (*iterator).second->string->c_str ();
-
-    // *IMPORTANT NOTE*: the 'compact' 'peers' representation is assumed here
-    //                   (see also: http://www.bittorrent.org/beps/bep_0023.html)
-    for (unsigned int i = 0;
-         i < ((*iterator).second->string->size () / 6);
-         ++i)
-    {
-      result = inet_address.set (*reinterpret_cast<const u_short*> (char_p + 4),
-                                 *reinterpret_cast<const ACE_UINT32*> (char_p),
-                                 0,  // already in network byte order
-                                 0); // do not map to ipv6
-      if (unlikely (result == -1))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-        return;
-      } // end IF
-      peer_addresses.push_back (inet_address);
-      char_p += 6;
-    } // end FOR
-  } // end ELSE
-  ACE_ASSERT (inherited::configuration_);
-  if (unlikely (!peer_addresses.size ()))
+  // can be 'list' or 'binary' model
+  switch ((*iterator).second->type)
   {
-    ACE_DEBUG ((LM_ERROR,
+    case Bencoding_Element::BENCODING_TYPE_STRING:
+    {
+      const char* char_p = (*iterator).second->string->c_str ();
+
+      // *IMPORTANT NOTE*: the 'compact' 'peers' representation is assumed here
+      //                   (see also: http://www.bittorrent.org/beps/bep_0023.html)
+      for (unsigned int i = 0;
+           i < ((*iterator).second->string->size () / 6);
+           ++i)
+      {
+        result = inet_address.set (*reinterpret_cast<const u_short*> (char_p + 4),
+                                   *reinterpret_cast<const ACE_UINT32*> (char_p),
+                                   0,  // already in network byte order
+                                   0); // do not map to ipv6
+        if (unlikely (result == -1))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+          return;
+        } // end IF
+        peer_addresses_a.push_back (inet_address);
+        char_p += 6;
+      } // end FOR
+
+      break;
+    }
+    case Bencoding_Element::BENCODING_TYPE_LIST:
+    {
+      u_short port_number_i;
+      int result;
+      for (Bencoding_ListIterator_t iterator_2 = (*iterator).second->list->begin ();
+           iterator_2 != (*iterator).second->list->end ();
+           ++iterator_2)
+      { ACE_ASSERT ((*iterator_2)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+        Bencoding_DictionaryIterator_t iterator_3;
+        for (iterator_3 = (*iterator_2)->dictionary->begin ();
+             iterator_3 != (*iterator_2)->dictionary->end ();
+             ++iterator_3)
+          if (*(*iterator_3).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_PORT_HEADER))
+          { ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+            port_number_i = (*iterator_3).second->integer;
+            break;
+          } // end IF
+        ACE_ASSERT (port_number_i);
+        for (iterator_3 = (*iterator_2)->dictionary->begin ();
+             iterator_3 != (*iterator_2)->dictionary->end ();
+             ++iterator_3)
+          if (*(*iterator_3).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_IP_HEADER))
+          { ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
+            std::string ip_address_string = *(*iterator_3).second->string;
+            int address_family_i = AF_INET;
+            if (Net_Common_Tools::matchIPv6Address (ip_address_string))
+            {
+              ip_address_string = '[' + ip_address_string;
+              ip_address_string.push_back (']');
+              address_family_i = AF_INET6;
+            } // end IF
+            ip_address_string.push_back (':');
+            std::ostringstream converter;
+            converter << port_number_i;
+            ip_address_string += converter.str ();
+            result = inet_address.set (ip_address_string.c_str (),
+                                       address_family_i);
+            if (unlikely (result == -1))
+            {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", continuing\n"),
+                          ACE_TEXT (ip_address_string.c_str ())));
+              break;
+            } // end IF
+            peer_addresses_a.push_back (inet_address);
+
+            break;
+          } // end IF
+      } // end FOR
+
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown type (was: %d), returning\n"),
+                  (*iterator).second->type));
+      return;
+    }
+  } // end SWITCH
+
+  ACE_ASSERT (inherited::configuration_);
+  if (unlikely (!peer_addresses_a.size ()))
+  {
+    ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s: tracker sent no peers, returning\n"),
                 ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                                ACE_DIRECTORY_SEPARATOR_CHAR)));
@@ -2517,13 +2574,13 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
               ACE_TEXT ("%s: connecting to %u peer(s)...\n"),
               ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                              ACE_DIRECTORY_SEPARATOR_CHAR),
-              peer_addresses.size ()));
+              peer_addresses_a.size ()));
 
   struct BitTorrent_SessionInitiationThreadData* thread_data_p = NULL;
   ACE_NEW_NORETURN (thread_data_p,
                     struct BitTorrent_SessionInitiationThreadData ());
   ACE_ASSERT (thread_data_p);
-  thread_data_p->addresses = peer_addresses;
+  thread_data_p->addresses = peer_addresses_a;
   thread_data_p->lock = &(inherited::lock_);
   thread_data_p->session = this;
   ACE_Thread_Manager* thread_manager_p = NULL;
@@ -2532,7 +2589,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   std::string buffer;
   std::ostringstream converter;
   int group_id_i = -1;
-  size_t number_of_threads_i = peer_addresses.size ();
+  size_t number_of_threads_i = peer_addresses_a.size ();
   ACE_ASSERT (number_of_threads_i);
   ACE_thread_t* thread_ids_p = NULL;
   ACE_hthread_t* thread_handles_p = NULL;
@@ -2817,16 +2874,17 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
 
-  std::string record_string = BitTorrent_Tools::RecordToString (record_in);
   if (inherited::configuration_->subscriber)
+  {
+    std::string record_string = BitTorrent_Tools::RecordToString (record_in);
     inherited::configuration_->subscriber->log (record_string);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%u: %s\n"),
-              id_in,
-              ACE_TEXT (record_string.c_str ())));
+  }
+  // ACE_DEBUG ((LM_DEBUG,
+  //             ACE_TEXT ("%u: %s\n"),
+  //             id_in,
+  //             ACE_TEXT (record_string.c_str ())));
 
-  ACE_INET_Addr peer_address = connectionIdToPeerAddress (id_in);
-  ACE_UINT32 peer_address_i = peer_address.get_ip_address ();
+  ACE_UINT32 peer_address_i = connectionIdToPeerAddress (id_in);
 
   if (!record_in.length)
     return;
@@ -2845,6 +2903,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     case BITTORRENT_MESSAGETYPE_UNCHOKE:
     {
       bool is_not_first_connection_to_peer_b = false;
+      bool have_peer_bitfield_b = false;
       BitTorrent_PeerStatusIterator_t iterator;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
         iterator = inherited::state_.peerStatus.find (peer_address_i);
@@ -2855,17 +2914,24 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
           inherited::state_.peerConnections.find (peer_address_i);
         ACE_ASSERT (iterator_2 != inherited::state_.peerConnections.end ());
         is_not_first_connection_to_peer_b = (*iterator_2).second.size () > 1;
+
+        BitTorrent_PeerPiecesIterator_t iterator_3 =
+          inherited::state_.peerPieces.find (peer_address_i);
+        ACE_ASSERT (iterator_3 != inherited::state_.peerPieces.end ());
+        have_peer_bitfield_b = !(*iterator_3).second.empty ();
       } // end lock scope
 
-      if (is_not_first_connection_to_peer_b)
-      { // get next piece !
+      // request a piece ?
+      if (is_not_first_connection_to_peer_b ||
+          have_peer_bitfield_b)
+      {
         bool requesting_piece_b = requestNextPiece (id_in);
+        if (requesting_piece_b)
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
           iterator = inherited::state_.peerStatus.find (peer_address_i);
           ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-          if (requesting_piece_b)
-            (*iterator).second.requesting_piece++;
-        } // end lock scope
+          (*iterator).second.requesting_piece++;
+        } // end IF && lock scope
       } // end IF
 
       break;
@@ -2949,14 +3015,43 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
             (*iterator_2).second.requesting_piece++;
         } // end lock scope
       } // end IF
-#undef NET_BITTORRENT_SUPPORT_MULITPLE_CONNECTIONS_TO_SAME_PEER
-#if defined (NET_BITTORRENT_SUPPORT_MULITPLE_CONNECTIONS_TO_SAME_PEER)
       else if (!am_choking_b &&
                has_missing_piece_b) // *TODO*: ...that is not already being requested...
-      { // open a new connection to the peer
-        connect (peer_address);
+      { // open another connection to the peer ?
+        unsigned int number_of_connections_to_this_peer_i = 0;
+        { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+          BitTorrent_PeerConnectionsIterator_t iterator_2 =
+            inherited::state_.peerConnections.find (peer_address_i);
+          ACE_ASSERT (iterator_2 != inherited::state_.peerConnections.end ());
+          number_of_connections_to_this_peer_i =
+            (*iterator_2).second.size ();
+        } // end lock scope
+
+        if (inherited::configuration_->allowMultipleConnectionsPerPeer && 
+            (number_of_connections_to_this_peer_i < BITTORRENT_DEFAULT_MAX_CONNECTIONS_PER_PEER))
+        {
+          ICONNECTION_T* iconnection_p =
+            inherited::CONNECTION_MANAGER_SINGLETON_T::instance ()->get (id_in);
+          if (unlikely (!iconnection_p))
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to retrieve connection handle (id was: %d), continuing\n"),
+                        id_in));
+            break;
+          } // end IF
+
+          ACE_HANDLE handle_h;
+          ACE_INET_Addr local_address, peer_address;
+          iconnection_p->info (handle_h,
+                               local_address,
+                               peer_address);
+
+          // clean up
+          iconnection_p->decrease (); iconnection_p = NULL;
+
+          connect (peer_address);
+        } // end IF
       } // end ELSE IF
-#endif // NET_BITTORRENT_SUPPORT_MULITPLE_CONNECTIONS_TO_SAME_PEER
 
       break;
     }
@@ -2967,7 +3062,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
         iterator = inherited::state_.peerPieces.find (peer_address_i);
         ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
-        ACE_ASSERT ((*iterator).second.empty ());
+        //ACE_ASSERT ((*iterator).second.empty ());
         (*iterator).second = record_in.bitfield;
 
         // send 'interested' ?
@@ -3504,8 +3599,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::requestNextPiece"));
 
-  ACE_INET_Addr peer_address = connectionIdToPeerAddress (id_in);
-  ACE_UINT32 peer_address_i = peer_address.get_ip_address ();
+  ACE_UINT32 peer_address_i = connectionIdToPeerAddress (id_in);
 
   unsigned int index = 0, offset = 0, length = 0;
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, false);
@@ -3668,8 +3762,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::populatePeerPiecesBitfield"));
 
-  ACE_INET_Addr peer_address = connectionIdToPeerAddress (id_in);
-  ACE_UINT32 peer_address_i = peer_address.get_ip_address ();
+  ACE_UINT32 peer_address_i = connectionIdToPeerAddress (id_in);
 
   BitTorrent_PeerPiecesIterator_t iterator;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
@@ -3728,7 +3821,7 @@ template <typename PeerConnectionConfigurationType,
 #else
           >
 #endif // GUI_SUPPORT
-ACE_INET_Addr
+ACE_UINT32
 BitTorrent_Session_T<PeerConnectionConfigurationType,
                      TrackerConnectionConfigurationType,
                      PeerConnectionStateType,
@@ -3759,8 +3852,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::connectionIdToPeerAddress"));
 
   // initialize return value(s)
-  ACE_INET_Addr result (static_cast<u_short> (0),
-                        static_cast<ACE_UINT32> (0));
+  ACE_UINT32 result = 0;
 
   // sanity check(s)
   ACE_ASSERT (id_in);
@@ -3772,17 +3864,29 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve connection handle (id was: %d), aborting\n"),
                 id_in));
-    return result;
+    return 0;
   } // end IF
 
   ACE_HANDLE handle_h;
-  ACE_INET_Addr local_address;
+  ACE_INET_Addr local_address, peer_address;
   iconnection_p->info (handle_h,
                        local_address,
-                       result);
+                       peer_address);
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;
+
+  if (peer_address.get_type () == PF_INET)
+    result = peer_address.get_ip_address ();
+  if (!result)
+  { ACE_ASSERT (peer_address.get_type () == PF_INET6);
+    sockaddr_in6* sockaddr_p = (sockaddr_in6*)peer_address.get_addr ();
+    uint8_t* data_p = static_cast<uint8_t*> (sockaddr_p->sin6_addr.u.Byte);
+    //data_p += 128 / 8 - 32 / 8;
+    //ACE_OS::memcpy (&result, data_p, sizeof (ACE_UINT32));
+    result = data_p[0] | (data_p[5] << 8) | (data_p[9] << 16) | (data_p[13] << 24);
+  } // end IF
+  ACE_ASSERT (result);
 
   return result;
 }

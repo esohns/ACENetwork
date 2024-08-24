@@ -130,21 +130,37 @@ BitTorrent_Tools::RecordToString (const struct BitTorrent_PeerRecord& peerRecord
       case BITTORRENT_MESSAGETYPE_BITFIELD:
       {
         result += ACE_TEXT_ALWAYS_CHAR (" ");
+        unsigned int num_pieces_i = 0;
         for (BitTorrent_MessagePayload_BitfieldIterator iterator = peerRecord_in.bitfield.begin ();
              iterator != peerRecord_in.bitfield.end ();
              ++iterator)
         {
-          result += ((*iterator & 0x80) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x40) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x20) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x10) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x08) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x04) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x02) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ((*iterator & 0x01) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
-          result += ACE_TEXT_ALWAYS_CHAR (" ");
+          num_pieces_i += (*iterator & 0x80) ? 1 : 0;
+          num_pieces_i += (*iterator & 0x40) ? 1 : 0;
+          num_pieces_i += (*iterator & 0x20) ? 1 : 0;
+          num_pieces_i += (*iterator & 0x10) ? 1 : 0;
+          num_pieces_i += (*iterator & 0x08) ? 1 : 0;
+          num_pieces_i += (*iterator & 0x04) ? 1 : 0;
+          num_pieces_i += (*iterator & 0x02) ? 1 : 0;
+          num_pieces_i += (*iterator & 0x01) ? 1 : 0;
+
+          //result += ((*iterator & 0x80) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ((*iterator & 0x40) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ((*iterator & 0x20) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ((*iterator & 0x10) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ((*iterator & 0x08) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ((*iterator & 0x04) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ((*iterator & 0x02) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ((*iterator & 0x01) ? ACE_TEXT_ALWAYS_CHAR ("1") : ACE_TEXT_ALWAYS_CHAR ("0"));
+          //result += ACE_TEXT_ALWAYS_CHAR (" ");
         } // end FOR
-        result.erase (result.end () - 1);
+        //result.erase (result.end () - 1);
+
+        std::ostringstream converter;
+        converter << num_pieces_i;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR (" pieces");
+
         break;
       }
       case BITTORRENT_MESSAGETYPE_REQUEST:
@@ -687,7 +703,7 @@ bool
 BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
                              unsigned int numberOfPieces_in,
                              unsigned int index_in,
-                             struct BitTorrent_Piece& piece_in)
+                             struct BitTorrent_Piece& piece_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::savePiece"));
 
@@ -719,7 +735,7 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
   converter << index_in;
   filename += converter.str ();
   filename += ACE_TEXT_ALWAYS_CHAR ("_");
-  filename += piece_in.filename;
+  filename += piece_inout.filename;
   filename += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECE_FILENAME_SUFFIX);
 
   int flags_i =  (O_BINARY |
@@ -727,7 +743,7 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
                   O_TRUNC  |
                   O_WRONLY);
   ACE_FILE_IO stream;
-  BitTorrent_PieceChunksConstIterator_t iterator = piece_in.chunks.begin ();
+  BitTorrent_PieceChunksConstIterator_t iterator = piece_inout.chunks.begin ();
   ACE_Message_Block* message_block_p = (*iterator).data;
   ssize_t result = 0;
   size_t bytes_transferred_i = 0;
@@ -744,16 +760,16 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
     return false;
   } // end IF
   ++iterator;
-  while (iterator != piece_in.chunks.end ())
+  while (iterator != piece_inout.chunks.end ())
   {
     message_block_p->next ((*iterator).data);
     message_block_p = (*iterator).data;
     ++iterator;
   } // end FOR
-  result = stream.send_n ((*piece_in.chunks.begin ()).data,
+  result = stream.send_n ((*piece_inout.chunks.begin ()).data,
                           NULL,
                           &bytes_transferred_i);
-  if (bytes_transferred_i != piece_in.length)
+  if (unlikely (bytes_transferred_i != piece_inout.length))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_FILE_IO::send_n(\"%s\"): \"%m\", aborting\n"),
@@ -770,12 +786,19 @@ BitTorrent_Tools::savePiece (const std::string& metaInfoFileName_in,
     result_3 = false;
   } // end IF
   else
+  {
+    piece_inout.onDisk = true;
+    BitTorrent_Tools::freeChunks (piece_inout.chunks);
+
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: saved piece %u to \"%s\" (%u byte(s))...\n"),
-                ACE_TEXT (metaInfoFileName_in.c_str ()),
+                ACE::basename (ACE_TEXT (metaInfoFileName_in.c_str ()),
+                               ACE_DIRECTORY_SEPARATOR_CHAR),
                 index_in,
                 ACE_TEXT (filename.c_str ()),
-                piece_in.length));
+                piece_inout.length));
+  } // end ELSE
+
   return result_3;
 }
 

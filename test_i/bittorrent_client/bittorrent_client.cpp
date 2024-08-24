@@ -127,6 +127,11 @@ do_printUsage (const std::string& programName_in)
             << !BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE
             << ACE_TEXT ("]")
             << std::endl;
+  std::cout << ACE_TEXT ("-c        : do NOT request 'compact' peer addresses")
+            << ACE_TEXT (" [")
+            << !BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES
+            << ACE_TEXT ("]")
+            << std::endl;
   std::cout << ACE_TEXT ("-d        : debug parser")
             << ACE_TEXT (" [")
             << false
@@ -146,6 +151,11 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT ("-l        : log to a file")
             << ACE_TEXT (" [")
             << TEST_I_DEFAULT_SESSION_LOG
+            << ACE_TEXT ("]")
+            << std::endl;
+  std::cout << ACE_TEXT ("-m        : allow multiple connections per peer")
+            << ACE_TEXT (" [")
+            << BITTORRENT_DEFAULT_ALLOW_MULTIPLE_CONNECTIONS_PER_PEER
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-r        : use reactor [")
@@ -172,10 +182,12 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR* argv_in[], // cannot be const...
+                     bool& requestCompactPeerAddresses_out,
                      bool& sendBitfieldAfterHandshake_out,
                      bool& debugParser_out,
                      std::string& metaInfoFileName_out,
                      bool& logToFile_out,
+                     bool& allowMultipleConnectionsPerPeer_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -189,6 +201,8 @@ do_processArguments (int argc_in,
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
+  requestCompactPeerAddresses_out =
+    BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES;
   sendBitfieldAfterHandshake_out =
     BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE;
   debugParser_out                = false;
@@ -199,6 +213,8 @@ do_processArguments (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   logToFile_out                  = TEST_I_DEFAULT_SESSION_LOG;
+  allowMultipleConnectionsPerPeer_out =
+    BITTORRENT_DEFAULT_ALLOW_MULTIPLE_CONNECTIONS_PER_PEER;
   useReactor_out                 =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
@@ -208,7 +224,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("bdf:lrs:tv"),
+                              ACE_TEXT ("bcdf:lmrs:tv"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -224,6 +240,11 @@ do_processArguments (int argc_in,
         sendBitfieldAfterHandshake_out = false;
         break;
       }
+      case 'c':
+      {
+        requestCompactPeerAddresses_out = false;
+        break;
+      }
       case 'd':
       {
         debugParser_out = true;
@@ -237,6 +258,11 @@ do_processArguments (int argc_in,
       case 'l':
       {
         logToFile_out = true;
+        break;
+      }
+      case 'm':
+      {
+        allowMultipleConnectionsPerPeer_out = true;
         break;
       }
       case 'r':
@@ -491,7 +517,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
          bool debugParser_in,
          const std::string& metaInfoFileName_in,
          bool useReactor_in,
+         bool requestCompactPeerAddresses_in,
          bool sendBitfieldAfterHandshake_in,
+         bool allowMultiplerConnectionsPerPeer_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -695,6 +723,10 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.sessionConfiguration.dispatch =
       ((configuration_in.dispatchConfiguration.numberOfReactorThreads > 0) ? COMMON_EVENT_DISPATCH_REACTOR
                                                                            : COMMON_EVENT_DISPATCH_PROACTOR);
+  configuration_in.sessionConfiguration.allowMultipleConnectionsPerPeer =
+    allowMultiplerConnectionsPerPeer_in;
+  configuration_in.sessionConfiguration.requestCompactPeerAddresses =
+    requestCompactPeerAddresses_in;
   configuration_in.sessionConfiguration.sendBitfieldAfterHandshake =
     sendBitfieldAfterHandshake_in;
 
@@ -957,7 +989,11 @@ ACE_TMAIN (int argc_in,
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 
+  bool allow_multiple_connections_per_peer_b =
+    BITTORRENT_DEFAULT_ALLOW_MULTIPLE_CONNECTIONS_PER_PEER;
   bool debug_parser                          = false;
+  bool request_compact_peer_addresses_b =
+    BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES;
   bool send_bitfield_after_handshake_b =
     BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE;
   std::string meta_info_file_name            = configuration_path;
@@ -979,10 +1015,12 @@ ACE_TMAIN (int argc_in,
     TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
+                            request_compact_peer_addresses_b,
                             send_bitfield_after_handshake_b,
                             debug_parser,
                             meta_info_file_name,
                             log_to_file,
+                            allow_multiple_connections_per_peer_b,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
@@ -1107,7 +1145,9 @@ ACE_TMAIN (int argc_in,
            debug_parser,
            meta_info_file_name,
            use_reactor,
+           request_compact_peer_addresses_b,
            send_bitfield_after_handshake_b,
+           allow_multiple_connections_per_peer_b,
            ACE_Time_Value (statistic_reporting_interval, 0),
            signal_set,
            ignored_signal_set,

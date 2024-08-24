@@ -288,7 +288,7 @@ Net_SessionBase_T<AddressType,
          iterator != state_.connections.end ();
          ++iterator)
     {
-      iconnection_p =connection_manager_p->get (*iterator);
+      iconnection_p = connection_manager_p->get (*iterator);
       if (unlikely (!iconnection_p)) // mostly likely: different connection manager
       {
         ACE_DEBUG ((LM_ERROR,
@@ -417,7 +417,6 @@ Net_SessionBase_T<AddressType,
 
   Net_ConnectionIdsIterator_t iterator;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
     iterator = state_.connections.find (id_in);
     ACE_ASSERT (iterator != state_.connections.end ());
     state_.connections.erase (iterator);

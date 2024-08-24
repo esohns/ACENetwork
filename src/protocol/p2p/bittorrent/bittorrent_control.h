@@ -68,6 +68,7 @@ class BitTorrent_Control_T
   // *NOTE*: key is the metainfo (aka '.torrent') file URI
   typedef std::map<std::string, CONTEXT_T> SESSIONS_T;
   typedef typename SESSIONS_T::iterator SESSIONS_ITERATOR_T;
+  typedef typename SessionType::TRACKER_CONNECTION_MANAGER_SINGLETON_T CONNECTION_MANAGER_SINGLETON_2;
 
   BitTorrent_Control_T (SessionConfigurationType*); // base session configuration
   virtual ~BitTorrent_Control_T ();
