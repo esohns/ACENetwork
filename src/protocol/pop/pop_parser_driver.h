@@ -92,6 +92,7 @@ class POP_ParserDriver_T
   bool                                       expectMultiline_;
 
  protected:
+  bool                                       error_;
   bool                                       finished_;
 
  private:

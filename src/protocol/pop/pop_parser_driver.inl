@@ -36,6 +36,7 @@ POP_ParserDriver_T<SessionMessageType>::POP_ParserDriver_T ()
  , offset_ (0)
  , record_ (NULL)
  , expectMultiline_ (false)
+ , error_ (false)
  , finished_ (false)
  , configuration_ (NULL)
  //, parser_ (this,               // driver

@@ -35,6 +35,7 @@ SMTP_ParserDriver_T<SessionMessageType>::SMTP_ParserDriver_T ()
  : fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
+ , error_ (false)
  , finished_ (false)
  , configuration_ (NULL)
  //, parser_ (this,               // driver

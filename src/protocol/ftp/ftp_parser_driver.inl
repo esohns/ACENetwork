@@ -32,7 +32,8 @@
 
 template <typename SessionMessageType>
 FTP_ParserDriver_T<SessionMessageType>::FTP_ParserDriver_T ()
- : finished_ (false)
+ : error_ (false)
+ , finished_ (false)
  , fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)

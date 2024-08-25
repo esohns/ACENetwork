@@ -86,6 +86,7 @@ class SMTP_ParserDriver_T
   struct SMTP_Record*                         record_;
 
  protected:
+  bool                                        error_;
   bool                                        finished_;
 
  private:

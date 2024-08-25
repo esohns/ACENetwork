@@ -80,6 +80,7 @@ class FTP_ParserDriver_T
   inline virtual const struct Common_FlexScannerState& getR () const { static struct Common_FlexScannerState dummy;  ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
 
  protected:
+  bool                                        error_;
   bool                                        finished_;
   // *NOTE*: current (unscanned) data fragment
   ACE_Message_Block*                          fragment_;
