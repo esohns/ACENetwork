@@ -405,6 +405,13 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
+
+#if defined (VALGRIND_USE)
+  // *NOTE*: valgrind uses SIGRT32 (--> SIGRTMAX ?) and apparently will not work
+  // if the application installs its own handler (see documentation)
+  if (RUNNING_ON_VALGRIND)
+    signals_out.sig_del (SIGRTMAX);        // 64
+#endif // VALGRIND_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GUI_SUPPORT)
@@ -639,6 +646,15 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
   BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+  struct _GUID interface_identifier;
+#else
+  std::string interface_identifier;
+#endif // _WIN32_WINNT_VISTA
+#else
+  std::string interface_identifier;
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -688,12 +704,12 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     &bittorrent_control;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID interface_identifier = Net_Common_Tools::getDefaultInterface_2 ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+  interface_identifier = Net_Common_Tools::getDefaultInterface_2 ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
 #else
-  std::string interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+  interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
 #endif // _WIN32_WINNT_VISTA
 #else
-  std::string interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
+  interface_identifier = Net_Common_Tools::getDefaultInterface ((NET_LINKLAYER_802_3 | NET_LINKLAYER_802_11 | NET_LINKLAYER_PPP));
 #endif // ACE_WIN32 || ACE_WIN64
   if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
                                                        configuration_in.sessionConfiguration.externalIPAddress))

@@ -398,6 +398,13 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
+
+#if defined (VALGRIND_USE)
+  // *NOTE*: valgrind uses SIGRT32 (--> SIGRTMAX ?) and apparently will not work
+  // if the application installs its own handler (see documentation)
+  if (RUNNING_ON_VALGRIND)
+    signals_out.sig_del (SIGRTMAX);        // 64
+#endif // VALGRIND_USE
 #endif
 }
 

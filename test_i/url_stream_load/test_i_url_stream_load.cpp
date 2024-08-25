@@ -53,6 +53,8 @@
 #include "common_os_tools.h"
 #include "common_tools.h"
 
+#include "common_error_tools.h"
+
 #include "common_event_tools.h"
 
 #include "common_logger_queue.h"
@@ -512,12 +514,12 @@ do_initialize_signals (bool allowUserRuntimeConnect_in,
   // *NOTE* don't care about SIGPIPE
   signals_out.sig_del (SIGPIPE);           // 12      /* Broken pipe: write to pipe with no readers */
 
-#if defined (LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
+#if defined (VALGRIND_USE)
   // *NOTE*: valgrind uses SIGRT32 (--> SIGRTMAX ?) and apparently will not work
   // if the application installs its own handler (see documentation)
   if (RUNNING_ON_VALGRIND)
     signals_out.sig_del (SIGRTMAX);        // 64
-#endif // LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
+#endif // VALGRIND_USE
 #endif // ACE_WIN32 || ACE_WIN64
 }
 

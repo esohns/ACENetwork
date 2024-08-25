@@ -3855,7 +3855,14 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   if (!result)
   { ACE_ASSERT (peer_address.get_type () == PF_INET6);
     sockaddr_in6* sockaddr_p = (sockaddr_in6*)peer_address.get_addr ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     uint8_t* data_p = static_cast<uint8_t*> (sockaddr_p->sin6_addr.u.Byte);
+#elif defined (ACE_LINUX)
+    uint8_t* data_p =
+      static_cast<uint8_t*> (sockaddr_p->sin6_addr.__in6_u.__u6_addr8);
+#else
+    ACE_ASSERT (false); // *TODO*
+#endif // ACE_WIN32 || ACE_WIN64
     //data_p += 128 / 8 - 32 / 8;
     //ACE_OS::memcpy (&result, data_p, sizeof (ACE_UINT32));
     result = data_p[0] | (data_p[5] << 8) | (data_p[9] << 16) | (data_p[13] << 24);

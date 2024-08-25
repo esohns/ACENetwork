@@ -31,7 +31,7 @@ net_bittorrent_session_setup_function (void* arg_in)
   result = -1;
 #else
   result = arg_in;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   struct BitTorrent_SessionInitiationThreadData* data_p =
     static_cast<struct BitTorrent_SessionInitiationThreadData*> (arg_in);
@@ -53,7 +53,7 @@ net_bittorrent_session_setup_function (void* arg_in)
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connecting to peer \"%s\"...\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address, false, false).c_str ())));
 
   isession_p->connect (peer_address);
 
