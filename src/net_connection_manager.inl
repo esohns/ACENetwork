@@ -716,6 +716,48 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
+                         UserDataType>::wait_2 (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait_2"));
+
+  int result = -1;
+  ICONNECTION_T* connection_p = NULL;
+  bool handle_found_b;
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
+    while (!connections_.is_empty ())
+    {
+      handle_found_b = false;
+      for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
+           iterator.next (connection_p);
+           iterator.advance ())
+      { ACE_ASSERT (connection_p);
+        handle_found_b = (connection_p->id () == handle_in);
+        if (handle_found_b)
+          break; // connection is still around
+      } // end FOR
+      if (!handle_found_b)
+        break; // connection is gone
+
+      result = connectionsCondition_.wait ();
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_CONDITION::wait(): \"%m\", continuing\n")));
+    } // end WHILE
+  } // end lock scope
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+void
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
                          UserDataType>::abortLeastRecent ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortLeastRecent"));

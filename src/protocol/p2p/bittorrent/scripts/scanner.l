@@ -181,10 +181,6 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 %% /* end of definitions */
 
 %{
-  //yylloc->step ();
-  //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
-
-  unsigned int bitfield_counter = 0;
   unsigned int bytes_to_skip = 0;
 %}
 
@@ -226,10 +222,15 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_length>{
 {LENGTH}                  { ACE_ASSERT (yyleng == 4);
                             iparser_p->offset (yyleng);
-                            /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->record,
                                               struct BitTorrent_PeerRecord ());
-                            ACE_ASSERT (yylval->record);
+                            if (unlikely (!yylval->record))
+                            {
+                              ACE_DEBUG ((LM_CRITICAL,
+                                          ACE_TEXT ("failed to allocate memory (was: %d byte(s)), aborting\n"),
+                                          sizeof (struct BitTorrent_PeerRecord)));
+                              yyterminate ();
+                            } // end IF
                             yylval->record->length =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -240,6 +241,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_type>{
 {TYPE}                    { ACE_ASSERT (yyleng == 1);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->type =
                               static_cast<enum BitTorrent_MessageType> (*reinterpret_cast<ACE_UINT8*> (yytext));
                             switch (yylval->record->type)
@@ -260,7 +262,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                                 BEGIN (state_have_payload);
                                 break;
                               case BITTORRENT_MESSAGETYPE_BITFIELD:
-                                bitfield_counter = yylval->record->length - 1;
+                                bytes_to_skip = yylval->record->length - 1;
                                 BEGIN (state_bitfield_payload);
                                 break;
                               case BITTORRENT_MESSAGETYPE_REQUEST:
@@ -285,6 +287,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_have_payload>{
 {HAVE_PAYLOAD}            { ACE_ASSERT (yyleng == 4);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->have =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -293,17 +296,22 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_have_payload>
 <state_bitfield_payload>{
 {BITFIELD_PAYLOAD}        { ACE_ASSERT (yyleng == 1);
-                            ACE_ASSERT (bitfield_counter);
-                            iparser_p->offset (bitfield_counter);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->bitfield.push_back (*reinterpret_cast<ACE_UINT8*> (yytext));
-                            for (unsigned int i = 0; i < (bitfield_counter - 1); ++i)
-                              yylval->record->bitfield.push_back (static_cast<ACE_UINT8> (yyinput (yyscanner)));
-                            BEGIN (state_length);
-                            return yy::BitTorrent_Parser::token::BITFIELD; }
+                            ACE_ASSERT (bytes_to_skip);
+                            --bytes_to_skip;
+                            if (unlikely (!bytes_to_skip))
+                            {
+                              iparser_p->offset (yylval->record->length - 1);
+                              BEGIN (state_length);
+                              return yy::BitTorrent_Parser::token::BITFIELD;
+                            } // end IF
+                          }
 } // end <state_bitfield_payload>
 <state_request_payload>{
 {REQUEST_PAYLOAD}         { ACE_ASSERT (yyleng == 12);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->request.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -319,6 +327,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_cancel_payload>{
 {CANCEL_PAYLOAD}          { ACE_ASSERT (yyleng == 12);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->cancel.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -334,6 +343,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_piece_payload>{
 {PIECE_PAYLOAD_HEAD}      { ACE_ASSERT (yyleng == 8);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->piece.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -346,18 +356,9 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_piece>{
 {OCTET}{1}                { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (yylval->record);
-                            // skip over piece data
-//                            unsigned int bytes_to_skip =
-//                              yylval->record->length - 9 - 1;
-//                            char c = 0;
-//                            for (unsigned int i = 0; i < bytes_to_skip; ++i)
-//                            {
-//                              c = static_cast<char> (yyinput (yyscanner));
-//                              // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-//                              *(yyg->yy_c_buf_p - 1) = c;
-//                            } // end IF
+                            ACE_ASSERT (bytes_to_skip);
                             --bytes_to_skip;
-                            if (!bytes_to_skip)
+                            if (unlikely (!bytes_to_skip))
                             {
                               iparser_p->offset (yylval->record->length - 9);
                               BEGIN (state_length);
@@ -378,7 +379,8 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
                               return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
                             } // end IF
-                            yyless (0); }
+                            yyless (0);
+                          }
 %%
 #ifdef __cplusplus
 extern "C"

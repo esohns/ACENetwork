@@ -610,8 +610,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
-  BitTorrent_MessagePayload_Bitfield peer_pieces;
-  struct BitTorrent_PeerStatus peer_status;
+  struct BitTorrent_PeerState peer_state_s;
   struct BitTorrent_PeerHandShake* record_p = NULL;
   struct BitTorrent_PeerRecord* record_2 = NULL;
   struct BitTorrent_PeerMessageData* data_p = NULL;
@@ -626,25 +625,20 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   bool populate_pieces_bitfield_b = false;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-    BitTorrent_PeerConnectionsIterator_t iterator =
-      inherited::state_.peerConnections.find (peer_address_i);
-    if (iterator == inherited::state_.peerConnections.end ())
+    BitTorrent_PeerStateIterator_t iterator =
+      inherited::state_.peerState.find (peer_address_i);
+    if (iterator == inherited::state_.peerState.end ())
     {
-      std::vector<Net_ConnectionId_t> connection_ids_a;
-      connection_ids_a.push_back (id_in);
-      inherited::state_.peerConnections.insert (std::make_pair (peer_address_i, connection_ids_a));
+      std::pair<BitTorrent_PeerStateIterator_t, bool> result_s =
+        inherited::state_.peerState.insert (std::make_pair (peer_address_i, peer_state_s));
+      ACE_ASSERT (result_s.second);
+      iterator = result_s.first;
     } // end IF
-    else
-      (*iterator).second.push_back (id_in);
+    ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+    (*iterator).second.connections.push_back (id_in);
   
-    BitTorrent_PeerPiecesIterator_t iterator_2 = inherited::state_.peerPieces.find (peer_address_i);
-    if (iterator_2 == inherited::state_.peerPieces.end ())
-    {
-      inherited::state_.peerPieces.insert (std::make_pair (peer_address_i, peer_pieces));
+    if ((*iterator).second.pieces.empty ())
       populate_pieces_bitfield_b = true;
-      ACE_ASSERT (inherited::state_.peerStatus.find (peer_address_i) == inherited::state_.peerStatus.end ());
-      inherited::state_.peerStatus.insert (std::make_pair (peer_address_i, peer_status));
-    } // end IF
   } // end lock scope
   if (unlikely (populate_pieces_bitfield_b))
     populatePeerPiecesBitfield (id_in);
@@ -840,23 +834,17 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   bool notify_controller_b = false;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-    BitTorrent_PeerConnectionsIterator_t iterator =
-      inherited::state_.peerConnections.find (peer_address_i);
-    ACE_ASSERT (iterator != inherited::state_.peerConnections.end ());
+    BitTorrent_PeerStateIterator_t iterator =
+      inherited::state_.peerState.find (peer_address_i);
+    ACE_ASSERT (iterator != inherited::state_.peerState.end ());
     std::vector<Net_ConnectionId_t>::iterator iterator_2 =
-      std::find ((*iterator).second.begin (), (*iterator).second.end (), id_in);
-    ACE_ASSERT (iterator_2 != (*iterator).second.end ());
-    (*iterator).second.erase (iterator_2);
-    if ((*iterator).second.empty ())
-    { // the last connection to this peer has closed; clean up status
-      BitTorrent_PeerPiecesIterator_t iterator_3 =
-        inherited::state_.peerPieces.find (peer_address_i);
-      ACE_ASSERT (iterator_3 != inherited::state_.peerPieces.end ());
-      inherited::state_.peerPieces.erase (iterator_3);
-      BitTorrent_PeerStatusIterator_t iterator_4 =
-        inherited::state_.peerStatus.find (peer_address_i);
-      ACE_ASSERT (iterator_4 != inherited::state_.peerStatus.end ());
-      inherited::state_.peerStatus.erase (iterator_4);
+      std::find ((*iterator).second.connections.begin (), (*iterator).second.connections.end (),
+                 id_in);
+    ACE_ASSERT (iterator_2 != (*iterator).second.connections.end ());
+    (*iterator).second.connections.erase (iterator_2);
+    if ((*iterator).second.connections.empty ())
+    { // the last connection to this peer has closed; erase peer state
+      inherited::state_.peerState.erase (iterator);
     } // end IF
 
     if (unlikely (inherited::state_.connections.empty ()))
@@ -2892,11 +2880,11 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   {
     case BITTORRENT_MESSAGETYPE_CHOKE:
     {
-      BitTorrent_PeerStatusIterator_t iterator;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-        (*iterator).second.am_choking = true;
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+        (*iterator).second.status.am_choking = true;
       } // end lock scope
       break;
     }
@@ -2904,21 +2892,16 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     {
       bool is_not_first_connection_to_peer_b = false;
       bool have_peer_bitfield_b = false;
-      BitTorrent_PeerStatusIterator_t iterator;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-        (*iterator).second.am_choking = false;
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+        (*iterator).second.status.am_choking = false;
 
-        BitTorrent_PeerConnectionsIterator_t iterator_2 =
-          inherited::state_.peerConnections.find (peer_address_i);
-        ACE_ASSERT (iterator_2 != inherited::state_.peerConnections.end ());
-        is_not_first_connection_to_peer_b = (*iterator_2).second.size () > 1;
-
-        BitTorrent_PeerPiecesIterator_t iterator_3 =
-          inherited::state_.peerPieces.find (peer_address_i);
-        ACE_ASSERT (iterator_3 != inherited::state_.peerPieces.end ());
-        have_peer_bitfield_b = !(*iterator_3).second.empty ();
+        is_not_first_connection_to_peer_b =
+          (*iterator).second.connections.size () > 1;
+        have_peer_bitfield_b =
+          !(*iterator).second.pieces.empty ();
       } // end lock scope
 
       // request a piece ?
@@ -2928,9 +2911,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
         bool requesting_piece_b = requestNextPiece (id_in);
         if (requesting_piece_b)
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-          iterator = inherited::state_.peerStatus.find (peer_address_i);
-          ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-          (*iterator).second.requesting_piece++;
+          BitTorrent_PeerStateIterator_t iterator =
+            inherited::state_.peerState.find (peer_address_i);
+          ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+          ++(*iterator).second.status.requesting_piece;
         } // end IF && lock scope
       } // end IF
 
@@ -2938,24 +2922,25 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     }
     case BITTORRENT_MESSAGETYPE_INTERESTED:
     {
-      BitTorrent_PeerStatusIterator_t iterator;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-        (*iterator).second.peer_interested = true;
-        (*iterator).second.peer_choking = false;
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+        (*iterator).second.status.peer_interested = true;
+        (*iterator).second.status.peer_choking = false;
       } // end lock scope
       choke (id_in,
              false);
+
       break;
     }
     case BITTORRENT_MESSAGETYPE_NOT_INTERESTED:
     {
-      BitTorrent_PeerStatusIterator_t iterator;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-        (*iterator).second.peer_interested = false;
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+        (*iterator).second.status.peer_interested = false;
       } // end lock scope
       break;
     }
@@ -2964,25 +2949,22 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       bool send_interested_b = false;
       bool has_missing_piece_b = false;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        BitTorrent_PeerPiecesIterator_t iterator =
-          inherited::state_.peerPieces.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
         unsigned int index = record_in.have / (sizeof (ACE_UINT8) * 8);
         unsigned int index_2 = record_in.have % (sizeof (ACE_UINT8) * 8);
         // *IMPORTANT NOTE*: the peer may 'repeat' itself, so cannot assert here
-        //ACE_ASSERT (!((*iterator).second[index] & (0x80 >> index_2)));
-        (*iterator).second[index] |= (0x80 >> index_2);
+        //ACE_ASSERT (!((*iterator).second.pieces[index] & (0x80 >> index_2)));
+        (*iterator).second.pieces[index] |= (0x80 >> index_2);
 
         // send 'interested' ?
-        BitTorrent_PeerStatusIterator_t iterator_2;
-        iterator_2 = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
         has_missing_piece_b = BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
-                                                                 (*iterator).second);
-        if (!(*iterator_2).second.am_interested &&
+                                                                 (*iterator).second.pieces);
+        if (!(*iterator).second.status.am_interested &&
             has_missing_piece_b)
         {
-          (*iterator_2).second.am_interested = true;
+          (*iterator).second.status.am_interested = true;
           send_interested_b = true;
         } // end IF
       } // end lock scope
@@ -2994,25 +2976,24 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       bool am_choking_b = false;
       bool request_piece_b = false;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        BitTorrent_PeerStatusIterator_t iterator_2 =
-          inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-        am_choking_b = (*iterator_2).second.am_choking;
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+        am_choking_b = (*iterator).second.status.am_choking;
         request_piece_b =
-          !am_choking_b                          &&
-          !(*iterator_2).second.requesting_piece &&
+          !am_choking_b                               &&
+          !(*iterator).second.status.requesting_piece &&
           has_missing_piece_b;
       } // end lock scope
-
       if (request_piece_b)
       {
         bool requesting_piece_b = requestNextPiece (id_in);
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-          BitTorrent_PeerStatusIterator_t iterator_2 =
-            inherited::state_.peerStatus.find (peer_address_i);
-          ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
+          BitTorrent_PeerStateIterator_t iterator =
+            inherited::state_.peerState.find (peer_address_i);
+          ACE_ASSERT (iterator != inherited::state_.peerState.end ());
           if (requesting_piece_b)
-            (*iterator_2).second.requesting_piece++;
+            (*iterator).second.status.requesting_piece++;
         } // end lock scope
       } // end IF
       else if (!am_choking_b &&
@@ -3020,13 +3001,12 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       { // open another connection to the peer ?
         unsigned int number_of_connections_to_this_peer_i = 0;
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-          BitTorrent_PeerConnectionsIterator_t iterator_2 =
-            inherited::state_.peerConnections.find (peer_address_i);
-          ACE_ASSERT (iterator_2 != inherited::state_.peerConnections.end ());
+          BitTorrent_PeerStateIterator_t iterator =
+            inherited::state_.peerState.find (peer_address_i);
+          ACE_ASSERT (iterator != inherited::state_.peerState.end ());
           number_of_connections_to_this_peer_i =
-            (*iterator_2).second.size ();
+            (*iterator).second.connections.size ();
         } // end lock scope
-
         if (inherited::configuration_->allowMultipleConnectionsPerPeer && 
             (number_of_connections_to_this_peer_i < BITTORRENT_DEFAULT_MAX_CONNECTIONS_PER_PEER))
         {
@@ -3057,23 +3037,20 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     }
     case BITTORRENT_MESSAGETYPE_BITFIELD:
     {
-      BitTorrent_PeerPiecesIterator_t iterator;
       bool send_interested_b = false;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerPieces.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
         //ACE_ASSERT ((*iterator).second.empty ());
-        (*iterator).second = record_in.bitfield;
+        (*iterator).second.pieces = record_in.bitfield;
 
         // send 'interested' ?
-        BitTorrent_PeerStatusIterator_t iterator_2;
-        iterator_2 = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-        if (!(*iterator_2).second.am_interested &&
+        if (!(*iterator).second.status.am_interested &&
             BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
-                                               (*iterator).second))
+                                               (*iterator).second.pieces))
         {
-          (*iterator_2).second.am_interested = true;
+          (*iterator).second.status.am_interested = true;
           send_interested_b = true;
         } // end IF
       } // end lock scope
@@ -3085,12 +3062,12 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     }
     case BITTORRENT_MESSAGETYPE_REQUEST:
     {
-      BitTorrent_PeerStatusIterator_t iterator;
       bool send_piece_b = true;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-        send_piece_b = !(*iterator).second.peer_choking;
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+        send_piece_b = !(*iterator).second.status.peer_choking;
       } // end lock scope
       if (send_piece_b)
         piece (id_in,
@@ -3104,12 +3081,12 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     { ACE_ASSERT (messageBlock_in);
       struct BitTorrent_Piece_Chunk chunk_s;
       chunk_s.offset = record_in.piece.begin;
-      BitTorrent_PiecesIterator_t iterator;
       bool send_have_b = false;
       bool request_next_piece_b = true;
       bool notify_completion_b = false;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        iterator = inherited::state_.pieces.begin ();
+        BitTorrent_PiecesIterator_t iterator =
+          inherited::state_.pieces.begin ();
         std::advance (iterator, record_in.piece.index);
         // sanity check(s): piece already complete ?
         if (unlikely ((*iterator).onDisk ||
@@ -3193,32 +3170,32 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
           notify_completion_b = true;
         } // end IF
 continue_:
-        BitTorrent_PeerStatusIterator_t iterator_2;
-        iterator_2 = inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-        if ((*iterator_2).second.am_choking || notify_completion_b)
+        BitTorrent_PeerStateIterator_t iterator_2;
+        iterator_2 = inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator_2 != inherited::state_.peerState.end ());
+        if ((*iterator_2).second.status.am_choking || notify_completion_b)
           request_next_piece_b = false;
       } // end lock scope
       if (unlikely (send_have_b))
         have (record_in.piece.index);
 
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-        BitTorrent_PeerStatusIterator_t iterator_2 =
-          inherited::state_.peerStatus.find (peer_address_i);
-        ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-        --(*iterator_2).second.requesting_piece;
+        BitTorrent_PeerStateIterator_t iterator =
+          inherited::state_.peerState.find (peer_address_i);
+        ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+        --(*iterator).second.status.requesting_piece;
       } // end lock scope
 
       if (likely (request_next_piece_b))
       {
         bool requesting_piece_b = requestNextPiece (id_in);
+        if (likely (requesting_piece_b))
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-          BitTorrent_PeerStatusIterator_t iterator_2 =
-            inherited::state_.peerStatus.find (peer_address_i);
-          ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-          if (requesting_piece_b)
-            (*iterator_2).second.requesting_piece++;
-        } // end lock scope
+          BitTorrent_PeerStateIterator_t iterator =
+            inherited::state_.peerState.find (peer_address_i);
+          ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+          ++(*iterator).second.status.requesting_piece;
+        } // end IF && lock scope
       } // end IF
 
       if (unlikely (notify_completion_b))
@@ -3603,17 +3580,14 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   unsigned int index = 0, offset = 0, length = 0;
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, false);
-    BitTorrent_PeerPiecesIterator_t iterator =
-      inherited::state_.peerPieces.find (peer_address_i);
-    ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
+    BitTorrent_PeerStateIterator_t iterator =
+      inherited::state_.peerState.find (peer_address_i);
+    ACE_ASSERT (iterator != inherited::state_.peerState.end ());
     if (!BitTorrent_Tools::hasMissingPiece (inherited::state_.pieces,
-                                            (*iterator).second))
+                                            (*iterator).second.pieces))
     {
       // --> send 'not interested'
-      BitTorrent_PeerStatusIterator_t iterator_2;
-      iterator_2 = inherited::state_.peerStatus.find (peer_address_i);
-      ACE_ASSERT (iterator_2 != inherited::state_.peerStatus.end ());
-      (*iterator_2).second.am_interested = false;
+      (*iterator).second.status.am_interested = false;
       goto not_interested;
     } // end IF
 
@@ -3625,7 +3599,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     for (unsigned int i = 0;
          i < inherited::state_.pieces.size ();
          ++i)
-      if (!BitTorrent_Tools::havePiece (i, (*iterator).second))
+      if (!BitTorrent_Tools::havePiece (i, (*iterator).second.pieces))
         doesnt_have_a.push_back (i);
     struct net_bittorrent_piece_index_remove_predicate predicate_s;
     missing_pieces_a.erase (std::remove_if (missing_pieces_a.begin (), missing_pieces_a.end (),
@@ -3764,11 +3738,11 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   ACE_UINT32 peer_address_i = connectionIdToPeerAddress (id_in);
 
-  BitTorrent_PeerPiecesIterator_t iterator;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-    iterator = inherited::state_.peerPieces.find (peer_address_i);
-    ACE_ASSERT (iterator != inherited::state_.peerPieces.end ());
-    ACE_ASSERT ((*iterator).second.empty ());
+    BitTorrent_PeerStateIterator_t iterator =
+      inherited::state_.peerState.find (peer_address_i);
+    ACE_ASSERT (iterator != inherited::state_.peerState.end ());
+    ACE_ASSERT ((*iterator).second.pieces.empty ());
     Bencoding_DictionaryIterator_t iterator_2 =
         inherited::configuration_->metaInfo->begin ();
     for (;
@@ -3791,7 +3765,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
         (*iterator_3).second->string->size () / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
     unsigned int indices_i = pieces / (sizeof (ACE_UINT8) * 8);
     unsigned int indices_2 = pieces % (sizeof (ACE_UINT8) * 8);
-    (*iterator).second.resize ((indices_2 ? indices_i + 1 : indices_i), 0);
+    (*iterator).second.pieces.resize ((indices_2 ? indices_i + 1 : indices_i), 0);
   } // end lock scope
 }
 

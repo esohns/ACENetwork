@@ -85,23 +85,29 @@ struct BitTorrent_TrackerConnectionState
   //BitTorrent_ISession_t*           session;
 };
 
-//struct BitTorrent_AllocatorConfiguration;
+struct BitTorrent_PeerModuleHandlerConfiguration;
 struct BitTorrent_PeerStreamConfiguration;
+typedef Stream_Configuration_T<//stream_name_string_,
+                               struct BitTorrent_PeerStreamConfiguration,
+                               struct BitTorrent_PeerModuleHandlerConfiguration> BitTorrent_PeerStreamConfiguration_t;
+
 class BitTorrent_PeerConnectionConfiguration
- : public Net_StreamConnectionConfiguration_T<struct BitTorrent_PeerStreamConfiguration,
+ : public Net_StreamConnectionConfiguration_T<BitTorrent_PeerStreamConfiguration_t,
                                               NET_TRANSPORTLAYER_TCP>
 {
  public:
   BitTorrent_PeerConnectionConfiguration ()
    : Net_StreamConnectionConfiguration_T ()
-  {
-    //PDUSize = BITTORRENT_BUFFER_SIZE;
-  }
+  {}
 };
 
+struct BitTorrent_TrackerModuleHandlerConfiguration;
 struct BitTorrent_TrackerStreamConfiguration;
+typedef Stream_Configuration_T<//stream_name_string_,
+                               struct BitTorrent_TrackerStreamConfiguration,
+                               struct BitTorrent_TrackerModuleHandlerConfiguration> BitTorrent_TrackerStreamConfiguration_t;
 class BitTorrent_TrackerConnectionConfiguration
- : public Net_StreamConnectionConfiguration_T<struct BitTorrent_TrackerStreamConfiguration,
+ : public Net_StreamConnectionConfiguration_T<BitTorrent_TrackerStreamConfiguration_t,
                                               NET_TRANSPORTLAYER_TCP>
 {
  public:
@@ -140,6 +146,7 @@ struct BitTorrent_SessionConfiguration
                         static_cast<ACE_UINT32> (0))
    , metaInfo (NULL)
    , metaInfoFileName ()
+   , parserConfiguration (NULL)
    , requestCompactPeerAddresses (BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES)
    , sendBitfieldAfterHandshake (BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE)
    , subscriber (NULL)
@@ -154,6 +161,7 @@ struct BitTorrent_SessionConfiguration
   ACE_INET_Addr                             externalIPAddress;
   Bencoding_Dictionary_t*                   metaInfo;
   std::string                               metaInfoFileName;
+  struct Common_ParserConfiguration*        parserConfiguration; // tracker stream handler
   bool                                      requestCompactPeerAddresses;
   bool                                      sendBitfieldAfterHandshake;
   BitTorrent_ISessionProgress*              subscriber; // session --> UI events
@@ -173,10 +181,11 @@ struct BitTorrent_PeerStatus
    , am_interested (false)
    , peer_choking (true)
    , peer_interested (false)
+   //////////////////////////////////////
    , requesting_piece (0)
-  {};
+  {}
 
-  // protocol
+  // protocol-specific
   bool am_choking;
   bool am_interested;
   bool peer_choking;
@@ -186,18 +195,18 @@ struct BitTorrent_PeerStatus
   int requesting_piece;
 };
 
-// *NOTE*: the key is the ip address in host byte order as returned by
-//         ACE_INET_Addr::get_ip_address()
-typedef std::map<ACE_UINT32, std::vector<Net_ConnectionId_t> > BitTorrent_PeerConnections_t;
-typedef BitTorrent_PeerConnections_t::iterator BitTorrent_PeerConnectionsIterator_t;
-// *NOTE*: the key is the ip address in host byte order as returned by
-//         ACE_INET_Addr::get_ip_address()
-typedef std::map<ACE_UINT32, struct BitTorrent_PeerStatus> BitTorrent_PeerStatus_t;
-typedef BitTorrent_PeerStatus_t::iterator BitTorrent_PeerStatusIterator_t;
-// *NOTE*: the key is the ip address in host byte order as returned by
-//         ACE_INET_Addr::get_ip_address()
-typedef std::map<ACE_UINT32, BitTorrent_MessagePayload_Bitfield> BitTorrent_PeerPieces_t;
-typedef BitTorrent_PeerPieces_t::iterator BitTorrent_PeerPiecesIterator_t;
+struct BitTorrent_PeerState
+{
+  BitTorrent_PeerState ()
+   : connections ()
+   , pieces ()
+   , status ()
+  {}
+
+  std::vector<Net_ConnectionId_t>    connections;
+  BitTorrent_MessagePayload_Bitfield pieces;
+  struct BitTorrent_PeerStatus       status;
+};
 
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
@@ -252,6 +261,9 @@ typedef BitTorrent_TrackerStreamHandler_T<struct BitTorrent_TrackerSessionData,
                                           > BitTorrent_TrackerStreamHandler_t;
 #endif // GUI_SUPPORT
 
+typedef std::map<ACE_UINT32, struct BitTorrent_PeerState> BitTorrent_PeerState_t;
+typedef BitTorrent_PeerState_t::iterator BitTorrent_PeerStateIterator_t;
+
 struct BitTorrent_SessionState
 {
   BitTorrent_SessionState ()
@@ -264,9 +276,7 @@ struct BitTorrent_SessionState
    , peerConnectionConfiguration (NULL)
    , peerId ()
    , peerModuleHandlerConfiguration (NULL)
-   , peerConnections ()
-   , peerPieces ()
-   , peerStatus ()
+   , peerState ()
    , peerStreamConfiguration (NULL)
    , peerStreamHandler (NULL)
    ///////////////////////////////////////
@@ -292,9 +302,7 @@ struct BitTorrent_SessionState
   struct Net_ConnectionConfigurationBase*   peerConnectionConfiguration;
   std::string                               peerId;
   struct Stream_ModuleHandlerConfiguration* peerModuleHandlerConfiguration;
-  BitTorrent_PeerConnections_t              peerConnections; // map of the peer connections
-  BitTorrent_PeerPieces_t                   peerPieces; // map of the pieces the peers have
-  BitTorrent_PeerStatus_t                   peerStatus; // choked/unchoked, interested/not interested
+  BitTorrent_PeerState_t                    peerState;
   struct Stream_Configuration*              peerStreamConfiguration;
   BitTorrent_PeerStreamHandler_t*           peerStreamHandler;
 

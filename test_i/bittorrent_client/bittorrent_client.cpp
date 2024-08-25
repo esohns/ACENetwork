@@ -607,7 +607,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
   peer_modulehandler_configuration.concurrency =
-    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
   peer_modulehandler_configuration.parserConfiguration =
       &configuration_in.peerParserConfiguration;
   //peer_modulehandler_configuration.statisticReportingInterval =
@@ -623,7 +623,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
   tracker_modulehandler_configuration.concurrency =
-    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
   tracker_modulehandler_configuration.parserConfiguration =
       &configuration_in.trackerParserConfiguration;
   //tracker_modulehandler_configuration.statisticReportingInterval =

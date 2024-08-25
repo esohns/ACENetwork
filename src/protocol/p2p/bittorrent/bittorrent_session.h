@@ -127,6 +127,8 @@ class BitTorrent_Session_T
   typedef typename PeerConnectionType::ISTREAM_CONNECTION_T ISTREAM_CONNECTION_T;
   typedef typename TrackerConnectionType::ISTREAM_CONNECTION_T ITRACKER_STREAM_CONNECTION_T;
   typedef ControllerInterfaceType ICONTROLLER_T;
+  typedef ACE_Singleton<PeerConnectionManagerType,
+                        ACE_SYNCH_MUTEX> PEER_CONNECTION_MANAGER_SINGLETON_T;
   typedef ACE_Singleton<TrackerConnectionManagerType,
                         ACE_SYNCH_MUTEX> TRACKER_CONNECTION_MANAGER_SINGLETON_T;
   typedef typename TrackerStreamType::MESSAGE_T TRACKER_MESSAGE_T;

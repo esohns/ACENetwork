@@ -68,7 +68,7 @@ class BitTorrent_ParserDriver
   // implement (part of) BitTorrent_IParser_T
   virtual void error (const yy::location&, // location
                       const std::string&); // message
-//  virtual void error (const std::string&); // message
+  virtual void error (const std::string&); // message
   inline virtual struct BitTorrent_PeerRecord& current () { static struct BitTorrent_PeerRecord dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
 
   ////////////////////////////////////////

@@ -71,7 +71,7 @@ class BitTorrent_IParser_T
                                BitTorrent_IParser_T<RecordType> > ISCANNER_T;
 
   using IPARSER_T::error;
-//  using ISCANNER_T::error;
+  using ISCANNER_T::error;
 
   ////////////////////////////////////////
   // callbacks

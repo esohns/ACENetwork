@@ -459,9 +459,6 @@ do_work (bool debug_in,
   tracker_stream_configuration.messageAllocator =
     &tracker_message_allocator;
 
-  CBData_in.configuration->sessionConfiguration.parserConfiguration =
-      &CBData_in.configuration->parserConfiguration;
-
   ////////////////////// socket handler configuration //////////////////////////
   BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
   peer_connection_configuration.allocatorConfiguration =
@@ -525,16 +522,17 @@ do_work (bool debug_in,
                                                                   tracker_modulehandler_configuration,
                                                                   tracker_stream_configuration);
 
-  CBData_in.configuration->sessionConfiguration.controller =
-      &bittorrent_control;
-  CBData_in.configuration->sessionConfiguration.metaInfoFileName =
-      torrentFile_in;
   CBData_in.configuration->sessionConfiguration.connectionConfiguration =
-      &peer_connection_configuration;
-  CBData_in.configuration->sessionConfiguration.trackerConnectionConfiguration =
-      &tracker_connection_configuration;
+    &peer_connection_configuration;
+  CBData_in.configuration->sessionConfiguration.controller =
+    &bittorrent_control;
+  CBData_in.configuration->sessionConfiguration.metaInfoFileName =
+    torrentFile_in;
   CBData_in.configuration->sessionConfiguration.parserConfiguration =
-      &CBData_in.configuration->parserConfiguration;
+    &CBData_in.configuration->parserConfiguration;
+  CBData_in.configuration->sessionConfiguration.trackerConnectionConfiguration =
+    &tracker_connection_configuration;
+
   CBData_in.configuration->sessionConfiguration.dispatch =
       (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                      : COMMON_EVENT_DISPATCH_PROACTOR);

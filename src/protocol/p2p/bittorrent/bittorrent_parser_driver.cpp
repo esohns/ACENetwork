@@ -80,24 +80,28 @@ BitTorrent_ParserDriver::error (const yy::location& location_in,
   }
 
   //std::clog << location_in << ": " << message_in << std::endl;
+
+  inherited::error_ = true;
 }
-//template <typename SessionMessageType>
-//void
-//BitTorrent_ParserDriver<SessionMessageType>::error (const std::string& message_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::error"));
 
-//  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
-//  ACE_DEBUG ((LM_ERROR,
-//              ACE_TEXT ("\": \"%s\"...\n"),
-//              ACE_TEXT (message_in.c_str ())));
-////   ACE_DEBUG((LM_ERROR,
-////              ACE_TEXT("failed to parse \"%s\": \"%s\"...\n"),
-////              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
-////              message_in.c_str()));
+void
+BitTorrent_ParserDriver::error (const std::string& message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver::error"));
 
-////   std::clog << message_in << std::endl;
-//}
+  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
+  ACE_DEBUG ((LM_ERROR,
+              ACE_TEXT ("%s\n"),
+              ACE_TEXT (message_in.c_str ())));
+//   ACE_DEBUG((LM_ERROR,
+//              ACE_TEXT("failed to parse \"%s\": \"%s\"...\n"),
+//              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
+//              message_in.c_str()));
+
+//   std::clog << message_in << std::endl;
+
+  inherited::error_ = true;
+}
 
 bool
 BitTorrent_ParserDriver::initialize (yyscan_t& state_inout, BitTorrent_IParser_t* extra_in)

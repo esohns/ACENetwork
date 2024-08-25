@@ -301,6 +301,9 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
           event_e = COMMON_UI_EVENT_STATISTIC;
           break;
         }
+        case STREAM_SESSION_MESSAGE_STEP_DATA:
+          event_e = COMMON_UI_EVENT_STEP;
+          break;
         default:
         {
           ACE_DEBUG ((LM_ERROR,
@@ -589,6 +592,9 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
           event_e = COMMON_UI_EVENT_STATISTIC;
           break;
         }
+        case STREAM_SESSION_MESSAGE_STEP_DATA:
+          event_e = COMMON_UI_EVENT_STEP;
+          break;
         default:
         {
           ACE_DEBUG ((LM_ERROR,

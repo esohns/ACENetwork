@@ -38,7 +38,6 @@
 
 #include "stdafx.h"
 
-#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 
 
@@ -73,7 +72,6 @@
 #include "net_macros.h"
 
 #include "bittorrent_defines.h"
-/*#include "ace/Synch.h"*/
 #include "bittorrent_parser_driver.h"
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
@@ -1507,7 +1505,7 @@ yy::BitTorrent_Parser::error (const location_type& location_in,
     parser->error (location_in, message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_IParser::error(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_IParser_t::error(), continuing\n")));
   }
 }
 

@@ -320,7 +320,9 @@ class Net_StreamConnectionConfiguration_T
    , delayRead (false)
    , streamConfiguration (NULL)
   {}
-  //inline virtual ~Net_StreamConnectionConfiguration_T () {}
+
+  // convenient types
+  typedef StreamConfigurationType STREAM_CONFIGURATION_T;
 
   // *IMPORTANT NOTE*: this delays setting up the receiving procedure
   //                   (i.e. registering with the reactor, starting asynch

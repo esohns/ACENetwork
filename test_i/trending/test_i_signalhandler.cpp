@@ -144,7 +144,7 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
     ACE_ASSERT (connection_manager_p);
     connection_manager_p->stop (false, true);
     connection_manager_p->abort ();
-    connection_manager_p->wait ();
+    connection_manager_p->wait (false); // N/A
 
     // step5: stop reactor (&& proactor, if applicable)
     Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,

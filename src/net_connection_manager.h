@@ -126,6 +126,8 @@ class Net_Connection_Manager_T
                               bool = true) const; // peer address ? : local address // *TODO*: this parameter is redundant; remove ASAP
   virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
 
+  virtual void wait_2 (ACE_HANDLE); // socket handle
+
   // implement (part of) Common_IStatistic_T
   virtual void report () const;
 

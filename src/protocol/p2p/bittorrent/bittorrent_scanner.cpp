@@ -5401,8 +5401,8 @@ static const yy_state_type yy_NUL_trans[144] =
 
 static const flex_int32_t yy_rule_linenum[15] =
     {   0,
-      193,  201,  206,  213,  220,  228,  242,  287,  296,  306,
-      321,  336,  348,  370
+      189,  197,  202,  209,  216,  224,  243,  289,  299,  313,
+      329,  345,  358,  370
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -5911,10 +5911,6 @@ YY_DECL
 
 
 
-  //yylloc->step ();
-  //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
-
-  unsigned int bitfield_counter = 0;
   unsigned int bytes_to_skip = 0;
 
 
@@ -6058,10 +6054,15 @@ case 6:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 4);
                             iparser_p->offset (yyleng);
-                            /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->record,
                                               struct BitTorrent_PeerRecord ());
-                            ACE_ASSERT (yylval->record);
+                            if (unlikely (!yylval->record))
+                            {
+                              ACE_DEBUG ((LM_CRITICAL,
+                                          ACE_TEXT ("failed to allocate memory (was: %d byte(s)), aborting\n"),
+                                          sizeof (struct BitTorrent_PeerRecord)));
+                              yyterminate ();
+                            } // end IF
                             yylval->record->length =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -6076,6 +6077,7 @@ case 7:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->type =
                               static_cast<enum BitTorrent_MessageType> (*reinterpret_cast<ACE_UINT8*> (yytext));
                             switch (yylval->record->type)
@@ -6096,7 +6098,7 @@ YY_RULE_SETUP
                                 BEGIN (state_have_payload);
                                 break;
                               case BITTORRENT_MESSAGETYPE_BITFIELD:
-                                bitfield_counter = yylval->record->length - 1;
+                                bytes_to_skip = yylval->record->length - 1;
                                 BEGIN (state_bitfield_payload);
                                 break;
                               case BITTORRENT_MESSAGETYPE_REQUEST:
@@ -6125,6 +6127,7 @@ case 8:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 4);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->have =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -6137,13 +6140,17 @@ case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                            ACE_ASSERT (bitfield_counter);
-                            iparser_p->offset (bitfield_counter);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->bitfield.push_back (*reinterpret_cast<ACE_UINT8*> (yytext));
-                            for (unsigned int i = 0; i < (bitfield_counter - 1); ++i)
-                              yylval->record->bitfield.push_back (static_cast<ACE_UINT8> (yyinput (yyscanner)));
-                            BEGIN (state_length);
-                            return yy::BitTorrent_Parser::token::BITFIELD; }
+                            ACE_ASSERT (bytes_to_skip);
+                            --bytes_to_skip;
+                            if (unlikely (!bytes_to_skip))
+                            {
+                              iparser_p->offset (yylval->record->length - 1);
+                              BEGIN (state_length);
+                              return yy::BitTorrent_Parser::token::BITFIELD;
+                            } // end IF
+                          }
 	YY_BREAK
 // end <state_bitfield_payload>
 
@@ -6152,6 +6159,7 @@ case 10:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 12);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->request.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -6171,6 +6179,7 @@ case 11:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 12);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->cancel.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -6190,6 +6199,7 @@ case 12:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 8);
                             iparser_p->offset (yyleng);
+                            ACE_ASSERT (yylval->record);
                             yylval->record->piece.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -6206,18 +6216,9 @@ case 13:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (yylval->record);
-                            // skip over piece data
-//                            unsigned int bytes_to_skip =
-//                              yylval->record->length - 9 - 1;
-//                            char c = 0;
-//                            for (unsigned int i = 0; i < bytes_to_skip; ++i)
-//                            {
-//                              c = static_cast<char> (yyinput (yyscanner));
-//                              // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-//                              *(yyg->yy_c_buf_p - 1) = c;
-//                            } // end IF
+                            ACE_ASSERT (bytes_to_skip);
                             --bytes_to_skip;
-                            if (!bytes_to_skip)
+                            if (unlikely (!bytes_to_skip))
                             {
                               iparser_p->offset (yylval->record->length - 9);
                               BEGIN (state_length);
@@ -6245,18 +6246,16 @@ case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
 { /* *TODO*: use (?s:.) ? */
-                            if (!iparser_p->isBlocking ())
-                              return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
-
                             // wait for more data fragment(s)
                             if (!iparser_p->switchBuffer ())
                             { // *NOTE*: most probable reason: connection has
                               //         been closed --> session end
                               ACE_DEBUG ((LM_DEBUG,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                              return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
+                              yyterminate (); // not enough data, cannot proceed
                             } // end IF
-                            yyless (0); }
+                            yyless (0);
+                          }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
@@ -7674,8 +7673,7 @@ BitTorrent_Scanner_wrap (yyscan_t yyscanner)
   if (!iparser_p->switchBuffer ())
   {
     // *NOTE*: most probable reason: received session end message
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
+    iparser_p->error (ACE_TEXT_ALWAYS_CHAR ("failed to Common_IScannerBase::switchBuffer(), aborting\n"));
     return 1;
   } // end IF
 

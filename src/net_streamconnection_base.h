@@ -138,6 +138,7 @@ class Net_StreamConnectionBase_T
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
   inline virtual int enqueue_head_i (ACE_Message_Block*, ACE_Time_Value* = 0) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); }
+  inline virtual bool hasData () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (true, flushSessionMessages_in, false); }
   inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual void signal () { ACE_ASSERT (false); ACE_NOTSUP; }
@@ -273,6 +274,7 @@ class Net_AsynchStreamConnectionBase_T
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
   inline virtual int enqueue_head_i (ACE_Message_Block*, ACE_Time_Value* = 0) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); }
+  inline virtual bool hasData () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); }
   inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (true, flushSessionMessages_in, false); }
   inline virtual void reset () { ACE_ASSERT (false); ACE_NOTSUP; }
   inline virtual void signal () { ACE_ASSERT (false); ACE_NOTSUP; }

@@ -165,14 +165,48 @@ Net_SessionBase_T<AddressType,
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->connectionConfiguration);
 
-  ConnectorType connector (true);
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-  //  typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
+  ConnectorType connector (true);
+
+  // *BUG*: leakage here
+  // *TODO*: associate the connection id to the configuration and clean up in disconnect()
+  typename ConnectionConfigurationType::STREAM_CONFIGURATION_T* stream_configuration_p =
+    NULL;
+  ACE_NEW_NORETURN (stream_configuration_p,
+                    typename ConnectionConfigurationType::STREAM_CONFIGURATION_T ());
+  ACE_ASSERT (stream_configuration_p);
+  *stream_configuration_p =
+    *static_cast<ConnectionConfigurationType*> (configuration_->connectionConfiguration)->streamConfiguration;
+
+  typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T* module_handler_configuration_p =
+    NULL;
+  for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator = stream_configuration_p->begin ();
+       iterator != stream_configuration_p->end ();
+       ++iterator)
+  {
+    ACE_NEW_NORETURN (module_handler_configuration_p,
+                      typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T ());
+    ACE_ASSERT (module_handler_configuration_p);
+    *module_handler_configuration_p = *(*iterator).second.second;
+    (*iterator).second.second = module_handler_configuration_p;
+  } // end FOR
+
+  ConnectionConfigurationType* connection_configuration_p = NULL;
+  ACE_NEW_NORETURN (connection_configuration_p,
+                    ConnectionConfigurationType ());
+  ACE_ASSERT (connection_configuration_p);
+  *connection_configuration_p =
+    *static_cast<ConnectionConfigurationType*> (configuration_->connectionConfiguration);
+  connection_configuration_p->streamConfiguration = stream_configuration_p;
+
   struct Net_UserData user_data_s; // *TODO*: make this generic
+  typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
+  Net_ConnectionId_t id_i;
+  std::pair<Net_SessionConnectionConfigurationsIterator_t, bool> result_s;
 
   handle_h =
     Net_Client_Common_Tools::connect (connector,
-                                      *static_cast<ConnectionConfigurationType*> (configuration_->connectionConfiguration),
+                                      *connection_configuration_p,
                                       user_data_s,
                                       address_in,
                                       true,
@@ -182,37 +216,50 @@ Net_SessionBase_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
-    return;
+    goto error;
   } // end IF
-  //  iconnection_p =
-  //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  //      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
-  //#else
-  //      CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle_h));
-  //#endif // ACE_WIN32 || ACE_WIN64
-  //  if (!iconnection_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
-  //                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
-  //    return;
-  //  } // end IF
+  iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+#else
+    CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
+  if (!iconnection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
+    goto error;
+  } // end IF
+  id_i = iconnection_p->id ();
 
- //ACE_DEBUG ((LM_DEBUG,
- //            ACE_TEXT ("connected to %s: %u...\n"),
- //            ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
- //            iconnection_p->id ()));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%u: connected to %s...\n"),
+              id_i,
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
 
-  //  iconnection_p->decrease ();
+  result_s =
+    configuration_->connectionConfigurations.insert (std::make_pair (id_i,
+                                                                     connection_configuration_p));
+  ACE_ASSERT (result_s.second);
+
+  iconnection_p->decrease (); iconnection_p = NULL;
 
   return;
 
-//error:
-//  if (iconnection_p)
-//  {
-//    iconnection_p->abort ();
-//    iconnection_p->decrease (); iconnection_p = NULL;
-//  } // end IF
+error:
+  if (iconnection_p)
+  {
+    iconnection_p->abort ();
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+  if (stream_configuration_p)
+    for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator = stream_configuration_p->begin ();
+         iterator != stream_configuration_p->end ();
+         ++iterator)
+      delete (*iterator).second.second;
+  delete stream_configuration_p;
+  delete connection_configuration_p;
 }
 
 template <typename AddressType,
@@ -241,11 +288,11 @@ Net_SessionBase_T<AddressType,
 
   ConnectionType* connection_p =
       CONNECTION_MANAGER_SINGLETON_T::instance ()->get (address_in);
-  if (!connection_p)
+  if (unlikely (!connection_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (peer address was: \"%s\") not found, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
     return;
   } // end IF
   connection_p->abort ();
@@ -282,8 +329,9 @@ Net_SessionBase_T<AddressType,
   ACE_ASSERT (connection_manager_p);
 
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
-
+  Net_ConnectionIds_t connection_ids_a;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+    connection_ids_a = state_.connections;
     for (Net_ConnectionIdsIterator_t iterator = state_.connections.begin ();
          iterator != state_.connections.end ();
          ++iterator)
@@ -292,7 +340,7 @@ Net_SessionBase_T<AddressType,
       if (unlikely (!iconnection_p)) // mostly likely: different connection manager
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to retrieve connection handle (id was: %d), continuing\n"),
+                    ACE_TEXT ("failed to retrieve connection handle (id was: %u), continuing\n"),
                     *iterator));
         continue;
       } // end IF
@@ -300,22 +348,50 @@ Net_SessionBase_T<AddressType,
       iconnection_p->decrease (); iconnection_p = NULL;
 
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("aborted connection (id was: %d)...\n"),
+                  ACE_TEXT ("aborted connection (id was: %u)...\n"),
                   *iterator));
     } // end FOR
 
     if (waitForCompletion_in)
     {
-      int result = -1;
+      // step1: wait for connections to leave
       while (!state_.connections.empty ())
       {
-        result = condition_.wait ();
+        int result = condition_.wait ();
         if (unlikely (result == -1))
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_Condition_Thread_Mutex::wait(): \"%m\", continuing\n")));
       } // end WHILE
     } // end IF
   } // end lock scope
+
+  if (waitForCompletion_in)
+  {
+    // step2: now wait for connections to be gone entirely
+    // *NOTE*: this step is needed to safely release all connection/stream
+    //         configurations that are still around (see step3)
+    for (Net_ConnectionIdsIterator_t iterator = connection_ids_a.begin ();
+          iterator != connection_ids_a.end ();
+          ++iterator)
+      connection_manager_p->wait_2 (*iterator);
+
+    // step3: clean up connection configurations (see connect()/disconnect())
+    for (Net_SessionConnectionConfigurationsIterator_t iterator = configuration_->connectionConfigurations.begin ();
+         iterator != configuration_->connectionConfigurations.end ();
+         ++iterator)
+    {
+      ConnectionConfigurationType* connection_configuration_p =
+        static_cast<ConnectionConfigurationType*> ((*iterator).second);
+      ACE_ASSERT (connection_configuration_p->streamConfiguration);
+      for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
+            iterator_2 != connection_configuration_p->streamConfiguration->end ();
+            ++iterator_2)
+        delete (*iterator_2).second.second;
+      delete connection_configuration_p->streamConfiguration;
+      delete connection_configuration_p;
+    } // end FOR
+    configuration_->connectionConfigurations.clear ();
+  } // end IF
 }
 
 template <typename AddressType,
@@ -342,11 +418,10 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::wait"));
 
-  int result = -1;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     while (!state_.connections.empty ())
     {
-      result = condition_.wait ();
+      int result = condition_.wait ();
       if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Condition_Thread_Mutex::wait(): \"%m\", continuing\n")));
@@ -387,7 +462,7 @@ Net_SessionBase_T<AddressType,
   } // end lock scope
 
   //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("new connection (id: %d)...\n"),
+  //            ACE_TEXT ("new connection (id: %u)...\n"),
   //            id_in));
 }
 
@@ -415,11 +490,31 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::disconnect"));
 
-  Net_ConnectionIdsIterator_t iterator;
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  // step1: clean up connection configuration
+  // *WARNING*: potential leakage here --> do it in the close(), after all (!)
+  //            session connections have deregistered
+  //Net_SessionConnectionConfigurationsIterator_t iterator =
+  //  configuration_->connectionConfigurations.find (id_in);
+  //ACE_ASSERT (iterator != configuration_->connectionConfigurations.end ());
+  //ConnectionConfigurationType* connection_configuration_p =
+  //  static_cast<ConnectionConfigurationType*> ((*iterator).second);
+  //ACE_ASSERT (connection_configuration_p->streamConfiguration);
+  //for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
+  //     iterator_2 != connection_configuration_p->streamConfiguration->end ();
+  //      ++iterator_2)
+  //  delete (*iterator_2).second.second;
+  //delete connection_configuration_p->streamConfiguration;
+  //delete connection_configuration_p;
+  //configuration_->connectionConfigurations.erase (iterator);
+
+  // step2: remove connection from state
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    iterator = state_.connections.find (id_in);
-    ACE_ASSERT (iterator != state_.connections.end ());
-    state_.connections.erase (iterator);
+    Net_ConnectionIdsIterator_t iterator_2 = state_.connections.find (id_in);
+    ACE_ASSERT (iterator_2 != state_.connections.end ());
+    state_.connections.erase (iterator_2);
 
     if (state_.connections.empty ())
     {
@@ -431,6 +526,6 @@ Net_SessionBase_T<AddressType,
   } // end lock scope
 
   //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("connection lost (id was: %d)...\n"),
+  //            ACE_TEXT ("connection lost (id was: %u)...\n"),
   //            id_in));
 }

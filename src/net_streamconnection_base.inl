@@ -492,7 +492,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     {
       notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
-                      true); // recurse upstream (if any) ?
+                      true,  // recurse upstream (if any) ?
+                      true); // expedite ?
     } // end IF
 
     // step1: shut down the processing stream

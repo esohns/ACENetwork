@@ -311,20 +311,24 @@ BitTorrent_Control_T<SessionAsynchType,
   return;
 
 error:
+  if (session_context.configuration.metaInfo)
+    Common_Parser_Bencoding_Tools::free (session_context.configuration.metaInfo);
+  if (session_context.session)
+    delete session_context.session;
   if (remove_session)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     SESSIONS_ITERATOR_T iterator = sessions_.find (metaInfoFileName_in);
-    if (iterator != sessions_.end ())
-      sessions_.erase (iterator);
-  } // end IF
+    ACE_ASSERT (iterator != sessions_.end ());
+    sessions_.erase (iterator);
+  } // end IF && lock scope
   bool stop_b = false;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     if (sessions_.empty ())
       stop_b = true;
   } // end lock scope
   if (stop_b)
-    stop (false,
-          true);
+    stop (false, // wait for completion ?
+          true); // high priority ?
   if (istream_connection_p)
     istream_connection_p->decrease ();
   if (session_context.configuration.metaInfo)
@@ -629,6 +633,7 @@ BitTorrent_Control_T<SessionAsynchType,
 
       SESSIONS_ITERATOR_T iterator;
       typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
+      Net_ConnectionId_t id_i;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
         iterator = sessions_.find (event_inout->metaInfoFileName);
         if (iterator == sessions_.end ())
@@ -636,22 +641,25 @@ BitTorrent_Control_T<SessionAsynchType,
         ACE_ASSERT ((*iterator).second.session);
 
         // close tracker connection
-        iconnection_p =
-            CONNECTION_MANAGER_SINGLETON_2::instance ()->get ((*iterator).second.session->trackerConnectionId ());
-        if (!iconnection_p)
+        id_i = (*iterator).second.session->trackerConnectionId ();
+        iconnection_p = CONNECTION_MANAGER_SINGLETON_2::instance ()->get (id_i);
+        if (unlikely (!iconnection_p))
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve tracker connection (id was: %u) handle, continuing\n"),
-                      (*iterator).second.session->trackerConnectionId ()));
+                      id_i));
         else
         {
           iconnection_p->abort ();
+          CONNECTION_MANAGER_SINGLETON_2::instance ()->wait_2 (id_i);
           iconnection_p->decrease (); iconnection_p = NULL;
-          CONNECTION_MANAGER_SINGLETON_2::instance ()->wait ();
         } // end IF
 
         // close all session connections
         (*iterator).second.session->close (true); // wait ?
 
+        // clean up
+        Common_Parser_Bencoding_Tools::free ((*iterator).second.configuration.metaInfo);
+        delete (*iterator).second.session;
         sessions_.erase (iterator);
 continue_:
         if (!sessions_.empty ())

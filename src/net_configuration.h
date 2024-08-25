@@ -21,13 +21,23 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
+#include <map>
+
 #include "common_event_common.h"
 #include "common_event_defines.h"
 
-//#include "common_parser_common.h"
+#if defined (GUI_SUPPORT)
+#include "common_ui_common.h"
+#endif // GUI_SUPPORT
 
-//typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
-//typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
+#include "net_common.h"
+
+// forward declarations
+struct Net_ConnectionConfigurationBase;
+
+typedef std::map<Net_ConnectionId_t,
+                 struct Net_ConnectionConfigurationBase*> Net_SessionConnectionConfigurations_t;
+typedef Net_SessionConnectionConfigurations_t::iterator Net_SessionConnectionConfigurationsIterator_t;
 
 struct Net_ConnectionConfigurationBase;
 struct Common_ParserConfiguration;
@@ -35,16 +45,17 @@ struct Net_SessionConfiguration
 {
   Net_SessionConfiguration ()
    : connectionConfiguration (NULL)
+   , connectionConfigurations ()
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
-   , parserConfiguration (NULL)
+   //, parserConfiguration (NULL)
 #if defined (GUI_SUPPORT)
    , CBData (NULL)
 #endif // GUI_SUPPORT
   {}
 
   struct Net_ConnectionConfigurationBase* connectionConfiguration;
+  Net_SessionConnectionConfigurations_t   connectionConfigurations; // *TODO*: this is part of the state; move it there
   enum Common_EventDispatchType           dispatch;
-  struct Common_ParserConfiguration*      parserConfiguration;
 
 #if defined (GUI_SUPPORT)
   struct Common_UI_CBData*                CBData;
