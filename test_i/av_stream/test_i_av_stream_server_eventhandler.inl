@@ -250,6 +250,8 @@ Test_I_Server_EventHandler_T<SessionDataType,
     case STREAM_SESSION_MESSAGE_CONNECT:
     case STREAM_SESSION_MESSAGE_DISCONNECT:
       return;
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
+      return;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       // sanity check(s)

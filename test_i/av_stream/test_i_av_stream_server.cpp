@@ -976,6 +976,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
         &directshow_configuration;
       directshow_modulehandler_configuration.connectionConfigurations =
         &directshow_configuration.connectionConfigurations;
+      directshow_modulehandler_configuration.deviceIdentifier.identifier._guid =
+        Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false);
+      directshow_modulehandler_configuration.deviceIdentifier.identifierDiscriminator =
+        Stream_Device_Identifier::GUID;
       directshow_modulehandler_configuration.display =
         Common_UI_Tools::getDefaultDisplay ();
       directshow_modulehandler_configuration.filterConfiguration =
