@@ -45,6 +45,7 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
                            UserDataType>::Test_I_AVStream_Streamer_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
+ , sessionId_ (-1)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Streamer_T::Test_I_AVStream_Streamer_T"));
 
@@ -116,6 +117,9 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
   passMessageDownstream_out = false;
   message_block_p->cont (message_inout);
   message_inout = NULL;
+  DataMessageType* message_p = static_cast<DataMessageType*> (message_block_p);
+  message_p->initialize (sessionId_,
+                         NULL);
 
   result = inherited::put_next (message_block_p,
                                 NULL);
@@ -127,4 +131,54 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
     message_block_p->release ();
     return;
   } // end IF
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename UserDataType>
+void
+Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
+                           TimePolicyType,
+                           ConfigurationType,
+                           ControlMessageType,
+                           DataMessageType,
+                           SessionMessageType,
+                           UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
+{
+  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Streamer_T::handleSessionMessage"));
+
+  // don't care (implies yes per default, if part of a stream)
+  ACE_UNUSED_ARG (passMessageDownstream_out);
+
+  switch (message_inout->type ())
+  {
+    case STREAM_SESSION_MESSAGE_BEGIN:
+    {
+      // sanity check(s)
+      ACE_ASSERT (inherited::sessionData_);
+
+      const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        inherited::sessionData_->getR ();
+
+      sessionId_ = session_data_r.sessionId;
+
+      break;
+
+error:
+      notify (STREAM_SESSION_MESSAGE_ABORT);
+
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_END:
+    {
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
 }

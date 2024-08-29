@@ -39,7 +39,7 @@
 
 bool
 curses_start (const std::string& URI_in,
-              BitTorrent_Client_CursesState& state_in)
+              struct BitTorrent_Client_CursesState& state_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_start"));
 
@@ -49,13 +49,13 @@ curses_start (const std::string& URI_in,
 
   int result = -1;
   BitTorrent_Client_CursesSessionsIterator_t iterator =
-      state_in.panels.find (std::string ());
+    state_in.panels.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != state_in.panels.end ());
   PANEL* panel_p = (*iterator).second;
   ACE_ASSERT (panel_p);
   ACE_ASSERT (panel_window (panel_p));
   WINDOW* window_p = dupwin (panel_window (panel_p));
-  if (!window_p)
+  if (unlikely (!window_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dupwin(), aborting\n")));
@@ -77,7 +77,7 @@ curses_start (const std::string& URI_in,
 //  } // end IF
 //  immedok (window_p, TRUE);
   panel_p = new_panel (window_p);
-  if (!panel_p)
+  if (unlikely (!panel_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to new_panel(), aborting\n")));
@@ -120,7 +120,7 @@ curses_start (const std::string& URI_in,
 void
 curses_log (const std::string& URI_in,
             const std::string& text_in,
-            BitTorrent_Client_CursesState& state_in,
+            struct BitTorrent_Client_CursesState& state_in,
             bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_log"));
@@ -131,7 +131,7 @@ curses_log (const std::string& URI_in,
   if (lockedAccess_in)
   {
     result = state_in.lock.acquire ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
@@ -198,7 +198,7 @@ release:
   if (lockedAccess_in)
   {
     result = state_in.lock.release ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
   } // end IF
@@ -231,7 +231,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
 
   // grab lock
   result = state_in.lock.acquire ();
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
@@ -240,9 +240,10 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
   release = true;
 
   use_env (TRUE);
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   use_tioctl (TRUE);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 //  nofilter ();
 
 //  setupterm (NULL, ACE_STDOUT, &result_2);
@@ -250,21 +251,22 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
   // *NOTE*: if this fails, the program exits, which is not intended behavior
   // *TODO*: --> use newterm() instead
   //state_in.screen = initscr ();
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   // *NOTE*: set $TERM to some terminal type (e.g. 'xterm-color')
   state_in.screen = newterm (NULL, NULL, NULL); // use $TERM, STD_OUT, STD_IN
-  if (!state_in.screen)
+  if (unlikely (!state_in.screen))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newterm(0x%@), aborting\n"),
                 NULL));
     goto close;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   // *NOTE*: for some reason, newterm does not work as advertised
   //         (curscr, stdscr corrupt; return value works though)
   stdscr_p = initscr ();
-  if (!stdscr_p)
+  if (unlikely (!stdscr_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initscr(), aborting\n")));
@@ -275,7 +277,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
 #endif
   ACE_ASSERT (state_in.screen && stdscr_p);
   string_p = longname ();
-  if (!string_p)
+  if (unlikely (!string_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to longname(), aborting\n")));
@@ -329,7 +331,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
   // step2: set up initial windows
   window_p = newwin (LINES - 2, COLS,
                      0, 0);
-  if (!window_p)
+  if (unlikely (!window_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
@@ -361,7 +363,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
   window_p = newwin (LINES - 4, COLS - 2,
                      1, 1);
 //#endif
-  if (!window_p)
+  if (unlikely (!window_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
@@ -369,7 +371,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
     goto clean;
   } // end IF
   panel_p = new_panel (window_p);
-  if (!panel_p)
+  if (unlikely (!panel_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to new_panel(), aborting\n")));
@@ -405,7 +407,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
   // status window
   state_in.status = newwin (1, COLS,
                             getmaxy (stdscr_p) - 1, 0);
-  if (!state_in.status)
+  if (unlikely (!state_in.status))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
@@ -424,7 +426,7 @@ curses_main (struct BitTorrent_Client_CursesState& state_in,
   // input window
   state_in.input = newwin (1, COLS,
                            getmaxy (stdscr_p), 0);
-  if (!state_in.input)
+  if (unlikely (!state_in.input))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to newwin(%d,%d), aborting\n"),
@@ -691,7 +693,7 @@ close:
   if (release)
   {
     result_2 = state_in.lock.release ();
-    if (result_2 == -1)
+    if (unlikely (result_2 == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
   } // end IF
@@ -728,7 +730,7 @@ curses_stop (const std::string& URI_in,
   ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
   ACE_ASSERT (state_in.log);
   result =
-      wbkgd (state_in.log, TEST_I_CURSES_COLOR_LOG);
+    wbkgd (state_in.log, TEST_I_CURSES_COLOR_LOG);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wbkgd(), continuing\n")));

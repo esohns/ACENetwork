@@ -65,13 +65,15 @@ class Test_I_AVStream_Streamer_T
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);            // return value: pass message downstream ?
-  inline virtual void handleSessionMessage (SessionMessageType*&, // data message handle
-                                            bool&) {}             // return value: pass message downstream ?
+  virtual void handleSessionMessage (SessionMessageType*&, // data message handle
+                                     bool&);               // return value: pass message downstream ?
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Streamer_T (const Test_I_AVStream_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Streamer_T& operator= (const Test_I_AVStream_Streamer_T&))
+
+  Stream_SessionId_t sessionId_;
 };
 
 // include template definition

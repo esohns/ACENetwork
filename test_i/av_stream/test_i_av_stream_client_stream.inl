@@ -65,6 +65,9 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator_2 =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING));
+  ACE_ASSERT (iterator_2 != inherited::configuration_->end ());
   Stream_Module_t* module_p = NULL;
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
   unsigned int index_i = 0;
@@ -95,7 +98,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   layout_out->append (module_p, NULL, 0);
   module_p = NULL;
 
-  if ((*iterator).second.second->window)
+  if ((*iterator_2).second.second->window)
   {
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_DirectShow_Distributor_Module (this,
@@ -113,7 +116,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   ACE_ASSERT (inherited::configuration_->configuration_->module_2);
   layout_out->append (inherited::configuration_->configuration_->module_2, NULL, 0);
 
-  if ((*iterator).second.second->window)
+  if ((*iterator_2).second.second->window)
   {
     module_p = NULL;
     ACE_NEW_RETURN (module_p,

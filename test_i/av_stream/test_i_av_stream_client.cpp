@@ -1008,8 +1008,14 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 
       directshow_modulehandler_configuration_4 =
         directshow_modulehandler_configuration;
+      ACE_ASSERT (audioDeviceIdentifier_in.identifierDiscriminator == Stream_Device_Identifier::ID);
       directshow_modulehandler_configuration_4.deviceIdentifier =
         audioDeviceIdentifier_in;
+      directshow_modulehandler_configuration_4.deviceIdentifier.identifier._guid =
+        Stream_MediaFramework_DirectSound_Tools::waveDeviceIdToDirectSoundGUID (audioDeviceIdentifier_in.identifier._id,
+                                                                                true);
+      directshow_modulehandler_configuration_4.deviceIdentifier.identifierDiscriminator =
+        Stream_Device_Identifier::GUID;
 
       directshow_stream_configuration_2.allocatorConfiguration = allocator_configuration_p;
       directshow_stream_configuration_2.messageAllocator = allocator_p;

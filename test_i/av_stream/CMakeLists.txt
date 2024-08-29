@@ -371,8 +371,11 @@ elseif (WIN32)
   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
  endif (WXWIDGETS_SUPPORT)
  file (TO_CMAKE_PATH "${SSL_LIB_DIR}" SSL_PATH)
+ # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
+ file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_PATH)
- set (RUNTIME_LIBRARY_DIRS ${FFMPEG_PATH}
+ set (RUNTIME_LIBRARY_DIRS ${VCPKG_LIB_PATH}
+                           ${FFMPEG_PATH}
                            ${IMAGEMAGICK_PATH}
                            ${GTK_PATH}
                            ${WXWIDGETS_PATH}
@@ -707,7 +710,7 @@ set (ARGS "")
 set (COMMAND "$<TARGET_FILE:${EXECUTABLE_SERVER}>")
 set (ENVIRONMENT "")
 if (UNIX)
- set (ARGS "-g./${ui_definition_file_2} -l -o -t")
+ set (ARGS "-g./${ui_definition_file_2} -l -t")
  set (RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib)
  file (TO_NATIVE_PATH ${PROJECT_SOURCE_DIR}/test_i/av_stream WORKING_DIRECTORY)
 elseif (WIN32)
@@ -717,9 +720,9 @@ elseif (WIN32)
   file (TO_NATIVE_PATH "${ui_definition_file_2}" ui_definition_file_2)
   string (REGEX REPLACE "\\\\" "/" ui_definition_file_2 "${ui_definition_file_2}")
   set (ARGS "-g.\\\\${ui_definition_file_2} ${ARGS}")
-  set (ARGS "${ARGS} -l -o -t")
+  set (ARGS "${ARGS} -l -t")
  else ()
-  set (ARGS "-c -g -l -o -t")
+  set (ARGS "-c -g -l -t")
  endif (GUI_SUPPORT)
  file (TO_NATIVE_PATH ${PROJECT_SOURCE_DIR}/test_i/av_stream WORKING_DIRECTORY)
  string (REPLACE "\\" "\\\\" WORKING_DIRECTORY ${WORKING_DIRECTORY})
