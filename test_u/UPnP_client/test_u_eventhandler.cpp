@@ -259,6 +259,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
       break;
     }
     case STREAM_SESSION_MESSAGE_STEP:
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
     {
 #if defined (GTK_USE)
       event_e = COMMON_UI_EVENT_STEP;
@@ -690,6 +691,7 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       break;
     }
     case STREAM_SESSION_MESSAGE_STEP:
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
     {
 #if defined (GTK_USE)
       event_e = COMMON_UI_EVENT_STEP;

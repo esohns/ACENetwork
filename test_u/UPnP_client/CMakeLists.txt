@@ -235,6 +235,8 @@ elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  if (FFMPEG_SUPPORT)
+  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
+  file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
   file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  endif (FFMPEG_SUPPORT)
  if (IMAGEMAGICK_SUPPORT)
@@ -252,6 +254,7 @@ elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}
+                           ${VCPKG_LIB_PATH}
                            ${FFMPEG_PATH}
                            ${IMAGEMAGICK_PATH}
                            ${GTK_LIB_PATH}
