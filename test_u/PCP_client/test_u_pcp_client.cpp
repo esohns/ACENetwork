@@ -685,49 +685,38 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  PCPClient_ConnectionConfiguration connection_configuration_outbound_unicast;
-  PCPClient_ConnectionConfiguration connection_configuration_inbound_unicast;
+  PCPClient_ConnectionConfiguration connection_configuration_io_unicast;
   PCPClient_ConnectionConfiguration connection_configuration_inbound_multicast;
-  connection_configuration_outbound_unicast.allocatorConfiguration =
+  connection_configuration_io_unicast.allocatorConfiguration =
     &configuration_in.allocatorConfiguration;
-  connection_configuration_outbound_unicast.delayRead = true;
   if (useReactor_in)
     ;
   else
-    connection_configuration_outbound_unicast.socketConfiguration.connect =
+    connection_configuration_io_unicast.socketConfiguration.connect =
       true;
-  connection_configuration_outbound_unicast.socketConfiguration.interfaceIdentifier =
+  connection_configuration_io_unicast.socketConfiguration.interfaceIdentifier =
     interface_identifier;
-  connection_configuration_outbound_unicast.socketConfiguration.peerAddress =
+  connection_configuration_io_unicast.socketConfiguration.peerAddress =
     gateway_address;
-  connection_configuration_outbound_unicast.socketConfiguration.peerAddress.set_port_number (static_cast<u_short> (PCP_DEFAULT_SERVER_PORT),
-                                                                                             1); // encode
-  connection_configuration_outbound_unicast.socketConfiguration.reuseAddress =
+  connection_configuration_io_unicast.socketConfiguration.peerAddress.set_port_number (static_cast<u_short> (PCP_DEFAULT_SERVER_PORT),
+                                                                                       1); // encode
+  connection_configuration_io_unicast.socketConfiguration.reuseAddress =
     true;
-  connection_configuration_outbound_unicast.socketConfiguration.sourcePort =
-    PCP_DEFAULT_CLIENT_PORT;
-  connection_configuration_outbound_unicast.socketConfiguration.writeOnly =
-    true;
-  connection_configuration_outbound_unicast.statisticReportingInterval =
+  connection_configuration_io_unicast.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration_outbound_unicast.messageAllocator = &message_allocator;
-  connection_configuration_outbound_unicast.streamConfiguration =
+  connection_configuration_io_unicast.messageAllocator = &message_allocator;
+  connection_configuration_io_unicast.streamConfiguration =
     &configuration_in.streamConfiguration;
-  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Out"),
-                                                                    &connection_configuration_outbound_unicast));
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In/Out"),
+                                                                    &connection_configuration_io_unicast));
   Net_ConnectionConfigurationsIterator_t iterator =
-    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
   ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
 
-  connection_configuration_inbound_unicast =
-    connection_configuration_outbound_unicast;
-  connection_configuration_inbound_unicast.socketConfiguration.connect =
-    false;
-  connection_configuration_inbound_unicast.socketConfiguration.listenAddress =
+  connection_configuration_io_unicast.socketConfiguration.listenAddress =
     interface_address;
-  connection_configuration_inbound_unicast.socketConfiguration.sourcePort = 0;
-  connection_configuration_inbound_unicast.socketConfiguration.writeOnly =
-    false;
+  connection_configuration_io_unicast.socketConfiguration.listenAddress.set_port_number (static_cast<u_short> (PCP_DEFAULT_CLIENT_PORT),
+                                                                                         1); // encode
 
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
@@ -782,10 +771,9 @@ do_work (//bool requestBroadcastReplies_in,
   //    sendRequestOnOffer_in;
 
   // ********************* listener configuration data *************************
-  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In"),
-                                                                    &connection_configuration_inbound_unicast));
   connection_configuration_inbound_multicast =
-    connection_configuration_inbound_unicast;
+    connection_configuration_io_unicast;
+  connection_configuration_inbound_multicast.socketConfiguration.connect = false;
   connection_configuration_inbound_multicast.socketConfiguration.reuseAddress =
     false;
   result =
@@ -913,76 +901,30 @@ do_work (//bool requestBroadcastReplies_in,
   PCP_ISession_t* isession_p = NULL;
   if (UIDefinitionFileName_in.empty ())
   {
-    // *IMPORTANT NOTE*: bind()ing is weird. On Windows systems, the FIRST bound
-    //                   socket will receive the inbound data. On Linux, it is
-    //                   the LAST...
     PCP_IConnection_t* iconnection_p = NULL;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-    // connect (unicast)
-    iterator =
-      configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-    ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    PCPClient_OutboundConnector_t connector (true);
-    PCPClient_OutboundAsynchConnector_t asynch_connector (true);
-    if (useReactor_in)
-      handle =
-        Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                         true, true);
-    else
-      handle =
-        Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
-                                                                               *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                               configuration_in.userData,
-                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                               true, true);
-    if (unlikely (handle == ACE_INVALID_HANDLE))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
-      connection_manager_p->abort ();
-      connection_manager_p->wait ();
-      Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                                 true); // wait ?
-      return;
-    } // end IF
-    iconnection_p =
-      connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-    ACE_ASSERT (iconnection_p);
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%u: connected to %s\n"),
-                (*iterator_2).second.second->connection->id (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
-
-    ACE_NEW_NORETURN (isession_p,
-                      PCP_Session_t ());
-    ACE_ASSERT (isession_p);
-#endif // ACE_WIN32 || ACE_WIN64
 
     // listen on unicast port
     iterator =
-      configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
+      configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    PCPClient_InboundConnector_t connector_2 (true);
-    PCPClient_InboundAsynchConnector_t asynch_connector_2 (true);
+    PCPClient_UnicastConnector_t connector_2 (true);
+    PCPClient_UnicastAsynchConnector_t asynch_connector_2 (true);
     if (useReactor_in)
       handle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundConnector_t> (connector_2,
+        Net_Client_Common_Tools::connect<PCPClient_UnicastConnector_t> (connector_2,
                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
                                                                         configuration_in.userData,
                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                        true, false);
+                                                                        true,
+                                                                        false);
     else
       handle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnector_t> (asynch_connector_2,
+        Net_Client_Common_Tools::connect<PCPClient_UnicastAsynchConnector_t> (asynch_connector_2,
                                                                               *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
                                                                               configuration_in.userData,
                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                              true, false);
+                                                                              true,
+                                                                              false);
     if (handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1003,28 +945,32 @@ do_work (//bool requestBroadcastReplies_in,
                 ACE_TEXT ("%d: listening to (UDP) %s\n"),
                 iconnection_p->id (),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
+    isession_p->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                            iconnection_p);
     iconnection_p->decrease (); iconnection_p = NULL;
 
     // listen on multicast port
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    PCPClient_InboundConnectorMcast_t connector_3 (true);
-    PCPClient_InboundAsynchConnectorMcast_t asynch_connector_3 (true);
+    PCPClient_McastConnector_t connector_3 (true);
+    PCPClient_McastAsynchConnector_t asynch_connector_3 (true);
     if (useReactor_in)
       handle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundConnectorMcast_t> (connector_3,
-                                                                             *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                             configuration_in.userData,
-                                                                             NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                             true, false);
+        Net_Client_Common_Tools::connect<PCPClient_McastConnector_t> (connector_3,
+                                                                      *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                      configuration_in.userData,
+                                                                      NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                      true,
+                                                                      false);
     else
       handle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnectorMcast_t> (asynch_connector_3,
-                                                                                   *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                                   configuration_in.userData,
-                                                                                   NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
-                                                                                   true, false);
+        Net_Client_Common_Tools::connect<PCPClient_McastAsynchConnector_t> (asynch_connector_3,
+                                                                            *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
+                                                                            configuration_in.userData,
+                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress,
+                                                                            true,
+                                                                            false);
     if (handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1048,56 +994,6 @@ do_work (//bool requestBroadcastReplies_in,
                 iconnection_p->id (),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.listenAddress).c_str ())));
     iconnection_p->decrease (); iconnection_p = NULL;
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    // connect (unicast)
-    iterator =
-      configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-    ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    PCPClient_OutboundConnector_t connector (true);
-    PCPClient_OutboundAsynchConnector_t asynch_connector (true);
-    if (useReactor_in)
-      handle =
-        Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector,
-                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                         configuration_in.userData,
-                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                         true, true);
-    else
-      handle =
-        Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector,
-                                                                               *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                                                                               configuration_in.userData,
-                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress,
-                                                                               true, true);
-    if (unlikely (handle == ACE_INVALID_HANDLE))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
-      connection_manager_p->abort ();
-      connection_manager_p->wait ();
-      Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                                 true); // wait ?
-      return;
-    } // end IF
-    iconnection_p =
-      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
-    ACE_ASSERT (iconnection_p);
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%u: connected to %s\n"),
-                (*iterator_2).second.second->connection->id (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator).second)->socketConfiguration.peerAddress).c_str ())));
-
-    ACE_NEW_NORETURN (isession_p,
-                      PCP_Session_t ());
-    ACE_ASSERT (isession_p);
-#endif // ACE_WIN32 || ACE_WIN64
-    iterator =
-      configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-    ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    isession_p->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator).second),
-                            iconnection_p);
 
     // step2: send PCP request
     ACE_INET_Addr internal_address;

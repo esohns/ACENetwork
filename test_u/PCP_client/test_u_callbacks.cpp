@@ -270,7 +270,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                                ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
   ACE_ASSERT (spin_button_p);
   Net_ConnectionConfigurationsIterator_t iterator_2 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.get_port_number ()));
@@ -706,14 +706,16 @@ idle_finalize_UI_cb (gpointer userData_in)
     static_cast<struct PCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
 
+  PCPClient_ConnectionManager_t* connection_manager_p =
+    PCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  connection_manager_p->abort (false);
+
   if (data_p->session)
   {
     delete data_p->session; data_p->session = NULL;
   } // end IF
 
-  PCPClient_ConnectionManager_t* connection_manager_p =
-    PCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
   if (data_p->configuration->multicastHandle != ACE_INVALID_HANDLE)
   {
     PCPClient_ConnectionManager_t::ICONNECTION_T* iconnection_p =
@@ -994,7 +996,7 @@ action_announce_activate_cb (GtkAction* action_in,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
   ACE_ASSERT (spin_button_p);
   Net_ConnectionConfigurationsIterator_t iterator_3 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
   ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
   NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
                                                                                                       1); // encode
@@ -1106,7 +1108,7 @@ action_peer_activate_cb (GtkAction* action_in,
   converter << gtk_spin_button_get_value_as_int (spin_button_p);
   address += converter.str ();
   Net_ConnectionConfigurationsIterator_t iterator_3 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
   ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
   int result =
       NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress.set (address.c_str ());
@@ -1221,7 +1223,7 @@ action_authenticate_activate_cb (GtkAction* action_in,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
   ACE_ASSERT (spin_button_p);
   Net_ConnectionConfigurationsIterator_t iterator_3 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
   ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
   NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
                                                                                                       1); // encode
@@ -1268,7 +1270,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
       static_cast<struct PCPClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->configuration);
   Net_ConnectionConfigurationsIterator_t iterator_2 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
   GtkTreeIter tree_iterator;
@@ -1422,71 +1424,19 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //    PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
 //      connection_manager_p;
 //    ACE_ASSERT (iconnection_manager_p);
-    PCPClient_InboundConnector_t connector (true);
-    PCPClient_InboundAsynchConnector_t asynch_connector (true);
-    PCPClient_InboundConnectorMcast_t connector_mcast (true);
-    PCPClient_InboundAsynchConnectorMcast_t asynch_connector_mcast (true);
+    PCPClient_UnicastConnector_t connector (true);
+    PCPClient_UnicastAsynchConnector_t asynch_connector (true);
+    PCPClient_McastConnector_t connector_mcast (true);
+    PCPClient_McastAsynchConnector_t asynch_connector_mcast (true);
     PCPClient_IConnection_t* iconnection_p = NULL;
 
-    // *IMPORTANT NOTE*: bind()ing is weird. On Windows systems, the FIRST bound
-    //                   socket will receive the inbound data. On Linux, it is
-    //                   the LAST...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-    // connect outbound (?)
-    if (unlikely (!data_p->session))
-    {
-      PCPClient_OutboundConnector_t connector_2 (true);
-      PCPClient_OutboundAsynchConnector_t asynch_connector_2 (true);
-      iterator_3 =
-        data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-      ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
-      ACE_HANDLE handle = ACE_INVALID_HANDLE;
-      if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
-        handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector_2,
-                                                                           *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                           data_p->configuration->userData,
-                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                           true,
-                                                                           true);
-      else
-        handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector_2,
-                                                                                 *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                                 data_p->configuration->userData,
-                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                                 true,
-                                                                                 true);
-      if (unlikely (handle == ACE_INVALID_HANDLE))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to connect to %s, returning\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
-        goto continue_;
-      } // end IF
-      iconnection_p =
-        connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
-      //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("%u: connected to %s\n"),
-      //            data_p->connection->id (),
-      //            ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
-
-      ACE_NEW_NORETURN (data_p->session,
-                        PCP_Session_t ());
-      ACE_ASSERT (data_p->session);
-      data_p->session->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                   iconnection_p);
-    } // end IF
-#endif // ACE_WIN32 || ACE_WIN64
-
-    // connect (unicast)
+    // listen on unicast port
     iterator_3 =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundConnector_t> (connector,
+        Net_Client_Common_Tools::connect<PCPClient_UnicastConnector_t> (connector,
                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                         data_p->configuration->userData,
                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1494,7 +1444,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                         false);
     else
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnector_t> (asynch_connector,
+        Net_Client_Common_Tools::connect<PCPClient_UnicastAsynchConnector_t> (asynch_connector,
                                                                               *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                               data_p->configuration->userData,
                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1507,38 +1457,47 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
       goto continue_;
     } // end IF
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
-//                data_p->configuration->handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
-//#else
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: opened UDP socket: %s\n"),
-//                data_p->configuration->handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
-//#endif // ACE_WIN32 || ACE_WIN64
+    iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+    ACE_ASSERT (iconnection_p);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: listening to (UDP) %s\n"),
+                iconnection_p->id (),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
+    if (!data_p->session)
+    {
+      ACE_NEW_NORETURN (data_p->session,
+                        PCP_Session_t ());
+    } // end IF
+    ACE_ASSERT (data_p->session);
+    data_p->session->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                 iconnection_p);
+    iconnection_p->decrease (); iconnection_p = NULL;
 
-    // connect (multiccast)
+    // listen on multicast port
     iterator_3 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundConnectorMcast_t> (connector_mcast,
-                                                                             *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                             data_p->configuration->userData,
-                                                                             NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                                                             true,
-                                                                             false);
+        Net_Client_Common_Tools::connect<PCPClient_McastConnector_t> (connector_mcast,
+                                                                      *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                      data_p->configuration->userData,
+                                                                      NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                                                      true,
+                                                                      false);
     else
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<PCPClient_InboundAsynchConnectorMcast_t> (asynch_connector_mcast,
-                                                                                   *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                                   data_p->configuration->userData,
-                                                                                   NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                                                                   true,
-                                                                                   false);
+        Net_Client_Common_Tools::connect<PCPClient_McastAsynchConnector_t> (asynch_connector_mcast,
+                                                                            *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
+                                                                            data_p->configuration->userData,
+                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                                                            true,
+                                                                            false);
     if (unlikely (data_p->configuration->multicastHandle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1546,68 +1505,18 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
       goto continue_;
     } // end IF
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
-//                data_p->configuration->multicastHandle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
-//#else
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: opened UDP socket: %s\n"),
-//                data_p->configuration->multicastHandle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
-//#endif // ACE_WIN32 || ACE_WIN64
-
+    iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    // connect outbound (?)
-    if (unlikely (!data_p->session))
-    {
-      PCPClient_IConnection_t* iconnection_p = NULL;
-      PCPClient_OutboundConnector_t connector_2 (true);
-      PCPClient_OutboundAsynchConnector_t asynch_connector_2 (true);
-      iterator_3 =
-        data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-      ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
-      ACE_HANDLE handle = ACE_INVALID_HANDLE;
-      if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
-        handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundConnector_t> (connector_2,
-                                                                           *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                           data_p->configuration->userData,
-                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                           true,
-                                                                           true);
-      else
-        handle =
-          Net_Client_Common_Tools::connect<PCPClient_OutboundAsynchConnector_t> (asynch_connector_2,
-                                                                                 *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                                 data_p->configuration->userData,
-                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                                                                 true,
-                                                                                 true);
-      if (unlikely (handle == ACE_INVALID_HANDLE))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to connect to %s, returning\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
-        goto continue_;
-      } // end IF
-      iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->multicastHandle));
+#else
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->multicastHandle));
 #endif // ACE_WIN32 || ACE_WIN64
-      //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("%u: connected to %s\n"),
-      //            data_p->connection->id (),
-      //            ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress).c_str ())));
-
-      ACE_NEW_NORETURN (data_p->session,
-                        PCP_Session_t ());
-      ACE_ASSERT (data_p->session);
-      data_p->session->initialize (*static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
-                                   iconnection_p);
-    } // end IF
-#endif // ACE_WIN32 || ACE_WIN64
+    ACE_ASSERT (iconnection_p);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: listening to (UDP) %s\n"),
+                iconnection_p->id (),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress).c_str ())));
+    iconnection_p->decrease (); iconnection_p = NULL;
 
     failed = false;
 
@@ -1723,7 +1632,7 @@ spinbutton_server_port_value_changed_cb (GtkSpinButton* spinButton_in,
   unsigned short port_number =
     static_cast<unsigned short> (gtk_spin_button_get_value_as_int (spinButton_in));
   Net_ConnectionConfigurationsIterator_t iterator_2 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.set_port_number (port_number,
                                                                                                       1);

@@ -55,7 +55,7 @@
 #include "pcp_configuration.h"
 
 // forward declarations
-class Test_U_InboundConnectionStream;
+class Test_U_ConnectionStream;
 class Test_U_OutboundConnectionStream;
 class PCPClient_ConnectionConfiguration;
 
@@ -78,66 +78,67 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           struct PCP_ConnectionState,
                           PCP_Statistic_t> PCPClient_IConnection_t;
 
+//typedef Net_IStreamConnection_T<ACE_INET_Addr,
+//                                PCPClient_ConnectionConfiguration,
+//                                struct PCP_ConnectionState,
+//                                PCP_Statistic_t,
+//                                Net_UDPSocketConfiguration_t,
+//                                Test_U_OutboundConnectionStream,
+//                                enum Stream_StateMachine_ControlState> PCPClient_IOutboundStreamConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 PCPClient_ConnectionConfiguration,
                                 struct PCP_ConnectionState,
                                 PCP_Statistic_t,
                                 Net_UDPSocketConfiguration_t,
-                                Test_U_OutboundConnectionStream,
-                                enum Stream_StateMachine_ControlState> PCPClient_IOutboundStreamConnection_t;
-typedef Net_IStreamConnection_T<ACE_INET_Addr,
-                                PCPClient_ConnectionConfiguration,
-                                struct PCP_ConnectionState,
-                                PCP_Statistic_t,
-                                Net_UDPSocketConfiguration_t,
-                                Test_U_InboundConnectionStream,
-                                enum Stream_StateMachine_ControlState> PCPClient_IInboundStreamConnection_t;
+                                Test_U_ConnectionStream,
+                                enum Stream_StateMachine_ControlState> PCPClient_IStreamConnection_t;
 
 //////////////////////////////////////////
 
-// inbound
+// unicast
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_UDPSocketHandler_t,
                                 PCPClient_ConnectionConfiguration,
                                 struct PCP_ConnectionState,
                                 PCP_Statistic_t,
-                                Test_U_InboundConnectionStream,
-                                struct Net_UserData> PCPClient_InboundConnection_t;
+                                Test_U_ConnectionStream,
+                                struct Net_UserData> PCPClient_UnicastConnection_t;
 typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
                                       PCPClient_ConnectionConfiguration,
                                       struct PCP_ConnectionState,
                                       PCP_Statistic_t,
-                                      Test_U_InboundConnectionStream,
-                                      struct Net_UserData> PCPClient_InboundAsynchConnection_t;
+                                      Test_U_ConnectionStream,
+                                      struct Net_UserData> PCPClient_UnicastAsynchConnection_t;
 
+// multicast
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_UDPSocketHandlerMcast_t,
                                 PCPClient_ConnectionConfiguration,
                                 struct PCP_ConnectionState,
                                 PCP_Statistic_t,
-                                Test_U_InboundConnectionStream,
-                                struct Net_UserData> PCPClient_InboundConnectionMcast_t;
+                                Test_U_ConnectionStream,
+                                struct Net_UserData> PCPClient_McastConnection_t;
 typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandlerMcast_t,
                                       PCPClient_ConnectionConfiguration,
                                       struct PCP_ConnectionState,
                                       PCP_Statistic_t,
-                                      Test_U_InboundConnectionStream,
-                                      struct Net_UserData> PCPClient_InboundAsynchConnectionMcast_t;
+                                      Test_U_ConnectionStream,
+                                      struct Net_UserData> PCPClient_McastAsynchConnection_t;
 
-// outbound
-typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
-                                Net_UDPSocketHandler_t,
-                                PCPClient_ConnectionConfiguration,
-                                struct PCP_ConnectionState,
-                                PCP_Statistic_t,
-                                Test_U_OutboundConnectionStream,
-                                struct Net_UserData> PCPClient_OutboundConnection_t;
-typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
-                                      PCPClient_ConnectionConfiguration,
-                                      struct PCP_ConnectionState,
-                                      PCP_Statistic_t,
-                                      Test_U_OutboundConnectionStream,
-                                      struct Net_UserData> PCPClient_OutboundAsynchConnection_t;
+//// outbound
+//typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
+//                                Net_UDPSocketHandler_t,
+//                                PCPClient_ConnectionConfiguration,
+//                                struct PCP_ConnectionState,
+//                                PCP_Statistic_t,
+//                                Test_U_OutboundConnectionStream,
+//                                struct Net_UserData> PCPClient_OutboundConnection_t;
+//typedef Net_AsynchUDPConnectionBase_T<Net_AsynchUDPSocketHandler_t,
+//                                      PCPClient_ConnectionConfiguration,
+//                                      struct PCP_ConnectionState,
+//                                      PCP_Statistic_t,
+//                                      Test_U_OutboundConnectionStream,
+//                                      struct Net_UserData> PCPClient_OutboundAsynchConnection_t;
 
 //////////////////////////////////////////
 
@@ -146,63 +147,64 @@ typedef Net_IConnector_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
-// inbound
-typedef Net_Client_AsynchConnector_T<PCPClient_InboundAsynchConnection_t,
+// unicast
+typedef Net_Client_AsynchConnector_T<PCPClient_UnicastAsynchConnection_t,
                                      ACE_INET_Addr,
                                      PCPClient_ConnectionConfiguration,
                                      struct PCP_ConnectionState,
                                      PCP_Statistic_t,
                                      Net_UDPSocketConfiguration_t,
-                                     Test_U_InboundConnectionStream,
-                                     struct Net_UserData> PCPClient_InboundAsynchConnector_t;
+                                     Test_U_ConnectionStream,
+                                     struct Net_UserData> PCPClient_UnicastAsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               PCPClient_InboundConnection_t,
+                               PCPClient_UnicastConnection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                PCPClient_ConnectionConfiguration,
                                struct PCP_ConnectionState,
                                PCP_Statistic_t,
                                Net_UDPSocketConfiguration_t,
-                               Test_U_InboundConnectionStream,
-                               struct Net_UserData> PCPClient_InboundConnector_t;
+                               Test_U_ConnectionStream,
+                               struct Net_UserData> PCPClient_UnicastConnector_t;
 
-typedef Net_Client_AsynchConnector_T<PCPClient_InboundAsynchConnectionMcast_t,
+// multicast
+typedef Net_Client_AsynchConnector_T<PCPClient_McastAsynchConnection_t,
                                      ACE_INET_Addr,
                                      PCPClient_ConnectionConfiguration,
                                      struct PCP_ConnectionState,
                                      PCP_Statistic_t,
                                      Net_UDPSocketConfiguration_t,
-                                     Test_U_InboundConnectionStream,
-                                     struct Net_UserData> PCPClient_InboundAsynchConnectorMcast_t;
+                                     Test_U_ConnectionStream,
+                                     struct Net_UserData> PCPClient_McastAsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               PCPClient_InboundConnectionMcast_t,
+                               PCPClient_McastConnection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                PCPClient_ConnectionConfiguration,
                                struct PCP_ConnectionState,
                                PCP_Statistic_t,
                                Net_UDPSocketConfiguration_t,
-                               Test_U_InboundConnectionStream,
-                               struct Net_UserData> PCPClient_InboundConnectorMcast_t;
+                               Test_U_ConnectionStream,
+                               struct Net_UserData> PCPClient_McastConnector_t;
 
-// outbound
-typedef Net_Client_AsynchConnector_T<PCPClient_OutboundAsynchConnection_t,
-                                     ACE_INET_Addr,
-                                     PCPClient_ConnectionConfiguration,
-                                     struct PCP_ConnectionState,
-                                     PCP_Statistic_t,
-                                     Net_UDPSocketConfiguration_t,
-                                     Test_U_OutboundConnectionStream,
-                                     struct Net_UserData> PCPClient_OutboundAsynchConnector_t;
-typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               PCPClient_OutboundConnection_t,
-                               Net_SOCK_Connector,
-                               ACE_INET_Addr,
-                               PCPClient_ConnectionConfiguration,
-                               struct PCP_ConnectionState,
-                               PCP_Statistic_t,
-                               Net_UDPSocketConfiguration_t,
-                               Test_U_OutboundConnectionStream,
-                               struct Net_UserData> PCPClient_OutboundConnector_t;
+//// outbound
+//typedef Net_Client_AsynchConnector_T<PCPClient_OutboundAsynchConnection_t,
+//                                     ACE_INET_Addr,
+//                                     PCPClient_ConnectionConfiguration,
+//                                     struct PCP_ConnectionState,
+//                                     PCP_Statistic_t,
+//                                     Net_UDPSocketConfiguration_t,
+//                                     Test_U_OutboundConnectionStream,
+//                                     struct Net_UserData> PCPClient_OutboundAsynchConnector_t;
+//typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+//                               PCPClient_OutboundConnection_t,
+//                               Net_SOCK_Connector,
+//                               ACE_INET_Addr,
+//                               PCPClient_ConnectionConfiguration,
+//                               struct PCP_ConnectionState,
+//                               PCP_Statistic_t,
+//                               Net_UDPSocketConfiguration_t,
+//                               Test_U_OutboundConnectionStream,
+//                               struct Net_UserData> PCPClient_OutboundConnector_t;
 
 #endif

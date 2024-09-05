@@ -218,6 +218,8 @@ class Net_AsynchUDPConnectionBase_T
   virtual void info (ACE_HANDLE&,           // return value: handle
                      ACE_INET_Addr&,        // return value: local SAP
                      ACE_INET_Addr&) const; // return value: peer SAP
+  // *NOTE*: override to cover write-only connections
+  virtual void abort ();
 
   // implement Common_IReset
   virtual void reset ();

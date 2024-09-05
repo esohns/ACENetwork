@@ -139,8 +139,10 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  ACE_ASSERT (iterator != sessionDataMap_.end ());
+  if (likely (iterator != sessionDataMap_.end ()))
+    sessionDataMap_.erase (iterator);
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
@@ -161,8 +163,6 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
   state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
-
-  sessionDataMap_.erase (iterator);
 }
 
 void

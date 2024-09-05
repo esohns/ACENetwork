@@ -122,21 +122,21 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   if (unlikely (inherited::configuration_->sourcePort))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     struct _GUID interface_identifier;
 #else
     std::string interface_identifier;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
     std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
     interface_identifier = inherited::configuration_->interfaceIdentifier;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
 #else
     if (unlikely (interface_identifier.empty ()))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
     if (unlikely (interface_identifier.empty ()))
 #endif // ACE_WIN32 || ACE_WIN64
@@ -154,7 +154,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     } // end IF
     ACE_INET_Addr gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
                                                              source_SAP,
                                                              gateway_address)))
@@ -162,7 +162,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
                                                            source_SAP,
                                                            gateway_address)))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
     if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
                                                            source_SAP,
@@ -170,7 +170,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_WIN32 || ACE_WIN64
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
@@ -178,7 +178,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
                   ACE_TEXT (interface_identifier.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
@@ -343,10 +343,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   // set source address ?
   if (unlikely (inherited::configuration_->sourcePort))
   {
-    //source_SAP.set (static_cast<u_short> (inherited::configuration_->sourcePort),
-    //                static_cast<ACE_UINT32> (INADDR_ANY),
-    //                1,
-    //                0);
     result =
         ACE_OS::bind (writeHandle_,
                       reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
@@ -364,27 +360,41 @@ Net_AsynchUDPSocketHandler_T<SocketType,
         ACE_DEBUG ((LM_ERROR,
                    ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
                    writeHandle_,
-                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ())));
 #else
         ACE_DEBUG ((LM_ERROR,
                    ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
                    writeHandle_,
-                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+                   ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
-    } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-               ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
-               writeHandle_,
-               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", continuing\n"),
+                  writeHandle_,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ())));
 #else
-    ACE_DEBUG ((LM_DEBUG,
-               ACE_TEXT ("bound write socket (handle: %d) to %s\n"),
-               writeHandle_,
-               ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", continuing\n"),
+                  writeHandle_,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP, false, false).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
+    } // end IF
+    else
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("bound write socket (handle: 0x%@) to %s\n"),
+                 writeHandle_,
+                 ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("bound write socket (handle: %d) to %s\n"),
+                 writeHandle_,
+                 ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+    } // end ELSE
   } // end IF
 
   // step0: initialize base class
@@ -498,7 +508,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   ACE_ASSERT (PDUSize_);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%@: maximum message size: %u\n"),
+              ACE_TEXT ("0x%@: maximum message size: %u\n"),
               handle,
               PDUSize_));
 #else

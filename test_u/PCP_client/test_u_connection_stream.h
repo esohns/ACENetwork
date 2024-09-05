@@ -44,7 +44,7 @@ class Test_U_SessionMessage;
 
 extern const char stream_name_string_[];
 
-class Test_U_InboundConnectionStream
+class Test_U_ConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
                                         stream_name_string_,
@@ -86,8 +86,8 @@ class Test_U_InboundConnectionStream
                                         struct Stream_UserData> inherited;
 
  public:
-  Test_U_InboundConnectionStream ();
-  inline virtual ~Test_U_InboundConnectionStream () { inherited::shutdown (); }
+  Test_U_ConnectionStream ();
+  inline virtual ~Test_U_ConnectionStream () { inherited::shutdown (); }
 
 //  using inherited::getR_2;
   inline virtual const PCPClient_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
@@ -101,8 +101,8 @@ class Test_U_InboundConnectionStream
                            ACE_HANDLE);                       // socket handle
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream (const Test_U_InboundConnectionStream&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream& operator= (const Test_U_InboundConnectionStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_ConnectionStream (const Test_U_ConnectionStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_ConnectionStream& operator= (const Test_U_ConnectionStream&))
 
   //// *TODO*: re-consider this API
   //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
@@ -110,68 +110,68 @@ class Test_U_InboundConnectionStream
 
 ////////////////////////////////////////////////////////////////////////////////
 
-class Test_U_OutboundConnectionStream
- : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
-                                        Common_TimePolicy_t,
-                                        stream_name_string_,
-                                        enum Stream_ControlType,
-                                        enum Stream_SessionMessageType,
-                                        enum Stream_StateMachine_ControlState,
-                                        struct PCPClient_StreamState,
-                                        struct PCP_StreamConfiguration,
-                                        struct Stream_Statistic,
-                                        Common_Timer_Manager_t,
-                                        struct PCPClient_ModuleHandlerConfiguration,
-                                        struct PCPClient_SessionData, // session data
-                                        PCPClient_SessionData_t,      // session data container (reference counted)
-                                        Stream_ControlMessage_t,
-                                        Test_U_Message,
-                                        Test_U_SessionMessage,
-                                        ACE_INET_Addr,
-                                        PCPClient_ConnectionManager_t,
-                                        struct Stream_UserData>
-{
-  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
-                                        Common_TimePolicy_t,
-                                        stream_name_string_,
-                                        enum Stream_ControlType,
-                                        enum Stream_SessionMessageType,
-                                        enum Stream_StateMachine_ControlState,
-                                        struct PCPClient_StreamState,
-                                        struct PCP_StreamConfiguration,
-                                        struct Stream_Statistic,
-                                        Common_Timer_Manager_t,
-                                        struct PCPClient_ModuleHandlerConfiguration,
-                                        struct PCPClient_SessionData,
-                                        PCPClient_SessionData_t,
-                                        Stream_ControlMessage_t,
-                                        Test_U_Message,
-                                        Test_U_SessionMessage,
-                                        ACE_INET_Addr,
-                                        PCPClient_ConnectionManager_t,
-                                        struct Stream_UserData> inherited;
-
- public:
-  Test_U_OutboundConnectionStream ();
-  inline virtual ~Test_U_OutboundConnectionStream () { inherited::shutdown (); }
-
-//  using inherited::getR_2;
-  inline virtual const PCPClient_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
-
-  // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ILayout*, // return value: layout
-                     bool&);          // return value: delete modules ?
-
-  // implement Common_IInitialize_T
-  virtual bool initialize (const inherited::CONFIGURATION_T&,
-                           ACE_HANDLE);                       // socket handle
-
- private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream& operator= (const Test_U_OutboundConnectionStream&))
-
-  //// *TODO*: re-consider this API
-  //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-};
+//class Test_U_OutboundConnectionStream
+// : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+//                                        Common_TimePolicy_t,
+//                                        stream_name_string_,
+//                                        enum Stream_ControlType,
+//                                        enum Stream_SessionMessageType,
+//                                        enum Stream_StateMachine_ControlState,
+//                                        struct PCPClient_StreamState,
+//                                        struct PCP_StreamConfiguration,
+//                                        struct Stream_Statistic,
+//                                        Common_Timer_Manager_t,
+//                                        struct PCPClient_ModuleHandlerConfiguration,
+//                                        struct PCPClient_SessionData, // session data
+//                                        PCPClient_SessionData_t,      // session data container (reference counted)
+//                                        Stream_ControlMessage_t,
+//                                        Test_U_Message,
+//                                        Test_U_SessionMessage,
+//                                        ACE_INET_Addr,
+//                                        PCPClient_ConnectionManager_t,
+//                                        struct Stream_UserData>
+//{
+//  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+//                                        Common_TimePolicy_t,
+//                                        stream_name_string_,
+//                                        enum Stream_ControlType,
+//                                        enum Stream_SessionMessageType,
+//                                        enum Stream_StateMachine_ControlState,
+//                                        struct PCPClient_StreamState,
+//                                        struct PCP_StreamConfiguration,
+//                                        struct Stream_Statistic,
+//                                        Common_Timer_Manager_t,
+//                                        struct PCPClient_ModuleHandlerConfiguration,
+//                                        struct PCPClient_SessionData,
+//                                        PCPClient_SessionData_t,
+//                                        Stream_ControlMessage_t,
+//                                        Test_U_Message,
+//                                        Test_U_SessionMessage,
+//                                        ACE_INET_Addr,
+//                                        PCPClient_ConnectionManager_t,
+//                                        struct Stream_UserData> inherited;
+//
+// public:
+//  Test_U_OutboundConnectionStream ();
+//  inline virtual ~Test_U_OutboundConnectionStream () { inherited::shutdown (); }
+//
+////  using inherited::getR_2;
+//  inline virtual const PCPClient_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
+//
+//  // implement (part of) Stream_IStreamControlBase
+//  virtual bool load (Stream_ILayout*, // return value: layout
+//                     bool&);          // return value: delete modules ?
+//
+//  // implement Common_IInitialize_T
+//  virtual bool initialize (const inherited::CONFIGURATION_T&,
+//                           ACE_HANDLE);                       // socket handle
+//
+// private:
+//  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))
+//  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream& operator= (const Test_U_OutboundConnectionStream&))
+//
+//  //// *TODO*: re-consider this API
+//  //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+//};
 
 #endif

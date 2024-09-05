@@ -677,7 +677,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   if (unlikely (messageBlock_in.length ()))
   {
     ACE_Message_Block* duplicate_p = messageBlock_in.duplicate ();
-    if (!duplicate_p)
+    if (unlikely (!duplicate_p))
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
@@ -687,17 +687,17 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     ACE_Proactor* proactor_p = inherited::proactor ();
     ACE_ASSERT (proactor_p);
     ACE_Asynch_Read_Dgram_Result_Impl* fake_result_p =
-        proactor_p->create_asynch_read_dgram_result (inherited::proxy (),                  // handler proxy
-                                                     handle_in,                            // socket handle
-                                                     duplicate_p,                          // buffer
-                                                     duplicate_p->size (),                 // (maximum) #bytes to read
-                                                     0,                                    // flags
-                                                     PF_INET,                              // protocol family
-                                                     NULL,                                 // ACT
-                                                     ACE_INVALID_HANDLE,                   // event
-                                                     0,                                    // priority
-                                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
-    if (!fake_result_p)
+      proactor_p->create_asynch_read_dgram_result (inherited::proxy (),                  // handler proxy
+                                                   handle_in,                            // socket handle
+                                                   duplicate_p,                          // buffer
+                                                   duplicate_p->size (),                 // (maximum) #bytes to read
+                                                   0,                                    // flags
+                                                   PF_INET,                              // protocol family
+                                                   NULL,                                 // ACT
+                                                   ACE_INVALID_HANDLE,                   // event
+                                                   0,                                    // priority
+                                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
+    if (unlikely (!fake_result_p))
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_dgram_result: \"%m\", aborting\n")));
@@ -714,7 +714,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                              0);                // error
 
     // clean up
-    delete fake_result_p;
+    delete fake_result_p; fake_result_p = NULL;
   } // end ELSE
 
 //continue_:
@@ -729,7 +729,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
 error:
   result = inherited::handle_close (handle_in,
                                     ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (result == -1)
+  if (unlikely (result == -1))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
@@ -957,6 +957,33 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
     } // end IF
   } // end IF
   peerSAP_out = inherited::HANDLER_T::configuration_->peerAddress;
+}
+
+template <typename SocketHandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType>
+void
+Net_AsynchUDPConnectionBase_T<SocketHandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              StreamType,
+                              UserDataType>::abort ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::abort"));
+
+  inherited::abort ();
+
+  int result = inherited::handle_close (inherited::writeHandle_,
+                                        ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (unlikely (result == -1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to Net_StreamConnectionBase_T::handle_close(): \"%m\", continuing\n"),
+                this->id ()));
+  // *NOTE*: the caller retains any final reference(s)
 }
 
 template <typename SocketHandlerType,
