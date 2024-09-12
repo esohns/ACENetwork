@@ -170,7 +170,7 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
       break;
 
 error:
-      notify (STREAM_SESSION_MESSAGE_ABORT);
+      inherited::notify (STREAM_SESSION_MESSAGE_ABORT);
 
       break;
     }
