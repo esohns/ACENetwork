@@ -142,16 +142,17 @@ Test_I_LibAVConverter::handleDataMessage_2 (Test_I_Message*& message_inout,
     goto error;
   } // end IF
 //  av_frame_unref (frame_);
-  result = av_image_fill_linesizes (inherited::frame_->linesize,
-                                    static_cast<AVPixelFormat> (inherited::frame_->format),
-                                    static_cast<int> (inherited::frame_->width));
+  result =
+    av_image_fill_linesizes (inherited::frame_->linesize,
+                             static_cast<AVPixelFormat> (inherited::frame_->format),
+                             inherited::frame_->width);
   ACE_ASSERT (result >= 0);
   result =
-      av_image_fill_pointers (inherited::frame_->data,
-                              static_cast<AVPixelFormat> (inherited::frame_->format),
-                              static_cast<int> (inherited::frame_->height),
-                              reinterpret_cast<uint8_t*> (inherited::buffer_->wr_ptr ()),
-                              inherited::frame_->linesize);
+    av_image_fill_pointers (inherited::frame_->data,
+                            static_cast<AVPixelFormat> (inherited::frame_->format),
+                            inherited::frame_->height,
+                            reinterpret_cast<uint8_t*> (inherited::buffer_->wr_ptr ()),
+                            inherited::frame_->linesize);
   ACE_ASSERT (result >= 0);
 
   return;

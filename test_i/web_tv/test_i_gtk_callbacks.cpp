@@ -433,6 +433,22 @@ idle_load_channel_configuration_cb (gpointer userData_in)
       { ACE_ASSERT (!(*iterator_2).frameRate);
         (*iterator_2).frameRate = 25;
       } // end FOR
+
+      if (data_p->currentChannel == 15) // ANIXE
+      {
+        struct Test_I_WebTV_Channel_Resolution resolution_s;
+        resolution_s.frameRate = 25;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        resolution_s.resolution.cx = 640;
+        resolution_s.resolution.cy = 368;
+#else
+        resolution_s.resolution.width = 640;
+        resolution_s.resolution.height = 368;
+#endif // ACE_WIN32 || ACE_WIN64
+        resolution_s.URI = (*channel_iterator).second.resolutions.begin ()->URI;
+        (*channel_iterator).second.resolutions.push_back (resolution_s);
+      } // end IF
+
       break;
     }
     case 18: // QVC
@@ -448,6 +464,7 @@ idle_load_channel_configuration_cb (gpointer userData_in)
       resolution_s.resolution.height = 540;
 #endif // ACE_WIN32 || ACE_WIN64
       (*channel_iterator).second.resolutions.push_back (resolution_s);
+
       break;
     }
     default:
@@ -1432,6 +1449,55 @@ add_segment_URIs (unsigned int program_in,
                            match_results[7].str () +
                            match_results[8].str ());
       URI_string_tail = match_results[10].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << ++index_i;
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    case 15: // ANIXE
+    {
+      ACE_UINT32 index_i = 0, date_i = 0;
+
+      position_i = last_URI_string.rfind ('_', std::string::npos);
+      ACE_ASSERT (position_i != std::string::npos);
+
+      URI_string_head = last_URI_string;
+      URI_string_head.erase (position_i + 1, std::string::npos);
+
+      regex_string =
+        ACE_TEXT_ALWAYS_CHAR ("^(media)(_)([[:digit:]]+)(.ts)$");
+      regex.assign (regex_string);
+      if (unlikely(!std::regex_match (last_URI_string,
+                                      match_results,
+                                      regex,
+                                      std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (last_URI_string.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[3].str ());
+      converter >> index_i;
+      URI_string_head_2 = (match_results[1].str () +
+                           match_results[2].str ());
+      URI_string_tail = match_results[4].str ();
 
       std::string URI_string;
       for (unsigned int i = 0;
