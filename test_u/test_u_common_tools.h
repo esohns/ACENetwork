@@ -21,8 +21,6 @@
 #ifndef TEST_U_COMMON_TOOLS_H
 #define TEST_U_COMMON_TOOLS_H
 
-#include <stdlib.h>
-
 #include <functional>
 #include <random>
 
@@ -30,8 +28,9 @@
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_iinitialize.h"
+
 #include "net_common.h"
-//#include "net_connection_configuration.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 

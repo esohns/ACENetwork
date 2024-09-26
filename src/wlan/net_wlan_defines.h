@@ -21,8 +21,6 @@
 #ifndef NET_WLAN_DEFINES_H
 #define NET_WLAN_DEFINES_H
 
-#include "ace/config-lite.h"
-
 // protocol
 // (see also: http://standards.ieee.org/findstds/standard/802.11-2016.html)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

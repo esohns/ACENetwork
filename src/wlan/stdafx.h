@@ -14,12 +14,12 @@
 #include "windows.h"
 #endif // _MSC_VER
 
-// C RunTime Header Files
-#include <string>
-
 #if defined (VALGRIND_USE)
 #include "valgrind/valgrind.h"
 #endif // VALGRIND_USE
+
+// C RunTime Header Files
+#include <string>
 
 // System Library Header Files
 #include "ace/config-lite.h"

@@ -21,7 +21,19 @@
 #ifndef NET_WLAN_COMMON_H
 #define NET_WLAN_COMMON_H
 
-#include "ace/config-lite.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "guiddef.h"
+#if defined (WLANAPI_SUPPORT)
+#include "wlanapi.h"
+#endif // WLANAPI_SUPPORT
+#else
+#include "net/ethernet.h"
+
+#if defined (NL80211_SUPPORT)
+#include "linux/nl80211.h"
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <cstdint>
 #endif // ACE_WIN32 || ACE_WIN64
@@ -36,19 +48,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "guiddef.h"
-#if defined (WLANAPI_SUPPORT)
-#include "wlanapi.h"
-#endif // WLANAPI_SUPPORT
-#else
-#include "net/ethernet.h"
-
-#if defined (NL80211_SUPPORT)
-#include "linux/nl80211.h"
-#endif // NL80211_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Basic_Types.h"
 #include "ace/Containers_T.h"

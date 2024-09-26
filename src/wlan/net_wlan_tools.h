@@ -21,8 +21,6 @@
 #ifndef NET_WLAN_TOOLS_H
 #define NET_WLAN_TOOLS_H
 
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
 #include "wlanapi.h"
@@ -38,6 +36,8 @@
 #include "dbus/dbus.h"
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <string>
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"

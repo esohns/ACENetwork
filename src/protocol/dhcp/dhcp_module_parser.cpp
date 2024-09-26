@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "dhcp_module_parser.h"
 
 #include "dhcp_defines.h"

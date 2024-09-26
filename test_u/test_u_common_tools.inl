@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_macros.h"
 

@@ -22,8 +22,8 @@
 #include "pcp_stream.h"
 
 #include "pcp_defines.h"
-#include "pcp_message.h"
-#include "pcp_sessionmessage.h"
+//#include "pcp_message.h"
+//#include "pcp_sessionmessage.h"
 
 //NET_PROTOCOL_PCP_Export const char libacenetwork_default_pcp_marshal_module_name_string[] =
 const char libacenetwork_default_pcp_marshal_module_name_string[] =

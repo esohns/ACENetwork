@@ -21,9 +21,6 @@
 #ifndef NET_WLAN_MONITOR_BASE_H
 #define NET_WLAN_MONITOR_BASE_H
 
-#include <list>
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #if defined (WLANAPI_SUPPORT)
@@ -40,6 +37,9 @@ extern "C"
 }
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <list>
+#include <string>
 
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"

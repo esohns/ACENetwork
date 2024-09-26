@@ -23,8 +23,6 @@
 
 #include "irc_defines.h"
 //#include "irc_exports.h"
-//#include "irc_message.h"
-//#include "irc_sessionmessage.h"
 
 //IRC_Export const char libacenetwork_default_irc_marshal_module_name_string[] =
 const char libacenetwork_default_irc_marshal_module_name_string[] =

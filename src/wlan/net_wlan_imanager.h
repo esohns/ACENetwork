@@ -21,13 +21,13 @@
 #ifndef NET_WLAN_IMANAGER_H
 #define NET_WLAN_IMANAGER_H
 
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #else
 #include "net/ethernet.h"
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <string>
 
 class Net_WLAN_IManager
 {

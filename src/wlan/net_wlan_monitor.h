@@ -21,9 +21,6 @@
 #ifndef NET_WLAN_MONITOR_H
 #define NET_WLAN_MONITOR_H
 
-#include <string>
-
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (WEXT_SUPPORT)
@@ -41,6 +38,8 @@
 //#include "dbus/dbus-glib.h"
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <string>
 
 #include "ace/Global_Macros.h"
 #include "ace/Time_Value.h"

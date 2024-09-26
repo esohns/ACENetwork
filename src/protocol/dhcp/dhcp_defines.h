@@ -21,8 +21,6 @@
 #ifndef DHCP_DEFINES_H
 #define DHCP_DEFINES_H
 
-#include "ace/config-lite.h"
-
 // stream
 #define DHCP_DEFAULT_MODULE_DISCOVER_NAME_STRING          "DHCPDiscover"
 #define DHCP_DEFAULT_MODULE_MARSHAL_NAME_STRING           "DHCPMarshal"

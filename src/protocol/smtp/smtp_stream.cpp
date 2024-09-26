@@ -22,8 +22,6 @@
 #include "smtp_stream.h"
 
 #include "smtp_defines.h"
-//#include "smtp_message.h"
-//#include "smtp_sessionmessage.h"
 
 //NET_PROTOCOL_PCP_Export const char libacenetwork_default_smtp_marshal_module_name_string[] =
 const char libacenetwork_default_smtp_marshal_module_name_string[] =

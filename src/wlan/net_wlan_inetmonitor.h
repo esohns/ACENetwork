@@ -21,11 +21,11 @@
 #ifndef NET_WLAN_INETMONITOR_T_H
 #define NET_WLAN_INETMONITOR_T_H
 
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <string>
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"

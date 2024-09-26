@@ -21,9 +21,9 @@
 
 #include "net_wlan_profile_xml_handler.h"
 
-#include <sstream>
+#include "wlantypes.h"
 
-#include <wlantypes.h>
+#include <sstream>
 
 #include "ace/Log_Msg.h"
 

@@ -21,9 +21,6 @@
 #ifndef NET_WLAN_CONFIGURATION_H
 #define NET_WLAN_CONFIGURATION_H
 
-#include <string>
-
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #include "Ks.h"
@@ -33,6 +30,8 @@
 #include "dbus/dbus.h"
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <string>
 
 #include "ace/Basic_Types.h"
 

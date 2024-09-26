@@ -21,6 +21,4 @@
 #ifndef TEST_U_NETWORK_COMMON_H
 #define TEST_U_NETWORK_COMMON_H
 
-//#include "net_connection_configuration.h"
-
 #endif

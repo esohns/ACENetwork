@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "gtk/gtk.h"
+
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
-
-#include "gtk/gtk.h"
 
 #include "common_ui_common.h"
 

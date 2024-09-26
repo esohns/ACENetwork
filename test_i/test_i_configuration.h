@@ -21,7 +21,6 @@
 #ifndef TEST_I_CONFIGURATION_H
 #define TEST_I_CONFIGURATION_H
 
-#include "ace/config-lite.h"
 #include "ace/Time_Value.h"
 
 #include "common.h"

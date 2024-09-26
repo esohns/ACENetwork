@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
 #include "bittorrent_stream_peer.h"
 
 #include "bittorrent_defines.h"

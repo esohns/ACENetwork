@@ -22,7 +22,6 @@
 #define TEST_I_WXWIDGETS_COMMON_H
 
 #include "ace/OS.h"
-//#include "ace/Synch_Traits.h"
 
 #include "common_ui_wxwidgets_common.h"
 

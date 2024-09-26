@@ -21,11 +21,11 @@
 
 #include "bittorrent_tools.h"
 
+#include "openssl/sha.h"
+
 #include <iomanip>
 #include <regex>
 #include <sstream>
-
-#include "openssl/sha.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"

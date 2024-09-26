@@ -22,8 +22,6 @@
 #include "ftp_stream.h"
 
 #include "ftp_defines.h"
-//#include "ftp_message.h"
-//#include "ftp_sessionmessage.h"
 
 //NET_PROTOCOL_PCP_Export const char libacenetwork_default_ftp_marshal_module_name_string[] =
 const char libacenetwork_default_ftp_marshal_module_name_string[] =

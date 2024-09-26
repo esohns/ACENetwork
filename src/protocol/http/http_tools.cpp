@@ -19,8 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "stream_dec_common.h"
-
 #include "http_tools.h"
 
 #include <algorithm>
@@ -35,6 +33,8 @@
 
 #include "common_defines.h"
 #include "common_tools.h"
+
+#include "stream_dec_common.h"
 
 #include "net_macros.h"
 

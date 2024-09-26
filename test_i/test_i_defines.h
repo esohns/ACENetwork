@@ -21,8 +21,6 @@
 #ifndef TEST_I_DEFINES_H
 #define TEST_I_DEFINES_H
 
-#include "ace/config-lite.h"
-
 #define TEST_I_STREAM_THREAD_NAME                        "stream processor"
 
 // event dispatch

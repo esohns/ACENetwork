@@ -21,12 +21,9 @@
 #ifndef NET_WLAN_IMONITOR_H
 #define NET_WLAN_IMONITOR_H
 
-#include <string>
-
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <guiddef.h>
-#include <wlanapi.h>
+#include "guiddef.h"
+#include "wlanapi.h"
 #else
 #include "net/ethernet.h"
 
@@ -34,6 +31,8 @@
 #include "dbus/dbus.h"
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <string>
 
 #include "ace/Synch_Traits.h"
 

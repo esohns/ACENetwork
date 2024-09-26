@@ -18,9 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <algorithm>
-#include <functional>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include "net/ethernet.h"
@@ -35,6 +32,9 @@
 #include "netlink/genl/genl.h"
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <algorithm>
+#include <functional>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
