@@ -19,11 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <iostream>
-#include <list>
-#include <sstream>
-#include <string>
-
 #if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
@@ -37,6 +32,11 @@
 #endif // ACE_WIN32 || ACE_WIN32
 #endif // CURSES_USE
 #endif // GUI_SUPPORT
+
+#include <iostream>
+#include <list>
+#include <sstream>
+#include <string>
 
 //// *WORKAROUND*
 //using namespace std;

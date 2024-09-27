@@ -21,6 +21,12 @@
 
 #include "IRC_client_gui_connection.h"
 
+#include "ace/Log_Msg.h"
+
+#include "common_file_tools.h"
+
+#include "net_macros.h"
+
 //////////////////////////////////////////
 
 #if defined (GTK_SUPPORT)

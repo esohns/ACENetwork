@@ -24,9 +24,9 @@
 #include "ace/Log_Msg.h"
 #include "ace/Malloc_Base.h"
 
-#include "dhcp_tools.h"
-
 #include "net_macros.h"
+
+#include "dhcp_tools.h"
 
 Test_U_Message::Test_U_Message (Stream_SessionId_t sessionId_in,
                                 unsigned int size_in)

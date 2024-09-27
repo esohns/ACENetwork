@@ -25,21 +25,21 @@
 
 #include "common_event_tools.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 #include "test_i_connection_manager_common.h"
 
 Test_I_SignalHandler::Test_I_SignalHandler ()
  : inherited (this) // event handler handle
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_SignalHandler::Test_I_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_SignalHandler::Test_I_SignalHandler"));
 
 }
 
 void
 Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_SignalHandler::handle"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_SignalHandler::handle"));
 
   bool statistic = false;
   bool shutdown = false;

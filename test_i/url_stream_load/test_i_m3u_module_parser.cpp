@@ -25,7 +25,7 @@
 
 #include "common_string_tools.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 Test_I_M3U_Module_Parser::Test_I_M3U_Module_Parser (ISTREAM_T* stream_in)
  : inherited (stream_in)

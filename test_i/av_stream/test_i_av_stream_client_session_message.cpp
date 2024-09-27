@@ -23,7 +23,7 @@
 
 #include "ace/Malloc_Base.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 Test_I_AVStream_Client_DirectShow_SessionMessage::Test_I_AVStream_Client_DirectShow_SessionMessage (Stream_SessionId_t sessionId_in,

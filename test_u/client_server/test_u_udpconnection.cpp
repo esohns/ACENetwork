@@ -19,17 +19,14 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
-//#include "test_u_message.h"
-//#include "test_u_stream.h"
 #include "test_u_udpconnection.h"
 
 #include "ace/Log_Msg.h"
 
-#include "test_u_sessionmessage.h"
-
 #include "net_defines.h"
 #include "net_macros.h"
+
+#include "test_u_sessionmessage.h"
 
 Test_U_UDPConnection::Test_U_UDPConnection (bool managed_in)
  : inherited (managed_in)

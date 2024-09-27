@@ -19,16 +19,16 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-#include <iostream>
-#include <limits>
-#include <regex>
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
 #include "sys/capability.h"
 #include "linux/capability.h"
 #endif // ACE_WIN32 || ACE_WIN32
+
+#include <iostream>
+#include <limits>
+#include <regex>
+#include <string>
 
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

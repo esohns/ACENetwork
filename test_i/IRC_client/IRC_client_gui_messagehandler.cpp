@@ -21,6 +21,10 @@
 
 #include "IRC_client_gui_messagehandler.h"
 
+#include "common_file_tools.h"
+
+#include "net_macros.h"
+
 //////////////////////////////////////////
 
 #if defined (GTK_SUPPORT)
@@ -34,7 +38,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
  , messageQueueLock_ ()
  , view_ (NULL)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>IRC_Client_GUI_MessageHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::IRC_Client_GUI_MessageHandler_T"));
 
   // sanity check(s)
   ACE_ASSERT (connection_in);
@@ -110,7 +114,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
  , messageQueueLock_ ()
  , view_ (NULL)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>IRC_Client_GUI_MessageHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::IRC_Client_GUI_MessageHandler_T"));
 
   // sanity check(s)
   ACE_ASSERT (connection_in);
@@ -512,7 +516,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::IRC_Client_GUI_Message
 
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::~IRC_Client_GUI_MessageHandler_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::~IRC_Client_GUI_MessageHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::~IRC_Client_GUI_MessageHandler_T"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -557,7 +561,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::~IRC_Client_GUI_Messag
 void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::queueForDisplay (const std::string& text_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::queueForDisplay"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::queueForDisplay"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, messageQueueLock_);
     messageQueue_.push_front (text_in);
@@ -567,7 +571,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::queueForDisplay (const
 void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::update ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::update"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::update"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -682,7 +686,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::update ()
 GtkWidget*
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::getTopLevelPageChild (bool lockedAccess_in) const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::getTopLevelPageChild"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::getTopLevelPageChild"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -739,7 +743,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::getTopLevelPageChild (
 // const std::string
 // IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::getChannel() const
 // {
-//   NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_MessageHandler_T<GUIType>::getChannel"));
+//   NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_MessageHandler_T::getChannel"));
 //
 //   // sanity check: 'this' might be a private message handler !...
 //   ACE_ASSERT(RPG_Net_Protocol_Tools::isValidIRCChannelName(CBData_->id));
@@ -750,7 +754,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::getTopLevelPageChild (
 void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::setTopic (const std::string& topic_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::setTopic"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::setTopic"));
 
   ACE_UNUSED_ARG (topic_in);
 
@@ -792,7 +796,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::setModes (const std::s
                                                                     const std::string& parameter_in,
                                                                     bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::setModes"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::setModes"));
 
   ACE_UNUSED_ARG (parameter_in);
 
@@ -839,7 +843,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::setModes (const std::s
 void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::clearMembers (bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::clearMembers"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::clearMembers"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -894,7 +898,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::clearMembers (bool loc
 void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::update (const std::string& currentNickName_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::update"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::update"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -917,7 +921,7 @@ void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::add (const std::string& nickname_in,
                                                                bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::add"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::add"));
 
   ACE_UNUSED_ARG (nickname_in);
 
@@ -992,7 +996,7 @@ void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::remove (const std::string& nick_in,
                                                                   bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::remove"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::remove"));
 
   ACE_UNUSED_ARG (nick_in);
 
@@ -1115,7 +1119,7 @@ void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::members (const string_list_t& list_in,
                                                                    bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::members"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::members"));
 
   ACE_UNUSED_ARG (list_in);
 
@@ -1199,7 +1203,7 @@ IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::members (const string_
 void
 IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK>::endMembers (bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::endMembers"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::endMembers"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);

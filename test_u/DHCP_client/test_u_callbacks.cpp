@@ -17,15 +17,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "net_common.h"
 #include "stdafx.h"
 
 #include "test_u_callbacks.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <limits>
-
 #include "iphlpapi.h"
+
+#include <limits>
 #else
 #include "netinet/ether.h"
 #include "ifaddrs.h"
@@ -45,6 +44,7 @@
 #include "common_ui_gtk_manager_common.h"
 #include "common_ui_gtk_tools.h"
 
+#include "net_common.h"
 #include "net_macros.h"
 
 #include "net_client_common_tools.h"

@@ -21,16 +21,16 @@
 
 #include "test_i_av_stream_client_message.h"
 
-#include "ace/Malloc_Base.h"
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "dshow.h"
+//#include "dshow.h"
 #else
-#include "libv4l2.h"
-#include "linux/videodev2.h"
+//#include "libv4l2.h"
+//#include "linux/videodev2.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include "stream_macros.h"
+#include "ace/Malloc_Base.h"
+
+#include "net_macros.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 Test_I_AVStream_Client_DirectShow_Message::Test_I_AVStream_Client_DirectShow_Message (Stream_SessionId_t sessionId_in,

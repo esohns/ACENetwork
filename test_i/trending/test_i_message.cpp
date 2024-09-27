@@ -23,7 +23,7 @@
 
 #include "ace/Malloc_Base.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 #include "http_defines.h"
 #include "http_tools.h"
@@ -31,7 +31,7 @@
 Test_I_Stream_MessageData::Test_I_Stream_MessageData ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::Test_I_Stream_MessageData"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::Test_I_Stream_MessageData"));
 
 }
 
@@ -40,14 +40,14 @@ Test_I_Stream_MessageData::Test_I_Stream_MessageData (struct Test_I_Trending_Mes
  : inherited (messageData_in,
               delete_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::Test_I_Stream_MessageData"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::Test_I_Stream_MessageData"));
 
 }
 
 void
 Test_I_Stream_MessageData::setPR (struct HTTP_Record*& record_inout)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::setPR"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::setPR"));
 
   Test_I_Trending_MessageData* data_p = NULL;
   ACE_NEW_NORETURN (data_p,
@@ -78,14 +78,14 @@ Test_I_Stream_Message::Test_I_Stream_Message (Stream_SessionId_t sessionId_in,
  : inherited (sessionId_in,
               size_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
 
 }
 
 Test_I_Stream_Message::Test_I_Stream_Message (const Test_I_Stream_Message& message_in)
  : inherited (message_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
 
 }
 
@@ -98,7 +98,7 @@ Test_I_Stream_Message::Test_I_Stream_Message (Stream_SessionId_t sessionId_in,
               messageAllocator_in,        // message block allocator
               incrementMessageCounter_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
 
 }
 
@@ -107,14 +107,14 @@ Test_I_Stream_Message::Test_I_Stream_Message (Stream_SessionId_t sessionId_in,
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Message::Test_I_Stream_Message"));
 
 }
 
 ACE_Message_Block*
 Test_I_Stream_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Message::duplicate"));
 
   Test_I_Stream_Message* message_p = NULL;
 
@@ -170,7 +170,7 @@ Test_I_Stream_Message::duplicate (void) const
 HTTP_Method_t
 Test_I_Stream_Message::command () const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::command"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Message::command"));
 
   // sanity check(s)
   if (!inherited::isInitialized_)
@@ -185,7 +185,7 @@ Test_I_Stream_Message::command () const
 void
 Test_I_Stream_Message::dump_state () const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Message::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Message::dump_state"));
 
   // sanity check(s)
   if (!inherited::data_)

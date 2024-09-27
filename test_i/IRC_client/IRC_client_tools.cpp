@@ -19,9 +19,9 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <sstream>
-
 #include "IRC_client_tools.h"
+
+#include <sstream>
 
 #include "ace/Configuration.h"
 #include "ace/Configuration_Import_Export.h"

@@ -24,7 +24,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 #include "test_i_connection_common.h"
 
@@ -34,7 +34,7 @@ Test_I_Stream_HTTPGet::Test_I_Stream_HTTPGet (ISTREAM_T* stream_in)
  : inherited (stream_in)
  , iterator_ ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::Test_I_Stream_HTTPGet"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::Test_I_Stream_HTTPGet"));
 
 }
 
@@ -42,7 +42,7 @@ void
 Test_I_Stream_HTTPGet::handleDataMessage (Test_I_Stream_Message*& message_inout,
                                           bool& passMessageDownstream_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::handleDataMessage"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
@@ -95,7 +95,7 @@ void
 Test_I_Stream_HTTPGet::handleSessionMessage (Test_I_Stream_SessionMessage*& message_inout,
                                              bool& passMessageDownstream_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::handleSessionMessage"));
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -218,7 +218,7 @@ Test_I_Stream_HTTPGet::makeURI (const std::string& baseURL_in,
                                 const std::string& ISIN_in,
                                 std::string& URI_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::makeURI"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_HTTPGet::makeURI"));
 
   // initialize return value(s)
   URI_out = baseURL_in;

@@ -22,7 +22,7 @@
 // *WORKAROUND*
 #include <iostream>
 using namespace std;
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+// *IMPORTANT NOTE*: several ACE headers include ace/iosfwd.h, which introduces
 //                   a problem in conjunction with the standard include headers
 //                   when ACE_USES_OLD_IOSTREAMS is defined
 //                   --> include the necessary header(s) manually (see above),

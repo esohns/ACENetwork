@@ -19,10 +19,4 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
-
-//#include "http_scanner.h"
-
-//#include "stream_misc_messagehandler.h"
-
 #include "bittorrent_client_gui_session.h"

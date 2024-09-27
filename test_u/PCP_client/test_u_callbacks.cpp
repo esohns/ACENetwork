@@ -21,15 +21,15 @@
 
 #include "test_u_callbacks.h"
 
-#include <sstream>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <limits>
-
 #include "iphlpapi.h"
+
+#include <limits>
 #else
 #include "netinet/ether.h"
 #include "ifaddrs.h"
 #endif // ACE_WIN32 || ACE_WIN64
+#include <sstream>
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"

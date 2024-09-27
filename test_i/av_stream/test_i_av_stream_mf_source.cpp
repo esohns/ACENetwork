@@ -28,7 +28,7 @@
 
 #include "strsafe.h"
 
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
 #include "WinReg.h"
 #else
 #include "ace/Synch.h"
@@ -82,10 +82,10 @@ RegDeleteKeyValueW (__in      HKEY     hKey,
 #else
 #define RegDeleteKeyValue  RegDeleteKeyValueA
 #endif // !UNICODE
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 
 #include "ace/Log_Msg.h"
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 
 #include "class_factory.h"
 #include "registry.h"       // Helpers to register COM objects.

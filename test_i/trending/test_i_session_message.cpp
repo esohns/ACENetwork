@@ -23,7 +23,7 @@
 
 #include "ace/Malloc_Base.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage (Stream_SessionId_t sessionId_in,
                                                             enum Stream_SessionMessageType messageType_in,
@@ -36,14 +36,14 @@ Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage (Stream_SessionId_t s
               userData_in,
               expedited_in) // expedited ?
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
 
 }
 
 Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage (const Test_I_Stream_SessionMessage& message_in)
  : inherited (message_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
 
 }
 
@@ -52,7 +52,7 @@ Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage (Stream_SessionId_t s
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
 
 }
 
@@ -63,14 +63,14 @@ Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage (Stream_SessionId_t s
               dataBlock_in,        // use (don't own (!) memory of-) this data block
               messageAllocator_in) // message block allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::Test_I_Stream_SessionMessage"));
 
 }
 
 ACE_Message_Block*
 Test_I_Stream_SessionMessage::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SessionMessage::duplicate"));
 
   Test_I_Stream_SessionMessage* message_p = NULL;
 

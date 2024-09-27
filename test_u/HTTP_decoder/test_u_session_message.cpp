@@ -23,7 +23,7 @@
 
 #include "ace/Malloc_Base.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
                                               enum Stream_SessionMessageType messageType_in,
@@ -36,14 +36,14 @@ Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
               userData_in,
               expedited_in) // expedited ?
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
 Test_U_SessionMessage::Test_U_SessionMessage (const Test_U_SessionMessage& message_in)
  : inherited (message_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
@@ -52,7 +52,7 @@ Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
@@ -63,14 +63,14 @@ Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
               dataBlock_in,        // use (don't own (!) memory of-) this data block
               messageAllocator_in) // message block allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
 ACE_Message_Block*
 Test_U_SessionMessage::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_SessionMessage::duplicate"));
 
   Test_U_SessionMessage* message_p = NULL;
 

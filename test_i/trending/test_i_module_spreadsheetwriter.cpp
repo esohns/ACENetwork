@@ -21,8 +21,6 @@
 
 #include "test_i_module_spreadsheetwriter.h"
 
-#include "ace/Log_Msg.h"
-
 #include "rtl/bootstrap.h"
 
 #include "com/sun/star/beans/Optional.hpp"
@@ -39,15 +37,17 @@
 #include "com/sun/star/table/XCell.hpp"
 #include "com/sun/star/table/XCellRange.hpp"
 
+#include "ace/Log_Msg.h"
+
 #include "common_file_tools.h"
 #include "common_os_tools.h"
 
 #include "common_timer_tools.h"
 
-#include "stream_macros.h"
-
 #include "stream_document_defines.h"
 #include "stream_document_tools.h"
+
+#include "net_macros.h"
 
 #include "test_i_trending_defines.h"
 
@@ -55,14 +55,14 @@ Test_I_Stream_DocumentHandler::Test_I_Stream_DocumentHandler ()
  : inherited ()
  , resolver_ ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_DocumentHandler::Test_I_Stream_DocumentHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_DocumentHandler::Test_I_Stream_DocumentHandler"));
 
 }
 
 void
 Test_I_Stream_DocumentHandler::initialize (uno::Reference<uno::XComponentContext>& context_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_DocumentHandler::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_DocumentHandler::initialize"));
 
   //// sanity check(s)
   //ACE_ASSERT (context_in.is ());
@@ -82,7 +82,7 @@ Test_I_Stream_DocumentHandler::initialize (uno::Reference<uno::XComponentContext
 void SAL_CALL
 Test_I_Stream_DocumentHandler::handle (const uno::Reference<task::XInteractionRequest>& request_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_DocumentHandler::handle"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_DocumentHandler::handle"));
 
   //// sanity check(s)
   //ACE_ASSERT (resolver_.is ());
@@ -117,7 +117,7 @@ Test_I_Stream_SpreadsheetWriter::Test_I_Stream_SpreadsheetWriter (ISTREAM_T* str
  , document_ ()
  , handler_2 (NULL)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SpreadsheetWriter::Test_I_Stream_SpreadsheetWriter"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SpreadsheetWriter::Test_I_Stream_SpreadsheetWriter"));
 
 //  ACE_NEW_NORETURN (handler_,
 //                    Test_I_Stream_DocumentHandler ());
@@ -141,7 +141,7 @@ Test_I_Stream_SpreadsheetWriter::Test_I_Stream_SpreadsheetWriter (ISTREAM_T* str
 
 Test_I_Stream_SpreadsheetWriter::~Test_I_Stream_SpreadsheetWriter ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SpreadsheetWriter::~Test_I_Stream_SpreadsheetWriter"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SpreadsheetWriter::~Test_I_Stream_SpreadsheetWriter"));
 
   if (document_.is ())
     document_.clear ();
@@ -156,7 +156,7 @@ void
 Test_I_Stream_SpreadsheetWriter::handleSessionMessage (Test_I_Stream_SessionMessage*& message_inout,
                                                        bool& passMessageDownstream_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_SpreadsheetWriter::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_SpreadsheetWriter::handleSessionMessage"));
 
 //  int result = -1;
   oslProcessError result_2 = osl_Process_E_InvalidError;

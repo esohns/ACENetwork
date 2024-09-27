@@ -50,7 +50,7 @@ IRC_Client_GUI_MessageHandler_T<GUIType>::IRC_Client_GUI_MessageHandler_T (IRC_C
  , messageQueue_ ()
  , messageQueueLock_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::IRC_Client_GUI_MessageHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::IRC_Client_GUI_MessageHandler_T"));
 
   // sanity check(s)
   ACE_ASSERT (connection_in);
@@ -82,7 +82,7 @@ IRC_Client_GUI_MessageHandler_T<GUIType>::IRC_Client_GUI_MessageHandler_T (IRC_C
  , messageQueue_ ()
  , messageQueueLock_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::IRC_Client_GUI_MessageHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::IRC_Client_GUI_MessageHandler_T"));
 
   // sanity check(s)
   ACE_ASSERT (connection_in);
@@ -113,7 +113,7 @@ IRC_Client_GUI_MessageHandler_T<GUIType>::IRC_Client_GUI_MessageHandler_T (IRC_C
 template <enum Common_UI_FrameworkType GUIType>
 IRC_Client_GUI_MessageHandler_T<GUIType>::~IRC_Client_GUI_MessageHandler_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::~IRC_Client_GUI_MessageHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::~IRC_Client_GUI_MessageHandler_T"));
 
   // remove builder ?
   if (!isServerLog ())
@@ -125,7 +125,7 @@ template <enum Common_UI_FrameworkType GUIType>
 void
 IRC_Client_GUI_MessageHandler_T<GUIType>::queueForDisplay (const std::string& text_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::queueForDisplay"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::queueForDisplay"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, messageQueueLock_);
     messageQueue_.push_front (text_in);
@@ -136,7 +136,7 @@ template <enum Common_UI_FrameworkType GUIType>
 void
 IRC_Client_GUI_MessageHandler_T<GUIType>::update ()
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::update"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::update"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -145,7 +145,7 @@ IRC_Client_GUI_MessageHandler_T<GUIType>::update ()
 // const std::string
 // IRC_Client_GUI_MessageHandler_T<GUIType>::getChannel() const
 // {
-//   NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_MessageHandler_T<GUIType>::getChannel"));
+//   NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_MessageHandler_T::getChannel"));
 //
 //   // sanity check: 'this' might be a private message handler !...
 //   ACE_ASSERT(RPG_Net_Protocol_Tools::isValidIRCChannelName(CBData_->id));
@@ -157,7 +157,7 @@ template <enum Common_UI_FrameworkType GUIType>
 void
 IRC_Client_GUI_MessageHandler_T<GUIType>::setTopic (const std::string& topic_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::setTopic"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::setTopic"));
 
   ACE_UNUSED_ARG (topic_in);
 
@@ -171,7 +171,7 @@ IRC_Client_GUI_MessageHandler_T<GUIType>::setModes (const std::string& modes_in,
                                                     const std::string& parameter_in,
                                                     bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::setModes"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::setModes"));
 
   ACE_UNUSED_ARG (parameter_in);
 
@@ -191,7 +191,7 @@ template <enum Common_UI_FrameworkType GUIType>
 void
 IRC_Client_GUI_MessageHandler_T<GUIType>::clearMembers (bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::clearMembers"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::clearMembers"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -209,7 +209,7 @@ template <enum Common_UI_FrameworkType GUIType>
 void
 IRC_Client_GUI_MessageHandler_T<GUIType>::update (const std::string& currentNickName_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::update"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::update"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -233,7 +233,7 @@ void
 IRC_Client_GUI_MessageHandler_T<GUIType>::add (const std::string& nickname_in,
                                                bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::add"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::add"));
 
   ACE_UNUSED_ARG (nickname_in);
 
@@ -254,7 +254,7 @@ void
 IRC_Client_GUI_MessageHandler_T<GUIType>::remove (const std::string& nick_in,
                                                   bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::remove"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::remove"));
 
   ACE_UNUSED_ARG (nick_in);
 
@@ -275,7 +275,7 @@ void
 IRC_Client_GUI_MessageHandler_T<GUIType>::members (const string_list_t& list_in,
                                                    bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::members"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::members"));
 
   ACE_UNUSED_ARG (list_in);
 
@@ -295,7 +295,7 @@ template <enum Common_UI_FrameworkType GUIType>
 void
 IRC_Client_GUI_MessageHandler_T<GUIType>::endMembers (bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T<GUIType>::endMembers"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler_T::endMembers"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);

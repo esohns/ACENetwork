@@ -501,7 +501,8 @@ ACE_Streambuf_alt::fillbuf (void)
   return bc;
 }
 
-ACE_Streambuf_alt::ACE_Streambuf_alt (u_int streambuf_size, int io_mode)
+ACE_Streambuf_alt::ACE_Streambuf_alt (u_int streambuf_size,
+                                      int io_mode)
   : eback_saved_ (0),  // to avoid Purify UMR
     pbase_saved_ (0),  // to avoid Purify UMR
     get_mode_ (1),

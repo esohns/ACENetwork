@@ -34,10 +34,6 @@
 #include "ace/Signal.h"
 #include "ace/Version.h"
 
-#if defined (VALGRIND_USE)
-#include "valgrind/valgrind.h"
-#endif // VALGRIND_USE
-
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H

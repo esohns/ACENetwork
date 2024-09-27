@@ -20,7 +20,7 @@
 
 #include "ace/Log_Msg.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //#include "test_i_module_msoffice_spreadsheetwriter.h"
@@ -30,7 +30,7 @@ template <typename ConnectorType>
 Test_I_Trending_Stream_T<ConnectorType>::Test_I_Trending_Stream_T ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::Test_I_Trending_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::Test_I_Trending_Stream_T"));
 
 }
 
@@ -40,7 +40,7 @@ Test_I_Trending_Stream_T<ConnectorType>::load (Stream_ILayout* layout_in,
                                               bool& delete_out)
 
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::load"));
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
@@ -109,7 +109,7 @@ template <typename ConnectorType>
 bool
 Test_I_Trending_Stream_T<ConnectorType>::initialize (const Test_I_Trending_StreamConfiguration_t& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -183,7 +183,7 @@ template <typename ConnectorType>
 bool
 Test_I_Trending_Stream_T<ConnectorType>::collect (struct Stream_Statistic& data_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::collect"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
@@ -253,7 +253,7 @@ template <typename ConnectorType>
 void
 Test_I_Trending_Stream_T<ConnectorType>::report () const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::report"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::report"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;

@@ -19,11 +19,6 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-#include <iostream>
-#include <limits>
-#include <regex>
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 // *NOTE*: uuids.h doesn't have double include protection
 #if defined (UUIDS_H)
@@ -46,6 +41,11 @@
 #include "libavutil/pixfmt.h"
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <iostream>
+#include <limits>
+#include <regex>
+#include <string>
 
 #include "ace/Configuration.h"
 #include "ace/Configuration_Import_Export.h"

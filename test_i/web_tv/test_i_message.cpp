@@ -24,9 +24,9 @@
 #include "ace/Log_Msg.h"
 #include "ace/Malloc_Base.h"
 
-#include "http_tools.h"
-
 #include "net_macros.h"
+
+#include "http_tools.h"
 
 Test_I_MessageDataContainer::Test_I_MessageDataContainer ()
  : inherited ()

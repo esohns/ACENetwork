@@ -19,9 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
-#include "test_u_stream.h"
-#include "test_u_sessionmessage.h"
 #include "test_u_module_headerparser.h"
 
 #include "ace/Log_Msg.h"
@@ -30,6 +27,8 @@
 
 #include "test_u_defines.h"
 #include "test_u_message.h"
+#include "test_u_sessionmessage.h"
+#include "test_u_stream.h"
 
 Test_U_Module_HeaderParser::Test_U_Module_HeaderParser (ISTREAM_T* stream_in)
  : inherited (stream_in)

@@ -23,7 +23,7 @@
 
 #include "ace/Malloc_Base.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message (Stream_SessionId_t sessionId_in,
@@ -31,14 +31,14 @@ Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Mes
  : inherited (sessionId_in,
               size_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
 
 }
 
 Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message (const Test_I_AVStream_Server_DirectShow_Message& message_in)
  : inherited (message_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
 
 }
 
@@ -51,7 +51,7 @@ Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Mes
               messageAllocator_in,        // message allocator
               incrementMessageCounter_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
 
 }
 
@@ -60,14 +60,14 @@ Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Mes
  : inherited (sessionId_in,        // session id
               messageAllocator_in) // message allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message"));
 
 }
 
 ACE_Message_Block*
 Test_I_AVStream_Server_DirectShow_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::duplicate"));
 
   Test_I_AVStream_Server_DirectShow_Message* message_p = NULL;
 
@@ -122,7 +122,7 @@ Test_I_AVStream_Server_DirectShow_Message::duplicate (void) const
 ACE_Message_Block*
 Test_I_AVStream_Server_DirectShow_Message::release (void)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::release"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::release"));
 
   // release any continuations
   if (inherited::cont_)
@@ -136,7 +136,7 @@ Test_I_AVStream_Server_DirectShow_Message::release (void)
 std::string
 Test_I_AVStream_Server_DirectShow_Message::CommandTypeToString (int command_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::CommandTypeToString"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_Message::CommandTypeToString"));
 
   ACE_UNUSED_ARG (command_in);
 
@@ -150,14 +150,14 @@ Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoun
  : inherited (sessionId_in,
               size_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
 
 }
 
 Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message (const Test_I_AVStream_Server_MediaFoundation_Message& message_in)
  : inherited (message_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
 
 }
 
@@ -170,7 +170,7 @@ Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoun
               messageAllocator_in,        // message allocator
               incrementMessageCounter_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
 
 }
 
@@ -179,14 +179,14 @@ Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoun
  : inherited (sessionId_in,        // session id
               messageAllocator_in) // message allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::Test_I_AVStream_Server_MediaFoundation_Message"));
 
 }
 
 ACE_Message_Block*
 Test_I_AVStream_Server_MediaFoundation_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::duplicate"));
 
   Test_I_AVStream_Server_MediaFoundation_Message* message_p = NULL;
 
@@ -242,7 +242,7 @@ Test_I_AVStream_Server_MediaFoundation_Message::duplicate (void) const
 ACE_Message_Block*
 Test_I_AVStream_Server_MediaFoundation_Message::release (void)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::release"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::release"));
 
   // release any continuations
   if (inherited::cont_)
@@ -256,7 +256,7 @@ Test_I_AVStream_Server_MediaFoundation_Message::release (void)
 std::string
 Test_I_AVStream_Server_MediaFoundation_Message::CommandTypeToString (int command_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::CommandTypeToString"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_Message::CommandTypeToString"));
 
   ACE_UNUSED_ARG (command_in);
 
@@ -268,14 +268,14 @@ Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message (Stream_SessionId
  : inherited (sessionId_in,
               size_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
 
 }
 
 Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message (const Test_I_AVStream_Server_Message& message_in)
  : inherited (message_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
 
 }
 
@@ -288,7 +288,7 @@ Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message (Stream_SessionId
               messageAllocator_in,        // message allocator
               incrementMessageCounter_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
 
 }
 
@@ -297,14 +297,14 @@ Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message (Stream_SessionId
  : inherited (sessionId_in,        // session id
               messageAllocator_in) // message allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::Test_I_AVStream_Server_Message"));
 
 }
 
 ACE_Message_Block*
 Test_I_AVStream_Server_Message::duplicate (void) const
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::duplicate"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::duplicate"));
 
   Test_I_AVStream_Server_Message* message_p = NULL;
 
@@ -357,7 +357,7 @@ Test_I_AVStream_Server_Message::duplicate (void) const
 ACE_Message_Block*
 Test_I_AVStream_Server_Message::release (void)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::release"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::release"));
 
   // release any continuations
   if (inherited::cont_)
@@ -371,7 +371,7 @@ Test_I_AVStream_Server_Message::release (void)
 std::string
 Test_I_AVStream_Server_Message::CommandTypeToString (int command_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::CommandTypeToString"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_Message::CommandTypeToString"));
 
   ACE_UNUSED_ARG (command_in);
 

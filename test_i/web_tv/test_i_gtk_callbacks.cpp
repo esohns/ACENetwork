@@ -21,11 +21,6 @@
 
 #include "test_i_gtk_callbacks.h"
 
-#include <iomanip>
-#include <limits>
-#include <regex>
-#include <sstream>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "iphlpapi.h"
 #else
@@ -34,6 +29,11 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "gdk/gdkkeysyms.h"
+
+#include <iomanip>
+#include <limits>
+#include <regex>
+#include <sstream>
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"

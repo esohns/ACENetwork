@@ -21,13 +21,13 @@
 
 #include "test_i_eventhandler.h"
 
-#include <regex>
-
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "gtk/gtk.h"
 #endif // GTK_USE
 #endif // GUI_SUPPORT
+
+#include <regex>
 
 #include "ace/FILE_Addr.h"
 #include "ace/FILE_Connector.h"

@@ -19,10 +19,6 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define INITGUID // *NOTE*: this exports DEFINE_GUIDs (see stream_misc_common.h)
 // *NOTE*: uuids.h doesn't have double include protection
@@ -32,6 +28,10 @@
 #include "uuids.h"
 #endif // UUIDS_H
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <iostream>
+#include <sstream>
+#include <string>
 
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

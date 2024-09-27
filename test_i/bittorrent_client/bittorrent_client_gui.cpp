@@ -77,7 +77,7 @@
 
 #include "test_i_defines.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_defines.h"
 #if defined (GTK_USE)

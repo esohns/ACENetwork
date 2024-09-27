@@ -19,6 +19,20 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_SUPPORT)
+#if defined (ACE_WIN32) || defined (ACE_WIN32)
+#include "curses.h"
+#else
+#include "ncurses.h"
+// *NOTE*: the ncurses "timeout" macros conflicts with
+//         ACE_Synch_Options::timeout. Since not currently being used, it's safe
+//         to undefine...
+#undef timeout
+#endif // ACE_WIN32 || ACE_WIN32
+#endif // CURSES_SUPPORT
+#endif // GUI_SUPPORT
+
 #include <iostream>
 #include <list>
 #include <sstream>
@@ -26,7 +40,7 @@
 
 // *WORKAROUND*
 using namespace std;
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+// *IMPORTANT NOTE*: several ACE headers include ace/iosfwd.h, which introduces
 //                   a problem in conjunction with the standard include headers
 //                   when ACE_USES_OLD_IOSTREAMS is defined
 //                   --> include the necessary headers manually (see above), and
@@ -45,20 +59,6 @@ using namespace std;
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
 #include "ace/Version.h"
-
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
-#if defined (ACE_WIN32) || defined (ACE_WIN32)
-#include "curses.h"
-#else
-#include "ncurses.h"
-// *NOTE*: the ncurses "timeout" macros conflicts with
-//         ACE_Synch_Options::timeout. Since not currently being used, it's safe
-//         to undefine...
-#undef timeout
-#endif // ACE_WIN32 || ACE_WIN32
-#endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"

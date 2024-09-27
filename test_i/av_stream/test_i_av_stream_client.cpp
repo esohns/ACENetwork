@@ -19,10 +19,6 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-#include <iostream>
-#include <limits>
-#include <string>
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define INITGUID // *NOTE*: this exports DEFINE_GUIDs (see stream_misc_common.h)
 #include "mfapi.h"
@@ -33,6 +29,10 @@
 #include "uuids.h"
 #endif // UUIDS_H
 #endif // ACE_WIN32 || ACE_WIN64
+
+#include <iostream>
+#include <limits>
+#include <string>
 
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
