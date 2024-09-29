@@ -25,7 +25,7 @@
 
 #include "common_ui_qt_common.h"
 
-#include "stream_common.h"
+#include "stream_statistic.h"
 
 struct Test_I_Qt_ProgressData
  : Common_UI_Qt_ProgressData

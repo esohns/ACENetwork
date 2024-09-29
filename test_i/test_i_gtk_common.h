@@ -28,6 +28,8 @@
 #include "common_ui_gtk_gl_common.h"
 #endif // GTKGL_SUPPORT
 
+#include "stream_statistic.h"
+
 #include "test_i_configuration.h"
 
 struct Test_I_GTK_Configuration

@@ -25,10 +25,7 @@
 
 #include "common_ui_wxwidgets_common.h"
 
-#include "test_i_common.h"
-
-// forward declarations
-struct Test_I_Configuration;
+#include "stream_statistic.h"
 
 struct Test_I_wxWidgets_ProgressData
  : Common_UI_wxWidgets_ProgressData

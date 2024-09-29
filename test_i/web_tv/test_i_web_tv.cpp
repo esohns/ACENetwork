@@ -1048,7 +1048,11 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.outputFormat.audio.channels = 2;
   modulehandler_configuration_4b.outputFormat.audio.sampleRate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_RGB24;
+#else
+  modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_BGRA;
+#endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_4b.queue = &av_input_queue;
   modulehandler_configuration_4b.display = Common_UI_Tools::getDefaultDisplay ();

@@ -267,7 +267,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
-                id (),
+                inherited2::state_.handle,
                 ACE_TEXT (stream_.name ().c_str ())));
     goto error;
   } // end IF
@@ -276,7 +276,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
-                id (),
+                inherited2::state_.handle,
                 ACE_TEXT (stream_.name ().c_str ())));
     goto error;
   } // end IF

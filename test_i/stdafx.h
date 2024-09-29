@@ -55,6 +55,9 @@
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
 #endif // GTK_SUPPORT
+#if defined (QT_SUPPORT)
+#include "test_i_qt_common.h"
+#endif // QT_SUPPORT
 #if defined (WXWIDGETS_SUPPORT)
 #include "test_i_wxwidgets_common.h"
 #endif // WXWIDGETS_SUPPORT
