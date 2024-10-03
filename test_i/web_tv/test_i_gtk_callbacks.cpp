@@ -1595,7 +1595,7 @@ idle_update_progress_cb (gpointer userData_in)
                              ACE_TEXT_ALWAYS_CHAR (buffer_a));
   gtk_progress_bar_pulse (progress_bar_p);
 
-         // --> reschedule
+  // --> reschedule
   return G_SOURCE_CONTINUE;
 }
 
@@ -1642,7 +1642,7 @@ idle_update_info_display_cb (gpointer userData_in)
           ACE_ASSERT (spin_button_p);
           gtk_spin_button_spin (spin_button_p,
                                 ((*event_p == COMMON_UI_EVENT_CONNECT) ? GTK_SPIN_STEP_FORWARD
-                                                                         : GTK_SPIN_STEP_BACKWARD),
+                                                                       : GTK_SPIN_STEP_BACKWARD),
                                 1.0);
 
           spin_button_p =
@@ -1817,7 +1817,7 @@ drawingarea_expose_event_cb (GtkWidget* widget_in,
 
   return TRUE; // do not propagate further
 } // drawingarea_expose_event_cb
-#endif // GTK_CHECK_VERSION(3,0,0)
+#endif // GTK_CHECK_VERSION (3,0,0)
 
 gboolean
 drawing_area_resize_end (gpointer userData_in)
@@ -2379,6 +2379,7 @@ continue_4:
                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
     ACE_ASSERT (progressbar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
+    gtk_progress_bar_set_show_text (progressbar_p, TRUE);
 
     //ACE_ASSERT (!data_p->progressData.eventSourceId);
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
@@ -2550,7 +2551,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true, // peer address ?
+                                            3); // #retries
     else
 #endif // SSL_SUPPORT
       data_p->videoHandle =
@@ -2559,7 +2561,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
                                             user_data_s,
                                             static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
                                             false, // wait ?
-                                            true); // peer address ?
+                                            true, // peer address ?
+                                            3); // #retries
   } // end IF
   else
   {
@@ -2573,7 +2576,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
                                           user_data_s,
                                           static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
                                           false, // wait ?
-                                          true); // peer address ?
+                                          true, // peer address ?
+                                          3); // #retries
   } // end ELSE
 //    iconnection_p =
 //        iconnection_manager_p->get (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
@@ -2961,7 +2965,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
   Common_UI_IFullscreen* ifullscreen_p =
       dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-  if (!ifullscreen_p)
+  if (unlikely (!ifullscreen_p))
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("%s:%s: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
@@ -3039,7 +3043,7 @@ key_cb (GtkWidget* widget_in,
     case GDK_Escape:
     case GDK_f:
     case GDK_F:
-#endif // GTK_CHECK_VERSION(3,0,0)
+#endif // GTK_CHECK_VERSION (3,0,0)
     {
       bool is_active_b = false;
       GtkToggleButton* toggle_button_p =
@@ -3049,11 +3053,11 @@ key_cb (GtkWidget* widget_in,
       is_active_b = gtk_toggle_button_get_active (toggle_button_p);
 
      // sanity check(s)
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION (3,0,0)
       if ((eventKey_in->keyval == GDK_KEY_Escape) &&
 #else
       if ((eventKey_in->keyval == GDK_Escape) &&
-#endif // GTK_CHECK_VERSION(3,0,0)
+#endif // GTK_CHECK_VERSION (3,0,0)
           !is_active_b)
         break; // <-- not in fullscreen mode, nothing to do
 
@@ -3154,7 +3158,7 @@ key_cb (GtkWidget* widget_in,
   } // end SWITCH
 
   return TRUE; // done (do not propagate further)
-}
+} // key_cb
 
 gboolean
 dialog_main_key_press_event_cb (GtkWidget* widget_in,
@@ -3164,7 +3168,7 @@ dialog_main_key_press_event_cb (GtkWidget* widget_in,
   return key_cb (widget_in,
                  eventKey_in,
                  userData_in);
-}
+} // dialog_main_key_press_event_cb
 
 gboolean
 window_fullscreen_key_press_event_cb (GtkWidget* widget_in,
@@ -3174,7 +3178,7 @@ window_fullscreen_key_press_event_cb (GtkWidget* widget_in,
   return key_cb (widget_in,
                  eventKey_in,
                  userData_in);
-}
+} // window_fullscreen_key_press_event_cb
 
 gint
 button_about_clicked_cb (GtkWidget* widget_in,
