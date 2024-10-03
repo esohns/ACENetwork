@@ -466,6 +466,18 @@ idle_load_channel_configuration_cb (gpointer userData_in)
 
       break;
     }
+    case 29: // Schlager TV
+    case 35: // ALEX
+    {
+      for (Test_I_WebTV_Channel_ResolutionsIterator_t iterator_2 = (*channel_iterator).second.resolutions.begin ();
+           iterator_2 != (*channel_iterator).second.resolutions.end ();
+           ++iterator_2)
+      { ACE_ASSERT (!(*iterator_2).frameRate);
+        (*iterator_2).frameRate = 25;
+      } // end FOR
+
+      break;
+    }
     default:
       break;
   } // end SWITCH
@@ -2585,7 +2597,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  ACE_ASSERT (!data_p->progressData.eventSourceId);
+  if (unlikely (data_p->progressData.eventSourceId))
+    goto continue_;
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, FALSE);
     data_p->progressData.eventSourceId =
                                          //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -2601,6 +2614,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
     state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
   } // end lock scope
 
+continue_:
   return FALSE;
 } // button_load_clicked_cb
 

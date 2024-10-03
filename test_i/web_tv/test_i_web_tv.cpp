@@ -729,7 +729,7 @@ do_work (const std::string& configurationFile_in,
 #else
   struct Stream_AllocatorConfiguration allocator_configuration_2;
 #endif // FFMPEG_SUPPORT
-  allocator_configuration.defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE;
+  allocator_configuration.defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE * 10;
   allocator_configuration_2.defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE * 10;
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,

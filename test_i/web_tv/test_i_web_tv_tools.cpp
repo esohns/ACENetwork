@@ -634,10 +634,10 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
       regex_string =
           ACE_TEXT_ALWAYS_CHAR ("^([^_]+)(_)([^_]+)(_)([[:digit:]]+)(.*)$");
       regex.assign (regex_string);
-      if (unlikely(!std::regex_match (last_URI_string,
-                                      match_results,
-                                      regex,
-                                      std::regex_constants::match_default)))
+      if (unlikely (!std::regex_match (last_URI_string,
+                                       match_results,
+                                       regex,
+                                       std::regex_constants::match_default)))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
@@ -655,6 +655,61 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
                            match_results[3].str () +
                            match_results[4].str ());
       URI_string_tail = match_results[6].str ();
+
+      std::string URI_string;
+      for (unsigned int i = 0;
+           i < TEST_I_WEBTV_DEFAULT_NUMBER_OF_QUEUED_SEGMENTS;
+           ++i)
+      {
+        URI_string = URI_string_head;
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << ++index_i;
+        URI_string += converter.str ();
+        URI_string += URI_string_tail;
+        URIs_out.push_back (URI_string);
+      } // end FOR
+
+      break;
+    }
+    case 35: // ALEX
+    {
+      ACE_UINT32 index_i = 0, date_i = 0;
+
+      position_i = last_URI_string.rfind ('_', std::string::npos);
+      ACE_ASSERT (position_i != std::string::npos);
+
+      URI_string_head = last_URI_string;
+      URI_string_head.erase (position_i + 1, std::string::npos);
+
+      regex_string =
+          ACE_TEXT_ALWAYS_CHAR ("^([^-]+)(-)([^_]+)(_)([^_]+)(_)([^_]+)(_)([[:digit:]]+)(.*)$");
+      regex.assign (regex_string);
+      if (unlikely (!std::regex_match (last_URI_string,
+                                       match_results,
+                                       regex,
+                                       std::regex_constants::match_default)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT("failed to parse segment URI \"%s\", returning\n"),
+                    ACE_TEXT (last_URI_string.c_str ())));
+        return;
+      } // end IF
+      ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (match_results[9].str ());
+      converter >> index_i;
+      //URI_string_head_2 = (match_results[1].str () +
+      //                     match_results[2].str () +
+      //                     match_results[3].str () +
+      //                     match_results[4].str () +
+      //                     match_results[5].str () +
+      //                     match_results[6].str () +
+      //                     match_results[7].str () +
+      //                     match_results[8].str ());
+      URI_string_tail = match_results[10].str ();
 
       std::string URI_string;
       for (unsigned int i = 0;
