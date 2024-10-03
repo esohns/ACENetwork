@@ -115,8 +115,9 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_web_tv.cpp
      test_i_web_tv_common.h
      test_i_web_tv_defines.h
-     test_i_web_tv_stream_common.h)
-#  test_i_template_instantiations.cpp
+     test_i_web_tv_stream_common.h
+     test_i_web_tv_tools.cpp
+     test_i_web_tv_tools.h)
 if (GUI_SUPPORT)
  if (GTK_SUPPORT)
   set (${EXECUTABLE}_EXE_SRCS
