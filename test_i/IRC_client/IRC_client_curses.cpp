@@ -932,7 +932,7 @@ curses_mode (const std::string& channel_in,
   ACE_ASSERT (window_p);
   result =
     wmove (window_p,
-           getbegy (window_p), getmaxx (window_p) - (3 + mode_string.size ()));
+           getbegy (window_p), getmaxx (window_p) - (3 + static_cast<int> (mode_string.size ())));
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));

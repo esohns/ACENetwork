@@ -546,7 +546,7 @@ BitTorrent_Control_T<SessionAsynchType,
 
   unsigned int sessions_i = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    sessions_i = sessions_.size ();
+    sessions_i = static_cast<unsigned int> (sessions_.size ());
     for (SESSIONS_ITERATOR_T iterator = sessions_.begin ();
          iterator != sessions_.end ();
          ++iterator)

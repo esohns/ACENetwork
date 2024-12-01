@@ -70,7 +70,7 @@ class HTTP_ParserDriver_T
                       const std::string&); // message
   virtual void error (const std::string&); // message
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; } // offset (increment)
-  inline virtual unsigned int offset () const { return offset_; }
+  inline virtual unsigned int offset () const { return static_cast<unsigned int> (offset_); }
   virtual bool begin (const char*,   // buffer handle
                       unsigned int); // buffer size
   virtual void end ();

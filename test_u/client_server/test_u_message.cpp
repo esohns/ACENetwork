@@ -76,8 +76,8 @@ Test_U_Message::command () const
          message_block_p = message_block_p->cont ())
     {
       bytes_to_write =
-        (message_block_p->length () < remaining ? message_block_p->length ()
-                                                : remaining);
+        (static_cast<unsigned int> (message_block_p->length ()) < remaining ? static_cast<unsigned int> (message_block_p->length ())
+                                                                            : remaining);
       ACE_OS::memcpy (wr_ptr_p, message_block_p->rd_ptr (), bytes_to_write);
       remaining -= bytes_to_write;
       if (!remaining)

@@ -317,7 +317,8 @@ add_subdirectory (WLAN_monitor)
 
 add_custom_target (test_u ALL
                    COMMENT "building test_u...")
-add_dependencies (test_u client server dhcp_client file_server http_decoder pcp_client upnp_client wlan_monitor)
+add_dependencies (test_u client server http_decoder wlan_monitor)
+add_dependencies (test_u dhcp_client file_server pcp_client upnp_client)
 if (GEOIP2_SUPPORT)
  add_dependencies (test_u geoip2_client)
 endif (GEOIP2_SUPPORT)

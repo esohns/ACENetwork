@@ -415,7 +415,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
         ACE_DEBUG ((LM_WARNING,
                     ACE_TEXT ("%s: content length was 0, continuing\n"),
                     inherited::mod_->name ()));
-        bytes_to_skip = headFragment_->total_length ();
+        bytes_to_skip = static_cast<unsigned int> (headFragment_->total_length ());
       } // end IF
     } // end IF
     else
@@ -423,7 +423,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("%s: no content length header, continuing\n"),
                   inherited::mod_->name ()));
-      bytes_to_skip = headFragment_->total_length ();
+      bytes_to_skip = static_cast<unsigned int> (headFragment_->total_length ());
     } // end ELSE
     ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
   } // end IF

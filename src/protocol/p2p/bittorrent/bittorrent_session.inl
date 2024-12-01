@@ -3613,7 +3613,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     std::advance (iterator_2,
                   missing_pieces_a[Common_Tools::getRandomNumber (static_cast<size_t> (0),
                                                                   missing_pieces_a.size () - 1)]);
-    index = std::distance (inherited::state_.pieces.begin (), iterator_2);
+    index =
+      static_cast<unsigned int> (std::distance (inherited::state_.pieces.begin (), iterator_2));
 #undef NET_BITTORRENT_GET_CHUNKS_ORDERED
 #if defined (NET_BITTORRENT_GET_CHUNKS_ORDERED)
     // *IMPORTANT NOTE*: this gets the first one missing
@@ -3762,7 +3763,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
     ACE_ASSERT (!((*iterator_3).second->string->size () % BITTORRENT_PRT_INFO_PIECE_HASH_SIZE));
     unsigned int pieces =
-        (*iterator_3).second->string->size () / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
+        static_cast<unsigned int> ((*iterator_3).second->string->size ()) / BITTORRENT_PRT_INFO_PIECE_HASH_SIZE;
     unsigned int indices_i = pieces / (sizeof (ACE_UINT8) * 8);
     unsigned int indices_2 = pieces % (sizeof (ACE_UINT8) * 8);
     (*iterator).second.pieces.resize ((indices_2 ? indices_i + 1 : indices_i), 0);

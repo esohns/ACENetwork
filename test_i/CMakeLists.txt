@@ -297,7 +297,8 @@ add_subdirectory (web_tv)
 add_custom_target (test_i ALL
                    COMMENT "building test_i..."
                    SOURCES ${ACENetwork_Test_I_SRCS})
-add_dependencies (test_i av_stream_client av_stream_server bittorrent_client bittorrent_client_gui ftp_client IRC_client IRC_client_gui trending url_stream_load web_tv)
+add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui trending)
+add_dependencies (test_i av_stream_client av_stream_server ftp_client url_stream_load web_tv)
 if (WIN32)
  add_dependencies (test_i av_stream_ds_source av_stream_mf_source)
 endif (WIN32)

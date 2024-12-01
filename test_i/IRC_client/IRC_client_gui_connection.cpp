@@ -1809,7 +1809,12 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::getActiveHandler (bool loc
     } // end FOR
   } // end lock scope
   if (gdkLockedAccess_in)
+  {
+#if GTK_CHECK_VERSION (3,6,0)
+#else
     gdk_threads_leave ();
+#endif // GTK_CHECK_VERSION (3,6,0)
+  } // end IF
 
 clean_up:
   if (lockedAccess_in)

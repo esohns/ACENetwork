@@ -793,13 +793,14 @@ IRC_Client_Module_IRCHandler::join (const string_list_t& channels_in,
     if (channels_in.size () > 1)
     {
       range.first = 0;
-      range.second = (channels_in.size () - 1);
+      range.second = (static_cast<unsigned long> (channels_in.size ()) - 1);
       message_p->parameterRanges_.push_back (range);
     } // end IF
     if (keys_in.size () > 1)
     {
-      range.first = channels_in.size ();
-      range.second = (channels_in.size () + keys_in.size () - 1);
+      range.first = static_cast<unsigned long> (channels_in.size ());
+      range.second =
+        static_cast<unsigned long> (channels_in.size () + keys_in.size () - 1);
       message_p->parameterRanges_.push_back (range);
     } // end IF
   } // end IF
@@ -911,7 +912,7 @@ IRC_Client_Module_IRCHandler::names (const string_list_t& channels_in)
   {
     list_item_range_t range;
     range.first = 0;
-    range.second = (channels_in.size () - 1);
+    range.second = (static_cast<unsigned long> (channels_in.size ()) - 1);
     message_p->parameterRanges_.push_back (range);
   } // end IF
   message_p->parameters_ = channels_in;
@@ -939,7 +940,7 @@ IRC_Client_Module_IRCHandler::list (const string_list_t& channels_in)
   {
     list_item_range_t range;
     range.first = 0;
-    range.second = (channels_in.size () - 1);
+    range.second = static_cast<unsigned long> (channels_in.size () - 1);
     message_p->parameterRanges_.push_back (range);
   } // end IF
   message_p->parameters_ = channels_in;
@@ -1019,7 +1020,7 @@ IRC_Client_Module_IRCHandler::send (const string_list_t& receivers_in,
   {
     list_item_range_t range;
     range.first = 0;
-    range.second = (receivers_in.size () - 1);
+    range.second = static_cast<unsigned long> (receivers_in.size () - 1);
     message_p->parameterRanges_.push_back (range);
   } // end IF
   message_p->parameters_ = receivers_in;

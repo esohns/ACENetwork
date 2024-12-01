@@ -84,7 +84,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   size_t pdu_size_i =
     inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize +
     inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->paddingBytes;
-  message_block_p = inherited::allocateMessage (pdu_size_i);
+  message_block_p = inherited::allocateMessage (static_cast<unsigned int> (pdu_size_i));
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
