@@ -304,24 +304,26 @@ export (TARGETS ${PROJECT_NAME}_Test_U
 
 # ----------------------------------------
 
-add_subdirectory (client_server)
-add_subdirectory (DHCP_client)
-add_subdirectory (file_server)
-if (GEOIP2_SUPPORT)
- add_subdirectory (GeoIp2_client)
-endif (GEOIP2_SUPPORT)
-add_subdirectory (HTTP_decoder)
-add_subdirectory (PCP_client)
-add_subdirectory (UPnP_client)
-add_subdirectory (WLAN_monitor)
-
 add_custom_target (test_u ALL
                    COMMENT "building test_u...")
-add_dependencies (test_u client server http_decoder wlan_monitor)
-add_dependencies (test_u dhcp_client file_server pcp_client upnp_client)
-if (GEOIP2_SUPPORT)
- add_dependencies (test_u geoip2_client)
-endif (GEOIP2_SUPPORT)
+if (BUILD_TEST_U)
+ add_subdirectory (client_server)
+ add_subdirectory (DHCP_client)
+ add_subdirectory (file_server)
+ if (GEOIP2_SUPPORT)
+  add_subdirectory (GeoIp2_client)
+ endif (GEOIP2_SUPPORT)
+ add_subdirectory (HTTP_decoder)
+ add_subdirectory (PCP_client)
+ add_subdirectory (UPnP_client)
+ add_subdirectory (WLAN_monitor)
+
+ add_dependencies (test_u client server http_decoder wlan_monitor)
+ add_dependencies (test_u dhcp_client file_server pcp_client upnp_client)
+ if (GEOIP2_SUPPORT)
+  add_dependencies (test_u geoip2_client)
+ endif (GEOIP2_SUPPORT)
+endif (BUILD_TEST_U)
 
 cmake_policy (SET CMP0012 NEW)
 if (NOT BUILD_TEST_U)

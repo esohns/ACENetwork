@@ -1051,7 +1051,7 @@ do_work (const std::string& configurationFile_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #else
-  modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_BGRA;
+  modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_RGB32;
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_4b.queue = &av_input_queue;

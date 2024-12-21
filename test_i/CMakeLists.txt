@@ -286,22 +286,24 @@ export (TARGETS ${PROJECT_NAME}_Test_I
 
 # ----------------------------------------
 
-add_subdirectory (av_stream)
-add_subdirectory (bittorrent_client)
-add_subdirectory (FTP_client)
-add_subdirectory (IRC_client)
-add_subdirectory (trending)
-add_subdirectory (url_stream_load)
-add_subdirectory (web_tv)
-
 add_custom_target (test_i ALL
                    COMMENT "building test_i..."
                    SOURCES ${ACENetwork_Test_I_SRCS})
-add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui trending)
-add_dependencies (test_i av_stream_client av_stream_server ftp_client url_stream_load web_tv)
-if (WIN32)
- add_dependencies (test_i av_stream_ds_source av_stream_mf_source)
-endif (WIN32)
+if (BUILD_TEST_I)
+ add_subdirectory (av_stream)
+ add_subdirectory (bittorrent_client)
+ add_subdirectory (FTP_client)
+ add_subdirectory (IRC_client)
+ add_subdirectory (trending)
+ add_subdirectory (url_stream_load)
+ add_subdirectory (web_tv)
+
+ add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui trending)
+ add_dependencies (test_i av_stream_client av_stream_server ftp_client url_stream_load web_tv)
+ if (WIN32)
+  add_dependencies (test_i av_stream_ds_source av_stream_mf_source)
+ endif (WIN32)
+endif (BUILD_TEST_I)
 
 if (NOT BUILD_TEST_I)
  set_target_properties (test_i PROPERTIES EXCLUDE_FROM_ALL 1)
