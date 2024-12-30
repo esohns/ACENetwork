@@ -166,14 +166,14 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
   //         --> reset it
   // *TODO*: resolve ACE bugzilla issue #4219
   ACE_Data_Block* data_block_p = inherited::data_block_->clone (0);
-  if (!data_block_p)
+  if (unlikely (!data_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Data_Block::clone(0): \"%m\", aborting\n")));
     return NULL;
   } // end IF
   result = data_block_p->size (current_size);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Data_Block::size(%u): \"%m\", aborting\n"),
@@ -205,14 +205,14 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
                                       data_block_p,
                                       NULL,
                                       true));
-  if (!result_p)
+  if (unlikely (!result_p))
   {
     Stream_IAllocator* allocator_p =
         dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
     if (allocator_p->block ())
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate ARDrone_LiveVideoMessage: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
     data_block_p->release (NULL); data_block_p = NULL;
     return NULL;
   } // end IF
@@ -230,7 +230,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
     Test_I_MessageDataContainer* data_container_p = NULL;
     ACE_NEW_NORETURN (data_container_p,
                       Test_I_MessageDataContainer ());
-    if (!data_container_p)
+    if (unlikely (!data_container_p))
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
@@ -254,7 +254,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in ACE_Message_Block::clone(): \"%m\", continuing\n")));
     }
-    if (!result_p->cont_)
+    if (unlikely (!result_p->cont_))
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to ACE_Message_Block::clone(): \"%m\", aborting\n")));
@@ -312,14 +312,14 @@ Test_I_Message::duplicate (void) const
                                                                                                         '\0')),
                              Test_I_Message (*this));
   } // end ELSE
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     Stream_IAllocator* allocator_p =
       dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
     if (allocator_p->block ())
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate Test_I_MessageBase: \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
     return NULL;
   } // end IF
 
@@ -330,7 +330,7 @@ Test_I_Message::duplicate (void) const
     if (!message_p->cont_)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Test_I_MessageBase::duplicate(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Test_I_Message::duplicate(): \"%m\", aborting\n")));
 
       // clean up
       message_p->release ();

@@ -1049,22 +1049,27 @@ idle_update_video_display_cb (gpointer userData_in)
     GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
-  GtkToggleButton* toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
-  ACE_ASSERT (toggle_button_p);
   GtkDrawingArea* drawing_area_2 =
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
   ACE_ASSERT (drawing_area_2);
 
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+  ACE_ASSERT (toggle_button_p);
   drawing_area_p =
-      (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
-                                                      : drawing_area_p);
-  gdk_window_invalidate_rect (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)),
+    (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
+                                                    : drawing_area_p);
+  GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+  if (unlikely (!window_p))
+    goto continue_;
+
+  gdk_window_invalidate_rect (window_p,
                               NULL,
                               FALSE);
 
+continue_:
   return G_SOURCE_CONTINUE;
 }
 
@@ -2929,10 +2934,28 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
     gtk_window_maximize (window_2);
     //  gtk_window_fullscreen (window_2);
 
+// #if GTK_CHECK_VERSION (3,0,0)
+//     g_signal_handlers_block_by_func (G_OBJECT (drawing_area_p),
+//                                      (gpointer)G_CALLBACK (drawingarea_size_allocate_cb),
+//                                      userData_in);
+// #elif GTK_CHECK_VERSION (2,0,0)
+//     gtk_signal_handler_block_by_func (GTK_OBJECT (drawing_area_p),
+//                                       G_CALLBACK (drawingarea_size_allocate_cb),
+//                                       userData_in);
+// #endif // GTK_CHECK_VERSION (x,0,0)
     gtk_window_iconify (window_p);
+// #if GTK_CHECK_VERSION (3,0,0)
+//     g_signal_handlers_unblock_by_func (G_OBJECT (drawing_area_p),
+//                                        (gpointer)G_CALLBACK (drawingarea_size_allocate_cb),
+//                                        userData_in);
+// #elif GTK_CHECK_VERSION (2,0,0)
+//     gtk_signal_handler_unblock_by_func (GTK_OBJECT (drawing_area_p),
+//                                         G_CALLBACK (drawingarea_size_allocate_cb),
+//                                         userData_in);
+// #endif // GTK_CHECK_VERSION (x,0,0)
 
     (*iterator_4b).second.second->window =
-        gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
+      gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
   } // end IF
   else
   {
@@ -2943,7 +2966,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
     gtk_window_deiconify (window_p);
 
     (*iterator_4b).second.second->window =
-        gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+      gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
 
     g_signal_emit_by_name (G_OBJECT (drawing_area_p),
                            ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
@@ -3062,7 +3085,7 @@ key_cb (GtkWidget* widget_in,
         break; // <-- not in fullscreen mode, nothing to do
 
       gtk_toggle_button_set_active (toggle_button_p,
-                                   !is_active_b);
+                                    !is_active_b);
 
       break;
     }
