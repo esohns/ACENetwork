@@ -13,9 +13,8 @@ if (UNIX)
 elseif (WIN32)
  include (directxsdk)
 
- set (DIRECTSHOW_BASECLASSES_DIRECTORY
-      "$ENV{LIB_ROOT}/DShowBaseClasses")
-#      "$ENV{PROGRAMFILES(X86)}/Microsoft SDKs/Windows/v7.0/Samples/multimedia/directshow")
+ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib/scripts")
+ include (DirectXBaseClasses)
 endif ()
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
@@ -40,10 +39,9 @@ if (WIN32)
 #  add_compile_options(-Wa,-mbig-obj)
  endif (MSVC)
 
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-# *NOTE*: DirectShow uses 'DEBUG'
-  add_definitions (-DDEBUG) # activate DirectShow debug logging
- endif (CMAKE_BUILD_TYPE STREQUAL Debug)
+ # *NOTE*: DirectShow uses 'DEBUG'
+# add_definitions (-DDEBUG) # activate DirectShow debug logging
+ add_compile_options ($<$<CONFIG:Debug>:-DDEBUG>)
 endif (WIN32)
 
 if (FFMPEG_SUPPORT)
@@ -279,6 +277,8 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC mfuuid.lib)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC strmiids.lib)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC winmm.lib)
+
+ target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${DS_BASECLASSES_LIBRARIES})
 endif ()
 target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${ACE_LIBRARY})
 
@@ -417,7 +417,7 @@ if (WIN32)
               etc/${LIBRARY_DS}.def)
  set_property (TARGET ${LIBRARY_DS} PROPERTY FOLDER "test_i")
 
- target_include_directories (${LIBRARY_DS} PUBLIC "${DIRECTSHOW_BASECLASSES_DIRECTORY}/baseclasses")
+ target_include_directories (${LIBRARY_DS} PUBLIC ${DS_BASECLASSES_INCLUDE_DIRS})
 
  add_dependencies (${LIBRARY_DS} Common)
  add_dependencies (${LIBRARY_DS} CommonLog)
@@ -429,14 +429,7 @@ if (WIN32)
 
  target_link_libraries (${LIBRARY_DS} PUBLIC strmiids.lib)
  target_link_libraries (${LIBRARY_DS} PUBLIC winmm.lib)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-#  link_directories (${DIRECTSHOW_BASECLASSES_DIRECTORY}/Debug)
-  target_link_libraries (${LIBRARY_DS} PUBLIC ${DIRECTSHOW_BASECLASSES_DIRECTORY}/build/msvc/baseclasses/Debug/BaseClassesd.lib)
-#  target_link_libraries (${LIBRARY_DS} ${DIRECTSHOW_BASECLASSES_DIRECTORY}/Debug/strmbasd.lib)
- else ()
-#  link_directories (${DIRECTSHOW_BASECLASSES_DIRECTORY}/Release)
-  target_link_libraries (${LIBRARY_DS} PUBLIC ${DIRECTSHOW_BASECLASSES_DIRECTORY}/build/msvc/baseclasses/Release/BaseClasses.lib)
- endif (CMAKE_BUILD_TYPE STREQUAL Debug)
+ target_link_libraries (${LIBRARY_DS} PUBLIC ${DS_BASECLASSES_LIBRARIES})
 
  if (GUI_SUPPORT)
   if (CURSES_SUPPORT)
@@ -505,7 +498,7 @@ if (WIN32)
               etc/${LIBRARY_MF}.def)
  set_property (TARGET ${LIBRARY_MF} PROPERTY FOLDER "test_i")
 
- target_include_directories (${LIBRARY_MF} PUBLIC "${DIRECTSHOW_BASECLASSES_DIRECTORY}/baseclasses")
+ target_include_directories (${LIBRARY_MF} PUBLIC ${DS_BASECLASSES_INCLUDE_DIRS})
 
  add_dependencies (${LIBRARY_MF} Common)
 
@@ -666,6 +659,8 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC evr.lib)
  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC strmiids.lib)
  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC winmm.lib)
+
+ target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${DS_BASECLASSES_LIBRARIES})
 endif ()
 target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${ACE_LIBRARY})
 
