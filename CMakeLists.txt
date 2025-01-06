@@ -27,19 +27,6 @@ if (UNIX)
  set (ENV{CCACHE_DISABLE} "true")
 endif (UNIX)
 
-# build type
-#variable_watch (CMAKE_BUILD_TYPE)
-# *NOTE*: iff the user specifies -DCMAKE_BUILD_TYPE on the command line, take
-#         their definition and dump it in the cache along with proper
-#         documentation, otherwise set CMAKE_BUILD_TYPE to Debug prior to
-#         calling PROJECT()
-set (BUILD_TYPE_CACHE_STRING "choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
-if (DEFINED CMAKE_BUILD_TYPE)
- set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING ${BUILD_TYPE_CACHE_STRING})
-elseif (NOT CMAKE_CONFIGURATION_TYPES)
- set (CMAKE_BUILD_TYPE Debug CACHE STRING ${BUILD_TYPE_CACHE_STRING})
-endif ()
-
 include (PrePreToolChain)
 
 # *NOTE*: sets CMAKE_TOOLCHAIN_FILE, so include BEFORE project()
@@ -59,6 +46,19 @@ include (ToolChain)
 # *NOTE*: or use the cmake.exe '-T' option instead
 include (SetTargetPlatform)
 include (TargetPlatform)
+
+# build type
+#variable_watch (CMAKE_BUILD_TYPE)
+# *NOTE*: iff the user specifies -DCMAKE_BUILD_TYPE on the command line, take
+#         their definition and dump it in the cache along with proper
+#         documentation, otherwise set CMAKE_BUILD_TYPE to Debug prior to
+#         calling PROJECT()
+set (BUILD_TYPE_CACHE_STRING "choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
+if (DEFINED CMAKE_BUILD_TYPE)
+ set (CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING ${BUILD_TYPE_CACHE_STRING})
+elseif (NOT CMAKE_CONFIGURATION_TYPES)
+ set (CMAKE_BUILD_TYPE Debug CACHE STRING ${BUILD_TYPE_CACHE_STRING})
+endif ()
 
 # directories
 # override the installation directories ?

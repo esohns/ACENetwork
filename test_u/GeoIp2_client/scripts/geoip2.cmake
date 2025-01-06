@@ -38,10 +38,13 @@ elseif (WIN32)
   endif (MAXMINDDB_LIBRARY)
  endif (VCPKG_USE)
  if (NOT GEOIP2_FOUND)
-#  set (CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll.a)
+  set (PATH_SUFFIX "Release")
+  if (DEFINED CMAKE_BUILD_TYPE)
+   set (PATH_SUFFIX ${CMAKE_BUILD_TYPE})
+  endif (DEFINED CMAKE_BUILD_TYPE)
   find_library (GEOIP2_LIBRARY maxminddb.lib
                 PATHS $ENV{LIB_ROOT}/libmaxminddb/build/msvc
-                PATH_SUFFIXES ${CMAKE_BUILD_TYPE}
+                PATH_SUFFIXES ${PATH_SUFFIX}
                 DOC "searching for maxminddb.lib"
                 NO_DEFAULT_PATH)
   if (NOT GEOIP2_LIBRARY)
@@ -51,7 +54,7 @@ elseif (WIN32)
    set (GEOIP2_FOUND TRUE)
    set (GEOIP2_INCLUDE_DIRS "$ENV{LIB_ROOT}/libmaxminddb/include")
    set (GEOIP2_LIBRARIES "${GEOIP2_LIBRARY}")
-   set (GEOIP2_LIB_DIR "$ENV{LIB_ROOT}/libmaxminddb/build/msvc/${CMAKE_BUILD_TYPE}")
+   set (GEOIP2_LIB_DIR "$ENV{LIB_ROOT}/libmaxminddb/build/msvc/${PATH_SUFFIX}")
   endif (NOT GEOIP2_LIBRARY)
  endif (NOT GEOIP2_FOUND)
 endif ()
