@@ -1453,8 +1453,8 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
 #else
   GValue value;
   ACE_OS::memset (&value, 0, sizeof (GValue));
-  g_value_init (&value, G_TYPE_STRING);
 #endif // GTK_CHECK_VERSION (2,30,0)
+  g_value_init (&value, G_TYPE_STRING);
 
   GtkTreeIter iterator_2;
   std::string current_essid_string =

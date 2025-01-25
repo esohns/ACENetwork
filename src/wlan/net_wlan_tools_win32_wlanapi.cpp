@@ -1462,6 +1462,7 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   IXMLDOMNode* node_p = NULL;
   struct tagVARIANT variant_s;
   VariantInit (&variant_s);
+  variant_s.vt = VT_BSTR;
   VARIANT_BOOL result_2 = VARIANT_FALSE;
   BSTR string_p = NULL;
   BSTR xpath_query_p =
@@ -1506,7 +1507,7 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
     goto clean;
   } // end IF
   ACE_ASSERT (data_p);
-  V_BSTR (&variant_s) =
+  variant_s.bstrVal =
     Common_String_Tools::to_2 (reinterpret_cast<char*> (data_p));
   ACE_ASSERT (V_BSTR (&variant_s));
   delete [] data_p; data_p = NULL;
@@ -1515,7 +1516,7 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   //                    &result_2);
   //ACE_ASSERT (result_2 == VARIANT_TRUE);
   document_p->loadXML (V_BSTR (&variant_s),
-                        &result_2);
+                       &result_2);
   if (unlikely ((result == S_FALSE) || (result_2 == VARIANT_FALSE)))
   {
     IXMLDOMParseError* error_p = NULL;

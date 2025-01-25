@@ -46,8 +46,8 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 add_definitions (-DCOMMON_HAS_DLL)
-add_definitions (-DCOMMON_UI_HAS_DLL)
-add_definitions (-DCOMMON_XML_HAS_DLL)
+#add_definitions (-DCOMMON_UI_HAS_DLL)
+#add_definitions (-DCOMMON_XML_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
