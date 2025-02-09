@@ -412,6 +412,12 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
     case NET_CONNECTION_CLOSE_REASON_USER_ABORT:
     {
+      if ((arg_in == CLOSE_DURING_NEW_CONNECTION) ||
+          (arg_in == NET_CONNECTION_CLOSE_REASON_INITIALIZATION))
+      { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+        inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
+      } // end IF | lock scope
+
       Net_ConnectionId_t id_i = this->id ();
       result = inherited::close (arg_in);
       if (unlikely (result == -1))

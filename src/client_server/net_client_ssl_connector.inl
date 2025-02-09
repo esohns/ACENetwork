@@ -95,8 +95,9 @@ Net_Client_SSL_Connector_T<HandlerType,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+                ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString (NULL, result).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);
@@ -131,22 +132,22 @@ Net_Client_SSL_Connector_T<HandlerType,
   // No errors initially
   int error = 0;
 
-  // See if we should enable non-blocking I/O on the <svc_handler>'s
+  // See if we should enable non-blocking I/O on the <handler_in>'s
   // peer.
-  //if (ACE_BIT_ENABLED (this->flags_, ACE_NONBLOCK) != 0)
-  //{
+  if (ACE_BIT_ENABLED (inherited::flags_, ACE_NONBLOCK) != 0)
+  {
     if (handler_in->peer ().enable (ACE_NONBLOCK) == -1)
       error = 1;
-  //}
-  //// Otherwise, make sure it's disabled by default.
-  //else if (svc_handler->peer ().disable (ACE_NONBLOCK) == -1)
-  //  error = 1;
+  }
+  // Otherwise, make sure it's disabled by default.
+  else if (handler_in->peer ().disable (ACE_NONBLOCK) == -1)
+    error = 1;
 
   // We are connected now, so try to open things up.
   ICONNECTOR_T* iconnector_p = this;
   if (error || handler_in->open (iconnector_p) == -1)
   {
-    // Make sure to close down the <svc_handler> to avoid descriptor
+    // Make sure to close down the <handler_in> to avoid descriptor
     // leaks.
     // The connection was already made; so this close is a "normal"
     // close operation.
@@ -205,13 +206,15 @@ Net_Client_SSL_Connector_T<HandlerType,
     } // end IF
   } // end IF
 
-  // support TLS SNI
   typename HandlerType::stream_type& stream_r = handler_out->peer ();
   SSL* context_p = stream_r.ssl ();
+
+  // support TLS SNI
   int result = -1;
   if (!configuration_->socketConfiguration.hostname.empty ())
   { ACE_ASSERT (context_p);
     result =
+      //SSL_ctrl (context_p, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, (void*)configuration_->socketConfiguration.hostname.c_str ());
       SSL_set_tlsext_host_name (context_p,
                                 configuration_->socketConfiguration.hostname.c_str ());
     if (unlikely (result == 0))
@@ -219,13 +222,25 @@ Net_Client_SSL_Connector_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to SSL_set_tlsext_host_name(\"%s\"): \"%s\", aborting\n"),
                   ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ()),
-                  ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+                  ACE_TEXT (Net_Common_Tools::SSLErrorToString (context_p, result).c_str ())));
       delete handler_out; handler_out = NULL;
       return -1;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("set TLS SNI hostname: \"%s\"\n"),
                 ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ())));
+
+    result = SSL_set1_host (context_p,
+                            configuration_->socketConfiguration.hostname.c_str ());
+    if (unlikely (result == 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to SSL_set1_host(\"%s\"): \"%s\", aborting\n"),
+                  ACE_TEXT (configuration_->socketConfiguration.hostname.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::SSLErrorToString (context_p, result).c_str ())));
+      delete handler_out; handler_out = NULL;
+      return -1;
+    } // end IF
   } // end IF
 
   // set options
@@ -237,7 +252,7 @@ Net_Client_SSL_Connector_T<HandlerType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to SSL_set_ssl_method(): \"%s\", aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+                  ACE_TEXT (Net_Common_Tools::SSLErrorToString (context_p, result).c_str ())));
       delete handler_out; handler_out = NULL;
       return -1;
     } // end IF
@@ -245,6 +260,14 @@ Net_Client_SSL_Connector_T<HandlerType,
                 ACE_TEXT ("set SSL method\n")));
   } // end IF
 
+  if (configuration_->socketConfiguration.minimalVersion)
+  { ACE_ASSERT (context_p);
+    SSL_set_min_proto_version (context_p,
+                               configuration_->socketConfiguration.minimalVersion);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set minimum protocol version: 0x%x\n"),
+                configuration_->socketConfiguration.minimalVersion));
+  } // end IF
   if (configuration_->socketConfiguration.maximalVersion)
   { ACE_ASSERT (context_p);
     SSL_set_max_proto_version (context_p,
@@ -254,10 +277,26 @@ Net_Client_SSL_Connector_T<HandlerType,
                 configuration_->socketConfiguration.maximalVersion));
   } // end IF
 
+  result = SSL_set_cipher_list (context_p,
+                                ACE_TEXT_ALWAYS_CHAR ("ALL:!COMPLEMENTOFDEFAULT:!eNULL"));
+  ACE_UNUSED_ARG (result);
+
+  result = SSL_set_session (context_p, NULL);
+  ACE_UNUSED_ARG (result);
+
   uint64_t options_i = SSL_get_options (context_p);
-  if (likely (options_i != SSL_set_options (context_p, SSL_OP_IGNORE_UNEXPECTED_EOF)))
+  uint64_t new_options_i = SSL_set_options (context_p,
+                                            SSL_OP_IGNORE_UNEXPECTED_EOF);
+  if (likely (new_options_i != options_i))
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("set SSL_OP_IGNORE_UNEXPECTED_EOF option\n")));
+  options_i = new_options_i;
+  new_options_i =
+    SSL_set_options (context_p,
+                     SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2
+  if (likely (new_options_i != options_i))
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1 options\n")));
 
   return 0;
 }

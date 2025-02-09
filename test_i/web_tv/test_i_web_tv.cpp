@@ -642,6 +642,8 @@ do_work (const std::string& configurationFile_in,
   Stream_MediaFramework_DirectSound_Tools::initialize ();
 #endif // ACE_WIN32 || ACE_WIN64
 
+  Net_Common_Tools::initialize ();
+
   // step0a: initialize configuration and stream
   Test_I_WebTV_ChannelConfigurations_t channels;
   if (unlikely (!do_parse_configuration_file (configurationFile_in,
@@ -780,7 +782,9 @@ do_work (const std::string& configurationFile_in,
 
   // *********************** socket configuration data ************************
   Test_I_WebTV_ConnectionConfiguration_t connection_configuration;
-//  connection_configuration.socketConfiguration.address = remoteHost_in;
+  connection_configuration.socketConfiguration.method = TLSv1_2_client_method ();
+  connection_configuration.socketConfiguration.minimalVersion = TLS1_2_VERSION;
+  connection_configuration.socketConfiguration.maximalVersion = TLS1_2_VERSION;
   connection_configuration.allocatorConfiguration = &allocator_configuration;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
@@ -790,45 +794,31 @@ do_work (const std::string& configurationFile_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
 
-  Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2a;
-//  connection_configuration.socketConfiguration.address = remoteHost_in;
-  connection_configuration_2a.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_2a.statisticReportingInterval =
-    statisticReportingInterval_in;
-  connection_configuration_2a.messageAllocator = &message_allocator;
+  Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2a =
+    connection_configuration;
   connection_configuration_2a.streamConfiguration =
     &configuration_in.streamConfiguration_2a;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2a"),
                                                                     &connection_configuration_2a));
-  Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2b;
-//  connection_configuration.socketConfiguration.address = remoteHost_in;
-  connection_configuration_2b.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_2b.statisticReportingInterval =
-    statisticReportingInterval_in;
-  connection_configuration_2b.messageAllocator = &message_allocator;
+  Test_I_WebTV_ConnectionConfiguration_t connection_configuration_2b =
+    connection_configuration;
   connection_configuration_2b.streamConfiguration =
     &configuration_in.streamConfiguration_2b;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2b"),
                                                                     &connection_configuration_2b));
 
   Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3a;
+  connection_configuration_3a.socketConfiguration.method = TLSv1_2_client_method ();
+  connection_configuration_3a.socketConfiguration.minimalVersion = TLS1_2_VERSION;
+  connection_configuration_3a.socketConfiguration.maximalVersion = TLS1_2_VERSION;
   connection_configuration_3a.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_3a.socketConfiguration.useLoopBackDevice = false;
-  //connection_configuration_3a.socketConfiguration.version = TLS1_VERSION;
-//  connection_configuration_3a.statisticReportingInterval =
-//    statisticReportingInterval_in;
   connection_configuration_3a.messageAllocator = &message_allocator_3;
   connection_configuration_3a.streamConfiguration =
     &configuration_in.streamConfiguration_3a;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("3a"),
                                                                     &connection_configuration_3a));
-  Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3b;
-  connection_configuration_3b.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_3b.socketConfiguration.useLoopBackDevice = false;
-//  connection_configuration_3b.socketConfiguration.version = TLS1_VERSION; // required for "Das Erste" ?
-//  connection_configuration_3b.statisticReportingInterval =
-//    statisticReportingInterval_in;
-  connection_configuration_3b.messageAllocator = &message_allocator_3;
+  Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3b =
+    connection_configuration_3a;
   connection_configuration_3b.streamConfiguration =
     &configuration_in.streamConfiguration_3b;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("3b"),

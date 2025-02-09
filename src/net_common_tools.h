@@ -45,6 +45,7 @@
 
 // forward declarations
 #if defined (SSL_SUPPORT)
+struct ssl_st;
 class ACE_SSL_Context;
 #endif // SSL_SUPPORT
 
@@ -317,7 +318,7 @@ class Net_Common_Tools
 
 #if defined (SSL_SUPPORT)
   // --- SSL ---
-  static std::string SSLErrorToString ();
+  static std::string SSLErrorToString (struct ssl_st*, int);
 
   // *IMPORTANT NOTE*: currently, certificates must be in PEM format
   static bool initializeSSLContext (const std::string&,       // certificate file (FQ-)path

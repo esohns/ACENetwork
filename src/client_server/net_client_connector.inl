@@ -220,22 +220,22 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   // No errors initially
   int error = 0;
 
-  // See if we should enable non-blocking I/O on the <svc_handler>'s
+  // See if we should enable non-blocking I/O on the <handler_in>'s
   // peer.
-  //if (ACE_BIT_ENABLED (this->flags_, ACE_NONBLOCK) != 0)
-  //{
+  if (ACE_BIT_ENABLED (inherited::flags_, ACE_NONBLOCK) != 0)
+  {
     if (handler_in->peer ().enable (ACE_NONBLOCK) == -1)
       error = 1;
-  //}
-  //// Otherwise, make sure it's disabled by default.
-  //else if (svc_handler->peer ().disable (ACE_NONBLOCK) == -1)
-  //  error = 1;
+  }
+  // Otherwise, make sure it's disabled by default.
+  else if (handler_in->peer ().disable (ACE_NONBLOCK) == -1)
+    error = 1;
 
   // We are connected now, so try to open things up.
   ICONNECTOR_T* iconnector_p = this;
   if (unlikely (error || handler_in->open (iconnector_p) == -1))
   {
-    // Make sure to close down the <svc_handler> to avoid descriptor
+    // Make sure to close down the <handler_in> to avoid descriptor
     // leaks.
     // The connection was already made; so this close is a "normal"
     // close operation.

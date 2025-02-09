@@ -146,6 +146,7 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
 #if defined (SSL_SUPPORT)
    , hostname ()
    , method (NULL)
+   , minimalVersion (0)
    , maximalVersion (0)
 #endif // SSL_SUPPORT
   {
@@ -164,10 +165,11 @@ class Net_SocketConfiguration_T<NET_TRANSPORTLAYER_TCP>
   }
   //inline virtual ~Net_SocketConfiguration_T () {}
 
-  ACE_INET_Addr address;  // listening/peer-
+  ACE_INET_Addr     address;  // listening/peer-
 #if defined (SSL_SUPPORT) // *TODO*: move these somewhere else
-  std::string       hostname; // peer- (supports TLS SNI)
+  std::string       hostname; // peer- (support TLS SNI)
   const SSL_METHOD* method;
+  long              minimalVersion; // minimal protocol-
   long              maximalVersion; // maximal protocol-
 #endif // SSL_SUPPORT
 };

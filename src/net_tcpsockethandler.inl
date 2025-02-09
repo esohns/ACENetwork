@@ -350,8 +350,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
+                (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
     return -1;
   } // end IF
@@ -360,8 +359,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-                (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
-                                                  : ACE_TEXT ("false")),
+                (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
     return -1;
   } // end IF
@@ -377,14 +375,14 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 
   // step2: tweak SSL context
-  typename inherited2::stream_type& peer_stream_r = inherited2::peer ();
-  struct ssl_st* ssl_p = peer_stream_r.ssl ();
-  ACE_ASSERT (ssl_p);
-  struct ssl_ctx_st* ssl_ctx_p = SSL_get_SSL_CTX (ssl_p);
-  ACE_ASSERT (ssl_ctx_p);
-  long ssl_ctx_mode_bitmask = SSL_CTX_set_mode (ssl_ctx_p,
-                                                SSL_MODE_AUTO_RETRY);
-  ACE_ASSERT (ssl_ctx_mode_bitmask & SSL_MODE_AUTO_RETRY);
+  //typename inherited2::stream_type& peer_stream_r = inherited2::peer ();
+  //struct ssl_st* ssl_p = peer_stream_r.ssl ();
+  //ACE_ASSERT (ssl_p);
+  //struct ssl_ctx_st* ssl_ctx_p = SSL_get_SSL_CTX (ssl_p);
+  //ACE_ASSERT (ssl_ctx_p);
+  //long ssl_ctx_mode_bitmask = SSL_CTX_set_mode (ssl_ctx_p,
+  //                                              SSL_MODE_AUTO_RETRY);
+  //ACE_ASSERT (ssl_ctx_mode_bitmask & SSL_MODE_AUTO_RETRY);
 
   // step3: register with the reactor
   result = inherited2::open (arg_in);
@@ -534,7 +532,7 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if (error != ENOTSOCK) // 10038: local close
 #else
-    if (error != EBADF) // // 9: EBADF
+    if (error != EBADF)    // 9: EBADF
 #endif // ACE_WIN32 || ACE_WIN64
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SSL_SOCK_Stream::close(): \"%m\", aborting\n")));

@@ -131,14 +131,18 @@ Net_Common_Tools::initialize ()
   if (unlikely (result == 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SSL_library_init: \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+                ACE_TEXT ("failed to SSL_library_init(): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString (NULL, result).c_str ())));
     return false;
   } // end IF
 
+  OpenSSL_add_all_algorithms ();
+
+  SSL_load_error_strings ();
+
   // initialize ACE SSL support
   ACE_SSL_Context* context_p = ACE_SSL_Context::instance ();
-  ACE_UNUSED_ARG(context_p);
+  ACE_UNUSED_ARG (context_p);
 #endif // SSL_SUPPORT
 
   return true;
@@ -4675,7 +4679,7 @@ error:
 }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_SDK_VERSION(0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_SDK_VERSION (0x0602) // _WIN32_WINNT_WIN8
 bool
 Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
 {
@@ -4866,25 +4870,77 @@ Net_Common_Tools::makeUUID ()
 
 #if defined (SSL_SUPPORT)
 std::string
-Net_Common_Tools::SSLErrorToString ()
+Net_Common_Tools::SSLErrorToString (struct ssl_st* context_in,
+                                    int returnValue_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::SSLErrorToString"));
 
   std::string result;
 
-  unsigned long const error_i = ::ERR_get_error ();
-  if (unlikely (!error_i))
+  if (context_in)
+  {
+    int error_i = ::SSL_get_error (context_in, returnValue_in);
+    switch (error_i)
+    {
+      case SSL_ERROR_NONE:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_NONE");
+        break;
+      case SSL_ERROR_ZERO_RETURN:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_ZERO_RETURN");
+        break;
+      case SSL_ERROR_WANT_READ:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_READ");
+        break;
+      case SSL_ERROR_WANT_WRITE:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_WRITE");
+        break;
+      case SSL_ERROR_WANT_CONNECT:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_CONNECT");
+        break;
+      case SSL_ERROR_WANT_ACCEPT:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_ACCEPT");
+        break;
+      case SSL_ERROR_WANT_X509_LOOKUP:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_X509_LOOKUP");
+        break;
+      case SSL_ERROR_WANT_ASYNC:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_ASYNC");
+        break;
+      case SSL_ERROR_WANT_ASYNC_JOB:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_ASYNC_JOB");
+        break;
+      case SSL_ERROR_WANT_CLIENT_HELLO_CB:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_WANT_CLIENT_HELLO_CB");
+        break;
+      case SSL_ERROR_SYSCALL:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_SYSCALL");
+        break;
+      case SSL_ERROR_SSL:
+        result = ACE_TEXT_ALWAYS_CHAR ("SSL_ERROR_SSL");
+        break;
+      default:
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown openssl error (was: %d), returning\n"),
+                    error_i));
+        break;
+    } // end SWITCH
+
+    return result;
+  } // end IF
+
+  unsigned long error_2 = ::ERR_peek_error ();
+  if (unlikely (!error_2))
     return result;
 
-  char error_string[256];
+  char error_string_a[256];
 // OpenSSL < 0.9.6a doesn't have ERR_error_string_n() function.
 #if OPENSSL_VERSION_NUMBER >= 0x0090601fL
-  (void) ::ERR_error_string_n (error_i, error_string, sizeof (char[256]));
+  ::ERR_error_string_n (error_2, error_string_a, sizeof (char[256]));
 #else /* OPENSSL_VERSION_NUMBER >= 0x0090601fL */
-  (void) ::ERR_error_string (error_i, error_string);
+  ::ERR_error_string (error_2, error_string);
 #endif /* OPENSSL_VERSION_NUMBER >= 0x0090601fL */
 
-  result = error_string;
+  result = error_string_a;
 
   return result;
 }
@@ -4910,30 +4966,33 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
     return false;
   } // end IF
 
+  /* *NOTE*: these translate to openssl macros which negotiate the highest
+             available SSL/TLS version (see: ace/SSL_Context.cpp:265) */
   result = context_p->set_mode (isClient_in ? ACE_SSL_Context::SSLv23_client
                                             : ACE_SSL_Context::SSLv23_server);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("failed to ACE_SSL_Context::set_mode(): \"%s\", aborting\n"),
-               ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+               ACE_TEXT (Net_Common_Tools::SSLErrorToString (NULL, -1).c_str ())));
     return false;
   } // end IF
 
   SSL_CTX* real_context_p = context_p->context ();
   ACE_ASSERT (real_context_p);
-  // uint64_t new_options_i = 0;
+  //SSL_CTX_set_security_level (real_context_p, 0);
+
+  uint64_t new_options_i = 0;
   //new_options_i = SSL_CTX_set_options (real_context_p, SSL_OP_ALL);
   //ACE_UNUSED_ARG (new_options_i);
   //new_options_i = SSL_CTX_clear_options (real_context_p, SSL_OP_ALL);
   //ACE_UNUSED_ARG (new_options_i);
-//  new_options_i =
-//    SSL_CTX_set_options (real_context_p, SSL_OP_NO_SSLv3); // force TLS
-//  ACE_UNUSED_ARG (new_options_i);
-  //new_options_i =
-  //    SSL_CTX_set_options (real_context_p,
-  //                         SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2
-  //ACE_UNUSED_ARG (new_options_i);
+  new_options_i =
+    SSL_CTX_set_options (real_context_p, SSL_OP_NO_SSLv3); // force TLS
+  new_options_i =
+    SSL_CTX_set_options (real_context_p,
+                         SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2
+  ACE_UNUSED_ARG (new_options_i);
 
   //SSL_CTX_set_verify (real_context_p,
   //                    SSL_VERIFY_NONE,
@@ -4950,7 +5009,7 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SSL_Context::certificate(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (certificate_in.c_str ()),
-                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString (NULL, -1).c_str ())));
     return false;
   } // end IF
   result = context_p->private_key (privateKey_in.c_str (),
@@ -4960,7 +5019,7 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SSL_Context::private_key(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (privateKey_in.c_str ()),
-                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString (NULL, -1).c_str ())));
     return false;
   } // end IF
   result = context_p->verify_private_key ();
@@ -4968,7 +5027,7 @@ Net_Common_Tools::initializeSSLContext (const std::string& certificate_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SSL_Context::verify_private_key(): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString (NULL, -1).c_str ())));
     return false;
   } // end IF
 
@@ -4996,7 +5055,7 @@ continue_:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SSL_Context::load_trusted_ca(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (CACertificates_in.c_str ()),
-                ACE_TEXT (Net_Common_Tools::SSLErrorToString ().c_str ())));
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString (NULL, -1).c_str ())));
     return false;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
