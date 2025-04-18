@@ -782,9 +782,9 @@ do_work (const std::string& configurationFile_in,
 
   // *********************** socket configuration data ************************
   Test_I_WebTV_ConnectionConfiguration_t connection_configuration;
-  connection_configuration.socketConfiguration.method = TLSv1_2_client_method ();
-  connection_configuration.socketConfiguration.minimalVersion = TLS1_2_VERSION;
-  connection_configuration.socketConfiguration.maximalVersion = TLS1_2_VERSION;
+  connection_configuration.socketConfiguration.method = TLS_client_method ();
+  connection_configuration.socketConfiguration.minimalVersion = TLS1_3_VERSION;
+  connection_configuration.socketConfiguration.maximalVersion = TLS1_3_VERSION;
   connection_configuration.allocatorConfiguration = &allocator_configuration;
   connection_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
@@ -808,9 +808,9 @@ do_work (const std::string& configurationFile_in,
                                                                     &connection_configuration_2b));
 
   Test_I_WebTV_ConnectionConfiguration_3_t connection_configuration_3a;
-  connection_configuration_3a.socketConfiguration.method = TLSv1_2_client_method ();
-  connection_configuration_3a.socketConfiguration.minimalVersion = TLS1_2_VERSION;
-  connection_configuration_3a.socketConfiguration.maximalVersion = TLS1_2_VERSION;
+  connection_configuration_3a.socketConfiguration.method = TLS_client_method ();
+  connection_configuration_3a.socketConfiguration.minimalVersion = TLS1_3_VERSION;
+  connection_configuration_3a.socketConfiguration.maximalVersion = TLS1_3_VERSION;
   connection_configuration_3a.allocatorConfiguration = &allocator_configuration;
   connection_configuration_3a.messageAllocator = &message_allocator_3;
   connection_configuration_3a.streamConfiguration =
