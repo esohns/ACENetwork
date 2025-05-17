@@ -12,7 +12,7 @@
     "glew",
     "glfw3",
     "glm",
-    "gtk",
+    "gtk3",
     "libiconv",
     "libxml2",
     "pdcurses",

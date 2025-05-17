@@ -10,7 +10,7 @@ runs:
   - run: |
          sudo apt-get update
          sudo apt-get install -y lsb-release libaio-dev libcap-dev libdbus-1-dev libsystemd-dev libstb-dev libmagickwand-6-headers libmagickwand-6.q16-dev libglu1-mesa-dev freeglut3-dev libglew-dev libglfw3-dev libglm-dev libassimp-dev libavcodec-dev libavformat-dev libswscale-dev libavutil-dev libgtk2.0-dev libgnutls28-dev libavahi-client-dev libcups2-dev libfl-dev libtinyobjloader-dev libvulkan-dev vulkan-utility-libraries-dev
-         sudo apt-get install -y libmysqlclient-dev libsox-dev libmpg123-dev libasound2-dev libv4l-dev libreoffice-dev libwayland-dev libsdl2-dev libavfilter-dev
+         sudo apt-get install -y libmysqlclient-dev libsox-dev libmpg123-dev libasound2-dev libv4l-dev libreoffice-dev libwayland-dev libsdl2-dev libavfilter-dev libopencv-dev
          sudo apt-get install -y libnl-3-dev libnl-genl-3-dev isc-dhcp-dev bind9-dev libjson-c-dev libkrb5-dev libgeoip-dev libiw-dev libnm-dev
     shell: bash
 #    if: inputs.os == 'ubuntu-latest'
