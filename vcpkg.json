@@ -19,6 +19,7 @@
     "stb",
     "vulkan",
     "vulkan-utility-libraries",
+    "wxwidgets",
     "faad2",
     "libnoise",
     "mpg123",
