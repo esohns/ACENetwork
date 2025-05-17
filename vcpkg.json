@@ -7,19 +7,23 @@
     },
     "assimp",
     "directxsdk",
-    "faad2",
     "ffmpeg",
     "freeglut",
     "glew",
+    "glfw3",
     "glm",
     "gtk",
     "libiconv",
-    "libmaxminddb",
-    "libnoise",
     "libxml2",
+    "pdcurses",
+    "stb",
+    "vulkan",
+    "vulkan-utility-libraries",
+    "faad2",
+    "libnoise",
     "mpg123",
     "opencv",
-    "pdcurses",
-    "zlib"
+    "zlib",
+    "libmaxminddb"
   ]
 }
