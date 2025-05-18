@@ -12,6 +12,7 @@
     "glew",
     "glfw3",
     "glm",
+    "graphicsmagick",
     "gtk3",
     "libiconv",
     "libxml2",
