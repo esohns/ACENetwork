@@ -189,11 +189,11 @@ jobs:
    - name: Add Common/ACENetwork links (ACEStream) [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
-          cd ..
-          del /F /Q ACEStream\\modules\\Common
-          mklink /D Common ACEStream\\modules\\Common
-          del /F /Q ACEStream\\modules\\ACENetwork
-          mklink /D ACENetwork ACEStream\\modules\\ACENetwork
+          cd modules\\ACEStream\\modules
+          del /F /Q Common
+          mklink /D Common ..\\..\\Common
+          del /F /Q ACENetwork
+          mklink /D ACENetwork ..\\..\\..\\..\\ACENetwork
      shell: cmd
 
    - name: Reset ACE link (ACEStream) [UNIX]
