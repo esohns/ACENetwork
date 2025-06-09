@@ -12,6 +12,11 @@ env:
  # set vcpkg root/installed directories
  VCPKG_ROOT: C:/vcpkg
  VCPKG_INSTALLED_DIR: C:/vcpkg/installed
+ # vcpkg binary cache
+ USERNAME: esohns
+ VCPKG_EXE: C:/vcpkg/vcpkg.exe
+ FEED_URL: https://nuget.pkg.github.com/esohns/index.json
+ VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/esohns/index.json,readwrite"
 
 jobs:
       
@@ -46,6 +51,26 @@ jobs:
      uses: ./.github/actions/install_deps
      with:
       os: ${{matrix.os}}
+
+   - name: Bootstrap vcpkg [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     shell: pwsh
+     run: ${{ env.VCPKG_ROOT }}/bootstrap-vcpkg.bat
+
+   - name: Add NuGet sources [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     shell: pwsh
+     run: |
+      .$(${{ env.VCPKG_EXE }} fetch nuget) `
+        sources add `
+        -Source "${{ env.FEED_URL }}" `
+        -StorePasswordInClearText `
+        -Name GitHubPackages `
+        -UserName "${{ env.USERNAME }}" `
+        -Password "${{ secrets.GH_PACKAGES_TOKEN }}"
+      .$(${{ env.VCPKG_EXE }} fetch nuget) `
+        setapikey "${{ secrets.GH_PACKAGES_TOKEN }}" `
+        -Source "${{ env.FEED_URL }}"
 
    - name: Install dependencies (packages) [Win32]
      if: ${{ matrix.os=='windows-latest' }}
@@ -172,18 +197,18 @@ jobs:
           sudo rm -f modules/ACEStream/modules/ACE
           sudo ln -s /usr/include modules/ACEStream/modules/ACE
 
-   - name: Generate LibreOffice headers (ACEStream) [UNIX]
-     if: ${{ matrix.os=='ubuntu-latest' }}
-     run: |
-          cd modules/ACEStream/src/modules/doc/scripts
-          chmod u+x make_oo_headers.sh
-          sudo ./make_oo_headers.sh
+#   - name: Generate LibreOffice headers (ACEStream) [UNIX]
+#     if: ${{ matrix.os=='ubuntu-latest' }}
+#     run: |
+#          cd modules/ACEStream/src/modules/doc/scripts
+#          chmod u+x make_oo_headers.sh
+#          sudo ./make_oo_headers.sh
 
-   - name: Generate LibreOffice headers (ACEStream) [Win32]
-     if: ${{ matrix.os=='windows-latest' }}
-     run: |
-          cd modules\\ACEStream\\src\\modules\\doc\\scripts
-          .\\make_oo_headers.cmd
+#   - name: Generate LibreOffice headers (ACEStream) [Win32]
+#     if: ${{ matrix.os=='windows-latest' }}
+#     run: |
+#          cd modules\\ACEStream\\src\\modules\\doc\\scripts
+#          .\\make_oo_headers.cmd
 
    - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork  [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}
@@ -223,6 +248,57 @@ jobs:
           cmake --build build --config ${{env.BUILD_TYPE}}
 
    - name: Build (ACEStream) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\ACEStream
+          cmake --build build --config ${{env.BUILD_TYPE}}
+     shell: cmd
+
+   - name: Configure CMake w/o tests [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DUI_FRAMEWORK=gtk
+
+   - name: Configure CMake w/o tests [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: cmake -B ${{github.workspace}}/build -DCommon_DIR=modules/Common/build -DACEStream_DIR=modules/ACEStream/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DUI_FRAMEWORK=gtk
+     shell: cmd
+
+   - name: Build w/o tests
+     run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+   - name: Remove Patch To (Temporarily) Remove Dependency on ACENetwork  [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          cd modules/ACEStream
+          git apply -v -R scripts/github_repo_build.patch
+
+   - name: Remove Patch To (Temporarily) Remove Dependency on ACENetwork [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\ACEStream
+          git apply -v -R scripts/github_repo_build.patch
+     shell: cmd
+
+   - name: Configure CMake (ACEStream) with ACENetwork support [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          cd modules/ACEStream
+          cmake -B ${{github.workspace}}/modules/ACEStream/build -DCommon_DIR=modules/Common/build -DACENetwork_DIR=modules/ACENetwork/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+   - name: Configure CMake (ACEStream) with ACENetwork support [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\ACEStream
+          cmake -B ${{github.workspace}}\\modules\\ACEStream\\build -DCommon_DIR=modules/Common/build -DACENetwork_DIR=modules/ACENetwork/build -DVCPKG_USE=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+     shell: cmd
+
+   - name: Build (ACEStream) with ACENetwork support [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          cd modules/ACEStream
+          cmake --build build --config ${{env.BUILD_TYPE}}
+
+   - name: Build (ACEStream) with ACENetwork support [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd modules\\ACEStream
