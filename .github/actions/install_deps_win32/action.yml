@@ -10,7 +10,7 @@ runs:
   - uses: lukka/run-vcpkg@v11.5
     with:
      vcpkgDirectory: '${{ env.VCPKG_ROOT }}'
-     vcpkgGitCommitId: 'ca846b21276c9a3171074ac8d2b4f6516894a7d0'
+     vcpkgGitCommitId: '984f9232b2fe0eb94f5e9f161d6c632c581fff0c'
      runVcpkgInstall: true
      vcpkgJsonGlob: '**/vcpkg.json'
      doNotCache: false
