@@ -186,11 +186,12 @@ jobs:
           sudo rm -f ACENetwork
           sudo ln -s ../../.. ACENetwork
 
-   - name: Add ACEStream link [Win32]
+   - name: Add ACEStream/ACENetwork links [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd ..
           mklink /D ACEStream ACENetwork\\modules\\ACEStream
+          mklink /D ACENetwork ACEStream\\modules\\ACENetwork
      shell: cmd
 
    - name: Reset ACE link (ACEStream) [UNIX]
