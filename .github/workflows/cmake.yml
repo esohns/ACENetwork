@@ -17,6 +17,8 @@ env:
  VCPKG_EXE: C:/vcpkg/vcpkg.exe
  FEED_URL: https://nuget.pkg.github.com/esohns/index.json
  VCPKG_BINARY_SOURCES: "clear;nuget,https://nuget.pkg.github.com/esohns/index.json,readwrite"
+ OO_SDK_HOME: C:/Program Files/LibreOffice/sdk
+ #UNO_PATH: C:/Program Files/LibreOffice/program
 
 jobs:
       
@@ -197,18 +199,18 @@ jobs:
           sudo rm -f modules/ACEStream/modules/ACE
           sudo ln -s /usr/include modules/ACEStream/modules/ACE
 
-#   - name: Generate LibreOffice headers (ACEStream) [UNIX]
-#     if: ${{ matrix.os=='ubuntu-latest' }}
-#     run: |
-#          cd modules/ACEStream/src/modules/doc/scripts
-#          chmod u+x make_oo_headers.sh
-#          sudo ./make_oo_headers.sh
+   - name: Generate LibreOffice headers (ACEStream) [UNIX]
+     if: ${{ matrix.os=='ubuntu-latest' }}
+     run: |
+          cd modules/ACEStream/src/modules/doc/scripts
+          chmod u+x make_oo_headers.sh
+          sudo ./make_oo_headers.sh
 
-#   - name: Generate LibreOffice headers (ACEStream) [Win32]
-#     if: ${{ matrix.os=='windows-latest' }}
-#     run: |
-#          cd modules\\ACEStream\\src\\modules\\doc\\scripts
-#          .\\make_oo_headers.cmd
+   - name: Generate LibreOffice headers (ACEStream) [Win32]
+     if: ${{ matrix.os=='windows-latest' }}
+     run: |
+          cd modules\\ACEStream\\src\\modules\\doc\\scripts
+          .\\make_oo_headers.cmd
 
    - name: Apply Patch To (Temporarily) Remove Dependency on ACENetwork  [UNIX]
      if: ${{ matrix.os=='ubuntu-latest' }}

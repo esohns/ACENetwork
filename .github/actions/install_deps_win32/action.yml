@@ -15,5 +15,5 @@ runs:
      vcpkgJsonGlob: '**/vcpkg.json'
      doNotCache: false
 
-  - run: choco install libreoffice-fresh
+  - run: choco install libreoffice-fresh libreoffice-sdk
     shell: cmd
