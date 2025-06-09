@@ -58,7 +58,7 @@ class Test_U_Message
 
  public:
   Test_U_Message (Stream_SessionId_t, // session id
-                  unsigned int);      // size
+                  size_t);            // size
   inline virtual ~Test_U_Message () {}
 
   virtual Net_MessageType_t command () const; // return value: message type

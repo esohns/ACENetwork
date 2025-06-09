@@ -118,22 +118,15 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
 
   if ((*iterator_2).second.second->window)
   {
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
     module_p = NULL;
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_DirectShow_Display_Module (this,
                                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
                     false);
     layout_out->append (module_p, branch_p, index_i);
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
   } // end IF
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  //else
-//  //{
-//  //  ACE_NEW_RETURN (module_p,
-//  //                  Test_I_AVStream_Client_DirectShow_DisplayNull_Module (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_RENDERER_NULL_MODULE_NAME)),
-//  //                  false);
-//  //  modules_out.push_back (module_p);
-//  //} // end ELSE
-//#endif
 
   delete_out = true;
 

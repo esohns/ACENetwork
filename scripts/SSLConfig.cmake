@@ -24,21 +24,21 @@ if (UNIX)
 elseif (WIN32)
  if (VCPKG_USE)
   find_library (OPENSSL_CRYPTO_LIBRARY libcrypto.lib
-                PATHS ${VCPKG_LIB_DIR}
+                PATHS ${VCPKG_LIB_DIR_BASE}
                 PATH_SUFFIXES lib
                 DOC "searching for libcrypto.lib"
                 NO_DEFAULT_PATH)
   find_library (OPENSSL_LIBRARY libssl.lib
-                PATHS ${VCPKG_LIB_DIR}
+                PATHS ${VCPKG_LIB_DIR_BASE}
                 PATH_SUFFIXES lib
                 DOC "searching for libssl.lib"
                 NO_DEFAULT_PATH)
   if (OPENSSL_CRYPTO_LIBRARY AND OPENSSL_LIBRARY)
    message (STATUS "found OpenSSL")
    set (OPENSSL_FOUND TRUE)
-   set (OPENSSL_INCLUDE_DIRS ${VCPKG_INCLUDE_DIR_BASE})
-   set (OPENSSL_LIBRARIES "${SSL_CRYPTO_LIBRARY};${SSL_LIBRARY}")
-   set (OPENSSL_LIB_DIR ${VCPKG_LIB_DIR}/bin)
+   set (OPENSSL_INCLUDE_DIRS ${VCPKG_INCLUDE_DIR})
+   set (OPENSSL_LIBRARIES "${OPENSSL_CRYPTO_LIBRARY};${OPENSSL_LIBRARY}")
+   set (OPENSSL_LIB_DIR ${VCPKG_BIN_DIR})
   endif (OPENSSL_CRYPTO_LIBRARY AND OPENSSL_LIBRARY)
  else ()
   find_library (OPENSSL_CRYPTO_LIBRARY libcrypto.lib

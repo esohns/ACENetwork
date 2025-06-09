@@ -42,10 +42,10 @@
 #include "stream_dev_mic_source_wasapi.h"
 #include "stream_dev_target_wasapi.h"
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 #include "stream_lib_directshow_asynch_source_filter.h"
 #include "stream_lib_directshow_source_filter.h"
-#include "stream_lib_directshow_target.h"
-#include "stream_lib_mediafoundation_target.h"
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
 #if defined (GUI_SUPPORT)
 #include "stream_vis_target_direct3d.h"
@@ -687,6 +687,7 @@ struct Test_I_AVStream_Client_DirectShow_FilterConfiguration
   Stream_Module_t*                                                module; // handle
   struct Stream_MediaFramework_DirectShow_FilterPinConfiguration* pinConfiguration; // handle
 };
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 typedef Stream_MediaFramework_DirectShow_Source_Filter_T<Test_I_AVStream_Client_DirectShow_Message,
                                                          struct Test_I_AVStream_Client_DirectShow_FilterConfiguration,
                                                          struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Test_I_AVStream_Client_DirectShowFilter_t;
@@ -705,6 +706,7 @@ typedef Stream_Vis_Target_DirectShow_T<ACE_MT_SYNCH,
                                        struct Test_I_AVStream_Client_DirectShow_PinConfiguration,
                                        Test_I_AVStream_Client_DirectShowFilter_t,
                                        struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Client_DirectShow_Display;
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 typedef Stream_Vis_MediaFoundation_Target_Direct3D_T<ACE_MT_SYNCH,
                                                      Common_TimePolicy_t,
                                                      struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
@@ -876,6 +878,7 @@ typedef Stream_Vis_Target_Direct3D_T<ACE_MT_SYNCH,
                                      Test_I_AVStream_Server_DirectShow_StreamSessionData_t,
                                      struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_Direct3D_Display;
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 typedef Stream_MediaFramework_DirectShow_Source_Filter_T<Test_I_AVStream_Server_DirectShow_Message,
                                                          struct Test_I_AVStream_Server_DirectShow_FilterConfiguration,
                                                          struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Test_I_AVStream_Server_DirectShowFilter_t;
@@ -894,6 +897,7 @@ typedef Stream_Vis_Target_DirectShow_T<ACE_MT_SYNCH,
                                        struct Test_I_AVStream_Server_DirectShow_PinConfiguration,
                                        Test_I_AVStream_Server_DirectShowFilter_t,
                                        struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_DirectShow_Display;
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 typedef Stream_Vis_Target_MediaFoundation_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,
                                             struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration,
@@ -1232,12 +1236,14 @@ DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,    
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                             // session event type
                               struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_vis_directshow_module_name_string,
                               Stream_INotify_t,                                           // stream notification interface type
                               Test_I_AVStream_Client_DirectShow_Display);                          // writer type
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                                  // session event type
                               struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration, // module handler configuration type
@@ -1367,13 +1373,14 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionDat
                               libacestream_default_vis_direct3d_module_name_string,
                               Stream_INotify_t,                                                    // stream notification interface type
                               Test_I_AVStream_Server_Direct3D_Display);                            // writer type
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                             // session event type
                               struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_vis_directshow_module_name_string,
                               Stream_INotify_t,                                           // stream notification interface type
                               Test_I_AVStream_Server_DirectShow_Display);                          // writer type
-
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_MediaFoundation_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                                  // session event type
                               struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration, // module handler configuration type

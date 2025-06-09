@@ -1,36 +1,4 @@
 if (UNIX)
- include (CheckLibraryExists)
-# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- set (CMAKE_THREAD_PREFER_PTHREAD ON)
- find_package (Threads)
-endif (UNIX)
-
-get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
-get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-              REQUIRED
-              CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-              PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
-              NO_DEFAULT_PATH)
-if (NOT EXISTS ${Common_DIR})
- message (FATAL_ERROR "could not find package \"Common\", aborting")
-endif ()
-add_definitions (-DCOMMON_HAS_DLL)
-add_definitions (-DCOMMON_UI_HAS_DLL)
-
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-              REQUIRED
-              CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-              PATH_SUFFIXES ACEStream/${BUILD_PATH_SUFFIX}
-              NO_DEFAULT_PATH)
-if (NOT EXISTS ${ACEStream_DIR})
- message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
-endif ()
-add_definitions (-DACESTREAM_HAS_DLL)
-
-if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/signal)
@@ -67,7 +35,6 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 ############## next target ################
 set (EXECUTABLE dhcp_client)
 set (${EXECUTABLE}_EXE_SRCS
-#     stdafx.cpp
      stdafx.h
      test_u_common_modules.h
      test_u_connection_common.h
@@ -123,7 +90,7 @@ add_executable (${EXECUTABLE}
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
-endif ()
+endif (WIN32 AND NOT BUILD_TEST_U)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -147,9 +114,9 @@ elseif (WIN32)
 # set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
 
-if (UNIX)
- target_link_libraries (${EXECUTABLE} PUBLIC X11)
-endif (UNIX)
+#if (UNIX)
+# target_link_libraries (${EXECUTABLE} PUBLIC X11)
+#endif (UNIX)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
@@ -165,7 +132,6 @@ target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_DHCP)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_U)

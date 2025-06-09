@@ -107,14 +107,23 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
   //                Test_I_AVStream_Server_DirectShow_StatisticReport_Module (this,
   //                                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
   //                false);
+  //ACE_ASSERT (module_p);
   //layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
   ++index_i;
-  module_p = NULL;
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_DirectShow_Display_Module (this,
                                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
                   false);
+#else
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Server_Direct3D_Display_Module (this,
+                                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECT3D_DEFAULT_NAME_STRING)),
+                  false);
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
+  ACE_ASSERT (module_p);
   layout_in->append (module_p, branch_p, index_i);
 
   delete_out = true;
@@ -165,26 +174,25 @@ Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& 
   // ---------------------------------------------------------------------------
 
   // ******************* Display Handler ***************************************
-  Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-    goto error;
-  } // end IF
+  //Stream_Module_t* module_p =
+  //  const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
+  //if (!module_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
+  //              ACE_TEXT (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
+  //  goto error;
+  //} // end IF
 
-  Test_I_AVStream_Server_DirectShow_Display* directshow_display_impl_p =
-    dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> (module_p->writer ());
-  if (!directshow_display_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> failed, aborting\n")));
-    goto error;
-  } // end IF
+  //Test_I_AVStream_Server_DirectShow_Display* directshow_display_impl_p =
+  //  dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> (module_p->writer ());
+  //if (!directshow_display_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> failed, aborting\n")));
+  //  goto error;
+  //} // end IF
 
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("source format: %s\n"),
               ACE_TEXT (Stream_MediaFramework_DirectShow_Tools::toString (configuration_in.configuration_->format, true).c_str ())));
@@ -196,7 +204,6 @@ Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& 
   //log_file_name += STREAM_DEV_DIRECTSHOW_LOGFILE_NAME;
   //Stream_Module_Device_DirectShow_Tools::debug (graphBuilder_,
   //                                              log_file_name);
-#endif // _DEBUG
 
   // ---------------------------------------------------------------------------
 
@@ -365,13 +372,20 @@ Test_I_AVStream_Server_DirectShow_UDPStream::load (Stream_ILayout* layout_in,
   //                false);
   //ACE_ASSERT (module_p);
   //layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
   ++index_i;
-  module_p = NULL;
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_DirectShow_Display_Module (this,
                                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
                   false);
+#else
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Server_Direct3D_Display_Module (this,
+                                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECT3D_DEFAULT_NAME_STRING)),
+                  false);
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
   ACE_ASSERT (module_p);
   layout_in->append (module_p, branch_p, index_i);
 
@@ -423,26 +437,25 @@ Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& 
   // ---------------------------------------------------------------------------
 
   // ******************* Display Handler ***************************************
-  Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-    goto error;
-  } // end IF
+  //Stream_Module_t* module_p =
+  //  const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
+  //if (!module_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
+  //              ACE_TEXT (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
+  //  goto error;
+  //} // end IF
 
-  Test_I_AVStream_Server_DirectShow_Display* directshow_display_impl_p =
-    dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> (module_p->writer ());
-  if (!directshow_display_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> failed, aborting\n")));
-    goto error;
-  } // end IF
+  //Test_I_AVStream_Server_DirectShow_Display* directshow_display_impl_p =
+  //  dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> (module_p->writer ());
+  //if (!directshow_display_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> failed, aborting\n")));
+  //  goto error;
+  //} // end IF
 
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("source format: %s\n"),
               ACE_TEXT (Stream_MediaFramework_DirectShow_Tools::toString (configuration_in.configuration_->format, true).c_str ())));
@@ -454,7 +467,6 @@ Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& 
   //log_file_name += STREAM_DEV_DIRECTSHOW_LOGFILE_NAME;
   //Stream_Module_Device_DirectShow_Tools::debug (graphBuilder_,
   //                                              log_file_name);
-#endif // _DEBUG
 
   // ---------------------------------------------------------------------------
 

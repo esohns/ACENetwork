@@ -186,7 +186,7 @@ jobs:
           sudo rm -f ACENetwork
           sudo ln -s ../../.. ACENetwork
 
-   - name: Add Common/ACENetwork links (ACEStream) [Win32]
+   - name: Add Common/ACENetwork link (ACEStream) [Win32]
      if: ${{ matrix.os=='windows-latest' }}
      run: |
           cd modules\\ACEStream\\modules
