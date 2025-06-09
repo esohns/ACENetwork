@@ -64,9 +64,9 @@ Test_I_AVStream_Parser_T<ACE_SYNCH_USE,
   // frame message
   ACE_Message_Block* message_block_p = inherited::headFragment_;
   ACE_Message_Block* message_block_2 = NULL;
-  ACE_UINT32 bytes_to_skip_i =
+  size_t bytes_to_skip_i =
     sizeof (struct acestream_av_stream_header) + inherited::header_.length;
-  ACE_UINT32 bytes_available_i = 0;
+  size_t bytes_available_i = 0;
   while (bytes_to_skip_i)
   {
     bytes_available_i = message_block_p->length ();

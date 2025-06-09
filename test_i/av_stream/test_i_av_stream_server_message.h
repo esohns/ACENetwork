@@ -65,7 +65,7 @@ class Test_I_AVStream_Server_DirectShow_Message
 
  public:
   Test_I_AVStream_Server_DirectShow_Message (Stream_SessionId_t, // session id
-                                             unsigned int);      // size
+                                             size_t);            // size
   inline virtual ~Test_I_AVStream_Server_DirectShow_Message () {}
 
   // overrides from ACE_Message_Block

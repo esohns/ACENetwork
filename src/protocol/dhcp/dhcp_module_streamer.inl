@@ -73,7 +73,7 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
       ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (DHCP_MAGIC_COOKIE)
                                              : DHCP_MAGIC_COOKIE);
   unsigned char field_length;
-  unsigned int offset = 0;
+  size_t offset = 0;
   unsigned char tag = DHCP_OPTION_TAG_END;
   char buffer_3[DHCP_OPTIONS_SIZE];
 

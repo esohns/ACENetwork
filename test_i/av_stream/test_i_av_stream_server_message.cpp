@@ -27,7 +27,7 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 Test_I_AVStream_Server_DirectShow_Message::Test_I_AVStream_Server_DirectShow_Message (Stream_SessionId_t sessionId_in,
-                                                                                      unsigned int size_in)
+                                                                                      size_t size_in)
  : inherited (sessionId_in,
               size_in)
 {

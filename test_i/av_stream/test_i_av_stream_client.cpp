@@ -547,6 +547,7 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
   BOOL result_2 = false;
   IMediaFilter* media_filter_p = NULL;
   struct _AMMediaType* media_type_p = NULL;
+  struct tWAVEFORMATEX waveformatex_s;
 
   // sanity check(s)
   ACE_ASSERT (!IGraphBuilder_out);
@@ -624,8 +625,8 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
     ////video_info_header_p->bmiHeader.biClrImportant;
     ACE_ASSERT (video_info_header_p->AvgTimePerFrame);
     video_info_header_p->dwBitRate =
-      (video_info_header_p->bmiHeader.biSizeImage * 8) *                   // bits / frame
-      (UNITS / static_cast<DWORD> (video_info_header_p->AvgTimePerFrame)); // fps
+      (video_info_header_p->bmiHeader.biSizeImage * 8) *                                // bits / frame
+      (/*UNITS*/ 10000000 / static_cast<DWORD> (video_info_header_p->AvgTimePerFrame)); // fps
 
     outputVideoFormat_inout.lSampleSize = video_info_header_p->bmiHeader.biSizeImage;
   } // end IF
@@ -646,8 +647,8 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
     ////video_info_header_p->bmiHeader.biClrImportant;
     ACE_ASSERT (video_info_header_p->AvgTimePerFrame);
     video_info_header_p->dwBitRate =
-      (video_info_header_p->bmiHeader.biSizeImage * 8) *                   // bits / frame
-      (UNITS / static_cast<DWORD> (video_info_header_p->AvgTimePerFrame)); // fps
+      (video_info_header_p->bmiHeader.biSizeImage * 8) *                                // bits / frame
+      (/*UNITS*/ 10000000 / static_cast<DWORD> (video_info_header_p->AvgTimePerFrame)); // fps
 
     outputVideoFormat_inout.lSampleSize = video_info_header_p->bmiHeader.biSizeImage;
   } // end IF
@@ -659,7 +660,6 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
     goto error;
   } // end ELSE
 
-  struct tWAVEFORMATEX waveformatex_s;
   ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
   waveformatex_s.wFormatTag = STREAM_DEV_MIC_DEFAULT_FORMAT;
   waveformatex_s.nChannels = STREAM_DEV_MIC_DEFAULT_CHANNELS;
@@ -670,14 +670,11 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
   waveformatex_s.nAvgBytesPerSec =
     (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
   //waveformatex_s.cbSize = 0;
-  result = CreateAudioMediaType (&waveformatex_s,
-                                 &captureAudioFormat_inout,
-                                 TRUE); // set format ?
-  if (FAILED (result))
+  if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
+                                                                 captureAudioFormat_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to CreateAudioMediaType(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
+                ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), aborting\n")));
     goto error;
   } // end IF
 

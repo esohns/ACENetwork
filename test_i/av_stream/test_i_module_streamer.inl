@@ -80,7 +80,10 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
   struct acestream_av_stream_header header_s;
   ACE_OS::memset (&header_s, 0, sizeof (struct acestream_av_stream_header));
   ACE_ASSERT (!message_inout->cont ());
-  header_s.length = message_inout->length ();
+  // *TODO*: support lengths of more than std::numeric_limits<ACE_UINT32>::max() bytes
+  //         --> change the header_s.length to ACE_UINT64, update scanner.l and
+  //             regenerate the scanner
+  header_s.length = static_cast<ACE_UINT32> (message_inout->length ());
   switch (message_inout->getMediaType ())
   {
     case STREAM_MEDIATYPE_AUDIO:

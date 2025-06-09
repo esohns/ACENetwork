@@ -118,6 +118,9 @@ enum acestream_av_stream_message_type
 struct acestream_av_stream_header
 {
   ACE_UINT8  type;
+  // *TODO*: support lengths of more than std::numeric_limits<ACE_UINT32>::max() bytes
+  //         --> change the length to ACE_UINT64, update scanner.l and regenerate the
+  //             scanner
   ACE_UINT32 length;
 #if defined (__GNUC__)
 } __attribute__ ((__packed__));
