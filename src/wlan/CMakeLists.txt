@@ -93,12 +93,8 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib>)
 elseif (WIN32)
  if (LIBXML2_SUPPORT)
-  if (LIBICONV_SUPPORT)
-   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                               $<BUILD_INTERFACE:${LIBICONV_INCLUDE_DIRS}>)
-  endif (LIBICONV_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIR}>)
+                              $<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIRS}>)
  endif (LIBXML2_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
