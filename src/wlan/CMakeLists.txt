@@ -22,21 +22,21 @@ if (WIN32)
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif (WIN32)
 
-string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
-string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-              REQUIRED
-              CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-              PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
-              NO_DEFAULT_PATH)
-if (NOT EXISTS ${Common_DIR})
- message (FATAL_ERROR "could not find package \"Common\", aborting")
-endif ()
-add_definitions (-DCOMMON_HAS_DLL)
+#string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
+#string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
+#find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+#              REQUIRED
+#              CONFIG
+#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+#              PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
+#              NO_DEFAULT_PATH)
+#if (NOT EXISTS ${Common_DIR})
+# message (FATAL_ERROR "could not find package \"Common\", aborting")
+#endif ()
+#add_definitions (-DCOMMON_HAS_DLL)
 if (UNIX)
  if (DBUS_SUPPORT)
-  add_definitions (-DCOMMON_DBUS_HAS_DLL)
+#  add_definitions (-DCOMMON_DBUS_HAS_DLL)
   add_definitions (-DSD_BUS_SUPPORT)
  endif (DBUS_SUPPORT)
 endif (UNIX)
@@ -56,13 +56,9 @@ if (UNIX)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
-#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-#                              "$<BUILD_INTERFACE:${PKG_NETWORKMANAGER_INCLUDE_DIRS}>")
  endif (DBUS_SUPPORT)
 
  if (DHCLIENT_SUPPORT)
-#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-#                              $<BUILD_INTERFACE:/usr/include/bind-export>)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC ${BIND9_CFLAGS})
  endif (DHCLIENT_SUPPORT)
 
@@ -94,7 +90,7 @@ if (UNIX)
 elseif (WIN32)
  if (LIBXML2_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIRS}>")
  endif (LIBXML2_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
@@ -221,14 +217,6 @@ endif (UNIX)
 
 add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME})
 add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME}_Protocol_DHCP)
-
-#set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES DEFINE_SYMBOL NET_WLAN_BUILD_DLL)
-#set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
-#set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-
-# add PCH
-target_precompile_headers (${PROJECT_NAME}_WLAN
-                           PUBLIC stdafx.h)
 
 if (UNIX)
  if (WEXT_SUPPORT)
